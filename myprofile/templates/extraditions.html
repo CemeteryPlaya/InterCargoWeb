@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Выдача клиентов</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/notifyButton.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+{% include 'includes/header.html' %}
+
+{% block content %}
+<div class="flex min-h-screen">
+    {% include 'includes/sidebar.html' %}
+
+    <main class="w-full px-6 py-8 mx-auto">
+        <div class="max-w-3xl mx-auto">
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="p-4 mb-3 rounded-lg text-sm font-medium 
+                                {% if message.tags == 'success' %}bg-green-100 text-green-800
+                                {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                                {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="ri-barcode-box-line text-primary text-2xl"></i>
+                    Оформление выдачи посылок
+                </h1>
+                <p class="text-sm text-gray-500">
+                    Оператор: <strong>{{ request.user.username }}</strong>
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm">
+                <form id="extraditionForm" method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <div>
+                        <label for="barcode" class="block font-medium mb-2">
+                            Штрихкод пакета <span class="text-sm text-gray-400">(обязательно)</span>
+                        </label>
+                        <input type="text" name="barcode" id="barcode" required
+                            class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
+                            placeholder="Введите штрихкод пакета">
+                    </div>
+
+                    <div>
+                        <label for="comment" class="block font-medium mb-2">Комментарий (необязательно)</label>
+                        <textarea name="comment" id="comment" rows="3"
+                            class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
+                            placeholder="Комментарий к выдаче"></textarea>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-button hover:bg-red-600 transition">
+                            <i class="ri-check-line"></i> Оформить выдачу
+                        </button>
+
+                        <button type="button" id="clearBtn"
+                            class="inline-flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50">
+                            <i class="ri-delete-bin-line"></i> Очистить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+document.getElementById('clearBtn').onclick = () => {
+    document.getElementById('barcode').value = '';
+    document.getElementById('comment').value = '';
+};
+</script>
+
+{% endblock %}
+{% include 'includes/footer.html' %}
+</body>
+</html>

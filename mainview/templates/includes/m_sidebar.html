@@ -1,0 +1,61 @@
+{% load static %}
+<!-- Мобильный Sidebar -->
+<div id="mobile-sidebar"
+     class="hidden md:hidden fixed inset-0 z-40 bg-white flex flex-col h-full max-h-screen overflow-hidden">
+    
+    <!-- Верхняя панель -->
+    <div class="flex justify-between items-center p-4 border-b flex-shrink-0">
+        <a href="{% url 'profile' %}" class="text-2xl font-['Pacifico'] text-primary">
+            <img src="{% static 'images/logo.png' %}" style="height: 40px; width: 40px;" alt="Inter Cargo Logo">
+        </a>
+        <button id="mobile-sidebar-close" class="text-gray-900 focus:outline-none" aria-label="Закрыть меню">
+            <i class="ri-close-line text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Основное меню (прокручиваемое) -->
+    <nav class="flex-grow overflow-y-auto p-4 space-y-4 text-gray-700">
+        <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-barcode-line"></i>Трек-коды
+        </a>
+        <a href="{% url 'notifications' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-notification-3-line"></i>Уведомления
+        </a>
+        {% if request.user.userprofile.is_staff %}
+        <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-shield-user-line"></i>Панель персонала
+        </a>
+        <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-admin-line"></i>Панель администратора
+        </a>
+        {% endif %}
+        <a href="{% url 'delivered_posts' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-bill-line"></i>Чеки
+        </a>   
+        <a href="{% url 'extradition_package' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-file-list-3-line"></i> Формирование выдачи
+        </a>
+        <a href="{% url 'settings' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-settings-line"></i>Настройки
+        </a>
+    </nav>
+
+    <!-- Нижняя панель (фиксированная) -->
+    <div class="p-4 border-t flex-shrink-0 bg-white">
+        <div class="flex items-center justify-between">
+            <a href="{% url 'profile' %}" class="flex items-center text-gray-900 hover:text-primary transition">
+                <i class="ri-user-fill mr-2"></i> Профиль
+            </a>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="flex items-center text-gray-900 hover:text-primary transition" title="Выйти">
+                    <i class="ri-logout-box-fill mr-2"></i> Выход
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Оверлей -->
+<div id="mobile-sidebar-overlay" class="hidden fixed inset-0 z-30 bg-black bg-opacity-50"></div>

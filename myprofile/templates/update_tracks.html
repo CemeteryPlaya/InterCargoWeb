@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}    	
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Обновления статусов</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+</head>
+<body class="bg-gray-50 min-h-screen">
+{% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+    {% include 'includes/sidebar.html' %}
+        <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Обновление трек-кодов</h2>
+
+        {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                    <li class="text-{{ message.tags }}-600">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'update_tracks' %}">
+            {% csrf_token %}
+
+            <!-- Статус -->
+            <label for="status" class="block font-medium mb-1">Новый статус</label>
+            <select name="status" id="status" required class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+                {% for key, value in status_choices %}
+                    {% if key != 'claimed' %}
+                        <option value="{{ key }}">{{ value }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+
+
+            <!-- Дата -->
+            <label for="update_date" class="block font-medium mb-1">Дата обновления</label>
+            <input type="date" name="update_date" id="update_date" required class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Трек-коды -->
+                <div>
+                    <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)</label>
+                    <textarea name="track_codes" id="track_codes" rows="10" required class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                </div>
+
+                <!-- Пользователи (только если delivered) -->
+                <div id="owner_block" class="hidden">
+                    <label for="owner_usernames" class="block font-medium mb-1">Имена владельцев (по одному в строке)</label>
+                    <textarea name="owner_usernames" id="owner_usernames" rows="10" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                </div>
+
+                <!-- Вес (только если delivered) -->
+                <div id="weight_block" class="hidden">
+                    <label for="weights" class="block font-medium mb-1">Вес (в кг, по одному в строке)</label>
+                    <textarea name="weights" id="weights" rows="10" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 mt-6 transition">Сохранить изменения</button>
+        </form>
+    </div>
+    <script>
+    document.getElementById('status').addEventListener('change', function () {
+        const isDelivered = this.value === 'delivered';
+        document.getElementById('owner_block').classList.toggle('hidden', !isDelivered);
+        document.getElementById('weight_block').classList.toggle('hidden', !isDelivered);
+    });
+    </script>
+    </div>
+    {% endblock %}
+
+{% include 'includes/footer.html' %}
+</body>
+</html>

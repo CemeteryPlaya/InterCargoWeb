@@ -1,0 +1,60 @@
+{% load static %}
+<!-- Sidebar 
+  <aside class="w-64 bg-white border-r border-gray-200 p-6 hidden md:block shadow-sm sticky top-0 h-screen">
+    <a href="{% url 'profile' %}">
+      <h1 class="text-2xl font-bold text-red-500 mb-8">Меню</h1>
+    </a>
+    <nav class="space-y-4 text-gray-700">
+      {% if request.user.userprofile.is_staff %}
+      <a href="{% url 'extradition' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-mail-line"></i> Выдача посылок</a>
+      <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-shield-user-line"></i> Панель персонала</a>
+      <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-admin-line"></i> Панель администратора</a>
+      {% endif %}
+      <a href="#messages" class="flex items-center gap-2 hover:text-red-500"><i class="ri-mail-line"></i> Сообщения</a>
+      <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-barcode-line"></i> Трек-коды</a>
+      <a href="{% url 'delivered_posts' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-bill-line"></i> Чеки</a>
+      <a href="{% url 'extradition_package' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-file-list-3-line"></i>Формирование выдачи</a>
+      <a href="{% url 'notifications' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-notification-3-line"></i> Уведомления</a>
+      <a href="#wallet" class="flex items-center gap-2 hover:text-red-500"><i class="ri-wallet-3-line"></i> Кошелек</a>
+      <a href="#news" class="flex items-center gap-2 hover:text-red-500"><i class="ri-news-line"></i> Новости</a>
+      <a href="{% url 'settings' %}" class="flex items-center gap-2 hover:text-red-500"><i class="ri-settings-line"></i> Настройки</a>
+    </nav>
+  </aside> -->
+
+<!-- Sidebar -->
+<aside class="w-64 bg-white border-r border-gray-200 p-6 hidden md:block shadow-sm sticky top-0 h-screen">
+    <a href="{% url 'profile' %}">
+        <h1 class="text-2xl font-bold text-red-500 mb-8">Меню</h1>
+    </a>
+    
+    <nav class="space-y-4 text-gray-700">
+        {% if request.user.userprofile.is_staff %}
+        <!-- Только для операторов -->
+        <a href="{% url 'extradition' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-mail-line"></i> Выдача посылок
+        </a>
+        <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-shield-user-line"></i> Панель персонала
+        </a>
+        <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-admin-line"></i> Панель администратора
+        </a>
+        {% endif %}
+        <!-- Общие разделы -->
+        <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-barcode-line"></i> Трек-коды
+        </a>
+        <a href="{% url 'delivered_posts' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-bill-line"></i> Чеки
+        </a>
+        <a href="{% url 'extradition_package' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-file-list-3-line"></i> Формирование выдачи
+        </a>
+        <a href="{% url 'notifications' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-notification-3-line"></i> Уведомления
+        </a>
+        <a href="{% url 'settings' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-settings-line"></i> Настройки
+        </a>
+    </nav>
+</aside>

@@ -1,0 +1,85 @@
+{% load static %} 
+<footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <a href="/" class="text-2xl font-['Pacifico'] text-white mb-4 inline-block"><img src="{% static 'images/logo.png' %}" style="height: 50px; width: 50px;"></a>
+                    <p class="text-gray-400 mb-6">Надежная доставка грузов из Китая в Казахстан по выгодным тарифам.</p>
+                    <div class="flex space-x-4">
+                        <a href="https://www.instagram.com/inter_cargo_trz/" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 hover:bg-gray-900 transition">
+                            <img src="{% static 'images/instagram.svg' %}" style="height: 35px; width: 35px;">
+                        </a>
+                        <a href="https://t.me/inter_cargo" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 hover:bg-gray-900 transition">
+                            <img src="{% static 'images/telegram.svg' %}" style="height: 35px; width: 35px;">
+                        </a>
+                        <a href="https://wa.me/77066440624" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 hover:bg-gray-900 transition">
+                            <img src="{% static 'images/whatsapp.svg' %}" style="height: 35px; width: 35px;">
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Навигация</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-gray-400 hover:text-white transition">Главная</a></li>
+                        <li><a href="{% url 'register' %}" class="text-gray-400 hover:text-white transition">Регистрация</a></li>
+                        <li><a href="{% url 'education' %}" class="text-gray-400 hover:text-white transition">Обучение</a></li>
+                        <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition">О компании</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Пункты выдачи</h3>
+                    <ul class="space-y-2">
+                        <li class="text-gray-400">Акбулак 21 (Ozon)</li>
+                        <li class="text-gray-400">Пушкина 8 (Ozon)</li>
+                        <li class="text-gray-400">Ташкентская 286 (Ozon)</li>
+                        <li class="text-gray-400">Абая 286 (Ozon)</li>
+                        <li class="text-gray-400">Атабаева 105 (Ozon)</li>
+                        <li class="text-gray-400">Ашимбаева 5 (Ozon)</li>
+                        <li class="text-gray-400">Байсеитовой 30 (Ozon)</li>
+                        <li class="text-gray-400">Самал 48 (WILDBERRIES)</li>
+                        <li class="text-gray-400">Сорокина 7 (OZON)</li>
+                        <li><a href="{% url 'about' %}" class="text-primary hover:text-primary-light transition">Смотреть все пункты</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Контакты</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
+                                <i class="ri-map-pin-line text-primary"></i>
+                            </div>
+                            <span class="text-gray-400">Республика Казахстан, Жамбылская обл., г. Тараз, мкр.Акбулак(1), д.21</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
+                                <i class="ri-phone-line text-primary"></i>
+                            </div>
+                            <span class="text-gray-400">Директор: +7 (777) 977-36-96</span>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
+                                
+                            </div>
+                            <span class="text-gray-400">Менеджер: +7 (706) 664-06-24</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
+                                <i class="ri-mail-line text-primary"></i>
+                            </div>
+                            <span class="text-gray-400">rustamttss@mail.ru</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 text-sm mb-4 md:mb-0">© 2025 Inter Cargo. Все права защищены.</p>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-500 text-sm">Способы оплаты:</span>
+                    <i ><img src="{% static 'images/kaspi.png' %}" style="height: 15px; width: 61px;"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
