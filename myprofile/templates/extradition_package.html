@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}    	
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Формирование выдачи</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/notifyButton.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+{% include 'includes/header.html' %}
+
+{% block content %}
+
+<div class="flex min-h-screen">
+    {% include 'includes/sidebar.html' %}
+
+    <div class="w-full px-6 py-8 mx-auto">
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="p-4 mb-3 rounded-lg text-sm font-medium 
+                            {% if message.tags == 'success' %}bg-green-100 text-green-800
+                            {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                            {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <h1 class="text-2xl font-bold mb-6">📦 Выдача пакетов клиенту</h1>
+
+        <!-- Форма создания пакета -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-10">
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+
+                <p class="text-gray-700">
+                    <strong>Клиент:</strong> {{ request.user.username }}
+                </p>
+
+                <p><strong>Пункт выдачи:</strong> {{ user.userprofile.get_pickup_display }}</p>
+           
+
+                <div>
+                    <label for="comment" class="block font-medium mb-2">
+                        Комментарий (необязательно):
+                    </label>
+                    <textarea name="comment" id="comment" rows="3"
+                        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary"
+                        placeholder="Комментарий к выдаче"></textarea>
+                </div>
+
+                <button type="submit"
+                    class="bg-primary text-white px-6 py-2 rounded-button hover:bg-red-600 transition-all">
+                    💼 Создать пакет выдачи
+                </button>
+            </form>
+        </div>
+
+        <!-- Список пакетов -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Мои пакеты выдачи</h2>
+
+            {% if packages %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full border border-gray-200 rounded-lg text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-2 px-4 text-left">Штрихкод</th>
+                            <th class="py-2 px-4 text-left">Создан</th>
+                            <th class="py-2 px-4 text-left">Пункт выдачи</th>
+                            <th class="py-2 px-4 text-left">Треки</th>
+                            <th class="py-2 px-4 text-left">Комментарий</th>
+                            <th class="py-2 px-4 text-left">Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for pkg in packages %}
+                    <tr class="border-t hover:bg-gray-50 transition">
+                        <td class="py-2 px-4 font-mono">{{ pkg.barcode }}</td>
+                        <td class="py-2 px-4 text-gray-500">{{ pkg.created_at|date:"d.m.Y H:i" }}</td>
+                        <td class="py-2 px-4 text-gray-700">
+                            {{ pkg.pickup_point_display }}
+                        </td>
+                        <td class="py-2 px-4">
+                            {% for t in pkg.track_codes.all %}
+                                <span class="text-xs bg-gray-100 px-2 py-1 rounded mb-1 inline-block">
+                                    {{ t.track_code }}
+                                </span>
+                            {% endfor %}
+                        </td>
+                        <td class="py-2 px-4 text-gray-600">{{ pkg.comment|default:"—" }}</td>
+                        <td class="py-2 px-4">
+                            {% if pkg.is_issued %}
+                                <span class="text-green-600 font-semibold">Выдан</span>
+                            {% else %}
+                                <span class="text-yellow-600 font-semibold">Ожидает выдачи</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-600">Пока нет оформленных пакетов.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% include 'includes/footer.html' %}
+</body>
+</html>

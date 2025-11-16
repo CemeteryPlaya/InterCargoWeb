@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}    	
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Информация о компании</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/notifyButton.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+</head>
+<body class="bg-gray-50 min-h-screen">
+{% include 'includes/header.html' %}
+
+    {% block content %}
+
+    <!-- Раздел о компании -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <div class="text-primary text-3xl font-bold mb-2">О компании INTER CARGO</div>
+                <h2 class="text-2xl font-semibold text-gray-900">История и инфо</h2>
+            </div>
+                <section id="about-company" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">О компании</h2>
+                    <p>Inter Cargo — это современная логистическая компания, созданная с целью упростить процесс доставки товаров из Китая для казахстанских клиентов. Мы начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней стремились 
+                        сделать китайский онлайн-шопинг доступным и понятным каждому. Наши клиенты совершают заказы на популярных китайских маркетплейсах: Pinduoduo, TaoBao, POIZON и 1688, а мы — берём на себя весь процесс доставки. Благодаря налаженной 
+                        системе работы с проверенными посредниками в Китае, мы гарантируем надёжность, скорость и прозрачность на всех этапах логистики.</p>
+                </section>
+                <section id="about-company" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Наш путь</h2>
+                    <p>С первых шагов мы открыли 3 пункта выдачи, а уже спустя несколько месяцев число выросло до 10, что позволило нам обслуживать клиентов более оперативно и удобно. За это время нам доверились около 1000 клиентов, которые выбрали 
+                        Inter Cargo за честность, стабильность и личный подход. Мы не просто доставляем посылки — мы создаём удобную экосистему для покупок за границей. Наша команда всегда на связи, а каждое отправление — под контролем до момента получения.</p>
+                </section>
+                <section id="about-company" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Почему выбирают нас:</h2>
+                    <li>Прямая доставка из Китая с популярных площадок</li>
+                    <li>Надёжные посредники и партнёры</li>
+                    <li>Развитая сеть ПВЗ</li>
+                    <li>Удобное отслеживание заказов</li>
+                    <li>Внимание к каждому клиенту</li>
+                </section>
+
+                <section id="pickup-points" class="py-16 bg-white">
+                    <div class="container mx-auto px-4">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl font-bold text-gray-900">Пункты выдачи</h2>
+                            <p class="text-gray-600 mt-2">Выберите ближайший к вам пункт и заберите посылку в удобное время</p>
+                        </div>
+                            <!-- ПВЗ 1 -->
+                        <div class="border border-gray-200 p-4 rounded-lg shadow bg-white">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Карта пунктов выдачи Inter Cargo</h3>
+                            <div class="aspect-w-16 aspect-h-9 rounded overflow-hidden">
+                                <iframe id="map_677104426" frameborder="0" width="100%" height="600px" src="https://makemap.2gis.ru/widget?data=eJy1ll1zokoQhv8L5zLWOjDDx6QqFwSM0RDjaMyGc2ovPAEJimIB4kcq_327B3SzF3tKTpWpSoED0zPz8Pbb_aGkWRBmYdAN02VYZHGYK9f_fCjFfh0q18pdOC02Wai0lHWWrsOskM_hcVwk-Jz03VFUOFvi3Yt84KjE80Tu2LtHdxKRvikS7oSkT24gQBDmb1m8LuJ0BROH9_YVefBEWXRt4g3h6uyJX4rN2BXJwLki3hYCHMRy4MDVFekYfvv3ouT4vityWLSH7_m9CBYdvQc45xkWhw0FTpv4Q7wa8M4e_tvEM0UB9zh3c9iWby7DTb2lSZrBdv4imqXONBg59FZBuFOuVXL8-2wpUQVnL49ekRmm8aqQEQBgvJoWEpypfqOqoVOzxbRvlmkYlv4D5scBBGRc_2ydT_ZBErXkhvc2eXJuX8eTXUcsXsaTRXI32d78gWr_SENUxGIk0nWAwCiSZOko3sMYd0zizUfvRdfrDYCq30ZCFXm_E00If3xZdCyP2lcXIkUt1dIkKYtSUzuR4sxqQgrksSmcHXxyseGoxTR6nHfO0N__IiX1BEFnYlU4wdDh22F0cyktMVPXKi1xXdeNIyGNmVozQqN44DDiHUQeIKHXKoHOytKvlLze1wn_kZEHFO8BxwuOC1PIzNvuZPHyLIh1SU3ppmGqkpihar-yT7MM1ij7wMcG3R7xMlEEDie-J-0EDjSa7-39k-s31dcMAiGpV1HsXVEO8DMMkRIFbYlyfOv-S_uL6fe7TeBe1J8MRozKnnSNsyMgSmkjQJB0Ukq-BckWaV9z4gwZebXVlKO541b3votFACQTXVIeXGcmq05P4P50eos3O700Zx31D_JgII-qgnl29Hiwz5GGiZ6FBNB26iQyR-8yS0sMblRBcXwOmnPFQtKTCxqXtR2mMsprSgbV1SMlRg2jYQmrDiAPW7uATZtpBRFLV38WGwc10nUqm7mvOw9ao8_E5qKJw6hZ13UO5eokHZ1Q0kg6bSgolbNsBuAsIJknOBfAeEVVrMRZdf13N_ktgfzHSFYwkNWCV6ZfStOf4YKs9_TQSbA8etGf_btP0f7sumvieM25cwXPd_huKa3QvmSiWtygFtLmRDMt80Sb02a9QYZQ9Lo_NeRBZOWLmla-GfaWKL9bTMz8SKWogmLfupQJ3a6_DEXaSCmX3RW2cTIWVM3-8Fdrx6Fp9i9aES1CNV2SpCphp2Q2TG59_mgpy-l6mOZxde4PJZkWkOgockMDG1CJyjRdM1pKgs8rC7V0xhnnuqpy2GCaLmF7FMICwDRJvr-HYfK3HC2yTfj5E88TvZo" sandbox="allow-modals allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            <div class="max-w-3xl mx-auto">
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-900">Популярные вопросы</h2>
+                    <div class="border border-gray-200 rounded">
+                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq1">
+                            <span>Как рассчитывается стоимость доставки?</span>
+                            <i class="ri-arrow-down-s-line text-xl"></i>
+                        </button>
+                        <div id="faq1" class="faq-content hidden px-6 pb-4">
+                            <p class="text-gray-700">Стоимость доставки рассчитывается по тарифу 1859₸ за килограмм груза. Минимальный вес для расчета - 0 кг, максимальный - 100 кг (Выше 100 кг. необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded">
+                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq2">
+                            <span>Какие сроки доставки из Китая в Казахстан?</span>
+                            <i class="ri-arrow-down-s-line text-xl"></i>
+                        </button>
+                        <div id="faq2" class="faq-content hidden px-6 pb-4">
+                            <p class="text-gray-700">Средний срок доставки составляет 8-12 дней с момента отправки товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и загруженности таможенных служб.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded">
+                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq3">
+                            <span>Как зарегистрироваться в системе?</span>
+                            <i class="ri-arrow-down-s-line text-xl"></i>
+                        </button>
+                        <div id="faq3" class="faq-content hidden px-6 pb-4">
+                            <p class="text-gray-700">Для регистрации необходимо заполнить форму на странице "Регистрация", указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи. После регистрации можете авторизоваться в личном кабинете нажав на кнопку, либо на инонку профиля в верхней части.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded">
+                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq4">
+                            <span>Какие товары запрещены к перевозке?</span>
+                            <i class="ri-arrow-down-s-line text-xl"></i>
+                        </button>
+                        <div id="faq4" class="faq-content hidden px-6 pb-4 text-gray-700">
+                            <p>К перевозке запрещены: <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li> 
+                                                                            <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li> 
+                                                                            <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li> 
+                                                                            <li>Техника, мобильные телефоны, ноутбуки. Хрупкие, стеклянные товары (либо просите продавца надежную упаковку, пузыочатую пленку, защиту края и т.д.)</li></p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded">
+                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq5">
+                            <span>Как отследить мой заказ?</span>
+                            <i class="ri-arrow-down-s-line text-xl"></i>
+                        </button>
+                        <div id="faq5" class="faq-content hidden px-6 pb-4">
+                            <p class="text-gray-700">После оформления заказа вам будет предоставлен трек-номер для отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через WhatsApp для получения актуальной информации о статусе вашего груза.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="education" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <div class="text-primary font-medium mb-2">ОБУЧЕНИЕ</div>
+                <h2 class="text-3xl font-bold text-gray-900">Как пользоваться нашим сервисом</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно использовать наш сервис доставки</p>
+            </div>        
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                        <img src="{% static 'images/edu1.jpg' %}" alt="Регистрация на сайте" class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Регистрация на сайте</h3>
+                        <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт выдачи для получения ваших посылок.</p>
+                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                            Смотреть видео
+                            <i class="ri-play-circle-line ml-2"></i>
+                        </button></a>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                        <img src="{% static 'images/edu2.jpg' %}" alt="Оформление заказа" class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Оформление заказа в Китае</h3>
+                        <p class="text-gray-700 mb-4">Пошаговая инструкция по оформлению заказа на китайских торговых площадках и указанию нашего адреса доставки.</p>
+                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                            Смотреть видео
+                            <i class="ri-play-circle-line ml-2"></i>
+                        </button></a>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                        <img src="{% static 'images/edu3.jpg' %}" alt="Отслеживание посылки" class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Отслеживание посылки</h3>
+                        <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из Китая в Казахстан.</p>
+                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                            Смотреть видео
+                            <i class="ri-play-circle-line ml-2"></i>
+                        </button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endblock %}
+
+{% include 'includes/footer.html' %}
+</body>
+</html>

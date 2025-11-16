@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+    	
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Успешная регистрация</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+    <script src="{% static 'scripts/scripts.js' %}"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+
+    <!-- Обучающий раздел -->
+    <section id="education" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="p-4 mb-3 rounded-lg text-sm font-medium 
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800
+                        {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                        {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="text-center mb-12">
+                <div class="text-primary font-medium mb-2">Спасибо за регистрацию, можете сейчас ознакомиться с тем как устроен наш сервис</div>
+                <h2 class="text-3xl font-bold text-gray-900">Как пользоваться нашим сервисом</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно использовать наш сервис доставки</p>
+                
+            </div>
+            <div class="text-center mb-12">
+                <a href="{% url 'login' %}"><button type="submit" style="width: 400px;" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap mx-auto">
+                    Войти в аккаунт
+                </button></a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                        <img src="{% static 'images/edu1.jpg' %}" alt="Регистрация на сайте" class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Регистрация на сайте</h3>
+                        <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт выдачи для получения ваших посылок.</p>
+                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                            Смотреть видео
+                            <i class="ri-play-circle-line ml-2"></i>
+                        </button></a>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                        <img src="{% static 'images/edu2.jpg' %}" alt="Оформление заказа" class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Оформление заказа в Китае</h3>
+                        <p class="text-gray-700 mb-4">Пошаговая инструкция по оформлению заказа на китайских торговых площадках и указанию нашего адреса доставки.</p>
+                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                            Смотреть видео
+                            <i class="ri-play-circle-line ml-2"></i>
+                        </button></a>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                        <img src="{% static 'images/edu3.jpg' %}" alt="Отслеживание посылки" class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Отслеживание посылки</h3>
+                        <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из Китая в Казахстан.</p>
+                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                            Смотреть видео
+                            <i class="ri-play-circle-line ml-2"></i>
+                        </button></a>
+                        <a href="https://luckytrack.kz/"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition" style="margin-left: 20px; color: rgb(41, 158, 66);">
+                            Перейти на LuckyTrack
+                        </button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endblock %}
+
+{% include 'includes/footer.html' %}
+</body>
+</html>
