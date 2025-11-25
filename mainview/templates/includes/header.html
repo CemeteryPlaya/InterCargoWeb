@@ -14,75 +14,100 @@
         </div>
         <div class="flex items-center space-x-4">
             <!-- Ссылки на соцсети ... (оставляем как есть) -->
-            <a href="https://www.instagram.com/inter_cargo_trz/" class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/inter_cargo_trz/"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex"
+                target="_blank" rel="noopener noreferrer">
                 <img src="{% static 'images/instagram.svg' %}" style="height: 35px; width: 35px;" alt="Instagram">
             </a>
-            <a href="https://t.me/inter_cargo" class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex" target="_blank" rel="noopener noreferrer">
+            <a href="https://t.me/inter_cargo"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex"
+                target="_blank" rel="noopener noreferrer">
                 <img src="{% static 'images/telegram.svg' %}" style="height: 35px; width: 35px;" alt="Telegram">
             </a>
-            <a href="https://wa.me/77066440624" class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex" target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.me/77066440624"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex"
+                target="_blank" rel="noopener noreferrer">
                 <img src="{% static 'images/whatsapp.svg' %}" style="height: 35px; width: 35px;" alt="WhatsApp">
             </a>
             {% if user.is_authenticated %}
-                <div class="relative">
-                    <button id="notification-button" class="relative w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition" title="Уведомления">
-                        <i class="ri-notification-3-fill text-white text-xl"></i>
-                        {% if unread > 0 %}
-                            <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                                {{ unread }}
+            <div class="relative">
+                <button id="notification-button"
+                    class="relative w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition"
+                    title="Уведомления">
+                    <i class="ri-notification-3-fill text-white text-xl"></i>
+                    {% if unread > 0 %}
+                    <span id="notification-count"
+                        class="absolute top-0 right-0 inline-flex items-center justify-center px-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                        {{ unread }}
+                    </span>
+                    {% endif %}
+                </button>
+                <!-- Контейнер для уведомлений -->
+                <div class="relative flex items-center">
+                    <!-- Оболочка уведомлений -->
+                    <div class="relative">
+                        <!-- Кнопка -->
+                        <button id="notif-btn"
+                            class="relative focus:outline-none flex items-center justify-center mt-[2px]">
+                            <i class="fa fa-bell text-2xl"></i>
+                            {% if user.notifications.unread.count > 0 %}
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+                                {{ user.notifications.unread.count }}
                             </span>
-                        {% endif %}
-                    </button>
-                    <!-- Контейнер для уведомлений -->
-                    <div class="relative flex items-center">
-                        <!-- Оболочка уведомлений -->
-                        <div class="relative">
-                            <!-- Кнопка -->
-                            <button id="notif-btn" class="relative focus:outline-none flex items-center justify-center mt-[2px]">
-                                <i class="fa fa-bell text-2xl"></i>
-                                {% if user.notifications.unread.count > 0 %}
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-                                    {{ user.notifications.unread.count }}
-                                </span>
-                                {% endif %}
-                            </button>
+                            {% endif %}
+                        </button>
 
-                            <!-- Выпадающее окно -->
-                            <div id="notification-dropdown"
-                                class="fixed sm:absolute sm:right-0 sm:left-auto left-1/2 top-[70px] sm:top-auto -translate-x-1/2 sm:translate-x-0 w-80 max-w-[90vw] bg-white border rounded-xl shadow-lg z-50 hidden overflow-hidden">
-                                <div class="p-3 font-semibold border-b text-center sm:text-left">Уведомления</div>
-                                <ul class="max-h-60 overflow-y-auto">
-                                    {% for notif in user.notifications.all|slice:":5" %}
-                                    <li class="px-4 py-2 text-sm {% if not notif.is_read %}bg-gray-100{% endif %}">
-                                        {{ notif.message }}
-                                        <div class="text-xs text-gray-500">{{ notif.created_at|date:"d.m.Y H:i" }}</div>
-                                    </li>
-                                    {% empty %}
-                                    <li class="px-4 py-2 text-sm text-gray-500">Нет уведомлений</li>
-                                    {% endfor %}
-                                </ul>
-                                <div class="p-2 text-center border-t">
-                                    <a href="{% url 'notifications' %}" class="text-primary text-sm hover:underline">Все уведомления</a>
-                                </div>
+                        <!-- Выпадающее окно -->
+                        <div id="notification-dropdown"
+                            class="fixed sm:absolute sm:right-0 sm:left-auto left-1/2 top-[70px] sm:top-auto -translate-x-1/2 sm:translate-x-0 w-80 max-w-[90vw] bg-white border rounded-xl shadow-lg z-50 hidden overflow-hidden">
+                            <div class="p-3 font-semibold border-b flex justify-between items-center">
+                                <span>Уведомления</span>
+                                <button id="mark-all-read"
+                                    class="text-xs text-primary hover:underline focus:outline-none">
+                                    Прочесть все
+                                </button>
+                            </div>
+                            <ul class="max-h-60 overflow-y-auto">
+                                {% for notif in header_notifications %}
+                                <li class="px-4 py-2 text-sm {% if not notif.is_read %}bg-gray-100{% endif %}">
+                                    {{ notif.message }}
+                                    <div class="text-xs text-gray-500">{{ notif.created_at|date:"d.m.Y H:i" }}</div>
+                                </li>
+                                {% empty %}
+                                <li class="px-4 py-2 text-sm text-gray-500">Нет уведомлений</li>
+                                {% endfor %}
+                            </ul>
+                            <div class="p-2 text-center border-t">
+                                <a href="{% url 'notifications' %}" class="text-primary text-sm hover:underline">Все
+                                    уведомления</a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'profile' %}" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition hidden md:flex" title="Профиль">
-                    <i class="ri-user-fill text-white"></i>
-                </a>
-                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+            </div>
+            <a href="{% url 'profile' %}"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition hidden md:flex"
+                title="Профиль">
+                <i class="ri-user-fill text-white"></i>
+            </a>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
                 {% csrf_token %}
-                    <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition hidden md:flex" title="Выйти">
-                        <i class="ri-logout-box-line text-white"></i>
-                    </button>
-                </form>
+                <button type="submit"
+                    class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition hidden md:flex"
+                    title="Выйти">
+                    <i class="ri-logout-box-line text-white"></i>
+                </button>
+            </form>
             {% else %}
-                <a href="{% url 'login' %}" class="text-sm text-gray-700 hover:text-primary transition hidden md:inline">Войти</a>
-                <a href="{% url 'register' %}" class="text-sm text-gray-700 hover:text-primary transition hidden md:inline">Регистрация</a>
+            <a href="{% url 'login' %}"
+                class="text-sm text-gray-700 hover:text-primary transition hidden md:inline">Войти</a>
+            <a href="{% url 'register' %}"
+                class="text-sm text-gray-700 hover:text-primary transition hidden md:inline">Регистрация</a>
             {% endif %}
             <!-- Кнопка меню для мобильных устройств -->
-            <button id="mobile-menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center text-gray-900 focus:outline-none" aria-label="Открыть меню" data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+            <button id="mobile-menu-toggle"
+                class="md:hidden w-10 h-10 flex items-center justify-center text-gray-900 focus:outline-none"
+                aria-label="Открыть меню" data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
                 <i class="ri-menu-line text-xl"></i>
             </button>
         </div>
@@ -104,36 +129,44 @@
                 <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition py-2">Обучение</a>
                 <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition py-2">О компании</a>
                 {% if not user.is_authenticated %}
-                    <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">Войти</a>
-                    <a href="{% url 'register' %}" class="text-gray-700 hover:text-primary transition py-2">Регистрация</a>
+                <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">Войти</a>
+                <a href="{% url 'register' %}" class="text-gray-700 hover:text-primary transition py-2">Регистрация</a>
                 {% endif %}
             </nav>
             <div class="p-4 border-t">
                 <div class="flex justify-center space-x-6 hidden md:flex">
-                     <a href="https://www.instagram.com/inter_cargo_trz/" class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition" target="_blank" rel="noopener noreferrer">
-                        <img src="{% static 'images/instagram.svg' %}" style="height: 28px; width: 28px;" alt="Instagram">
+                    <a href="https://www.instagram.com/inter_cargo_trz/"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition"
+                        target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'images/instagram.svg' %}" style="height: 28px; width: 28px;"
+                            alt="Instagram">
                     </a>
-                    <a href="https://t.me/inter_cargo" class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition" target="_blank" rel="noopener noreferrer">
-                        <img src="{% static 'images/telegram.svg' %}" style="height: 28px; width: 28px;" alt="Telegram">
+                    <a href="https://t.me/inter_cargo"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition"
+                        target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'images/telegram.svg'}" style="height: 28px; width: 28px;" alt="Telegram">
                     </a>
-                    <a href="https://wa.me/77066440624" class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition" target="_blank" rel="noopener noreferrer">
+                    <a href="https://wa.me/77066440624"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition"
+                        target="_blank" rel="noopener noreferrer">
                         <img src="{% static 'images/whatsapp.svg' %}" style="height: 28px; width: 28px;" alt="WhatsApp">
                     </a>
                 </div>
-                 {% if user.is_authenticated %}
-                    <div class="mt-4 flex items-center justify-between md:hidden hidden md:flex">
-                        <a href="{% url 'profile' %}" class="flex items-center text-gray-900 hover:text-primary transition">
-                            <i class="ri-user-fill mr-2"></i> Профиль
-                        </a>
-                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="text-gray-700 hover:text-primary transition">
-                                <a class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition" title="Выйти">
-                                    <i class="ri-logout-box-line text-white"></i>
-                                </a>
-                            </button>
-                        </form>
-                    </div>
+                {% if user.is_authenticated %}
+                <div class="mt-4 flex items-center justify-between md:hidden hidden md:flex">
+                    <a href="{% url 'profile' %}" class="flex items-center text-gray-900 hover:text-primary transition">
+                        <i class="ri-user-fill mr-2"></i> Профиль
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="text-gray-700 hover:text-primary transition">
+                            <a class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition"
+                                title="Выйти">
+                                <i class="ri-logout-box-line text-white"></i>
+                            </a>
+                        </button>
+                    </form>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -143,4 +176,33 @@
 
     <!-- Включаем мобильный сайдбар -->
     {% include 'includes/m_sidebar.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const markAllReadBtn = document.getElementById('mark-all-read');
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function () {
+                    fetch('{% url "mark_notifications_as_read" %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                // Обновляем UI: скрываем бейджик и очищаем список (или перезагружаем страницу)
+                                // Для простоты перезагрузим страницу, чтобы обновились все счетчики
+                                window.location.reload();
+                            } else {
+                                console.error('Ошибка при пометке уведомлений как прочитанных');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка сети:', error);
+                        });
+                });
+            }
+        });
+    </script>
 </header>

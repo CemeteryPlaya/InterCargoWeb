@@ -1,25 +1,28 @@
 from django.db import models
 from django.conf import settings
-
-
-# Create your models here.
-from django.db import models
-from django.conf import settings
 from django.core.exceptions import ValidationError
+import uuid
+from io import BytesIO
+import base64
+from barcode import Code128
+from barcode.writer import ImageWriter
 import inspect
+from django.utils import timezone
 
 class TrackCode(models.Model):
     STATUS_CHOICES = [
-        ('user_added', 'Добавлено пользователем'),
-        ('warehouse_cn', 'Принято на склад (Китай)'),
+        ('no_owner', 'Нет владельца товара'),
+        ('user_added', 'Добавлен пользователем'),
+        ('warehouse_cn', 'Прибыло на склад (Китай)'),
         ('shipped_cn', 'Отправлено со склада (Китай)'),
-        ('delivered', 'Принято сортировочным центром'),
-        ('ready', 'Доставлено на ПВЗ'),
-        ('claimed', 'Выдано получателю'),
+        ('delivered', 'Доставлен на сортировочный склад'),
+        ('ready', 'Доставлен на ПВЗ'),
+        ('claimed', 'Выдано клиенту'),
     ]
 
     # Порядок статусов для проверки отката
     STATUS_ORDER = {
+        'no_owner': -1,
         'user_added': 0,
         'warehouse_cn': 1,
         'shipped_cn': 2,
@@ -30,12 +33,14 @@ class TrackCode(models.Model):
 
     id = models.AutoField(primary_key=True, verbose_name="№ трек кода")
     track_code = models.CharField(max_length=100, unique=True, verbose_name="Трек код")
-    update_date = models.DateField(auto_now=True, verbose_name="Дата обновления")
+    update_date = models.DateField(default=timezone.now, verbose_name="Дата обновления")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name="Статус трек-кода")
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        verbose_name="Имя владельца"
+        verbose_name="Имя владельца",
+        null=True,
+        blank=True
     )
     description = models.CharField(max_length=255, blank=True, verbose_name="О посылке")
     weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес посылки (кг)")
@@ -96,6 +101,7 @@ class Receipt(models.Model):
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
     total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
+    price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")
     
     # 🏬 Пункт выдачи
     pickup_point = models.CharField(max_length=255, blank=True, null=True, verbose_name="Пункт выдачи")
@@ -194,108 +200,72 @@ class Extradition(models.Model):
                     self.pickup_point = "Не указан"
         super().save(*args, **kwargs)
 
-
-
-
-import uuid
-
-
 class ExtraditionPackage(models.Model):
-    """Пакет выдачи: собирает все трек-коды пользователя со статусом 'ready' и из оплаченных чеков."""
-    
+    """
+    Пакет выдачи: собирает все трек-коды пользователя,
+    у которых статус 'ready' и есть оплаченная квитанция.
+    Генерация штрихкода происходит на лету, без сохранения PNG.
+    """
+
     barcode = models.CharField(
         max_length=20,
         unique=True,
         blank=True,
         verbose_name="Штрихкод выдачи"
     )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="extradition_packages",
         verbose_name="Получатель"
     )
+
     track_codes = models.ManyToManyField(
         'TrackCode',
         related_name="extradition_packages",
         verbose_name="Трек-коды"
     )
+
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     is_issued = models.BooleanField(default=False, verbose_name="Выдано клиенту")
 
     def save(self, *args, **kwargs):
+        """Автоматически генерируем штрихкод, если он пустой."""
         if not self.barcode:
             self.barcode = f"PKG-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
 
-    comment = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Комментарий"
-    )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
-    is_issued = models.BooleanField(default=False, verbose_name="Выдано клиенту")
-
-    def save(self, *args, **kwargs):
-        """При первом сохранении создаёт уникальный штрихкод."""
-        if not self.barcode:
-            self.barcode = f"PKG-{uuid.uuid4().hex[:8].upper()}"
-        super().save(*args, **kwargs)
+    def get_barcode_base64(self):
+        """
+        Генерирует штрихкод на лету и возвращает base64-строку для отображения в шаблоне.
+        """
+        buffer = BytesIO()
+        Code128(self.barcode, writer=ImageWriter()).write(buffer)
+        encoded = base64.b64encode(buffer.getvalue()).decode()
+        return f"data:image/png;base64,{encoded}"
 
     def __str__(self):
         return f"{self.barcode} ({self.user.username})"
-    
-    @property
-    def pickup_point_display(self):
-        """
-        Возвращает отображаемое название пункта выдачи пользователя.
-        """
-        try:
-            profile = self.user.userprofile
-            return profile.get_pickup_display()
-        except:
-            return "Не указан"
-    
-    @property
-    def pickup_point(self):
-        """
-        Возвращает значение пункта выдачи пользователя.
-        """
-        try:
-            profile = self.user.userprofile
-            return profile.pickup
-        except:
-            return None
 
-    def auto_fill(self):
-        """
-        Добавляет все треки пользователя, которые:
-        - имеют статус 'ready'
-        - принадлежат оплаченной квитанции
-        """
-        ready_paid_tracks = TrackCode.objects.filter(
-            owner=self.user,
-            status='ready',
-            receiptitem__receipt__is_paid=True
-        ).distinct()
 
-        if ready_paid_tracks.exists():
-            self.track_codes.add(*ready_paid_tracks)
-        
-        return ready_paid_tracks.count()
+class GlobalSettings(models.Model):
+    price_per_kg = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=1859,
+        verbose_name="Цена за кг (₸/кг)"
+    )
 
-    @classmethod
-    def create_for_user(cls, user, extradition=None):
-        """
-        Создаёт новый пакет выдачи и автоматически добавляет треки.
-        Опционально привязывает к конкретной выдаче.
-        """
-        package = cls.objects.create(user=user, extradition=extradition)
-        package.auto_fill()
-        return package
+    class Meta:
+        verbose_name = "Глобальные настройки"
+        verbose_name_plural = "Глобальные настройки"
+
+    def __str__(self):
+        return "Глобальные настройки"
+
 
 
 

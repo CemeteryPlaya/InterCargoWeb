@@ -21,6 +21,24 @@ class UserProfile(models.Model):
     phone = models.CharField(max_length=20, verbose_name="Телефон")
     pickup = models.CharField(max_length=100, choices=PICKUP_CHOICES, verbose_name="ПВЗ")
     is_staff = models.BooleanField(default=False)
+    is_hr = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} — {self.phone}"
+    
+class PendingRegistration(models.Model):
+    login = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20)
+    pickup = models.CharField(max_length=100)
+    password = models.CharField(max_length=255)  # хешировать не нужно, мы создадим User позднее
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def pickup_name(self):
+        # Превращаем массив CHOICES в словарь
+        choices_dict = dict(UserProfile.PICKUP_CHOICES)
+        # Возвращаем по коду красивое название
+        return choices_dict.get(self.pickup, self.pickup)
+
+    def __str__(self):
+        return f"{self.login} ({self.phone})"

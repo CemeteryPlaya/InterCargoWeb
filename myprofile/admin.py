@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
-    TrackCode, Receipt, ReceiptItem, CustomerDiscount, 
-    Notification, UserPushSubscription, Extradition, ExtraditionPackage
+    TrackCode, Receipt, ReceiptItem, CustomerDiscount,
+    Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings
 )
 from django import forms
 
@@ -32,7 +32,7 @@ class TrackCodeAdminForm(forms.ModelForm):
 class TrackCodeAdmin(admin.ModelAdmin):
     form = TrackCodeAdminForm
     list_display = ('id', 'track_code', 'owner', 'update_date', 'status', 'description', 'weight')
-    search_fields = ('id', 'track_code', 'owner')
+    search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name')
     list_filter = ('status', 'update_date')
     
     def save_model(self, request, obj, form, change):
@@ -130,3 +130,16 @@ class ExtraditionAdmin(admin.ModelAdmin):
         if obj:  # Если объект уже существует, делаем user и package readonly
             return self.readonly_fields + ('package', 'user')
         return self.readonly_fields
+
+@admin.register(GlobalSettings)
+class GlobalSettingsAdmin(admin.ModelAdmin):
+    list_display = ('price_per_kg',)
+    fields = ('price_per_kg',)
+
+    def has_add_permission(self, request):
+        # Allow add only if no instance exists
+        return not GlobalSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deletion
+        return False

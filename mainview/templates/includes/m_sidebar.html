@@ -29,6 +29,11 @@
             <i class="ri-admin-line"></i>Панель администратора
         </a>
         {% endif %}
+        {% if request.user.userprofile.is_hr %}
+        <a href="{% url 'confirm' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-admin-fill"></i>Подтверждение пользователей
+        </a>
+        {% endif %}
         <a href="{% url 'delivered_posts' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-bill-line"></i>Чеки
         </a>   

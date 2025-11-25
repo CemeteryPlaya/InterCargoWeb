@@ -16,6 +16,9 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
+
 from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package
 
 urlpatterns = [
@@ -29,13 +32,17 @@ urlpatterns = [
     path('generate-receipt/', customer_paycheks.generate_daily_receipt, name='generate_receipt'),
     path('pay-receipt/<int:receipt_id>/', customer_paycheks.pay_receipt, name='pay_receipt'),
     path('update_tracks/', status_update.update_tracks, name='update_tracks'),
+    path('get-track-owner/', status_update.get_track_owner, name='get_track_owner'),
     path('notifications/', notifications.notifications_list, name='notifications'),
     path('notifications/read/<int:notif_id>/', notifications.mark_as_read, name='mark_as_read'),
     path("notifications/mark-as-read/", notifications.mark_notifications_as_read, name="mark_notifications_as_read"),
     path('save-subscription/', push_subscribe.save_push_subscription, name='save_subscription'),
     path('extradition/', extraditions.extradition_view, name='extradition'),
+    path('extradition/search/', extraditions.search_package, name='extradition_search'),
+    path('extradition/toggle-payment/', extraditions.toggle_payment, name='extradition_toggle_payment'),
     path('extradition-package/', extradition_Package.extradition_package_view, name='extradition_package'),
-
 ]
-# urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Подключение медиа-файлов при DEBUG=True
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -8,7 +8,7 @@
     <title>Inter Cargo - Выдача клиентов</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
     <script src="{% static 'scripts/core.js' %}"></script>
     <script src="{% static 'scripts/menu.js' %}"></script>
     <script src="{% static 'scripts/notifications.js' %}"></script>
@@ -18,23 +18,23 @@
     <script src="{% static 'scripts/forms.js' %}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-{% include 'includes/header.html' %}
+    {% include 'includes/header.html' %}
 
-{% block content %}
-<div class="flex min-h-screen">
-    {% include 'includes/sidebar.html' %}
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
 
-    <main class="w-full px-6 py-8 mx-auto">
-        <div class="max-w-3xl mx-auto">
-            {% if messages %}
-            <div class="mb-6">
-                {% for message in messages %}
+        <main class="w-full px-6 py-8 mx-auto">
+            <div class="max-w-3xl mx-auto">
+                {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
                     <div class="p-4 mb-3 rounded-lg text-sm font-medium 
                                 {% if message.tags == 'success' %}bg-green-100 text-green-800
                                 {% elif message.tags == 'error' %}bg-red-100 text-red-800
@@ -42,64 +42,233 @@
                                 {% else %}bg-gray-100 text-gray-800{% endif %}">
                         {{ message }}
                     </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                        <i class="ri-barcode-box-line text-primary text-2xl"></i>
+                        Оформление выдачи посылок
+                    </h1>
+                    <p class="text-sm text-gray-500">
+                        Оператор: <strong>{{ request.user.username }}</strong>
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm">
+                    <form id="extraditionForm" method="post" class="space-y-6">
+                        {% csrf_token %}
+
+                        <div>
+                            <label for="barcode" class="block font-medium mb-2">
+                                Штрихкод пакета <span class="text-sm text-gray-400">(обязательно)</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" name="barcode" id="barcode" required
+                                    class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
+                                    placeholder="Введите штрихкод пакета" autocomplete="off">
+                                <button type="button" id="searchBtn"
+                                    class="bg-secondary text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition">
+                                    <i class="ri-search-line"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Блок информации о пакете -->
+                        <div id="packageInfo" class="hidden border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <h3 class="font-bold text-lg mb-3 text-gray-800">Информация о пакете</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-gray-500">Владелец:</p>
+                                    <p class="font-medium text-gray-900" id="infoOwner">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Пункт выдачи:</p>
+                                    <p class="font-medium text-gray-900" id="infoPickup">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Статус оплаты:</p>
+                                    <div id="paymentStatusContainer">
+                                        <span id="infoPaymentStatus"
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer transition-colors">
+                                            -
+                                        </span>
+                                        <p class="text-xs text-gray-400 mt-1 hidden" id="paymentHint">Нажмите, чтобы
+                                            отметить как оплачено</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <button type="submit" id="submitBtn" disabled
+                                class="inline-flex items-center gap-2 bg-gray-400 text-white px-5 py-2 rounded-button transition cursor-not-allowed">
+                                <i class="ri-check-line"></i> Оформить выдачу
+                            </button>
+
+                            <button type="button" id="clearBtn"
+                                class="inline-flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50">
+                                <i class="ri-delete-bin-line"></i> Очистить
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            {% endif %}
-            <div class="flex items-center justify-between mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                    <i class="ri-barcode-box-line text-primary text-2xl"></i>
-                    Оформление выдачи посылок
-                </h1>
-                <p class="text-sm text-gray-500">
-                    Оператор: <strong>{{ request.user.username }}</strong>
-                </p>
-            </div>
+        </main>
+    </div>
+    {% endblock %}
+    {% include 'includes/footer.html' %}
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <form id="extraditionForm" method="post" class="space-y-6">
-                    {% csrf_token %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const barcodeInput = document.getElementById('barcode');
+            const searchBtn = document.getElementById('searchBtn');
+            const packageInfo = document.getElementById('packageInfo');
+            const infoOwner = document.getElementById('infoOwner');
+            const infoPickup = document.getElementById('infoPickup');
+            const infoPaymentStatus = document.getElementById('infoPaymentStatus');
+            const paymentHint = document.getElementById('paymentHint');
+            const submitBtn = document.getElementById('submitBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const messagesContainer = document.querySelector('.mb-6') || createMessagesContainer();
 
-                    <div>
-                        <label for="barcode" class="block font-medium mb-2">
-                            Штрихкод пакета <span class="text-sm text-gray-400">(обязательно)</span>
-                        </label>
-                        <input type="text" name="barcode" id="barcode" required
-                            class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
-                            placeholder="Введите штрихкод пакета">
-                    </div>
+            function createMessagesContainer() {
+                const container = document.createElement('div');
+                container.className = 'mb-6';
+                const main = document.querySelector('main .max-w-3xl');
+                main.insertBefore(container, main.firstChild);
+                return container;
+            }
 
-                    <div>
-                        <label for="comment" class="block font-medium mb-2">Комментарий (необязательно)</label>
-                        <textarea name="comment" id="comment" rows="3"
-                            class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
-                            placeholder="Комментарий к выдаче"></textarea>
-                    </div>
+            function showMessage(text, type = 'error') {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `p-4 mb-3 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
+                msgDiv.textContent = text;
+                messagesContainer.innerHTML = ''; // Clear previous messages
+                messagesContainer.appendChild(msgDiv);
 
-                    <div class="flex items-center gap-3">
-                        <button type="submit"
-                            class="inline-flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-button hover:bg-red-600 transition">
-                            <i class="ri-check-line"></i> Оформить выдачу
-                        </button>
+                // Auto remove after 5 seconds
+                setTimeout(() => msgDiv.remove(), 5000);
+            }
 
-                        <button type="button" id="clearBtn"
-                            class="inline-flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50">
-                            <i class="ri-delete-bin-line"></i> Очистить
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </main>
-</div>
+            function clearForm() {
+                barcodeInput.value = '';
+                packageInfo.classList.add('hidden');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
+                infoPaymentStatus.onclick = null;
+                messagesContainer.innerHTML = '';
+            }
 
-<script>
-document.getElementById('clearBtn').onclick = () => {
-    document.getElementById('barcode').value = '';
-    document.getElementById('comment').value = '';
-};
-</script>
+            clearBtn.onclick = clearForm;
 
-{% endblock %}
-{% include 'includes/footer.html' %}
+            // Поиск по клику
+            searchBtn.onclick = performSearch;
+
+            // Поиск по Enter
+            barcodeInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            function performSearch() {
+                const barcode = barcodeInput.value.trim();
+                if (!barcode) {
+                    showMessage('Введите штрихкод');
+                    return;
+                }
+
+                const searchUrl = "{% url 'extradition_search' %}";
+                fetch(`${searchUrl}?barcode=${encodeURIComponent(barcode)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 404) throw new Error('Пакет не найден');
+                            throw new Error('Ошибка сервера');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Очищаем ошибки
+                        messagesContainer.innerHTML = '';
+
+                        // Отображаем данные
+                        infoOwner.textContent = data.owner;
+                        infoPickup.textContent = data.pickup_point;
+
+                        updatePaymentUI(data.is_paid, data.barcode);
+
+                        packageInfo.classList.remove('hidden');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        packageInfo.classList.add('hidden');
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                        submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
+                        showMessage(err.message);
+                    });
+            }
+
+            function updatePaymentUI(isPaid, barcode) {
+                infoPaymentStatus.textContent = isPaid ? 'Оплачено' : 'Не оплачено';
+
+                if (isPaid) {
+                    infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                    paymentHint.classList.add('hidden');
+                    infoPaymentStatus.onclick = null;
+
+                    // Разблокируем кнопку выдачи
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    submitBtn.classList.add('bg-primary', 'hover:bg-red-600');
+                } else {
+                    infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
+                    paymentHint.classList.remove('hidden');
+
+                    // Блокируем кнопку выдачи
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
+
+                    // Клик для оплаты
+                    infoPaymentStatus.onclick = function () {
+                        if (confirm('Отметить пакет как оплаченный?')) {
+                            togglePayment(barcode);
+                        }
+                    };
+                }
+            }
+
+            function togglePayment(barcode) {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const toggleUrl = "{% url 'extradition_toggle_payment' %}";
+
+                fetch(toggleUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: `barcode=${encodeURIComponent(barcode)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updatePaymentUI(true, barcode);
+                            showMessage('Статус оплаты обновлен', 'success');
+                        } else {
+                            showMessage('Ошибка: ' + (data.error || 'Не удалось обновить статус'));
+                        }
+                    })
+                    .catch(err => {
+                        showMessage('Ошибка связи с сервером');
+                    });
+            }
+        });
+    </script>
 </body>
+
 </html>

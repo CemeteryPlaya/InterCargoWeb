@@ -18,8 +18,14 @@ def mark_as_read(request, notif_id):
 
 def notifications_context(request):
     if request.user.is_authenticated:
-        unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-        return {'unread': unread_count}   # см. пункт 1
+        unread_qs = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
+        unread_count = unread_qs.count()
+        # Берём 5 последних непрочитанных для отображения в хедере
+        header_notifications = unread_qs[:5]
+        return {
+            'unread': unread_count,
+            'header_notifications': header_notifications
+        }
     return {}
 
 @login_required

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from register.models import UserProfile
+from register.models import PendingRegistration, UserProfile
+from myprofile.models import Notification
 
 # Create your views here.
 def pre_register(request):
@@ -50,15 +51,62 @@ def register_view(request):
             messages.error(request, "Заполните все поля.")
             return render(request, 'registration.html')
 
+        # Проверка на существование пользователя с таким логином
         if User.objects.filter(username=username).exists():
             messages.error(request, "Пользователь с таким логином уже существует.")
-            return render(request, 'registration.html')
+            return render(request, 'registration.html', {
+                'login': username,
+                'phone': phone,
+                'pickup': pickup
+            })
 
-        user = User.objects.create_user(username=username, password=password)
-        UserProfile.objects.create(user=user, phone=phone, pickup=pickup)
+        # Проверка на существование профиля с таким телефоном
+        if UserProfile.objects.filter(phone=phone).exists():
+            messages.error(request, "Пользователь с таким номером телефона уже существует.")
+            return render(request, 'registration.html', {
+                'login': username,
+                'phone': phone,
+                'pickup': pickup
+            })
 
-        messages.success(request, "Регистрация прошла успешно. Выполните вход.")
-        return redirect('login')
+        # Проверка на существование заявки с таким логином или телефоном
+        if PendingRegistration.objects.filter(login=username).exists():
+            messages.error(request, "Заявка с таким логином уже существует.")
+            return render(request, 'registration.html', {
+                'login': username,
+                'phone': phone,
+                'pickup': pickup
+            })
+        
+        if PendingRegistration.objects.filter(phone=phone).exists():
+            messages.error(request, "Заявка с таким номером телефона уже существует.")
+            return render(request, 'registration.html', {
+                'login': username,
+                'phone': phone,
+                'pickup': pickup
+            })
+
+        # Создаём заявку
+        PendingRegistration.objects.create(
+            login=username,
+            phone=phone,
+            pickup=pickup,
+            password=password
+        )
+
+                # Создаем уведомления для HR пользователей
+        hr_users = UserProfile.objects.filter(is_hr=True)
+        for hr_profile in hr_users:
+            Notification.objects.create(
+                user=hr_profile.user,
+                message=f"Новая заявка на регистрацию клиента: {username}"
+            )
+
+        # очищаем сессию (если пользовался pre-register)
+        request.session.pop('registration_data', None)
+
+        # на страницу успешной заявки
+        return redirect('success')
 
     return render(request, 'registration.html')
 
