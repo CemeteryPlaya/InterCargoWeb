@@ -4,16 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const dec = document.getElementById('decrement');
   const totalWeight = document.getElementById('total-weight');
   const totalPrice = document.getElementById('total-price');
+  const discountEl = document.getElementById('discount');
   const RATE = 1859;
 
   if (!weightInput) return;
 
-  const update = () => {
-    const w = parseFloat(weightInput.value) || 0;
-    const p = w * RATE;
-    totalWeight.textContent = `${w} кг`;
-    totalPrice.textContent = `${p.toLocaleString()} ₸`;
-  };
+const update = () => {
+  const w = parseFloat(weightInput.value) || 0;
+  const price = w * RATE;
+
+  totalWeight.textContent = `${w.toLocaleString()} кг`;
+  totalPrice.textContent = `${Math.round(price).toLocaleString()} ₸`;
+
+  if (w >= 30) {
+    const discountAmount = price - (w * 10);
+    document.getElementById('discount-amount').textContent = `${Math.round(discountAmount).toLocaleString()} ₸`;
+    discountEl.style.visibility = 'visible';
+  } else {
+    discountEl.style.visibility = 'hidden';
+  }
+};
 
   weightInput.addEventListener('input', update);
   inc?.addEventListener('click', () => {

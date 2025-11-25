@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -126,7 +127,8 @@ def update_tracks(request):
                 continue
 
         except TrackCode.DoesNotExist:
-            # создаём только когда статус 'delivered' (как и раньше)
+            # Если трек-код не найден, создаём его
+            # Если статус 'delivered', то обязательно нужны владелец и вес
             if status == 'delivered':
                 try:
                     user = User.objects.get(username=usernames[i])
@@ -156,9 +158,21 @@ def update_tracks(request):
                     errors += 1
                     continue
             else:
-                messages.warning(request, f"Трек-код '{code}' не найден и не создан.")
-                skipped += 1
-                continue
+                # Для других статусов создаём "сиротский" трек (без владельца)
+                try:
+                    track = TrackCode.objects.create(
+                        track_code=code,
+                        status=status,
+                        update_date=update_date,
+                        owner=None,  # Владельца нет
+                        weight=None
+                    )
+                    created += 1
+                    # Уведомление некому отправлять
+                except ValidationError as e:
+                    messages.error(request, f"Не удалось создать трек-код {code}: {e}")
+                    errors += 1
+                    continue
 
     if updated:
         messages.success(request, f"Обновлено: {updated}")
@@ -172,3 +186,23 @@ def update_tracks(request):
         messages.error(request, f"Ошибок: {errors}")
 
     return redirect('update_tracks')
+
+@login_required
+def get_track_owner(request):
+    track_code = request.GET.get('track_code')
+    if not track_code:
+        return JsonResponse({'error': 'No track code provided'}, status=400)
+    
+    try:
+        print(f"DEBUG: get_track_owner called with track_code='{track_code}'")
+        track = TrackCode.objects.get(track_code=track_code)
+        if track.owner:
+            print(f"DEBUG: Found owner '{track.owner.username}' for track '{track_code}'")
+            return JsonResponse({'owner': track.owner.username})
+        else:
+            print(f"DEBUG: Track '{track_code}' found but has no owner")
+            return JsonResponse({'owner': None}) # Found but no owner
+    except TrackCode.DoesNotExist:
+        print(f"DEBUG: Track '{track_code}' not found")
+        return JsonResponse({'owner': None}) # Not found
+

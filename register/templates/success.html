@@ -39,16 +39,12 @@
             </div>
             {% endif %}
             <div class="text-center mb-12">
-                <div class="text-primary font-medium mb-2">Спасибо за регистрацию, можете сейчас ознакомиться с тем как устроен наш сервис</div>
+                <div class="text-primary font-medium mb-2">Спасибо за регистрацию!<br> Пока ваша заявка проходит модерация, можете ознакомиться с тем как устроен наш сервис</div>
                 <h2 class="text-3xl font-bold text-gray-900">Как пользоваться нашим сервисом</h2>
                 <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно использовать наш сервис доставки</p>
                 
             </div>
-            <div class="text-center mb-12">
-                <a href="{% url 'login' %}"><button type="submit" style="width: 400px;" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap mx-auto">
-                    Войти в аккаунт
-                </button></a>
-            </div>
+
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
@@ -97,7 +93,13 @@
                 </div>
             </div>
         </div>
+
     </section>
+        <div class="text-center mb-12 bg-white">
+            <a href="{% url 'login' %}"><button type="submit" style="width: 400px;" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap mx-auto">
+                Войти в аккаунт
+            </button></a>
+        </div>
 
     {% endblock %}
 

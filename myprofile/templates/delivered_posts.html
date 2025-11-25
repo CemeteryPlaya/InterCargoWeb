@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
-{% load static %}    	
+{% load static %}
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Доставленные товары</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
-    <script src="{% static 'scripts/core.js' %}"></script>
-    <script src="{% static 'scripts/menu.js' %}"></script>
-    <script src="{% static 'scripts/notifications.js' %}"></script>
-    <script src="{% static 'scripts/notifyButton.js' %}"></script>
-    <script src="{% static 'scripts/faq.js' %}"></script>
-    <script src="{% static 'scripts/phone.js' %}"></script>
-    <script src="{% static 'scripts/forms.js' %}"></script>
-    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inter Cargo - Доставленные товары</title>
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+  <script src="{% static 'scripts/core.js' %}"></script>
+  <script src="{% static 'scripts/menu.js' %}"></script>
+  <script src="{% static 'scripts/notifications.js' %}"></script>
+  <script src="{% static 'scripts/notifyButton.js' %}"></script>
+  <script src="{% static 'scripts/faq.js' %}"></script>
+  <script src="{% static 'scripts/phone.js' %}"></script>
+  <script src="{% static 'scripts/forms.js' %}"></script>
+  <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+  <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+  <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
 </head>
+
 <body class="bg-gray-50 min-h-screen">
-{% include 'includes/header.html' %}
+  {% include 'includes/header.html' %}
 
   {% block content %}
 
@@ -35,134 +36,166 @@
     <div class="w-full px-4 py-6 mx-auto">
       {% if messages %}
       <div class="mb-6">
-          {% for message in messages %}
-              <div class="p-4 mb-3 rounded-lg text-sm font-medium 
+        {% for message in messages %}
+        <div class="p-4 mb-3 rounded-lg text-sm font-medium 
                           {% if message.tags == 'success' %}bg-green-100 text-green-800
                           {% elif message.tags == 'error' %}bg-red-100 text-red-800
                           {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
                           {% else %}bg-gray-100 text-gray-800{% endif %}">
-                  {{ message }}
-              </div>
-          {% endfor %}
+          {{ message }}
+        </div>
+        {% endfor %}
       </div>
       {% endif %}
-        <h1 class="text-2xl font-bold mb-6 ml-2">Доставленные заказы</h1>
+      <h1 class="text-2xl font-bold mb-6 ml-2">Доставленные заказы</h1>
 
-        {% for date, data in grouped_trackcodes.items %}
-          <div x-data="{ open: false }" class="border rounded-lg shadow mb-4 w-full">
-                <!-- Заголовок блока -->
-                <div @click="open = !open" class="flex items-center justify-between px-4 py-3 cursor-pointer bg-gray-100 hover:bg-gray-200 transition">
-                    <span class="font-semibold text-lg">{{ date|date:"d.m.Y" }}</span>
-                    <svg :class="open ? 'rotate-180' : ''" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
+      {% for date, data in grouped_trackcodes.items %}
+      <div x-data="{ open: false }" class="border rounded-lg shadow mb-4 w-full">
+        <!-- Заголовок блока -->
+        <div @click="open = !open"
+          class="flex items-center justify-between px-4 py-3 cursor-pointer bg-gray-100 hover:bg-gray-200 transition">
+          <span class="font-semibold text-lg">{{ date|date:"d.m.Y" }}</span>
+          <svg :class="open ? 'rotate-180' : ''" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
 
-                <!-- Контент -->
-                <div x-show="open" x-transition class="px-4 py-3 border-t">
-                    <p class="mb-2 text-sm text-gray-600">Общий вес: <strong>{{ data.total_weight }} кг</strong></p>
-                    <p class="mb-2 text-sm text-gray-600">Общая сумма: <strong>{{ data.total_price|floatformat:0 }} ₸</strong></p>
+        <!-- Контент -->
+        <div x-show="open" x-transition class="px-4 py-3 border-t">
+          <p class="mb-2 text-sm text-gray-600">Общий вес: <strong>{{ data.total_weight }} кг</strong></p>
+          <p class="mb-2 text-sm text-gray-600">Общая сумма: <strong>{{ data.total_price|floatformat:0 }} ₸</strong></p>
 
-                    <!-- Таблица трек-кодов -->
-                    <div class="overflow-x-auto mt-4">
-                        <table class="min-w-full bg-white border border-gray-300 text-sm">
-                            <thead class="bg-gray-50">
-                                <tr class="text-left">
-                                    <th class="py-2 px-3 border-b">Трек-код</th>
-                                    <th class="py-2 px-3 border-b">Описание</th>
-                                    <th class="py-2 px-3 border-b">Вес (кг)</th>
-                                    <th class="py-2 px-3 border-b">Цена (₸)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for track in data.tracks %}
-                                    <tr>
-                                        <td class="py-2 px-3 border-b">{{ track.track_code }}</td>
-                                        <td class="py-2 px-3 border-b">{{ track.description }}</td>
-                                        <td class="py-2 px-3 border-b">{{ track.weight }}</td>
-                                        <td class="py-2 px-3 border-b">{{ track.price|floatformat:0 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <p class="text-gray-500 ml-2">Нет доставленных трек-кодов.</p>
-        {% endfor %}
+          <!-- Таблица трек-кодов -->
+          <div class="overflow-x-auto mt-4">
+            <table class="min-w-full bg-white border border-gray-300 text-sm">
+              <thead class="bg-gray-50">
+                <tr class="text-left">
+                  <th class="py-2 px-3 border-b">Трек-код</th>
+                  <th class="py-2 px-3 border-b">Описание</th>
+                  <th class="py-2 px-3 border-b">Вес (кг)</th>
+                  <th class="py-2 px-3 border-b">Цена (₸)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for track in data.tracks %}
+                <tr>
+                  <td class="py-2 px-3 border-b">{{ track.track_code }}</td>
+                  <td class="py-2 px-3 border-b">{{ track.description }}</td>
+                  <td class="py-2 px-3 border-b">{{ track.weight }}</td>
+                  <td class="py-2 px-3 border-b">{{ track.price|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 ml-2">Нет доставленных трек-кодов.</p>
+      {% endfor %}
 
-            <hr class="my-6">
-            <h2 class="text-xl font-bold mb-4 ml-2">Сформированные чеки</h2>
+      <hr class="my-6">
+      <h2 class="text-xl font-bold mb-4 ml-2">Сформированные чеки</h2>
 
-            <div x-data="{ filter: 'all' }" class="mb-4 ml-2">
-              <label class="mr-2 font-medium">Фильтр:</label>
-              <button @click="filter = 'all'" :class="{ 'bg-red-500 text-white': filter === 'all' }" class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Все</button>
-              <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }" class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Оплаченные</button>
-              <button @click="filter = 'unpaid'" :class="{ 'bg-red-500 text-white': filter === 'unpaid' }" class="px-3 py-1 border rounded text-sm hover:bg-red-100">Неоплаченные</button>
+      <div x-data="{ filter: 'all', activeReceipt: null }" class="mb-4 ml-2">
+        <label class="mr-2 font-medium">Фильтр:</label>
+        <button @click="filter = 'all'" :class="{ 'bg-red-500 text-white': filter === 'all' }"
+          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Все</button>
+        <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }"
+          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Оплаченные</button>
+        <button @click="filter = 'unpaid'" :class="{ 'bg-red-500 text-white': filter === 'unpaid' }"
+          class="px-3 py-1 border rounded text-sm hover:bg-red-100">Неоплаченные</button>
 
-              {% if receipts %}
-              {% for receipt in receipts %}
-              <div x-data="{ open: false }" x-show="filter === 'all' || (filter === 'paid' && {{ receipt.is_paid|yesno:'true,false' }}) || (filter === 'unpaid' && {{ receipt.is_paid|yesno:'false,true' }})" class="border border-gray-300 rounded mb-4 shadow bg-white mt-4">
-
-                <!-- Заголовок -->
-                <div class="flex justify-between items-stretch bg-gray-100 hover:bg-gray-200 transition cursor-pointer" @click="open = !open">
-                  <!-- Левая часть (заголовок + дата) -->
-                  <div class="flex-1 px-4 py-3 flex items-center">
-                    <h3 class="font-semibold text-lg">Чек #{{ receipt.id }} — {{ receipt.created_at|date:"d.m.Y" }}</h3>
-                  </div>
-
-                  <!-- Иконка -->
-                  <div class="px-4 py-3 flex items-center">
-                    <svg :class="open ? 'rotate-180' : ''" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-
-                <!-- Контент чека -->
-                <div x-show="open" x-transition class="px-4 py-3 border-t text-sm text-gray-700">
-
-                  <!-- Основной блок: данные чека + кнопка сбоку -->
-                  <div class="flex justify-between items-start gap-4">
-                    <!-- Список трек-кодов -->
-                    <ul class="mt-4 list-disc list-inside">
-                      {% for item in receipt.items.all %}
-                        <li>{{ item.track_code.track_code }} — {{ item.track_code.weight }} кг</li>
-                      {% endfor %}
-                    </ul>
-                    <!-- Правая часть: данные -->
-                    <div class="space-y-2">
-                      <p>Общий вес: <strong>{{ receipt.total_weight }} кг</strong></p>
-                      <p>Итого: <strong>{{ receipt.total_price|floatformat:0 }} тг</strong></p>
-                      <p>
-                        Статус оплаты:
-                        <span class="font-semibold {% if receipt.is_paid %}text-green-600{% else %}text-red-600{% endif %}">
-                          {{ receipt.is_paid|yesno:"Оплачен,Не оплачен" }}
-                        </span>
-                      </p>
-                      {% if not receipt.is_paid %}
-                      <div class="mt-3">
-                        <a href="{{ receipt.payment_link }}" target="_blank"
-                          class="inline-block bg-red-500 text-white font-medium px-4 py-2 rounded-button hover:bg-red-600 transition">
-                          💳 Оплатить сейчас
-                        </a>
-                      </div>
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
+        {% if receipts %}
+        <!-- Сетка чеков -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 items-start">
+          {% for receipt in receipts %}
+          <div
+            x-show="filter === 'all' || (filter === 'paid' && {{ receipt.is_paid|yesno:'true,false' }}) || (filter === 'unpaid' && {{ receipt.is_paid|yesno:'false,true' }})"
+            class="bg-white border-2 border-gray-300 rounded-lg shadow-lg overflow-hidden">
+            <!-- Заголовок чека (кликабельный) -->
+            <div @click="activeReceipt = activeReceipt === {{ receipt.id }} ? null : {{ receipt.id }}"
+              class="cursor-pointer bg-gray-100 hover:bg-gray-200 transition p-3 flex justify-between items-center">
+              <div>
+                <h4 class="text-sm font-bold text-gray-800">Чек #{{ receipt.id }}</h4>
+                <p class="text-xs text-gray-500">{{ receipt.created_at|date:"d.m.Y" }}</p>
+                <p class="text-xs text-gray-600">Вес: {{ receipt.total_weight }} кг | Сумма:
+                  {{receipt.total_price|floatformat:0 }} ₸</p>
               </div>
-              {% endfor %}
-              {% else %}
-              <p class="text-gray-500 ml-2 mt-4">Чеки ещё не сформированы.</p>
+              <div class="flex items-center">
+                <span
+                  class="text-xs font-semibold mr-2 {% if receipt.is_paid %}text-green-600{% else %}text-red-600{% endif %}">
+                  {{ receipt.is_paid|yesno:"Оплачен,Не оплачен" }}
+                </span>
+                <svg :class="activeReceipt === {{ receipt.id }} ? 'rotate-180' : ''"
+                  class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Разворачиваемый контент -->
+            <div x-bind:style="activeReceipt === {{ receipt.id }} ? 'display: block' : 'display: none'"
+              class="p-3 border-t">
+              <!-- Кнопка оплаты -->
+              {% if not receipt.is_paid %}
+              <div class="text-center mb-3">
+                <a href="{{ receipt.payment_link }}" target="_blank"
+                  class="inline-block bg-red-500 text-white font-medium px-4 py-2 rounded-button hover:bg-red-600 transition text-sm">
+                  💳 Оплатить сейчас
+                </a>
+              </div>
+              {% endif %}
+
+              <!-- Таблица с товарами -->
+              <table class="w-full text-xs border-collapse border border-gray-300 mb-3">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-1 py-1 text-left">Трек-код</th>
+                    <th class="border border-gray-300 px-1 py-1 text-center">Вес (кг)</th>
+                    <th class="border border-gray-300 px-1 py-1 text-center">Цена (₸)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in receipt.items_list %}
+                  <tr>
+                    <td class="border border-gray-300 px-1 py-1">{{ item.track_code.track_code }}</td>
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ item.track_code.weight }}</td>
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ item.price|floatformat:0 }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+                <tfoot>
+                  <tr class="bg-gray-50 font-semibold">
+                    <td class="border border-gray-300 px-1 py-1">Итого</td>
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.total_weight }}</td>
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.total_price|floatformat:0 }}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              <!-- Пункт выдачи -->
+              {% if receipt.pickup_point %}
+              <div class="text-center text-xs text-gray-600">
+                Пункт выдачи: {{ receipt.display_pickup_point }}
+              </div>
               {% endif %}
             </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 ml-2 mt-4">Чеки ещё не сформированы.</p>
+        {% endif %}
+      </div>
     </div>
   </div>
   {% endblock %}
 
-{% include 'includes/footer.html' %}
+  {% include 'includes/footer.html' %}
 </body>
+
 </html>
