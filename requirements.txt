@@ -4,3 +4,4 @@ psycopg2
 pywebpush
 python-barcode
 pillow
+python-dotenv

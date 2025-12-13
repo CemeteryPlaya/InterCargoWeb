@@ -270,3 +270,16 @@ class GlobalSettings(models.Model):
 
 
 
+
+class ClientRegistry(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    registry_date = models.DateField(verbose_name="Дата реестра")
+    pickup_points = models.JSONField(verbose_name="Пункты выдачи")
+    track_codes = models.ManyToManyField(TrackCode, related_name='registries', verbose_name="Трек-коды")
+
+    class Meta:
+        verbose_name = "Реестр клиентов"
+        verbose_name_plural = "Реестры клиентов"
+
+    def __str__(self):
+        return f"Реестр от {self.created_at.strftime('%d.%m.%Y %H:%M')} ({self.registry_date})"

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чеки {{ date|date:"d.m.Y" }}</title>
+    <style>
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            margin: 0 auto;
+            padding: 5px;
+            color: #000;
+            width: 74mm;
+            /* Slightly less than 76mm to ensure no clipping */
+        }
+
+        .check-container {
+            width: 100%;
+            margin-bottom: 20px;
+            page-break-after: always;
+        }
+
+        .logo {
+            text-align: center;
+            font-weight: 900;
+            font-size: 26px;
+            margin-bottom: 5px;
+            line-height: 0.9;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            display: block;
+        }
+
+        .logo-red {
+            color: #e53e3e;
+        }
+
+        .logo-black {
+            color: #2d3748;
+        }
+
+        .logo-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e53e3e;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+            margin-left: 2px;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+
+        .client-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .address {
+            font-weight: normal;
+            font-size: 11px;
+            text-align: right;
+            max-width: 60%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        th {
+            text-align: left;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 2px 0;
+            /* No border as per image */
+        }
+
+        td {
+            padding: 2px 0;
+            vertical-align: top;
+            font-size: 12px;
+        }
+
+        /* Column Alignments */
+        th:nth-child(1),
+        td:nth-child(1) {
+            text-align: left;
+            width: 45%;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            text-align: center;
+            width: 15%;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            text-align: right;
+            width: 20%;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            text-align: right;
+            width: 20%;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 13px;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            width: 45%;
+            /* Matches first column */
+        }
+
+        .total-values {
+            display: flex;
+            width: 55%;
+            justify-content: space-between;
+        }
+
+        .total-count {
+            width: 27%;
+            text-align: center;
+        }
+
+        /* Approx match to col 2 */
+        .total-weight {
+            width: 36%;
+            text-align: right;
+        }
+
+        /* Approx match to col 3 */
+        .total-sum {
+            width: 36%;
+            text-align: right;
+        }
+
+        /* Approx match to col 4 */
+
+        @media print {
+            body {
+                width: auto;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        .no-print {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="no-print" onclick="window.print()">Печать</button>
+
+    {% for client in clients %}
+    <div class="check-container">
+        <div class="logo">
+            <span class="logo-red">INTER</span>
+            <span class="logo-black">CARGO<span class="logo-arrow">➜</span></span>
+        </div>
+
+        <div class="header-row">
+            <span style="color: #718096;">Дата</span>
+            <span>{{ date|date:"d.m.Y" }}</span>
+        </div>
+
+        <div class="client-row">
+            <span>{{ client.username }}</span>
+            <span class="address">{{ client.address }}</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Трек-номер</th>
+                    <th>Кол-во</th>
+                    <th>Вес</th>
+                    <th>Стоимость</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for track in client.tracks %}
+                <tr>
+                    <td>{{ track.track_code }}</td>
+                    <td>1</td>
+                    <td>{{ track.weight|floatformat:3 }}</td>
+                    <td>{{ track.price|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total-row">
+            <span class="total-label">Итого</span>
+            <div class="total-values">
+                <span class="total-count">{{ client.total_count }}</span>
+                <span class="total-weight">{{ client.total_weight|floatformat:3 }}</span>
+                <span class="total-sum">{{ client.total_sum|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</body>
+
+</html>

@@ -20,6 +20,34 @@
     </script>
     <script src="{% static 'scripts/core.js' %}"></script>
     <script src="{% static 'scripts/menu.js' %}"></script>
+    <script>
+        function toggleFilter(status) {
+            const url = new URL(window.location.href);
+            const params = url.searchParams;
+
+            if (!status) {
+                // "Все" selected -> clear all status params
+                params.delete('status');
+            } else {
+                // Check if status is already selected
+                let currentStatuses = params.getAll('status');
+
+                if (currentStatuses.includes(status)) {
+                    // Remove it (toggle off)
+                    // We filter out the clicked status
+                    currentStatuses = currentStatuses.filter(s => s !== status);
+
+                    // Rebuild params
+                    params.delete('status');
+                    currentStatuses.forEach(s => params.append('status', s));
+                } else {
+                    // Add it (toggle on)
+                    params.append('status', status);
+                }
+            }
+            window.location.href = url.toString();
+        }
+    </script>
     <script src="{% static 'scripts/notifications.js' %}"></script>
     <script src="{% static 'scripts/faq.js' %}"></script>
     <script src="{% static 'scripts/phone.js' %}"></script>
@@ -113,8 +141,49 @@
                 </div>
             </div>
 
+            <!-- Filters -->
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button onclick="toggleFilter('')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if not current_filters %}bg-gray-800 text-white{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-300{% endif %}">
+                    Все
+                </button>
+                <button onclick="toggleFilter('ready')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if 'ready' in current_filters %}bg-green-600 text-white{% else %}bg-white text-gray-700 hover:bg-green-50 border border-green-200{% endif %}">
+                    Доставлен на ПВЗ
+                </button>
+                <button onclick="toggleFilter('user_added')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if 'user_added' in current_filters %}bg-red-600 text-white{% else %}bg-white text-gray-700 hover:bg-red-50 border border-red-200{% endif %}">
+                    Добавлен
+                </button>
+                <button onclick="toggleFilter('warehouse_cn')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if 'warehouse_cn' in current_filters %}bg-yellow-600 text-white{% else %}bg-white text-gray-700 hover:bg-yellow-50 border border-yellow-200{% endif %}">
+                    На складе (Китай)
+                </button>
+                <button onclick="toggleFilter('shipped_cn')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if 'shipped_cn' in current_filters %}bg-indigo-600 text-white{% else %}bg-white text-gray-700 hover:bg-indigo-50 border border-indigo-200{% endif %}">
+                    Отправлен (Китай)
+                </button>
+                <button onclick="toggleFilter('delivered')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if 'delivered' in current_filters %}bg-purple-600 text-white{% else %}bg-white text-gray-700 hover:bg-purple-50 border border-purple-200{% endif %}">
+                    На сортировке
+                </button>
+                <button onclick="toggleFilter('claimed')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if 'claimed' in current_filters %}bg-blue-600 text-white{% else %}bg-white text-gray-700 hover:bg-blue-50 border border-blue-200{% endif %}">
+                    Выдано
+                </button>
+            </div>
+
             <!-- Track Codes List -->
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                x-data="{ editModal: false, editTrackId: null, editDescription: '' }">
                 {% for code in track_codes %}
                 <div class="p-4 rounded-lg shadow border
                 {% if code.status == 'ready' %}bg-green-100 border-green-300
@@ -125,18 +194,56 @@
                 {% elif code.status == 'claimed' %}bg-blue-100 border-blue-300
                 {% else %}bg-white-100 border-white-300
                 {% endif %}
-                space-y-1">
+                space-y-1 relative">
                     <p><strong>Код:</strong> {{ code.track_code }}</p>
                     <p><strong>Статус:</strong> {{ code.get_status_display }}</p>
                     <p><strong>Обновлено:</strong> {{ code.update_date }}</p>
-                    <p><strong>Описание:</strong> {{ code.description }}</p>
+                    <div class="relative">
+                        <p class="pr-12"><strong>Описание:</strong> <span x-text="'{{ code.description }}'">{{
+                                code.description }}</span></p>
+                        <button
+                            @click="editModal = true; editTrackId = {{ code.id }}; editDescription = '{{ code.description|escapejs }}'"
+                            class="absolute right-0 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md p-2 hover:bg-gray-50 transition-colors flex items-center justify-center h-10 w-10">
+                            <i class="ri-pencil-line text-xl"></i>
+                        </button>
+                    </div>
                     {% if code.status == 'delivered' or code.status == 'claimed' or code.status == 'ready' %}
                     <p><strong>Вес:</strong> {{ code.weight }} кг</p>
                     {% endif %}
                 </div>
                 {% empty %}
-                <p class="text-gray-600">У вас пока нет трек-кодов.</p>
+                <div class="col-span-full text-center py-8 text-gray-500">
+                    Трек-коды не найдены.
+                </div>
                 {% endfor %}
+
+                <!-- Edit Modal -->
+                <div x-show="editModal"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                    style="display: none;" x-transition.opacity>
+                    <div @click.away="editModal = false"
+                        class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md space-y-4">
+                        <h2 class="text-xl font-bold text-gray-800">Изменить описание</h2>
+                        <form method="post" :action="'/profile/track-codes/edit/' + editTrackId + '/'">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Описание:</label>
+                                <input type="text" name="description" x-model="editDescription"
+                                    class="w-full border border-gray-300 rounded px-3 py-2" />
+                            </div>
+                            <div class="flex justify-end mt-4 space-x-2">
+                                <button type="submit"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                    Сохранить
+                                </button>
+                                <button type="button" @click="editModal = false"
+                                    class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                                    Отмена
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
