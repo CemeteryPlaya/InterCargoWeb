@@ -13,6 +13,13 @@
             </nav>
         </div>
         <div class="flex items-center space-x-4">
+            <!-- Кнопка переключения темы -->
+            <button id="theme-toggle"
+                type="button"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-900 hover:bg-gray-300 transition"
+                aria-label="Переключить тему">
+                <i id="theme-toggle-icon" class="ri-moon-line text-lg"></i>
+            </button>
             <!-- Ссылки на соцсети ... (оставляем как есть) -->
             <a href="https://www.instagram.com/inter_cargo_trz/"
                 class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex"
@@ -99,10 +106,12 @@
                 </button>
             </form>
             {% else %}
-            <a href="{% url 'login' %}"
-                class="text-sm text-gray-700 hover:text-primary transition hidden md:inline">Войти</a>
-            <a href="{% url 'register' %}"
-                class="text-sm text-gray-700 hover:text-primary transition hidden md:inline">Регистрация</a>
+            <div class="flex flex-col items-end space-y-1 hidden md:flex">
+                <a href="{% url 'register' %}"
+                    class="text-sm text-gray-700 hover:text-primary transition">Регистрация</a>
+                <a href="{% url 'login' %}"
+                    class="text-sm text-gray-700 hover:text-primary transition">Войти</a>
+            </div>
             {% endif %}
             <!-- Кнопка меню для мобильных устройств -->
             <button id="mobile-menu-toggle"
@@ -129,8 +138,8 @@
                 <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition py-2">Обучение</a>
                 <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition py-2">О компании</a>
                 {% if not user.is_authenticated %}
-                <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">Войти</a>
                 <a href="{% url 'register' %}" class="text-gray-700 hover:text-primary transition py-2">Регистрация</a>
+                <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">Войти</a>
                 {% endif %}
             </nav>
             <div class="p-4 border-t">

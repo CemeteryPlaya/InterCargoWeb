@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django import forms
 from myprofile.models import TrackCode
@@ -57,10 +57,33 @@ def track_codes_view(request):
         form = TrackCodeForm()
 
     track_codes = TrackCode.objects.filter(owner=request.user).order_by('-update_date')
+    
+    # Filter by status (multi-select)
+    status_filters = request.GET.getlist('status')
+    # Filter out empty strings if any
+    status_filters = [s for s in status_filters if s]
+
+    if status_filters:
+        track_codes = track_codes.filter(status__in=status_filters)
+
     return render(request, 'track_codes.html', {
         'track_codes': track_codes,
-        'form': form
+        'form': form,
+        'current_filters': status_filters
     })
+
+@login_required
+def edit_track_code_description(request, track_id):
+    if request.method == 'POST':
+        track = get_object_or_404(TrackCode, id=track_id, owner=request.user)
+        new_description = request.POST.get('description')
+        if new_description is not None:
+            track.description = new_description
+            track.save()
+            messages.success(request, "Описание успешно обновлено.")
+        else:
+            messages.error(request, "Некорректные данные.")
+    return redirect('track_codes')
 
 @login_required
 def add_track_code_view(request):

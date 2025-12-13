@@ -1,12 +1,264 @@
-        :where([class^="ri-"])::before { content: "\f3c2"; }
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
         body {
             font-family: 'Inter', sans-serif;
         }
+
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type="number"] {
             -moz-appearance: textfield;
+        }
+
+        /* =========
+           Темная тема
+           ========= */
+        :root {
+            color-scheme: light;
+        }
+
+        /* Класс тёмной темы навешивается на body из JS */
+        body.theme-dark {
+            color-scheme: dark;
+            background-color: #020617;
+            /* slate-950 */
+            color: #e5e7eb;
+            /* gray-200 */
+        }
+
+        /* Фоновые утилиты Tailwind под темную тему */
+        body.theme-dark .bg-gray-50 {
+            background-color: #020617 !important;
+        }
+
+        body.theme-dark .bg-white {
+            background-color: #020617 !important;
+        }
+
+        body.theme-dark .bg-gray-100 {
+            background-color: #0f172a !important;
+        }
+
+        body.theme-dark .bg-gray-200 {
+            background-color: #111827 !important;
+        }
+
+        body.theme-dark .bg-gray-500 {
+            background-color: #4b5563 !important;
+        }
+
+        /* Текстовые цвета */
+        body.theme-dark .text-gray-900,
+        body.theme-dark .text-gray-800 {
+            color: #e5e7eb !important;
+        }
+
+        body.theme-dark .text-gray-700,
+        body.theme-dark .text-gray-600 {
+            color: #d1d5db !important;
+        }
+
+        body.theme-dark .text-gray-500 {
+            color: #9ca3af !important;
+        }
+
+        body.theme-dark .text-gray-400 {
+            color: #9ca3af !important;
+        }
+
+        /* Границы и карточки */
+        body.theme-dark .border-gray-200 {
+            border-color: #1f2937 !important;
+        }
+
+        body.theme-dark .border-gray-300 {
+            border-color: #374151 !important;
+        }
+
+        body.theme-dark .shadow,
+        body.theme-dark .shadow-sm,
+        body.theme-dark .shadow-md,
+        body.theme-dark .shadow-lg {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        /* Карточки статусов трек-кодов в тёмной теме:
+           сохраняем цветной "светлый" фон, но делаем текст более контрастным */
+        body.theme-dark .bg-green-100 {
+            background-color: #dcfce7 !important;
+        }
+
+        body.theme-dark .bg-red-100 {
+            background-color: #fee2e2 !important;
+        }
+
+        body.theme-dark .bg-yellow-100 {
+            background-color: #fef9c3 !important;
+        }
+
+        body.theme-dark .bg-purple-100 {
+            background-color: #f3e8ff !important;
+        }
+
+        body.theme-dark .bg-blue-100 {
+            background-color: #dbeafe !important;
+        }
+
+        body.theme-dark .bg-white-100 {
+            background-color: #f9fafb !important;
+        }
+
+        /* Контрастный тёмный текст внутри этих карточек */
+        body.theme-dark .bg-green-100,
+        body.theme-dark .bg-red-100,
+        body.theme-dark .bg-yellow-100,
+        body.theme-dark .bg-purple-100,
+        body.theme-dark .bg-blue-100,
+        body.theme-dark .bg-white-100 {
+            color: #111827 !important;
+            /* почти чёрный */
+        }
+
+        body.theme-dark .bg-green-100 p,
+        body.theme-dark .bg-red-100 p,
+        body.theme-dark .bg-yellow-100 p,
+        body.theme-dark .bg-purple-100 p,
+        body.theme-dark .bg-blue-100 p,
+        body.theme-dark .bg-white-100 p,
+        body.theme-dark .bg-green-100 strong,
+        body.theme-dark .bg-red-100 strong,
+        body.theme-dark .bg-yellow-100 strong,
+        body.theme-dark .bg-purple-100 strong,
+        body.theme-dark .bg-blue-100 strong,
+        body.theme-dark .bg-white-100 strong {
+            color: #111827 !important;
+        }
+
+        /* Инпуты и формы */
+        body.theme-dark input,
+        body.theme-dark select,
+        body.theme-dark textarea {
+            background-color: #020617;
+            color: #e5e7eb;
+            border-color: #374151;
+        }
+
+        body.theme-dark input::placeholder,
+        body.theme-dark textarea::placeholder {
+            color: #6b7280;
+        }
+
+        /* Хедер и футер */
+        body.theme-dark header.bg-white {
+            background-color: #020617 !important;
+        }
+
+        body.theme-dark footer.bg-gray-900 {
+            background-color: #020617 !important;
+        }
+
+        /* Кнопка переключения темы */
+        #theme-toggle {
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+        }
+
+        #theme-toggle:hover {
+            transform: translateY(-1px);
+        }
+
+        body.theme-dark #theme-toggle {
+            background-color: #111827 !important;
+            color: #e5e7eb !important;
+        }
+
+
+        /* Таблица и её элементы остаются тёмными */
+        body.theme-dark table.bg-white {
+            background-color: #020617 !important;
+        }
+
+        body.theme-dark table thead th {
+            background-color: #0f172a !important;
+            color: #e5e7eb !important;
+            border-color: #374151 !important;
+        }
+
+        body.theme-dark table tbody td {
+            background-color: #020617 !important;
+            color: #e5e7eb !important;
+            border-color: #374151 !important;
+        }
+
+        /* Инпуты внутри таблицы остаются тёмными */
+        body.theme-dark table input[type="text"],
+        body.theme-dark table input[type="number"] {
+            background-color: #020617 !important;
+            color: #e5e7eb !important;
+            border-color: #374151 !important;
+        }
+
+        body.theme-dark table input::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* Стили для переключателя табов регистрации/авторизации */
+        .tab-button {
+            color: #374151;
+        }
+
+        .tab-button:hover {
+            color: #e53e3e;
+        }
+
+        .tab-button.active {
+            background-color: #e53e3e;
+            color: white;
+        }
+
+
+        /* =========
+           Dark Mode Fixes
+           ========= */
+
+        /* 1) Header Icons: remove white background in dark mode */
+        body.theme-dark header a.bg-white-100 {
+            background-color: #1f2937 !important; /* gray-800 */
+            color: #fff !important;
+            border: 1px solid #374151; /* gray-700 */
+        }
+        
+        body.theme-dark header a.bg-white-100:hover {
+            background-color: #374151 !important; /* gray-700 */
+        }
+
+        /* 2) Soften Hover Effects in Dark Mode */
+        /* Overriding common Tailwind hover classes to be less bright */
+        
+        body.theme-dark .hover\:bg-gray-50:hover {
+            background-color: #0f172a !important; /* slate-900 */
+        }
+
+        body.theme-dark .hover\:bg-gray-100:hover {
+            background-color: #1e293b !important; /* slate-800 */
+        }
+
+        body.theme-dark .hover\:bg-gray-200:hover {
+            background-color: #334155 !important; /* slate-700 */
+        }
+
+        body.theme-dark .hover\:bg-white:hover {
+            background-color: #1e293b !important; /* slate-800 instead of white */
+        }
+        
+        /* Specific fix if FAQ/Lists use other classes */
+        body.theme-dark .faq-panel:hover,
+        body.theme-dark .pickup-item:hover,
+        body.theme-dark .registry-item:hover {
+             background-color: #1e293b !important;
         }

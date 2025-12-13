@@ -59,7 +59,15 @@
                 <input type="date" name="update_date" id="update_date" required
                     class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
 
-                <div id="standard_view" class="grid grid-cols-1 gap-6">
+                <!-- Кнопка переключения формы (только для статуса delivered) -->
+                <div id="form_toggle_container" class="hidden mb-4">
+                    <button type="button" id="form_toggle_btn"
+                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+                        <i class="ri-table-line"></i> Переключить на табличный вид
+                    </button>
+                </div>
+
+                <div id="standard_view" class="grid grid-cols-3 gap-4">
                     <!-- Трек-коды -->
                     <div>
                         <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)</label>
@@ -67,23 +75,23 @@
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
 
-                    <!-- Пользователи (скрыт в стандартном режиме) -->
-                    <div id="owner_block" class="hidden">
+                    <!-- Пользователи -->
+                    <div id="owner_block">
                         <label for="owner_usernames" class="block font-medium mb-1">Имена владельцев (по одному в
                             строке)</label>
                         <textarea name="owner_usernames" id="owner_usernames" rows="10"
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
 
-                    <!-- Вес (скрыт в стандартном режиме) -->
-                    <div id="weight_block" class="hidden">
+                    <!-- Вес -->
+                    <div id="weight_block">
                         <label for="weights" class="block font-medium mb-1">Вес (в кг, по одному в строке)</label>
                         <textarea name="weights" id="weights" rows="10"
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
                 </div>
 
-                <div id="delivered_view" class="hidden mt-6">
+                <div id="delivered_view" class="hidden">
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead>
                             <tr>
@@ -126,20 +134,60 @@
                 const tracksTableBody = document.getElementById('tracks_table_body');
                 const addRowBtn = document.getElementById('add_row_btn');
                 const form = document.querySelector('form');
+                const formToggleContainer = document.getElementById('form_toggle_container');
+                const formToggleBtn = document.getElementById('form_toggle_btn');
+                const ownerBlock = document.getElementById('owner_block');
+                const weightBlock = document.getElementById('weight_block');
+
+                // Состояние переключения формы (true = таблица, false = текстовые поля)
+                let isTableMode = false;
+
+                function toggleFormView() {
+                    isTableMode = !isTableMode;
+                    
+                    if (isTableMode) {
+                        // Переключаемся на табличный вид
+                        standardView.classList.add('hidden');
+                        deliveredView.classList.remove('hidden');
+                        trackCodesArea.removeAttribute('required');
+                        syncToTable(); // Синхронизируем данные из textarea в таблицу
+                        formToggleBtn.innerHTML = '<i class="ri-file-text-line"></i> Переключить на текстовый вид';
+                    } else {
+                        // Переключаемся на текстовый вид
+                        standardView.classList.remove('hidden');
+                        deliveredView.classList.add('hidden');
+                        trackCodesArea.setAttribute('required', '');
+                        syncFromTable(); // Синхронизируем данные из таблицы в textarea
+                        formToggleBtn.innerHTML = '<i class="ri-table-line"></i> Переключить на табличный вид';
+                    }
+                }
 
                 function updateView() {
                     const isDelivered = statusSelect.value === 'delivered';
 
                     if (isDelivered) {
-                        standardView.classList.add('hidden');
-                        deliveredView.classList.remove('hidden');
-                        trackCodesArea.removeAttribute('required');
-                        syncToTable(); // Initial sync from textareas to table
-                    } else {
+                        // Показываем кнопку переключения и блоки владельца/веса
+                        formToggleContainer.classList.remove('hidden');
+                        ownerBlock.classList.remove('hidden');
+                        weightBlock.classList.remove('hidden');
+                        
+                        // По умолчанию показываем текстовый вид (старая форма)
+                        isTableMode = false;
                         standardView.classList.remove('hidden');
                         deliveredView.classList.add('hidden');
                         trackCodesArea.setAttribute('required', '');
-                        syncFromTable(); // Sync back to textareas just in case
+                        formToggleBtn.innerHTML = '<i class="ri-table-line"></i> Переключить на табличный вид';
+                    } else {
+                        // Скрываем кнопку переключения и блоки владельца/веса
+                        formToggleContainer.classList.add('hidden');
+                        ownerBlock.classList.add('hidden');
+                        weightBlock.classList.add('hidden');
+                        
+                        // Показываем только стандартный вид
+                        standardView.classList.remove('hidden');
+                        deliveredView.classList.add('hidden');
+                        trackCodesArea.setAttribute('required', '');
+                        isTableMode = false;
                     }
                 }
 
@@ -163,7 +211,7 @@
                     <input type="text" class="w-full border rounded px-2 py-1 owner-input" value="${owner}" placeholder="Login владельца">
                 </td>
                 <td class="border px-4 py-2">
-                    <input type="number" step="0.01" class="w-full border rounded px-2 py-1 weight-input" value="${weight}" placeholder="Вес (кг)">
+                    <input type="number" step="0.001" class="w-full border rounded px-2 py-1 weight-input" value="${weight}" placeholder="Вес (кг)">
                 </td>
                 <td class="border px-4 py-2 text-center">
                     <button type="button" class="text-red-500 hover:text-red-700 delete-row-btn">
@@ -260,6 +308,8 @@
 
                 // Event Listeners
                 statusSelect.addEventListener('change', updateView);
+                
+                formToggleBtn.addEventListener('click', toggleFormView);
 
                 addRowBtn.addEventListener('click', function () {
                     tracksTableBody.appendChild(createRow());
@@ -268,7 +318,10 @@
                 // Sync on submit if in delivered mode
                 form.addEventListener('submit', function (e) {
                     if (statusSelect.value === 'delivered') {
-                        syncFromTable();
+                        // Если активен табличный вид, синхронизируем данные перед отправкой
+                        if (isTableMode) {
+                            syncFromTable();
+                        }
                     }
                 });
 

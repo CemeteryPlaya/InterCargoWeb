@@ -1,12 +1,140 @@
-        :where([class^="ri-"])::before { content: "\f3c2"; }
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+
         body {
             font-family: 'Inter', sans-serif;
         }
+
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type="number"] {
             -moz-appearance: textfield;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .header-label {
+            width: 150px;
+            font-weight: bold;
+        }
+
+        .header-value {
+            border-bottom: 1px solid #000;
+            min-width: 200px;
+            padding-left: 10px;
+        }
+
+        .pickup-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .pickup-header {
+            background-color: #f0f0f0;
+            padding: 5px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .pickup-label {
+            margin-right: 10px;
+        }
+
+        .pickup-name {
+            background-color: #444;
+            color: #fff;
+            padding: 2px 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 4px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #fff;
+            font-weight: bold;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .footer-total {
+            margin-top: 20px;
+            border-top: 2px solid #000;
+            padding-top: 10px;
+        }
+
+        .footer-table {
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer-table td {
+            border: 1px solid #ccc;
+            padding: 5px 15px;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
         }

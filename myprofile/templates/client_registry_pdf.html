@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Реестр {{ registry.registry_date|date:"d.m.Y" }}</title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+            color: #000;
+        }
+
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: sans-serif;
+            z-index: 1000;
+        }
+
+        .delete-btn {
+            color: #e53e3e;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            margin-left: 5px;
+            font-size: 16px;
+        }
+
+        @media print {
+
+            .no-print,
+            .delete-btn {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+            }
+        }
+
+        .header-section {
+            margin-bottom: 20px;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .header-label {
+            font-weight: bold;
+            width: 120px;
+            color: #888;
+        }
+
+        .header-input {
+            border: 1px solid #000;
+            padding: 2px 5px;
+            width: 200px;
+            font-weight: normal;
+        }
+
+        .header-input.date-input {
+            width: 100px;
+        }
+
+        .header-input.pickup-input {
+            width: 300px;
+            background-color: #f0f0f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+            color: #888;
+            border: none;
+            font-size: 14px;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        .data-table th {
+            border: none;
+            text-align: center;
+            padding: 5px;
+            font-weight: bold;
+            color: #888;
+        }
+
+        .data-table td {
+            border: 1px solid #888;
+            padding: 2px 5px;
+            text-align: center;
+            font-size: 14px;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        .data-table td.text-left {
+            text-align: left;
+        }
+
+        .data-table td.text-right {
+            text-align: right;
+        }
+
+        .totals-row td {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .pickup-group {
+            margin-bottom: 30px;
+        }
+
+        .pickup-header-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .pickup-header-label {
+            font-weight: bold;
+            color: #888;
+            margin-right: 10px;
+            width: 120px;
+        }
+
+        .pickup-header-value {
+            background-color: #444;
+            color: white;
+            padding: 2px 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="no-print" onclick="window.print()">Печать</button>
+
+    <div class="header-section">
+        <table style="width: auto; margin-bottom: 10px;">
+            <tr>
+                <td style="border: none; font-weight: bold; color: #888; width: 100px;">Дата</td>
+                <td style="border: 1px solid #888; width: 150px; text-align: center;">
+                    {{ registry.registry_date|date:"d.m.Y" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 200px;">Клиент</th>
+                <th style="width: 50px;">Кол-во</th>
+                <th style="width: 80px;">Вес, кг</th>
+                <th style="width: 80px;">Сумма, тг</th>
+                <th style="width: 100px;">Ячейка</th>
+                <th style="width: 100px;">Выдано</th>
+            </tr>
+        </thead>
+
+        {% for pickup_code, info in data.items %}
+        <tbody id="tbody-{{ pickup_code }}">
+            <!-- Pickup Point Header Row -->
+            <tr class="pickup-header-row" style="background-color: #f0f0f0;">
+                <td colspan="6" style="text-align: left; font-weight: bold; border: 1px solid #888; padding: 5px;">
+                    Пункт выдачи:
+                </td>
+                <td></td>
+                <td>
+                    {{ info.name }}
+                </td>
+            </tr>
+
+            {% for username, client in info.clients.items %}
+            <tr class="client-row" data-count="{{ client.count }}" data-weight="{{ client.weight }}"
+                data-sum="{{ client.sum }}">
+                <td class="text-left">
+                    {{ username }}
+                    <span class="delete-btn" onclick="removeClient(this)">×</span>
+                </td>
+                <td class="count-cell">{{ client.count }}</td>
+                <td class="weight-cell">{{ client.weight|floatformat:3 }}</td>
+                <td class="sum-cell">{{ client.sum|floatformat:0 }}</td>
+                <td></td> <!-- Ячейка -->
+                <td></td> <!-- Выдано -->
+            </tr>
+            {% endfor %}
+            <tr class="totals-row">
+                <td class="text-left">ИТОГО:</td>
+                <td id="total-count-{{ pickup_code }}">{{ info.total_count }}</td>
+                <td id="total-weight-{{ pickup_code }}">{{ info.total_weight|floatformat:3 }}</td>
+                <td id="total-sum-{{ pickup_code }}">{{ info.total_sum|floatformat:0 }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% if not forloop.last %}
+            <tr>
+                <td colspan="6" style="border: none; height: 20px;"></td>
+            </tr>
+            {% endif %}
+        </tbody>
+        {% endfor %}
+    </table>
+
+    <!-- Global Totals -->
+    <div style="margin-top: 0px; page-break-inside: avoid;">
+        <table class="data-table" style="width: 100%; border-top: none;">
+            <tr style="background-color: #f0f0f0;">
+                <td style="width: 200px; text-align: left; font-weight: bold; border-top: 1px solid #888;">ОБЩИЙ ИТОГ ПО
+                    РЕЕСТРУ:</td>
+                <td style="width: 50px; font-weight: bold; border-top: 1px solid #888;" id="grand-total-clients">
+                    {{ all_clients_count }}</td>
+                <td style="width: 80px; font-weight: bold; border-top: 1px solid #888;" id="grand-total-weight">
+                    {{ all_weight_total|floatformat:3 }}</td>
+                <td style="width: 80px; font-weight: bold; border-top: 1px solid #888;" id="grand-total-sum">
+                    {{ all_sum_total|floatformat:0 }}</td>
+                <td style="width: 100px; border-top: 1px solid #888;"></td>
+                <td style="width: 100px; border-top: 1px solid #888;"></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function removeClient(element) {
+            if (!confirm('Удалить клиента из этого списка?')) return;
+
+            const row = element.closest('tr');
+            const tbody = row.parentElement; // This will find the specific tbody for the pickup point
+
+            // Remove the row
+            row.remove();
+
+            // Recalculate totals for this table (tbody)
+            recalculateTableTotals(tbody);
+
+            // Recalculate grand totals
+            recalculateGrandTotals();
+        }
+
+        function recalculateTableTotals(tbody) {
+            let totalCount = 0;
+            let totalWeight = 0;
+            let totalSum = 0;
+
+            const rows = tbody.querySelectorAll('.client-row');
+            rows.forEach(row => {
+                const count = parseFloat(row.getAttribute('data-count')) || 0;
+                const weight = parseFloat(row.getAttribute('data-weight').replace(',', '.')) || 0;
+                const sum = parseFloat(row.getAttribute('data-sum').replace(',', '.')) || 0;
+
+                totalCount += count;
+                totalWeight += weight;
+                totalSum += sum;
+            });
+
+            // Update footer row in this tbody
+            const totalsRow = tbody.querySelector('.totals-row');
+            if (totalsRow) {
+                totalsRow.cells[1].textContent = totalCount;
+                totalsRow.cells[2].textContent = totalWeight.toFixed(3).replace('.', ',');
+                totalsRow.cells[3].textContent = totalSum.toFixed(0);
+            }
+        }
+
+        function recalculateGrandTotals() {
+            let grandCount = 0;
+            let grandWeight = 0;
+            let grandSum = 0;
+
+            const allRows = document.querySelectorAll('.client-row');
+            allRows.forEach(row => {
+                const count = parseFloat(row.getAttribute('data-count')) || 0;
+                const weight = parseFloat(row.getAttribute('data-weight').replace(',', '.')) || 0;
+                const sum = parseFloat(row.getAttribute('data-sum').replace(',', '.')) || 0;
+
+                grandCount += count;
+                grandWeight += weight;
+                grandSum += sum;
+            });
+
+            const grandCountEl = document.getElementById('grand-total-clients');
+            const grandWeightEl = document.getElementById('grand-total-weight');
+            const grandSumEl = document.getElementById('grand-total-sum');
+
+            if (grandCountEl) grandCountEl.textContent = grandCount;
+            if (grandWeightEl) grandWeightEl.textContent = grandWeight.toFixed(3).replace('.', ',');
+            if (grandSumEl) grandSumEl.textContent = grandSum.toFixed(0);
+        }
+    </script>
+</body>
+
+</html>

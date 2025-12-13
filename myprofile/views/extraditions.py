@@ -2,7 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import transaction
-from myprofile.models import Extradition, ExtraditionPackage, Notification
+from myprofile.models import Extradition, ExtraditionPackage, Notification, ReceiptItem
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 @login_required(login_url='login')
 def extradition_view(request):
@@ -82,10 +84,6 @@ def extradition_view(request):
 
     # GET — страница с формой
     return render(request, "extraditions.html")
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from myprofile.models import ReceiptItem
 
 @login_required
 def search_package(request):

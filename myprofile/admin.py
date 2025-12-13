@@ -1,9 +1,13 @@
 from django.contrib import admin
 from .models import (
     TrackCode, Receipt, ReceiptItem, CustomerDiscount,
-    Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings
+    Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry
 )
 from django import forms
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
+from .forms import MassUpdateTrackForm
 
 # Register your models here.
 class TrackCodeAdminForm(forms.ModelForm):
@@ -34,6 +38,59 @@ class TrackCodeAdmin(admin.ModelAdmin):
     list_display = ('id', 'track_code', 'owner', 'update_date', 'status', 'description', 'weight')
     search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name')
     list_filter = ('status', 'update_date')
+    actions = ['update_status_action']
+
+    def update_status_action(self, request, queryset):
+        if 'post' in request.POST:
+            form = MassUpdateTrackForm(request.POST)
+            if form.is_valid():
+                new_status = form.cleaned_data['status']
+                payment_status = form.cleaned_data['payment_status']
+                
+                updated_count = 0
+                receipts_updated = 0
+                
+                for track in queryset:
+                    # Update status
+                    track.status = new_status
+                    track._skip_status_validation = True
+                    track.save()
+                    updated_count += 1
+                    
+                    # Update payment status if requested and linked to a receipt
+                    if payment_status != 'no_change':
+                        # Find receipt item linked to this track
+                        receipt_items = ReceiptItem.objects.filter(track_code=track)
+                        for item in receipt_items:
+                            receipt = item.receipt
+                            if payment_status == 'paid':
+                                if not receipt.is_paid:
+                                    receipt.is_paid = True
+                                    receipt.save()
+                                    receipts_updated += 1
+                            elif payment_status == 'not_paid':
+                                if receipt.is_paid:
+                                    receipt.is_paid = False
+                                    receipt.save()
+                                    receipts_updated += 1
+                
+                self.message_user(request, f"Successfully updated status for {updated_count} track codes.", messages.SUCCESS)
+                if payment_status != 'no_change':
+                     self.message_user(request, f"Updated payment status for {receipts_updated} receipts.", messages.SUCCESS)
+                
+                return None # Return None to redirect to the changelist
+        else:
+            form = MassUpdateTrackForm()
+
+        return render(request, 'admin/myprofile/trackcode/mass_update.html', {
+            'title': _('Mass Status Update'),
+            'queryset': queryset,
+            'opts': self.model._meta,
+            'form': form,
+            'action_checkbox_name': admin.helpers.ACTION_CHECKBOX_NAME,
+        })
+    
+    update_status_action.short_description = "Обновить статус (массово)"
     
     def save_model(self, request, obj, form, change):
         """
@@ -143,3 +200,10 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Prevent deletion
         return False
+
+@admin.register(ClientRegistry)
+class ClientRegistryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'registry_date', 'created_at')
+    list_filter = ('registry_date', 'created_at')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)

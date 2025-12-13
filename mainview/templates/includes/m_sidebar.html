@@ -1,8 +1,8 @@
 {% load static %}
 <!-- Мобильный Sidebar -->
 <div id="mobile-sidebar"
-     class="hidden md:hidden fixed inset-0 z-40 bg-white flex flex-col h-full max-h-screen overflow-hidden">
-    
+    class="hidden md:hidden fixed inset-0 z-40 bg-white flex flex-col h-full max-h-screen overflow-hidden">
+
     <!-- Верхняя панель -->
     <div class="flex justify-between items-center p-4 border-b flex-shrink-0">
         <a href="{% url 'profile' %}" class="text-2xl font-['Pacifico'] text-primary">
@@ -22,11 +22,17 @@
             <i class="ri-notification-3-line"></i>Уведомления
         </a>
         {% if request.user.userprofile.is_staff %}
+        <a href="{% url 'extradition' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-mail-line"></i>Выдача посылок
+        </a>
         <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-shield-user-line"></i>Панель персонала
         </a>
         <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-admin-line"></i>Панель администратора
+        </a>
+        <a href="{% url 'print_documents' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-printer-line"></i>Печать документов
         </a>
         {% endif %}
         {% if request.user.userprofile.is_hr %}
@@ -36,7 +42,7 @@
         {% endif %}
         <a href="{% url 'delivered_posts' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-bill-line"></i>Чеки
-        </a>   
+        </a>
         <a href="{% url 'extradition_package' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-file-list-3-line"></i> Формирование выдачи
         </a>
@@ -54,7 +60,8 @@
 
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="flex items-center text-gray-900 hover:text-primary transition" title="Выйти">
+                <button type="submit" class="flex items-center text-gray-900 hover:text-primary transition"
+                    title="Выйти">
                     <i class="ri-logout-box-fill mr-2"></i> Выход
                 </button>
             </form>

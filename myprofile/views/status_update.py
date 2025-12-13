@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from myprofile.models import TrackCode, Notification
 from register.models import UserProfile
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from datetime import datetime
 
 @login_required
@@ -83,12 +83,12 @@ def update_tracks(request):
                     user = User.objects.get(username=usernames[i])
                     UserProfile.objects.get(user=user)  # проверяем профиль
                     track.owner = user
-                    track.weight = Decimal(weights[i])
+                    track.weight = Decimal(weights[i].replace(',', '.'))
                 except (User.DoesNotExist, UserProfile.DoesNotExist):
                     messages.error(request, f"Пользователь '{usernames[i]}' не найден для трек-кода {code}.")
                     errors += 1
                     continue
-                except (Decimal.InvalidOperation, ValueError):
+                except (InvalidOperation, ValueError):
                     messages.error(request, f"Неверный формат веса для трек-кода {code}.")
                     errors += 1
                     continue
@@ -138,7 +138,7 @@ def update_tracks(request):
                         status=status,
                         update_date=update_date,
                         owner=user,
-                        weight=Decimal(weights[i])
+                        weight=Decimal(weights[i].replace(',', '.'))
                     )
                     created += 1
                     Notification.objects.create(
@@ -153,7 +153,7 @@ def update_tracks(request):
                     messages.error(request, f"Не удалось создать трек-код {code}: {e}")
                     errors += 1
                     continue
-                except (Decimal.InvalidOperation, ValueError):
+                except (InvalidOperation, ValueError):
                     messages.error(request, f"Неверный формат веса для трек-кода {code}.")
                     errors += 1
                     continue

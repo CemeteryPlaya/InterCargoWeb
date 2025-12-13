@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 
-{% load static %}    	
+{% load static %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <title>Inter Cargo - доставка из Китая в Казахстан</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
     <script src="{% static 'scripts/core.js' %}"></script>
     <script src="{% static 'scripts/faq.js' %}"></script>
     <script src="{% static 'scripts/menu.js' %}"></script>
@@ -19,28 +20,41 @@
     <script src="{% static 'scripts/forms.js' %}"></script>
     <script src="{% static 'scripts/phone.js' %}"></script>
     <script src="{% static 'scripts/coockiesAndPush.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
 </head>
+
 <body class="bg-gray-50 min-h-screen">
-{% include 'includes/header.html' %}
+    {% include 'includes/header.html' %}
     {% block content %}
 
     <!-- Hero секция с калькулятором -->
-    <section class="relative py-16 md:py-24 overflow-hidden" style="background-image: url('{% static "images/hero.jpg" %}'); background-size: cover; background-position: center;">
+    <section class="relative py-16 md:py-24 overflow-hidden"
+        style="background-image: url('{% static 'images/hero.jpg'%}'); background-size: cover; background-position: center;">
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
         <div class="container mx-auto px-4 relative z-10">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div class="md:w-1/2 mb-12 md:mb-0 text-white">
                     <div class="text-primary font-medium mb-2">КАЛЬКУЛЯТОР</div>
-                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Узнайте цену доставки груза из Китая в Казахстан</h1>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Узнайте цену доставки груза из Китая в Казахстан
+                    </h1>
                     <p class="text-xl mb-8">Тариф: 1859₸/кг</p>
-                    <a href="#registration" class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-                        Регистрация
-                        <i class="ri-arrow-right-line ml-2"></i>
-                    </a>
+                    {% if not user.is_authenticated %}
+                    <div class="flex flex-col space-y-3">
+                        <a href="#registration"
+                            class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
+                            Регистрация
+                            <i class="ri-arrow-right-line ml-2"></i>
+                        </a>
+                        <a href="{% url 'login' %}"
+                            class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
+                            Войти
+                            <i class="ri-arrow-right-line ml-2"></i>
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="md:w-5/12">
                     <div class="bg-white rounded-lg shadow-lg p-6">
@@ -48,12 +62,16 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Напишите количество в кг</label>
                             <div class="relative">
-                                <input type="number" id="weight" class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="0" min="0" max="100">
+                                <input type="number" id="weight"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+                                    placeholder="0" min="0" max="100">
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                    <button id="increment" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                                    <button id="increment"
+                                        class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700">
                                         <i class="ri-arrow-up-s-line"></i>
                                     </button>
-                                    <button id="decrement" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                                    <button id="decrement"
+                                        class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700">
                                         <i class="ri-arrow-down-s-line"></i>
                                     </button>
                                 </div>
@@ -73,7 +91,9 @@
                                 <span class="text-gray-900">Сумма</span>
                                 <span id="total-price" class="text-gray-900">0 ₸</span>
                             </div>
-                            <div id="discount" class="flex justify-between text-green-600 font-semibold py-2 border-b border-gray-200" style="visibility: hidden;">
+                            <div id="discount"
+                                class="flex justify-between text-green-600 font-semibold py-2 border-b border-gray-200"
+                                style="visibility: hidden;">
                                 <span>Скидка</span>
                                 <span id="discount-amount">0 ₸</span>
                             </div>
@@ -94,90 +114,132 @@
             <div class="max-w-3xl mx-auto">
                 <div class="space-y-4">
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq1">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq1">
                             <span>Как рассчитывается стоимость доставки?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq1" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Стоимость доставки рассчитывается по тарифу 1859₸ за килограмм груза. Минимальный вес для расчета - 0 кг, максимальный - 100 кг (Выше 100 кг. необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.</p>
+                            <p class="text-gray-700">Стоимость доставки рассчитывается по тарифу 1859₸ за килограмм
+                                груза. Минимальный вес для расчета - 0 кг, максимальный - 100 кг (Выше 100 кг.
+                                необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.
+                            </p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq2">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq2">
                             <span>Какие сроки доставки из Китая в Казахстан?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq2" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Средний срок доставки составляет 8-12 дней с момента отправки товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и загруженности таможенных служб.</p>
+                            <p class="text-gray-700">Средний срок доставки составляет 8-12 дней с момента отправки
+                                товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и
+                                загруженности таможенных служб.</p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq3">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq3">
                             <span>Как зарегистрироваться в системе?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq3" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Для регистрации необходимо заполнить форму на странице "Регистрация", указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи. После регистрации можете авторизоваться в личном кабинете нажав на кнопку, либо на инонку профиля в верхней части.</p>
+                            <p class="text-gray-700">Для регистрации необходимо заполнить форму на странице
+                                "Регистрация", указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона
+                                и выбрав удобный пункт выдачи. После регистрации можете авторизоваться в личном кабинете
+                                нажав на кнопку, либо на инонку профиля в верхней части.</p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq4">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq4">
                             <span>Какие товары запрещены к перевозке?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq4" class="faq-content hidden px-6 pb-4 text-gray-700">
-                            <p>К перевозке запрещены: <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li> 
-                                                                            <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li> 
-                                                                            <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li> 
-                                                                            <li>Техника, мобильные телефоны, ноутбуки. Хрупкие, стеклянные товары (либо просите продавца надежную упаковку, пузыочатую пленку, защиту края и т.д.)</li></p>
+                            <p>К перевозке запрещены: <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые
+                                    вещества.</li>
+                                <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
+                                <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных
+                                    упаковках).</li>
+                                <li>Техника, мобильные телефоны, ноутбуки. Хрупкие, стеклянные товары (либо просите
+                                    продавца надежную упаковку, пузыочатую пленку, защиту края и т.д.)</li>
+                            </p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq5">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq5">
                             <span>Как отследить мой заказ?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq5" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">После оформления заказа вам будет предоставлен трек-номер для отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через WhatsApp для получения актуальной информации о статусе вашего груза.</p>
+                            <p class="text-gray-700">После оформления заказа вам будет предоставлен трек-номер для
+                                отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через
+                                WhatsApp для получения актуальной информации о статусе вашего груза.</p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq8">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq8">
                             <span>Как заполнить адрес склада в Китае?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq8" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">На главной странице в разделе «Адрес склада в Китае» указан полный адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте скриншот менеджеру для проверки.</p>
+                            <p class="text-gray-700">На главной странице в разделе «Адрес склада в Китае» указан полный
+                                адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте
+                                скриншот менеджеру для проверки.</p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq9">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq9">
                             <span>Что делать, если заказ пришел сломанным или поврежденным?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq9" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">· Ваша задача — заранее попросить продавца обеспечить надежную упаковку (например, пенопластом).<br>
-                            · Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешетку груза (стоимость уточняйте у менеджера).<br>
-                            · Если упаковка не соответствовала требованиям, компания не несет ответственности за повреждения.<br>
-                            · Если товар был упакован правильно, но поврежден при доставке, ответственность несет Inter Cargo.</p>
+                            <p class="text-gray-700">· Ваша задача — заранее попросить продавца обеспечить надежную
+                                упаковку (например, пенопластом).<br>
+                                · Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется
+                                сделать обрешетку груза (стоимость уточняйте у менеджера).<br>
+                                · Если упаковка не соответствовала требованиям, компания не несет ответственности за
+                                повреждения.<br>
+                                · Если товар был упакован правильно, но поврежден при доставке, ответственность несет
+                                Inter Cargo.</p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq10">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq10">
                             <span>Как связаться с менеджером?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq10" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу или в левом нижнем углу главной страницы.</p>
+                            <p class="text-gray-700">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом
+                                верхнем углу или в левом нижнем углу главной страницы.</p>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
-                        <button class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition" data-target="faq11">
+                        <button
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            data-target="faq11">
                             <span>Кто несет ответственность за заказ в статусе «Добавлено пользователем»?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq11" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Ответственность за заказ, который еще не прибыл на склад (статус «Добавлено пользователем»), несет продавец с маркетплейса. Inter Cargo начинает нести ответственность с момента поступления товара на свой склад в Китае. При возникновении проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции.</p>
+                            <p class="text-gray-700">Ответственность за заказ, который еще не прибыл на склад (статус
+                                «Добавлено пользователем»), несет продавец с маркетплейса. Inter Cargo начинает нести
+                                ответственность с момента поступления товара на свой склад в Китае. При возникновении
+                                проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции.</p>
                         </div>
                     </div>
                 </div>
@@ -187,94 +249,164 @@
 
 
 
-<!-- Форма регистрации -->
-<section id="registration" class="py-16 bg-gray-50">
-  <div class="container mx-auto px-4">
-    
-    <!-- Заголовок формы -->
-    <div class="text-center mb-12">
-      <div class="text-primary font-medium mb-2">РЕГИСТРАЦИЯ</div>
-      <h2 class="text-3xl font-bold text-gray-900">Регистрация нового клиента</h2>
-      <p class="text-gray-600 mt-4 max-w-2xl mx-auto">
-        Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая
-      </p>
-    </div>
+    {% if not user.is_authenticated %}
+    <!-- Форма регистрации и авторизации -->
+    <section id="registration" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
 
-    <!-- Форма -->
-    <div class="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        
-      <form id="registration-form" method="POST" action="{% url 'pre_register' %}">
-        {% csrf_token %}
+            <!-- Заголовок формы -->
+            <div class="text-center mb-12">
+                <div class="text-primary font-medium mb-2" id="section-title">РЕГИСТРАЦИЯ</div>
+                <h2 class="text-3xl font-bold text-gray-900" id="section-heading">Регистрация нового клиента</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto" id="section-description">
+                    Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами
+                    доставки из Китая
+                </p>
+            </div>
 
-        <!-- Логин -->
-        <div class="mb-6">
-          <label for="login" class="block text-sm font-medium text-gray-700 mb-2">
-            Логин (Имя/Ник + 4 цифры номера)
-          </label>
-          <input
-            type="text"
-            id="login"
-            name="login"
-            required
-            pattern="^[A-Za-zА-Яа-яЁё]+[0-9]{4}$"
-            title="Введите имя или ник и 4 цифры номера, например ANDREY1234"
-            placeholder="Например: ANDREY1234"
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition">
-          <div class="text-xs text-gray-500 mt-1">
-            Введите ваше имя или ник и последние 4 цифры номера телефона
-          </div>
+            <!-- Переключатель табов -->
+            <div class="max-w-xl mx-auto mb-6">
+                <div class="flex bg-white rounded-lg shadow-sm p-1">
+                    <button id="tab-register"
+                        class="flex-1 py-3 px-4 text-center font-medium rounded-md transition-all tab-button active"
+                        onclick="switchTab('register')">
+                        Регистрация
+                    </button>
+                    <button id="tab-login"
+                        class="flex-1 py-3 px-4 text-center font-medium rounded-md transition-all tab-button"
+                        onclick="switchTab('login')">
+                        Войти
+                    </button>
+                </div>
+            </div>
+
+            <!-- Форма регистрации -->
+            <div class="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8" id="register-form-container">
+                <form id="registration-form" method="POST" action="{% url 'pre_register' %}">
+                    {% csrf_token %}
+
+                    <!-- Логин -->
+                    <div class="mb-6">
+                        <label for="reg-login" class="block text-sm font-medium text-gray-700 mb-2">
+                            Логин (Имя/Ник + 4 цифры номера)
+                        </label>
+                        <input type="text" id="reg-login" name="login" required pattern="^[A-Za-zА-Яа-яЁё]+[0-9]{4}$"
+                            title="Введите имя или ник и 4 цифры номера, например ANDREY1234"
+                            placeholder="Например: ANDREY1234"
+                            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition">
+                        <div class="text-xs text-gray-500 mt-1">
+                            Введите ваше имя или ник и последние 4 цифры номера телефона
+                        </div>
+                    </div>
+
+                    <!-- Телефон -->
+                    <div class="mb-6">
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                            Номер телефона
+                        </label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+7 (___) ___-__-__"
+                            maxlength="18"
+                            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition">
+                    </div>
+
+                    <!-- Пункт выдачи -->
+                    <div class="mb-8">
+                        <label for="pickup" class="block text-sm font-medium text-gray-700 mb-2">
+                            Выбор пункта выдачи
+                        </label>
+                        <select id="pickup" name="pickup" required
+                            class="w-full px-4 py-3 pr-8 border border-gray-300 rounded appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition">
+                            <option value="" disabled selected>Выберите пункт выдачи</option>
+                            <option value="akbulak">Акбулак 21 (Ozon)</option>
+                            <option value="pushkina">Пушкина 8 (Ozon)</option>
+                            <option value="tashkentskaya">Ташкентская 286 (Ozon)</option>
+                            <option value="bayseytovoy">Байсеитовой 30 (Ozon)</option>
+                            <option value="samal">Самал 48 (Wildberries)</option>
+                            <option value="sorokina">Сорокина 7 (Ozon)</option>
+                            <option value="ashimbaeva">Ашимбаева 5 (Ozon)</option>
+                            <option value="abaya286">Абая 286 (Ozon)</option>
+                            <option value="atabaeva">Атабаева 105 (Ozon)</option>
+                            <option value="koybakova">Койбакова 8 (Ozon)</option>
+                        </select>
+                    </div>
+
+                    <!-- Кнопка отправки -->
+                    <button type="submit"
+                        class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
+                        Зарегистрироваться
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- Форма авторизации -->
+            <div class="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8 hidden" id="login-form-container">
+                <form id="login-form" method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <!-- Логин -->
+                    <div class="mb-6">
+                        <label for="auth-login" class="block text-sm font-medium text-gray-700 mb-2">Логин (Имя/Ник + 4
+                            цифры номера)</label>
+                        <input type="text" id="auth-login" name="login" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+                            placeholder="Например: ANDREY1234">
+                        <div class="text-xs text-gray-500 mt-1">Введите ваше имя или ник и последние 4 цифры номера
+                            телефона</div>
+                    </div>
+
+                    <!-- Пароль -->
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+                        <input type="password" id="password" name="password" required minlength="6"
+                            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+                            placeholder="Введите пароль">
+                    </div>
+
+                    <!-- Кнопка -->
+                    <button type="submit"
+                        class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
+                        Войти
+                    </button>
+                </form>
+            </div>
         </div>
+    </section>
 
-        <!-- Телефон -->
-        <div class="mb-6">
-          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-            Номер телефона
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            required
-            placeholder="+7 (___) ___-__-__"
-            maxlength="18"
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition">
-        </div>
+    <script>
+        function switchTab(tab) {
+            const registerTab = document.getElementById('tab-register');
+            const loginTab = document.getElementById('tab-login');
+            const registerForm = document.getElementById('register-form-container');
+            const loginForm = document.getElementById('login-form-container');
+            const sectionTitle = document.getElementById('section-title');
+            const sectionHeading = document.getElementById('section-heading');
+            const sectionDescription = document.getElementById('section-description');
 
-        <!-- Пункт выдачи -->
-        <div class="mb-8">
-          <label for="pickup" class="block text-sm font-medium text-gray-700 mb-2">
-            Выбор пункта выдачи
-          </label>
-          <select
-            id="pickup"
-            name="pickup"
-            required
-            class="w-full px-4 py-3 pr-8 border border-gray-300 rounded appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition">
-            <option value="" disabled selected>Выберите пункт выдачи</option>
-            <option value="akbulak">Акбулак 21 (Ozon)</option>
-            <option value="pushkina">Пушкина 8 (Ozon)</option>
-            <option value="tashkentskaya">Ташкентская 286 (Ozon)</option>
-            <option value="bayseytovoy">Байсеитовой 30 (Ozon)</option>
-            <option value="samal">Самал 48 (Wildberries)</option>
-            <option value="sorokina">Сорокина 7 (Ozon)</option>
-            <option value="ashimbaeva">Ашимбаева 5 (Ozon)</option>
-            <option value="abaya286">Абая 286 (Ozon)</option>
-            <option value="atabaeva">Атабаева 105 (Ozon)</option>
-            <option value="koybakova">Койбакова 8 (Ozon)</option>
-          </select>
-        </div>
-
-        <!-- Кнопка отправки -->
-        <button
-          type="submit"
-          class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-          Зарегистрироваться
-        </button>
-
-      </form>
-    </div>
-  </div>
-</section>
+            if (tab === 'register') {
+                registerTab.classList.add('active', 'bg-primary', 'text-white');
+                registerTab.classList.remove('text-gray-700', 'hover:text-primary');
+                loginTab.classList.remove('active', 'bg-primary', 'text-white');
+                loginTab.classList.add('text-gray-700', 'hover:text-primary');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                sectionTitle.textContent = 'РЕГИСТРАЦИЯ';
+                sectionHeading.textContent = 'Регистрация нового клиента';
+                sectionDescription.textContent = 'Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая';
+            } else {
+                loginTab.classList.add('active', 'bg-primary', 'text-white');
+                loginTab.classList.remove('text-gray-700', 'hover:text-primary');
+                registerTab.classList.remove('active', 'bg-primary', 'text-white');
+                registerTab.classList.add('text-gray-700', 'hover:text-primary');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                sectionTitle.textContent = 'АВТОРИЗАЦИЯ';
+                sectionHeading.textContent = 'Вход клиента';
+                sectionDescription.textContent = 'Заполните форму ниже, чтобы войти в свой аккаунт в нашей системе и начать пользоваться услугами доставки из Китая';
+            }
+        }
+    </script>
+    {% endif %}
 
 
 
@@ -284,48 +416,58 @@
             <div class="text-center mb-12">
                 <div class="text-primary font-medium mb-2">ОБУЧЕНИЕ</div>
                 <h2 class="text-3xl font-bold text-gray-900">Как пользоваться нашим сервисом</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно использовать наш сервис доставки</p>
-            </div>        
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы
+                    узнать, как эффективно использовать наш сервис доставки</p>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu1.jpg' %}" alt="Регистрация на сайте" class="object-cover w-full h-full">
+                        <img src="{% static 'images/edu1.jpg' %}" alt="Регистрация на сайте"
+                            class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Регистрация на сайте</h3>
-                        <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт выдачи для получения ваших посылок.</p>
-                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                            Смотреть видео
-                            <i class="ri-play-circle-line ml-2"></i>
-                        </button></a>
+                        <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать
+                            удобный пункт выдачи для получения ваших посылок.</p>
+                        <a href="#"><button
+                                class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                                Смотреть видео
+                                <i class="ri-play-circle-line ml-2"></i>
+                            </button></a>
                     </div>
                 </div>
-                
+
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu2.jpg' %}" alt="Оформление заказа" class="object-cover w-full h-full">
+                        <img src="{% static 'images/edu2.jpg' %}" alt="Оформление заказа"
+                            class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Оформление заказа в Китае</h3>
-                        <p class="text-gray-700 mb-4">Пошаговая инструкция по оформлению заказа на китайских торговых площадках и указанию нашего адреса доставки.</p>
-                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                            Смотреть видео
-                            <i class="ri-play-circle-line ml-2"></i>
-                        </button></a>
+                        <p class="text-gray-700 mb-4">Пошаговая инструкция по оформлению заказа на китайских торговых
+                            площадках и указанию нашего адреса доставки.</p>
+                        <a href="#"><button
+                                class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                                Смотреть видео
+                                <i class="ri-play-circle-line ml-2"></i>
+                            </button></a>
                     </div>
                 </div>
-                
+
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu3.jpg' %}" alt="Отслеживание посылки" class="object-cover w-full h-full">
+                        <img src="{% static 'images/edu3.jpg' %}" alt="Отслеживание посылки"
+                            class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Отслеживание посылки</h3>
-                        <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из Китая в Казахстан.</p>
-                        <a href="#"><button class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                            Смотреть видео
-                            <i class="ri-play-circle-line ml-2"></i>
-                        </button></a>
+                        <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе
+                            доставки из Китая в Казахстан.</p>
+                        <a href="#"><button
+                                class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                                Смотреть видео
+                                <i class="ri-play-circle-line ml-2"></i>
+                            </button></a>
                     </div>
                 </div>
             </div>
@@ -333,6 +475,7 @@
     </section>
     {% endblock %}
 
-{% include 'includes/footer.html' %}
+    {% include 'includes/footer.html' %}
 </body>
+
 </html>
