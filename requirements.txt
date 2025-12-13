@@ -5,3 +5,4 @@ pywebpush
 python-barcode
 pillow
 python-dotenv
+gunicorn
