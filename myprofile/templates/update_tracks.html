@@ -39,7 +39,7 @@
             </ul>
             {% endif %}
 
-            <form method="post" action="{% url 'update_tracks' %}">
+            <form method="post" action="{% url 'update_tracks' %}" id="update_tracks_form">
                 {% csrf_token %}
 
                 <!-- Статус -->
@@ -52,7 +52,6 @@
                     {% endif %}
                     {% endfor %}
                 </select>
-
 
                 <!-- Дата -->
                 <label for="update_date" class="block font-medium mb-1">Дата обновления</label>
@@ -96,13 +95,13 @@
                         <thead>
                             <tr>
                                 <th
-                                    class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking>
                                     Трек-код</th>
                                 <th
-                                    class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking>
                                     Владелец</th>
                                 <th
-                                    class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking>
                                     Вес (кг)</th>
                                 <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100"></th>
                             </tr>
@@ -111,6 +110,7 @@
                             <!-- Rows will be added here by JavaScript -->
                         </tbody>
                     </table>
+
                     <button type="button" id="add_row_btn"
                         class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4 transition">
                         <i class="ri-add-line"></i> Добавить строку
@@ -133,7 +133,7 @@
                 const deliveredView = document.getElementById('delivered_view');
                 const tracksTableBody = document.getElementById('tracks_table_body');
                 const addRowBtn = document.getElementById('add_row_btn');
-                const form = document.querySelector('form');
+                const form = document.getElementById('update_tracks_form');
                 const formToggleContainer = document.getElementById('form_toggle_container');
                 const formToggleBtn = document.getElementById('form_toggle_btn');
                 const ownerBlock = document.getElementById('owner_block');
@@ -144,7 +144,7 @@
 
                 function toggleFormView() {
                     isTableMode = !isTableMode;
-                    
+
                     if (isTableMode) {
                         // Переключаемся на табличный вид
                         standardView.classList.add('hidden');
@@ -170,7 +170,7 @@
                         formToggleContainer.classList.remove('hidden');
                         ownerBlock.classList.remove('hidden');
                         weightBlock.classList.remove('hidden');
-                        
+
                         // По умолчанию показываем текстовый вид (старая форма)
                         isTableMode = false;
                         standardView.classList.remove('hidden');
@@ -182,7 +182,7 @@
                         formToggleContainer.classList.add('hidden');
                         ownerBlock.classList.add('hidden');
                         weightBlock.classList.add('hidden');
-                        
+
                         // Показываем только стандартный вид
                         standardView.classList.remove('hidden');
                         deliveredView.classList.add('hidden');
@@ -211,7 +211,7 @@
                     <input type="text" class="w-full border rounded px-2 py-1 owner-input" value="${owner}" placeholder="Login владельца">
                 </td>
                 <td class="border px-4 py-2">
-                    <input type="number" step="0.001" class="w-full border rounded px-2 py-1 weight-input" value="${weight}" placeholder="Вес (кг)">
+                   <input type="text" inputmode="decimal" class="w-full border rounded px-2 py-1 weight-input" value="${weight}" placeholder="Вес (кг)">
                 </td>
                 <td class="border px-4 py-2 text-center">
                     <button type="button" class="text-red-500 hover:text-red-700 delete-row-btn">
@@ -222,6 +222,35 @@
 
                     tr.querySelector('.delete-row-btn').addEventListener('click', function () {
                         tr.remove();
+                    });
+
+                    // Navigation logic
+                    const inputs = tr.querySelectorAll('input');
+                    inputs.forEach((input, index) => {
+                        input.addEventListener('keydown', function (e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                moveFocus(tr, index, 'next', false);
+                            } else if (e.key === 'ArrowRight') {
+                                // Only move if cursor is at end of text or empty
+                                if (this.selectionStart === this.value.length) {
+                                    e.preventDefault(); // Prevent default only if we are actually moving
+                                    moveFocus(tr, index, 'next', true);
+                                }
+                            } else if (e.key === 'ArrowLeft') {
+                                // Only move if cursor is at start
+                                if (this.selectionStart === 0) {
+                                    e.preventDefault();
+                                    moveFocus(tr, index, 'prev', true);
+                                }
+                            } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                moveVerticalFocus(tr, index, 'up');
+                            } else if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                moveVerticalFocus(tr, index, 'down');
+                            }
+                        });
                     });
 
                     // Auto-add row logic
@@ -249,7 +278,15 @@
                                     console.log('Data received:', data);
                                     if (data.owner) {
                                         console.log('Setting owner to:', data.owner);
-                                        tr.querySelector('.owner-input').value = data.owner;
+                                        const ownerInput = tr.querySelector('.owner-input');
+                                        ownerInput.value = data.owner;
+                                        // Auto-focus logic: user requirement 3
+                                        // Move focus to the cell after owner (which is Weight)
+                                        // Owner input is index 1, Weight is index 2
+                                        const inputs = tr.querySelectorAll('input');
+                                        if (inputs[2]) {
+                                            inputs[2].focus();
+                                        }
                                     } else {
                                         console.log('No owner found in data');
                                     }
@@ -260,6 +297,49 @@
 
                     return tr;
                 }
+
+                                function moveFocus(currentRow, currentIndex, direction, allowWrap = true) {
+                    const inputs = currentRow.querySelectorAll('input');
+                    if (direction === 'next') {
+                        if (currentIndex < inputs.length - 1) {
+                            inputs[currentIndex + 1].focus();
+                        } else if (allowWrap) {
+                            // Move to next row first input
+                            const nextRow = currentRow.nextElementSibling;
+                            if (nextRow) {
+                                const nextInputs = nextRow.querySelectorAll('input');
+                                if (nextInputs.length > 0) nextInputs[0].focus();
+                            }
+                        }
+                    } else if (direction === 'prev') {
+                        if (currentIndex > 0) {
+                            inputs[currentIndex - 1].focus();
+                        } else if (allowWrap) {
+                            // Move to prev row last input
+                            const prevRow = currentRow.previousElementSibling;
+                            if (prevRow) {
+                                const prevInputs = prevRow.querySelectorAll('input');
+                                if (prevInputs.length > 0) prevInputs[prevInputs.length - 1].focus();
+                            }
+                        }
+                    }
+                }
+                function moveVerticalFocus(currentRow, currentIndex, direction) {
+                    if (direction === 'up') {
+                        const prevRow = currentRow.previousElementSibling;
+                        if (prevRow) {
+                            const prevInputs = prevRow.querySelectorAll('input');
+                            if (prevInputs[currentIndex]) prevInputs[currentIndex].focus();
+                        }
+                    } else if (direction === 'down') {
+                        const nextRow = currentRow.nextElementSibling;
+                        if (nextRow) {
+                            const nextInputs = nextRow.querySelectorAll('input');
+                            if (nextInputs[currentIndex]) nextInputs[currentIndex].focus();
+                        }
+                    }
+                }
+
 
                 function syncToTable() {
                     // Parse textareas
@@ -308,7 +388,7 @@
 
                 // Event Listeners
                 statusSelect.addEventListener('change', updateView);
-                
+
                 formToggleBtn.addEventListener('click', toggleFormView);
 
                 addRowBtn.addEventListener('click', function () {
