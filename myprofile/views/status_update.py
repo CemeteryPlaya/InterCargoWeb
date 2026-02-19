@@ -192,7 +192,7 @@ def get_track_owner(request):
     track_code = request.GET.get('track_code')
     if not track_code:
         return JsonResponse({'error': 'No track code provided'}, status=400)
-    
+
     try:
         print(f"DEBUG: get_track_owner called with track_code='{track_code}'")
         track = TrackCode.objects.get(track_code=track_code)
@@ -205,4 +205,3 @@ def get_track_owner(request):
     except TrackCode.DoesNotExist:
         print(f"DEBUG: Track '{track_code}' not found")
         return JsonResponse({'owner': None}) # Not found
-

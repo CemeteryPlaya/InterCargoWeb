@@ -23,35 +23,46 @@ class TrackCodeForm(forms.ModelForm):
 @login_required(login_url='login')
 def track_codes_view(request):
     if request.method == 'POST':
-        form = TrackCodeForm(request.POST)
-        if form.is_valid():
-            track_code_str = form.cleaned_data['track_code']
-            description = form.cleaned_data['description']
-            
+        track_code_str = request.POST.get('track_code', '').strip()
+        description = request.POST.get('description', '').strip()
+
+        if track_code_str:
             try:
                 # Проверяем, существует ли уже такой трек-код
                 existing_track = TrackCode.objects.get(track_code=track_code_str)
-                
+
                 if existing_track.owner is None:
-                    # Если трек-код существует, но без владельца ("сиротский"), присваиваем его текущему пользователю
+                    # Если трек-код существует, но без владельца, присваиваем его текущему пользователю
                     existing_track.owner = request.user
                     existing_track.description = description
-                    # Статус НЕ меняем, оставляем тот, который был (например, shipped_cn)
+
+                    # Статусная иерархия: не понижаем статус при добавлении
+                    current_order = TrackCode.STATUS_ORDER.get(existing_track.status, -1)
+                    user_added_order = TrackCode.STATUS_ORDER.get('user_added', 0)
+
+                    if current_order < user_added_order:
+                        existing_track.status = 'user_added'
+
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
                 elif existing_track.owner == request.user:
                     messages.warning(request, "Этот трек-код уже добавлен в ваш список.")
                 else:
                     messages.error(request, "Этот трек-код уже зарегистрирован другим пользователем.")
-                    
+                return redirect('track_codes')
+
             except TrackCode.DoesNotExist:
-                # Если трек-кода нет, создаём новый со статусом 'user_added'
-                track_code = form.save(commit=False)
-                track_code.owner = request.user
-                track_code.status = 'user_added'
-                track_code.save()
-                messages.success(request, "Трек-код успешно добавлен.")
-            
+                # Если трек-кода нет, создаём новый через форму для валидации
+                form = TrackCodeForm(request.POST)
+                if form.is_valid():
+                    track_code = form.save(commit=False)
+                    track_code.owner = request.user
+                    track_code.status = 'user_added'
+                    track_code.save()
+                    messages.success(request, "Трек-код успешно добавлен.")
+                    return redirect('track_codes')
+        else:
+            messages.error(request, "Введите трек-код.")
             return redirect('track_codes')
     else:
         form = TrackCodeForm()
@@ -88,31 +99,43 @@ def edit_track_code_description(request, track_id):
 @login_required
 def add_track_code_view(request):
     if request.method == 'POST':
-        form = TrackCodeForm(request.POST)
-        if form.is_valid():
-            track_code_str = form.cleaned_data['track_code']
-            description = form.cleaned_data['description']
-            
+        track_code_str = request.POST.get('track_code', '').strip()
+        description = request.POST.get('description', '').strip()
+
+        if track_code_str:
             try:
                 existing_track = TrackCode.objects.get(track_code=track_code_str)
-                
+
                 if existing_track.owner is None:
                     existing_track.owner = request.user
                     existing_track.description = description
+
+                    # Статусная иерархия
+                    current_order = TrackCode.STATUS_ORDER.get(existing_track.status, -1)
+                    user_added_order = TrackCode.STATUS_ORDER.get('user_added', 0)
+
+                    if current_order < user_added_order:
+                        existing_track.status = 'user_added'
+
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
                 elif existing_track.owner == request.user:
                     messages.warning(request, "Этот трек-код уже добавлен в ваш список.")
                 else:
                     messages.error(request, "Этот трек-код уже зарегистрирован другим пользователем.")
-                    
+                return redirect('track_codes')
+
             except TrackCode.DoesNotExist:
-                track_code = form.save(commit=False)
-                track_code.owner = request.user
-                track_code.status = 'user_added'
-                track_code.save()
-                messages.success(request, "Трек-код успешно добавлен.")
-                
+                form = TrackCodeForm(request.POST)
+                if form.is_valid():
+                    track_code = form.save(commit=False)
+                    track_code.owner = request.user
+                    track_code.status = 'user_added'
+                    track_code.save()
+                    messages.success(request, "Трек-код успешно добавлен.")
+                    return redirect('track_codes')
+        else:
+            messages.error(request, "Введите трек-код.")
             return redirect('track_codes')
     else:
         form = TrackCodeForm()
