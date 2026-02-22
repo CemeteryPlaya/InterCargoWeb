@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
-{% load static %}    
+{% load static %}
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Формирование выдачи</title>
+    <title>Inter Cargo - История выдачи</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
@@ -48,7 +48,7 @@
         {% if messages %}
         <div class="mb-6">
             {% for message in messages %}
-                <div class="p-4 mb-3 rounded-lg text-sm font-medium 
+                <div class="p-4 mb-3 rounded-lg text-sm font-medium
                             {% if message.tags == 'success' %}bg-green-100 text-green-800
                             {% elif message.tags == 'error' %}bg-red-100 text-red-800
                             {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
@@ -59,40 +59,26 @@
         </div>
         {% endif %}
 
-        <h1 class="text-2xl font-bold mb-6">📦 Выдача пакетов клиенту</h1>
+        <h1 class="text-2xl font-bold mb-6"><i class="ri-history-line text-red-500"></i> История выдачи</h1>
 
-        <!-- Форма создания пакета -->
-        <div class="bg-white p-6 rounded-lg shadow-lg mb-10">
-            <form method="post" class="space-y-4">
-                {% csrf_token %}
-
-                <p class="text-gray-700"><strong>Клиент:</strong> {{ request.user.username }}</p>
-
-                <button type="submit"
-                    class="bg-primary text-white px-6 py-2 rounded-button hover:bg-red-600 transition-all">
-                    💼 Создать пакет выдачи
-                </button>
-            </form>
-        </div>
-
-        <!-- Список пакетов -->
-<div class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-xl font-semibold mb-4">Мои пакеты выдачи</h2>
-
+        <div class="bg-white p-6 rounded-lg shadow-lg">
     {% if packages %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for item in packages %}
         <div class="border rounded-lg p-4 shadow hover:shadow-lg transition">
             <p class="font-mono text-sm mb-2">Штрихкод: {{ item.package.barcode }}</p>
             <p class="text-gray-500 mb-2">Создан: {{ item.package.created_at|date:"d.m.Y H:i" }}</p>
-            <p class="text-gray-600 mb-2">Комментарий: {{ item.package.comment|default:"—" }}</p>
+            <p class="text-gray-600 mb-2">Трек-кодов: <strong>{{ item.package.track_codes.count }}</strong></p>
+            <details class="mb-2">
+                <summary class="cursor-pointer text-sm text-blue-600 hover:text-blue-800">Показать трек-коды</summary>
+                <div class="mt-2">
+                    {% for t in item.package.track_codes.all %}
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded mb-1 inline-block">{{ t.track_code }}</span>
+                    {% endfor %}
+                </div>
+            </details>
             <p class="mb-2">
-                {% for t in item.package.track_codes.all %}
-                    <span class="text-xs bg-gray-100 px-2 py-1 rounded mb-1 inline-block">{{ t.track_code }}</span>
-                {% endfor %}
-            </p>
-            <p class="mb-2">
-                Статус: 
+                Статус:
                 {% if item.package.is_issued %}
                     <span class="text-green-600 font-semibold">Выдан</span>
                 {% else %}
@@ -100,14 +86,13 @@
                 {% endif %}
             </p>
 
-            <!-- Кнопка показать штрихкод только если пакет не выдан -->
             {% if not item.package.is_issued and item.barcode_base64 %}
             <button
                 type="button"
                 class="show-barcode-btn bg-primary text-white px-4 py-2 rounded-button hover:bg-red-600 transition"
                 data-barcode="{{ item.package.barcode|escape }}"
                 data-img="{{ item.barcode_base64|escape }}">
-                🔍 Показать штрихкод
+                <i class="ri-barcode-line"></i> Показать штрихкод
             </button>
             {% endif %}
         </div>
@@ -144,6 +129,23 @@
         </div>
     </div>
 </div>
+
+<script>
+// Автоматически открыть штрихкод если в URL есть параметр show_barcode
+document.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    var showBarcode = params.get('show_barcode');
+    if (showBarcode) {
+        var btns = document.querySelectorAll('.show-barcode-btn');
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i].dataset.barcode === showBarcode) {
+                btns[i].click();
+                break;
+            }
+        }
+    }
+});
+</script>
 
 {% endblock %}
 {% include 'includes/footer.html' %}

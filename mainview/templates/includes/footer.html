@@ -31,16 +31,9 @@
                 <div>
                     <h3 class="text-lg font-bold mb-4">Пункты выдачи</h3>
                     <ul class="space-y-2">
-                        <li class="text-gray-400">Акбулак 21 (Ozon)</li>
-                        <li class="text-gray-400">Пушкина 8 (Ozon)</li>
-                        <li class="text-gray-400">Ташкентская 286 (Ozon)</li>
-                        <li class="text-gray-400">Абая 286 (Ozon)</li>
-                        <li class="text-gray-400">Атабаева 105 (Ozon)</li>
-                        <li class="text-gray-400">Ашимбаева 5 (Ozon)</li>
-                        <li class="text-gray-400">Байсеитовой 30 (Ozon)</li>
-                        <li class="text-gray-400">Самал 48 (WILDBERRIES)</li>
-                        <li class="text-gray-400">Сорокина 7 (OZON)</li>
-                        <li class="text-gray-400">Койбакова 8 (OZON)</li>
+                        {% for pp in pickup_points %}
+                        <li class="text-gray-400">{{ pp }}</li>
+                        {% endfor %}
                         <li><a href="{% url 'about' %}" class="text-primary hover:text-primary-light transition">Смотреть все пункты</a></li>
                     </ul>
                 </div>
@@ -58,18 +51,19 @@
                             <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
                                 <i class="ri-phone-line text-primary"></i>
                             </div>
-                            <span class="text-gray-400">Директор: +7 (777) 977-36-96</span>
+                            <span class="text-gray-400">Директор: <a href="tel:+77779773696" class="hover:text-white transition">+7 (777) 977-36-96</a></span>
+                        </li>
                         <li class="flex items-start">
                             <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
-                                
+
                             </div>
-                            <span class="text-gray-400">Менеджер: +7 (706) 664-06-24</span>
+                            <span class="text-gray-400">Менеджер: <a href="tel:+77066640624" class="hover:text-white transition">+7 (706) 664-06-24</a></span>
                         </li>
                         <li class="flex items-start">
                             <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
                                 <i class="ri-mail-line text-primary"></i>
                             </div>
-                            <span class="text-gray-400">rustamttss@mail.ru</span>
+                            <a href="mailto:rustamttss@mail.ru" class="text-gray-400 hover:text-white transition">rustamttss@mail.ru</a>
                         </li>
                     </ul>
                 </div>

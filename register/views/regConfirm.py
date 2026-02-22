@@ -22,7 +22,9 @@ def approve_registration(request, reg_id):
     # создаём User
     user = User.objects.create_user(
         username=reg.login,
-        password=reg.password
+        password=reg.password,
+        first_name=reg.first_name,
+        last_name=reg.last_name
     )
 
     UserProfile.objects.create(

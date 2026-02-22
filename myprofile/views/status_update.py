@@ -8,6 +8,7 @@ from myprofile.models import TrackCode, Notification
 from register.models import UserProfile
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
+from collections import defaultdict
 
 @login_required
 def update_tracks(request):
@@ -49,6 +50,7 @@ def update_tracks(request):
     partially_updated = 0  # когда не удалось поменять статус, но обновили дату/вес/владельца
     skipped = 0
     errors = 0
+    notif_counts = defaultdict(int)  # {user: count} для групповых уведомлений
 
     for i, code in enumerate(track_codes):
         try:
@@ -97,12 +99,8 @@ def update_tracks(request):
             try:
                 track.save()
                 updated += 1
-                if old_status != status:
-                    # Отправляем нотификацию пользователю (владелец мог измениться)
-                    Notification.objects.create(
-                        user=track.owner,
-                        message=f"📦 Ваш трек-код {track.track_code} обновлен: {track.get_status_display()}"
-                    )
+                if old_status != status and track.owner:
+                    notif_counts[track.owner] += 1
             except ValidationError as e:
                 # Если валидация не прошла, попробуем откатиться: не менять статус, но обновить безопасные поля
                 try:
@@ -141,10 +139,7 @@ def update_tracks(request):
                         weight=Decimal(weights[i].replace(',', '.'))
                     )
                     created += 1
-                    Notification.objects.create(
-                        user=user,
-                        message=f"📦 Добавлен новый трек-код {track.track_code}: {track.get_status_display()}"
-                    )
+                    notif_counts[user] += 1
                 except (User.DoesNotExist, UserProfile.DoesNotExist):
                     messages.error(request, f"Пользователь '{usernames[i]}' не найден для трек-кода {code}.")
                     errors += 1
@@ -174,6 +169,20 @@ def update_tracks(request):
                     errors += 1
                     continue
 
+    # Групповые уведомления
+    status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
+    for user, count in notif_counts.items():
+        if count == 1:
+            Notification.objects.create(
+                user=user,
+                message=f"📦 Ваш трек-код обновлён: {status_display}"
+            )
+        else:
+            Notification.objects.create(
+                user=user,
+                message=f"📦 Обновлено {count} трек-кодов: {status_display}"
+            )
+
     if updated:
         messages.success(request, f"Обновлено: {updated}")
     if created:
@@ -194,14 +203,10 @@ def get_track_owner(request):
         return JsonResponse({'error': 'No track code provided'}, status=400)
 
     try:
-        print(f"DEBUG: get_track_owner called with track_code='{track_code}'")
         track = TrackCode.objects.get(track_code=track_code)
         if track.owner:
-            print(f"DEBUG: Found owner '{track.owner.username}' for track '{track_code}'")
             return JsonResponse({'owner': track.owner.username})
         else:
-            print(f"DEBUG: Track '{track_code}' found but has no owner")
-            return JsonResponse({'owner': None}) # Found but no owner
+            return JsonResponse({'owner': None})
     except TrackCode.DoesNotExist:
-        print(f"DEBUG: Track '{track_code}' not found")
-        return JsonResponse({'owner': None}) # Not found
+        return JsonResponse({'owner': None})

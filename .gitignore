@@ -31,3 +31,8 @@ Desktop.ini
 
 # Claude
 .claude/
+
+ngrok.exe
+
+PLAN.md
+*.md

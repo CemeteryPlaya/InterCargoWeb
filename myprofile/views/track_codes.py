@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django import forms
-from myprofile.models import TrackCode
+from myprofile.models import TrackCode, ArchivedTrackCode
 
 class TrackCodeForm(forms.ModelForm):
     class Meta:
@@ -69,18 +70,19 @@ def track_codes_view(request):
 
     track_codes = TrackCode.objects.filter(owner=request.user).order_by('-update_date')
     
-    # Filter by status (multi-select)
-    status_filters = request.GET.getlist('status')
-    # Filter out empty strings if any
-    status_filters = [s for s in status_filters if s]
+    # Filter by status (single select)
+    status_filter = request.GET.get('status', '')
 
-    if status_filters:
-        track_codes = track_codes.filter(status__in=status_filters)
+    if status_filter:
+        track_codes = track_codes.filter(status=status_filter)
+
+    archived_codes = ArchivedTrackCode.objects.filter(owner=request.user).order_by('-archived_at')
 
     return render(request, 'track_codes.html', {
         'track_codes': track_codes,
+        'archived_codes': archived_codes,
         'form': form,
-        'current_filters': status_filters
+        'current_filters': [status_filter] if status_filter else []
     })
 
 @login_required
@@ -140,6 +142,42 @@ def add_track_code_view(request):
     else:
         form = TrackCodeForm()
     return render(request, 'add_track_code.html', {'form': form})
+
+@login_required
+@require_POST
+def archive_track_code(request, track_id):
+    track = get_object_or_404(TrackCode, id=track_id, owner=request.user)
+    ArchivedTrackCode.objects.create(
+        track_code=track.track_code,
+        update_date=track.update_date,
+        status=track.status,
+        owner=track.owner,
+        description=track.description,
+        weight=track.weight,
+    )
+    track.delete()
+    messages.success(request, "Трек-код перемещён в архив.")
+    return redirect('track_codes')
+
+
+@login_required
+@require_POST
+def unarchive_track_code(request, track_id):
+    archived = get_object_or_404(ArchivedTrackCode, id=track_id, owner=request.user)
+    track = TrackCode(
+        track_code=archived.track_code,
+        update_date=archived.update_date,
+        status=archived.status,
+        owner=archived.owner,
+        description=archived.description,
+        weight=archived.weight,
+    )
+    track._skip_status_validation = True
+    track.save()
+    archived.delete()
+    messages.success(request, "Трек-код восстановлен из архива.")
+    return redirect('track_codes')
+
 
 def tracks(request):
     return render(request, "track_codes.html")

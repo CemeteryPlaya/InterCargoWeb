@@ -1,9 +1,12 @@
 import json
+import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
 from pywebpush import webpush, WebPushException
 from myprofile.models import UserPushSubscription, Notification
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def save_push_subscription(request):
@@ -33,9 +36,9 @@ def send_push(user, title, message, url='/'):
             vapid_claims={"sub": f"mailto:{settings.WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL']}"}
         )
     except UserPushSubscription.DoesNotExist:
-        print(f"[!] Нет подписки для пользователя {user.username}")
+        logger.warning("Нет подписки для пользователя %s", user.username)
     except WebPushException as e:
-        print(f"[!] Ошибка при отправке push: {e}")
+        logger.warning("Ошибка при отправке push: %s", e)
 
 
 def create_notification(user, message):

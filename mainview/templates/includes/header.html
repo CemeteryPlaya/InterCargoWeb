@@ -1,4 +1,5 @@
 {% load static %}
+<meta name="vapid-key" content="{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}">
 <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center">
@@ -70,6 +71,8 @@
                             <div class="p-3 font-semibold border-b flex justify-between items-center">
                                 <span>Уведомления</span>
                                 <button id="mark-all-read"
+                                    data-url="{% url 'mark_notifications_as_read' %}"
+                                    data-csrf="{{ csrf_token }}"
                                     class="text-xs text-primary hover:underline focus:outline-none">
                                     Прочесть все
                                 </button>
@@ -186,32 +189,5 @@
     <!-- Включаем мобильный сайдбар -->
     {% include 'includes/m_sidebar.html' %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const markAllReadBtn = document.getElementById('mark-all-read');
-            if (markAllReadBtn) {
-                markAllReadBtn.addEventListener('click', function () {
-                    fetch('{% url "mark_notifications_as_read" %}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'Content-Type': 'application/json'
-                        },
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                // Обновляем UI: скрываем бейджик и очищаем список (или перезагружаем страницу)
-                                // Для простоты перезагрузим страницу, чтобы обновились все счетчики
-                                window.location.reload();
-                            } else {
-                                console.error('Ошибка при пометке уведомлений как прочитанных');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка сети:', error);
-                        });
-                });
-            }
-        });
-    </script>
+    <script src="{% static 'scripts/headerNotifications.js' %}"></script>
 </header>

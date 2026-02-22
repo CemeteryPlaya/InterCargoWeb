@@ -6,7 +6,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="vapid-key" content="{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}">
     <title>Inter Cargo - доставка из Китая в Казахстан</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
@@ -40,7 +39,7 @@
                     <div class="text-primary font-medium mb-2">КАЛЬКУЛЯТОР</div>
                     <h1 class="text-4xl md:text-5xl font-bold mb-6">Узнайте цену доставки груза из Китая в Казахстан
                     </h1>
-                    <p class="text-xl mb-8">Тариф: 1859₸/кг</p>
+                    <p class="text-xl mb-8">Тариф: {{ price_per_kg }}₸/кг</p>
                     {% if not user.is_authenticated %}
                     <div class="flex flex-col space-y-3">
                         <a href="#registration"
@@ -62,7 +61,7 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Напишите количество в кг</label>
                             <div class="relative">
-                                <input type="number" id="weight"
+                                <input type="number" id="weight" data-rate="{{ price_per_kg }}"
                                     class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
                                     placeholder="0" min="0" max="100">
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -121,7 +120,7 @@
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq1" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Стоимость доставки рассчитывается по тарифу 1859₸ за килограмм
+                            <p class="text-gray-700">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм
                                 груза. Минимальный вес для расчета - 0 кг, максимальный - 100 кг (Выше 100 кг.
                                 необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.
                             </p>
@@ -161,20 +160,18 @@
                             <span>Какие товары запрещены к перевозке?</span>
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
-                        <div id="faq4" class="faq-content px-6 pb-4 text-gray-700">
+                        <div id="faq4" class="faq-content hidden px-6 pb-4 text-gray-700">
                             <p>К перевозке запрещены: </p>
-                            <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые
-                                вещества.</li>
-                            <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
-				            <li>Психотропные и наркотические средства, алкоголь, сигареты</li>
-                            <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных
-                                упаковках).</li>
-                            <li>Техника, мобильные телефоны, ноутбуки (под свою ответственность)</li> 
-				            <li>Животные (млекопитающию, рептилии, птицы, живые насекомые, молюски и рыбы)</li>
-				            <li>Дроны</li>
-				            <li>Хрупкие, стеклянные товары (либо просите
-                                продавца надежную упаковку, пузырчатую пленку, защиту края и т.д.)</li>
-                            <p></p>
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li>
+                                <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
+                                <li>Психотропные и наркотические средства, алкоголь, сигареты</li>
+                                <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li>
+                                <li>Техника, мобильные телефоны, ноутбуки (под свою ответственность)</li>
+                                <li>Животные (млекопитающию, рептилии, птицы, живые насекомые, молюски и рыбы)</li>
+                                <li>Дроны</li>
+                                <li>Хрупкие, стеклянные товары (либо просите продавца надежную упаковку, пузырчатую пленку, защиту края и т.д.)</li>
+                            </ul>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
@@ -211,14 +208,12 @@
                             <i class="ri-arrow-down-s-line text-xl"></i>
                         </button>
                         <div id="faq9" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">· Ваша задача — заранее попросить продавца обеспечить надежную
-                                упаковку (например, пенопластом).<br>
-                                · Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется
-                                сделать обрешетку груза (стоимость уточняйте у менеджера).<br>
-                                · Если упаковка не соответствовала требованиям, компания не несет ответственности за
-                                повреждения.<br>
-                                · Если товар был упакован правильно, но поврежден при доставке, ответственность несет
-                                Inter Cargo.</p>
+                            <ul class="text-gray-700 list-disc pl-5 space-y-2">
+                                <li>Ваша задача — заранее попросить продавца обеспечить надежную упаковку (например, пенопластом).</li>
+                                <li>Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешетку груза (стоимость уточняйте у менеджера).</li>
+                                <li>Если упаковка не соответствовала требованиям, компания не несет ответственности за повреждения.</li>
+                                <li>Если товар был упакован правильно, но поврежден при доставке, ответственность несет Inter Cargo.</li>
+                            </ul>
                         </div>
                     </div>
                     <div class="border border-gray-200 rounded">
@@ -295,8 +290,8 @@
                         <label for="reg-login" class="block text-sm font-medium text-gray-700 mb-2">
                             Логин (Имя/Ник + 4 цифры номера)
                         </label>
-                        <input type="text" id="reg-login" name="login" required pattern="^[A-Za-zА-Яа-яЁё]+[0-9]{4}$"
-                            title="Введите имя или ник и 4 цифры номера, например ANDREY1234"
+                        <input type="text" id="reg-login" name="login" required pattern="^[A-Za-z]+[0-9]{4}$"
+                            title="Введите имя или ник (только латинские буквы) и 4 цифры номера, например ANDREY1234"
                             placeholder="Например: ANDREY1234"
                             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition">
                         <div class="text-xs text-gray-500 mt-1">
@@ -322,16 +317,9 @@
                         <select id="pickup" name="pickup" required
                             class="w-full px-4 py-3 pr-8 border border-gray-300 rounded appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition">
                             <option value="" disabled selected>Выберите пункт выдачи</option>
-                            <option value="akbulak">Акбулак 21 (Ozon)</option>
-                            <option value="pushkina">Пушкина 8 (Ozon)</option>
-                            <option value="tashkentskaya">Ташкентская 286 (Ozon)</option>
-                            <option value="bayseytovoy">Байсеитовой 30 (Ozon)</option>
-                            <option value="samal">Самал 48 (Wildberries)</option>
-                            <option value="sorokina">Сорокина 7 (Ozon)</option>
-                            <option value="ashimbaeva">Ашимбаева 5 (Ozon)</option>
-                            <option value="abaya286">Абая 286 (Ozon)</option>
-                            <option value="atabaeva">Атабаева 105 (Ozon)</option>
-                            <option value="koybakova">Койбакова 8 (Ozon)</option>
+                            {% for pp in pickup_points %}
+                            <option value="{{ pp.id }}">{{ pp }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -346,29 +334,67 @@
 
             <!-- Форма авторизации -->
             <div class="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8 hidden" id="login-form-container">
-                <form id="login-form" method="POST" action="{% url 'login' %}">
-                    {% csrf_token %}
 
-                    <!-- Логин -->
+                <!-- Переключатель: Логин / Телефон -->
+                <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
+                    <button type="button" id="idx-tab-login"
+                        class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
+                        onclick="switchIndexLoginMethod('login')">
+                        Логин
+                    </button>
+                    <button type="button" id="idx-tab-phone"
+                        class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
+                        onclick="switchIndexLoginMethod('phone')">
+                        Телефон
+                    </button>
+                </div>
+
+                <!-- Вход по логину -->
+                <form id="idx-login-by-login" method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
                     <div class="mb-6">
-                        <label for="auth-login" class="block text-sm font-medium text-gray-700 mb-2">Логин (Имя/Ник + 4
-                            цифры номера)</label>
+                        <label for="auth-login" class="block text-sm font-medium text-gray-700 mb-2">Логин (Имя/Ник + 4 цифры номера)</label>
                         <input type="text" id="auth-login" name="login" required
                             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
                             placeholder="Например: ANDREY1234">
-                        <div class="text-xs text-gray-500 mt-1">Введите ваше имя или ник и последние 4 цифры номера
-                            телефона</div>
                     </div>
-
-                    <!-- Пароль -->
                     <div class="mb-6">
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
-                        <input type="password" id="password" name="password" required minlength="6"
-                            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-                            placeholder="Введите пароль">
+                        <label for="idx-pass-login" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+                        <div class="relative">
+                            <input type="password" id="idx-pass-login" name="password" required minlength="6"
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+                                placeholder="Введите пароль">
+                            <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i class="ri-eye-off-line text-xl"></i>
+                            </button>
+                        </div>
                     </div>
+                    <button type="submit"
+                        class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
+                        Войти
+                    </button>
+                </form>
 
-                    <!-- Кнопка -->
+                <!-- Вход по телефону -->
+                <form id="idx-login-by-phone" method="POST" action="{% url 'login' %}" class="hidden">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <label for="auth-phone" class="block text-sm font-medium text-gray-700 mb-2">Номер телефона</label>
+                        <input type="tel" id="auth-phone" name="phone" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+                            placeholder="+7 (___) ___-__-__" maxlength="18">
+                    </div>
+                    <div class="mb-6">
+                        <label for="idx-pass-phone" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+                        <div class="relative">
+                            <input type="password" id="idx-pass-phone" name="password" required minlength="6"
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+                                placeholder="Введите пароль">
+                            <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i class="ri-eye-off-line text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
                     <button type="submit"
                         class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
                         Войти
@@ -378,38 +404,39 @@
         </div>
     </section>
 
+    <script src="{% static 'scripts/tabSwitcher.js' %}"></script>
     <script>
-        function switchTab(tab) {
-            const registerTab = document.getElementById('tab-register');
-            const loginTab = document.getElementById('tab-login');
-            const registerForm = document.getElementById('register-form-container');
-            const loginForm = document.getElementById('login-form-container');
-            const sectionTitle = document.getElementById('section-title');
-            const sectionHeading = document.getElementById('section-heading');
-            const sectionDescription = document.getElementById('section-description');
+    function switchIndexLoginMethod(method) {
+        var loginForm = document.getElementById('idx-login-by-login');
+        var phoneForm = document.getElementById('idx-login-by-phone');
+        var tabLogin = document.getElementById('idx-tab-login');
+        var tabPhone = document.getElementById('idx-tab-phone');
 
-            if (tab === 'register') {
-                registerTab.classList.add('active', 'bg-primary', 'text-white');
-                registerTab.classList.remove('text-gray-700', 'hover:text-primary');
-                loginTab.classList.remove('active', 'bg-primary', 'text-white');
-                loginTab.classList.add('text-gray-700', 'hover:text-primary');
-                registerForm.classList.remove('hidden');
-                loginForm.classList.add('hidden');
-                sectionTitle.textContent = 'РЕГИСТРАЦИЯ';
-                sectionHeading.textContent = 'Регистрация нового клиента';
-                sectionDescription.textContent = 'Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая';
-            } else {
-                loginTab.classList.add('active', 'bg-primary', 'text-white');
-                loginTab.classList.remove('text-gray-700', 'hover:text-primary');
-                registerTab.classList.remove('active', 'bg-primary', 'text-white');
-                registerTab.classList.add('text-gray-700', 'hover:text-primary');
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-                sectionTitle.textContent = 'АВТОРИЗАЦИЯ';
-                sectionHeading.textContent = 'Вход клиента';
-                sectionDescription.textContent = 'Заполните форму ниже, чтобы войти в свой аккаунт в нашей системе и начать пользоваться услугами доставки из Китая';
-            }
+        if (method === 'phone') {
+            loginForm.classList.add('hidden');
+            phoneForm.classList.remove('hidden');
+            tabPhone.classList.add('bg-white', 'shadow-sm', 'text-gray-900');
+            tabPhone.classList.remove('text-gray-500');
+            tabLogin.classList.remove('bg-white', 'shadow-sm', 'text-gray-900');
+            tabLogin.classList.add('text-gray-500');
+            loginForm.querySelectorAll('[required]').forEach(function(el) { el.removeAttribute('required'); });
+            phoneForm.querySelector('[name="phone"]').setAttribute('required', '');
+            phoneForm.querySelector('[name="password"]').setAttribute('required', '');
+        } else {
+            phoneForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            tabLogin.classList.add('bg-white', 'shadow-sm', 'text-gray-900');
+            tabLogin.classList.remove('text-gray-500');
+            tabPhone.classList.remove('bg-white', 'shadow-sm', 'text-gray-900');
+            tabPhone.classList.add('text-gray-500');
+            phoneForm.querySelectorAll('[required]').forEach(function(el) { el.removeAttribute('required'); });
+            loginForm.querySelector('[name="login"]').setAttribute('required', '');
+            loginForm.querySelector('[name="password"]').setAttribute('required', '');
         }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        switchIndexLoginMethod('login');
+    });
     </script>
     {% endif %}
 
@@ -434,7 +461,7 @@
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Регистрация на сайте</h3>
                         <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать
                             удобный пункт выдачи для получения ваших посылок.</p>
-                        <a href="#"><button
+                        <a href="https://t.me/c/3896488034/3"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                                 Смотреть видео
                                 <i class="ri-play-circle-line ml-2"></i>
@@ -468,7 +495,7 @@
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Отслеживание посылки</h3>
                         <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе
                             доставки из Китая в Казахстан.</p>
-                        <a href="#"><button
+                        <a href="https://t.me/c/3896488034/4"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                                 Смотреть видео
                                 <i class="ri-play-circle-line ml-2"></i>

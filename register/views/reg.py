@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from register.models import PendingRegistration, UserProfile
+from register.models import PendingRegistration, UserProfile, PickupPoint
 from myprofile.models import Notification
 
-# Create your views here.
+
 def pre_register(request):
+    pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
     if request.method == 'POST':
-        login = request.POST.get('login')
+        login = request.POST.get('login', '').upper()
         phone = request.POST.get('phone')
         pickup = request.POST.get('pickup')
 
@@ -16,85 +17,91 @@ def pre_register(request):
                 'error': 'Пожалуйста, заполните все поля.',
                 'login': login,
                 'phone': phone,
-                'pickup': pickup
+                'selected_pickup': pickup,
+                'pickup_points': pickup_points
             })
 
         # Сохраняем данные во временную сессию
         request.session['registration_data'] = {
             'login': login,
             'phone': phone,
-            'pickup': pickup
+            'pickup': pickup  # stores PickupPoint id
         }
         return redirect('continue_register')
 
-    return render(request, 'index.html')
+    return render(request, 'index.html', {'pickup_points': pickup_points})
+
 
 def continue_register(request):
     data = request.session.get('registration_data')
     if not data:
-        return render(request, 'index.html')  # если данных нет — на главную
+        return render(request, 'index.html')
 
+    pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
     return render(request, 'registration.html', {
         'login': data.get('login', ''),
         'phone': data.get('phone', ''),
-        'pickup': data.get('pickup', ''),
+        'selected_pickup': data.get('pickup', ''),
+        'pickup_points': pickup_points,
     })
+
+
+def _render_registration(request, username, phone, pickup_id, first_name, last_name):
+    pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
+    return render(request, 'registration.html', {
+        'login': username, 'phone': phone, 'selected_pickup': str(pickup_id),
+        'first_name': first_name, 'last_name': last_name,
+        'pickup_points': pickup_points,
+    })
+
 
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('login')
+        username = request.POST.get('login', '').upper()
         password = request.POST.get('password')
         phone = request.POST.get('phone')
-        pickup = request.POST.get('pickup')
+        pickup_id = request.POST.get('pickup')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
 
-        if not all([username, password, phone, pickup]):
+        if not all([username, password, phone, pickup_id]):
             messages.error(request, "Заполните все поля.")
-            return render(request, 'registration.html')
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
 
-        # Проверка на существование пользователя с таким логином
+        # Проверка ПВЗ
+        try:
+            pickup_point = PickupPoint.objects.get(id=pickup_id, is_active=True)
+        except (PickupPoint.DoesNotExist, ValueError):
+            messages.error(request, "Выбранный пункт выдачи не найден.")
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+
         if User.objects.filter(username=username).exists():
             messages.error(request, "Пользователь с таким логином уже существует.")
-            return render(request, 'registration.html', {
-                'login': username,
-                'phone': phone,
-                'pickup': pickup
-            })
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
 
-        # Проверка на существование профиля с таким телефоном
         if UserProfile.objects.filter(phone=phone).exists():
             messages.error(request, "Пользователь с таким номером телефона уже существует.")
-            return render(request, 'registration.html', {
-                'login': username,
-                'phone': phone,
-                'pickup': pickup
-            })
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
 
-        # Проверка на существование заявки с таким логином или телефоном
         if PendingRegistration.objects.filter(login=username).exists():
             messages.error(request, "Заявка с таким логином уже существует.")
-            return render(request, 'registration.html', {
-                'login': username,
-                'phone': phone,
-                'pickup': pickup
-            })
-        
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+
         if PendingRegistration.objects.filter(phone=phone).exists():
             messages.error(request, "Заявка с таким номером телефона уже существует.")
-            return render(request, 'registration.html', {
-                'login': username,
-                'phone': phone,
-                'pickup': pickup
-            })
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
 
         # Создаём заявку
         PendingRegistration.objects.create(
             login=username,
             phone=phone,
-            pickup=pickup,
-            password=password
+            pickup=pickup_point,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
         )
 
-                # Создаем уведомления для HR пользователей
+        # Создаем уведомления для HR пользователей
         hr_users = UserProfile.objects.filter(is_hr=True)
         for hr_profile in hr_users:
             Notification.objects.create(
@@ -102,13 +109,13 @@ def register_view(request):
                 message=f"Новая заявка на регистрацию клиента: {username}"
             )
 
-        # очищаем сессию (если пользовался pre-register)
         request.session.pop('registration_data', None)
-
-        # на страницу успешной заявки
         return redirect('success')
 
-    return render(request, 'registration.html')
+    pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
+    return render(request, 'registration.html', {'pickup_points': pickup_points})
+
 
 def registration(request):
-    return render(request, "registration.html")
+    pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
+    return render(request, "registration.html", {'pickup_points': pickup_points})

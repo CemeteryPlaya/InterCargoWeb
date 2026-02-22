@@ -77,7 +77,7 @@
                         <!-- Блок информации о пакете -->
                         <div id="packageInfo" class="hidden border border-gray-200 rounded-lg p-4 bg-gray-50">
                             <h3 class="font-bold text-lg mb-3 text-gray-800">Информация о пакете</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                                 <div>
                                     <p class="text-gray-500">Владелец:</p>
                                     <p class="font-medium text-gray-900" id="infoOwner">-</p>
@@ -96,6 +96,32 @@
                                         <p class="text-xs text-gray-400 mt-1 hidden" id="paymentHint">Нажмите, чтобы
                                             отметить как оплачено</p>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Чек клиента -->
+                            <div id="receiptTable" class="hidden">
+                                <h4 class="font-semibold text-sm text-gray-700 mb-2">Чек клиента</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm border-collapse">
+                                        <thead>
+                                            <tr class="bg-gray-200 text-gray-700">
+                                                <th class="border border-gray-300 px-3 py-2 text-left">#</th>
+                                                <th class="border border-gray-300 px-3 py-2 text-left">Трек-код</th>
+                                                <th class="border border-gray-300 px-3 py-2 text-right">Вес (кг)</th>
+                                                <th class="border border-gray-300 px-3 py-2 text-right">Стоимость (тг)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="receiptBody"></tbody>
+                                        <tfoot>
+                                            <tr class="bg-gray-100 font-semibold">
+                                                <td class="border border-gray-300 px-3 py-2"></td>
+                                                <td class="border border-gray-300 px-3 py-2">Итого: <span id="totalCount">0</span> шт.</td>
+                                                <td class="border border-gray-300 px-3 py-2 text-right" id="totalWeight">0</td>
+                                                <td class="border border-gray-300 px-3 py-2 text-right" id="totalPrice">0</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -119,156 +145,10 @@
     {% endblock %}
     {% include 'includes/footer.html' %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const barcodeInput = document.getElementById('barcode');
-            const searchBtn = document.getElementById('searchBtn');
-            const packageInfo = document.getElementById('packageInfo');
-            const infoOwner = document.getElementById('infoOwner');
-            const infoPickup = document.getElementById('infoPickup');
-            const infoPaymentStatus = document.getElementById('infoPaymentStatus');
-            const paymentHint = document.getElementById('paymentHint');
-            const submitBtn = document.getElementById('submitBtn');
-            const clearBtn = document.getElementById('clearBtn');
-            const messagesContainer = document.querySelector('.mb-6') || createMessagesContainer();
-
-            function createMessagesContainer() {
-                const container = document.createElement('div');
-                container.className = 'mb-6';
-                const main = document.querySelector('main .max-w-3xl');
-                main.insertBefore(container, main.firstChild);
-                return container;
-            }
-
-            function showMessage(text, type = 'error') {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `p-4 mb-3 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
-                msgDiv.textContent = text;
-                messagesContainer.innerHTML = ''; // Clear previous messages
-                messagesContainer.appendChild(msgDiv);
-
-                // Auto remove after 5 seconds
-                setTimeout(() => msgDiv.remove(), 5000);
-            }
-
-            function clearForm() {
-                barcodeInput.value = '';
-                packageInfo.classList.add('hidden');
-                submitBtn.disabled = true;
-                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
-                infoPaymentStatus.onclick = null;
-                messagesContainer.innerHTML = '';
-            }
-
-            clearBtn.onclick = clearForm;
-
-            // Поиск по клику
-            searchBtn.onclick = performSearch;
-
-            // Поиск по Enter
-            barcodeInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    performSearch();
-                }
-            });
-
-            function performSearch() {
-                const barcode = barcodeInput.value.trim();
-                if (!barcode) {
-                    showMessage('Введите штрихкод');
-                    return;
-                }
-
-                const searchUrl = "{% url 'extradition_search' %}";
-                fetch(`${searchUrl}?barcode=${encodeURIComponent(barcode)}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            if (response.status === 404) throw new Error('Пакет не найден');
-                            throw new Error('Ошибка сервера');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Очищаем ошибки
-                        messagesContainer.innerHTML = '';
-
-                        // Отображаем данные
-                        infoOwner.textContent = data.owner;
-                        infoPickup.textContent = data.pickup_point;
-
-                        updatePaymentUI(data.is_paid, data.barcode);
-
-                        packageInfo.classList.remove('hidden');
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        packageInfo.classList.add('hidden');
-                        submitBtn.disabled = true;
-                        submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                        submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
-                        showMessage(err.message);
-                    });
-            }
-
-            function updatePaymentUI(isPaid, barcode) {
-                infoPaymentStatus.textContent = isPaid ? 'Оплачено' : 'Не оплачено';
-
-                if (isPaid) {
-                    infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                    paymentHint.classList.add('hidden');
-                    infoPaymentStatus.onclick = null;
-
-                    // Разблокируем кнопку выдачи
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                    submitBtn.classList.add('bg-primary', 'hover:bg-red-600');
-                } else {
-                    infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
-                    paymentHint.classList.remove('hidden');
-
-                    // Блокируем кнопку выдачи
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                    submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
-
-                    // Клик для оплаты
-                    infoPaymentStatus.onclick = function () {
-                        if (confirm('Отметить пакет как оплаченный?')) {
-                            togglePayment(barcode);
-                        }
-                    };
-                }
-            }
-
-            function togglePayment(barcode) {
-                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                const toggleUrl = "{% url 'extradition_toggle_payment' %}";
-
-                fetch(toggleUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: `barcode=${encodeURIComponent(barcode)}`
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            updatePaymentUI(true, barcode);
-                            showMessage('Статус оплаты обновлен', 'success');
-                        } else {
-                            showMessage('Ошибка: ' + (data.error || 'Не удалось обновить статус'));
-                        }
-                    })
-                    .catch(err => {
-                        showMessage('Ошибка связи с сервером');
-                    });
-            }
-        });
-    </script>
+    <div id="extradition-config" class="hidden"
+         data-search-url="{% url 'extradition_search' %}"
+         data-toggle-url="{% url 'extradition_toggle_payment' %}"></div>
+    <script src="{% static 'scripts/extraditions.js' %}"></script>
 </body>
 
 </html>

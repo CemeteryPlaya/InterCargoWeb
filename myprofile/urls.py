@@ -19,11 +19,13 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
     path('track-codes/edit/<int:track_id>/', track_codes.edit_track_code_description, name='edit_track_code_description'),
+    path('track-codes/archive/<int:track_id>/', track_codes.archive_track_code, name='archive_track_code'),
+    path('track-codes/unarchive/<int:track_id>/', track_codes.unarchive_track_code, name='unarchive_track_code'),
     path('settings/', profile_setting.settings, name='settings'),
     path('update/', profile_setting.update_profile, name='update_profile'),
     path('', personal_profile.profile, name='profile'),
@@ -42,8 +44,14 @@ urlpatterns = [
     path('extradition/search/', extraditions.search_package, name='extradition_search'),
     path('extradition/toggle-payment/', extraditions.toggle_payment, name='extradition_toggle_payment'),
     path('extradition-package/', extradition_Package.extradition_package_view, name='extradition_package'),
+    path('quick-issue/', extradition_Package.quick_issue, name='quick_issue'),
     path('documents/', documents.print_documents_view, name='print_documents'),
     path('documents/print/<int:registry_id>/', documents.client_registry_pdf, name='client_registry_pdf'),
+    path('goods-arrival/', goods_arrival.goods_arrival_view, name='goods_arrival'),
+    path('delivery/', delivery.delivery_view, name='delivery'),
+    path('delivery/take/', delivery.take_delivery, name='take_delivery'),
+    path('delivery/complete/', delivery.complete_delivery, name='complete_delivery'),
+    path('shipped-cn/', shipped_cn.shipped_cn_view, name='shipped_cn'),
 ]
 
 # Подключение медиа-файлов при DEBUG=True

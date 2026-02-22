@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Приход товаров</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+        <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Приход товаров</h2>
+
+            {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                <li class="text-{{ message.tags }}-600">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <form method="post" action="{% url 'goods_arrival' %}" id="goods_arrival_form"
+                  data-get-owner-url="{% url 'get_track_owner' %}">
+                {% csrf_token %}
+
+                <!-- Дата -->
+                <label for="update_date" class="block font-medium mb-1">Дата прихода</label>
+                <input type="date" name="update_date" id="update_date" required
+                    class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+
+                <!-- Кнопка переключения формы -->
+                <div class="mb-4">
+                    <button type="button" id="form_toggle_btn"
+                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+                        <i class="ri-table-line"></i> Переключить на табличный вид
+                    </button>
+                </div>
+
+                <div id="standard_view" class="grid grid-cols-3 gap-4">
+                    <!-- Трек-коды -->
+                    <div>
+                        <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)</label>
+                        <textarea name="track_codes" id="track_codes" rows="10" required
+                            class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                    </div>
+
+                    <!-- Пользователи -->
+                    <div>
+                        <label for="owner_usernames" class="block font-medium mb-1">Имена владельцев (по одному в строке)</label>
+                        <textarea name="owner_usernames" id="owner_usernames" rows="10" required
+                            class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                    </div>
+
+                    <!-- Вес -->
+                    <div>
+                        <label for="weights" class="block font-medium mb-1">Вес (в кг, по одному в строке)</label>
+                        <textarea name="weights" id="weights" rows="10" required
+                            class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                    </div>
+                </div>
+
+                <div id="table_view" class="hidden">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                    Трек-код</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                    Владелец</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                    Вес (кг)</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracks_table_body">
+                        </tbody>
+                    </table>
+
+                    <button type="button" id="add_row_btn"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4 transition">
+                        <i class="ri-add-line"></i> Добавить строку
+                    </button>
+                </div>
+
+                <button type="submit"
+                    class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 mt-6 transition">Сохранить</button>
+            </form>
+        </div>
+        <script src="{% static 'scripts/goodsArrival.js' %}"></script>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

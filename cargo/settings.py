@@ -34,6 +34,21 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(',')
 
+# CSRF trusted origins (for external devices, ngrok, etc.)
+CSRF_TRUSTED_ORIGINS = [
+    'https://' + host.strip()
+    for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(',')
+    if host.strip() and host.strip() not in ('127.0.0.1', 'localhost')
+]
+# Also allow http for local development
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS += [
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+        'http://26.162.180.192:8000',
+        'http://sabine-unchromed-bryon.ngrok-free.dev:8000',
+    ]
+
 
 # Application definition
 
@@ -162,3 +177,10 @@ LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/profile/'
 
 LOGOUT_REDIRECT_URL = '/'
+
+# Web Push Notifications (VAPID)
+WEBPUSH_SETTINGS = {
+    'VAPID_PUBLIC_KEY': os.getenv('VAPID_PUBLIC_KEY', ''),
+    'VAPID_PRIVATE_KEY': os.getenv('VAPID_PRIVATE_KEY', ''),
+    'VAPID_ADMIN_EMAIL': os.getenv('VAPID_ADMIN_EMAIL', 'admin@cargointer.kz'),
+}
