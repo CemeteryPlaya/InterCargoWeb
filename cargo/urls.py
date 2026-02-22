@@ -18,9 +18,12 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve as static_serve
 from mainview import views as mainview_views
 
 urlpatterns = [
+    # Service worker must be served from root scope
+    path('sw.js', static_serve, {'document_root': settings.BASE_DIR / 'mainview' / 'static', 'path': 'sw.js'}, name='sw.js'),
     re_path(r"^mainview/", include('mainview.urls')),
     path('auth/', include('django.contrib.auth.urls')),
     re_path(r"^register/", include('register.urls')),

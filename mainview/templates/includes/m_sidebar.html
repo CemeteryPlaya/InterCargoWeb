@@ -15,40 +15,55 @@
 
     <!-- Основное меню (прокручиваемое) -->
     <nav class="flex-grow overflow-y-auto p-4 space-y-4 text-gray-700">
-        <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-barcode-line"></i>Трек-коды
-        </a>
-        <a href="{% url 'notifications' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-notification-3-line"></i>Уведомления
-        </a>
-        {% if request.user.userprofile.is_staff %}
+        {% if request.user.userprofile.is_staff or request.user.userprofile.is_pp_worker %}
         <a href="{% url 'extradition' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-mail-line"></i>Выдача посылок
+            <i class="ri-mail-line"></i> Выдача посылок
+        </a>
+        {% endif %}
+        {% if request.user.userprofile.is_staff %}
+        <a href="{% url 'shipped_cn' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-flight-takeoff-line"></i> Отправлено из Китая
         </a>
         <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-shield-user-line"></i>Панель персонала
+            <i class="ri-shield-user-line"></i> Панель персонала
         </a>
         <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-admin-line"></i>Панель администратора
+            <i class="ri-admin-line"></i> Панель администратора
         </a>
         <a href="{% url 'print_documents' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-printer-line"></i>Печать документов
+            <i class="ri-printer-line"></i> Печать документов
+        </a>
+        {% endif %}
+        {% if request.user.userprofile.is_driver %}
+        <a href="{% url 'delivery' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-truck-line"></i> Доставка
         </a>
         {% endif %}
         {% if request.user.userprofile.is_hr %}
         <a href="{% url 'confirm' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-admin-fill"></i>Подтверждение пользователей
+            <i class="ri-admin-fill"></i> Подтверждение пользователей
         </a>
         {% endif %}
+        <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-barcode-line"></i> Трек-коды
+        </a>
         <a href="{% url 'delivered_posts' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-bill-line"></i>Чеки
+            <i class="ri-bill-line"></i> Чеки
         </a>
         <a href="{% url 'extradition_package' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-file-list-3-line"></i> Формирование выдачи
+            <i class="ri-history-line"></i> История выдачи
+        </a>
+        <a href="{% url 'notifications' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-notification-3-line"></i> Уведомления
         </a>
         <a href="{% url 'settings' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-settings-line"></i>Настройки
+            <i class="ri-settings-line"></i> Настройки
         </a>
+        {% if request.user.userprofile.is_staff %}
+        <a href="{% url 'goods_arrival' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-inbox-archive-line"></i> Приход товаров
+        </a>
+        {% endif %}
     </nav>
 
     <!-- Нижняя панель (фиксированная) -->

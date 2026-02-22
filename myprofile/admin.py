@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    TrackCode, Receipt, ReceiptItem, CustomerDiscount,
+    TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry
 )
 from django import forms
@@ -200,6 +200,13 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Prevent deletion
         return False
+
+@admin.register(ArchivedTrackCode)
+class ArchivedTrackCodeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'track_code', 'owner', 'status', 'weight', 'archived_at')
+    search_fields = ('track_code', 'owner__username')
+    list_filter = ('status', 'archived_at')
+    readonly_fields = ('archived_at',)
 
 @admin.register(ClientRegistry)
 class ClientRegistryAdmin(admin.ModelAdmin):

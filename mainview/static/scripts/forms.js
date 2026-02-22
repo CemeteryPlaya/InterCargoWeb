@@ -1,4 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Auto-uppercase + Latin-only for all login fields
+  document.querySelectorAll('input[name="login"]').forEach(function (input) {
+    input.addEventListener('input', function () {
+      var oldLen = this.value.length;
+      var start = this.selectionStart;
+      var end = this.selectionEnd;
+      // Убираем кириллицу, оставляем только латиницу, цифры и допустимые символы
+      var clean = this.value.replace(/[а-яА-ЯёЁ]/g, '').toUpperCase();
+      this.value = clean;
+      // Корректируем позицию курсора если символы были удалены
+      var removed = oldLen - clean.length;
+      this.setSelectionRange(Math.max(0, start - removed), Math.max(0, end - removed));
+    });
+  });
+
+  // Password visibility toggle
+  document.querySelectorAll('.password-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = this.parentElement.querySelector('input');
+      var icon = this.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('ri-eye-off-line');
+        icon.classList.add('ri-eye-line');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('ri-eye-line');
+        icon.classList.add('ri-eye-off-line');
+      }
+    });
+  });
+
   const registrationForm = document.getElementById('registration-form');
   const loginForm = document.getElementById('login-form');
 

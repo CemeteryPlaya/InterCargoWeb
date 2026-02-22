@@ -11,7 +11,7 @@ def profile(request):
     except UserProfile.DoesNotExist:
         profile = None
 
-    last_two_codes = TrackCode.objects.filter(owner=user).order_by('-update_date')[:2]
+    last_two_codes = TrackCode.objects.filter(owner=user, status='ready').order_by('-update_date')[:2]
 
     user_added_count = TrackCode.objects.filter(owner=user, status='user_added').count()
     warehouse_cn_count = TrackCode.objects.filter(owner=user, status='warehouse_cn').count()

@@ -25,10 +25,14 @@ def update_profile(request):
     user = request.user
     email = request.POST.get('email')
     phone = request.POST.get('phone')
+    first_name = request.POST.get('first_name', '').strip()
+    last_name = request.POST.get('last_name', '').strip()
 
+    user.first_name = first_name
+    user.last_name = last_name
     if email:
         user.email = email
-        user.save()
+    user.save()
 
     try:
         profile = user.userprofile

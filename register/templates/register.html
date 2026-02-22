@@ -70,33 +70,36 @@
           <label for="pickup" class="block text-sm font-medium text-gray-700 mb-2">Выбор пункта выдачи</label>
           <select id="pickup" name="pickup" required class="w-full px-4 py-3 pr-8 border border-gray-300 rounded appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition">
             <option value="" disabled selected>Выберите пункт выдачи</option>
-            <option value="akbulak" {% if pickup == "akbulak" %}selected{% endif %}>Акбулак 21 (Ozon)</option>
-            <option value="pushkina" {% if pickup == "pushkina" %}selected{% endif %}>Пушкина 8 (Ozon)</option>
-            <option value="tashkentskaya" {% if pickup == "tashkentskaya" %}selected{% endif %}>Ташкентская 286 (Ozon)</option>
-            <option value="bayseytovoy" {% if pickup == "bayseytovoy" %}selected{% endif %}>Байсеитовой 30 (Ozon)</option>
-            <option value="samal" {% if pickup == "samal" %}selected{% endif %}>Самал 48 (Wildberries)</option>
-            <option value="sorokina" {% if pickup == "sorokina" %}selected{% endif %}>Сорокина 7 (Ozon)</option>
-            <option value="ashimbaeva" {% if pickup == "ashimbaeva" %}selected{% endif %}>Ашимбаева 5 (Ozon)</option>
-            <option value="abaya286" {% if pickup == "abaya286" %}selected{% endif %}>Абая 286 (Ozon)</option>
-            <option value="atabaeva" {% if pickup == "atabaeva" %}selected{% endif %}>Атабаева 105 (Ozon)</option>
-            <option value="koybakova" {% if pickup == "koybakova" %}selected{% endif %}>Койбакова 8 (Ozon)</option>
+            {% for pp in pickup_points %}
+            <option value="{{ pp.id }}" {% if selected_pickup == pp.id|stringformat:"d" %}selected{% endif %}>{{ pp }}</option>
+            {% endfor %}
           </select>
         </div>
 
         <!-- Пароль -->
         <div class="mb-6">
           <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
-          <input type="password" id="password" name="password" required minlength="6"
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-            placeholder="Введите пароль">
+          <div class="relative">
+            <input type="password" id="password" name="password" required minlength="6"
+              class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+              placeholder="Введите пароль">
+            <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+              <i class="ri-eye-off-line text-xl"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Подтверждение пароля -->
         <div class="mb-8">
           <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">Подтверждение пароля</label>
-          <input type="password" id="confirm_password" name="confirm_password" required minlength="6"
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-            placeholder="Повторите пароль">
+          <div class="relative">
+            <input type="password" id="confirm_password" name="confirm_password" required minlength="6"
+              class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+              placeholder="Повторите пароль">
+            <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+              <i class="ri-eye-off-line text-xl"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Кнопка -->

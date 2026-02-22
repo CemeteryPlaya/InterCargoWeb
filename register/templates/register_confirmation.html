@@ -58,6 +58,7 @@
             <thead>
                 <tr class="bg-gray-100 border-b">
                     <th class="px-4 py-2 text-left">Логин</th>
+                    <th class="px-4 py-2 text-left">Фамилия Имя</th>
                     <th class="px-4 py-2 text-left">Телефон</th>
                     <th class="px-4 py-2 text-left">ПВЗ</th>
                     <th class="px-4 py-2">Действия</th>
@@ -68,6 +69,7 @@
                 {% for r in registrations %}
                 <tr class="border-b">
                     <td class="px-4 py-2">{{ r.login }}</td>
+                    <td class="px-4 py-2">{{ r.last_name }} {{ r.first_name }}</td>
                     <td class="px-4 py-2">{{ r.phone }}</td>
                     <td class="px-4 py-2">{{ r.pickup_name }}</td>
                     <td class="px-4 py-2 text-center">

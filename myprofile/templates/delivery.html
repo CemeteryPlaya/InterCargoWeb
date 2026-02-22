@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Доставка</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+        <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Доставка</h2>
+
+            {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                <li class="text-{{ message.tags }}-600">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <!-- Табы -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="tab-take" class="tab-delivery-btn px-6 py-3 font-medium text-sm border-b-2 border-primary text-primary transition-colors"
+                    data-tab="take">
+                    <i class="ri-truck-line"></i> Взять в доставку
+                </button>
+                <button id="tab-complete" class="tab-delivery-btn px-6 py-3 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
+                    data-tab="complete">
+                    <i class="ri-checkbox-circle-line"></i> Завершить доставку
+                </button>
+            </div>
+
+            <!-- Вкладка: Взять в доставку -->
+            <div id="panel-take" class="tab-delivery-panel">
+                {% if pending_pickups %}
+                <form method="post" action="{% url 'take_delivery' %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        {% for pp in pending_pickups %}
+                        <label class="delivery-card cursor-pointer block border border-gray-200 rounded-lg p-4 hover:border-primary hover:shadow-md transition-all">
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" name="pickup_ids" value="{{ pp.id }}"
+                                    class="mt-1 w-4 h-4 text-primary border-gray-300 rounded">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800">{{ pp.address }}</h3>
+                                    <p class="text-sm text-gray-500">{{ pp.premise_name }}</p>
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                            <i class="ri-archive-line mr-1"></i> {{ pp.track_count }} посылок
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="select-all-take" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition text-sm">
+                            Выбрать все
+                        </button>
+                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-red-600 transition">
+                            <i class="ri-truck-line"></i> Взять в доставку
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-12 text-gray-500">
+                    <i class="ri-inbox-line text-4xl mb-2"></i>
+                    <p>Нет посылок для доставки</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Вкладка: Завершить доставку -->
+            <div id="panel-complete" class="tab-delivery-panel hidden">
+                {% if in_transit_pickups %}
+                <form method="post" action="{% url 'complete_delivery' %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        {% for pp in in_transit_pickups %}
+                        <label class="delivery-card cursor-pointer block border-2 border-yellow-400 rounded-lg p-4 hover:border-green-500 hover:shadow-md transition-all bg-white">
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" name="pickup_ids" value="{{ pp.id }}"
+                                    class="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900">{{ pp.address }}</h3>
+                                    <p class="text-sm text-gray-600">{{ pp.premise_name }}</p>
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-200 text-yellow-900 border border-yellow-400">
+                                            <i class="ri-truck-line mr-1"></i> {{ pp.track_count }} в доставке
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="select-all-complete" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition text-sm">
+                            Выбрать все
+                        </button>
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+                            <i class="ri-checkbox-circle-line"></i> Доставлено на ПВЗ
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-12 text-gray-600">
+                    <i class="ri-truck-line text-4xl mb-2"></i>
+                    <p>Нет посылок в доставке</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+        <script src="{% static 'scripts/delivery.js' %}"></script>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

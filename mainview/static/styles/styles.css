@@ -110,6 +110,10 @@
             background-color: #dbeafe !important;
         }
 
+        body.theme-dark .bg-orange-100 {
+            background-color: #ffedd5 !important;
+        }
+
         body.theme-dark .bg-white-100 {
             background-color: #f9fafb !important;
         }
@@ -118,6 +122,7 @@
         body.theme-dark .bg-green-100,
         body.theme-dark .bg-red-100,
         body.theme-dark .bg-yellow-100,
+        body.theme-dark .bg-orange-100,
         body.theme-dark .bg-purple-100,
         body.theme-dark .bg-blue-100,
         body.theme-dark .bg-white-100 {
@@ -128,12 +133,14 @@
         body.theme-dark .bg-green-100 p,
         body.theme-dark .bg-red-100 p,
         body.theme-dark .bg-yellow-100 p,
+        body.theme-dark .bg-orange-100 p,
         body.theme-dark .bg-purple-100 p,
         body.theme-dark .bg-blue-100 p,
         body.theme-dark .bg-white-100 p,
         body.theme-dark .bg-green-100 strong,
         body.theme-dark .bg-red-100 strong,
         body.theme-dark .bg-yellow-100 strong,
+        body.theme-dark .bg-orange-100 strong,
         body.theme-dark .bg-purple-100 strong,
         body.theme-dark .bg-blue-100 strong,
         body.theme-dark .bg-white-100 strong {
@@ -205,6 +212,27 @@
 
         body.theme-dark table input::placeholder {
             color: #6b7280 !important;
+        }
+
+        /* Списки <ul>/<ol> — отступ для буллетов и нумерации */
+        ul, ol {
+            padding-left: 2rem;
+        }
+
+        ul {
+            list-style-type: disc;
+        }
+
+        ol {
+            list-style-type: decimal;
+        }
+
+        /* FAQ: отступ для <li> внутри контента FAQ (без обёртки <ul>) */
+        .faq-content li {
+            padding-left: 1.5rem;
+            position: relative;
+            list-style-type: disc;
+            margin-left: 1rem;
         }
 
         /* Стили для переключателя табов регистрации/авторизации */
