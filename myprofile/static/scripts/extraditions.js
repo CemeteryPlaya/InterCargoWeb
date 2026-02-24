@@ -12,15 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const paymentHint = document.getElementById('paymentHint');
     const submitBtn = document.getElementById('submitBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const messagesContainer = document.querySelector('.mb-6') || createMessagesContainer();
-
-    function createMessagesContainer() {
-        const container = document.createElement('div');
-        container.className = 'mb-6';
-        const main = document.querySelector('main .max-w-3xl');
-        main.insertBefore(container, main.firstChild);
-        return container;
-    }
+    const messagesContainer = document.getElementById('ajax-messages');
 
     function showMessage(text, type) {
         type = type || 'error';

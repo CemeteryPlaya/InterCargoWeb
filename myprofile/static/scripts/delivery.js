@@ -45,4 +45,24 @@ document.addEventListener('DOMContentLoaded', function () {
             this.textContent = allChecked ? 'Выбрать все' : 'Снять все';
         });
     }
+
+    // History expand/collapse — event delegation for both date and pickup point levels
+    var historyPanel = document.getElementById('panel-history');
+    if (historyPanel) {
+        historyPanel.addEventListener('click', function (e) {
+            var toggle = e.target.closest('.history-toggle');
+            if (!toggle) return;
+
+            var targetId = toggle.dataset.target;
+            var content = document.getElementById(targetId);
+            var arrow = toggle.querySelector('.history-arrow');
+
+            if (content) {
+                content.classList.toggle('hidden');
+            }
+            if (arrow) {
+                arrow.classList.toggle('rotate-180');
+            }
+        });
+    }
 });

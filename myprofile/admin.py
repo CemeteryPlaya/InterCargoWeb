@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
-    Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry
+    Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
+    DeliveryHistory
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -207,6 +208,25 @@ class ArchivedTrackCodeAdmin(admin.ModelAdmin):
     search_fields = ('track_code', 'owner__username')
     list_filter = ('status', 'archived_at')
     readonly_fields = ('archived_at',)
+
+@admin.register(DeliveryHistory)
+class DeliveryHistoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'driver_name', 'pickup_point', 'total_weight', 'track_codes_count', 'taken_at', 'delivered_at')
+    list_filter = ('driver', 'taken_at', 'delivered_at', 'pickup_point')
+    search_fields = ('driver__username', 'driver__first_name', 'driver__last_name', 'pickup_point__address', 'pickup_point__premise_name')
+    readonly_fields = ('created_at',)
+    filter_horizontal = ('track_codes',)
+    date_hierarchy = 'taken_at'
+    ordering = ('-taken_at',)
+
+    def driver_name(self, obj):
+        return obj.driver.get_full_name() or obj.driver.username
+    driver_name.short_description = 'Доставщик'
+    driver_name.admin_order_field = 'driver__first_name'
+
+    def track_codes_count(self, obj):
+        return obj.track_codes.count()
+    track_codes_count.short_description = 'Кол-во треков'
 
 @admin.register(ClientRegistry)
 class ClientRegistryAdmin(admin.ModelAdmin):

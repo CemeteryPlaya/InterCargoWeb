@@ -3,10 +3,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.utils import timezone
-from collections import defaultdict
-from myprofile.models import TrackCode, Notification
+from collections import defaultdict, OrderedDict
+from myprofile.models import TrackCode, Notification, DeliveryHistory
 from register.models import UserProfile, PickupPoint
 
 
@@ -46,9 +46,45 @@ def delivery_view(request):
         .order_by('id')
     )
 
+    # История доставок текущего водителя
+    history_qs = (
+        DeliveryHistory.objects
+        .filter(driver=request.user)
+        .select_related('pickup_point')
+        .prefetch_related('track_codes', 'track_codes__owner')
+        .order_by('-taken_at')
+    )
+
+    # Группируем по дате и для каждой записи считаем клиентов
+    history_by_date = OrderedDict()
+    for entry in history_qs:
+        date_key = entry.taken_at.date()
+        if date_key not in history_by_date:
+            history_by_date[date_key] = []
+
+        # Группируем треки по клиенту (owner)
+        clients = {}
+        for track in entry.track_codes.all():
+            owner = track.owner
+            if owner:
+                key = owner.id
+                if key not in clients:
+                    clients[key] = {
+                        'username': owner.username,
+                        'full_name': owner.get_full_name() or owner.username,
+                        'track_count': 0,
+                        'total_weight': 0,
+                    }
+                clients[key]['track_count'] += 1
+                clients[key]['total_weight'] += float(track.weight or 0)
+
+        entry.clients_list = list(clients.values())
+        history_by_date[date_key].append(entry)
+
     return render(request, "delivery.html", {
         'pending_pickups': pending_pickups,
         'in_transit_pickups': in_transit_pickups,
+        'history_by_date': history_by_date,
     })
 
 
@@ -63,7 +99,8 @@ def take_delivery(request):
         messages.error(request, "Выберите хотя бы один пункт выдачи.")
         return redirect('delivery')
 
-    today = timezone.now().date()
+    now = timezone.now()
+    today = now.date()
     updated = 0
     notif_counts = defaultdict(int)
 
@@ -73,10 +110,12 @@ def take_delivery(request):
         except PickupPoint.DoesNotExist:
             continue
 
-        tracks = TrackCode.objects.filter(
+        tracks = list(TrackCode.objects.filter(
             status='delivered',
             owner__userprofile__pickup=pickup
-        )
+        ))
+
+        total_weight = sum(t.weight or 0 for t in tracks)
 
         for track in tracks:
             track.status = 'shipping_pp'
@@ -85,6 +124,17 @@ def take_delivery(request):
             updated += 1
             if track.owner:
                 notif_counts[track.owner] += 1
+
+        # Создаём запись истории доставки и привязываем треки
+        if tracks:
+            history = DeliveryHistory.objects.create(
+                driver=request.user,
+                pickup_point=pickup,
+                total_weight=total_weight,
+                taken_at=now,
+                delivered_at=None,
+            )
+            history.track_codes.set(tracks)
 
     # Групповые уведомления
     for user, count in notif_counts.items():
@@ -118,7 +168,8 @@ def complete_delivery(request):
         messages.error(request, "Выберите хотя бы один пункт выдачи.")
         return redirect('delivery')
 
-    today = timezone.now().date()
+    now = timezone.now()
+    today = now.date()
     updated = 0
     notif_counts = defaultdict(int)
 
@@ -140,6 +191,21 @@ def complete_delivery(request):
             updated += 1
             if track.owner:
                 notif_counts[track.owner] += 1
+
+        # Обновляем запись истории доставки — ставим время доставки
+        history_entry = (
+            DeliveryHistory.objects
+            .filter(
+                driver=request.user,
+                pickup_point=pickup,
+                delivered_at__isnull=True,
+            )
+            .order_by('-taken_at')
+            .first()
+        )
+        if history_entry:
+            history_entry.delivered_at = now
+            history_entry.save()
 
     # Групповые уведомления
     for user, count in notif_counts.items():

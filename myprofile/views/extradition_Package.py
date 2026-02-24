@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
@@ -35,14 +36,14 @@ def quick_issue(request):
     Быстрая выдача: собирает все ready трек-коды в один пакет.
     За один день — один штрихкод: если сегодня уже есть невыданный пакет,
     обновляем его треки; иначе создаём новый.
+    Возвращает JSON с barcode и base64-картинкой штрихкода.
     """
     user = request.user
 
     ready_tracks = TrackCode.objects.filter(owner=user, status='ready')
 
     if not ready_tracks.exists():
-        messages.warning(request, "Нет трек-кодов со статусом «Доставлено на ПВЗ».")
-        return redirect('profile')
+        return JsonResponse({'error': 'Нет трек-кодов со статусом «Доставлено на ПВЗ».'}, status=400)
 
     try:
         with transaction.atomic():
@@ -76,10 +77,12 @@ def quick_issue(request):
                     message=f"📦 Создан пакет {package.barcode} — ожидает выдачи ({ready_tracks.count()} треков)."
                 )
 
-        messages.success(request, f"Пакет {package.barcode} ({ready_tracks.count()} треков).")
+        return JsonResponse({
+            'success': True,
+            'barcode': package.barcode,
+            'barcode_base64': package.get_barcode_base64(),
+            'track_count': ready_tracks.count(),
+        })
 
     except Exception as e:
-        messages.error(request, f"Ошибка при создании пакета: {e}")
-        return redirect('profile')
-
-    return redirect(f"/profile/extradition-package/?show_barcode={package.barcode}")
+        return JsonResponse({'error': str(e)}, status=500)

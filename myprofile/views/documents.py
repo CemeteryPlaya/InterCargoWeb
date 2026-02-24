@@ -4,7 +4,13 @@ from django.utils import timezone
 from myprofile.models import TrackCode, ClientRegistry, GlobalSettings
 from register.models import UserProfile, PickupPoint
 from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount
+
+
+def _round_price(value):
+    """Округляет цену до целого числа по стандартным правилам (5-9 вверх)."""
+    return int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 @login_required
 def print_documents_view(request):
@@ -55,20 +61,20 @@ def print_documents_view(request):
                             'total_sum': 0
                         }
 
-                    weight = track.weight or 0
+                    weight = track.weight or Decimal("0")
                     discount_per_kg = get_user_discount(owner)
                     price_per_kg = default_price_per_kg - discount_per_kg
-                    price = weight * price_per_kg
+                    price = _round_price(weight * price_per_kg)
 
                     clients_data[username]['tracks'].append({
                         'track_code': track.track_code,
-                        'weight': weight,
+                        'weight': float(weight),
                         'price': price
                     })
 
                     clients_data[username]['total_count'] += 1
                     clients_data[username]['total_weight'] += float(weight)
-                    clients_data[username]['total_sum'] += float(price)
+                    clients_data[username]['total_sum'] += price
 
                 sorted_clients = sorted(clients_data.values(), key=lambda x: x['username'])
 
@@ -152,19 +158,19 @@ def client_registry_pdf(request, registry_id):
                 'sum': 0
             }
 
-        weight = track.weight or 0
+        weight = track.weight or Decimal("0")
         discount_per_kg = get_user_discount(owner)
         price_per_kg = default_price_per_kg - discount_per_kg
-        price = weight * price_per_kg
+        price = _round_price(weight * price_per_kg)
 
         client_data = data[pickup_key]['clients'][client_username]
         client_data['count'] += 1
         client_data['weight'] += float(weight)
-        client_data['sum'] += float(price)
+        client_data['sum'] += price
 
         data[pickup_key]['total_count'] += 1
         data[pickup_key]['total_weight'] += float(weight)
-        data[pickup_key]['total_sum'] += float(price)
+        data[pickup_key]['total_sum'] += price
 
     for pickup_key in data:
         data[pickup_key]['clients'] = dict(sorted(data[pickup_key]['clients'].items()))
