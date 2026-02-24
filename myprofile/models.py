@@ -302,6 +302,46 @@ class GlobalSettings(models.Model):
 
 
 
+class DeliveryHistory(models.Model):
+    """Запись истории доставки: какой водитель доставил какой пункт выдачи."""
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="delivery_history",
+        verbose_name="Доставщик"
+    )
+    pickup_point = models.ForeignKey(
+        'register.PickupPoint',
+        on_delete=models.CASCADE,
+        related_name="delivery_history",
+        verbose_name="Пункт выдачи"
+    )
+    track_codes = models.ManyToManyField(
+        'TrackCode',
+        related_name="delivery_history",
+        blank=True,
+        verbose_name="Трек-коды в доставке"
+    )
+    total_weight = models.DecimalField(
+        max_digits=10, decimal_places=3, default=0,
+        verbose_name="Общий вес (кг)"
+    )
+    taken_at = models.DateTimeField(verbose_name="Время принятия в доставку")
+    delivered_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="Время доставки до пункта"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+
+    class Meta:
+        verbose_name = "История доставки"
+        verbose_name_plural = "История доставок"
+        ordering = ['-taken_at']
+
+    def __str__(self):
+        return f"{self.driver.get_full_name() or self.driver.username} → {self.pickup_point} ({self.taken_at.strftime('%d.%m.%Y')})"
+
+
 class ClientRegistry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     registry_date = models.DateField(verbose_name="Дата реестра")

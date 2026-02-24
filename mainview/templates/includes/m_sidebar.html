@@ -24,14 +24,16 @@
         <a href="{% url 'shipped_cn' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-flight-takeoff-line"></i> Отправлено из Китая
         </a>
-        <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-shield-user-line"></i> Панель персонала
-        </a>
         <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-admin-line"></i> Панель администратора
         </a>
         <a href="{% url 'print_documents' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-printer-line"></i> Печать документов
+        </a>
+        {% endif %}
+        {% if request.user.is_superuser %}
+        <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-shield-user-line"></i> Панель персонала
         </a>
         {% endif %}
         {% if request.user.userprofile.is_driver %}

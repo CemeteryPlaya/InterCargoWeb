@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
+from decimal import Decimal, ROUND_HALF_UP
 from myprofile.models import Extradition, ExtraditionPackage, Notification, ReceiptItem
 from register.models import UserProfile
 
@@ -125,17 +126,17 @@ def search_package(request):
             if not receipt_item or not receipt_item.receipt.is_paid:
                 is_paid = False
 
-            weight = float(track.weight) if track.weight else 0
+            weight = track.weight or Decimal("0")
             try:
-                price_per_kg = float(receipt_item.receipt.price_per_kg) if receipt_item else 0
+                price_per_kg = receipt_item.receipt.price_per_kg if receipt_item else Decimal("0")
             except Exception:
-                price_per_kg = 0
-            track_price = round(weight * price_per_kg)
+                price_per_kg = Decimal("0")
+            track_price = int((weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
             tracks_data.append({
                 'track_code': track.track_code,
                 'description': track.description or '',
-                'weight': weight,
+                'weight': float(weight),
                 'price': track_price,
             })
 
