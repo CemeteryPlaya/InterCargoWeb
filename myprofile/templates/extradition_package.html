@@ -63,39 +63,87 @@
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
     {% if packages %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="space-y-3">
         {% for item in packages %}
-        <div class="border rounded-lg p-4 shadow hover:shadow-lg transition">
-            <p class="font-mono text-sm mb-2">Штрихкод: {{ item.package.barcode }}</p>
-            <p class="text-gray-500 mb-2">Создан: {{ item.package.created_at|date:"d.m.Y H:i" }}</p>
-            <p class="text-gray-600 mb-2">Трек-кодов: <strong>{{ item.package.track_codes.count }}</strong></p>
-            <details class="mb-2">
-                <summary class="cursor-pointer text-sm text-blue-600 hover:text-blue-800">Показать трек-коды</summary>
-                <div class="mt-2">
-                    {% for t in item.package.track_codes.all %}
-                        <span class="text-xs bg-gray-100 px-2 py-1 rounded mb-1 inline-block">{{ t.track_code }}</span>
-                    {% endfor %}
+        <details class="border rounded-lg shadow hover:shadow-lg transition group">
+            <summary class="cursor-pointer px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition">
+                <div class="flex items-center gap-3">
+                    <i class="ri-arrow-right-s-line text-xl text-gray-400 transition-transform group-open:rotate-90"></i>
+                    <div>
+                        <p class="font-mono text-sm">{{ item.package.barcode }}</p>
+                        <p class="text-gray-400 text-xs">{{ item.package.created_at|date:"d.m.Y H:i" }}</p>
+                    </div>
                 </div>
-            </details>
-            <p class="mb-2">
-                Статус:
-                {% if item.package.is_issued %}
-                    <span class="text-green-600 font-semibold">Выдан</span>
-                {% else %}
-                    <span class="text-yellow-600 font-semibold">Ожидает выдачи</span>
-                {% endif %}
-            </p>
+                <div class="flex items-center gap-4">
+                    <p class="text-sm font-semibold text-gray-800">{{ item.package_total }} тг</p>
+                    {% if item.package.is_issued %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Выдан</span>
+                    {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Ожидает выдачи</span>
+                    {% endif %}
+                </div>
+            </summary>
 
-            {% if not item.package.is_issued and item.barcode_base64 %}
-            <button
-                type="button"
-                class="show-barcode-btn bg-primary text-white px-4 py-2 rounded-button hover:bg-red-600 transition"
-                data-barcode="{{ item.package.barcode|escape }}"
-                data-img="{{ item.barcode_base64|escape }}">
-                <i class="ri-barcode-line"></i> Показать штрихкод
-            </button>
-            {% endif %}
-        </div>
+            <div class="px-4 pb-4 border-t border-gray-100 pt-3">
+                {% for receipt in item.receipts %}
+                <details class="mb-2 border border-gray-200 rounded-lg overflow-hidden">
+                    <summary class="cursor-pointer px-4 py-3 bg-gray-100 hover:bg-gray-200 transition flex items-center justify-between text-sm">
+                        <span class="font-medium">
+                            Чек #{{ receipt.id }} от {{ receipt.created_at|date:"d.m.Y" }}
+                            — {{ receipt.computed_weight }} кг, {{ receipt.computed_price }} тг
+                        </span>
+                        {% if receipt.is_paid %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Оплачен</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>
+                        {% endif %}
+                    </summary>
+                    <div class="px-4 py-3">
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-gray-200 text-gray-700">
+                                    <th class="border border-gray-300 px-3 py-2 text-left">#</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-left">Трек-код</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-right">Вес (кг)</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-right">Стоимость (тг)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ri in receipt.items_list %}
+                                <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
+                                    <td class="border border-gray-300 px-3 py-1.5">{{ forloop.counter }}</td>
+                                    <td class="border border-gray-300 px-3 py-1.5 font-mono text-xs">{{ ri.track_code.track_code }}</td>
+                                    <td class="border border-gray-300 px-3 py-1.5 text-right">{{ ri.track_code.weight }}</td>
+                                    <td class="border border-gray-300 px-3 py-1.5 text-right">{{ ri.computed_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-100 font-semibold">
+                                    <td class="border border-gray-300 px-3 py-2"></td>
+                                    <td class="border border-gray-300 px-3 py-2">Итого: {{ receipt.items_list|length }} шт.</td>
+                                    <td class="border border-gray-300 px-3 py-2 text-right">{{ receipt.computed_weight }}</td>
+                                    <td class="border border-gray-300 px-3 py-2 text-right">{{ receipt.computed_price }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </details>
+                {% endfor %}
+
+                {% if not item.package.is_issued and item.barcode_base64 %}
+                <div class="mt-3">
+                    <button
+                        type="button"
+                        class="show-barcode-btn bg-primary text-white px-4 py-2 rounded-button hover:bg-red-600 transition"
+                        data-barcode="{{ item.package.barcode|escape }}"
+                        data-img="{{ item.barcode_base64|escape }}">
+                        <i class="ri-barcode-line"></i> Показать штрихкод
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </details>
         {% endfor %}
     </div>
     {% else %}

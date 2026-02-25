@@ -18,7 +18,7 @@ def _is_staff(user):
         return False
 
 
-@login_required(login_url='login')
+@login_required
 def goods_arrival_view(request):
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")

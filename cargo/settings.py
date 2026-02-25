@@ -172,7 +172,7 @@ SESSION_COOKIE_HTTPONLY = True
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-LOGIN_URL = '/auth/login/'
+LOGIN_URL = '/'
 
 LOGIN_REDIRECT_URL = '/profile/'
 
@@ -184,3 +184,11 @@ WEBPUSH_SETTINGS = {
     'VAPID_PRIVATE_KEY': os.getenv('VAPID_PRIVATE_KEY', ''),
     'VAPID_ADMIN_EMAIL': os.getenv('VAPID_ADMIN_EMAIL', 'admin@cargointer.kz'),
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER', 'noreply@cargointer.kz')

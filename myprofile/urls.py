@@ -19,13 +19,14 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
     path('track-codes/edit/<int:track_id>/', track_codes.edit_track_code_description, name='edit_track_code_description'),
     path('track-codes/archive/<int:track_id>/', track_codes.archive_track_code, name='archive_track_code'),
     path('track-codes/unarchive/<int:track_id>/', track_codes.unarchive_track_code, name='unarchive_track_code'),
+    path('track-codes/mass-archive/', track_codes.mass_archive_track_codes, name='mass_archive_track_codes'),
     path('settings/', profile_setting.settings, name='settings'),
     path('update/', profile_setting.update_profile, name='update_profile'),
     path('', personal_profile.profile, name='profile'),
@@ -52,6 +53,11 @@ urlpatterns = [
     path('delivery/take/', delivery.take_delivery, name='take_delivery'),
     path('delivery/complete/', delivery.complete_delivery, name='complete_delivery'),
     path('shipped-cn/', shipped_cn.shipped_cn_view, name='shipped_cn'),
+    path('warehouse/', warehouse.warehouse_view, name='warehouse'),
+    path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
+    path('arrival-summary/', arrival_summary.arrival_summary_view, name='arrival_summary'),
+    path('arrival-summary/toggle/', arrival_summary.toggle_home_delivery, name='toggle_home_delivery'),
+    path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
 ]
 
 # Подключение медиа-файлов при DEBUG=True

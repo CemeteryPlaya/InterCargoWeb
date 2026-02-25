@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Склад ПВЗ</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            <i class="ri-building-2-line text-primary"></i>
+                            Склад ПВЗ
+                        </h1>
+                        {% if pickup_point %}
+                        <p class="text-gray-500 mt-1">{{ pickup_point }}</p>
+                        {% endif %}
+                    </div>
+
+                    {% if all_pickups %}
+                    <div>
+                        <select id="pickup-select" onchange="window.location.href='?pickup='+this.value"
+                            class="px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">-- Выберите ПВЗ --</option>
+                            {% for pp in all_pickups %}
+                            <option value="{{ pp.id }}" {% if pickup_point and pickup_point.id == pp.id %}selected{% endif %}>
+                                {{ pp }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if not pickup_point %}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <i class="ri-information-line text-yellow-500 text-3xl"></i>
+                    <p class="text-gray-600 mt-2">Выберите пункт выдачи для просмотра склада.</p>
+                </div>
+                {% elif not cells %}
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                    <i class="ri-inbox-line text-gray-400 text-4xl"></i>
+                    <p class="text-gray-500 mt-2">На складе нет товаров, ожидающих выдачи.</p>
+                </div>
+                {% else %}
+                <div class="mb-4 text-sm text-gray-500">
+                    Ячеек с товарами: <strong>{{ cells|length }}</strong>
+                </div>
+
+                <div class="grid gap-4">
+                    {% for item in cells %}
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
+                             onclick="toggleCell({{ item.cell.cell_number }})">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <span class="text-primary font-bold text-xl">{{ item.cell.cell_number }}</span>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">{{ item.cell.user.username }}</div>
+                                    {% if item.cell.user.get_full_name %}
+                                    <div class="text-sm text-gray-500">{{ item.cell.user.get_full_name }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-6 text-sm text-gray-600">
+                                <div class="text-center">
+                                    <div class="font-semibold text-gray-900">{{ item.track_count }}</div>
+                                    <div class="text-xs text-gray-400">посылок</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="font-semibold text-gray-900">{{ item.total_weight|floatformat:2 }} кг</div>
+                                    <div class="text-xs text-gray-400">вес</div>
+                                </div>
+                                <i class="ri-arrow-down-s-line text-xl text-gray-400 transition-transform" id="arrow-{{ item.cell.cell_number }}"></i>
+                            </div>
+                        </div>
+
+                        <div class="hidden border-t border-gray-100" id="cell-{{ item.cell.cell_number }}">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="text-left px-5 py-2 text-gray-500 font-medium">Трек-код</th>
+                                        <th class="text-left px-5 py-2 text-gray-500 font-medium">Описание</th>
+                                        <th class="text-right px-5 py-2 text-gray-500 font-medium">Вес</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for track in item.tracks %}
+                                    <tr class="border-t border-gray-50 hover:bg-gray-50">
+                                        <td class="px-5 py-2 font-mono text-gray-800">{{ track.track_code }}</td>
+                                        <td class="px-5 py-2 text-gray-600">{{ track.description|default:"-" }}</td>
+                                        <td class="px-5 py-2 text-right text-gray-800">{{ track.weight|default:"—"|floatformat:3 }} кг</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+    function toggleCell(cellNumber) {
+        var content = document.getElementById('cell-' + cellNumber);
+        var arrow = document.getElementById('arrow-' + cellNumber);
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            content.classList.add('hidden');
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+    </script>
+
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

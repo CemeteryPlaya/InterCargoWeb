@@ -25,7 +25,6 @@ urlpatterns = [
     # Service worker must be served from root scope
     path('sw.js', static_serve, {'document_root': settings.BASE_DIR / 'mainview' / 'static', 'path': 'sw.js'}, name='sw.js'),
     re_path(r"^mainview/", include('mainview.urls')),
-    path('auth/', include('django.contrib.auth.urls')),
     re_path(r"^register/", include('register.urls')),
     re_path(r"^profile/", include('myprofile.urls')),
     path('admin/', admin.site.urls),

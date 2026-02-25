@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
-    DeliveryHistory
+    DeliveryHistory, StorageCell
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -141,23 +141,23 @@ class UserPushSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(ExtraditionPackage)
 class ExtraditionPackageAdmin(admin.ModelAdmin):
-    list_display = ('barcode', 'user', 'is_issued', 'created_at', 'updated_at', 'track_codes_count')
+    list_display = ('barcode', 'user', 'is_issued', 'created_at', 'updated_at', 'receipts_count')
     list_filter = ('is_issued', 'created_at')
     search_fields = ('barcode', 'user__username')
     readonly_fields = ('barcode', 'created_at', 'updated_at')
-    filter_horizontal = ('track_codes',)
+    filter_horizontal = ('receipts',)
     date_hierarchy = 'created_at'
-    
-    def track_codes_count(self, obj):
-        return obj.track_codes.count()
-    track_codes_count.short_description = 'Количество трек-кодов'
-    
+
+    def receipts_count(self, obj):
+        return obj.receipts.count()
+    receipts_count.short_description = 'Количество чеков'
+
     fieldsets = (
         ('Основная информация', {
             'fields': ('barcode', 'user', 'is_issued')
         }),
-        ('Трек-коды', {
-            'fields': ('track_codes',)
+        ('Чеки', {
+            'fields': ('receipts',)
         }),
         ('Дополнительно', {
             'fields': ('comment', 'created_at', 'updated_at')
@@ -234,3 +234,9 @@ class ClientRegistryAdmin(admin.ModelAdmin):
     list_filter = ('registry_date', 'created_at')
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)
+
+@admin.register(StorageCell)
+class StorageCellAdmin(admin.ModelAdmin):
+    list_display = ('cell_number', 'pickup_point', 'user', 'created_at')
+    list_filter = ('pickup_point',)
+    search_fields = ('user__username', 'cell_number')

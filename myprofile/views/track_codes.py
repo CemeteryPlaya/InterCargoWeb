@@ -21,7 +21,7 @@ class TrackCodeForm(forms.ModelForm):
             }),
         }
 
-@login_required(login_url='login')
+@login_required
 def track_codes_view(request):
     if request.method == 'POST':
         track_code_str = request.POST.get('track_code', '').strip()
@@ -176,6 +176,34 @@ def unarchive_track_code(request, track_id):
     track.save()
     archived.delete()
     messages.success(request, "Трек-код восстановлен из архива.")
+    return redirect('track_codes')
+
+
+@login_required
+@require_POST
+def mass_archive_track_codes(request):
+    """Массовая архивация трек-кодов."""
+    track_ids = request.POST.getlist('track_ids')
+    if not track_ids:
+        messages.info(request, "Не выбрано ни одного трек-кода.")
+        return redirect('track_codes')
+
+    tracks = TrackCode.objects.filter(id__in=track_ids, owner=request.user)
+    count = 0
+    for track in tracks:
+        ArchivedTrackCode.objects.create(
+            track_code=track.track_code,
+            update_date=track.update_date,
+            status=track.status,
+            owner=track.owner,
+            description=track.description,
+            weight=track.weight,
+        )
+        track.delete()
+        count += 1
+
+    if count:
+        messages.success(request, f"В архив перемещено: {count} трек-кодов.")
     return redirect('track_codes')
 
 

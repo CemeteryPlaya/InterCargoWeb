@@ -5,7 +5,7 @@ from django.db import transaction
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.models import Extradition, ExtraditionPackage, Notification, ReceiptItem
+from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt
 from register.models import UserProfile
 
 
@@ -18,11 +18,11 @@ def _can_issue(user):
         return False
 
 
-@login_required(login_url='login')
+@login_required
 def extradition_view(request):
     """
     Оформление выдачи по штрихкоду пакета.
-    Вводится barcode пакета — создаётся Extradition и меняются статусы треков.
+    Проверяем оплату всех чеков, создаём Extradition и меняем статусы треков.
     """
     if not _can_issue(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
@@ -41,33 +41,27 @@ def extradition_view(request):
             messages.error(request, f"Пакет с штрихкодом '{barcode}' не найден.")
             return redirect('extradition')
 
-        # Проверяем, был ли пакет уже выдан
         if package.is_issued:
             messages.warning(request, f"Пакет '{barcode}' уже был выдан.")
             return redirect('extradition')
 
-        # Проверка оплаты перед выдачей
-        from myprofile.models import ReceiptItem
-        track_codes = package.track_codes.all()
-        is_paid = True
-        for track in track_codes:
-            receipt_item = ReceiptItem.objects.filter(track_code=track).first()
-            if not receipt_item or not receipt_item.receipt.is_paid:
-                is_paid = False
-                break
-        
-        if not is_paid:
+        # Проверка оплаты всех чеков
+        all_receipts = package.receipts.all()
+        if not all_receipts.exists():
+            messages.error(request, f"В пакете '{barcode}' нет чеков.")
+            return redirect('extradition')
+
+        unpaid = all_receipts.filter(is_paid=False)
+        if unpaid.exists():
             messages.error(request, f"Пакет '{barcode}' НЕ ОПЛАЧЕН! Выдача запрещена.")
             return redirect('extradition')
 
         with transaction.atomic():
-            # Получаем пункт выдачи из профиля пользователя
             try:
                 pickup_point_display = str(package.user.userprofile.pickup) if package.user.userprofile.pickup else "Не указан"
             except (UserProfile.DoesNotExist, AttributeError):
                 pickup_point_display = "Не указан"
-            
-            # Создаём выдачу
+
             extradition = Extradition.objects.create(
                 package=package,
                 user=package.user,
@@ -77,34 +71,33 @@ def extradition_view(request):
                 confirmed=True
             )
 
-            # Меняем статус всех трек-кодов пакета
-            track_codes = package.track_codes.all()
-            for track in track_codes:
-                track.status = 'claimed'
-                track.save()
+            # Меняем статус всех трек-кодов через чеки
+            for receipt in all_receipts:
+                for item in receipt.items.all():
+                    track = item.track_code
+                    track.status = 'claimed'
+                    track.save()
 
-                # Отправка уведомления владельцу трека
-                Notification.objects.create(
-                    user=track.owner,
-                    message=f"📦 Ваш трек {track.track_code} выдан в пункте: {extradition.pickup_point}. "
-                            f"Штрих-код выдачи: {package.barcode}"
-                )
+                    Notification.objects.create(
+                        user=track.owner,
+                        message=f"📦 Ваш трек {track.track_code} выдан в пункте: {extradition.pickup_point}. "
+                                f"Штрих-код выдачи: {package.barcode}"
+                    )
 
-            # Помечаем пакет как выданный
             package.is_issued = True
             package.save()
 
         messages.success(request, f"✅ Выдача пакета '{barcode}' оформлена успешно.")
         return redirect('extradition')
 
-    # GET — страница с формой
     return render(request, "extraditions.html")
+
 
 @login_required
 def search_package(request):
     """
     AJAX: Поиск пакета по штрихкоду.
-    Возвращает данные о пакете: владелец, пункт выдачи, статус оплаты.
+    Возвращает данные о пакете с чеками, сгруппированными по Receipt.
     """
     if not _can_issue(request.user):
         return JsonResponse({'error': 'Нет доступа'}, status=403)
@@ -116,28 +109,41 @@ def search_package(request):
     try:
         package = ExtraditionPackage.objects.get(barcode=barcode)
 
-        track_codes = package.track_codes.all()
-        is_paid = True
+        receipts = package.receipts.prefetch_related('items__track_code').all()
 
-        # Собираем данные по каждому треку: код, вес, стоимость
-        tracks_data = []
-        for track in track_codes:
-            receipt_item = ReceiptItem.objects.filter(track_code=track).select_related('receipt').first()
-            if not receipt_item or not receipt_item.receipt.is_paid:
-                is_paid = False
+        receipts_data = []
+        all_paid = True
 
-            weight = track.weight or Decimal("0")
-            try:
-                price_per_kg = receipt_item.receipt.price_per_kg if receipt_item else Decimal("0")
-            except Exception:
-                price_per_kg = Decimal("0")
-            track_price = int((weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+        for receipt in receipts:
+            items = receipt.items.all()
+            tracks_data = []
+            computed_weight = Decimal("0")
+            price_per_kg = receipt.price_per_kg if receipt.price_per_kg else Decimal("0")
+            for item in items:
+                track = item.track_code
+                weight = track.weight or Decimal("0")
+                track_price = int((weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+                computed_weight += weight
 
-            tracks_data.append({
-                'track_code': track.track_code,
-                'description': track.description or '',
-                'weight': float(weight),
-                'price': track_price,
+                tracks_data.append({
+                    'track_code': track.track_code,
+                    'description': track.description or '',
+                    'weight': float(weight),
+                    'price': track_price,
+                })
+
+            computed_price = int((computed_weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+            if not receipt.is_paid:
+                all_paid = False
+
+            receipts_data.append({
+                'receipt_id': receipt.id,
+                'created_at': receipt.created_at.strftime('%d.%m.%Y') if receipt.created_at else '',
+                'is_paid': receipt.is_paid,
+                'total_weight': float(computed_weight),
+                'total_price': computed_price,
+                'tracks': tracks_data,
             })
 
         # Получаем пункт выдачи
@@ -146,59 +152,49 @@ def search_package(request):
         except (UserProfile.DoesNotExist, AttributeError):
             pickup_point = "Не указан"
 
+        package_total = sum(r['total_price'] for r in receipts_data)
+
         return JsonResponse({
             'found': True,
             'barcode': package.barcode,
             'owner': package.user.username,
             'pickup_point': pickup_point,
-            'is_paid': is_paid,
+            'is_paid': all_paid,
             'is_issued': package.is_issued,
-            'tracks': tracks_data,
+            'receipts': receipts_data,
+            'package_total': package_total,
         })
 
     except ExtraditionPackage.DoesNotExist:
         return JsonResponse({'found': False, 'error': 'Пакет не найден'}, status=404)
 
+
 @login_required
 @require_POST
 def toggle_payment(request):
     """
-    AJAX: Переключение статуса оплаты для пакета.
-    Находит чеки, связанные с треками пакета, и помечает их как оплаченные.
+    AJAX: Переключение статуса оплаты для одного чека.
+    Принимает receipt_id, переключает is_paid.
     """
     if not _can_issue(request.user):
         return JsonResponse({'error': 'Нет доступа'}, status=403)
 
-    barcode = request.POST.get('barcode', '').strip()
-    if not barcode:
-        return JsonResponse({'error': 'Не указан штрихкод'}, status=400)
+    receipt_id = request.POST.get('receipt_id', '').strip()
+    if not receipt_id:
+        return JsonResponse({'error': 'Не указан ID чека'}, status=400)
 
     try:
-        package = ExtraditionPackage.objects.get(barcode=barcode)
-        track_codes = package.track_codes.all()
-        
-        if not track_codes.exists():
-             return JsonResponse({'error': 'В пакете нет треков'}, status=400)
+        receipt = Receipt.objects.get(id=receipt_id)
+        receipt.is_paid = not receipt.is_paid
+        receipt.save()
 
-        updated_receipts = 0
-        
-        with transaction.atomic():
-            for track in track_codes:
-                receipt_item = ReceiptItem.objects.filter(track_code=track).first()
-                if receipt_item:
-                    receipt = receipt_item.receipt
-                    if not receipt.is_paid:
-                        receipt.is_paid = True
-                        receipt.save()
-                        updated_receipts += 1
-        
         return JsonResponse({
             'success': True,
-            'message': f'Оплачено чеков: {updated_receipts}',
-            'is_paid': True
+            'receipt_id': receipt.id,
+            'is_paid': receipt.is_paid,
         })
 
-    except ExtraditionPackage.DoesNotExist:
-        return JsonResponse({'error': 'Пакет не найден'}, status=404)
+    except Receipt.DoesNotExist:
+        return JsonResponse({'error': 'Чек не найден'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

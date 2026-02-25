@@ -3,7 +3,7 @@ from django.shortcuts import render
 from myprofile.models import TrackCode
 from register.models import UserProfile
 
-@login_required(login_url='login')
+@login_required
 def profile(request):
     user = request.user
     try:
@@ -20,6 +20,14 @@ def profile(request):
     ready_count = TrackCode.objects.filter(owner=user, status='ready').count()
     claimed_count = TrackCode.objects.filter(owner=user, status='claimed').count()
 
+    missing_fields = []
+    if not user.last_name:
+        missing_fields.append('last_name')
+    if not user.first_name:
+        missing_fields.append('first_name')
+    if not user.email:
+        missing_fields.append('email')
+
     return render(request, 'profile.html', {
         'user': user,
         'profile': profile,
@@ -30,6 +38,7 @@ def profile(request):
         'delivered': delivered_count,
         'ready': ready_count,
         'claimed': claimed_count,
+        'missing_fields': missing_fields,
     })
 
 @login_required

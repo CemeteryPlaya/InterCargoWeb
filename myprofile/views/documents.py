@@ -28,13 +28,17 @@ def print_documents_view(request):
             pickup_point_ids = request.POST.getlist('pickup_points')
 
             if check_date_str and pickup_point_ids:
+                from django.db.models import Q
                 check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
 
+                # Обычные треки (без delivery_pickup) + треки с delivery_pickup в выбранных ПВЗ
                 tracks = TrackCode.objects.filter(
                     status__in=['ready', 'delivered'],
                     update_date=check_date,
-                    owner__userprofile__pickup_id__in=pickup_point_ids
-                ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup')
+                ).filter(
+                    Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
+                    Q(delivery_pickup_id__in=pickup_point_ids)
+                ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
 
                 clients_data = {}
                 default_price_per_kg = get_global_price_per_kg()
@@ -46,24 +50,31 @@ def print_documents_view(request):
 
                     username = owner.username
                     if username not in clients_data:
-                        try:
-                            profile = owner.userprofile
-                            address = str(profile.pickup) if profile.pickup else ''
-                        except (UserProfile.DoesNotExist, AttributeError):
-                            address = ''
+                        # Определяем адрес: delivery_pickup или обычный
+                        if track.delivery_pickup_id and track.delivery_pickup:
+                            address = str(track.delivery_pickup)
+                        else:
+                            try:
+                                profile = owner.userprofile
+                                address = str(profile.pickup) if profile.pickup else ''
+                            except (UserProfile.DoesNotExist, AttributeError):
+                                address = ''
+
+                        discount_per_kg = get_user_discount(owner)
+                        effective_rate = default_price_per_kg - discount_per_kg
 
                         clients_data[username] = {
                             'username': username,
                             'address': address,
                             'tracks': [],
                             'total_count': 0,
-                            'total_weight': 0,
-                            'total_sum': 0
+                            'total_weight': Decimal("0"),
+                            'total_sum': 0,
+                            'effective_rate': effective_rate,
                         }
 
                     weight = track.weight or Decimal("0")
-                    discount_per_kg = get_user_discount(owner)
-                    price_per_kg = default_price_per_kg - discount_per_kg
+                    price_per_kg = clients_data[username]['effective_rate']
                     price = _round_price(weight * price_per_kg)
 
                     clients_data[username]['tracks'].append({
@@ -73,8 +84,12 @@ def print_documents_view(request):
                     })
 
                     clients_data[username]['total_count'] += 1
-                    clients_data[username]['total_weight'] += float(weight)
-                    clients_data[username]['total_sum'] += price
+                    clients_data[username]['total_weight'] += weight
+
+                # Пересчитываем total_sum от общего веса (одно округление)
+                for client in clients_data.values():
+                    client['total_sum'] = _round_price(client['total_weight'] * client['effective_rate'])
+                    client['total_weight'] = float(client['total_weight'])
 
                 sorted_clients = sorted(clients_data.values(), key=lambda x: x['username'])
 
@@ -87,6 +102,7 @@ def print_documents_view(request):
         pickup_point_ids = request.POST.getlist('pickup_points')
 
         if registry_date_str and pickup_point_ids:
+            from django.db.models import Q
             registry = ClientRegistry.objects.create(
                 registry_date=registry_date_str,
                 pickup_points=pickup_point_ids
@@ -97,7 +113,9 @@ def print_documents_view(request):
             tracks = TrackCode.objects.filter(
                 status__in=['ready', 'delivered'],
                 update_date=registry_date,
-                owner__userprofile__pickup_id__in=pickup_point_ids
+            ).filter(
+                Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
+                Q(delivery_pickup_id__in=pickup_point_ids)
             )
 
             registry.track_codes.set(tracks)
@@ -121,59 +139,72 @@ def print_documents_view(request):
 def client_registry_pdf(request, registry_id):
     registry = get_object_or_404(ClientRegistry, id=registry_id)
 
-    tracks = registry.track_codes.all().select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup')
+    tracks = registry.track_codes.all().select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
     default_price_per_kg = get_global_price_per_kg()
 
     data = {}
+    user_rates = {}
 
     for track in tracks:
         owner = track.owner
         if not owner:
             continue
 
-        try:
-            profile = owner.userprofile
-            pickup_obj = profile.pickup
-            pickup_key = str(pickup_obj.id) if pickup_obj else 'unknown'
-            pickup_name = str(pickup_obj) if pickup_obj else 'Не указан'
-        except (UserProfile.DoesNotExist, AttributeError):
-            pickup_key = 'unknown'
-            pickup_name = 'Не указан'
+        # Используем delivery_pickup если задан, иначе обычный ПВЗ пользователя
+        if track.delivery_pickup_id and track.delivery_pickup:
+            pickup_obj = track.delivery_pickup
+        else:
+            try:
+                profile = owner.userprofile
+                pickup_obj = profile.pickup
+            except (UserProfile.DoesNotExist, AttributeError):
+                pickup_obj = None
+
+        pickup_key = str(pickup_obj.id) if pickup_obj else 'unknown'
+        pickup_name = str(pickup_obj) if pickup_obj else 'Не указан'
 
         if pickup_key not in data:
             data[pickup_key] = {
                 'name': pickup_name,
                 'clients': {},
                 'total_count': 0,
-                'total_weight': 0,
+                'total_weight': Decimal("0"),
                 'total_sum': 0
             }
 
         client_username = owner.username
 
+        if client_username not in user_rates:
+            discount_per_kg = get_user_discount(owner)
+            user_rates[client_username] = default_price_per_kg - discount_per_kg
+
         if client_username not in data[pickup_key]['clients']:
             data[pickup_key]['clients'][client_username] = {
                 'count': 0,
-                'weight': 0,
-                'sum': 0
+                'weight': Decimal("0"),
+                'sum': 0,
+                'effective_rate': user_rates[client_username],
             }
 
         weight = track.weight or Decimal("0")
-        discount_per_kg = get_user_discount(owner)
-        price_per_kg = default_price_per_kg - discount_per_kg
-        price = _round_price(weight * price_per_kg)
 
         client_data = data[pickup_key]['clients'][client_username]
         client_data['count'] += 1
-        client_data['weight'] += float(weight)
-        client_data['sum'] += price
+        client_data['weight'] += weight
 
         data[pickup_key]['total_count'] += 1
-        data[pickup_key]['total_weight'] += float(weight)
-        data[pickup_key]['total_sum'] += price
+        data[pickup_key]['total_weight'] += weight
 
+    # Пересчитываем суммы от общего веса (одно округление на клиента)
     for pickup_key in data:
-        data[pickup_key]['clients'] = dict(sorted(data[pickup_key]['clients'].items()))
+        pickup_data = data[pickup_key]
+        pickup_data['total_sum'] = 0
+        for client_username, client_data in pickup_data['clients'].items():
+            client_data['sum'] = _round_price(client_data['weight'] * client_data['effective_rate'])
+            client_data['weight'] = float(client_data['weight'])
+            pickup_data['total_sum'] += client_data['sum']
+        pickup_data['total_weight'] = float(pickup_data['total_weight'])
+        pickup_data['clients'] = dict(sorted(pickup_data['clients'].items()))
 
     all_clients_count = sum(item['total_count'] for item in data.values())
     all_weight_total = sum(item['total_weight'] for item in data.values())

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Сводка прихода</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}"/>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+                <i class="ri-file-list-3-line text-red-500"></i> Сводка прихода
+            </h2>
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="p-3 mb-2 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Выбор даты -->
+            <form method="get" class="flex items-center gap-3 mb-6">
+                <label for="date" class="font-medium text-gray-700">Дата:</label>
+                <input type="date" name="date" id="date" value="{{ selected_date }}"
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400">
+                <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
+                    Показать
+                </button>
+            </form>
+
+            {% if not pickups and not home_clients %}
+            <div class="text-center py-12 text-gray-500">
+                <i class="ri-inbox-line text-4xl mb-2"></i>
+                <p>Нет посылок со статусом "Доставлен на сортировочный склад" за эту дату</p>
+            </div>
+            {% else %}
+
+            <!-- Клиенты с доставкой на дом -->
+            {% if home_clients %}
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-orange-700 mb-3">
+                    <i class="ri-home-4-line"></i> Доставка на дом (Курьер)
+                </h3>
+                <div class="bg-white rounded-lg shadow border border-orange-200 overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-orange-50 text-gray-600 border-b border-orange-200">
+                                <th class="py-3 px-4 text-left font-medium">Клиент</th>
+                                <th class="py-3 px-4 text-left font-medium">Телефон</th>
+                                <th class="py-3 px-4 text-center font-medium">Посылок</th>
+                                <th class="py-3 px-4 text-right font-medium">Вес (кг)</th>
+                                <th class="py-3 px-4 text-right font-medium">Стоимость (₸)</th>
+                                <th class="py-3 px-4 text-center font-medium">Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for uid, client in home_clients.items %}
+                            <tr class="border-b border-gray-100 last:border-0">
+                                <td class="py-3 px-4 text-gray-800">
+                                    <i class="ri-user-line text-gray-400 mr-1"></i>
+                                    {{ client.full_name }}
+                                    <span class="text-xs text-gray-400">({{ client.username }})</span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    {% if client.phone %}
+                                    <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline">{{ client.phone }}</a>
+                                    {% else %}-{% endif %}
+                                </td>
+                                <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
+                                <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
+                                <td class="py-3 px-4 text-right font-medium">{{ client.total_price }}</td>
+                                <td class="py-3 px-4 text-center">
+                                    <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ uid }}">
+                                        <input type="hidden" name="date" value="{{ selected_date }}">
+                                        <input type="hidden" name="action" value="unset">
+                                        <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
+                                            <i class="ri-arrow-go-back-line"></i> Вернуть на ПВЗ
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- По пунктам выдачи -->
+            {% for pp_id, pp_data in pickups.items %}
+            <div class="mb-6">
+                <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer bg-white rounded-lg shadow border border-gray-200 px-4 py-3 hover:bg-gray-50 transition">
+                        <span class="font-semibold text-gray-800">
+                            <i class="ri-map-pin-line text-red-500 mr-1"></i> {{ pp_data.name }}
+                            {% if pp_data.is_override %}
+                            <span class="text-xs text-blue-600 ml-1">(перенаправлено)</span>
+                            {% endif %}
+                        </span>
+                        <span class="text-sm text-gray-500">
+                            {{ pp_data.clients|length }} клиентов
+                            <i class="ri-arrow-down-s-line ml-1 transition-transform group-open:rotate-180"></i>
+                        </span>
+                    </summary>
+                    <div class="mt-1 bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 border-b border-gray-200">
+                                    <th class="py-3 px-4 text-left font-medium">Клиент</th>
+                                    <th class="py-3 px-4 text-left font-medium">Телефон</th>
+                                    <th class="py-3 px-4 text-center font-medium">Посылок</th>
+                                    <th class="py-3 px-4 text-right font-medium">Вес (кг)</th>
+                                    <th class="py-3 px-4 text-right font-medium">Стоимость (₸)</th>
+                                    <th class="py-3 px-4 text-center font-medium">Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for uid, client in pp_data.clients.items %}
+                                <tr class="border-b border-gray-100 last:border-0">
+                                    <td class="py-3 px-4 text-gray-800">
+                                        <i class="ri-user-line text-gray-400 mr-1"></i>
+                                        {{ client.full_name }}
+                                        <span class="text-xs text-gray-400">({{ client.username }})</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        {% if client.phone %}
+                                        <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline">{{ client.phone }}</a>
+                                        {% else %}-{% endif %}
+                                    </td>
+                                    <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
+                                    <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
+                                    <td class="py-3 px-4 text-right font-medium">{{ client.total_price }}</td>
+                                    <td class="py-3 px-4 text-center flex gap-1 justify-center flex-wrap">
+                                        {% if client.is_override %}
+                                        <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ uid }}">
+                                            <input type="hidden" name="date" value="{{ selected_date }}">
+                                            <input type="hidden" name="action" value="unset">
+                                            <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
+                                                <i class="ri-arrow-go-back-line"></i> Вернуть на ПВЗ
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        {% if home_pp_id %}
+                                        <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ uid }}">
+                                            <input type="hidden" name="date" value="{{ selected_date }}">
+                                            <input type="hidden" name="action" value="home">
+                                            <button type="submit" class="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded hover:bg-orange-200 transition">
+                                                <i class="ri-home-4-line"></i> На дом
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        {% if warehouse_pp_id %}
+                                        <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ uid }}">
+                                            <input type="hidden" name="date" value="{{ selected_date }}">
+                                            <input type="hidden" name="action" value="warehouse">
+                                            <input type="hidden" name="pickup_id" value="{{ warehouse_pp_id }}">
+                                            <button type="submit" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition">
+                                                <i class="ri-building-line"></i> Со склада
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
+            {% endfor %}
+
+            {% endif %}
+        </main>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

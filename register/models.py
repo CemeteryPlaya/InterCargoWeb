@@ -8,6 +8,7 @@ class PickupPoint(models.Model):
     payment_link = models.URLField(blank=True, null=True, verbose_name="Ссылка на оплату")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     show_in_registration = models.BooleanField(default=True, verbose_name="Показывать в регистрации/футере")
+    is_home_delivery = models.BooleanField(default=False, verbose_name="Доставка на дом")
 
     class Meta:
         verbose_name = "Пункт выдачи"
@@ -27,6 +28,7 @@ class UserProfile(models.Model):
     is_hr = models.BooleanField(default=False)
     is_driver = models.BooleanField(default=False, verbose_name="Водитель")
     is_pp_worker = models.BooleanField(default=False, verbose_name="Работник ПВЗ")
+    profile_updated_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего изменения профиля")
 
     def __str__(self):
         return f"{self.user.username} — {self.phone}"
@@ -35,6 +37,7 @@ class UserProfile(models.Model):
 class PendingRegistration(models.Model):
     login = models.CharField(max_length=150)
     phone = models.CharField(max_length=20)
+    email = models.EmailField(blank=True, default='', verbose_name="Email")
     pickup = models.ForeignKey(
         PickupPoint, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ПВЗ"
     )
@@ -49,3 +52,32 @@ class PendingRegistration(models.Model):
 
     def __str__(self):
         return f"{self.login} ({self.phone})"
+
+
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_codes')
+    code = models.CharField(max_length=7, verbose_name="Код сброса")
+    created_at = models.DateTimeField(auto_now_add=True)
+    attempts = models.IntegerField(default=0, verbose_name="Попытки ввода")
+    is_used = models.BooleanField(default=False, verbose_name="Использован")
+
+    class Meta:
+        verbose_name = "Код сброса пароля"
+        verbose_name_plural = "Коды сброса пароля"
+
+    def __str__(self):
+        return f"{self.user.username} — {self.code}"
+
+
+class LoginAttempt(models.Model):
+    identifier = models.CharField(max_length=255, unique=True, verbose_name="Идентификатор")
+    attempts = models.IntegerField(default=0, verbose_name="Попытки")
+    locked_until = models.DateTimeField(null=True, blank=True, verbose_name="Заблокирован до")
+    last_attempt = models.DateTimeField(auto_now=True, verbose_name="Последняя попытка")
+
+    class Meta:
+        verbose_name = "Попытка входа"
+        verbose_name_plural = "Попытки входа"
+
+    def __str__(self):
+        return f"{self.identifier} — {self.attempts} попыток"

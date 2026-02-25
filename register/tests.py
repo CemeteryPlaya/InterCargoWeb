@@ -119,6 +119,7 @@ class RegistrationFlowTest(PickupPointMixin, TestCase):
             'login': 'brandnew',
             'password': 'securepass',
             'phone': '7008888888',
+            'email': 'brandnew@test.com',
             'pickup': str(self.pickup_point.id),
         })
         self.assertEqual(response.status_code, 302)
