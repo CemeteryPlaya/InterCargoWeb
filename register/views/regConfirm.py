@@ -24,7 +24,8 @@ def approve_registration(request, reg_id):
         username=reg.login,
         password=reg.password,
         first_name=reg.first_name,
-        last_name=reg.last_name
+        last_name=reg.last_name,
+        email=reg.email
     )
 
     UserProfile.objects.create(

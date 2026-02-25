@@ -21,12 +21,16 @@ document.addEventListener('DOMContentLoaded', function () {
             standardView.classList.add('hidden');
             tableView.classList.remove('hidden');
             trackCodesArea.removeAttribute('required');
+            ownerUsernamesArea.removeAttribute('required');
+            weightsArea.removeAttribute('required');
             syncToTable();
             formToggleBtn.innerHTML = '<i class="ri-file-text-line"></i> Переключить на текстовый вид';
         } else {
             standardView.classList.remove('hidden');
             tableView.classList.add('hidden');
             trackCodesArea.setAttribute('required', '');
+            ownerUsernamesArea.setAttribute('required', '');
+            weightsArea.setAttribute('required', '');
             syncFromTable();
             formToggleBtn.innerHTML = '<i class="ri-table-line"></i> Переключить на табличный вид';
         }
@@ -214,9 +218,21 @@ document.addEventListener('DOMContentLoaded', function () {
         tracksTableBody.appendChild(createRow());
     });
 
-    formEl.addEventListener('submit', function () {
+    formEl.addEventListener('submit', function (e) {
         if (isTableMode) {
             syncFromTable();
+            // Re-add required so empty form is still caught
+            trackCodesArea.setAttribute('required', '');
+            ownerUsernamesArea.setAttribute('required', '');
+            weightsArea.setAttribute('required', '');
+            // If the synced textareas are empty, block submit
+            if (!trackCodesArea.value.trim()) {
+                e.preventDefault();
+                alert('Заполните хотя бы один трек-код.');
+                trackCodesArea.removeAttribute('required');
+                ownerUsernamesArea.removeAttribute('required');
+                weightsArea.removeAttribute('required');
+            }
         }
     });
 });

@@ -1,22 +1,26 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const config = document.getElementById('extradition-config');
-    const searchUrl = config.dataset.searchUrl;
-    const toggleUrl = config.dataset.toggleUrl;
+    var config = document.getElementById('extradition-config');
+    var searchUrl = config.dataset.searchUrl;
+    var toggleUrl = config.dataset.toggleUrl;
 
-    const barcodeInput = document.getElementById('barcode');
-    const searchBtn = document.getElementById('searchBtn');
-    const packageInfo = document.getElementById('packageInfo');
-    const infoOwner = document.getElementById('infoOwner');
-    const infoPickup = document.getElementById('infoPickup');
-    const infoPaymentStatus = document.getElementById('infoPaymentStatus');
-    const paymentHint = document.getElementById('paymentHint');
-    const submitBtn = document.getElementById('submitBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const messagesContainer = document.getElementById('ajax-messages');
+    var barcodeInput = document.getElementById('barcode');
+    var searchBtn = document.getElementById('searchBtn');
+    var packageInfo = document.getElementById('packageInfo');
+    var infoOwner = document.getElementById('infoOwner');
+    var infoPickup = document.getElementById('infoPickup');
+    var infoPaymentStatus = document.getElementById('infoPaymentStatus');
+    var submitBtn = document.getElementById('submitBtn');
+    var clearBtn = document.getElementById('clearBtn');
+    var messagesContainer = document.getElementById('ajax-messages');
+    var receiptsContainer = document.getElementById('receiptsContainer');
+    var packageTotalBlock = document.getElementById('packageTotalBlock');
+    var packageTotalEl = document.getElementById('packageTotal');
+
+    var currentBarcode = '';
 
     function showMessage(text, type) {
         type = type || 'error';
-        const msgDiv = document.createElement('div');
+        var msgDiv = document.createElement('div');
         msgDiv.className = 'p-4 mb-3 rounded-lg text-sm font-medium ' + (type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800');
         msgDiv.textContent = text;
         messagesContainer.innerHTML = '';
@@ -27,13 +31,37 @@ document.addEventListener('DOMContentLoaded', function () {
     function clearForm() {
         barcodeInput.value = '';
         packageInfo.classList.add('hidden');
-        document.getElementById('receiptTable').classList.add('hidden');
-        document.getElementById('receiptBody').innerHTML = '';
-        submitBtn.disabled = true;
-        submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-        submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
-        infoPaymentStatus.onclick = null;
+        receiptsContainer.innerHTML = '';
+        packageTotalBlock.classList.add('hidden');
+        currentBarcode = '';
+        updateSubmitButton();
         messagesContainer.innerHTML = '';
+    }
+
+    function updateSubmitButton() {
+        var unpaidBadges = receiptsContainer.querySelectorAll('[data-paid="false"]');
+        var hasReceipts = receiptsContainer.querySelectorAll('.receipt-block').length > 0;
+
+        if (hasReceipts && unpaidBadges.length === 0) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            submitBtn.classList.add('bg-primary', 'hover:bg-red-600');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
+        }
+    }
+
+    function updateGlobalPaymentStatus() {
+        var unpaidBadges = receiptsContainer.querySelectorAll('[data-paid="false"]');
+        if (unpaidBadges.length === 0) {
+            infoPaymentStatus.textContent = 'Оплачено';
+            infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+        } else {
+            infoPaymentStatus.textContent = 'Не оплачено';
+            infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800';
+        }
     }
 
     clearBtn.onclick = clearForm;
@@ -63,101 +91,177 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(function (data) {
                 messagesContainer.innerHTML = '';
+                currentBarcode = data.barcode;
                 infoOwner.textContent = data.owner;
                 infoPickup.textContent = data.pickup_point;
-                updatePaymentUI(data.is_paid, data.barcode);
-                renderReceipt(data.tracks || []);
+                renderReceipts(data.receipts || []);
+                updateGlobalPaymentStatus();
+                updateSubmitButton();
+                // Показываем общую сумму пакета
+                if (data.package_total !== undefined) {
+                    packageTotalEl.textContent = data.package_total;
+                    packageTotalBlock.classList.remove('hidden');
+                }
                 packageInfo.classList.remove('hidden');
             })
             .catch(function (err) {
                 console.error(err);
                 packageInfo.classList.add('hidden');
-                submitBtn.disabled = true;
-                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
+                receiptsContainer.innerHTML = '';
+                updateSubmitButton();
                 showMessage(err.message);
             });
     }
 
-    function updatePaymentUI(isPaid, barcode) {
-        infoPaymentStatus.textContent = isPaid ? 'Оплачено' : 'Не оплачено';
+    function renderReceipts(receipts) {
+        receiptsContainer.innerHTML = '';
 
-        if (isPaid) {
-            infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-            paymentHint.classList.add('hidden');
-            infoPaymentStatus.onclick = null;
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-            submitBtn.classList.add('bg-primary', 'hover:bg-red-600');
-        } else {
-            infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
-            paymentHint.classList.remove('hidden');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-            submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
+        if (!receipts.length) return;
 
-            infoPaymentStatus.onclick = function () {
-                if (confirm('Отметить пакет как оплаченный?')) {
-                    togglePayment(barcode);
-                }
-            };
-        }
-    }
+        receipts.forEach(function (receipt) {
+            var block = document.createElement('div');
+            block.className = 'receipt-block border border-gray-200 rounded-lg mb-3 overflow-hidden';
 
-    function renderReceipt(tracks) {
-        var receiptTable = document.getElementById('receiptTable');
-        var receiptBody = document.getElementById('receiptBody');
-        var totalCount = document.getElementById('totalCount');
-        var totalWeight = document.getElementById('totalWeight');
-        var totalPrice = document.getElementById('totalPrice');
+            // Заголовок чека
+            var header = document.createElement('div');
+            header.className = 'flex items-center justify-between px-4 py-3 bg-gray-100 cursor-pointer hover:bg-gray-200 transition';
 
-        receiptBody.innerHTML = '';
+            var headerLeft = document.createElement('div');
+            headerLeft.className = 'flex items-center gap-3';
 
-        if (!tracks.length) {
-            receiptTable.classList.add('hidden');
-            return;
-        }
+            var chevron = document.createElement('i');
+            chevron.className = 'ri-arrow-down-s-line text-gray-500 transition-transform';
 
-        var sumWeight = 0;
-        var sumPrice = 0;
+            var title = document.createElement('span');
+            title.className = 'font-medium text-sm';
+            title.textContent = 'Чек #' + receipt.receipt_id + ' от ' + receipt.created_at;
 
-        tracks.forEach(function (t, i) {
-            var tr = document.createElement('tr');
-            tr.className = i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-            var cellClass = 'border border-gray-300 px-3 py-1.5';
+            var weightInfo = document.createElement('span');
+            weightInfo.className = 'text-xs text-gray-500';
+            weightInfo.textContent = receipt.total_weight.toFixed(3) + ' кг — ' + receipt.total_price + ' тг';
 
-            var td1 = document.createElement('td');
-            td1.className = cellClass;
-            td1.textContent = i + 1;
+            headerLeft.appendChild(chevron);
+            headerLeft.appendChild(title);
+            headerLeft.appendChild(weightInfo);
 
-            var td2 = document.createElement('td');
-            td2.className = cellClass + ' font-mono text-xs';
-            td2.textContent = t.track_code;
+            // Бейдж оплаты
+            var payBadge = document.createElement('span');
+            payBadge.setAttribute('data-receipt-id', receipt.receipt_id);
+            payBadge.setAttribute('data-paid', receipt.is_paid ? 'true' : 'false');
 
-            var td3 = document.createElement('td');
-            td3.className = cellClass + ' text-right';
-            td3.textContent = t.weight.toFixed(3);
+            if (receipt.is_paid) {
+                payBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                payBadge.textContent = 'Оплачено';
+            } else {
+                payBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
+                payBadge.textContent = 'Не оплачено';
+                payBadge.title = 'Нажмите, чтобы отметить как оплачено';
 
-            var td4 = document.createElement('td');
-            td4.className = cellClass + ' text-right';
-            td4.textContent = t.price;
+                payBadge.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (confirm('Отметить чек #' + receipt.receipt_id + ' как оплаченный?')) {
+                        togglePayment(receipt.receipt_id, payBadge);
+                    }
+                });
+            }
 
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tr.appendChild(td3);
-            tr.appendChild(td4);
-            receiptBody.appendChild(tr);
-            sumWeight += t.weight;
-            sumPrice += t.price;
+            header.appendChild(headerLeft);
+            header.appendChild(payBadge);
+
+            // Тело — таблица трек-кодов (по умолчанию скрыта)
+            var body = document.createElement('div');
+            body.className = 'hidden px-4 py-3';
+
+            header.addEventListener('click', function () {
+                body.classList.toggle('hidden');
+                chevron.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
+            });
+
+            if (receipt.tracks && receipt.tracks.length) {
+                var table = document.createElement('table');
+                table.className = 'w-full text-sm border-collapse';
+
+                var thead = document.createElement('thead');
+                var headRow = document.createElement('tr');
+                headRow.className = 'bg-gray-200 text-gray-700';
+
+                ['#', 'Трек-код', 'Вес (кг)', 'Стоимость (тг)'].forEach(function (text, i) {
+                    var th = document.createElement('th');
+                    th.className = 'border border-gray-300 px-3 py-2 ' + (i >= 2 ? 'text-right' : 'text-left');
+                    th.textContent = text;
+                    headRow.appendChild(th);
+                });
+
+                thead.appendChild(headRow);
+                table.appendChild(thead);
+
+                var tbody = document.createElement('tbody');
+                receipt.tracks.forEach(function (t, i) {
+                    var tr = document.createElement('tr');
+                    tr.className = i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    var cellClass = 'border border-gray-300 px-3 py-1.5';
+
+                    var td1 = document.createElement('td');
+                    td1.className = cellClass;
+                    td1.textContent = i + 1;
+
+                    var td2 = document.createElement('td');
+                    td2.className = cellClass + ' font-mono text-xs';
+                    td2.textContent = t.track_code;
+
+                    var td3 = document.createElement('td');
+                    td3.className = cellClass + ' text-right';
+                    td3.textContent = t.weight.toFixed(3);
+
+                    var td4 = document.createElement('td');
+                    td4.className = cellClass + ' text-right';
+                    td4.textContent = t.price;
+
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tr.appendChild(td3);
+                    tr.appendChild(td4);
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(tbody);
+
+                var tfoot = document.createElement('tfoot');
+                var footRow = document.createElement('tr');
+                footRow.className = 'bg-gray-100 font-semibold';
+
+                var fc1 = document.createElement('td');
+                fc1.className = 'border border-gray-300 px-3 py-2';
+
+                var fc2 = document.createElement('td');
+                fc2.className = 'border border-gray-300 px-3 py-2';
+                fc2.textContent = 'Итого: ' + receipt.tracks.length + ' шт.';
+
+                var fc3 = document.createElement('td');
+                fc3.className = 'border border-gray-300 px-3 py-2 text-right';
+                fc3.textContent = receipt.total_weight.toFixed(3);
+
+                var fc4 = document.createElement('td');
+                fc4.className = 'border border-gray-300 px-3 py-2 text-right';
+                fc4.textContent = receipt.total_price;
+
+                footRow.appendChild(fc1);
+                footRow.appendChild(fc2);
+                footRow.appendChild(fc3);
+                footRow.appendChild(fc4);
+                tfoot.appendChild(footRow);
+                table.appendChild(tfoot);
+
+                body.appendChild(table);
+            }
+
+            block.appendChild(header);
+            block.appendChild(body);
+            receiptsContainer.appendChild(block);
         });
-
-        totalCount.textContent = tracks.length;
-        totalWeight.textContent = sumWeight.toFixed(3);
-        totalPrice.textContent = sumPrice;
-        receiptTable.classList.remove('hidden');
     }
 
-    function togglePayment(barcode) {
+    function togglePayment(receiptId, badgeEl) {
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         fetch(toggleUrl, {
@@ -166,12 +270,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': csrfToken
             },
-            body: 'barcode=' + encodeURIComponent(barcode)
+            body: 'receipt_id=' + encodeURIComponent(receiptId)
         })
             .then(function (response) { return response.json(); })
             .then(function (data) {
                 if (data.success) {
-                    updatePaymentUI(true, barcode);
+                    badgeEl.setAttribute('data-paid', data.is_paid ? 'true' : 'false');
+                    if (data.is_paid) {
+                        badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                        badgeEl.textContent = 'Оплачено';
+                        badgeEl.style.cursor = '';
+                        badgeEl.title = '';
+                    } else {
+                        badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
+                        badgeEl.textContent = 'Не оплачено';
+                        badgeEl.title = 'Нажмите, чтобы отметить как оплачено';
+                    }
+                    updateGlobalPaymentStatus();
+                    updateSubmitButton();
                     showMessage('Статус оплаты обновлен', 'success');
                 } else {
                     showMessage('Ошибка: ' + (data.error || 'Не удалось обновить статус'));

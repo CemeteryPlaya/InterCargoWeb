@@ -120,8 +120,8 @@
               <div>
                 <h4 class="text-sm font-bold text-gray-800">Чек #{{ receipt.id }}</h4>
                 <p class="text-xs text-gray-500">{{ receipt.created_at|date:"d.m.Y" }}</p>
-                <p class="text-xs text-gray-600">Вес: {{ receipt.total_weight }} кг | Сумма:
-                  {{receipt.total_price|floatformat:0 }} ₸</p>
+                <p class="text-xs text-gray-600">Вес: {{ receipt.computed_weight }} кг | Сумма:
+                  {{ receipt.computed_price|floatformat:0 }} ₸</p>
               </div>
               <div class="flex items-center">
                 <span
@@ -170,8 +170,8 @@
                 <tfoot>
                   <tr class="bg-gray-50 font-semibold">
                     <td class="border border-gray-300 px-1 py-1">Итого</td>
-                    <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.total_weight }}</td>
-                    <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.total_price|floatformat:0 }}
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.computed_weight }}</td>
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.computed_price|floatformat:0 }}
                     </td>
                   </tr>
                 </tfoot>

@@ -48,7 +48,7 @@
       </div>
       {% endif %}
 
-      <!-- Переключатель: Логин / Телефон -->
+      <!-- Переключатель: Логин / Телефон / Email -->
       <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
         <button type="button" id="tab-login-method"
             class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
@@ -59,6 +59,11 @@
             class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
             onclick="switchLoginMethod('phone')">
             Телефон
+        </button>
+        <button type="button" id="tab-email-method"
+            class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
+            onclick="switchLoginMethod('email')">
+            Email
         </button>
       </div>
 
@@ -86,6 +91,9 @@
         <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
           Войти
         </button>
+        <div class="mt-3 text-center">
+          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">Забыли пароль?</a>
+        </div>
       </form>
 
       <!-- Форма входа по телефону -->
@@ -111,6 +119,37 @@
         <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
           Войти
         </button>
+        <div class="mt-3 text-center">
+          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">Забыли пароль?</a>
+        </div>
+      </form>
+
+      <!-- Форма входа по email -->
+      <form id="login-by-email" method="POST" action="{% url 'login' %}" class="hidden">
+        {% csrf_token %}
+        <div class="mb-6">
+          <label for="email-login" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <input type="email" id="email-login" name="email" required
+            class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+            placeholder="example@mail.com">
+        </div>
+        <div class="mb-6">
+          <label for="password-email" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+          <div class="relative">
+            <input type="password" id="password-email" name="password" required minlength="6"
+              class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
+              placeholder="Введите пароль">
+            <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+              <i class="ri-eye-off-line text-xl"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
+          Войти
+        </button>
+        <div class="mt-3 text-center">
+          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">Забыли пароль?</a>
+        </div>
       </form>
     </div>
   </div>
@@ -118,32 +157,40 @@
 
 <script>
 function switchLoginMethod(method) {
-    var loginForm = document.getElementById('login-by-login');
-    var phoneForm = document.getElementById('login-by-phone');
-    var tabLogin = document.getElementById('tab-login-method');
-    var tabPhone = document.getElementById('tab-phone-method');
+    var forms = {
+        login: document.getElementById('login-by-login'),
+        phone: document.getElementById('login-by-phone'),
+        email: document.getElementById('login-by-email')
+    };
+    var tabs = {
+        login: document.getElementById('tab-login-method'),
+        phone: document.getElementById('tab-phone-method'),
+        email: document.getElementById('tab-email-method')
+    };
 
-    if (method === 'phone') {
-        loginForm.classList.add('hidden');
-        phoneForm.classList.remove('hidden');
-        tabPhone.classList.add('bg-white', 'shadow-sm', 'text-gray-900');
-        tabPhone.classList.remove('text-gray-500');
-        tabLogin.classList.remove('bg-white', 'shadow-sm', 'text-gray-900');
-        tabLogin.classList.add('text-gray-500');
-        // Снимаем required с login формы, ставим на phone
-        loginForm.querySelectorAll('[required]').forEach(function(el) { el.removeAttribute('required'); });
-        phoneForm.querySelector('[name="phone"]').setAttribute('required', '');
-        phoneForm.querySelector('[name="password"]').setAttribute('required', '');
-    } else {
-        phoneForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-        tabLogin.classList.add('bg-white', 'shadow-sm', 'text-gray-900');
-        tabLogin.classList.remove('text-gray-500');
-        tabPhone.classList.remove('bg-white', 'shadow-sm', 'text-gray-900');
-        tabPhone.classList.add('text-gray-500');
-        phoneForm.querySelectorAll('[required]').forEach(function(el) { el.removeAttribute('required'); });
-        loginForm.querySelector('[name="login"]').setAttribute('required', '');
-        loginForm.querySelector('[name="password"]').setAttribute('required', '');
+    // Скрываем все формы, деактивируем табы
+    Object.keys(forms).forEach(function(key) {
+        forms[key].classList.add('hidden');
+        forms[key].querySelectorAll('[required]').forEach(function(el) { el.removeAttribute('required'); });
+        tabs[key].classList.remove('bg-white', 'shadow-sm', 'text-gray-900');
+        tabs[key].classList.add('text-gray-500');
+    });
+
+    // Показываем нужную форму
+    forms[method].classList.remove('hidden');
+    tabs[method].classList.add('bg-white', 'shadow-sm', 'text-gray-900');
+    tabs[method].classList.remove('text-gray-500');
+
+    // Ставим required на активную форму
+    if (method === 'login') {
+        forms.login.querySelector('[name="login"]').setAttribute('required', '');
+        forms.login.querySelector('[name="password"]').setAttribute('required', '');
+    } else if (method === 'phone') {
+        forms.phone.querySelector('[name="phone"]').setAttribute('required', '');
+        forms.phone.querySelector('[name="password"]').setAttribute('required', '');
+    } else if (method === 'email') {
+        forms.email.querySelector('[name="email"]').setAttribute('required', '');
+        forms.email.querySelector('[name="password"]').setAttribute('required', '');
     }
 }
 // Инициализация: активируем нужный таб

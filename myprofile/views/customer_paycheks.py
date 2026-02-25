@@ -5,7 +5,7 @@ from django.contrib import messages
 from collections import defaultdict
 from myprofile.models import TrackCode, Receipt, ReceiptItem
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.views.utils import get_user_discount, deactivate_temporary_discount, get_global_price_per_kg
+from myprofile.views.utils import get_user_discount, deactivate_temporary_discount, get_global_price_per_kg, create_receipts_for_user
 from register.models import UserProfile
 
 
@@ -26,56 +26,18 @@ def delivered_trackcodes_by_date(request):
     result = {}
     for date, tracks in sorted(grouped.items(), reverse=True):
         total_weight = sum(t.weight or Decimal("0") for t in tracks)
-        total_price = sum(t.price for t in tracks)
+        total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
         result[date] = {
             'tracks': tracks,
             'total_weight': round(total_weight, 2),
             'total_price': total_price
         }
 
-    # Автоматическое формирование чека
-    if delivered.exists():
-        already_in_receipt = ReceiptItem.objects.filter(track_code__in=delivered).values_list('track_code_id', flat=True)
-        new_tracks = delivered.exclude(id__in=already_in_receipt)
-
-        if new_tracks.exists():
-            total_weight = sum(t.weight or Decimal("0") for t in new_tracks)
-            total_price = sum(
-                ((t.weight or Decimal("0")) * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-                for t in new_tracks
-            )
-
-            # Получаем пункт выдачи из профиля пользователя
-            pickup_point = None
-            pickup_display = ''
-            payment_link = None
-            try:
-                profile = UserProfile.objects.get(user=request.user)
-                if profile.pickup:
-                    pickup_display = str(profile.pickup)
-                    payment_link = profile.pickup.payment_link
-            except UserProfile.DoesNotExist:
-                pass
-
-            # Создаём чек
-            receipt = Receipt.objects.create(
-                owner=request.user,
-                total_weight=round(total_weight, 2),
-                total_price=total_price,
-                price_per_kg=effective_rate,
-                is_paid=False,
-                pickup_point=pickup_display,
-                payment_link=payment_link
-            )
-
-            for track in new_tracks:
-                ReceiptItem.objects.create(receipt=receipt, track_code=track)
-
-            # После генерации деактивируем разовую скидку
-            deactivate_temporary_discount(request.user)
-
-            messages.success(request, f"Чек #{receipt.id} создан. Оплатите по ссылке ниже.")
-            return redirect('delivered_posts')
+    # Автоматическое формирование чека (fallback — если чек не был создан при take_delivery)
+    receipt = create_receipts_for_user(request.user, statuses=('delivered', 'shipping_pp', 'ready'))
+    if receipt:
+        messages.success(request, f"Чек #{receipt.id} создан. Оплатите по ссылке ниже.")
+        return redirect('delivered_posts')
 
     receipts = Receipt.objects.filter(owner=request.user).order_by('-created_at')
 
@@ -85,9 +47,8 @@ def delivered_trackcodes_by_date(request):
     effective_rate = RATE - discount_per_kg
 
     for receipt in receipts:
-        # pickup_point уже хранит строку-название
         receipt.display_pickup_point = receipt.pickup_point or ''
-        receipt.items_list = list(receipt.items.all())
+        receipt.items_list = list(receipt.items.select_related('track_code').all())
 
         # Определяем цену за кг для этого чека
         if receipt.price_per_kg > 0:
@@ -98,9 +59,15 @@ def delivered_trackcodes_by_date(request):
             else:
                 receipt_rate = effective_rate
 
+        # Пересчитываем итоги от актуальных items (а не хранимых значений)
+        computed_weight = Decimal("0")
         for item in receipt.items_list:
             weight = item.track_code.weight or Decimal("0")
             item.price = (weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            computed_weight += weight
+
+        receipt.computed_weight = computed_weight
+        receipt.computed_price = (computed_weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
 
     return render(request, 'delivered_posts.html', {
         'grouped_trackcodes': result,
@@ -122,21 +89,22 @@ def generate_daily_receipt(request):
     discount_per_kg = get_user_discount(request.user)
     effective_rate = RATE - discount_per_kg
 
-    total_weight = sum(track.weight or Decimal("0") for track in unbilled)
-    total_price = sum(
-        ((t.weight or Decimal("0")) * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-        for t in unbilled
-    )
-
     receipt = Receipt.objects.create(
         owner=request.user,
-        total_weight=round(total_weight, 2),
-        total_price=total_price,
+        total_weight=0,
+        total_price=0,
         price_per_kg=effective_rate
     )
 
-    for track in unbilled:
+    tracks_list = list(unbilled)
+    for track in tracks_list:
         ReceiptItem.objects.create(receipt=receipt, track_code=track)
+
+    total_weight = sum(track.weight or Decimal("0") for track in tracks_list)
+    total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    receipt.total_weight = total_weight
+    receipt.total_price = total_price
+    receipt.save()
 
     messages.success(request, f"Создан чек #{receipt.id} на сумму {receipt.total_price} тг.")
     return redirect('receipt_list')

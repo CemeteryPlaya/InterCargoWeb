@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - История приходов</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+    <style>
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] > summary .arrow-icon { transform: rotate(90deg); }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-8">
+            <div class="max-w-6xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="ri-archive-line text-primary"></i> История приходов
+                </h1>
+
+                {% if not hierarchy %}
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                    <i class="ri-inbox-line text-gray-400 text-4xl"></i>
+                    <p class="text-gray-500 mt-2">Нет данных о приходах.</p>
+                </div>
+                {% else %}
+
+                <div class="space-y-3">
+                {% for year, months in hierarchy.items %}
+                    <!-- Год -->
+                    <details class="border border-gray-300 rounded-lg bg-white shadow-sm" open>
+                        <summary class="cursor-pointer px-5 py-3 flex items-center gap-3 hover:bg-gray-50 transition font-bold text-lg text-gray-900">
+                            <i class="ri-arrow-right-s-line text-xl text-gray-400 arrow-icon transition-transform"></i>
+                            <i class="ri-calendar-line text-primary"></i>
+                            {{ year }}
+                        </summary>
+
+                        <div class="pl-4 pr-2 pb-3 space-y-2">
+                        {% for month_num, month_data in months.items %}
+                            <!-- Месяц -->
+                            <details class="border border-gray-200 rounded-lg ml-2">
+                                <summary class="cursor-pointer px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition font-semibold text-gray-800">
+                                    <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                                    <i class="ri-calendar-2-line text-blue-500"></i>
+                                    {{ month_data.name }}
+                                </summary>
+
+                                <div class="pl-4 pr-2 pb-2 space-y-2">
+                                {% for day_key, day_data in month_data.days.items %}
+                                    <!-- День -->
+                                    <details class="border border-gray-200 rounded-lg ml-2">
+                                        <summary class="cursor-pointer px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition font-medium text-gray-700">
+                                            <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                                            <i class="ri-calendar-event-line text-green-500"></i>
+                                            {{ day_key }}
+                                        </summary>
+
+                                        <div class="pl-4 pr-2 pb-2 space-y-2">
+                                        {% for pickup_key, clients in day_data.pickups.items %}
+                                            <!-- Пункт выдачи -->
+                                            <details class="border border-gray-200 rounded-lg ml-2 bg-gray-50">
+                                                <summary class="cursor-pointer px-4 py-2 flex items-center gap-3 hover:bg-gray-100 transition text-sm font-medium text-gray-700">
+                                                    <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                                                    <i class="ri-map-pin-line text-orange-500"></i>
+                                                    {{ pickup_key.1 }}
+                                                    <span class="text-xs text-gray-400 ml-auto">{{ clients|length }} клиентов</span>
+                                                </summary>
+
+                                                <div class="pl-4 pr-2 pb-2 space-y-2">
+                                                {% for client_id, client in clients.items %}
+                                                    <!-- Клиент -->
+                                                    <details class="border border-gray-200 rounded-lg ml-2 bg-white">
+                                                        <summary class="cursor-pointer px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition text-sm">
+                                                            <div class="flex items-center gap-3">
+                                                                <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                                                                <i class="ri-user-line text-purple-500"></i>
+                                                                <span class="font-medium">{{ client.username }}</span>
+                                                                {% if client.full_name != client.username %}
+                                                                <span class="text-gray-400 text-xs">({{ client.full_name }})</span>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="flex items-center gap-4 text-xs text-gray-500">
+                                                                <span>{{ client.tracks|length }} треков</span>
+                                                                <span>{{ client.total_weight }} кг</span>
+                                                            </div>
+                                                        </summary>
+
+                                                        <div class="px-4 pb-3 pt-2">
+                                                            <!-- Список трек-кодов -->
+                                                            <div class="mb-3">
+                                                                <p class="text-xs font-medium text-gray-500 mb-1">Трек-коды:</p>
+                                                                <div class="flex flex-wrap gap-1">
+                                                                    {% for track in client.tracks %}
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono
+                                                                        {% if track.status == 'delivered' %}bg-purple-100 text-purple-700
+                                                                        {% elif track.status == 'shipping_pp' %}bg-gray-200 text-gray-700
+                                                                        {% elif track.status == 'ready' %}bg-green-100 text-green-700
+                                                                        {% elif track.status == 'claimed' %}bg-blue-100 text-blue-700
+                                                                        {% endif %}">
+                                                                        {{ track.track_code }}
+                                                                        <span class="ml-1 text-gray-400">{{ track.weight|default:"—" }}кг</span>
+                                                                    </span>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Чеки клиента -->
+                                                            {% if client.receipts %}
+                                                            {% for rd in client.receipts %}
+                                                            <details class="border border-gray-200 rounded-lg overflow-hidden mb-2">
+                                                                <summary class="cursor-pointer px-3 py-2 bg-gray-100 hover:bg-gray-200 transition flex items-center justify-between text-xs">
+                                                                    <span class="font-medium">
+                                                                        <i class="ri-arrow-right-s-line text-gray-400 arrow-icon transition-transform"></i>
+                                                                        Чек #{{ rd.receipt.id }} от {{ rd.receipt.created_at|date:"d.m.Y" }}
+                                                                        — {{ rd.computed_weight }} кг, {{ rd.computed_price }} тг
+                                                                    </span>
+                                                                    {% if rd.receipt.is_paid %}
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Оплачен</span>
+                                                                    {% else %}
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>
+                                                                    {% endif %}
+                                                                </summary>
+                                                                <div class="px-3 py-2">
+                                                                    <table class="w-full text-xs border-collapse">
+                                                                        <thead>
+                                                                            <tr class="bg-gray-200 text-gray-700">
+                                                                                <th class="border border-gray-300 px-2 py-1 text-left">#</th>
+                                                                                <th class="border border-gray-300 px-2 py-1 text-left">Трек-код</th>
+                                                                                <th class="border border-gray-300 px-2 py-1 text-right">Вес (кг)</th>
+                                                                                <th class="border border-gray-300 px-2 py-1 text-right">Стоимость (тг)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {% for item in rd.items %}
+                                                                            <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
+                                                                                <td class="border border-gray-300 px-2 py-1">{{ forloop.counter }}</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 font-mono">{{ item.track_code.track_code }}</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ item.track_code.weight|default:"—" }}</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ item.price }}</td>
+                                                                            </tr>
+                                                                            {% endfor %}
+                                                                        </tbody>
+                                                                        <tfoot>
+                                                                            <tr class="bg-gray-100 font-semibold">
+                                                                                <td class="border border-gray-300 px-2 py-1" colspan="2">Итого: {{ rd.items|length }} шт.</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ rd.computed_weight }}</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ rd.computed_price }}</td>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </table>
+                                                                </div>
+                                                            </details>
+                                                            {% endfor %}
+                                                            {% else %}
+                                                            <p class="text-xs text-gray-400 italic">Чек ещё не сформирован</p>
+                                                            {% endif %}
+                                                        </div>
+                                                    </details>
+                                                {% endfor %}
+                                                </div>
+                                            </details>
+                                        {% endfor %}
+                                        </div>
+                                    </details>
+                                {% endfor %}
+                                </div>
+                            </details>
+                        {% endfor %}
+                        </div>
+                    </details>
+                {% endfor %}
+                </div>
+
+                {% endif %}
+            </div>
+        </main>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

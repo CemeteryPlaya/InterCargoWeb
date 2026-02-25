@@ -46,11 +46,11 @@ def continue_register(request):
     })
 
 
-def _render_registration(request, username, phone, pickup_id, first_name, last_name):
+def _render_registration(request, username, phone, pickup_id, first_name, last_name, email=''):
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
     return render(request, 'registration.html', {
         'login': username, 'phone': phone, 'selected_pickup': str(pickup_id),
-        'first_name': first_name, 'last_name': last_name,
+        'first_name': first_name, 'last_name': last_name, 'email': email,
         'pickup_points': pickup_points,
     })
 
@@ -60,41 +60,51 @@ def register_view(request):
         username = request.POST.get('login', '').upper()
         password = request.POST.get('password')
         phone = request.POST.get('phone')
+        email = request.POST.get('email', '').strip().lower()
         pickup_id = request.POST.get('pickup')
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
 
-        if not all([username, password, phone, pickup_id]):
+        if not all([username, password, phone, pickup_id, email]):
             messages.error(request, "Заполните все поля.")
-            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         # Проверка ПВЗ
         try:
             pickup_point = PickupPoint.objects.get(id=pickup_id, is_active=True)
         except (PickupPoint.DoesNotExist, ValueError):
             messages.error(request, "Выбранный пункт выдачи не найден.")
-            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Пользователь с таким логином уже существует.")
-            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if UserProfile.objects.filter(phone=phone).exists():
             messages.error(request, "Пользователь с таким номером телефона уже существует.")
-            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Пользователь с таким email уже существует.")
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if PendingRegistration.objects.filter(login=username).exists():
             messages.error(request, "Заявка с таким логином уже существует.")
-            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if PendingRegistration.objects.filter(phone=phone).exists():
             messages.error(request, "Заявка с таким номером телефона уже существует.")
-            return _render_registration(request, username, phone, pickup_id, first_name, last_name)
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
+
+        if PendingRegistration.objects.filter(email=email).exists():
+            messages.error(request, "Заявка с таким email уже существует.")
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         # Создаём заявку
         PendingRegistration.objects.create(
             login=username,
             phone=phone,
+            email=email,
             pickup=pickup_point,
             password=password,
             first_name=first_name,

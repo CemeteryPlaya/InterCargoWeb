@@ -46,6 +46,11 @@ class TrackCode(models.Model):
     )
     description = models.CharField(max_length=255, blank=True, verbose_name="О посылке")
     weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес посылки (кг)")
+    delivery_pickup = models.ForeignKey(
+        'register.PickupPoint', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='delivery_tracks',
+        verbose_name="Переопределённый ПВЗ доставки"
+    )
 
     def clean(self):
         """
@@ -244,10 +249,11 @@ class ExtraditionPackage(models.Model):
         verbose_name="Получатель"
     )
 
-    track_codes = models.ManyToManyField(
-        'TrackCode',
+    receipts = models.ManyToManyField(
+        'Receipt',
         related_name="extradition_packages",
-        verbose_name="Трек-коды"
+        verbose_name="Чеки",
+        blank=True
     )
 
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
@@ -300,6 +306,31 @@ class GlobalSettings(models.Model):
 
 
 
+
+
+class StorageCell(models.Model):
+    pickup_point = models.ForeignKey(
+        'register.PickupPoint',
+        on_delete=models.CASCADE,
+        related_name='storage_cells',
+        verbose_name="Пункт выдачи"
+    )
+    cell_number = models.PositiveIntegerField(verbose_name="Номер ячейки")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='storage_cells',
+        verbose_name="Клиент"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('pickup_point', 'cell_number'), ('pickup_point', 'user')]
+        verbose_name = "Ячейка хранения"
+        verbose_name_plural = "Ячейки хранения"
+
+    def __str__(self):
+        return f"Ячейка #{self.cell_number} — {self.user.username} ({self.pickup_point})"
 
 
 class DeliveryHistory(models.Model):

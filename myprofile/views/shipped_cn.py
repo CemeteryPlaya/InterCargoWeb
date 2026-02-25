@@ -37,7 +37,7 @@ def _parse_xlsx(file):
     return codes
 
 
-@login_required(login_url='login')
+@login_required
 def shipped_cn_view(request):
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
