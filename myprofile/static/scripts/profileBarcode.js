@@ -45,7 +45,17 @@
     var btn = document.getElementById('quickIssueBtn');
     if (btn) {
         var btnLabel = btn.dataset.label || 'Выдать';
-        btn.addEventListener('click', function() {
+        var readyCount = btn.dataset.readyCount || '0';
+
+        var confirmModal = document.getElementById('issue-confirm-modal');
+        var confirmBackdrop = document.getElementById('issue-confirm-backdrop');
+        var confirmText = document.getElementById('issue-confirm-text');
+        var confirmOk = document.getElementById('issue-confirm-ok');
+
+        function doIssue() {
+            confirmModal.classList.remove('flex');
+            confirmModal.classList.add('hidden');
+
             btn.disabled = true;
             btn.textContent = 'Создание...';
 
@@ -71,6 +81,18 @@
                 btn.disabled = false;
                 btn.innerHTML = '<i class="ri-hand-coin-line"></i> ' + btnLabel;
             });
+        }
+
+        btn.addEventListener('click', function() {
+            confirmText.textContent = 'Проверяйте количество ваших товаров на пункте выдачи, у вас их ' + readyCount;
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+        });
+
+        confirmOk.addEventListener('click', doIssue);
+        confirmBackdrop.addEventListener('click', function() {
+            confirmModal.classList.remove('flex');
+            confirmModal.classList.add('hidden');
         });
     }
 })();

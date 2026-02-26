@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from myprofile.models import TrackCode
-from register.models import UserProfile
+from register.models import UserProfile, PickupPoint
 
 @login_required
 def profile(request):
@@ -27,6 +27,13 @@ def profile(request):
         missing_fields.append('first_name')
     if not user.email:
         missing_fields.append('email')
+    if not profile or not profile.pickup:
+        missing_fields.append('pickup')
+
+    # Список ПВЗ для выпадающего списка (исключаем "Доставка на дом")
+    available_pickups = PickupPoint.objects.filter(
+        is_active=True, show_in_registration=True, is_home_delivery=False,
+    ).order_by('id')
 
     return render(request, 'profile.html', {
         'user': user,
@@ -39,6 +46,7 @@ def profile(request):
         'ready': ready_count,
         'claimed': claimed_count,
         'missing_fields': missing_fields,
+        'available_pickups': available_pickups,
     })
 
 @login_required
