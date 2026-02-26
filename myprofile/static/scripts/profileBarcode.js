@@ -1,0 +1,76 @@
+(function() {
+    var modal = document.getElementById('barcode-modal');
+    var backdrop = document.getElementById('barcode-backdrop');
+    var img = document.getElementById('barcode-modal-img');
+    var title = document.getElementById('barcode-modal-title');
+    var codeEl = document.getElementById('barcode-modal-code');
+    var closeBtn = document.getElementById('barcode-modal-close');
+    var copyBtn = document.getElementById('barcode-copy-btn');
+    var downloadLink = document.getElementById('barcode-download-link');
+
+    function openModal(barcodeText, imgData) {
+        title.textContent = 'Штрихкод ' + barcodeText;
+        codeEl.textContent = barcodeText;
+        img.src = imgData;
+        downloadLink.href = imgData;
+        downloadLink.setAttribute('download', barcodeText + '.png');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal() {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        img.src = '';
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    copyBtn.addEventListener('click', function() {
+        var text = codeEl.textContent || '';
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function() {
+            copyBtn.textContent = 'Скопировано!';
+            setTimeout(function() { copyBtn.textContent = 'Копировать код'; }, 1200);
+        }).catch(function() {
+            copyBtn.textContent = 'Ошибка';
+            setTimeout(function() { copyBtn.textContent = 'Копировать код'; }, 1200);
+        });
+    });
+
+    var btn = document.getElementById('quickIssueBtn');
+    if (btn) {
+        var btnLabel = btn.dataset.label || 'Выдать';
+        btn.addEventListener('click', function() {
+            btn.disabled = true;
+            btn.textContent = 'Создание...';
+
+            fetch(btn.dataset.url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': btn.dataset.csrf,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    openModal(data.barcode, data.barcode_base64);
+                } else {
+                    alert(data.error || 'Ошибка');
+                }
+            })
+            .catch(function() {
+                alert('Ошибка связи с сервером');
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-hand-coin-line"></i> ' + btnLabel;
+            });
+        });
+    }
+})();

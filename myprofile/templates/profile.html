@@ -8,7 +8,7 @@
     <title>Inter Cargo - Личный кабинет</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script>tailwind.config={theme:{extend:{colors:{primary:'#e53e3e',secondary:'#4a5568'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
     <script src="{% static 'scripts/core.js' %}"></script>
     <script src="{% static 'scripts/menu.js' %}"></script>
     <script src="{% static 'scripts/notifications.js' %}"></script>
@@ -80,7 +80,7 @@
             <div class="mt-4">
                 <button type="button" id="quickIssueBtn"
                     class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium"
-                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}">
+                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}" data-label="Выдать ({{ ready }})">
                     <i class="ri-hand-coin-line"></i> Выдать ({{ ready }})
                 </button>
             </div>
@@ -178,82 +178,6 @@
     </div>
 </div>
 
-<script>
-(function() {
-    var modal = document.getElementById('barcode-modal');
-    var backdrop = document.getElementById('barcode-backdrop');
-    var img = document.getElementById('barcode-modal-img');
-    var title = document.getElementById('barcode-modal-title');
-    var codeEl = document.getElementById('barcode-modal-code');
-    var closeBtn = document.getElementById('barcode-modal-close');
-    var copyBtn = document.getElementById('barcode-copy-btn');
-    var downloadLink = document.getElementById('barcode-download-link');
-
-    function openModal(barcodeText, imgData) {
-        title.textContent = 'Штрихкод ' + barcodeText;
-        codeEl.textContent = barcodeText;
-        img.src = imgData;
-        downloadLink.href = imgData;
-        downloadLink.setAttribute('download', barcodeText + '.png');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeModal() {
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-        img.src = '';
-    }
-
-    closeBtn.addEventListener('click', closeModal);
-    backdrop.addEventListener('click', closeModal);
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    copyBtn.addEventListener('click', function() {
-        var text = codeEl.textContent || '';
-        if (!text) return;
-        navigator.clipboard.writeText(text).then(function() {
-            copyBtn.textContent = 'Скопировано!';
-            setTimeout(function() { copyBtn.textContent = 'Копировать код'; }, 1200);
-        }).catch(function() {
-            copyBtn.textContent = 'Ошибка';
-            setTimeout(function() { copyBtn.textContent = 'Копировать код'; }, 1200);
-        });
-    });
-
-    var btn = document.getElementById('quickIssueBtn');
-    if (btn) {
-        btn.addEventListener('click', function() {
-            btn.disabled = true;
-            btn.textContent = 'Создание...';
-
-            fetch(btn.dataset.url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': btn.dataset.csrf,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-            .then(function(resp) { return resp.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    openModal(data.barcode, data.barcode_base64);
-                } else {
-                    alert(data.error || 'Ошибка');
-                }
-            })
-            .catch(function() {
-                alert('Ошибка связи с сервером');
-            })
-            .finally(function() {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="ri-hand-coin-line"></i> Выдать ({{ ready }})';
-            });
-        });
-    }
-})();
-</script>
+<script src="{% static 'scripts/profileBarcode.js' %}"></script>
 </body>
 </html>
