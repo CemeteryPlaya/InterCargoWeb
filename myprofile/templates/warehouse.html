@@ -8,7 +8,7 @@
     <title>Inter Cargo - Склад ПВЗ</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script>tailwind.config = { theme: { extend: { colors: { primary: '#e53e3e', secondary: '#4a5568' }, borderRadius: { 'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' } } } }</script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
     <script src="{% static 'scripts/core.js' %}"></script>
     <script src="{% static 'scripts/menu.js' %}"></script>
     <script src="{% static 'scripts/notifications.js' %}"></script>
@@ -126,19 +126,7 @@
         </main>
     </div>
 
-    <script>
-    function toggleCell(cellNumber) {
-        var content = document.getElementById('cell-' + cellNumber);
-        var arrow = document.getElementById('arrow-' + cellNumber);
-        if (content.classList.contains('hidden')) {
-            content.classList.remove('hidden');
-            arrow.style.transform = 'rotate(180deg)';
-        } else {
-            content.classList.add('hidden');
-            arrow.style.transform = 'rotate(0deg)';
-        }
-    }
-    </script>
+    <script src="{% static 'scripts/warehouse.js' %}"></script>
 
     {% endblock %}
 

@@ -8,16 +8,7 @@
     <title>Inter Cargo - Трек-коды</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { primary: '#e53e3e', secondary: '#4a5568' },
-                    borderRadius: { 'none': '0px', 'sm': '4px', 'DEFAULT': '8px', 'md': '12px', 'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px', 'full': '9999px', 'button': '8px' }
-                }
-            }
-        }
-    </script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
     <script src="{% static 'scripts/core.js' %}"></script>
     <script src="{% static 'scripts/menu.js' %}"></script>
     <script src="{% static 'scripts/trackFilter.js' %}"></script>
@@ -314,54 +305,7 @@
     {% endblock %}
 
     {% include 'includes/footer.html' %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var trackInput = document.getElementById('track-code-input');
-    var trackError = document.getElementById('track-code-error');
-    if (!trackInput) return;
-
-    // Блокируем ввод кириллицы — заменяем на пустоту при вводе
-    trackInput.addEventListener('input', function() {
-        var clean = this.value.replace(/[а-яА-ЯёЁ]/g, '');
-        if (clean !== this.value) {
-            this.value = clean;
-            trackError.textContent = 'Трек-код должен содержать только латинские буквы и цифры';
-        } else {
-            trackError.textContent = '';
-        }
-    });
-
-    // Валидация при отправке формы
-    var form = trackInput.closest('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            var val = trackInput.value.trim();
-            // Проверка: начинается на "2" + 5 цифр + "-" + цифра (формат 2*****-*)
-            if (/^2\d{5}-\d/.test(val)) {
-                e.preventDefault();
-                trackError.textContent = 'Неверный формат трек-кода. Код не должен начинаться с "2XXXXX-X"';
-                trackInput.focus();
-                return;
-            }
-            // Проверка: начинается с "№"
-            if (val.indexOf('№') !== -1) {
-                e.preventDefault();
-                trackError.textContent = 'Трек-код не должен содержать символ "№"';
-                trackInput.focus();
-                return;
-            }
-            // Проверка на кириллицу
-            if (/[а-яА-ЯёЁ]/.test(val)) {
-                e.preventDefault();
-                trackError.textContent = 'Трек-код должен содержать только латинские буквы и цифры';
-                trackInput.focus();
-                return;
-            }
-            trackError.textContent = '';
-        });
-    }
-});
-</script>
+<script src="{% static 'scripts/trackCodeValidation.js' %}"></script>
 </body>
 
 </html>
