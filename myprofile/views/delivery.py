@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Sum, Q, F
 from django.db import transaction
 from django.utils import timezone
 from django.core.mail import send_mail
@@ -66,33 +66,48 @@ def delivery_view(request):
     if not _is_driver(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
 
-    # Пункты с посылками в статусе 'delivered' (готовы к забору) — исключаем home delivery
+    # Пункты с посылками в статусе 'delivered' (готовы к забору)
+    # Учитываем как обычные треки (через профиль клиента), так и переопределённые (delivery_pickup)
     pending_pickups = (
         PickupPoint.objects
-        .filter(
-            is_active=True,
-            is_home_delivery=False,
-            userprofile__user__trackcode__status='delivered',
-            userprofile__user__trackcode__delivery_pickup__isnull=True,
+        .filter(is_active=True, is_home_delivery=False)
+        .annotate(
+            _normal_count=Count(
+                'userprofile__user__trackcode',
+                filter=Q(
+                    userprofile__user__trackcode__status='delivered',
+                    userprofile__user__trackcode__delivery_pickup__isnull=True,
+                ),
+            ),
+            _override_count=Count(
+                'delivery_tracks',
+                filter=Q(delivery_tracks__status='delivered'),
+            ),
         )
-        .annotate(track_count=Count('userprofile__user__trackcode'))
+        .annotate(track_count=F('_normal_count') + F('_override_count'))
         .filter(track_count__gt=0)
-        .distinct()
         .order_by('id')
     )
 
-    # Пункты с посылками в статусе 'shipping_pp' (в доставке) — исключаем home delivery
+    # Пункты с посылками в статусе 'shipping_pp' (в доставке)
     in_transit_pickups = (
         PickupPoint.objects
-        .filter(
-            is_active=True,
-            is_home_delivery=False,
-            userprofile__user__trackcode__status='shipping_pp',
-            userprofile__user__trackcode__delivery_pickup__isnull=True,
+        .filter(is_active=True, is_home_delivery=False)
+        .annotate(
+            _normal_count=Count(
+                'userprofile__user__trackcode',
+                filter=Q(
+                    userprofile__user__trackcode__status='shipping_pp',
+                    userprofile__user__trackcode__delivery_pickup__isnull=True,
+                ),
+            ),
+            _override_count=Count(
+                'delivery_tracks',
+                filter=Q(delivery_tracks__status='shipping_pp'),
+            ),
         )
-        .annotate(track_count=Count('userprofile__user__trackcode'))
+        .annotate(track_count=F('_normal_count') + F('_override_count'))
         .filter(track_count__gt=0)
-        .distinct()
         .order_by('id')
     )
 
@@ -161,7 +176,7 @@ def take_delivery(request):
     updated = 0
     notif_counts = defaultdict(int)
 
-    # Обычные ПВЗ
+    # Обычные ПВЗ (включая треки с delivery_pickup override)
     for pickup_id in pickup_ids:
         try:
             pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
@@ -169,9 +184,9 @@ def take_delivery(request):
             continue
 
         tracks = list(TrackCode.objects.filter(
+            Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+            Q(delivery_pickup=pickup),
             status='delivered',
-            owner__userprofile__pickup=pickup,
-            delivery_pickup__isnull=True,
         ))
 
         total_weight = sum(t.weight or 0 for t in tracks)
@@ -277,9 +292,9 @@ def complete_delivery(request):
             continue
 
         tracks = TrackCode.objects.filter(
+            Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+            Q(delivery_pickup=pickup),
             status='shipping_pp',
-            owner__userprofile__pickup=pickup,
-            delivery_pickup__isnull=True,
         )
 
         for track in tracks:
@@ -404,11 +419,12 @@ def driver_issue(request):
         # Создаём чеки если ещё нет
         receipt = create_receipts_for_user(client_user, statuses=('shipping_pp',))
 
-        # Находим все чеки для текущих треков
+        # Находим все чеки для текущих треков и помечаем как оплаченные
         track_ids = [t.id for t in tracks]
         receipts = Receipt.objects.filter(
             items__track_code_id__in=track_ids
         ).distinct()
+        receipts.update(is_paid=True)
 
         # Создаём пакет выдачи
         package = ExtraditionPackage.objects.create(user=client_user)
