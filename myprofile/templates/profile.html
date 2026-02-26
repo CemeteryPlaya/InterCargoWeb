@@ -80,7 +80,7 @@
             <div class="mt-4">
                 <button type="button" id="quickIssueBtn"
                     class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium"
-                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}" data-label="Выдать ({{ ready }})">
+                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}" data-label="Выдать ({{ ready }})" data-ready-count="{{ ready }}">
                     <i class="ri-hand-coin-line"></i> Выдать ({{ ready }})
                 </button>
             </div>
@@ -144,6 +144,18 @@
                     placeholder="example@mail.com">
             </div>
             {% endif %}
+            {% if 'pickup' in missing_fields %}
+            <div>
+                <label for="modal_pickup" class="block font-medium text-gray-700 mb-1">Пункт выдачи</label>
+                <select name="pickup" id="modal_pickup" required
+                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 bg-white">
+                    <option value="" disabled selected>Выберите пункт выдачи</option>
+                    {% for pp in available_pickups %}
+                    <option value="{{ pp.id }}">{{ pp.address }} — {{ pp.premise_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
             <input type="hidden" name="next" value="{% url 'profile' %}">
             <div class="flex justify-end">
                 <button type="submit" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition">
@@ -154,6 +166,18 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Модалка подтверждения выдачи -->
+<div id="issue-confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div id="issue-confirm-backdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4 z-10 text-center">
+        <i class="ri-error-warning-line text-yellow-500 text-4xl mb-3"></i>
+        <p class="text-gray-800 text-lg font-medium mb-6" id="issue-confirm-text"></p>
+        <button id="issue-confirm-ok" class="w-full bg-green-600 text-white text-lg font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition">
+            Окей
+        </button>
+    </div>
+</div>
 
 <!-- Модалка штрихкода -->
 <div id="barcode-modal" class="fixed inset-0 z-50 hidden items-center justify-center">

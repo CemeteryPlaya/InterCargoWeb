@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
-from register.models import UserProfile
+from register.models import UserProfile, PickupPoint
 
 EDIT_COOLDOWN_DAYS = 30
 
@@ -77,6 +77,16 @@ def update_profile(request):
         if phone != profile.phone:
             profile.phone = phone
             changed = True
+
+    pickup_id = request.POST.get('pickup')
+    if pickup_id:
+        try:
+            new_pickup = PickupPoint.objects.get(id=pickup_id, is_active=True, is_home_delivery=False)
+            if profile.pickup_id != new_pickup.id:
+                profile.pickup = new_pickup
+                changed = True
+        except PickupPoint.DoesNotExist:
+            pass
 
     user.save()
 
