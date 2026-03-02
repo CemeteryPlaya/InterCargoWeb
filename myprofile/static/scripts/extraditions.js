@@ -152,6 +152,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (receipt.is_paid) {
                 payBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
                 payBadge.textContent = 'Оплачено';
+                if (receipt.paid_at) {
+                    payBadge.title = receipt.paid_at;
+                }
             } else {
                 payBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
                 payBadge.textContent = 'Не оплачено';
@@ -159,9 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 payBadge.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    if (confirm('Отметить чек #' + receipt.receipt_id + ' как оплаченный?')) {
-                        togglePayment(receipt.receipt_id, payBadge);
-                    }
+                    showPaymentModal(receipt.receipt_id, payBadge);
                 });
             }
 
@@ -261,8 +262,46 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function togglePayment(receiptId, badgeEl) {
+    function showPaymentModal(receiptId, badgeEl) {
+        // Создаём модальное окно с выбором даты/времени оплаты
+        var overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center';
+        overlay.innerHTML =
+            '<div class="absolute inset-0 bg-black/50" id="pay-modal-backdrop"></div>' +
+            '<div class="relative bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4 z-10">' +
+                '<h3 class="text-lg font-semibold mb-4">Отметить оплату чека #' + receiptId + '</h3>' +
+                '<label class="block text-sm font-medium text-gray-700 mb-1">Дата и время оплаты</label>' +
+                '<input type="datetime-local" id="pay-modal-datetime" class="w-full border border-gray-300 rounded px-3 py-2 mb-4">' +
+                '<div class="flex gap-2 justify-end">' +
+                    '<button type="button" id="pay-modal-cancel" class="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 text-sm">Отмена</button>' +
+                    '<button type="button" id="pay-modal-confirm" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm">Подтвердить</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        // Устанавливаем текущую дату/время
+        var now = new Date();
+        var pad = function (n) { return n < 10 ? '0' + n : n; };
+        var dtInput = overlay.querySelector('#pay-modal-datetime');
+        dtInput.value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+            'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+
+        overlay.querySelector('#pay-modal-backdrop').onclick = function () { overlay.remove(); };
+        overlay.querySelector('#pay-modal-cancel').onclick = function () { overlay.remove(); };
+        overlay.querySelector('#pay-modal-confirm').onclick = function () {
+            var paidAt = dtInput.value;
+            overlay.remove();
+            togglePayment(receiptId, badgeEl, paidAt);
+        };
+    }
+
+    function togglePayment(receiptId, badgeEl, paidAt) {
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        var body = 'receipt_id=' + encodeURIComponent(receiptId);
+        if (paidAt) {
+            body += '&paid_at=' + encodeURIComponent(paidAt);
+        }
 
         fetch(toggleUrl, {
             method: 'POST',
@@ -270,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': csrfToken
             },
-            body: 'receipt_id=' + encodeURIComponent(receiptId)
+            body: body
         })
             .then(function (response) { return response.json(); })
             .then(function (data) {
@@ -280,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
                         badgeEl.textContent = 'Оплачено';
                         badgeEl.style.cursor = '';
-                        badgeEl.title = '';
+                        badgeEl.title = data.paid_at || '';
                     } else {
                         badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
                         badgeEl.textContent = 'Не оплачено';

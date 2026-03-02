@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from register.models import PendingRegistration, UserProfile, PickupPoint
-from myprofile.models import Notification
+from register.models import PendingRegistration, UserProfile, PickupPoint, TempUser
+from myprofile.models import Notification, TrackCode
 
 
 def pre_register(request):
@@ -65,7 +65,7 @@ def register_view(request):
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
 
-        if not all([username, password, phone, pickup_id, email]):
+        if not all([username, password, phone, pickup_id, email, first_name, last_name]):
             messages.error(request, "Заполните все поля.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
@@ -100,7 +100,31 @@ def register_view(request):
             messages.error(request, "Заявка с таким email уже существует.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
-        # Создаём заявку
+        # Проверяем наличие в TempUser — если есть, регистрируем сразу
+        temp_user = TempUser.objects.filter(login=username).first()
+        if temp_user:
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+            )
+            UserProfile.objects.create(
+                user=user,
+                phone=phone,
+                pickup=pickup_point,
+            )
+            # Переносим все треки с temp_owner на нового пользователя
+            TrackCode.objects.filter(temp_owner=temp_user).update(
+                owner=user, temp_owner=None
+            )
+            temp_user.delete()
+            request.session.pop('registration_data', None)
+            messages.success(request, "Регистрация прошла успешно! Вы можете войти в систему.")
+            return redirect('login')
+
+        # Создаём заявку на подтверждение HR
         PendingRegistration.objects.create(
             login=username,
             phone=phone,

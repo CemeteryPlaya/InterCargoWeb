@@ -30,6 +30,10 @@ class UserProfile(models.Model):
     is_pp_worker = models.BooleanField(default=False, verbose_name="Работник ПВЗ")
     profile_updated_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего изменения профиля")
 
+    class Meta:
+        verbose_name = "Профиль пользователя"
+        verbose_name_plural = "Профили пользователей"
+
     def __str__(self):
         return f"{self.user.username} — {self.phone}"
 
@@ -50,6 +54,10 @@ class PendingRegistration(models.Model):
     def pickup_name(self):
         return str(self.pickup) if self.pickup else ''
 
+    class Meta:
+        verbose_name = "Заявка на регистрацию"
+        verbose_name_plural = "Заявки на регистрацию"
+
     def __str__(self):
         return f"{self.login} ({self.phone})"
 
@@ -67,6 +75,22 @@ class PasswordResetCode(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.code}"
+
+
+class TempUser(models.Model):
+    """Временные пользователи — клиенты, на которых пришли посылки, но которые ещё не зарегистрированы."""
+    login = models.CharField(max_length=150, unique=True, verbose_name="Логин")
+    pickup = models.ForeignKey(
+        PickupPoint, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ПВЗ"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    class Meta:
+        verbose_name = "Временный пользователь"
+        verbose_name_plural = "Временные пользователи"
+
+    def __str__(self):
+        return self.login
 
 
 class LoginAttempt(models.Model):

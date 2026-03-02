@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Sum, Q, F
@@ -10,6 +10,7 @@ from django.core.mail import send_mail
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 from collections import defaultdict, OrderedDict
+import json
 import logging
 from myprofile.models import (
     TrackCode, Notification, DeliveryHistory,
@@ -164,10 +165,17 @@ def take_delivery(request):
     if not _is_driver(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
-    pickup_ids = request.POST.getlist('pickup_ids')
+    pickup_id = request.POST.get('pickup_id')
     home_client_ids = request.POST.getlist('home_client_ids')
 
-    if not pickup_ids and not home_client_ids:
+    # Получаем список отсканированных чеков (JSON)
+    scanned_raw = request.POST.get('scanned_receipts', '[]')
+    try:
+        scanned_receipts = json.loads(scanned_raw) if scanned_raw else []
+    except (json.JSONDecodeError, TypeError):
+        scanned_receipts = []
+
+    if not pickup_id and not home_client_ids:
         messages.error(request, "Выберите хотя бы один пункт выдачи или клиента.")
         return redirect('delivery')
 
@@ -176,38 +184,53 @@ def take_delivery(request):
     updated = 0
     notif_counts = defaultdict(int)
 
-    # Обычные ПВЗ (включая треки с delivery_pickup override)
-    for pickup_id in pickup_ids:
+    # Обычные ПВЗ — берём только треки привязанные к отсканированным чекам
+    if pickup_id:
         try:
             pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
         except PickupPoint.DoesNotExist:
-            continue
+            pickup = None
 
-        tracks = list(TrackCode.objects.filter(
-            Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-            Q(delivery_pickup=pickup),
-            status='delivered',
-        ))
-
-        total_weight = sum(t.weight or 0 for t in tracks)
-
-        for track in tracks:
-            track.status = 'shipping_pp'
-            track.update_date = today
-            track.save()
-            updated += 1
-            if track.owner:
-                notif_counts[track.owner] += 1
-
-        if tracks:
-            history = DeliveryHistory.objects.create(
-                driver=request.user,
-                pickup_point=pickup,
-                total_weight=total_weight,
-                taken_at=now,
-                delivered_at=None,
+        if pickup:
+            # Все треки этого ПВЗ в статусе 'delivered'
+            all_tracks = TrackCode.objects.filter(
+                Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+                Q(delivery_pickup=pickup),
+                status='delivered',
             )
-            history.track_codes.set(tracks)
+
+            if scanned_receipts:
+                # Находим track_id привязанные к отсканированным чекам
+                scanned_track_ids = set(
+                    ReceiptItem.objects.filter(
+                        receipt__receipt_number__in=scanned_receipts,
+                        track_code__in=all_tracks,
+                    ).values_list('track_code_id', flat=True)
+                )
+                tracks = list(all_tracks.filter(id__in=scanned_track_ids))
+            else:
+                # Нет чеков — берём все (fallback для треков без чеков)
+                tracks = list(all_tracks)
+
+            total_weight = sum(t.weight or 0 for t in tracks)
+
+            for track in tracks:
+                track.status = 'shipping_pp'
+                track.update_date = today
+                track.save()
+                updated += 1
+                if track.owner:
+                    notif_counts[track.owner] += 1
+
+            if tracks:
+                history = DeliveryHistory.objects.create(
+                    driver=request.user,
+                    pickup_point=pickup,
+                    total_weight=total_weight,
+                    taken_at=now,
+                    delivered_at=None,
+                )
+                history.track_codes.set(tracks)
 
     # Доставка на дом
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
@@ -455,3 +478,104 @@ def driver_issue(request):
 
     messages.success(request, f"Выдано клиенту {client_user.username}: {len(tracks)} посылок")
     return redirect('delivery')
+
+
+@login_required
+def get_pickup_receipts(request):
+    """AJAX: возвращает чеки ПВЗ, сгруппированные по клиентам."""
+    if not _is_driver(request.user):
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    pickup_id = request.GET.get('pickup_id')
+    if not pickup_id:
+        return JsonResponse({'clients': []})
+
+    try:
+        pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
+    except PickupPoint.DoesNotExist:
+        return JsonResponse({'clients': []})
+
+    # Находим треки этого ПВЗ в статусе 'delivered'
+    tracks = list(TrackCode.objects.filter(
+        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(delivery_pickup=pickup),
+        status='delivered',
+    ).select_related('owner'))
+
+    # Автосоздание чеков для треков в 'delivered', у которых ещё нет ReceiptItem
+    owners_seen = set()
+    for track in tracks:
+        if track.owner and track.owner_id not in owners_seen:
+            owners_seen.add(track.owner_id)
+            create_receipts_for_user(track.owner, statuses=('delivered',))
+
+    track_ids = [t.id for t in tracks]
+
+    # Находим чеки связанные с этими треками
+    items = (
+        ReceiptItem.objects
+        .filter(track_code_id__in=track_ids)
+        .select_related('receipt', 'receipt__owner', 'track_code')
+    )
+
+    # Группируем: клиент → список чеков
+    clients_map = {}  # username → { ... , receipts: { number → { tracks, weight } } }
+    for item in items:
+        receipt = item.receipt
+        owner = receipt.owner
+        username = owner.username
+
+        if username not in clients_map:
+            clients_map[username] = {
+                'username': username,
+                'full_name': owner.get_full_name() or username,
+                'receipts': {},
+            }
+
+        rn = receipt.receipt_number
+        if rn not in clients_map[username]['receipts']:
+            clients_map[username]['receipts'][rn] = {
+                'receipt_number': rn,
+                'track_count': 0,
+                'total_weight': 0,
+            }
+
+        clients_map[username]['receipts'][rn]['track_count'] += 1
+        clients_map[username]['receipts'][rn]['total_weight'] += float(item.track_code.weight or 0)
+
+    # Треки без чеков — считаем отдельно по клиентам
+    tracks_with_receipts = set(item.track_code_id for item in items)
+    for track in tracks:
+        if track.id not in tracks_with_receipts and track.owner:
+            username = track.owner.username
+            if username not in clients_map:
+                clients_map[username] = {
+                    'username': username,
+                    'full_name': track.owner.get_full_name() or username,
+                    'receipts': {},
+                }
+            # Помечаем как "без чека"
+            no_receipt_key = '__no_receipt__'
+            if no_receipt_key not in clients_map[username]['receipts']:
+                clients_map[username]['receipts'][no_receipt_key] = {
+                    'receipt_number': None,
+                    'track_count': 0,
+                    'total_weight': 0,
+                }
+            clients_map[username]['receipts'][no_receipt_key]['track_count'] += 1
+            clients_map[username]['receipts'][no_receipt_key]['total_weight'] += float(track.weight or 0)
+
+    # Преобразуем в список
+    result = []
+    for client in sorted(clients_map.values(), key=lambda c: c['username']):
+        result.append({
+            'username': client['username'],
+            'full_name': client['full_name'],
+            'receipts': sorted(
+                [r for r in client['receipts'].values() if r['receipt_number']],
+                key=lambda r: r['receipt_number'],
+            ),
+            'no_receipt_tracks': client['receipts'].get('__no_receipt__', {}).get('track_count', 0),
+        })
+
+    return JsonResponse({'clients': result})

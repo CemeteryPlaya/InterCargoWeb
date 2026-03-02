@@ -216,6 +216,9 @@
                     <p class="pr-24" :class="archiveMode ? 'pl-8' : ''"><strong>Код:</strong> {{ code.track_code }}</p>
                     <p><strong>Статус:</strong> {{ code.get_status_display }}</p>
                     <p><strong>Обновлено:</strong> {{ code.update_date }}</p>
+                    {% if code.sorting_location %}
+                    <p><strong>Где отсортирован:</strong> {{ code.sorting_location }}</p>
+                    {% endif %}
                     <div class="relative">
                         <p class="{% if code.status != 'shipping_pp' %}pr-12{% endif %}"><strong>Описание:</strong> <span x-text="'{{ code.description }}'">{{
                                 code.description }}</span></p>
@@ -305,7 +308,7 @@
     {% endblock %}
 
     {% include 'includes/footer.html' %}
-<script src="{% static 'scripts/trackCodeValidation.js' %}"></script>
+<script src="{% static 'scripts/trackCodeValidation.js' %}?v=2"></script>
 </body>
 
 </html>

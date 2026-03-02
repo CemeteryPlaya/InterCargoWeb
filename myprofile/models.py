@@ -9,6 +9,19 @@ from barcode.writer import ImageWriter
 import inspect
 from django.utils import timezone
 
+
+class SortingLocation(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Название")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    class Meta:
+        verbose_name = "Место сортировки"
+        verbose_name_plural = "Места сортировки"
+
+    def __str__(self):
+        return self.name
+
+
 class TrackCode(models.Model):
     STATUS_CHOICES = [
         ('no_owner', 'Нет владельца товара'),
@@ -50,6 +63,20 @@ class TrackCode(models.Model):
         'register.PickupPoint', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='delivery_tracks',
         verbose_name="Переопределённый ПВЗ доставки"
+    )
+    temp_owner = models.ForeignKey(
+        'register.TempUser', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='track_codes',
+        verbose_name="Временный владелец"
+    )
+    sorting_location = models.ForeignKey(
+        SortingLocation, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='track_codes',
+        verbose_name="Где отсортирован"
+    )
+    delivered_date = models.DateField(
+        null=True, blank=True,
+        verbose_name="Дата прихода на сорт. склад"
     )
 
     def clean(self):
@@ -98,6 +125,10 @@ class TrackCode(models.Model):
             self.full_clean()
         super().save(*args, **kwargs)
 
+    class Meta:
+        verbose_name = "Трек-код"
+        verbose_name_plural = "Трек-коды"
+
     def __str__(self):
         return f"{self.track_code} - {self.get_status_display()}"
 
@@ -119,6 +150,18 @@ class ArchivedTrackCode(models.Model):
         verbose_name = "Архивный трек-код"
         verbose_name_plural = "Архивные трек-коды"
 
+    @classmethod
+    def from_track(cls, track):
+        """Создаёт архивный трек-код из активного TrackCode."""
+        return cls.objects.create(
+            track_code=track.track_code,
+            update_date=track.update_date,
+            status=track.status,
+            owner=track.owner,
+            description=track.description,
+            weight=track.weight,
+        )
+
     def __str__(self):
         return f"{self.track_code} (архив)"
 
@@ -127,22 +170,46 @@ class Receipt(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
     created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
     total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
     price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")
-    
-    # 🏬 Пункт выдачи
+    receipt_number = models.CharField(max_length=20, unique=True, blank=True, verbose_name="Номер чека")
+
+    # Пункт выдачи
     pickup_point = models.CharField(max_length=255, blank=True, null=True, verbose_name="Пункт выдачи")
-    
-    # 💳 Ссылка на оплату (генерируется в зависимости от пункта)
+
+    # Ссылка на оплату (генерируется в зависимости от пункта)
     payment_link = models.URLField(blank=True, null=True, verbose_name="Ссылка на оплату")
 
+    class Meta:
+        verbose_name = "Чек"
+        verbose_name_plural = "Чеки"
+
+    def save(self, *args, **kwargs):
+        if not self.receipt_number:
+            self.receipt_number = f"IC-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+    def get_qr_base64(self):
+        """Генерирует QR-код из номера чека и возвращает base64-строку."""
+        import qrcode
+        qr = qrcode.make(self.receipt_number, box_size=4, border=1)
+        buffer = BytesIO()
+        qr.save(buffer, format='PNG')
+        encoded = base64.b64encode(buffer.getvalue()).decode()
+        return f"data:image/png;base64,{encoded}"
+
     def __str__(self):
-        return f"Чек #{self.id} от {self.created_at} — {'Оплачен' if self.is_paid else 'Не оплачен'}"
+        return f"Чек {self.receipt_number} от {self.created_at} — {'Оплачен' if self.is_paid else 'Не оплачен'}"
 
 class ReceiptItem(models.Model):
     receipt = models.ForeignKey(Receipt, related_name='items', on_delete=models.CASCADE)
     track_code = models.OneToOneField(TrackCode, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Позиция чека"
+        verbose_name_plural = "Позиции чеков"
 
     def __str__(self):
         return str(self.track_code)
@@ -153,9 +220,13 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False, verbose_name="Прочитано")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата")
 
+    class Meta:
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
+
     def __str__(self):
         return f"Уведомление для {self.user.username}: {self.message}"
-    
+
 class CustomerDiscount(models.Model):
     """Постоянная или разовая скидка в тенге за 1 кг"""
     user = models.ForeignKey(
@@ -174,13 +245,21 @@ class CustomerDiscount(models.Model):
     comment = models.CharField(max_length=255, blank=True, verbose_name="Комментарий")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Скидка клиента"
+        verbose_name_plural = "Скидки клиентов"
+
     def __str__(self):
         type_label = "Разовая" if self.is_temporary else "Постоянная"
         return f"{type_label} скидка {self.amount_per_kg} ₸/кг ({self.user.username})"
-    
+
 class UserPushSubscription(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     subscription_data = models.JSONField(default=dict, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Push-подписка"
+        verbose_name_plural = "Push-подписки"
 
 class Extradition(models.Model):
     package = models.OneToOneField(
@@ -260,6 +339,10 @@ class ExtraditionPackage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
     is_issued = models.BooleanField(default=False, verbose_name="Выдано клиенту")
+
+    class Meta:
+        verbose_name = "Пакет выдачи"
+        verbose_name_plural = "Пакеты выдачи"
 
     def save(self, *args, **kwargs):
         """Автоматически генерируем штрихкод, если он пустой."""
@@ -371,6 +454,31 @@ class DeliveryHistory(models.Model):
 
     def __str__(self):
         return f"{self.driver.get_full_name() or self.driver.username} → {self.pickup_point} ({self.taken_at.strftime('%d.%m.%Y')})"
+
+
+class PickupChangeRequest(models.Model):
+    """Заявка на смену пункта выдачи."""
+    STATUS_CHOICES = [
+        ('pending', 'На рассмотрении'),
+        ('approved', 'Одобрена'),
+        ('rejected', 'Отклонена'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pickup_change_requests', verbose_name="Пользователь")
+    current_pickup = models.ForeignKey('register.PickupPoint', on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name="Текущий ПВЗ")
+    requested_pickup = models.ForeignKey('register.PickupPoint', on_delete=models.CASCADE, related_name='+', verbose_name="Запрашиваемый ПВЗ")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Статус")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата заявки")
+    reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата рассмотрения")
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name="Рассмотрел")
+
+    class Meta:
+        verbose_name = "Заявка на смену ПВЗ"
+        verbose_name_plural = "Заявки на смену ПВЗ"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.current_pickup} → {self.requested_pickup} ({self.get_status_display()})"
 
 
 class ClientRegistry(models.Model):

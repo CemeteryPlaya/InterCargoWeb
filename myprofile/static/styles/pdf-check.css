@@ -18,6 +18,11 @@ body {
     page-break-after: always;
 }
 
+.check-header {
+    position: relative;
+    margin-bottom: 5px;
+}
+
 .logo {
     text-align: center;
     font-weight: 900;
@@ -25,6 +30,30 @@ body {
     margin-bottom: 5px;
     line-height: 0.9;
     text-transform: uppercase;
+}
+
+.qr-section {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 4px;
+}
+
+.qr-item {
+    text-align: center;
+}
+
+.qr-item img {
+    width: 60px;
+    height: 60px;
+}
+
+.qr-number {
+    display: block;
+    font-size: 7px;
+    color: #4a5568;
+    margin-top: 1px;
 }
 
 .logo span {

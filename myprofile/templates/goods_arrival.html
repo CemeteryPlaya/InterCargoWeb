@@ -40,13 +40,24 @@
             {% endif %}
 
             <form method="post" action="{% url 'goods_arrival' %}" id="goods_arrival_form"
-                  data-get-owner-url="{% url 'get_track_owner' %}">
+                  data-get-owner-url="{% url 'get_track_owner' %}"
+                  data-search-users-url="{% url 'search_users' %}">
                 {% csrf_token %}
 
                 <!-- Дата -->
                 <label for="update_date" class="block font-medium mb-1">Дата прихода</label>
                 <input type="date" name="update_date" id="update_date" required
                     class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+
+                <!-- Место сортировки -->
+                <label for="sorting_location" class="block font-medium mb-1">Где отсортирован</label>
+                <select name="sorting_location" id="sorting_location"
+                    class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4 bg-white">
+                    <option value="">— Не указано —</option>
+                    {% for loc in sorting_locations %}
+                    <option value="{{ loc.id }}">{{ loc.name }}</option>
+                    {% endfor %}
+                </select>
 
                 <!-- Кнопка переключения формы -->
                 <div class="mb-4">

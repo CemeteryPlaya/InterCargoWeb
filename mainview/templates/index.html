@@ -36,11 +36,19 @@
         <div class="container mx-auto px-4 relative z-10">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div class="md:w-1/2 mb-12 md:mb-0 text-white">
+                    {% if user.is_authenticated %}
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Добро пожаловать, {{ user.get_full_name|default:user.username }} !</h1>
+                    <p class="text-xl mb-8">Тариф: {{ price_per_kg }}₸/кг</p>
+                    <a href="{% url 'profile' %}"
+                        class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
+                        Личный кабинет
+                        <i class="ri-arrow-right-line ml-2"></i>
+                    </a>
+                    {% else %}
                     <div class="text-primary font-medium mb-2">КАЛЬКУЛЯТОР</div>
                     <h1 class="text-4xl md:text-5xl font-bold mb-6">Узнайте цену доставки груза из Китая в Казахстан
                     </h1>
                     <p class="text-xl mb-8">Тариф: {{ price_per_kg }}₸/кг</p>
-                    {% if not user.is_authenticated %}
                     <div class="flex flex-col space-y-3">
                         <a href="#registration"
                             class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">

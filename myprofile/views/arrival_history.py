@@ -4,15 +4,8 @@ from django.http import HttpResponseForbidden
 from collections import OrderedDict
 from decimal import Decimal, ROUND_HALF_UP
 from myprofile.models import TrackCode, Receipt, ReceiptItem
-from myprofile.views.utils import get_global_price_per_kg
+from myprofile.views.utils import get_global_price_per_kg, is_staff as _is_staff
 from register.models import UserProfile
-
-
-def _is_staff(user):
-    try:
-        return user.userprofile.is_staff
-    except UserProfile.DoesNotExist:
-        return False
 
 
 MONTH_NAMES = {

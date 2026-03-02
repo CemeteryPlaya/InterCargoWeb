@@ -84,7 +84,9 @@
                             — {{ receipt.computed_weight }} кг, {{ receipt.computed_price }} тг
                         </span>
                         {% if receipt.is_paid %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Оплачен</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Оплачен{% if receipt.paid_at %} {{ receipt.paid_at|date:"d.m.Y H:i" }}{% endif %}
+                            </span>
                         {% else %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>
                         {% endif %}

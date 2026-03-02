@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, PickupPoint
+from .models import UserProfile, PickupPoint, TempUser
 
 @admin.register(PickupPoint)
 class PickupPointAdmin(admin.ModelAdmin):
@@ -8,6 +8,13 @@ class PickupPointAdmin(admin.ModelAdmin):
     list_display_links = ('id',)
     search_fields = ('address', 'premise_name')
     list_filter = ('is_active', 'premise_name')
+
+@admin.register(TempUser)
+class TempUserAdmin(admin.ModelAdmin):
+    list_display = ('login', 'pickup', 'created_at')
+    search_fields = ('login',)
+    list_filter = ('pickup',)
+
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

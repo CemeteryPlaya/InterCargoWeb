@@ -147,14 +147,7 @@ def add_track_code_view(request):
 @require_POST
 def archive_track_code(request, track_id):
     track = get_object_or_404(TrackCode, id=track_id, owner=request.user)
-    ArchivedTrackCode.objects.create(
-        track_code=track.track_code,
-        update_date=track.update_date,
-        status=track.status,
-        owner=track.owner,
-        description=track.description,
-        weight=track.weight,
-    )
+    ArchivedTrackCode.from_track(track)
     track.delete()
     messages.success(request, "Трек-код перемещён в архив.")
     return redirect('track_codes')
@@ -191,14 +184,7 @@ def mass_archive_track_codes(request):
     tracks = TrackCode.objects.filter(id__in=track_ids, owner=request.user)
     count = 0
     for track in tracks:
-        ArchivedTrackCode.objects.create(
-            track_code=track.track_code,
-            update_date=track.update_date,
-            status=track.status,
-            owner=track.owner,
-            description=track.description,
-            weight=track.weight,
-        )
+        ArchivedTrackCode.from_track(track)
         track.delete()
         count += 1
 

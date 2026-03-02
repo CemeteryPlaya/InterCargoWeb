@@ -32,6 +32,9 @@
     <nav class="space-y-4 text-gray-700 flex-1 overflow-y-auto px-6 pb-6">
         {% if request.user.userprofile.is_staff or request.user.userprofile.is_pp_worker %}
         <!-- Для операторов и работников ПВЗ -->
+        <a href="{% url 'pp_acceptance' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-inbox-archive-line"></i> Приёмка товара
+        </a>
         <a href="{% url 'extradition' %}" class="flex items-center gap-2 hover:text-red-500">
             <i class="ri-mail-line"></i> Выдача посылок
         </a>
@@ -67,9 +70,12 @@
         </a>
         {% endif %}
         {% if request.user.userprofile.is_hr %}
-        <!-- Только для операторов -->
+        <!-- Только для HR -->
         <a href="{% url 'confirm' %}" class="flex items-center gap-2 hover:text-red-500">
             <i class="ri-admin-fill"></i> Подтверждение пользователей
+        </a>
+        <a href="{% url 'pickup_change_requests' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-exchange-line"></i> Заявки на смену ПВЗ
         </a>
         {% endif %}
         <!-- Общие разделы -->

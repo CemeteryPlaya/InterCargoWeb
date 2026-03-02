@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from register.models import PendingRegistration, UserProfile
+from register.models import PendingRegistration, UserProfile, TempUser
+from myprofile.models import TrackCode
 
 
 def confirm_view(request):
@@ -33,6 +34,14 @@ def approve_registration(request, reg_id):
         phone=reg.phone,
         pickup=reg.pickup
     )
+
+    # Переносим треки с temp_owner на нового пользователя
+    temp_user = TempUser.objects.filter(login=reg.login).first()
+    if temp_user:
+        TrackCode.objects.filter(temp_owner=temp_user).update(
+            owner=user, temp_owner=None
+        )
+        temp_user.delete()
 
     reg.delete()
     messages.success(request, "Пользователь успешно подтверждён.")

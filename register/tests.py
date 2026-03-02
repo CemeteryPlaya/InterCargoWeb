@@ -121,6 +121,8 @@ class RegistrationFlowTest(PickupPointMixin, TestCase):
             'phone': '7008888888',
             'email': 'brandnew@test.com',
             'pickup': str(self.pickup_point.id),
+            'first_name': 'Иван',
+            'last_name': 'Иванов',
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(PendingRegistration.objects.filter(login='BRANDNEW').exists())

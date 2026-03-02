@@ -2,20 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from myprofile.models import TrackCode, Notification
+from myprofile.models import TrackCode, SortingLocation
 from register.models import UserProfile
+from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
-
-
-def _is_staff(user):
-    try:
-        return user.userprofile.is_staff
-    except UserProfile.DoesNotExist:
-        return False
 
 
 @login_required
@@ -23,13 +16,24 @@ def goods_arrival_view(request):
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
 
+    sorting_locations = SortingLocation.objects.filter(is_active=True).order_by('id')
+
     if request.method != 'POST':
-        return render(request, "goods_arrival.html")
+        return render(request, "goods_arrival.html", {'sorting_locations': sorting_locations})
 
     update_date_str = request.POST.get('update_date')
     track_codes_raw = request.POST.get('track_codes', '').strip()
     usernames_raw = request.POST.get('owner_usernames', '').strip()
     weights_raw = request.POST.get('weights', '').strip()
+    sorting_location_id = request.POST.get('sorting_location')
+
+    # Определяем место сортировки
+    sorting_location = None
+    if sorting_location_id:
+        try:
+            sorting_location = SortingLocation.objects.get(id=sorting_location_id, is_active=True)
+        except SortingLocation.DoesNotExist:
+            pass
 
     if not update_date_str or not track_codes_raw:
         messages.error(request, "Заполните все обязательные поля.")
@@ -53,6 +57,7 @@ def goods_arrival_view(request):
     updated = 0
     created = 0
     partially_updated = 0
+    temp_created = 0
     errors = 0
     notif_counts = defaultdict(int)
 
@@ -65,16 +70,19 @@ def goods_arrival_view(request):
             if TrackCode.STATUS_ORDER.get(old_status, 0) >= TrackCode.STATUS_ORDER.get(status, 0):
                 try:
                     track.update_date = update_date
-                    user = User.objects.get(username=usernames[i])
-                    UserProfile.objects.get(user=user)
-                    track.owner = user
                     track.weight = Decimal(weights[i].replace(',', '.'))
-                    track.save(update_fields=['update_date', 'owner', 'weight'])
+                    user, temp_user = _resolve_owner(usernames[i])
+                    if user:
+                        track.owner = user
+                        track.temp_owner = None
+                    else:
+                        track.owner = None
+                        track.temp_owner = temp_user
+                    if sorting_location:
+                        track.sorting_location = sorting_location
+                    track.save(update_fields=['update_date', 'owner', 'temp_owner', 'weight', 'sorting_location'])
                     partially_updated += 1
                     messages.warning(request, f"Статус трек-кода {code} НЕ изменён (уже {track.get_status_display()}). Обновлены данные.")
-                except (User.DoesNotExist, UserProfile.DoesNotExist):
-                    messages.error(request, f"Пользователь '{usernames[i]}' не найден для трек-кода {code}.")
-                    errors += 1
                 except (InvalidOperation, ValueError):
                     messages.error(request, f"Неверный формат веса для трек-кода {code}.")
                     errors += 1
@@ -86,16 +94,20 @@ def goods_arrival_view(request):
             # Обновляем статус на delivered
             track.status = status
             track.update_date = update_date
+            track.delivered_date = update_date
 
             try:
-                user = User.objects.get(username=usernames[i])
-                UserProfile.objects.get(user=user)
-                track.owner = user
                 track.weight = Decimal(weights[i].replace(',', '.'))
-            except (User.DoesNotExist, UserProfile.DoesNotExist):
-                messages.error(request, f"Пользователь '{usernames[i]}' не найден для трек-кода {code}.")
-                errors += 1
-                continue
+                user, temp_user = _resolve_owner(usernames[i])
+                if user:
+                    track.owner = user
+                    track.temp_owner = None
+                else:
+                    track.owner = None
+                    track.temp_owner = temp_user
+                    temp_created += 1
+                if sorting_location:
+                    track.sorting_location = sorting_location
             except (InvalidOperation, ValueError):
                 messages.error(request, f"Неверный формат веса для трек-кода {code}.")
                 errors += 1
@@ -114,20 +126,23 @@ def goods_arrival_view(request):
         except TrackCode.DoesNotExist:
             # Создаём новый трек-код
             try:
-                user = User.objects.get(username=usernames[i])
-                UserProfile.objects.get(user=user)
+                weight = Decimal(weights[i].replace(',', '.'))
+                user, temp_user = _resolve_owner(usernames[i])
                 TrackCode.objects.create(
                     track_code=code,
                     status=status,
                     update_date=update_date,
+                    delivered_date=update_date,
                     owner=user,
-                    weight=Decimal(weights[i].replace(',', '.'))
+                    temp_owner=temp_user,
+                    weight=weight,
+                    sorting_location=sorting_location,
                 )
                 created += 1
-                notif_counts[user] += 1
-            except (User.DoesNotExist, UserProfile.DoesNotExist):
-                messages.error(request, f"Пользователь '{usernames[i]}' не найден для трек-кода {code}.")
-                errors += 1
+                if user:
+                    notif_counts[user] += 1
+                else:
+                    temp_created += 1
             except ValidationError as e:
                 messages.error(request, f"Не удалось создать трек-код {code}: {e}")
                 errors += 1
@@ -135,27 +150,9 @@ def goods_arrival_view(request):
                 messages.error(request, f"Неверный формат веса для трек-кода {code}.")
                 errors += 1
 
-    # Групповые уведомления
-    status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
-    for user, count in notif_counts.items():
-        if count == 1:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Ваш трек-код обновлён: {status_display}"
-            )
-        else:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Обновлено {count} трек-кодов: {status_display}"
-            )
-
-    if updated:
-        messages.success(request, f"Обновлено: {updated}")
-    if created:
-        messages.success(request, f"Создано новых: {created}")
-    if partially_updated:
-        messages.info(request, f"Частично обновлено (статус не изменён): {partially_updated}")
-    if errors:
-        messages.error(request, f"Ошибок: {errors}")
+    send_grouped_notifications(notif_counts, status)
+    add_bulk_result_messages(request, updated=updated, created=created,
+                              partially_updated=partially_updated,
+                              temp_created=temp_created, errors=errors)
 
     return redirect('goods_arrival')

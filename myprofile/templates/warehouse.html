@@ -103,7 +103,9 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="text-left px-5 py-2 text-gray-500 font-medium">Трек-код</th>
+                                        {% if not hide_description %}
                                         <th class="text-left px-5 py-2 text-gray-500 font-medium">Описание</th>
+                                        {% endif %}
                                         <th class="text-right px-5 py-2 text-gray-500 font-medium">Вес</th>
                                     </tr>
                                 </thead>
@@ -111,7 +113,9 @@
                                     {% for track in item.tracks %}
                                     <tr class="border-t border-gray-50 hover:bg-gray-50">
                                         <td class="px-5 py-2 font-mono text-gray-800">{{ track.track_code }}</td>
+                                        {% if not hide_description %}
                                         <td class="px-5 py-2 text-gray-600">{{ track.description|default:"-" }}</td>
+                                        {% endif %}
                                         <td class="px-5 py-2 text-right text-gray-800">{{ track.weight|default:"—"|floatformat:3 }} кг</td>
                                     </tr>
                                     {% endfor %}

@@ -16,13 +16,30 @@
     <!-- Основное меню (прокручиваемое) -->
     <nav class="flex-grow overflow-y-auto p-4 space-y-4 text-gray-700">
         {% if request.user.userprofile.is_staff or request.user.userprofile.is_pp_worker %}
+        <!-- Для операторов и работников ПВЗ -->
+        <a href="{% url 'pp_acceptance' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-inbox-archive-line"></i> Приёмка товара
+        </a>
         <a href="{% url 'extradition' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-mail-line"></i> Выдача посылок
         </a>
+        <a href="{% url 'warehouse' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-building-2-line"></i> Склад ПВЗ
+        </a>
         {% endif %}
         {% if request.user.userprofile.is_staff %}
+        <!-- Только для операторов -->
         <a href="{% url 'shipped_cn' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-flight-takeoff-line"></i> Отправлено из Китая
+        </a>
+        <a href="{% url 'goods_arrival' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-inbox-archive-line"></i> Приход товаров
+        </a>
+        <a href="{% url 'arrival_history' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-archive-line"></i> История приходов
+        </a>
+        <a href="{% url 'arrival_summary' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-file-list-3-line"></i> Сводка прихода
         </a>
         <a href="{% url 'admin:index' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-admin-line"></i> Панель администратора
@@ -31,21 +48,19 @@
             <i class="ri-printer-line"></i> Печать документов
         </a>
         {% endif %}
-        {% if request.user.is_superuser %}
-        <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-shield-user-line"></i> Панель персонала
-        </a>
-        {% endif %}
         {% if request.user.userprofile.is_driver %}
+        <!-- Только для водителей -->
         <a href="{% url 'delivery' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-truck-line"></i> Доставка
         </a>
         {% endif %}
         {% if request.user.userprofile.is_hr %}
+        <!-- Только для HR -->
         <a href="{% url 'confirm' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-admin-fill"></i> Подтверждение пользователей
         </a>
         {% endif %}
+        <!-- Общие разделы -->
         <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-barcode-line"></i> Трек-коды
         </a>
@@ -61,9 +76,9 @@
         <a href="{% url 'settings' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-settings-line"></i> Настройки
         </a>
-        {% if request.user.userprofile.is_staff %}
-        <a href="{% url 'goods_arrival' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
-            <i class="ri-inbox-archive-line"></i> Приход товаров
+        {% if request.user.is_superuser %}
+        <a href="{% url 'update_tracks' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-shield-user-line"></i> Панель персонала
         </a>
         {% endif %}
     </nav>

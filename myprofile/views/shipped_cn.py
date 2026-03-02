@@ -3,17 +3,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.utils import timezone
+from datetime import datetime
 from collections import defaultdict
-from myprofile.models import TrackCode, Notification
+from myprofile.models import TrackCode
 from register.models import UserProfile
-
-
-def _is_staff(user):
-    try:
-        return user.userprofile.is_staff
-    except UserProfile.DoesNotExist:
-        return False
+from myprofile.views.utils import is_staff as _is_staff, send_grouped_notifications, add_bulk_result_messages
 
 
 def _parse_xlsx(file):
@@ -54,7 +48,6 @@ def shipped_cn_view(request):
         return redirect('shipped_cn')
 
     try:
-        from datetime import datetime
         update_date = datetime.strptime(update_date_str, "%Y-%m-%d").date()
     except ValueError:
         messages.error(request, "Неверный формат даты.")
@@ -132,27 +125,8 @@ def shipped_cn_view(request):
                 messages.error(request, f"Не удалось создать трек-код {code}: {e}")
                 errors += 1
 
-    # Групповые уведомления
-    status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
-    for user, count in notif_counts.items():
-        if count == 1:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Ваш трек-код обновлён: {status_display}"
-            )
-        else:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Обновлено {count} трек-кодов: {status_display}"
-            )
-
-    if updated:
-        messages.success(request, f"Обновлено: {updated}")
-    if created:
-        messages.success(request, f"Создано новых: {created}")
-    if skipped:
-        messages.info(request, f"Пропущено (статус уже дальше): {skipped}")
-    if errors:
-        messages.error(request, f"Ошибок: {errors}")
+    send_grouped_notifications(notif_counts, status)
+    add_bulk_result_messages(request, updated=updated, created=created,
+                              skipped=skipped, errors=errors)
 
     return redirect('shipped_cn')

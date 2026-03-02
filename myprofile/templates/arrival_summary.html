@@ -54,7 +54,7 @@
                 </button>
             </form>
 
-            {% if not pickups and not home_clients %}
+            {% if not pickups and not home_clients and not temp_clients %}
             <div class="text-center py-12 text-gray-500">
                 <i class="ri-inbox-line text-4xl mb-2"></i>
                 <p>Нет посылок со статусом "Доставлен на сортировочный склад" за эту дату</p>
@@ -106,6 +106,56 @@
                                         </button>
                                     </form>
                                 </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Временные пользователи (без пункта) -->
+            {% if temp_clients %}
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-purple-700 mb-3">
+                    <i class="ri-user-unfollow-line"></i> Без пункта (незарегистрированные)
+                </h3>
+                <div class="bg-white rounded-lg shadow border border-purple-200 overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-purple-50 text-gray-600 border-b border-purple-200">
+                                <th class="py-3 px-4 text-left font-medium">Логин</th>
+                                <th class="py-3 px-4 text-left font-medium">Назначить ПВЗ</th>
+                                <th class="py-3 px-4 text-center font-medium">Посылок</th>
+                                <th class="py-3 px-4 text-right font-medium">Вес (кг)</th>
+                                <th class="py-3 px-4 text-right font-medium">Стоимость (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tid, client in temp_clients.items %}
+                            <tr class="border-b border-gray-100 last:border-0">
+                                <td class="py-3 px-4 text-gray-800">
+                                    <i class="ri-user-line text-purple-400 mr-1"></i>
+                                    {{ client.login }}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <form method="post" action="{% url 'assign_temp_pickup' %}" class="flex items-center gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="temp_user_id" value="{{ tid }}">
+                                        <input type="hidden" name="date" value="{{ selected_date }}">
+                                        <select name="pickup_id" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-purple-400">
+                                            {% for pp in all_pickups %}
+                                            <option value="{{ pp.id }}">{{ pp }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition">
+                                            <i class="ri-check-line"></i> Назначить
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
+                                <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
+                                <td class="py-3 px-4 text-right font-medium">{{ client.total_price }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

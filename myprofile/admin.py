@@ -2,11 +2,12 @@ from django.contrib import admin
 from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
-    DeliveryHistory, StorageCell
+    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest
 )
 from django import forms
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .forms import MassUpdateTrackForm
 
@@ -36,9 +37,9 @@ class TrackCodeAdminForm(forms.ModelForm):
 @admin.register(TrackCode)
 class TrackCodeAdmin(admin.ModelAdmin):
     form = TrackCodeAdminForm
-    list_display = ('id', 'track_code', 'owner', 'update_date', 'status', 'description', 'weight')
-    search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name')
-    list_filter = ('status', 'update_date')
+    list_display = ('id', 'track_code', 'owner', 'temp_owner', 'update_date', 'status', 'sorting_location', 'description', 'weight')
+    search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name', 'temp_owner__login')
+    list_filter = ('status', 'update_date', 'sorting_location')
     actions = ['update_status_action']
 
     def update_status_action(self, request, queryset):
@@ -67,6 +68,7 @@ class TrackCodeAdmin(admin.ModelAdmin):
                             if payment_status == 'paid':
                                 if not receipt.is_paid:
                                     receipt.is_paid = True
+                                    receipt.paid_at = timezone.now()
                                     receipt.save()
                                     receipts_updated += 1
                             elif payment_status == 'not_paid':
@@ -105,7 +107,7 @@ class TrackCodeAdmin(admin.ModelAdmin):
 
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display = ('id', 'owner', 'created_at', 'is_paid', 'total_weight', 'total_price')
+    list_display = ('id', 'owner', 'created_at', 'is_paid', 'paid_at', 'total_weight', 'total_price')
     list_filter = ('is_paid', 'created_at')
     search_fields = ('owner__username',)
 
@@ -240,3 +242,16 @@ class StorageCellAdmin(admin.ModelAdmin):
     list_display = ('cell_number', 'pickup_point', 'user', 'created_at')
     list_filter = ('pickup_point',)
     search_fields = ('user__username', 'cell_number')
+
+@admin.register(SortingLocation)
+class SortingLocationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'is_active')
+    list_editable = ('name', 'is_active')
+    list_display_links = ('id',)
+
+@admin.register(PickupChangeRequest)
+class PickupChangeRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'current_pickup', 'requested_pickup', 'status', 'created_at', 'reviewed_at', 'reviewed_by')
+    list_filter = ('status', 'created_at')
+    search_fields = ('user__username',)
+    readonly_fields = ('created_at',)
