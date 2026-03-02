@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const login = document.getElementById('login');
     const pickup = document.getElementById('pickup');
     const phone = document.getElementById('phone');
+    const firstName = document.getElementById('first_name');
+    const lastName = document.getElementById('last_name');
 
     confirm?.addEventListener('input', () => {
       confirm.classList.toggle('border-red-500', confirm.value !== password.value);
@@ -49,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     registrationForm.addEventListener('submit', e => {
       const raw = phone?.value.replace(/\D/g, '') || '';
       let msg = '';
+      if (!lastName || !lastName.value.trim()) msg += 'Введите фамилию.\n';
+      if (!firstName || !firstName.value.trim()) msg += 'Введите имя.\n';
       if (raw.length !== 11 || !raw.startsWith('7')) msg += 'Неверный телефон.\n';
       if (!login.value.trim()) msg += 'Введите логин.\n';
       if (!pickup.value) msg += 'Выберите пункт выдачи.\n';

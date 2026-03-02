@@ -2,10 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.utils import timezone
 from collections import defaultdict
 from myprofile.models import TrackCode, Receipt, ReceiptItem
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.views.utils import get_user_discount, deactivate_temporary_discount, get_global_price_per_kg, create_receipts_for_user
+from datetime import datetime
+from myprofile.views.utils import get_user_discount, deactivate_temporary_discount, get_global_price_per_kg, create_receipts_for_user, parse_paid_at
 from register.models import UserProfile
 
 
@@ -40,11 +42,6 @@ def delivered_trackcodes_by_date(request):
         return redirect('delivered_posts')
 
     receipts = Receipt.objects.filter(owner=request.user).order_by('-created_at')
-
-    # Добавляем цены к элементам чеков
-    RATE = get_global_price_per_kg()
-    discount_per_kg = get_user_discount(request.user)
-    effective_rate = RATE - discount_per_kg
 
     for receipt in receipts:
         receipt.display_pickup_point = receipt.pickup_point or ''
@@ -122,5 +119,6 @@ def pay_receipt(request, receipt_id):
     receipt = get_object_or_404(Receipt, id=receipt_id, owner=request.user)
     if not receipt.is_paid:
         receipt.is_paid = True
+        receipt.paid_at = parse_paid_at(request)
         receipt.save()
     return redirect('delivered_posts')

@@ -12,11 +12,21 @@
 <body>
     <button class="no-print" onclick="window.print()">Печать</button>
 
-    {% for client in clients %}
+    {% for check in checks %}
     <div class="check-container">
-        <div class="logo">
-            <span class="logo-red">INTER</span>
-            <span class="logo-black">CARGO<span class="logo-arrow">➜</span></span>
+        <div class="check-header">
+            <div class="logo">
+                <span class="logo-red">INTER</span>
+                <span class="logo-black">CARGO<span class="logo-arrow">➜</span></span>
+            </div>
+            {% if check.qr_image %}
+            <div class="qr-section">
+                <div class="qr-item">
+                    <img src="{{ check.qr_image }}" alt="QR {{ check.qr_number }}">
+                    <span class="qr-number">{{ check.qr_number }}</span>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <div class="header-row">
@@ -25,8 +35,8 @@
         </div>
 
         <div class="client-row">
-            <span>{{ client.username }}</span>
-            <span class="address">{{ client.address }}</span>
+            <span>{{ check.username }}</span>
+            <span class="address">{{ check.address }}</span>
         </div>
 
         <table>
@@ -39,7 +49,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for track in client.tracks %}
+                {% for track in check.tracks %}
                 <tr>
                     <td>{{ track.track_code }}</td>
                     <td>1</td>
@@ -53,9 +63,9 @@
         <div class="total-row">
             <span class="total-label">Итого</span>
             <div class="total-values">
-                <span class="total-count">{{ client.total_count }}</span>
-                <span class="total-weight">{{ client.total_weight|floatformat:3 }}</span>
-                <span class="total-sum">{{ client.total_sum|floatformat:0 }}</span>
+                <span class="total-count">{{ check.total_count }}</span>
+                <span class="total-weight">{{ check.total_weight|floatformat:3 }}</span>
+                <span class="total-sum">{{ check.total_sum|floatformat:0 }}</span>
             </div>
         </div>
     </div>

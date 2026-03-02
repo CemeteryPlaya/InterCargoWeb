@@ -8,19 +8,8 @@ from decimal import Decimal, ROUND_HALF_UP
 from collections import OrderedDict
 
 from myprofile.models import TrackCode
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount
-from register.models import UserProfile, PickupPoint
-
-
-def _is_staff(user):
-    try:
-        return user.userprofile.is_staff
-    except UserProfile.DoesNotExist:
-        return False
-
-
-def _round_price(value):
-    return int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, is_staff as _is_staff, round_price as _round_price
+from register.models import UserProfile, PickupPoint, TempUser
 
 
 @login_required
@@ -33,9 +22,9 @@ def arrival_summary_view(request):
         selected_date = timezone.now().date().isoformat()
 
     tracks = TrackCode.objects.filter(
-        status='delivered',
-        update_date=selected_date
-    ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
+        delivered_date=selected_date,
+        status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+    ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup', 'temp_owner')
 
     default_rate = get_global_price_per_kg()
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
@@ -43,9 +32,27 @@ def arrival_summary_view(request):
     # Группируем по ПВЗ → Клиент
     pickups = OrderedDict()  # pickup_id -> {name, clients: {user_id -> data}}
     home_clients = OrderedDict()  # user_id -> data (клиенты с доставкой на дом)
+    temp_clients = OrderedDict()  # temp_user_id -> data (временные пользователи без ПВЗ)
 
     for track in tracks:
         owner = track.owner
+
+        # Временный пользователь (без регистрации)
+        if not owner and track.temp_owner_id:
+            temp_user = track.temp_owner
+            tid = temp_user.id
+            if tid not in temp_clients:
+                temp_clients[tid] = {
+                    'login': temp_user.login,
+                    'track_count': 0,
+                    'total_weight': Decimal("0"),
+                    'effective_rate': default_rate,
+                    'total_price': 0,
+                }
+            temp_clients[tid]['track_count'] += 1
+            temp_clients[tid]['total_weight'] += track.weight or Decimal("0")
+            continue
+
         if not owner:
             continue
 
@@ -158,13 +165,22 @@ def arrival_summary_view(request):
         client['total_price'] = _round_price(client['total_weight'] * client['effective_rate'])
         client['total_weight'] = float(client['total_weight'])
 
+    for client in temp_clients.values():
+        client['total_price'] = _round_price(client['total_weight'] * client['effective_rate'])
+        client['total_weight'] = float(client['total_weight'])
+
     # ПВЗ "Со склада" (Акбулак 21, id=1)
     warehouse_pp = PickupPoint.objects.filter(id=1, is_active=True).first()
+
+    # Все активные ПВЗ для выпадающего списка (временным пользователям)
+    all_pickups = PickupPoint.objects.filter(is_active=True, is_home_delivery=False).order_by('id')
 
     return render(request, 'arrival_summary.html', {
         'selected_date': selected_date,
         'pickups': pickups,
         'home_clients': home_clients,
+        'temp_clients': temp_clients,
+        'all_pickups': all_pickups,
         'home_pp_id': home_pp.id if home_pp else None,
         'warehouse_pp_id': warehouse_pp.id if warehouse_pp else None,
     })
@@ -186,8 +202,8 @@ def toggle_home_delivery(request):
 
     tracks = TrackCode.objects.filter(
         owner_id=user_id,
-        status='delivered',
-        update_date=date,
+        delivered_date=date,
+        status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
     )
 
     if action == 'home':
@@ -212,5 +228,41 @@ def toggle_home_delivery(request):
     else:
         tracks.update(delivery_pickup=None)
         messages.success(request, "Клиент возвращён на свой ПВЗ.")
+
+    return redirect(f'/profile/arrival-summary/?date={date}')
+
+
+@login_required
+@require_POST
+def assign_temp_pickup(request):
+    """Назначает ПВЗ трекам временного пользователя."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    temp_user_id = request.POST.get('temp_user_id')
+    pickup_id = request.POST.get('pickup_id')
+    date = request.POST.get('date')
+
+    if not temp_user_id or not pickup_id or not date:
+        messages.error(request, "Недостаточно данных.")
+        return redirect('arrival_summary')
+
+    try:
+        pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
+    except PickupPoint.DoesNotExist:
+        messages.error(request, "Пункт выдачи не найден.")
+        return redirect(f'/profile/arrival-summary/?date={date}')
+
+    tracks = TrackCode.objects.filter(
+        temp_owner_id=temp_user_id,
+        delivered_date=date,
+        status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+    )
+    count = tracks.update(delivery_pickup=pickup)
+
+    if count:
+        messages.success(request, f"Назначен ПВЗ для {count} посылок: {pickup}")
+    else:
+        messages.info(request, "Нет посылок для назначения.")
 
     return redirect(f'/profile/arrival-summary/?date={date}')

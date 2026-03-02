@@ -1,16 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from myprofile.models import TrackCode, ClientRegistry, GlobalSettings
+from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem
 from register.models import UserProfile, PickupPoint
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount
-
-
-def _round_price(value):
-    """Округляет цену до целого числа по стандартным правилам (5-9 вверх)."""
-    return int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+from collections import defaultdict
+from django.db.models import Q
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, round_price as _round_price
 
 @login_required
 def print_documents_view(request):
@@ -28,81 +25,131 @@ def print_documents_view(request):
             pickup_point_ids = request.POST.getlist('pickup_points')
 
             if check_date_str and pickup_point_ids:
-                from django.db.models import Q
+
                 check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
 
-                # Обычные треки (без delivery_pickup) + треки с delivery_pickup в выбранных ПВЗ
+                # Треки, пришедшие на сорт. склад в выбранную дату (любой статус >= delivered)
                 tracks = TrackCode.objects.filter(
-                    status__in=['ready', 'delivered'],
-                    update_date=check_date,
+                    delivered_date=check_date,
+                    status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
                 ).filter(
                     Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
                     Q(delivery_pickup_id__in=pickup_point_ids)
                 ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
 
-                clients_data = {}
+                track_ids = [t.id for t in tracks]
+
+                # Находим все ReceiptItem для этих треков → группируем по Receipt
+                items = (
+                    ReceiptItem.objects
+                    .filter(track_code_id__in=track_ids)
+                    .select_related('receipt', 'receipt__owner', 'track_code',
+                                    'track_code__owner__userprofile__pickup', 'track_code__delivery_pickup')
+                )
+
+                # receipt_id → { receipt, tracks[] }
+                receipts_map = {}
+                tracks_with_receipt = set()
+                for item in items:
+                    r = item.receipt
+                    tracks_with_receipt.add(item.track_code_id)
+                    if r.id not in receipts_map:
+                        receipts_map[r.id] = {'receipt': r, 'tracks': []}
+                    receipts_map[r.id]['tracks'].append(item.track_code)
+
+                # Формируем список чеков для печати
+                checks = []
+                for entry in sorted(receipts_map.values(), key=lambda e: (e['receipt'].owner.username, e['receipt'].id)):
+                    receipt = entry['receipt']
+                    owner = receipt.owner
+                    receipt_tracks = entry['tracks']
+
+                    # Адрес
+                    if receipt.pickup_point:
+                        address = receipt.pickup_point
+                    else:
+                        try:
+                            address = str(owner.userprofile.pickup) if owner.userprofile.pickup else ''
+                        except (UserProfile.DoesNotExist, AttributeError):
+                            address = ''
+
+                    effective_rate = receipt.price_per_kg or get_global_price_per_kg()
+                    total_weight = Decimal("0")
+                    track_rows = []
+                    for track in receipt_tracks:
+                        weight = track.weight or Decimal("0")
+                        price = _round_price(weight * effective_rate)
+                        track_rows.append({
+                            'track_code': track.track_code,
+                            'weight': float(weight),
+                            'price': price,
+                        })
+                        total_weight += weight
+
+                    checks.append({
+                        'username': owner.username,
+                        'address': address,
+                        'tracks': track_rows,
+                        'total_count': len(track_rows),
+                        'total_weight': float(total_weight),
+                        'total_sum': _round_price(total_weight * effective_rate),
+                        'qr_number': receipt.receipt_number,
+                        'qr_image': receipt.get_qr_base64(),
+                    })
+
+                # Треки без чеков — группируем по клиенту (без QR)
                 default_price_per_kg = get_global_price_per_kg()
-
+                no_receipt_clients = {}
                 for track in tracks:
-                    owner = track.owner
-                    if not owner:
+                    if track.id in tracks_with_receipt or not track.owner:
                         continue
-
-                    username = owner.username
-                    if username not in clients_data:
-                        # Определяем адрес: delivery_pickup или обычный
+                    username = track.owner.username
+                    if username not in no_receipt_clients:
                         if track.delivery_pickup_id and track.delivery_pickup:
                             address = str(track.delivery_pickup)
                         else:
                             try:
-                                profile = owner.userprofile
-                                address = str(profile.pickup) if profile.pickup else ''
+                                address = str(track.owner.userprofile.pickup) if track.owner.userprofile.pickup else ''
                             except (UserProfile.DoesNotExist, AttributeError):
                                 address = ''
-
-                        discount_per_kg = get_user_discount(owner)
-                        effective_rate = default_price_per_kg - discount_per_kg
-
-                        clients_data[username] = {
+                        discount = get_user_discount(track.owner)
+                        no_receipt_clients[username] = {
                             'username': username,
                             'address': address,
                             'tracks': [],
-                            'total_count': 0,
                             'total_weight': Decimal("0"),
-                            'total_sum': 0,
-                            'effective_rate': effective_rate,
+                            'effective_rate': default_price_per_kg - discount,
                         }
-
                     weight = track.weight or Decimal("0")
-                    price_per_kg = clients_data[username]['effective_rate']
-                    price = _round_price(weight * price_per_kg)
-
-                    clients_data[username]['tracks'].append({
+                    rate = no_receipt_clients[username]['effective_rate']
+                    no_receipt_clients[username]['tracks'].append({
                         'track_code': track.track_code,
                         'weight': float(weight),
-                        'price': price
+                        'price': _round_price(weight * rate),
+                    })
+                    no_receipt_clients[username]['total_weight'] += weight
+
+                for client in sorted(no_receipt_clients.values(), key=lambda c: c['username']):
+                    checks.append({
+                        'username': client['username'],
+                        'address': client['address'],
+                        'tracks': client['tracks'],
+                        'total_count': len(client['tracks']),
+                        'total_weight': float(client['total_weight']),
+                        'total_sum': _round_price(client['total_weight'] * client['effective_rate']),
+                        'qr_number': None,
+                        'qr_image': None,
                     })
 
-                    clients_data[username]['total_count'] += 1
-                    clients_data[username]['total_weight'] += weight
-
-                # Пересчитываем total_sum от общего веса (одно округление)
-                for client in clients_data.values():
-                    client['total_sum'] = _round_price(client['total_weight'] * client['effective_rate'])
-                    client['total_weight'] = float(client['total_weight'])
-
-                sorted_clients = sorted(clients_data.values(), key=lambda x: x['username'])
-
                 return render(request, 'client_check_pdf.html', {
-                    'clients': sorted_clients,
-                    'date': check_date
+                    'checks': checks,
+                    'date': check_date,
                 })
 
         registry_date_str = request.POST.get('registry_date')
         pickup_point_ids = request.POST.getlist('pickup_points')
 
         if registry_date_str and pickup_point_ids:
-            from django.db.models import Q
             registry = ClientRegistry.objects.create(
                 registry_date=registry_date_str,
                 pickup_points=pickup_point_ids
@@ -111,8 +158,8 @@ def print_documents_view(request):
             registry_date = datetime.strptime(registry_date_str, '%Y-%m-%d').date()
 
             tracks = TrackCode.objects.filter(
-                status__in=['ready', 'delivered'],
-                update_date=registry_date,
+                delivered_date=registry_date,
+                status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
             ).filter(
                 Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
                 Q(delivery_pickup_id__in=pickup_point_ids)

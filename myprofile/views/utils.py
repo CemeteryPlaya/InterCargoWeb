@@ -1,7 +1,10 @@
 # utils.py
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell
-from register.models import UserProfile
+from django.contrib.auth.models import User
+from django.utils import timezone
+from django.contrib import messages as django_messages
+from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell, Notification
+from register.models import UserProfile, TempUser
 
 def get_user_discount(user):
     """Возвращает активную скидку (₸/кг) для пользователя."""
@@ -90,3 +93,75 @@ def get_or_create_storage_cell(pickup_point, user):
     number = (max_number or 0) + 1
 
     return StorageCell.objects.create(pickup_point=pickup_point, cell_number=number, user=user)
+
+
+def is_staff(user):
+    """Проверяет, является ли пользователь оператором."""
+    try:
+        return user.userprofile.is_staff
+    except UserProfile.DoesNotExist:
+        return False
+
+
+def round_price(value):
+    """Округляет цену до целого числа по стандартным правилам."""
+    return int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+
+def resolve_owner(username):
+    """
+    Ищет пользователя по логину. Возвращает (user, temp_user).
+    Если зарегистрирован — (user, None). Иначе создаёт/находит TempUser — (None, temp_user).
+    """
+    try:
+        user = User.objects.get(username=username)
+        UserProfile.objects.get(user=user)
+        return user, None
+    except (User.DoesNotExist, UserProfile.DoesNotExist):
+        temp_user, _ = TempUser.objects.get_or_create(login=username)
+        return None, temp_user
+
+
+def send_grouped_notifications(notif_counts, status):
+    """Отправляет групповые уведомления после обновления трек-кодов."""
+    status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
+    for user, count in notif_counts.items():
+        if count == 1:
+            Notification.objects.create(
+                user=user,
+                message=f"📦 Ваш трек-код обновлён: {status_display}"
+            )
+        else:
+            Notification.objects.create(
+                user=user,
+                message=f"📦 Обновлено {count} трек-кодов: {status_display}"
+            )
+
+
+def add_bulk_result_messages(request, updated=0, created=0, partially_updated=0,
+                              skipped=0, temp_created=0, errors=0):
+    """Добавляет стандартные сводные сообщения после массовой операции."""
+    if updated:
+        django_messages.success(request, f"Обновлено: {updated}")
+    if created:
+        django_messages.success(request, f"Создано новых: {created}")
+    if partially_updated:
+        django_messages.info(request, f"Частично обновлено (статус не изменён): {partially_updated}")
+    if skipped:
+        django_messages.info(request, f"Пропущено (статус уже дальше): {skipped}")
+    if temp_created:
+        django_messages.info(request, f"Временных пользователей создано: {temp_created}")
+    if errors:
+        django_messages.error(request, f"Ошибок: {errors}")
+
+
+def parse_paid_at(request):
+    """Парсит дату/время оплаты из POST. Возвращает datetime."""
+    from datetime import datetime
+    paid_at_str = request.POST.get('paid_at', '').strip()
+    if paid_at_str:
+        try:
+            return datetime.strptime(paid_at_str, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            return timezone.now()
+    return timezone.now()

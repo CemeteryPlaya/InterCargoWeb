@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Заявки на смену ПВЗ</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="ri-exchange-line text-primary"></i> Заявки на смену ПВЗ
+                </h1>
+
+                {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                    <div class="p-4 mb-3 rounded-lg text-sm font-medium
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800
+                        {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if requests %}
+                <div class="space-y-4">
+                    {% for req in requests %}
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                                <p class="font-semibold text-gray-900">{{ req.user.username }}
+                                    {% if req.user.get_full_name %}
+                                    <span class="text-gray-500 font-normal">({{ req.user.get_full_name }})</span>
+                                    {% endif %}
+                                </p>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    {{ req.current_pickup|default:"Не указан" }}
+                                    <i class="ri-arrow-right-line mx-1"></i>
+                                    <strong>{{ req.requested_pickup }}</strong>
+                                </p>
+                                <p class="text-xs text-gray-400 mt-1">{{ req.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <form method="post" action="{% url 'review_pickup_change' req.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition text-sm">
+                                        <i class="ri-check-line"></i> Одобрить
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'review_pickup_change' req.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
+                                        <i class="ri-close-line"></i> Отклонить
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                    <i class="ri-inbox-line text-gray-400 text-4xl"></i>
+                    <p class="text-gray-500 mt-2">Нет заявок на рассмотрении.</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

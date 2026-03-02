@@ -4,9 +4,12 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt
 from register.models import UserProfile
+from myprofile.views.utils import parse_paid_at
 
 
 def _can_issue(user):
@@ -57,16 +60,11 @@ def extradition_view(request):
             return redirect('extradition')
 
         with transaction.atomic():
-            try:
-                pickup_point_display = str(package.user.userprofile.pickup) if package.user.userprofile.pickup else "Не указан"
-            except (UserProfile.DoesNotExist, AttributeError):
-                pickup_point_display = "Не указан"
-
             extradition = Extradition.objects.create(
                 package=package,
                 user=package.user,
                 issued_by=request.user,
-                pickup_point=pickup_point_display,
+                pickup_point=package.pickup_point_display,
                 comment=comment,
                 confirmed=True
             )
@@ -141,16 +139,11 @@ def search_package(request):
                 'receipt_id': receipt.id,
                 'created_at': receipt.created_at.strftime('%d.%m.%Y') if receipt.created_at else '',
                 'is_paid': receipt.is_paid,
+                'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
                 'total_weight': float(computed_weight),
                 'total_price': computed_price,
                 'tracks': tracks_data,
             })
-
-        # Получаем пункт выдачи
-        try:
-            pickup_point = str(package.user.userprofile.pickup) if package.user.userprofile.pickup else "Не указан"
-        except (UserProfile.DoesNotExist, AttributeError):
-            pickup_point = "Не указан"
 
         package_total = sum(r['total_price'] for r in receipts_data)
 
@@ -158,7 +151,7 @@ def search_package(request):
             'found': True,
             'barcode': package.barcode,
             'owner': package.user.username,
-            'pickup_point': pickup_point,
+            'pickup_point': package.pickup_point_display,
             'is_paid': all_paid,
             'is_issued': package.is_issued,
             'receipts': receipts_data,
@@ -186,12 +179,19 @@ def toggle_payment(request):
     try:
         receipt = Receipt.objects.get(id=receipt_id)
         receipt.is_paid = not receipt.is_paid
+
+        if receipt.is_paid:
+            receipt.paid_at = parse_paid_at(request)
+        else:
+            receipt.paid_at = None
+
         receipt.save()
 
         return JsonResponse({
             'success': True,
             'receipt_id': receipt.id,
             'is_paid': receipt.is_paid,
+            'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
         })
 
     except Receipt.DoesNotExist:

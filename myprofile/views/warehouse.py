@@ -26,11 +26,14 @@ def warehouse_view(request):
     else:
         pickup_point = user_profile.pickup
 
+    is_pp_worker_only = user_profile.is_pp_worker and not user_profile.is_staff
+
     if not pickup_point:
         return render(request, "warehouse.html", {
             'pickup_point': None,
             'cells': [],
             'all_pickups': PickupPoint.objects.filter(is_active=True) if user_profile.is_staff else None,
+            'hide_description': is_pp_worker_only,
         })
 
     cells = StorageCell.objects.filter(pickup_point=pickup_point) \
@@ -57,4 +60,5 @@ def warehouse_view(request):
         'pickup_point': pickup_point,
         'cells': cells_data,
         'all_pickups': PickupPoint.objects.filter(is_active=True) if user_profile.is_staff else None,
+        'hide_description': is_pp_worker_only,
     })

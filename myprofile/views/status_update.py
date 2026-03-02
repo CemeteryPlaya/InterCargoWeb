@@ -4,8 +4,9 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from myprofile.models import TrackCode, Notification
+from myprofile.models import TrackCode
 from register.models import UserProfile
+from myprofile.views.utils import send_grouped_notifications, add_bulk_result_messages
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
@@ -81,6 +82,7 @@ def update_tracks(request):
 
             if status == 'delivered':
                 # для delivered требуется имя пользователя и вес
+                track.delivered_date = update_date
                 try:
                     user = User.objects.get(username=usernames[i])
                     UserProfile.objects.get(user=user)  # проверяем профиль
@@ -135,6 +137,7 @@ def update_tracks(request):
                         track_code=code,
                         status=status,
                         update_date=update_date,
+                        delivered_date=update_date,
                         owner=user,
                         weight=Decimal(weights[i].replace(',', '.'))
                     )
@@ -169,32 +172,49 @@ def update_tracks(request):
                     errors += 1
                     continue
 
-    # Групповые уведомления
-    status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
-    for user, count in notif_counts.items():
-        if count == 1:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Ваш трек-код обновлён: {status_display}"
-            )
-        else:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Обновлено {count} трек-кодов: {status_display}"
-            )
-
-    if updated:
-        messages.success(request, f"Обновлено: {updated}")
-    if created:
-        messages.success(request, f"Создано новых: {created}")
-    if partially_updated:
-        messages.info(request, f"Частично обновлено (статус не изменён): {partially_updated}")
-    if skipped:
-        messages.info(request, f"Пропущено: {skipped}")
-    if errors:
-        messages.error(request, f"Ошибок: {errors}")
+    send_grouped_notifications(notif_counts, status)
+    add_bulk_result_messages(request, updated=updated, created=created,
+                              partially_updated=partially_updated,
+                              skipped=skipped, errors=errors)
 
     return redirect('update_tracks')
+
+@login_required
+def search_users(request):
+    """AJAX: поиск пользователей по логину из User, UserProfile и TempUser."""
+    from register.models import TempUser
+    query = request.GET.get('q', '').strip()
+    if not query or len(query) < 1:
+        return JsonResponse({'results': []})
+
+    results = []
+    seen = set()
+
+    # Поиск в User (зарегистрированные)
+    users = User.objects.filter(username__icontains=query)[:10]
+    for u in users:
+        if u.username not in seen:
+            seen.add(u.username)
+            full_name = u.get_full_name()
+            results.append({
+                'login': u.username,
+                'label': f"{u.username} ({full_name})" if full_name else u.username,
+                'type': 'user',
+            })
+
+    # Поиск в TempUser
+    temp_users = TempUser.objects.filter(login__icontains=query)[:10]
+    for tu in temp_users:
+        if tu.login not in seen:
+            seen.add(tu.login)
+            results.append({
+                'login': tu.login,
+                'label': tu.login,
+                'type': 'temp',
+            })
+
+    return JsonResponse({'results': results[:15]})
+
 
 @login_required
 def get_track_owner(request):

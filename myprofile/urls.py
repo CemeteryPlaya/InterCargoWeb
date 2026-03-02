@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -29,6 +29,9 @@ urlpatterns = [
     path('track-codes/mass-archive/', track_codes.mass_archive_track_codes, name='mass_archive_track_codes'),
     path('settings/', profile_setting.settings, name='settings'),
     path('update/', profile_setting.update_profile, name='update_profile'),
+    path('request-pickup-change/', profile_setting.request_pickup_change, name='request_pickup_change'),
+    path('pickup-change-requests/', profile_setting.pickup_change_requests_view, name='pickup_change_requests'),
+    path('pickup-change-requests/<int:req_id>/review/', profile_setting.review_pickup_change, name='review_pickup_change'),
     path('', personal_profile.profile, name='profile'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     path('delivered-posts/', customer_paycheks.delivered_trackcodes_by_date, name='delivered_posts'),
@@ -37,6 +40,8 @@ urlpatterns = [
     path('pay-receipt/<int:receipt_id>/', customer_paycheks.pay_receipt, name='pay_receipt'),
     path('update_tracks/', status_update.update_tracks, name='update_tracks'),
     path('get-track-owner/', status_update.get_track_owner, name='get_track_owner'),
+    path('search-users/', status_update.search_users, name='search_users'),
+
     path('notifications/', notifications.notifications_list, name='notifications'),
     path('notifications/read/<int:notif_id>/', notifications.mark_as_read, name='mark_as_read'),
     path("notifications/mark-as-read/", notifications.mark_notifications_as_read, name="mark_notifications_as_read"),
@@ -57,7 +62,13 @@ urlpatterns = [
     path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
     path('arrival-summary/', arrival_summary.arrival_summary_view, name='arrival_summary'),
     path('arrival-summary/toggle/', arrival_summary.toggle_home_delivery, name='toggle_home_delivery'),
+    path('arrival-summary/assign-temp-pickup/', arrival_summary.assign_temp_pickup, name='assign_temp_pickup'),
     path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
+    path('delivery/receipts/', delivery.get_pickup_receipts, name='get_pickup_receipts'),
+    path('pp-acceptance/', pp_acceptance.pp_acceptance_view, name='pp_acceptance'),
+    path('pp-acceptance/accept/', pp_acceptance.accept_delivery, name='accept_delivery'),
+    path('pp-acceptance/receipts/', pp_acceptance.get_acceptance_receipts, name='get_acceptance_receipts'),
+
 ]
 
 # Подключение медиа-файлов при DEBUG=True

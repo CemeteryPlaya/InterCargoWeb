@@ -1,81 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // ============================================
-    // Tab switching
-    // ============================================
-    var tabButtons = document.querySelectorAll('.tab-delivery-btn');
-    var tabPanels = document.querySelectorAll('.tab-delivery-panel');
+    var panel = document.getElementById('acceptance-panel');
+    if (!panel) return;
 
-    tabButtons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var targetTab = this.dataset.tab;
-
-            tabButtons.forEach(function (b) {
-                b.classList.remove('border-primary', 'text-primary');
-                b.classList.add('border-transparent', 'text-gray-500');
-            });
-            this.classList.remove('border-transparent', 'text-gray-500');
-            this.classList.add('border-primary', 'text-primary');
-
-            tabPanels.forEach(function (panel) {
-                panel.classList.add('hidden');
-            });
-            document.getElementById('panel-' + targetTab).classList.remove('hidden');
-        });
-    });
-
-    // ============================================
-    // Select all (for home delivery checkboxes)
-    // ============================================
-    var selectAllTake = document.getElementById('select-all-take');
-    if (selectAllTake) {
-        selectAllTake.addEventListener('click', function () {
-            var form = document.getElementById('home-delivery-form');
-            if (!form) return;
-            var checkboxes = form.querySelectorAll('input[type="checkbox"]');
-            var allChecked = Array.from(checkboxes).every(function (cb) { return cb.checked; });
-            checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-            this.textContent = allChecked ? 'Выбрать все' : 'Снять все';
-        });
-    }
-
-    var selectAllComplete = document.getElementById('select-all-complete');
-    if (selectAllComplete) {
-        selectAllComplete.addEventListener('click', function () {
-            var panel = document.getElementById('panel-complete');
-            var checkboxes = panel.querySelectorAll('input[type="checkbox"]');
-            var allChecked = Array.from(checkboxes).every(function (cb) { return cb.checked; });
-            checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-            this.textContent = allChecked ? 'Выбрать все' : 'Снять все';
-        });
-    }
-
-    // ============================================
-    // History expand/collapse
-    // ============================================
-    var historyPanel = document.getElementById('panel-history');
-    if (historyPanel) {
-        historyPanel.addEventListener('click', function (e) {
-            var toggle = e.target.closest('.history-toggle');
-            if (!toggle) return;
-
-            var targetId = toggle.dataset.target;
-            var content = document.getElementById(targetId);
-            var arrow = toggle.querySelector('.history-arrow');
-
-            if (content) content.classList.toggle('hidden');
-            if (arrow) arrow.classList.toggle('rotate-180');
-        });
-    }
-
-    // ============================================
-    // QR Scanner for per-pickup-point scanning
-    // ============================================
-    var takePanel = document.getElementById('panel-take');
-    if (!takePanel) return;
-
-    var receiptsUrl = takePanel.dataset.receiptsUrl;
-    var takeUrl = takePanel.dataset.takeUrl;
-    var csrfToken = takePanel.dataset.csrf;
+    var receiptsUrl = panel.dataset.receiptsUrl;
+    var acceptUrl = panel.dataset.acceptUrl;
+    var csrfToken = panel.dataset.csrf;
 
     // Modal elements
     var modal = document.getElementById('qr-modal');
@@ -93,61 +22,52 @@ document.addEventListener('DOMContentLoaded', function () {
     var lastScanText = document.getElementById('qr-last-scan-text');
     var errorEl = document.getElementById('qr-error');
 
-    // Scanner state
+    // State
     var currentPickupId = null;
-    var clientsData = [];            // from server: [{username, full_name, receipts: [{receipt_number, track_count, total_weight}]}]
-    var allExpectedReceipts = [];    // flat list of receipt_numbers
-    var scannedReceipts = [];        // already scanned receipt_numbers
-    var receiptToClient = {};        // receipt_number → username (for quick lookup)
+    var clientsData = [];
+    var allExpectedReceipts = [];
+    var scannedReceipts = [];
+    var receiptToClient = {};
     var html5QrCode = null;
     var scannerActive = false;
     var scanProcessing = false;
+    var scanningInProgress = false;
 
     // Prevent page reload while scanning
-    var scanningInProgress = false;
     window.addEventListener('beforeunload', function (e) {
         if (scanningInProgress) {
             e.preventDefault();
-            e.returnValue = 'Сканирование не завершено. Вы уверены, что хотите покинуть страницу?';
+            e.returnValue = 'Приёмка не завершена. Вы уверены, что хотите покинуть страницу?';
             return e.returnValue;
         }
     });
 
-    // Keep-alive: ping server every 10 minutes
+    // Keep-alive
     setInterval(function () {
         fetch(window.location.href, { method: 'HEAD', credentials: 'same-origin' }).catch(function () {});
     }, 600000);
 
-    // ============================================
-    // Per-pickup scan buttons
-    // ============================================
-    var scanButtons = document.querySelectorAll('.scan-pickup-btn');
+    // Scan buttons
+    var scanButtons = document.querySelectorAll('.scan-accept-btn');
     scanButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
-            var pickupId = this.dataset.pickupId;
-            var pickupName = this.dataset.pickupName;
-            startScanForPickup(pickupId, pickupName);
+            startScan(this.dataset.pickupId, this.dataset.pickupName);
         });
     });
 
-    function startScanForPickup(pickupId, pickupName) {
-        // Fetch receipt data for this pickup
+    function startScan(pickupId, pickupName) {
         fetch(receiptsUrl + '?pickup_id=' + encodeURIComponent(pickupId), { credentials: 'same-origin' })
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 if (!data.clients || data.clients.length === 0) {
-                    // No clients/receipts — just take directly without scanning
                     submitDirectly(pickupId, []);
                     return;
                 }
-
-                // Check if there are any receipts at all
                 var hasReceipts = data.clients.some(function (c) { return c.receipts.length > 0; });
                 if (!hasReceipts) {
                     submitDirectly(pickupId, []);
                     return;
                 }
-
                 openScanner(pickupId, pickupName, data.clients);
             })
             .catch(function (err) {
@@ -157,10 +77,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function submitDirectly(pickupId, scannedList) {
-        // Create and submit a form
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = takeUrl;
+        form.action = acceptUrl;
         form.innerHTML =
             '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">' +
             '<input type="hidden" name="pickup_id" value="' + pickupId + '">' +
@@ -169,37 +88,28 @@ document.addEventListener('DOMContentLoaded', function () {
         form.submit();
     }
 
-    // ============================================
-    // Scanner Modal
-    // ============================================
     function openScanner(pickupId, pickupName, clients) {
         currentPickupId = pickupId;
         clientsData = clients;
         scannedReceipts = [];
         scanningInProgress = true;
 
-        // Build flat list and lookup
         allExpectedReceipts = [];
         receiptToClient = {};
         clients.forEach(function (client) {
             client.receipts.forEach(function (r) {
                 allExpectedReceipts.push(r.receipt_number);
-                receiptToClient[r.receipt_number] = client.username;
+                receiptToClient[r.receipt_number] = client.full_name;
             });
         });
 
-        // Set title
         modalTitle.textContent = pickupName;
-
-        // Reset UI
         updateProgress();
         errorEl.classList.add('hidden');
         lastScanEl.classList.add('hidden');
         submitBtn.disabled = true;
 
-        // Build clients list
         renderClientsList();
-
         modal.classList.remove('hidden');
         startCamera();
     }
@@ -220,14 +130,12 @@ document.addEventListener('DOMContentLoaded', function () {
             var clientDiv = document.createElement('div');
             clientDiv.className = 'border border-gray-200 rounded-lg overflow-hidden';
 
-            // Client header
             var header = document.createElement('div');
             header.className = 'px-3 py-2 bg-gray-50 font-medium text-sm text-gray-800 flex items-center gap-2';
             header.innerHTML = '<i class="ri-user-line text-gray-400"></i> ' +
                 client.full_name + ' <span class="text-xs text-gray-400">(' + client.username + ')</span>';
             clientDiv.appendChild(header);
 
-            // Receipts
             client.receipts.forEach(function (r) {
                 var row = document.createElement('div');
                 row.className = 'receipt-row flex items-center gap-2 px-3 py-2 border-t border-gray-100 text-sm';
@@ -246,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 var manualBtn = document.createElement('button');
                 manualBtn.type = 'button';
-                manualBtn.className = 'manual-check-btn px-2 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-700 transition';
+                manualBtn.className = 'manual-check-btn px-2 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 transition';
                 manualBtn.innerHTML = '<i class="ri-check-line"></i>';
                 manualBtn.title = 'Отметить вручную';
                 manualBtn.dataset.receipt = r.receipt_number;
@@ -259,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Manual check button handler (delegated)
+    // Manual check handler
     clientsListEl.addEventListener('click', function (e) {
         var btn = e.target.closest('.manual-check-btn');
         if (!btn) return;
@@ -292,14 +200,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ============================================
     // Camera
-    // ============================================
     function startCamera() {
         if (scannerActive) return;
-
         html5QrCode = new Html5Qrcode('qr-reader');
-
         html5QrCode.start(
             { facingMode: 'environment' },
             { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
@@ -326,41 +230,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function onScanSuccess(decodedText) {
         if (scanProcessing) return;
-
         var code = decodedText.trim();
 
-        // Already scanned?
         if (scannedReceipts.indexOf(code) !== -1) {
             showError('Этот QR-код уже отсканирован: ' + code);
             return;
         }
-
-        // Is it expected?
         if (allExpectedReceipts.indexOf(code) === -1) {
             showError('Неизвестный QR-код: ' + code);
             return;
         }
 
-        // Prevent rapid duplicates
         scanProcessing = true;
         setTimeout(function () { scanProcessing = false; }, 1500);
 
-        // Accept
         scannedReceipts.push(code);
         errorEl.classList.add('hidden');
 
-        // Show success flash
         var clientName = receiptToClient[code] || '';
         lastScanText.textContent = code + (clientName ? ' — ' + clientName : '');
         lastScanEl.classList.remove('hidden');
         setTimeout(function () { lastScanEl.classList.add('hidden'); }, 2500);
 
-        // Mark in client list
         markReceiptScanned(code);
-
         updateProgress();
 
-        // All scanned?
         if (scannedReceipts.length >= allExpectedReceipts.length) {
             onAllScanned();
         }
@@ -369,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function onAllScanned() {
         submitBtn.disabled = false;
         stopCamera();
-
         qrReaderDiv.innerHTML =
             '<div class="flex flex-col items-center justify-center py-6 text-green-600">' +
             '<i class="ri-checkbox-circle-fill text-5xl mb-2"></i>' +
@@ -387,7 +280,6 @@ document.addEventListener('DOMContentLoaded', function () {
         progressPercent.textContent = pct + '%';
         progressBar.style.width = pct + '%';
 
-        // Enable submit when at least 1 receipt scanned (partial delivery allowed)
         if (scanned > 0) {
             submitBtn.disabled = false;
         }
@@ -399,19 +291,17 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () { errorEl.classList.add('hidden'); }, 3000);
     }
 
-    // ============================================
     // Modal actions
-    // ============================================
     modalClose.addEventListener('click', function () {
         if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
-            if (!confirm('Сканирование не завершено. Вы уверены, что хотите отменить?')) return;
+            if (!confirm('Приёмка не завершена. Вы уверены, что хотите отменить?')) return;
         }
         closeScanner();
     });
 
     cancelBtn.addEventListener('click', function () {
         if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
-            if (!confirm('Сканирование не завершено. Вы уверены, что хотите отменить?')) return;
+            if (!confirm('Приёмка не завершена. Вы уверены, что хотите отменить?')) return;
         }
         closeScanner();
     });
@@ -419,10 +309,9 @@ document.addEventListener('DOMContentLoaded', function () {
     submitBtn.addEventListener('click', function () {
         if (scannedReceipts.length === 0) return;
 
-        // If not all scanned, confirm
         if (scannedReceipts.length < allExpectedReceipts.length) {
             var remaining = allExpectedReceipts.length - scannedReceipts.length;
-            if (!confirm('Не все чеки отсканированы (' + remaining + ' осталось). Не отсканированные чеки НЕ будут взяты в доставку. Продолжить?')) {
+            if (!confirm('Не все чеки отсканированы (' + remaining + ' осталось). Не отсканированные чеки НЕ будут приняты. Продолжить?')) {
                 return;
             }
         }
