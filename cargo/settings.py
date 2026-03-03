@@ -90,6 +90,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'myprofile.views.notifications_context',
+                'mainview.context_processors.pickup_points',
             ],
         },
     },

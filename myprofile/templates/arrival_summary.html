@@ -75,13 +75,14 @@
                                 <th class="py-3 px-4 text-left font-medium">Телефон</th>
                                 <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Цена/кг (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-center font-medium">Действие</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for uid, client in home_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0">
+                            <tr class="border-b border-gray-100 last:border-0" data-user-id="{% if client.is_temp %}{% else %}{{ uid }}{% endif %}" data-temp-user-id="{% if client.is_temp %}{{ client.temp_user_id }}{% endif %}" data-weight="{{ client.total_weight }}">
                                 <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                     <i class="ri-user-line text-gray-400 mr-1"></i>
                                     {{ client.full_name }}
@@ -94,7 +95,8 @@
                                 </td>
                                 <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
                                 <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
-                                <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
+                                <td class="py-3 px-4 text-right client-rate" data-val="{{ client.effective_rate }}">{{ client.effective_rate }}</td>
+                                <td class="py-3 px-4 text-right font-medium client-price" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
                                 <td class="py-3 px-4 text-center">
                                     <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                         {% csrf_token %}
@@ -158,12 +160,13 @@
                                 <th class="py-3 px-4 text-left font-medium">Назначить ПВЗ</th>
                                 <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Цена/кг (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for tid, client in temp_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ tid }}" data-login="{{ client.login }}">
+                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ tid }}" data-login="{{ client.login }}" data-temp-user-id="{{ tid }}" data-weight="{{ client.total_weight }}">
                                 <td class="py-3 px-4 bulk-col hidden">
                                     <input type="checkbox" class="bulk-check rounded border-gray-300 text-purple-600 focus:ring-purple-400" value="{{ tid }}">
                                 </td>
@@ -188,7 +191,8 @@
                                 </td>
                                 <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
                                 <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
-                                <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
+                                <td class="py-3 px-4 text-right client-rate" data-val="{{ client.effective_rate }}">{{ client.effective_rate }}</td>
+                                <td class="py-3 px-4 text-right font-medium client-price" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -246,13 +250,14 @@
                                     <th class="py-3 px-4 text-left font-medium">Телефон</th>
                                     <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                     <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Цена/кг (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                     <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                     <th class="py-3 px-4 text-center font-medium">Действие</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for uid, client in pp_data.clients.items %}
-                                <tr class="border-b border-gray-100 last:border-0">
+                                <tr class="border-b border-gray-100 last:border-0" data-user-id="{% if client.is_temp %}{% else %}{{ uid }}{% endif %}" data-temp-user-id="{% if client.is_temp %}{{ client.temp_user_id }}{% endif %}" data-weight="{{ client.total_weight }}">
                                     <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                         <i class="ri-user-line text-gray-400 mr-1"></i>
                                         {{ client.full_name }}
@@ -265,7 +270,8 @@
                                     </td>
                                     <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
                                     <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
-                                    <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
+                                    <td class="py-3 px-4 text-right client-rate" data-val="{{ client.effective_rate }}">{{ client.effective_rate }}</td>
+                                    <td class="py-3 px-4 text-right font-medium client-price" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
                                     <td class="py-3 px-4 text-center">
                                         <div class="flex gap-1 justify-center flex-wrap">
                                         {% if client.is_override %}
@@ -527,7 +533,7 @@
             });
         }
 
-        // === Модалка скидки ===
+        // === Модалка скидки (AJAX) ===
         var discountModal = document.getElementById('discountModal');
         var discountCancelBtn = document.getElementById('discountCancelBtn');
         if (discountModal) {
@@ -546,6 +552,52 @@
             });
             discountModal.addEventListener('click', function(e) {
                 if (e.target === discountModal) discountModal.classList.add('hidden');
+            });
+
+            // AJAX-отправка скидки
+            var discountForm = document.getElementById('discountForm');
+            discountForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var formData = new FormData(discountForm);
+                fetch(discountForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                }).then(function(resp) { return resp.json(); }).then(function(data) {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    // Обновляем цену и стоимость в строке клиента
+                    var userId = formData.get('user_id');
+                    var tempUserId = formData.get('temp_user_id');
+                    var newRate = data.effective_rate;
+                    var rows = document.querySelectorAll('tr[data-user-id], tr[data-temp-user-id]');
+                    rows.forEach(function(row) {
+                        var match = false;
+                        if (userId && row.dataset.userId === userId) match = true;
+                        if (tempUserId && row.dataset.tempUserId === tempUserId) match = true;
+                        if (!match) return;
+                        var rateCell = row.querySelector('.client-rate');
+                        var priceCell = row.querySelector('.client-price');
+                        var weight = parseFloat(row.dataset.weight) || 0;
+                        if (rateCell) {
+                            rateCell.textContent = newRate;
+                            rateCell.dataset.val = newRate;
+                        }
+                        if (priceCell) {
+                            var newPrice = Math.round(weight * newRate);
+                            priceCell.textContent = newPrice;
+                            priceCell.dataset.val = newPrice;
+                        }
+                        // Подсветка строки
+                        row.classList.add('bg-green-50');
+                        setTimeout(function() { row.classList.remove('bg-green-50'); }, 2000);
+                    });
+                    discountModal.classList.add('hidden');
+                }).catch(function() {
+                    alert('Ошибка при применении скидки');
+                });
             });
         }
     });

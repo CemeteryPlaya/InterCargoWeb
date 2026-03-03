@@ -113,26 +113,20 @@ td {
 th:nth-child(1),
 td:nth-child(1) {
     text-align: left;
-    width: 44%;
+    width: 50%;
 }
 
 th:nth-child(2),
 td:nth-child(2) {
-    text-align: center;
-    width: 12%;
+    text-align: right;
+    width: 25%;
+    padding-right: 6px;
 }
 
 th:nth-child(3),
 td:nth-child(3) {
     text-align: right;
-    width: 20%;
-    padding-right: 6px;
-}
-
-th:nth-child(4),
-td:nth-child(4) {
-    text-align: right;
-    width: 24%;
+    width: 25%;
 }
 
 .total-row {
@@ -145,28 +139,28 @@ td:nth-child(4) {
 }
 
 .total-label {
-    width: 44%;
+    width: 30%;
 }
 
 .total-values {
     display: flex;
-    width: 56%;
+    width: 70%;
     justify-content: space-between;
 }
 
 .total-count {
-    width: 21%;
+    width: 20%;
     text-align: center;
 }
 
 .total-weight {
-    width: 36%;
+    width: 40%;
     text-align: right;
     padding-right: 6px;
 }
 
 .total-sum {
-    width: 43%;
+    width: 40%;
     text-align: right;
 }
 

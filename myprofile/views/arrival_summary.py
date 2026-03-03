@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -208,6 +208,7 @@ def arrival_summary_view(request):
         'home_pp_id': home_pp.id if home_pp else None,
         'warehouse_pp_id': warehouse_pp.id if warehouse_pp else None,
         'discount_threshold': discount_threshold,
+        'default_rate': float(default_rate),
     })
 
 
@@ -305,12 +306,16 @@ def apply_discount(request):
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     user_id = request.POST.get('user_id')
     temp_user_id = request.POST.get('temp_user_id')
     amount_raw = request.POST.get('amount_per_kg', '').strip()
     date = request.POST.get('date', '')
 
     if not amount_raw:
+        if is_ajax:
+            return JsonResponse({'error': 'Укажите размер скидки.'}, status=400)
         messages.error(request, "Укажите размер скидки.")
         return redirect(f'/profile/arrival-summary/?date={date}')
 
@@ -319,16 +324,23 @@ def apply_discount(request):
         if amount <= 0:
             raise ValueError
     except (ValueError, Exception):
+        if is_ajax:
+            return JsonResponse({'error': 'Некорректный размер скидки.'}, status=400)
         messages.error(request, "Некорректный размер скидки.")
         return redirect(f'/profile/arrival-summary/?date={date}')
+
+    default_rate = get_global_price_per_kg()
+    effective_rate = None
+    client_name = ''
 
     if user_id:
         try:
             target_user = User.objects.get(id=user_id)
         except User.DoesNotExist:
+            if is_ajax:
+                return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
             messages.error(request, "Пользователь не найден.")
             return redirect(f'/profile/arrival-summary/?date={date}')
-        # Удаляем предыдущие активные разовые скидки
         CustomerDiscount.objects.filter(
             user=target_user, is_temporary=True, active=True
         ).delete()
@@ -337,11 +349,15 @@ def apply_discount(request):
             is_temporary=True, active=True,
             comment=f"Разовая скидка (сводка прихода {date})"
         )
+        effective_rate = default_rate - amount
+        client_name = target_user.username
         messages.success(request, f"Скидка {amount} ₸/кг применена для {target_user.username}")
     elif temp_user_id:
         try:
             temp_user = TempUser.objects.get(id=temp_user_id)
         except TempUser.DoesNotExist:
+            if is_ajax:
+                return JsonResponse({'error': 'Клиент не найден.'}, status=404)
             messages.error(request, "Клиент не найден.")
             return redirect(f'/profile/arrival-summary/?date={date}')
         CustomerDiscount.objects.filter(
@@ -352,8 +368,21 @@ def apply_discount(request):
             is_temporary=True, active=True,
             comment=f"Разовая скидка (сводка прихода {date})"
         )
+        effective_rate = default_rate - amount
+        client_name = temp_user.login
         messages.success(request, f"Скидка {amount} ₸/кг применена для {temp_user.login}")
     else:
+        if is_ajax:
+            return JsonResponse({'error': 'Не указан клиент.'}, status=400)
         messages.error(request, "Не указан клиент.")
+        return redirect(f'/profile/arrival-summary/?date={date}')
+
+    if is_ajax:
+        return JsonResponse({
+            'success': True,
+            'effective_rate': float(effective_rate),
+            'discount': float(amount),
+            'client_name': client_name,
+        })
 
     return redirect(f'/profile/arrival-summary/?date={date}')
