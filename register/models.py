@@ -6,6 +6,7 @@ class PickupPoint(models.Model):
     address = models.CharField(max_length=255, verbose_name="Адрес")
     premise_name = models.CharField(max_length=100, verbose_name="Название помещения")
     payment_link = models.URLField(blank=True, null=True, verbose_name="Ссылка на оплату")
+    working_hours = models.CharField(max_length=100, blank=True, default='', verbose_name="Время работы")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     show_in_registration = models.BooleanField(default=True, verbose_name="Показывать в регистрации/футере")
     is_home_delivery = models.BooleanField(default=False, verbose_name="Доставка на дом")

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Чеки {{ date|date:"d.m.Y" }}</title>
-    <link rel="stylesheet" href="{% static 'styles/pdf-check.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/pdf-check.css' %}?v=2">
 </head>
 
 <body>
@@ -43,7 +43,6 @@
             <thead>
                 <tr>
                     <th>Трек-номер</th>
-                    <th>Кол-во</th>
                     <th>Вес</th>
                     <th>Стоимость</th>
                 </tr>
@@ -52,7 +51,6 @@
                 {% for track in check.tracks %}
                 <tr>
                     <td>{{ track.track_code }}</td>
-                    <td>1</td>
                     <td>{{ track.weight|floatformat:3 }}</td>
                     <td>{{ track.price|floatformat:0 }}</td>
                 </tr>

@@ -32,7 +32,12 @@
                     <h3 class="text-lg font-bold mb-4">Пункты выдачи</h3>
                     <ul class="space-y-2">
                         {% for pp in pickup_points %}
-                        <li class="text-gray-400">{{ pp }}</li>
+                        <li class="text-gray-400">
+                            {{ pp }}
+                            {% if pp.working_hours %}
+                            <br><span class="text-gray-500 text-sm"><i class="ri-time-line"></i> {{ pp.working_hours }}</span>
+                            {% endif %}
+                        </li>
                         {% endfor %}
                         <li><a href="{% url 'about' %}" class="text-primary hover:text-primary-light transition">Смотреть все пункты</a></li>
                     </ul>

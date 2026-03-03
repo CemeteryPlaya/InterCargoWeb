@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem
-from register.models import UserProfile, PickupPoint
+from register.models import UserProfile, PickupPoint, TempUser
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
@@ -170,8 +170,13 @@ def print_documents_view(request):
                                 address = ''
                     elif track.temp_owner_id:
                         username = track.temp_owner.login
-                        discount = Decimal("0")
-                        address = str(track.delivery_pickup) if track.delivery_pickup_id and track.delivery_pickup else ''
+                        discount = get_temp_user_discount(track.temp_owner)
+                        if track.delivery_pickup_id and track.delivery_pickup:
+                            address = str(track.delivery_pickup)
+                        elif track.temp_owner.pickup:
+                            address = str(track.temp_owner.pickup)
+                        else:
+                            address = ''
                     else:
                         continue
                     if username not in no_receipt_clients:
@@ -251,7 +256,7 @@ def print_documents_view(request):
 def client_registry_pdf(request, registry_id):
     registry = get_object_or_404(ClientRegistry, id=registry_id)
 
-    tracks = registry.track_codes.all().select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup', 'temp_owner')
+    tracks = registry.track_codes.all().select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup', 'temp_owner', 'temp_owner__pickup')
     default_price_per_kg = get_global_price_per_kg()
 
     data = {}
@@ -275,9 +280,15 @@ def client_registry_pdf(request, registry_id):
                 user_rates[client_username] = default_price_per_kg - discount_per_kg
         elif track.temp_owner_id:
             client_username = track.temp_owner.login
-            pickup_obj = track.delivery_pickup if track.delivery_pickup_id else None
+            if track.delivery_pickup_id and track.delivery_pickup:
+                pickup_obj = track.delivery_pickup
+            elif track.temp_owner.pickup:
+                pickup_obj = track.temp_owner.pickup
+            else:
+                pickup_obj = None
             if client_username not in user_rates:
-                user_rates[client_username] = default_price_per_kg
+                discount_per_kg = get_temp_user_discount(track.temp_owner)
+                user_rates[client_username] = default_price_per_kg - discount_per_kg
         else:
             continue
 
