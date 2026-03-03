@@ -12,6 +12,20 @@ from myprofile.views.utils import get_global_price_per_kg, get_user_discount, is
 from register.models import UserProfile, PickupPoint, TempUser
 
 
+def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weight):
+    """Добавить клиента в группу ПВЗ (или создать группу)."""
+    if pp_id not in pickups:
+        pickups[pp_id] = {
+            'id': pp_id,
+            'name': pp_name,
+            'clients': OrderedDict(),
+        }
+    if client_key not in pickups[pp_id]['clients']:
+        pickups[pp_id]['clients'][client_key] = client_data
+    pickups[pp_id]['clients'][client_key]['track_count'] += 1
+    pickups[pp_id]['clients'][client_key]['total_weight'] += track_weight or Decimal("0")
+
+
 @login_required
 def arrival_summary_view(request):
     if not _is_staff(request.user):
@@ -24,99 +38,133 @@ def arrival_summary_view(request):
     tracks = TrackCode.objects.filter(
         delivered_date=selected_date,
         status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-    ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup', 'temp_owner')
+    ).select_related(
+        'owner', 'owner__userprofile', 'owner__userprofile__pickup',
+        'delivery_pickup', 'temp_owner', 'temp_owner__pickup',
+    )
 
     default_rate = get_global_price_per_kg()
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
 
     # Группируем по ПВЗ → Клиент
-    pickups = OrderedDict()  # pickup_id -> {name, clients: {user_id -> data}}
-    home_clients = OrderedDict()  # user_id -> data (клиенты с доставкой на дом)
-    temp_clients = OrderedDict()  # temp_user_id -> data (временные пользователи без ПВЗ)
+    pickups = OrderedDict()  # pickup_id -> {name, clients: {key -> data}}
+    home_clients = OrderedDict()  # key -> data (клиенты с доставкой на дом)
+    temp_clients = OrderedDict()  # temp_user_id -> data (клиенты без ПВЗ)
 
     for track in tracks:
         owner = track.owner
+        weight = track.weight or Decimal("0")
 
-        # Временный пользователь (без регистрации)
+        # === Временный пользователь (без регистрации) ===
         if not owner and track.temp_owner_id:
             temp_user = track.temp_owner
-            tid = temp_user.id
-            if tid not in temp_clients:
-                temp_clients[tid] = {
-                    'login': temp_user.login,
+
+            has_override = track.delivery_pickup_id and track.delivery_pickup
+            is_home = has_override and track.delivery_pickup.is_home_delivery
+            is_warehouse_override = has_override and not track.delivery_pickup.is_home_delivery
+
+            if is_home:
+                # Доставка на дом
+                key = f'temp_{temp_user.id}'
+                if key not in home_clients:
+                    home_clients[key] = {
+                        'username': temp_user.login,
+                        'full_name': temp_user.login,
+                        'phone': '',
+                        'track_count': 0,
+                        'total_weight': Decimal("0"),
+                        'effective_rate': default_rate,
+                        'total_price': 0,
+                        'is_temp': True,
+                        'temp_user_id': temp_user.id,
+                        'is_override': True,
+                    }
+                home_clients[key]['track_count'] += 1
+                home_clients[key]['total_weight'] += weight
+            elif is_warehouse_override:
+                # Перенаправлено на другой ПВЗ (например "Со склада")
+                dp = track.delivery_pickup
+                key = f'temp_{temp_user.id}'
+                _add_to_pickup(pickups, dp.id, str(dp), key, {
+                    'username': temp_user.login,
+                    'full_name': temp_user.login,
+                    'phone': '',
                     'track_count': 0,
                     'total_weight': Decimal("0"),
                     'effective_rate': default_rate,
                     'total_price': 0,
-                }
-            temp_clients[tid]['track_count'] += 1
-            temp_clients[tid]['total_weight'] += track.weight or Decimal("0")
+                    'is_temp': True,
+                    'temp_user_id': temp_user.id,
+                    'is_override': True,
+                }, weight)
+            elif temp_user.pickup_id:
+                # ПВЗ из профиля TempUser
+                pp = temp_user.pickup
+                key = f'temp_{temp_user.id}'
+                _add_to_pickup(pickups, pp.id, str(pp), key, {
+                    'username': temp_user.login,
+                    'full_name': temp_user.login,
+                    'phone': '',
+                    'track_count': 0,
+                    'total_weight': Decimal("0"),
+                    'effective_rate': default_rate,
+                    'total_price': 0,
+                    'is_temp': True,
+                    'temp_user_id': temp_user.id,
+                }, weight)
+            else:
+                # Без ПВЗ — в список "Без пункта"
+                tid = temp_user.id
+                if tid not in temp_clients:
+                    temp_clients[tid] = {
+                        'login': temp_user.login,
+                        'track_count': 0,
+                        'total_weight': Decimal("0"),
+                        'effective_rate': default_rate,
+                        'total_price': 0,
+                    }
+                temp_clients[tid]['track_count'] += 1
+                temp_clients[tid]['total_weight'] += weight
             continue
 
         if not owner:
             continue
 
+        # === Зарегистрированный пользователь ===
         has_override = track.delivery_pickup_id and track.delivery_pickup
         is_home = has_override and track.delivery_pickup.is_home_delivery
         is_warehouse_override = has_override and not track.delivery_pickup.is_home_delivery
 
-        if is_warehouse_override:
-            # Треки, перенаправленные на другой ПВЗ (например "Со склада")
-            override_pp = track.delivery_pickup
-            pp_id = override_pp.id
-            pp_name = str(override_pp)
-            if pp_id not in pickups:
-                pickups[pp_id] = {
-                    'id': pp_id,
-                    'name': pp_name,
-                    'clients': OrderedDict(),
-                    'is_override': True,
-                }
+        discount = get_user_discount(owner)
+        effective_rate = default_rate - discount
+        phone = ''
+        try:
+            phone = owner.userprofile.phone
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
 
-            uid = owner.id
-            if uid not in pickups[pp_id]['clients']:
-                discount = get_user_discount(owner)
-                effective_rate = default_rate - discount
-                phone = ''
-                try:
-                    phone = owner.userprofile.phone
-                except (UserProfile.DoesNotExist, AttributeError):
-                    pass
-                pickups[pp_id]['clients'][uid] = {
-                    'user': owner,
-                    'username': owner.username,
-                    'full_name': owner.get_full_name() or owner.username,
-                    'phone': phone,
-                    'track_count': 0,
-                    'total_weight': Decimal("0"),
-                    'effective_rate': effective_rate,
-                    'total_price': 0,
-                    'is_override': True,
-                }
-            pickups[pp_id]['clients'][uid]['track_count'] += 1
-            pickups[pp_id]['clients'][uid]['total_weight'] += track.weight or Decimal("0")
-        elif is_home:
-            uid = owner.id
+        base_client = {
+            'username': owner.username,
+            'full_name': owner.get_full_name() or owner.username,
+            'phone': phone,
+            'track_count': 0,
+            'total_weight': Decimal("0"),
+            'effective_rate': effective_rate,
+            'total_price': 0,
+        }
+
+        uid = owner.id
+
+        if is_home:
             if uid not in home_clients:
-                discount = get_user_discount(owner)
-                effective_rate = default_rate - discount
-                phone = ''
-                try:
-                    phone = owner.userprofile.phone
-                except (UserProfile.DoesNotExist, AttributeError):
-                    pass
-                home_clients[uid] = {
-                    'user': owner,
-                    'username': owner.username,
-                    'full_name': owner.get_full_name() or owner.username,
-                    'phone': phone,
-                    'track_count': 0,
-                    'total_weight': Decimal("0"),
-                    'effective_rate': effective_rate,
-                    'total_price': 0,
-                }
+                home_clients[uid] = {**base_client, 'is_override': True}
             home_clients[uid]['track_count'] += 1
-            home_clients[uid]['total_weight'] += track.weight or Decimal("0")
+            home_clients[uid]['total_weight'] += weight
+        elif is_warehouse_override:
+            override_pp = track.delivery_pickup
+            _add_to_pickup(pickups, override_pp.id, str(override_pp), uid, {
+                **base_client, 'is_override': True,
+            }, weight)
         else:
             try:
                 pp = owner.userprofile.pickup
@@ -125,35 +173,7 @@ def arrival_summary_view(request):
 
             pp_id = pp.id if pp else 0
             pp_name = str(pp) if pp else 'Не указан'
-
-            if pp_id not in pickups:
-                pickups[pp_id] = {
-                    'id': pp_id,
-                    'name': pp_name,
-                    'clients': OrderedDict(),
-                }
-
-            uid = owner.id
-            if uid not in pickups[pp_id]['clients']:
-                discount = get_user_discount(owner)
-                effective_rate = default_rate - discount
-                phone = ''
-                try:
-                    phone = owner.userprofile.phone
-                except (UserProfile.DoesNotExist, AttributeError):
-                    pass
-                pickups[pp_id]['clients'][uid] = {
-                    'user': owner,
-                    'username': owner.username,
-                    'full_name': owner.get_full_name() or owner.username,
-                    'phone': phone,
-                    'track_count': 0,
-                    'total_weight': Decimal("0"),
-                    'effective_rate': effective_rate,
-                    'total_price': 0,
-                }
-            pickups[pp_id]['clients'][uid]['track_count'] += 1
-            pickups[pp_id]['clients'][uid]['total_weight'] += track.weight or Decimal("0")
+            _add_to_pickup(pickups, pp_id, pp_name, uid, base_client, weight)
 
     # Считаем total_price от общего веса
     for pp_data in pickups.values():
@@ -193,18 +213,27 @@ def toggle_home_delivery(request):
         return HttpResponseForbidden("У вас нет доступа.")
 
     user_id = request.POST.get('user_id')
+    temp_user_id = request.POST.get('temp_user_id')
     date = request.POST.get('date')
     action = request.POST.get('action')  # 'home', 'warehouse', 'unset'
 
-    if not user_id or not date:
+    if (not user_id and not temp_user_id) or not date:
         messages.error(request, "Недостаточно данных.")
         return redirect('arrival_summary')
 
-    tracks = TrackCode.objects.filter(
-        owner_id=user_id,
-        delivered_date=date,
-        status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-    )
+    # Выбираем треки по владельцу (зарегистрированному или временному)
+    if temp_user_id:
+        tracks = TrackCode.objects.filter(
+            temp_owner_id=temp_user_id,
+            delivered_date=date,
+            status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+        )
+    else:
+        tracks = TrackCode.objects.filter(
+            owner_id=user_id,
+            delivered_date=date,
+            status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+        )
 
     if action == 'home':
         home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
@@ -235,15 +264,15 @@ def toggle_home_delivery(request):
 @login_required
 @require_POST
 def assign_temp_pickup(request):
-    """Назначает ПВЗ трекам временного пользователя."""
+    """Назначает ПВЗ временным пользователям (записывает в TempUser.pickup)."""
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
-    temp_user_id = request.POST.get('temp_user_id')
+    temp_user_ids = request.POST.getlist('temp_user_id')
     pickup_id = request.POST.get('pickup_id')
     date = request.POST.get('date')
 
-    if not temp_user_id or not pickup_id or not date:
+    if not temp_user_ids or not pickup_id or not date:
         messages.error(request, "Недостаточно данных.")
         return redirect('arrival_summary')
 
@@ -253,16 +282,12 @@ def assign_temp_pickup(request):
         messages.error(request, "Пункт выдачи не найден.")
         return redirect(f'/profile/arrival-summary/?date={date}')
 
-    tracks = TrackCode.objects.filter(
-        temp_owner_id=temp_user_id,
-        delivered_date=date,
-        status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-    )
-    count = tracks.update(delivery_pickup=pickup)
+    # Записываем ПВЗ в модель TempUser
+    count = TempUser.objects.filter(id__in=temp_user_ids).update(pickup=pickup)
 
     if count:
-        messages.success(request, f"Назначен ПВЗ для {count} посылок: {pickup}")
+        messages.success(request, f"Назначен ПВЗ для {count} клиентов: {pickup}")
     else:
-        messages.info(request, "Нет посылок для назначения.")
+        messages.info(request, "Нет клиентов для назначения.")
 
     return redirect(f'/profile/arrival-summary/?date={date}')

@@ -5,7 +5,7 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    font-size: 12px;
+    font-size: 10px;
     margin: 0 auto;
     padding: 5px;
     color: #000;
@@ -21,12 +21,13 @@ body {
 .check-header {
     position: relative;
     margin-bottom: 5px;
+    min-height: 70px;
 }
 
 .logo {
-    text-align: center;
+    text-align: left;
     font-weight: 900;
-    font-size: 26px;
+    font-size: 24px;
     margin-bottom: 5px;
     line-height: 0.9;
     text-transform: uppercase;
@@ -45,13 +46,13 @@ body {
 }
 
 .qr-item img {
-    width: 60px;
-    height: 60px;
+    width: 55px;
+    height: 55px;
 }
 
 .qr-number {
     display: block;
-    font-size: 7px;
+    font-size: 6px;
     color: #4a5568;
     margin-top: 1px;
 }
@@ -68,40 +69,24 @@ body {
     color: #2d3748;
 }
 
-.logo-arrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e53e3e;
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 14px;
-    margin-left: 2px;
-    vertical-align: middle;
-    position: relative;
-    top: -2px;
-}
-
 .header-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 11px;
+    margin-bottom: 6px;
+    font-size: 10px;
 }
 
 .client-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 11px;
 }
 
 .address {
     font-weight: normal;
-    font-size: 11px;
+    font-size: 10px;
     text-align: right;
     max-width: 60%;
 }
@@ -109,49 +94,50 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 th {
     text-align: left;
     font-weight: bold;
-    font-size: 11px;
+    font-size: 10px;
     padding: 2px 0;
 }
 
 td {
     padding: 2px 0;
     vertical-align: top;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 th:nth-child(1),
 td:nth-child(1) {
     text-align: left;
-    width: 45%;
+    width: 44%;
 }
 
 th:nth-child(2),
 td:nth-child(2) {
     text-align: center;
-    width: 15%;
+    width: 12%;
 }
 
 th:nth-child(3),
 td:nth-child(3) {
     text-align: right;
     width: 20%;
+    padding-right: 6px;
 }
 
 th:nth-child(4),
 td:nth-child(4) {
     text-align: right;
-    width: 20%;
+    width: 24%;
 }
 
 .total-row {
     font-weight: bold;
-    font-size: 13px;
+    font-size: 11px;
     margin-top: 5px;
     display: flex;
     justify-content: space-between;
@@ -159,27 +145,28 @@ td:nth-child(4) {
 }
 
 .total-label {
-    width: 45%;
+    width: 44%;
 }
 
 .total-values {
     display: flex;
-    width: 55%;
+    width: 56%;
     justify-content: space-between;
 }
 
 .total-count {
-    width: 27%;
+    width: 21%;
     text-align: center;
 }
 
 .total-weight {
     width: 36%;
     text-align: right;
+    padding-right: 6px;
 }
 
 .total-sum {
-    width: 36%;
+    width: 43%;
     text-align: right;
 }
 

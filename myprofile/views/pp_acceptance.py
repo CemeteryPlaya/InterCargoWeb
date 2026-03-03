@@ -100,9 +100,10 @@ def get_acceptance_receipts(request):
 
     tracks = list(TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='shipping_pp',
-    ).select_related('owner'))
+    ).select_related('owner', 'temp_owner'))
 
     # Автосоздание чеков если нет
     owners_seen = set()
@@ -143,26 +144,34 @@ def get_acceptance_receipts(request):
         clients_map[username]['receipts'][rn]['track_count'] += 1
         clients_map[username]['receipts'][rn]['total_weight'] += float(item.track_code.weight or 0)
 
-    # Треки без чеков
+    # Треки без чеков (зарег. и временные пользователи)
     tracks_with_receipts = set(item.track_code_id for item in items)
     for track in tracks:
-        if track.id not in tracks_with_receipts and track.owner:
+        if track.id in tracks_with_receipts:
+            continue
+        if track.owner:
             username = track.owner.username
-            if username not in clients_map:
-                clients_map[username] = {
-                    'username': username,
-                    'full_name': track.owner.get_full_name() or username,
-                    'receipts': {},
-                }
-            no_receipt_key = '__no_receipt__'
-            if no_receipt_key not in clients_map[username]['receipts']:
-                clients_map[username]['receipts'][no_receipt_key] = {
-                    'receipt_number': None,
-                    'track_count': 0,
-                    'total_weight': 0,
-                }
-            clients_map[username]['receipts'][no_receipt_key]['track_count'] += 1
-            clients_map[username]['receipts'][no_receipt_key]['total_weight'] += float(track.weight or 0)
+            full_name = track.owner.get_full_name() or username
+        elif track.temp_owner_id:
+            username = track.temp_owner.login
+            full_name = track.temp_owner.login
+        else:
+            continue
+        if username not in clients_map:
+            clients_map[username] = {
+                'username': username,
+                'full_name': full_name,
+                'receipts': {},
+            }
+        no_receipt_key = '__no_receipt__'
+        if no_receipt_key not in clients_map[username]['receipts']:
+            clients_map[username]['receipts'][no_receipt_key] = {
+                'receipt_number': None,
+                'track_count': 0,
+                'total_weight': 0,
+            }
+        clients_map[username]['receipts'][no_receipt_key]['track_count'] += 1
+        clients_map[username]['receipts'][no_receipt_key]['total_weight'] += float(track.weight or 0)
 
     result = []
     for client in sorted(clients_map.values(), key=lambda c: c['username']):
@@ -209,6 +218,7 @@ def accept_delivery(request):
 
     all_tracks = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='shipping_pp',
     )
