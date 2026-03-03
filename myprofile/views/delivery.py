@@ -192,9 +192,10 @@ def take_delivery(request):
             pickup = None
 
         if pickup:
-            # Все треки этого ПВЗ в статусе 'delivered'
+            # Все треки этого ПВЗ в статусе 'delivered' (зарег. и врем. пользователи)
             all_tracks = TrackCode.objects.filter(
                 Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+                Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
                 Q(delivery_pickup=pickup),
                 status='delivered',
             )
@@ -496,11 +497,13 @@ def get_pickup_receipts(request):
         return JsonResponse({'clients': []})
 
     # Находим треки этого ПВЗ в статусе 'delivered'
+    # Включаем: зарег. пользователей (по профилю или delivery_pickup) и врем. пользователей (по TempUser.pickup или delivery_pickup)
     tracks = list(TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='delivered',
-    ).select_related('owner'))
+    ).select_related('owner', 'temp_owner'))
 
     # Автосоздание чеков для треков в 'delivered', у которых ещё нет ReceiptItem
     owners_seen = set()
@@ -543,27 +546,35 @@ def get_pickup_receipts(request):
         clients_map[username]['receipts'][rn]['track_count'] += 1
         clients_map[username]['receipts'][rn]['total_weight'] += float(item.track_code.weight or 0)
 
-    # Треки без чеков — считаем отдельно по клиентам
+    # Треки без чеков — считаем отдельно по клиентам (зарег. и временные)
     tracks_with_receipts = set(item.track_code_id for item in items)
     for track in tracks:
-        if track.id not in tracks_with_receipts and track.owner:
+        if track.id in tracks_with_receipts:
+            continue
+        if track.owner:
             username = track.owner.username
-            if username not in clients_map:
-                clients_map[username] = {
-                    'username': username,
-                    'full_name': track.owner.get_full_name() or username,
-                    'receipts': {},
-                }
-            # Помечаем как "без чека"
-            no_receipt_key = '__no_receipt__'
-            if no_receipt_key not in clients_map[username]['receipts']:
-                clients_map[username]['receipts'][no_receipt_key] = {
-                    'receipt_number': None,
-                    'track_count': 0,
-                    'total_weight': 0,
-                }
-            clients_map[username]['receipts'][no_receipt_key]['track_count'] += 1
-            clients_map[username]['receipts'][no_receipt_key]['total_weight'] += float(track.weight or 0)
+            full_name = track.owner.get_full_name() or username
+        elif track.temp_owner_id:
+            username = track.temp_owner.login
+            full_name = track.temp_owner.login
+        else:
+            continue
+        if username not in clients_map:
+            clients_map[username] = {
+                'username': username,
+                'full_name': full_name,
+                'receipts': {},
+            }
+        # Помечаем как "без чека"
+        no_receipt_key = '__no_receipt__'
+        if no_receipt_key not in clients_map[username]['receipts']:
+            clients_map[username]['receipts'][no_receipt_key] = {
+                'receipt_number': None,
+                'track_count': 0,
+                'total_weight': 0,
+            }
+        clients_map[username]['receipts'][no_receipt_key]['track_count'] += 1
+        clients_map[username]['receipts'][no_receipt_key]['total_weight'] += float(track.weight or 0)
 
     # Преобразуем в список
     result = []

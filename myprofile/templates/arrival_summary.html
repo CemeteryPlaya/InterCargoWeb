@@ -68,21 +68,21 @@
                     <i class="ri-home-4-line"></i> Доставка на дом (Курьер)
                 </h3>
                 <div class="bg-white rounded-lg shadow border border-orange-200 overflow-hidden">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm sortable-table">
                         <thead>
                             <tr class="bg-orange-50 text-gray-600 border-b border-orange-200">
-                                <th class="py-3 px-4 text-left font-medium">Клиент</th>
+                                <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Клиент <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-left font-medium">Телефон</th>
-                                <th class="py-3 px-4 text-center font-medium">Посылок</th>
-                                <th class="py-3 px-4 text-right font-medium">Вес (кг)</th>
-                                <th class="py-3 px-4 text-right font-medium">Стоимость (₸)</th>
+                                <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-center font-medium">Действие</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for uid, client in home_clients.items %}
                             <tr class="border-b border-gray-100 last:border-0">
-                                <td class="py-3 px-4 text-gray-800">
+                                <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                     <i class="ri-user-line text-gray-400 mr-1"></i>
                                     {{ client.full_name }}
                                     <span class="text-xs text-gray-400">({{ client.username }})</span>
@@ -92,13 +92,17 @@
                                     <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline">{{ client.phone }}</a>
                                     {% else %}-{% endif %}
                                 </td>
-                                <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
-                                <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
-                                <td class="py-3 px-4 text-right font-medium">{{ client.total_price }}</td>
+                                <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
+                                <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
+                                <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
                                 <td class="py-3 px-4 text-center">
                                     <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                         {% csrf_token %}
+                                        {% if client.is_temp %}
+                                        <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
+                                        {% else %}
                                         <input type="hidden" name="user_id" value="{{ uid }}">
+                                        {% endif %}
                                         <input type="hidden" name="date" value="{{ selected_date }}">
                                         <input type="hidden" name="action" value="unset">
                                         <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
@@ -117,24 +121,53 @@
             <!-- Временные пользователи (без пункта) -->
             {% if temp_clients %}
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-purple-700 mb-3">
-                    <i class="ri-user-unfollow-line"></i> Без пункта (незарегистрированные)
-                </h3>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-purple-700">
+                        <i class="ri-user-unfollow-line"></i> Без пункта (незарегистрированные)
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="copyLoginsBtn" class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition">
+                            <i class="ri-file-copy-line"></i> Копировать логины
+                        </button>
+                        <button type="button" id="bulkSelectBtn" class="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded hover:bg-purple-200 transition">
+                            <i class="ri-checkbox-multiple-line"></i> Выбрать несколько
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Панель массового назначения (скрыта по умолчанию) -->
+                <div id="bulkPanel" class="hidden mb-3 bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-center gap-3 flex-wrap">
+                    <span class="text-sm text-purple-700 font-medium">Выбрано: <span id="bulkCount">0</span></span>
+                    <button type="button" id="bulkSelectAll" class="text-xs bg-white text-purple-700 border border-purple-300 px-3 py-1 rounded hover:bg-purple-100 transition">
+                        Выбрать всех
+                    </button>
+                    <button type="button" id="bulkAssignBtn" class="text-xs bg-purple-600 text-white px-3 py-1.5 rounded hover:bg-purple-700 transition disabled:opacity-50" disabled>
+                        <i class="ri-map-pin-add-line"></i> Назначить ПВЗ
+                    </button>
+                    <button type="button" id="bulkCancelBtn" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
+                        Отмена
+                    </button>
+                </div>
+
                 <div class="bg-white rounded-lg shadow border border-purple-200 overflow-hidden">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm sortable-table" id="tempClientsTable">
                         <thead>
                             <tr class="bg-purple-50 text-gray-600 border-b border-purple-200">
-                                <th class="py-3 px-4 text-left font-medium">Логин</th>
+                                <th class="py-3 px-4 text-left font-medium bulk-col hidden w-8"></th>
+                                <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Логин <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-left font-medium">Назначить ПВЗ</th>
-                                <th class="py-3 px-4 text-center font-medium">Посылок</th>
-                                <th class="py-3 px-4 text-right font-medium">Вес (кг)</th>
-                                <th class="py-3 px-4 text-right font-medium">Стоимость (₸)</th>
+                                <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for tid, client in temp_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0">
-                                <td class="py-3 px-4 text-gray-800">
+                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ tid }}" data-login="{{ client.login }}">
+                                <td class="py-3 px-4 bulk-col hidden">
+                                    <input type="checkbox" class="bulk-check rounded border-gray-300 text-purple-600 focus:ring-purple-400" value="{{ tid }}">
+                                </td>
+                                <td class="py-3 px-4 text-gray-800" data-val="{{ client.login }}">
                                     <i class="ri-user-line text-purple-400 mr-1"></i>
                                     {{ client.login }}
                                 </td>
@@ -153,13 +186,41 @@
                                         </button>
                                     </form>
                                 </td>
-                                <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
-                                <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
-                                <td class="py-3 px-4 text-right font-medium">{{ client.total_price }}</td>
+                                <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
+                                <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
+                                <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Модалка выбора ПВЗ для массового назначения -->
+            <div id="bulkPickupModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="ri-map-pin-add-line text-purple-600"></i> Назначить ПВЗ
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">Выбрано клиентов: <span id="modalBulkCount" class="font-medium text-purple-700">0</span></p>
+                    <form method="post" action="{% url 'assign_temp_pickup' %}" id="bulkAssignForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="date" value="{{ selected_date }}">
+                        <div id="bulkHiddenInputs"></div>
+                        <select name="pickup_id" class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                            {% for pp in all_pickups %}
+                            <option value="{{ pp.id }}">{{ pp }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="flex gap-3 justify-end">
+                            <button type="button" id="modalCancelBtn" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
+                                Отмена
+                            </button>
+                            <button type="submit" class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition">
+                                <i class="ri-check-line"></i> Назначить
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
             {% endif %}
@@ -171,9 +232,6 @@
                     <summary class="flex items-center justify-between cursor-pointer bg-white rounded-lg shadow border border-gray-200 px-4 py-3 hover:bg-gray-50 transition">
                         <span class="font-semibold text-gray-800">
                             <i class="ri-map-pin-line text-red-500 mr-1"></i> {{ pp_data.name }}
-                            {% if pp_data.is_override %}
-                            <span class="text-xs text-blue-600 ml-1">(перенаправлено)</span>
-                            {% endif %}
                         </span>
                         <span class="text-sm text-gray-500">
                             {{ pp_data.clients|length }} клиентов
@@ -181,21 +239,21 @@
                         </span>
                     </summary>
                     <div class="mt-1 bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-                        <table class="w-full text-sm">
+                        <table class="w-full text-sm sortable-table">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-600 border-b border-gray-200">
-                                    <th class="py-3 px-4 text-left font-medium">Клиент</th>
+                                    <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Клиент <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                     <th class="py-3 px-4 text-left font-medium">Телефон</th>
-                                    <th class="py-3 px-4 text-center font-medium">Посылок</th>
-                                    <th class="py-3 px-4 text-right font-medium">Вес (кг)</th>
-                                    <th class="py-3 px-4 text-right font-medium">Стоимость (₸)</th>
+                                    <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                     <th class="py-3 px-4 text-center font-medium">Действие</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for uid, client in pp_data.clients.items %}
                                 <tr class="border-b border-gray-100 last:border-0">
-                                    <td class="py-3 px-4 text-gray-800">
+                                    <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                         <i class="ri-user-line text-gray-400 mr-1"></i>
                                         {{ client.full_name }}
                                         <span class="text-xs text-gray-400">({{ client.username }})</span>
@@ -205,14 +263,18 @@
                                         <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline">{{ client.phone }}</a>
                                         {% else %}-{% endif %}
                                     </td>
-                                    <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
-                                    <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
-                                    <td class="py-3 px-4 text-right font-medium">{{ client.total_price }}</td>
+                                    <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
+                                    <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
+                                    <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
                                     <td class="py-3 px-4 text-center flex gap-1 justify-center flex-wrap">
                                         {% if client.is_override %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
+                                            {% if client.is_temp %}
+                                            <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
+                                            {% else %}
                                             <input type="hidden" name="user_id" value="{{ uid }}">
+                                            {% endif %}
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="unset">
                                             <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
@@ -223,7 +285,11 @@
                                         {% if home_pp_id %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
+                                            {% if client.is_temp %}
+                                            <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
+                                            {% else %}
                                             <input type="hidden" name="user_id" value="{{ uid }}">
+                                            {% endif %}
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="home">
                                             <button type="submit" class="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded hover:bg-orange-200 transition">
@@ -234,7 +300,11 @@
                                         {% if warehouse_pp_id %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
+                                            {% if client.is_temp %}
+                                            <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
+                                            {% else %}
                                             <input type="hidden" name="user_id" value="{{ uid }}">
+                                            {% endif %}
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="warehouse">
                                             <input type="hidden" name="pickup_id" value="{{ warehouse_pp_id }}">
@@ -260,5 +330,137 @@
     {% endblock %}
 
     {% include 'includes/footer.html' %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // === Сортировка таблиц ===
+        document.querySelectorAll('.sortable-table').forEach(function(table) {
+            var ths = table.querySelectorAll('.sortable-th');
+            ths.forEach(function(th) {
+                th.addEventListener('click', function() {
+                    var tbody = table.querySelector('tbody');
+                    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+                    var colIdx = Array.prototype.indexOf.call(th.parentNode.children, th);
+                    var sortType = th.dataset.sort; // 'string' or 'number'
+                    var asc = th.dataset.dir !== 'asc';
+                    th.dataset.dir = asc ? 'asc' : 'desc';
+
+                    // Сбрасываем иконки на остальных заголовках
+                    ths.forEach(function(h) {
+                        var icon = h.querySelector('i');
+                        if (h === th) {
+                            icon.className = asc ? 'ri-arrow-up-s-line text-xs' : 'ri-arrow-down-s-line text-xs';
+                        } else {
+                            icon.className = 'ri-arrow-up-down-line text-xs text-gray-400';
+                            delete h.dataset.dir;
+                        }
+                    });
+
+                    rows.sort(function(a, b) {
+                        var cellA = a.children[colIdx];
+                        var cellB = b.children[colIdx];
+                        var valA = cellA ? (cellA.dataset.val || cellA.textContent.trim()) : '';
+                        var valB = cellB ? (cellB.dataset.val || cellB.textContent.trim()) : '';
+                        if (sortType === 'number') {
+                            valA = parseFloat(valA) || 0;
+                            valB = parseFloat(valB) || 0;
+                            return asc ? valA - valB : valB - valA;
+                        }
+                        valA = valA.toLowerCase();
+                        valB = valB.toLowerCase();
+                        if (valA < valB) return asc ? -1 : 1;
+                        if (valA > valB) return asc ? 1 : -1;
+                        return 0;
+                    });
+
+                    rows.forEach(function(row) { tbody.appendChild(row); });
+                });
+            });
+        });
+
+        // === Массовое назначение ===
+        var bulkSelectBtn = document.getElementById('bulkSelectBtn');
+        var bulkPanel = document.getElementById('bulkPanel');
+        var bulkCancelBtn = document.getElementById('bulkCancelBtn');
+        var bulkAssignBtn = document.getElementById('bulkAssignBtn');
+        var bulkSelectAll = document.getElementById('bulkSelectAll');
+        var bulkCount = document.getElementById('bulkCount');
+        var modalBulkCount = document.getElementById('modalBulkCount');
+        var bulkPickupModal = document.getElementById('bulkPickupModal');
+        var modalCancelBtn = document.getElementById('modalCancelBtn');
+        var bulkHiddenInputs = document.getElementById('bulkHiddenInputs');
+        var copyLoginsBtn = document.getElementById('copyLoginsBtn');
+
+        if (!bulkSelectBtn) return;
+
+        var bulkMode = false;
+
+        function toggleBulkMode(on) {
+            bulkMode = on;
+            var cols = document.querySelectorAll('.bulk-col');
+            cols.forEach(function(c) { c.classList.toggle('hidden', !on); });
+            bulkPanel.classList.toggle('hidden', !on);
+            if (!on) {
+                document.querySelectorAll('.bulk-check').forEach(function(cb) { cb.checked = false; });
+                updateBulkCount();
+            }
+        }
+
+        function updateBulkCount() {
+            var checked = document.querySelectorAll('.bulk-check:checked');
+            bulkCount.textContent = checked.length;
+            bulkAssignBtn.disabled = checked.length === 0;
+        }
+
+        bulkSelectBtn.addEventListener('click', function() { toggleBulkMode(true); });
+        bulkCancelBtn.addEventListener('click', function() { toggleBulkMode(false); });
+
+        bulkSelectAll.addEventListener('click', function() {
+            var checks = document.querySelectorAll('.bulk-check');
+            var allChecked = Array.prototype.every.call(checks, function(c) { return c.checked; });
+            checks.forEach(function(c) { c.checked = !allChecked; });
+            updateBulkCount();
+        });
+
+        document.getElementById('tempClientsTable').addEventListener('change', function(e) {
+            if (e.target.classList.contains('bulk-check')) updateBulkCount();
+        });
+
+        bulkAssignBtn.addEventListener('click', function() {
+            var checked = document.querySelectorAll('.bulk-check:checked');
+            if (checked.length === 0) return;
+            modalBulkCount.textContent = checked.length;
+            bulkHiddenInputs.innerHTML = '';
+            checked.forEach(function(cb) {
+                var inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'temp_user_id';
+                inp.value = cb.value;
+                bulkHiddenInputs.appendChild(inp);
+            });
+            bulkPickupModal.classList.remove('hidden');
+        });
+
+        modalCancelBtn.addEventListener('click', function() {
+            bulkPickupModal.classList.add('hidden');
+        });
+        bulkPickupModal.addEventListener('click', function(e) {
+            if (e.target === bulkPickupModal) bulkPickupModal.classList.add('hidden');
+        });
+
+        // Копировать логины
+        copyLoginsBtn.addEventListener('click', function() {
+            var rows = document.querySelectorAll('#tempClientsTable tbody tr[data-login]');
+            var logins = [];
+            rows.forEach(function(r) { logins.push(r.dataset.login); });
+            var text = logins.join('\n');
+            navigator.clipboard.writeText(text).then(function() {
+                var orig = copyLoginsBtn.innerHTML;
+                copyLoginsBtn.innerHTML = '<i class="ri-check-line"></i> Скопировано!';
+                setTimeout(function() { copyLoginsBtn.innerHTML = orig; }, 2000);
+            });
+        });
+    });
+    </script>
 </body>
 </html>
