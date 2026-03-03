@@ -7,7 +7,7 @@ from collections import defaultdict
 from myprofile.models import TrackCode, Receipt, ReceiptItem
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from myprofile.views.utils import get_user_discount, deactivate_temporary_discount, get_global_price_per_kg, create_receipts_for_user, parse_paid_at
+from myprofile.views.utils import get_user_discount, get_global_price_per_kg, create_receipts_for_user, parse_paid_at
 from register.models import UserProfile
 
 

@@ -11,7 +11,7 @@ from collections import defaultdict
 import json
 import logging
 from myprofile.models import TrackCode, Notification, DeliveryHistory, ReceiptItem
-from myprofile.views.utils import create_receipts_for_user, get_or_create_storage_cell
+from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user, get_or_create_storage_cell
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
@@ -107,29 +107,39 @@ def get_acceptance_receipts(request):
 
     # Автосоздание чеков если нет
     owners_seen = set()
+    temp_owners_seen = set()
     for track in tracks:
         if track.owner and track.owner_id not in owners_seen:
             owners_seen.add(track.owner_id)
             create_receipts_for_user(track.owner, statuses=('shipping_pp',))
+        elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
+            temp_owners_seen.add(track.temp_owner_id)
+            create_receipts_for_temp_user(track.temp_owner, statuses=('shipping_pp',))
 
     track_ids = [t.id for t in tracks]
 
     items = (
         ReceiptItem.objects
         .filter(track_code_id__in=track_ids)
-        .select_related('receipt', 'receipt__owner', 'track_code')
+        .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code')
     )
 
     clients_map = {}
     for item in items:
         receipt = item.receipt
-        owner = receipt.owner
-        username = owner.username
+        if receipt.owner:
+            username = receipt.owner.username
+            full_name = receipt.owner.get_full_name() or username
+        elif receipt.temp_owner:
+            username = receipt.temp_owner.login
+            full_name = receipt.temp_owner.login
+        else:
+            continue
 
         if username not in clients_map:
             clients_map[username] = {
                 'username': username,
-                'full_name': owner.get_full_name() or username,
+                'full_name': full_name,
                 'receipts': {},
             }
 

@@ -13,7 +13,93 @@ document.addEventListener('DOMContentLoaded', function () {
     var addRowBtn = document.getElementById('add_row_btn');
     var formToggleBtn = document.getElementById('form_toggle_btn');
 
+    // Счётчики
+    var tableRowCounter = document.getElementById('table_row_counter');
+    var textCountTracks = document.getElementById('text_count_tracks');
+    var textCountOwners = document.getElementById('text_count_owners');
+    var textCountWeights = document.getElementById('text_count_weights');
+    var emptyCellsWarning = document.getElementById('empty_cells_warning');
+    var emptyCellsCount = document.getElementById('empty_cells_count');
+
     var isTableMode = false;
+
+    // ============================================
+    // Счётчик строк текстового вида
+    // ============================================
+    function countNonEmptyLines(text) {
+        return text.split('\n').filter(function (s) { return s.trim() !== ''; }).length;
+    }
+
+    function updateTextCounters() {
+        var tc = countNonEmptyLines(trackCodesArea.value);
+        var oc = countNonEmptyLines(ownerUsernamesArea.value);
+        var wc = countNonEmptyLines(weightsArea.value);
+        textCountTracks.textContent = tc > 0 ? '(' + tc + ')' : '';
+        textCountOwners.textContent = oc > 0 ? '(' + oc + ')' : '';
+        textCountWeights.textContent = wc > 0 ? '(' + wc + ')' : '';
+    }
+
+    trackCodesArea.addEventListener('input', updateTextCounters);
+    ownerUsernamesArea.addEventListener('input', updateTextCounters);
+    weightsArea.addEventListener('input', updateTextCounters);
+    updateTextCounters();
+
+    // ============================================
+    // Счётчик строк и пустых ячеек табличного вида
+    // ============================================
+    function updateTableRowCounter() {
+        var rows = tracksTableBody.querySelectorAll('tr');
+        var filledCount = 0;
+        rows.forEach(function (row) {
+            var c = row.querySelector('.track-code-input').value.trim();
+            var o = row.querySelector('.owner-input').value.trim();
+            var w = row.querySelector('.weight-input').value.trim();
+            if (c || o || w) filledCount++;
+        });
+        tableRowCounter.textContent = 'Строк: ' + filledCount;
+    }
+
+    function getEmptyCells() {
+        // Возвращает массив input-элементов, которые пусты в строках с хотя бы одним заполненным полем
+        var rows = tracksTableBody.querySelectorAll('tr');
+        var emptyCells = [];
+        rows.forEach(function (row) {
+            var inputs = [
+                row.querySelector('.track-code-input'),
+                row.querySelector('.owner-input'),
+                row.querySelector('.weight-input')
+            ];
+            var values = inputs.map(function (inp) { return inp.value.trim(); });
+            var hasAny = values.some(function (v) { return v !== ''; });
+            if (hasAny) {
+                inputs.forEach(function (inp, i) {
+                    if (values[i] === '') emptyCells.push(inp);
+                });
+            }
+        });
+        return emptyCells;
+    }
+
+    function updateEmptyCellsCounter() {
+        if (!isTableMode) {
+            emptyCellsWarning.classList.add('hidden');
+            return;
+        }
+        var empty = getEmptyCells();
+        if (empty.length > 0) {
+            emptyCellsWarning.classList.remove('hidden');
+            emptyCellsCount.textContent = empty.length;
+        } else {
+            emptyCellsWarning.classList.add('hidden');
+        }
+    }
+
+    function clearAllRedBorders() {
+        tracksTableBody.querySelectorAll('.border-red-500').forEach(function (inp) {
+            inp.classList.remove('border-red-500', 'border-2');
+            inp.classList.add('border');
+        });
+    }
 
     function toggleFormView() {
         isTableMode = !isTableMode;
@@ -26,6 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
             weightsArea.removeAttribute('required');
             syncToTable();
             formToggleBtn.innerHTML = '<i class="ri-file-text-line"></i> Переключить на текстовый вид';
+            updateTableRowCounter();
+            updateEmptyCellsCounter();
         } else {
             standardView.classList.remove('hidden');
             tableView.classList.add('hidden');
@@ -33,7 +121,10 @@ document.addEventListener('DOMContentLoaded', function () {
             ownerUsernamesArea.setAttribute('required', '');
             weightsArea.setAttribute('required', '');
             syncFromTable();
+            clearAllRedBorders();
             formToggleBtn.innerHTML = '<i class="ri-table-line"></i> Переключить на табличный вид';
+            updateTextCounters();
+            updateEmptyCellsCounter();
         }
     }
 
@@ -51,11 +142,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inline-автозаполнение (ghost text в поле ввода)
     // ============================================
     var inlineAc = {
-        active: false,       // есть ли активная подсказка
-        input: null,         // текущий input с подсказкой
-        typedLen: 0,         // длина введённого пользователем текста
-        suggestion: '',      // полный логин подсказки
-        results: []          // все результаты (для textarea dropdown)
+        active: false,
+        input: null,
+        typedLen: 0,
+        suggestion: '',
+        results: []
     };
 
     function inlineClear() {
@@ -71,9 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
             inlineClear();
             return;
         }
-        // Берём первый результат
         var login = results[0].login;
-        // Подсказка должна начинаться с того, что набрал пользователь (без учёта регистра)
         if (login.toLowerCase().indexOf(typedQuery.toLowerCase()) !== 0) {
             inlineClear();
             return;
@@ -84,19 +173,16 @@ document.addEventListener('DOMContentLoaded', function () {
         inlineAc.typedLen = typedQuery.length;
         inlineAc.suggestion = login;
 
-        // Вставляем полный логин и выделяем дополненную часть
         input.value = typedQuery + login.substring(typedQuery.length);
         input.setSelectionRange(typedQuery.length, login.length);
     }
 
     function inlineAccept(input) {
         if (!inlineAc.active || inlineAc.input !== input) return false;
-        // Подтверждаем: курсор в конец
         input.value = inlineAc.suggestion;
         input.setSelectionRange(input.value.length, input.value.length);
         inlineClear();
 
-        // Перейти к следующему полю (вес)
         var td = input.closest('td');
         if (td) {
             var nextTd = td.nextElementSibling;
@@ -110,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function inlineReject(input) {
         if (!inlineAc.active || inlineAc.input !== input) return;
-        // Убираем подсказку, оставляем только набранный текст
         var typed = input.value.substring(0, inlineAc.typedLen);
         input.value = typed;
         input.setSelectionRange(typed.length, typed.length);
@@ -136,6 +221,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ============================================
+    // Нумерация строк
+    // ============================================
+    function updateRowNumbers() {
+        var rows = tracksTableBody.querySelectorAll('tr');
+        rows.forEach(function (row, i) {
+            var numCell = row.querySelector('.row-number');
+            if (numCell) numCell.textContent = i + 1;
+        });
+    }
+
+    // ============================================
     // Создание строки таблицы
     // ============================================
     function createRow(code, owner, weight) {
@@ -145,6 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var tr = document.createElement('tr');
         tr.innerHTML =
+            '<td class="border px-2 py-2 text-center text-sm text-gray-400 row-number w-12"></td>' +
             '<td class="border px-4 py-2">' +
             '<input type="text" class="w-full border rounded px-2 py-1 track-code-input" value="' + code + '" placeholder="Трек-код">' +
             '</td>' +
@@ -162,10 +259,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tr.querySelector('.delete-row-btn').addEventListener('click', function () {
             tr.remove();
+            updateRowNumbers();
+            updateTableRowCounter();
+            updateEmptyCellsCounter();
         });
 
         var inputs = tr.querySelectorAll('input');
         inputs.forEach(function (input, index) {
+            // Снимаем красную рамку при вводе
+            input.addEventListener('input', function () {
+                if (this.value.trim() !== '') {
+                    this.classList.remove('border-red-500', 'border-2');
+                    this.classList.add('border');
+                }
+                updateTableRowCounter();
+                updateEmptyCellsCounter();
+            });
+
             input.addEventListener('keydown', function (e) {
                 // Inline-автозаполнение: Enter подтверждает подсказку
                 if (inlineAc.active && inlineAc.input === this) {
@@ -212,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var lastRow = allRows[allRows.length - 1];
             if (tr === lastRow && this.value.trim() !== '') {
                 tracksTableBody.appendChild(createRow());
+                updateRowNumbers();
             }
         });
 
@@ -224,10 +335,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.owner) {
                             var ownerInput = tr.querySelector('.owner-input');
                             ownerInput.value = data.owner;
+                            ownerInput.classList.remove('border-red-500', 'border-2');
+                            ownerInput.classList.add('border');
                             var rowInputs = tr.querySelectorAll('input');
                             if (rowInputs[2]) {
                                 rowInputs[2].focus();
                             }
+                            updateEmptyCellsCounter();
                         }
                     })
                     .catch(function (err) { console.error('Error fetching owner:', err); });
@@ -287,7 +401,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ============================================
     function setupOwnerAutocomplete(input) {
         var fetchDebounced = debounce(function () {
-            // Если подсказка активна, берём только набранную часть
             var query;
             if (inlineAc.active && inlineAc.input === input) {
                 query = input.value.substring(0, inlineAc.typedLen).trim();
@@ -312,10 +425,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 250);
 
         input.addEventListener('input', function () {
-            // При вводе сбрасываем старую подсказку
             if (inlineAc.active && inlineAc.input === input) {
-                // Пользователь набирает дальше — обновляем typedLen
-                // Браузер заменяет выделение новым символом, value уже обновлён
                 inlineAc.active = false;
             }
             fetchDebounced();
@@ -347,6 +457,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 tracksTableBody.appendChild(createRow(c, o, w));
             }
         }
+        updateRowNumbers();
     }
 
     function syncFromTable() {
@@ -376,10 +487,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     addRowBtn.addEventListener('click', function () {
         tracksTableBody.appendChild(createRow());
+        updateRowNumbers();
+        updateTableRowCounter();
     });
 
     formEl.addEventListener('submit', function (e) {
         if (isTableMode) {
+            // Валидация пустых ячеек
+            clearAllRedBorders();
+            var empty = getEmptyCells();
+            if (empty.length > 0) {
+                e.preventDefault();
+                // Помечаем все пустые ячейки красной рамкой
+                empty.forEach(function (inp) {
+                    inp.classList.remove('border');
+                    inp.classList.add('border-red-500', 'border-2');
+                });
+                // Прокрутка к первой незаполненной ячейке (сверху вниз)
+                empty[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                empty[0].focus();
+                updateEmptyCellsCounter();
+                return;
+            }
+
             syncFromTable();
             trackCodesArea.setAttribute('required', '');
             ownerUsernamesArea.setAttribute('required', '');

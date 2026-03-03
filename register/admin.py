@@ -11,8 +11,9 @@ class PickupPointAdmin(admin.ModelAdmin):
 
 @admin.register(TempUser)
 class TempUserAdmin(admin.ModelAdmin):
-    list_display = ('login', 'pickup', 'created_at')
-    search_fields = ('login',)
+    list_display = ('login', 'phone', 'pickup', 'created_at')
+    list_editable = ('phone',)
+    search_fields = ('login', 'phone')
     list_filter = ('pickup',)
 
 

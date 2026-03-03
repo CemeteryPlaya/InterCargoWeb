@@ -141,13 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // Check if there are any receipts at all
-                var hasReceipts = data.clients.some(function (c) { return c.receipts.length > 0; });
-                if (!hasReceipts) {
-                    submitDirectly(pickupId, []);
-                    return;
-                }
-
                 openScanner(pickupId, pickupName, data.clients);
             })
             .catch(function (err) {
@@ -201,7 +194,19 @@ document.addEventListener('DOMContentLoaded', function () {
         renderClientsList();
 
         modal.classList.remove('hidden');
-        startCamera();
+
+        if (allExpectedReceipts.length > 0) {
+            startCamera();
+        } else {
+            // No receipts to scan (e.g. only TempUser tracks) — allow submit immediately
+            submitBtn.disabled = false;
+            qrReaderDiv.innerHTML =
+                '<div class="flex flex-col items-center justify-center py-6 text-yellow-600">' +
+                '<i class="ri-information-line text-5xl mb-2"></i>' +
+                '<p class="font-semibold text-lg">Нет QR-кодов для сканирования</p>' +
+                '<p class="text-sm text-gray-500 mt-1">У клиентов нет чеков — можно сразу взять в доставку</p>' +
+                '</div>';
+        }
     }
 
     function closeScanner() {
@@ -215,7 +220,10 @@ document.addEventListener('DOMContentLoaded', function () {
         clientsListEl.innerHTML = '';
 
         clientsData.forEach(function (client) {
-            if (client.receipts.length === 0) return;
+            var hasReceipts = client.receipts.length > 0;
+            var hasNoReceiptTracks = client.no_receipt_tracks > 0;
+
+            if (!hasReceipts && !hasNoReceiptTracks) return;
 
             var clientDiv = document.createElement('div');
             clientDiv.className = 'border border-gray-200 rounded-lg overflow-hidden';
@@ -254,6 +262,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clientDiv.appendChild(row);
             });
+
+            // Tracks without receipts (e.g. TempUser clients)
+            if (hasNoReceiptTracks) {
+                var noReceiptRow = document.createElement('div');
+                noReceiptRow.className = 'flex items-center gap-2 px-3 py-2 border-t border-gray-100 text-sm bg-yellow-50';
+                var noReceiptWeight = client.no_receipt_weight || 0;
+                noReceiptRow.innerHTML =
+                    '<i class="ri-information-line text-yellow-500 text-base"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="text-yellow-700 text-xs">Без чека: ' + client.no_receipt_tracks + ' шт. / ' +
+                    noReceiptWeight.toFixed(3) + ' кг</span>' +
+                    '</div>';
+                clientDiv.appendChild(noReceiptRow);
+            }
 
             clientsListEl.appendChild(clientDiv);
         });

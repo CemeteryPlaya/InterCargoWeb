@@ -167,7 +167,12 @@ class ArchivedTrackCode(models.Model):
 
 
 class Receipt(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Владелец")
+    temp_owner = models.ForeignKey(
+        'register.TempUser', on_delete=models.CASCADE,
+        null=True, blank=True, related_name='receipts',
+        verbose_name="Временный владелец"
+    )
     created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
@@ -233,7 +238,17 @@ class CustomerDiscount(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="discounts",
-        verbose_name="Пользователь"
+        verbose_name="Пользователь",
+        null=True,
+        blank=True,
+    )
+    temp_user = models.ForeignKey(
+        'register.TempUser',
+        on_delete=models.CASCADE,
+        related_name="discounts",
+        verbose_name="Временный пользователь",
+        null=True,
+        blank=True,
     )
     amount_per_kg = models.DecimalField(
         max_digits=6,
@@ -251,7 +266,8 @@ class CustomerDiscount(models.Model):
 
     def __str__(self):
         type_label = "Разовая" if self.is_temporary else "Постоянная"
-        return f"{type_label} скидка {self.amount_per_kg} ₸/кг ({self.user.username})"
+        owner_name = self.user.username if self.user else (self.temp_user.login if self.temp_user else "—")
+        return f"{type_label} скидка {self.amount_per_kg} ₸/кг ({owner_name})"
 
 class UserPushSubscription(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -377,6 +393,12 @@ class GlobalSettings(models.Model):
         decimal_places=2,
         default=1859,
         verbose_name="Цена за кг (₸/кг)"
+    )
+    discount_weight_threshold = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=30,
+        verbose_name="Порог веса для скидки (кг)"
     )
 
     class Meta:

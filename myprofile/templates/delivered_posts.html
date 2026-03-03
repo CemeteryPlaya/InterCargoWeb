@@ -145,23 +145,13 @@
               class="p-3 border-t">
               <!-- Кнопка оплаты -->
               {% if not receipt.is_paid %}
-              <div class="text-center mb-3 space-y-2">
+              <div class="text-center mb-3">
                 {% if receipt.payment_link %}
                 <a href="{{ receipt.payment_link }}" target="_blank"
                   class="inline-block bg-red-500 text-white font-medium px-4 py-2 rounded-button hover:bg-red-600 transition text-sm">
-                  Оплатить сейчас
+                  💳 Оплатить сейчас
                 </a>
                 {% endif %}
-                <form method="post" action="{% url 'pay_receipt' receipt.id %}" class="inline-block">
-                  {% csrf_token %}
-                  <div class="flex items-center gap-2 justify-center">
-                    <input type="datetime-local" name="paid_at" class="border border-gray-300 rounded px-2 py-1 text-xs">
-                    <button type="submit"
-                      class="bg-green-500 text-white font-medium px-3 py-1 rounded hover:bg-green-600 transition text-xs">
-                      Отметить оплату
-                    </button>
-                  </div>
-                </form>
               </div>
               {% endif %}
 
