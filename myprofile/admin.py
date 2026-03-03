@@ -107,9 +107,17 @@ class TrackCodeAdmin(admin.ModelAdmin):
 
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display = ('id', 'owner', 'created_at', 'is_paid', 'paid_at', 'total_weight', 'total_price')
+    list_display = ('id', 'client_display', 'created_at', 'is_paid', 'paid_at', 'total_weight', 'total_price')
     list_filter = ('is_paid', 'created_at')
-    search_fields = ('owner__username',)
+    search_fields = ('owner__username', 'temp_owner__login')
+
+    def client_display(self, obj):
+        if obj.owner:
+            return obj.owner.username
+        elif obj.temp_owner:
+            return f"{obj.temp_owner.login} (временный)"
+        return "—"
+    client_display.short_description = "Клиент"
 
 @admin.register(ReceiptItem)
 class ReceiptItemAdmin(admin.ModelAdmin):
@@ -117,9 +125,17 @@ class ReceiptItemAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount_per_kg', 'is_temporary', 'active', 'created_at')
+    list_display = ('client_display', 'amount_per_kg', 'is_temporary', 'active', 'created_at')
     list_filter = ('is_temporary', 'active')
-    search_fields = ('user__username',)
+    search_fields = ('user__username', 'temp_user__login')
+
+    def client_display(self, obj):
+        if obj.user:
+            return obj.user.username
+        elif obj.temp_user:
+            return f"{obj.temp_user.login} (временный)"
+        return "—"
+    client_display.short_description = "Клиент"
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
@@ -193,8 +209,8 @@ class ExtraditionAdmin(admin.ModelAdmin):
 
 @admin.register(GlobalSettings)
 class GlobalSettingsAdmin(admin.ModelAdmin):
-    list_display = ('price_per_kg',)
-    fields = ('price_per_kg',)
+    list_display = ('price_per_kg', 'discount_weight_threshold')
+    fields = ('price_per_kg', 'discount_weight_threshold')
 
     def has_add_permission(self, request):
         # Allow add only if no instance exists

@@ -70,30 +70,41 @@
                 <div id="standard_view" class="grid grid-cols-3 gap-4">
                     <!-- Трек-коды -->
                     <div>
-                        <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)</label>
+                        <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)
+                            <span id="text_count_tracks" class="text-sm text-gray-500 ml-2"></span>
+                        </label>
                         <textarea name="track_codes" id="track_codes" rows="10" required
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
 
                     <!-- Пользователи -->
                     <div>
-                        <label for="owner_usernames" class="block font-medium mb-1">Имена владельцев (по одному в строке)</label>
+                        <label for="owner_usernames" class="block font-medium mb-1">Имена владельцев (по одному в строке)
+                            <span id="text_count_owners" class="text-sm text-gray-500 ml-2"></span>
+                        </label>
                         <textarea name="owner_usernames" id="owner_usernames" rows="10" required
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
 
                     <!-- Вес -->
                     <div>
-                        <label for="weights" class="block font-medium mb-1">Вес (в кг, по одному в строке)</label>
+                        <label for="weights" class="block font-medium mb-1">Вес (в кг, по одному в строке)
+                            <span id="text_count_weights" class="text-sm text-gray-500 ml-2"></span>
+                        </label>
                         <textarea name="weights" id="weights" rows="10" required
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
                 </div>
 
                 <div id="table_view" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span id="table_row_counter" class="text-sm font-medium text-gray-600"></span>
+                    </div>
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead>
                             <tr>
+                                <th class="px-2 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wide w-12">
+                                    №</th>
                                 <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
                                     Трек-код</th>
                                 <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
@@ -113,7 +124,13 @@
                     </button>
                 </div>
 
-                <button type="submit"
+                <!-- Счётчик незаполненных ячеек (только для табличного вида) -->
+                <div id="empty_cells_warning" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                    <i class="ri-error-warning-line mr-1"></i>
+                    Незаполненных ячеек: <span id="empty_cells_count" class="font-semibold">0</span>
+                </div>
+
+                <button type="submit" id="submit_btn"
                     class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 mt-6 transition">Сохранить</button>
             </form>
         </div>

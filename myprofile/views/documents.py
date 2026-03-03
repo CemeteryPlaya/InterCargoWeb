@@ -11,7 +11,7 @@ from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 from django.db.models import Q
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount, round_price as _round_price, create_receipts_for_user
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, round_price as _round_price, create_receipts_for_user, create_receipts_for_temp_user
 
 
 def _generate_qr_base64(text):
@@ -59,12 +59,20 @@ def print_documents_view(request):
                     ReceiptItem.objects.filter(track_code_id__in=track_ids).values_list('track_code_id', flat=True)
                 )
                 owners_seen = set()
+                temp_owners_seen = set()
                 for track in tracks:
                     if track.owner_id and track.owner_id not in owners_seen:
                         if track.id not in existing_receipt_track_ids:
                             owners_seen.add(track.owner_id)
                             create_receipts_for_user(
                                 track.owner,
+                                statuses=('delivered', 'shipping_pp', 'ready', 'claimed'),
+                            )
+                    elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
+                        if track.id not in existing_receipt_track_ids:
+                            temp_owners_seen.add(track.temp_owner_id)
+                            create_receipts_for_temp_user(
+                                track.temp_owner,
                                 statuses=('delivered', 'shipping_pp', 'ready', 'claimed'),
                             )
 
@@ -88,17 +96,34 @@ def print_documents_view(request):
 
                 # Формируем список чеков для печати
                 checks = []
-                for entry in sorted(receipts_map.values(), key=lambda e: (e['receipt'].owner.username, e['receipt'].id)):
+                def _receipt_sort_key(e):
+                    r = e['receipt']
+                    name = r.owner.username if r.owner else (r.temp_owner.login if r.temp_owner else '')
+                    return (name, r.id)
+
+                for entry in sorted(receipts_map.values(), key=_receipt_sort_key):
                     receipt = entry['receipt']
-                    owner = receipt.owner
                     receipt_tracks = entry['tracks']
+
+                    # Имя клиента
+                    if receipt.owner:
+                        client_username = receipt.owner.username
+                    elif receipt.temp_owner:
+                        client_username = receipt.temp_owner.login
+                    else:
+                        client_username = ''
 
                     # Адрес
                     if receipt.pickup_point:
                         address = receipt.pickup_point
                     else:
                         try:
-                            address = str(owner.userprofile.pickup) if owner.userprofile.pickup else ''
+                            if receipt.owner:
+                                address = str(receipt.owner.userprofile.pickup) if receipt.owner.userprofile.pickup else ''
+                            elif receipt.temp_owner and receipt.temp_owner.pickup:
+                                address = str(receipt.temp_owner.pickup)
+                            else:
+                                address = ''
                         except (UserProfile.DoesNotExist, AttributeError):
                             address = ''
 
@@ -116,7 +141,7 @@ def print_documents_view(request):
                         total_weight += weight
 
                     checks.append({
-                        'username': owner.username,
+                        'username': client_username,
                         'address': address,
                         'tracks': track_rows,
                         'total_count': len(track_rows),

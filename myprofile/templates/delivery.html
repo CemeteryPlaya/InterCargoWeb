@@ -103,7 +103,7 @@
                             <div class="p-4 space-y-3">
                                 {% for client in home_delivery_clients %}
                                 <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 cursor-pointer transition">
-                                    <input type="checkbox" name="home_client_ids" value="{{ client.user_id }}"
+                                    <input type="checkbox" name="home_client_ids" value="{% if client.is_temp %}temp_{{ client.user_id }}{% else %}{{ client.user_id }}{% endif %}"
                                         class="w-4 h-4 text-orange-600 border-gray-300 rounded">
                                     <div class="flex-1">
                                         <span class="font-medium text-gray-800">{{ client.full_name }}</span>
@@ -209,7 +209,7 @@
                         </div>
                         <form method="post" action="{% url 'driver_issue' %}">
                             {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ client.user_id }}">
+                            <input type="hidden" name="user_id" value="{% if client.is_temp %}temp_{{ client.user_id }}{% else %}{{ client.user_id }}{% endif %}">
                             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm"
                                 onclick="return confirm('Подтвердить выдачу клиенту {{ client.full_name }}?')">
                                 <i class="ri-hand-coin-line"></i> Выдать

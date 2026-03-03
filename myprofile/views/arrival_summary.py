@@ -7,9 +7,10 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from collections import OrderedDict
 
-from myprofile.models import TrackCode
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount, is_staff as _is_staff, round_price as _round_price
+from myprofile.models import TrackCode, CustomerDiscount
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint, TempUser
+from django.contrib.auth.models import User
 
 
 def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weight):
@@ -44,6 +45,7 @@ def arrival_summary_view(request):
     )
 
     default_rate = get_global_price_per_kg()
+    discount_threshold = float(get_discount_weight_threshold())
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
 
     # Группируем по ПВЗ → Клиент
@@ -58,6 +60,8 @@ def arrival_summary_view(request):
         # === Временный пользователь (без регистрации) ===
         if not owner and track.temp_owner_id:
             temp_user = track.temp_owner
+            temp_discount = get_temp_user_discount(temp_user)
+            temp_effective_rate = default_rate - temp_discount
 
             has_override = track.delivery_pickup_id and track.delivery_pickup
             is_home = has_override and track.delivery_pickup.is_home_delivery
@@ -70,10 +74,10 @@ def arrival_summary_view(request):
                     home_clients[key] = {
                         'username': temp_user.login,
                         'full_name': temp_user.login,
-                        'phone': '',
+                        'phone': temp_user.phone or '',
                         'track_count': 0,
                         'total_weight': Decimal("0"),
-                        'effective_rate': default_rate,
+                        'effective_rate': temp_effective_rate,
                         'total_price': 0,
                         'is_temp': True,
                         'temp_user_id': temp_user.id,
@@ -88,10 +92,10 @@ def arrival_summary_view(request):
                 _add_to_pickup(pickups, dp.id, str(dp), key, {
                     'username': temp_user.login,
                     'full_name': temp_user.login,
-                    'phone': '',
+                    'phone': temp_user.phone or '',
                     'track_count': 0,
                     'total_weight': Decimal("0"),
-                    'effective_rate': default_rate,
+                    'effective_rate': temp_effective_rate,
                     'total_price': 0,
                     'is_temp': True,
                     'temp_user_id': temp_user.id,
@@ -104,10 +108,10 @@ def arrival_summary_view(request):
                 _add_to_pickup(pickups, pp.id, str(pp), key, {
                     'username': temp_user.login,
                     'full_name': temp_user.login,
-                    'phone': '',
+                    'phone': temp_user.phone or '',
                     'track_count': 0,
                     'total_weight': Decimal("0"),
-                    'effective_rate': default_rate,
+                    'effective_rate': temp_effective_rate,
                     'total_price': 0,
                     'is_temp': True,
                     'temp_user_id': temp_user.id,
@@ -120,7 +124,7 @@ def arrival_summary_view(request):
                         'login': temp_user.login,
                         'track_count': 0,
                         'total_weight': Decimal("0"),
-                        'effective_rate': default_rate,
+                        'effective_rate': temp_effective_rate,
                         'total_price': 0,
                     }
                 temp_clients[tid]['track_count'] += 1
@@ -203,6 +207,7 @@ def arrival_summary_view(request):
         'all_pickups': all_pickups,
         'home_pp_id': home_pp.id if home_pp else None,
         'warehouse_pp_id': warehouse_pp.id if warehouse_pp else None,
+        'discount_threshold': discount_threshold,
     })
 
 
@@ -289,5 +294,66 @@ def assign_temp_pickup(request):
         messages.success(request, f"Назначен ПВЗ для {count} клиентов: {pickup}")
     else:
         messages.info(request, "Нет клиентов для назначения.")
+
+    return redirect(f'/profile/arrival-summary/?date={date}')
+
+
+@login_required
+@require_POST
+def apply_discount(request):
+    """Применяет разовую скидку клиенту из страницы сводки прихода."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    user_id = request.POST.get('user_id')
+    temp_user_id = request.POST.get('temp_user_id')
+    amount_raw = request.POST.get('amount_per_kg', '').strip()
+    date = request.POST.get('date', '')
+
+    if not amount_raw:
+        messages.error(request, "Укажите размер скидки.")
+        return redirect(f'/profile/arrival-summary/?date={date}')
+
+    try:
+        amount = Decimal(amount_raw)
+        if amount <= 0:
+            raise ValueError
+    except (ValueError, Exception):
+        messages.error(request, "Некорректный размер скидки.")
+        return redirect(f'/profile/arrival-summary/?date={date}')
+
+    if user_id:
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            messages.error(request, "Пользователь не найден.")
+            return redirect(f'/profile/arrival-summary/?date={date}')
+        # Удаляем предыдущие активные разовые скидки
+        CustomerDiscount.objects.filter(
+            user=target_user, is_temporary=True, active=True
+        ).delete()
+        CustomerDiscount.objects.create(
+            user=target_user, amount_per_kg=amount,
+            is_temporary=True, active=True,
+            comment=f"Разовая скидка (сводка прихода {date})"
+        )
+        messages.success(request, f"Скидка {amount} ₸/кг применена для {target_user.username}")
+    elif temp_user_id:
+        try:
+            temp_user = TempUser.objects.get(id=temp_user_id)
+        except TempUser.DoesNotExist:
+            messages.error(request, "Клиент не найден.")
+            return redirect(f'/profile/arrival-summary/?date={date}')
+        CustomerDiscount.objects.filter(
+            temp_user=temp_user, is_temporary=True, active=True
+        ).delete()
+        CustomerDiscount.objects.create(
+            temp_user=temp_user, amount_per_kg=amount,
+            is_temporary=True, active=True,
+            comment=f"Разовая скидка (сводка прихода {date})"
+        )
+        messages.success(request, f"Скидка {amount} ₸/кг применена для {temp_user.login}")
+    else:
+        messages.error(request, "Не указан клиент.")
 
     return redirect(f'/profile/arrival-summary/?date={date}')

@@ -16,8 +16,8 @@ from myprofile.models import (
     TrackCode, Notification, DeliveryHistory,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
-from myprofile.views.utils import create_receipts_for_user, get_or_create_storage_cell
-from register.models import UserProfile, PickupPoint
+from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user, get_or_create_storage_cell
+from register.models import UserProfile, PickupPoint, TempUser
 
 logger = logging.getLogger(__name__)
 
@@ -34,30 +34,44 @@ def _get_home_delivery_clients(status):
     tracks = TrackCode.objects.filter(
         status=status,
         delivery_pickup__is_home_delivery=True,
-    ).select_related('owner', 'owner__userprofile')
+    ).select_related('owner', 'owner__userprofile', 'temp_owner')
 
     clients = {}
     for track in tracks:
-        owner = track.owner
-        if not owner:
+        if track.owner:
+            key = f'user_{track.owner.id}'
+            if key not in clients:
+                phone = ''
+                try:
+                    phone = track.owner.userprofile.phone
+                except (UserProfile.DoesNotExist, AttributeError):
+                    pass
+                clients[key] = {
+                    'user_id': track.owner.id,
+                    'username': track.owner.username,
+                    'full_name': track.owner.get_full_name() or track.owner.username,
+                    'phone': phone,
+                    'track_count': 0,
+                    'total_weight': 0,
+                    'is_temp': False,
+                }
+        elif track.temp_owner:
+            key = f'temp_{track.temp_owner.id}'
+            if key not in clients:
+                clients[key] = {
+                    'user_id': track.temp_owner.id,
+                    'username': track.temp_owner.login,
+                    'full_name': track.temp_owner.login,
+                    'phone': track.temp_owner.phone or '',
+                    'track_count': 0,
+                    'total_weight': 0,
+                    'is_temp': True,
+                }
+        else:
             continue
-        uid = owner.id
-        if uid not in clients:
-            phone = ''
-            try:
-                phone = owner.userprofile.phone
-            except (UserProfile.DoesNotExist, AttributeError):
-                pass
-            clients[uid] = {
-                'user_id': uid,
-                'username': owner.username,
-                'full_name': owner.get_full_name() or owner.username,
-                'phone': phone,
-                'track_count': 0,
-                'total_weight': 0,
-            }
-        clients[uid]['track_count'] += 1
-        clients[uid]['total_weight'] += float(track.weight or 0)
+
+        clients[key]['track_count'] += 1
+        clients[key]['total_weight'] += float(track.weight or 0)
 
     return list(clients.values())
 
@@ -80,12 +94,19 @@ def delivery_view(request):
                     userprofile__user__trackcode__delivery_pickup__isnull=True,
                 ),
             ),
+            _temp_count=Count(
+                'tempuser__track_codes',
+                filter=Q(
+                    tempuser__track_codes__status='delivered',
+                    tempuser__track_codes__delivery_pickup__isnull=True,
+                ),
+            ),
             _override_count=Count(
                 'delivery_tracks',
                 filter=Q(delivery_tracks__status='delivered'),
             ),
         )
-        .annotate(track_count=F('_normal_count') + F('_override_count'))
+        .annotate(track_count=F('_normal_count') + F('_temp_count') + F('_override_count'))
         .filter(track_count__gt=0)
         .order_by('id')
     )
@@ -102,12 +123,19 @@ def delivery_view(request):
                     userprofile__user__trackcode__delivery_pickup__isnull=True,
                 ),
             ),
+            _temp_count=Count(
+                'tempuser__track_codes',
+                filter=Q(
+                    tempuser__track_codes__status='shipping_pp',
+                    tempuser__track_codes__delivery_pickup__isnull=True,
+                ),
+            ),
             _override_count=Count(
                 'delivery_tracks',
                 filter=Q(delivery_tracks__status='shipping_pp'),
             ),
         )
-        .annotate(track_count=F('_normal_count') + F('_override_count'))
+        .annotate(track_count=F('_normal_count') + F('_temp_count') + F('_override_count'))
         .filter(track_count__gt=0)
         .order_by('id')
     )
@@ -133,19 +161,29 @@ def delivery_view(request):
             history_by_date[date_key] = []
 
         clients = {}
-        for track in entry.track_codes.all():
-            owner = track.owner
-            if owner:
-                key = owner.id
+        for track in entry.track_codes.select_related('owner', 'temp_owner'):
+            if track.owner:
+                key = f'user_{track.owner.id}'
                 if key not in clients:
                     clients[key] = {
-                        'username': owner.username,
-                        'full_name': owner.get_full_name() or owner.username,
+                        'username': track.owner.username,
+                        'full_name': track.owner.get_full_name() or track.owner.username,
                         'track_count': 0,
                         'total_weight': 0,
                     }
-                clients[key]['track_count'] += 1
-                clients[key]['total_weight'] += float(track.weight or 0)
+            elif track.temp_owner:
+                key = f'temp_{track.temp_owner.id}'
+                if key not in clients:
+                    clients[key] = {
+                        'username': track.temp_owner.login,
+                        'full_name': track.temp_owner.login,
+                        'track_count': 0,
+                        'total_weight': 0,
+                    }
+            else:
+                continue
+            clients[key]['track_count'] += 1
+            clients[key]['total_weight'] += float(track.weight or 0)
 
         entry.clients_list = list(clients.values())
         history_by_date[date_key].append(entry)
@@ -183,6 +221,7 @@ def take_delivery(request):
     today = now.date()
     updated = 0
     notif_counts = defaultdict(int)
+    temp_user_ids = set()  # Для автоформирования чеков временных пользователей
 
     # Обычные ПВЗ — берём только треки привязанные к отсканированным чекам
     if pickup_id:
@@ -222,6 +261,8 @@ def take_delivery(request):
                 updated += 1
                 if track.owner:
                     notif_counts[track.owner] += 1
+                elif track.temp_owner_id:
+                    temp_user_ids.add(track.temp_owner_id)
 
             if tracks:
                 history = DeliveryHistory.objects.create(
@@ -236,17 +277,29 @@ def take_delivery(request):
     # Доставка на дом
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
     if home_client_ids and home_pp:
-        for client_id in home_client_ids:
-            try:
-                client_user = User.objects.get(id=client_id)
-            except User.DoesNotExist:
-                continue
-
-            tracks = list(TrackCode.objects.filter(
-                status='delivered',
-                owner=client_user,
-                delivery_pickup=home_pp,
-            ))
+        for client_id_raw in home_client_ids:
+            # Определяем тип клиента: temp_123 или просто 123
+            if str(client_id_raw).startswith('temp_'):
+                temp_id = str(client_id_raw).replace('temp_', '')
+                try:
+                    temp_user = TempUser.objects.get(id=temp_id)
+                except TempUser.DoesNotExist:
+                    continue
+                tracks = list(TrackCode.objects.filter(
+                    status='delivered',
+                    temp_owner=temp_user,
+                    delivery_pickup=home_pp,
+                ))
+            else:
+                try:
+                    client_user = User.objects.get(id=client_id_raw)
+                except User.DoesNotExist:
+                    continue
+                tracks = list(TrackCode.objects.filter(
+                    status='delivered',
+                    owner=client_user,
+                    delivery_pickup=home_pp,
+                ))
 
             total_weight = sum(t.weight or 0 for t in tracks)
 
@@ -255,7 +308,10 @@ def take_delivery(request):
                 track.update_date = today
                 track.save()
                 updated += 1
-                notif_counts[client_user] += 1
+                if track.owner:
+                    notif_counts[track.owner] += 1
+                elif track.temp_owner_id:
+                    temp_user_ids.add(track.temp_owner_id)
 
             if tracks:
                 history = DeliveryHistory.objects.create(
@@ -283,6 +339,14 @@ def take_delivery(request):
     # Автоформирование чеков для затронутых клиентов
     for user in notif_counts.keys():
         create_receipts_for_user(user, statuses=('shipping_pp',))
+
+    # Автоформирование чеков для временных пользователей
+    for temp_id in temp_user_ids:
+        try:
+            temp_user = TempUser.objects.get(id=temp_id)
+            create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
+        except TempUser.DoesNotExist:
+            pass
 
     if updated:
         messages.success(request, f"Взято в доставку: {updated} посылок")
@@ -317,6 +381,7 @@ def complete_delivery(request):
 
         tracks = TrackCode.objects.filter(
             Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+            Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
             Q(delivery_pickup=pickup),
             status='shipping_pp',
         )
@@ -411,15 +476,9 @@ def driver_issue(request):
     if not _is_driver(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
-    user_id = request.POST.get('user_id')
-    if not user_id:
+    user_id_raw = request.POST.get('user_id')
+    if not user_id_raw:
         messages.error(request, "Не указан клиент.")
-        return redirect('delivery')
-
-    try:
-        client_user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        messages.error(request, "Клиент не найден.")
         return redirect('delivery')
 
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
@@ -427,11 +486,35 @@ def driver_issue(request):
         messages.error(request, "Пункт 'Доставка на дом' не настроен.")
         return redirect('delivery')
 
-    tracks = list(TrackCode.objects.filter(
-        status='shipping_pp',
-        owner=client_user,
-        delivery_pickup=home_pp,
-    ))
+    is_temp = str(user_id_raw).startswith('temp_')
+    client_user = None
+    temp_user = None
+
+    if is_temp:
+        temp_id = str(user_id_raw).replace('temp_', '')
+        try:
+            temp_user = TempUser.objects.get(id=temp_id)
+        except TempUser.DoesNotExist:
+            messages.error(request, "Клиент не найден.")
+            return redirect('delivery')
+        tracks = list(TrackCode.objects.filter(
+            status='shipping_pp',
+            temp_owner=temp_user,
+            delivery_pickup=home_pp,
+        ))
+        client_name = temp_user.login
+    else:
+        try:
+            client_user = User.objects.get(id=user_id_raw)
+        except User.DoesNotExist:
+            messages.error(request, "Клиент не найден.")
+            return redirect('delivery')
+        tracks = list(TrackCode.objects.filter(
+            status='shipping_pp',
+            owner=client_user,
+            delivery_pickup=home_pp,
+        ))
+        client_name = client_user.username
 
     if not tracks:
         messages.info(request, "Нет посылок для выдачи этому клиенту.")
@@ -440,30 +523,47 @@ def driver_issue(request):
     today = timezone.now().date()
 
     with transaction.atomic():
-        # Создаём чеки если ещё нет
-        receipt = create_receipts_for_user(client_user, statuses=('shipping_pp',))
+        if client_user:
+            # Создаём чеки если ещё нет
+            create_receipts_for_user(client_user, statuses=('shipping_pp',))
 
-        # Находим все чеки для текущих треков и помечаем как оплаченные
-        track_ids = [t.id for t in tracks]
-        receipts = Receipt.objects.filter(
-            items__track_code_id__in=track_ids
-        ).distinct()
-        receipts.update(is_paid=True)
+            # Находим все чеки для текущих треков и помечаем как оплаченные
+            track_ids = [t.id for t in tracks]
+            receipts = Receipt.objects.filter(
+                items__track_code_id__in=track_ids
+            ).distinct()
+            receipts.update(is_paid=True)
 
-        # Создаём пакет выдачи
-        package = ExtraditionPackage.objects.create(user=client_user)
-        package.receipts.set(receipts)
+            # Создаём пакет выдачи
+            package = ExtraditionPackage.objects.create(user=client_user)
+            package.receipts.set(receipts)
 
-        # Создаём запись выдачи
-        Extradition.objects.create(
-            package=package,
-            user=client_user,
-            issued_by=request.user,
-            pickup_point="Доставка на дом (Курьер)",
-            confirmed=True,
-        )
-        package.is_issued = True
-        package.save()
+            # Создаём запись выдачи
+            Extradition.objects.create(
+                package=package,
+                user=client_user,
+                issued_by=request.user,
+                pickup_point="Доставка на дом (Курьер)",
+                confirmed=True,
+            )
+            package.is_issued = True
+            package.save()
+
+            # Уведомление клиенту
+            Notification.objects.create(
+                user=client_user,
+                message=f"📦 Ваши посылки ({len(tracks)} шт.) доставлены курьером. Штрихкод: {package.barcode}"
+            )
+        elif temp_user:
+            # Создаём чеки для временного пользователя
+            create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
+
+            # Находим все чеки для текущих треков и помечаем как оплаченные
+            track_ids = [t.id for t in tracks]
+            receipts = Receipt.objects.filter(
+                items__track_code_id__in=track_ids
+            ).distinct()
+            receipts.update(is_paid=True)
 
         # Меняем статус треков на claimed
         for track in tracks:
@@ -471,13 +571,7 @@ def driver_issue(request):
             track.update_date = today
             track.save()
 
-        # Уведомление клиенту
-        Notification.objects.create(
-            user=client_user,
-            message=f"📦 Ваши посылки ({len(tracks)} шт.) доставлены курьером. Штрихкод: {package.barcode}"
-        )
-
-    messages.success(request, f"Выдано клиенту {client_user.username}: {len(tracks)} посылок")
+    messages.success(request, f"Выдано клиенту {client_name}: {len(tracks)} посылок")
     return redirect('delivery')
 
 
@@ -507,10 +601,14 @@ def get_pickup_receipts(request):
 
     # Автосоздание чеков для треков в 'delivered', у которых ещё нет ReceiptItem
     owners_seen = set()
+    temp_owners_seen = set()
     for track in tracks:
         if track.owner and track.owner_id not in owners_seen:
             owners_seen.add(track.owner_id)
             create_receipts_for_user(track.owner, statuses=('delivered',))
+        elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
+            temp_owners_seen.add(track.temp_owner_id)
+            create_receipts_for_temp_user(track.temp_owner, statuses=('delivered',))
 
     track_ids = [t.id for t in tracks]
 
@@ -518,20 +616,26 @@ def get_pickup_receipts(request):
     items = (
         ReceiptItem.objects
         .filter(track_code_id__in=track_ids)
-        .select_related('receipt', 'receipt__owner', 'track_code')
+        .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code')
     )
 
     # Группируем: клиент → список чеков
     clients_map = {}  # username → { ... , receipts: { number → { tracks, weight } } }
     for item in items:
         receipt = item.receipt
-        owner = receipt.owner
-        username = owner.username
+        if receipt.owner:
+            username = receipt.owner.username
+            full_name = receipt.owner.get_full_name() or username
+        elif receipt.temp_owner:
+            username = receipt.temp_owner.login
+            full_name = receipt.temp_owner.login
+        else:
+            continue
 
         if username not in clients_map:
             clients_map[username] = {
                 'username': username,
-                'full_name': owner.get_full_name() or username,
+                'full_name': full_name,
                 'receipts': {},
             }
 

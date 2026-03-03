@@ -63,6 +63,7 @@ urlpatterns = [
     path('arrival-summary/', arrival_summary.arrival_summary_view, name='arrival_summary'),
     path('arrival-summary/toggle/', arrival_summary.toggle_home_delivery, name='toggle_home_delivery'),
     path('arrival-summary/assign-temp-pickup/', arrival_summary.assign_temp_pickup, name='assign_temp_pickup'),
+    path('arrival-summary/apply-discount/', arrival_summary.apply_discount, name='apply_discount'),
     path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
     path('delivery/receipts/', delivery.get_pickup_receipts, name='get_pickup_receipts'),
     path('pp-acceptance/', pp_acceptance.pp_acceptance_view, name='pp_acceptance'),

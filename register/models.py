@@ -80,6 +80,7 @@ class PasswordResetCode(models.Model):
 class TempUser(models.Model):
     """Временные пользователи — клиенты, на которых пришли посылки, но которые ещё не зарегистрированы."""
     login = models.CharField(max_length=150, unique=True, verbose_name="Логин")
+    phone = models.CharField(max_length=20, blank=True, default='', verbose_name="Телефон")
     pickup = models.ForeignKey(
         PickupPoint, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ПВЗ"
     )

@@ -266,7 +266,8 @@
                                     <td class="py-3 px-4 text-center" data-val="{{ client.track_count }}">{{ client.track_count }}</td>
                                     <td class="py-3 px-4 text-right" data-val="{{ client.total_weight }}">{{ client.total_weight }}</td>
                                     <td class="py-3 px-4 text-right font-medium" data-val="{{ client.total_price }}">{{ client.total_price }}</td>
-                                    <td class="py-3 px-4 text-center flex gap-1 justify-center flex-wrap">
+                                    <td class="py-3 px-4 text-center">
+                                        <div class="flex gap-1 justify-center flex-wrap">
                                         {% if client.is_override %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
@@ -282,7 +283,14 @@
                                             </button>
                                         </form>
                                         {% else %}
-                                        {% if home_pp_id %}
+                                        {% if client.total_weight >= discount_threshold %}
+                                        <button type="button" class="discount-btn text-xs bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200 transition"
+                                            data-user-id="{% if client.is_temp %}{% else %}{{ uid }}{% endif %}"
+                                            data-temp-user-id="{% if client.is_temp %}{{ client.temp_user_id }}{% endif %}"
+                                            data-client-name="{{ client.full_name }}">
+                                            <i class="ri-percent-line"></i> Ввести скидку
+                                        </button>
+                                        {% endif %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
                                             {% if client.is_temp %}
@@ -296,7 +304,6 @@
                                                 <i class="ri-home-4-line"></i> На дом
                                             </button>
                                         </form>
-                                        {% endif %}
                                         {% if warehouse_pp_id %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
@@ -314,6 +321,7 @@
                                         </form>
                                         {% endif %}
                                         {% endif %}
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -323,6 +331,34 @@
                 </details>
             </div>
             {% endfor %}
+
+            <!-- Модалка ввода скидки -->
+            <div id="discountModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                        <i class="ri-percent-line text-green-600"></i> Ввести разовую скидку
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">Клиент: <span id="discountClientName" class="font-medium text-gray-700"></span></p>
+                    <form method="post" action="{% url 'apply_discount' %}" id="discountForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="date" value="{{ selected_date }}">
+                        <input type="hidden" name="user_id" id="discountUserId" value="">
+                        <input type="hidden" name="temp_user_id" id="discountTempUserId" value="">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Скидка (₸/кг)</label>
+                        <input type="number" name="amount_per_kg" step="0.01" min="1" required
+                            class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-green-400"
+                            placeholder="Например: 100">
+                        <div class="flex gap-3 justify-end">
+                            <button type="button" id="discountCancelBtn" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
+                                Отмена
+                            </button>
+                            <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition">
+                                <i class="ri-check-line"></i> Применить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             {% endif %}
         </main>
@@ -334,18 +370,19 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // === Сортировка таблиц ===
-        document.querySelectorAll('.sortable-table').forEach(function(table) {
+        function initSortableTable(table) {
             var ths = table.querySelectorAll('.sortable-th');
             ths.forEach(function(th) {
+                if (th.dataset.sortBound) return;
+                th.dataset.sortBound = '1';
                 th.addEventListener('click', function() {
                     var tbody = table.querySelector('tbody');
-                    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+                    var rows = Array.prototype.slice.call(tbody.querySelectorAll(':scope > tr'));
                     var colIdx = Array.prototype.indexOf.call(th.parentNode.children, th);
-                    var sortType = th.dataset.sort; // 'string' or 'number'
+                    var sortType = th.dataset.sort;
                     var asc = th.dataset.dir !== 'asc';
                     th.dataset.dir = asc ? 'asc' : 'desc';
 
-                    // Сбрасываем иконки на остальных заголовках
                     ths.forEach(function(h) {
                         var icon = h.querySelector('i');
                         if (h === th) {
@@ -359,15 +396,15 @@
                     rows.sort(function(a, b) {
                         var cellA = a.children[colIdx];
                         var cellB = b.children[colIdx];
-                        var valA = cellA ? (cellA.dataset.val || cellA.textContent.trim()) : '';
-                        var valB = cellB ? (cellB.dataset.val || cellB.textContent.trim()) : '';
+                        var valA = cellA ? (cellA.dataset.val !== undefined ? cellA.dataset.val : cellA.textContent.trim()) : '';
+                        var valB = cellB ? (cellB.dataset.val !== undefined ? cellB.dataset.val : cellB.textContent.trim()) : '';
                         if (sortType === 'number') {
-                            valA = parseFloat(valA) || 0;
-                            valB = parseFloat(valB) || 0;
+                            valA = parseFloat(String(valA).replace(/[^\d.\-]/g, '')) || 0;
+                            valB = parseFloat(String(valB).replace(/[^\d.\-]/g, '')) || 0;
                             return asc ? valA - valB : valB - valA;
                         }
-                        valA = valA.toLowerCase();
-                        valB = valB.toLowerCase();
+                        valA = String(valA).toLowerCase();
+                        valB = String(valB).toLowerCase();
                         if (valA < valB) return asc ? -1 : 1;
                         if (valA > valB) return asc ? 1 : -1;
                         return 0;
@@ -375,6 +412,17 @@
 
                     rows.forEach(function(row) { tbody.appendChild(row); });
                 });
+            });
+        }
+
+        document.querySelectorAll('.sortable-table').forEach(initSortableTable);
+
+        // Переинициализация сортировки при открытии details
+        document.querySelectorAll('details').forEach(function(details) {
+            details.addEventListener('toggle', function() {
+                if (details.open) {
+                    details.querySelectorAll('.sortable-table').forEach(initSortableTable);
+                }
             });
         });
 
@@ -391,75 +439,115 @@
         var bulkHiddenInputs = document.getElementById('bulkHiddenInputs');
         var copyLoginsBtn = document.getElementById('copyLoginsBtn');
 
-        if (!bulkSelectBtn) return;
-
         var bulkMode = false;
 
-        function toggleBulkMode(on) {
-            bulkMode = on;
-            var cols = document.querySelectorAll('.bulk-col');
-            cols.forEach(function(c) { c.classList.toggle('hidden', !on); });
-            bulkPanel.classList.toggle('hidden', !on);
-            if (!on) {
-                document.querySelectorAll('.bulk-check').forEach(function(cb) { cb.checked = false; });
-                updateBulkCount();
+        if (bulkSelectBtn) {
+            function toggleBulkMode(on) {
+                bulkMode = on;
+                var cols = document.querySelectorAll('.bulk-col');
+                cols.forEach(function(c) { c.classList.toggle('hidden', !on); });
+                bulkPanel.classList.toggle('hidden', !on);
+                var rows = document.querySelectorAll('#tempClientsTable tbody tr[data-tid]');
+                rows.forEach(function(r) {
+                    r.classList.toggle('cursor-pointer', on);
+                    r.classList.toggle('hover:bg-purple-50', on);
+                    if (!on) r.classList.remove('bg-purple-50');
+                });
+                if (!on) {
+                    document.querySelectorAll('.bulk-check').forEach(function(cb) { cb.checked = false; });
+                    updateBulkCount();
+                }
             }
+
+            function updateBulkCount() {
+                var checked = document.querySelectorAll('.bulk-check:checked');
+                bulkCount.textContent = checked.length;
+                bulkAssignBtn.disabled = checked.length === 0;
+            }
+
+            bulkSelectBtn.addEventListener('click', function() { toggleBulkMode(true); });
+            bulkCancelBtn.addEventListener('click', function() { toggleBulkMode(false); });
+
+            bulkSelectAll.addEventListener('click', function() {
+                var checks = document.querySelectorAll('.bulk-check');
+                var allChecked = Array.prototype.every.call(checks, function(c) { return c.checked; });
+                checks.forEach(function(c) { c.checked = !allChecked; });
+                updateBulkCount();
+            });
+
+            document.getElementById('tempClientsTable').addEventListener('change', function(e) {
+                if (e.target.classList.contains('bulk-check')) updateBulkCount();
+            });
+
+            document.getElementById('tempClientsTable').addEventListener('click', function(e) {
+                if (!bulkMode) return;
+                if (e.target.closest('input, button, a, select')) return;
+                var row = e.target.closest('tr[data-tid]');
+                if (!row) return;
+                var cb = row.querySelector('.bulk-check');
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    updateBulkCount();
+                    row.classList.toggle('bg-purple-50', cb.checked);
+                }
+            });
+
+            bulkAssignBtn.addEventListener('click', function() {
+                var checked = document.querySelectorAll('.bulk-check:checked');
+                if (checked.length === 0) return;
+                modalBulkCount.textContent = checked.length;
+                bulkHiddenInputs.innerHTML = '';
+                checked.forEach(function(cb) {
+                    var inp = document.createElement('input');
+                    inp.type = 'hidden';
+                    inp.name = 'temp_user_id';
+                    inp.value = cb.value;
+                    bulkHiddenInputs.appendChild(inp);
+                });
+                bulkPickupModal.classList.remove('hidden');
+            });
+
+            modalCancelBtn.addEventListener('click', function() {
+                bulkPickupModal.classList.add('hidden');
+            });
+            bulkPickupModal.addEventListener('click', function(e) {
+                if (e.target === bulkPickupModal) bulkPickupModal.classList.add('hidden');
+            });
+
+            copyLoginsBtn.addEventListener('click', function() {
+                var rows = document.querySelectorAll('#tempClientsTable tbody tr[data-login]');
+                var logins = [];
+                rows.forEach(function(r) { logins.push(r.dataset.login); });
+                var text = logins.join('\n');
+                navigator.clipboard.writeText(text).then(function() {
+                    var orig = copyLoginsBtn.innerHTML;
+                    copyLoginsBtn.innerHTML = '<i class="ri-check-line"></i> Скопировано!';
+                    setTimeout(function() { copyLoginsBtn.innerHTML = orig; }, 2000);
+                });
+            });
         }
 
-        function updateBulkCount() {
-            var checked = document.querySelectorAll('.bulk-check:checked');
-            bulkCount.textContent = checked.length;
-            bulkAssignBtn.disabled = checked.length === 0;
+        // === Модалка скидки ===
+        var discountModal = document.getElementById('discountModal');
+        var discountCancelBtn = document.getElementById('discountCancelBtn');
+        if (discountModal) {
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.discount-btn');
+                if (!btn) return;
+                document.getElementById('discountUserId').value = btn.dataset.userId || '';
+                document.getElementById('discountTempUserId').value = btn.dataset.tempUserId || '';
+                document.getElementById('discountClientName').textContent = btn.dataset.clientName || '';
+                discountModal.querySelector('input[name="amount_per_kg"]').value = '';
+                discountModal.classList.remove('hidden');
+            });
+
+            discountCancelBtn.addEventListener('click', function() {
+                discountModal.classList.add('hidden');
+            });
+            discountModal.addEventListener('click', function(e) {
+                if (e.target === discountModal) discountModal.classList.add('hidden');
+            });
         }
-
-        bulkSelectBtn.addEventListener('click', function() { toggleBulkMode(true); });
-        bulkCancelBtn.addEventListener('click', function() { toggleBulkMode(false); });
-
-        bulkSelectAll.addEventListener('click', function() {
-            var checks = document.querySelectorAll('.bulk-check');
-            var allChecked = Array.prototype.every.call(checks, function(c) { return c.checked; });
-            checks.forEach(function(c) { c.checked = !allChecked; });
-            updateBulkCount();
-        });
-
-        document.getElementById('tempClientsTable').addEventListener('change', function(e) {
-            if (e.target.classList.contains('bulk-check')) updateBulkCount();
-        });
-
-        bulkAssignBtn.addEventListener('click', function() {
-            var checked = document.querySelectorAll('.bulk-check:checked');
-            if (checked.length === 0) return;
-            modalBulkCount.textContent = checked.length;
-            bulkHiddenInputs.innerHTML = '';
-            checked.forEach(function(cb) {
-                var inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = 'temp_user_id';
-                inp.value = cb.value;
-                bulkHiddenInputs.appendChild(inp);
-            });
-            bulkPickupModal.classList.remove('hidden');
-        });
-
-        modalCancelBtn.addEventListener('click', function() {
-            bulkPickupModal.classList.add('hidden');
-        });
-        bulkPickupModal.addEventListener('click', function(e) {
-            if (e.target === bulkPickupModal) bulkPickupModal.classList.add('hidden');
-        });
-
-        // Копировать логины
-        copyLoginsBtn.addEventListener('click', function() {
-            var rows = document.querySelectorAll('#tempClientsTable tbody tr[data-login]');
-            var logins = [];
-            rows.forEach(function(r) { logins.push(r.dataset.login); });
-            var text = logins.join('\n');
-            navigator.clipboard.writeText(text).then(function() {
-                var orig = copyLoginsBtn.innerHTML;
-                copyLoginsBtn.innerHTML = '<i class="ri-check-line"></i> Скопировано!';
-                setTimeout(function() { copyLoginsBtn.innerHTML = orig; }, 2000);
-            });
-        });
     });
     </script>
 </body>
