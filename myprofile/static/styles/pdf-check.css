@@ -21,7 +21,7 @@ body {
 .check-header {
     position: relative;
     margin-bottom: 5px;
-    min-height: 70px;
+    min-height: 100px;
 }
 
 .logo {
@@ -46,8 +46,8 @@ body {
 }
 
 .qr-item img {
-    width: 55px;
-    height: 55px;
+    width: 83px;
+    height: 83px;
 }
 
 .qr-number {
