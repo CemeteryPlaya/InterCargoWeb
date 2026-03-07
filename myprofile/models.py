@@ -4,8 +4,7 @@ from django.core.exceptions import ValidationError
 import uuid
 from io import BytesIO
 import base64
-from barcode import Code128
-from barcode.writer import ImageWriter
+import qrcode
 import inspect
 from django.utils import timezone
 
@@ -78,6 +77,7 @@ class TrackCode(models.Model):
         null=True, blank=True,
         verbose_name="Дата прихода на сорт. склад"
     )
+    pp_sorted = models.BooleanField(default=False, verbose_name="Отсортирован на ПВЗ")
 
     def clean(self):
         """
@@ -198,7 +198,6 @@ class Receipt(models.Model):
 
     def get_qr_base64(self):
         """Генерирует QR-код из номера чека и возвращает base64-строку."""
-        import qrcode
         qr = qrcode.make(self.receipt_number, box_size=4, border=1)
         buffer = BytesIO()
         qr.save(buffer, format='PNG')
@@ -374,12 +373,11 @@ class ExtraditionPackage(models.Model):
         except Exception:
             return "Не указан"
 
-    def get_barcode_base64(self):
-        """
-        Генерирует штрихкод на лету и возвращает base64-строку для отображения в шаблоне.
-        """
+    def get_qr_base64(self):
+        """Генерирует QR-код на лету и возвращает base64-строку для отображения в шаблоне."""
+        qr = qrcode.make(self.barcode, box_size=6, border=2)
         buffer = BytesIO()
-        Code128(self.barcode, writer=ImageWriter()).write(buffer)
+        qr.save(buffer, format='PNG')
         encoded = base64.b64encode(buffer.getvalue()).decode()
         return f"data:image/png;base64,{encoded}"
 

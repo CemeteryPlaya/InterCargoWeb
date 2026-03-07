@@ -58,14 +58,14 @@
                             <h3 class="font-semibold text-gray-800">{{ pp.address }}</h3>
                             <p class="text-sm text-gray-500">{{ pp.premise_name }}</p>
                             <div class="mt-2 flex items-center gap-2">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    <i class="ri-truck-line mr-1"></i> {{ pp.track_count }} в доставке
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="ri-inbox-archive-line mr-1"></i> {{ pp.track_count }} для сортировки
                                 </span>
                             </div>
                         </div>
                         <button type="button" class="scan-accept-btn w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm"
                                 data-pickup-id="{{ pp.id }}" data-pickup-name="{{ pp.address }} — {{ pp.premise_name }}">
-                            <i class="ri-qr-scan-2-line mr-1"></i> Сканировать и принять
+                            <i class="ri-qr-scan-2-line mr-1"></i> Сканировать и отсортировать
                         </button>
                     </div>
                     {% endfor %}
@@ -74,7 +74,7 @@
                 <div class="text-center py-12 text-gray-500">
                     <i class="ri-inbox-archive-line text-4xl mb-2"></i>
                     <p>Нет посылок для приёмки</p>
-                    <p class="text-sm text-gray-400 mt-1">Здесь будут отображаться посылки, доставляемые водителем</p>
+                    <p class="text-sm text-gray-400 mt-1">Здесь будут отображаться посылки, доставленные водителем для сортировки</p>
                 </div>
                 {% endif %}
             </div>
@@ -91,6 +91,16 @@
                 </div>
 
                 <div class="px-5 py-4">
+                    <!-- Ввод сканером -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">
+                            <i class="ri-barcode-box-line mr-1"></i> Ввод сканером / вручную
+                        </label>
+                        <input type="text" id="qr-scanner-input"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Наведите сканер или введите код чека" autocomplete="off">
+                    </div>
+
                     <!-- Camera -->
                     <div id="qr-reader" class="w-full rounded-lg overflow-hidden mb-4"></div>
 
@@ -121,13 +131,13 @@
                     </button>
                     <button id="qr-submit-btn" type="button" disabled
                         class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="ri-checkbox-circle-line mr-1"></i> Принять на ПВЗ
+                        <i class="ri-checkbox-circle-line mr-1"></i> Отсортировать
                     </button>
                 </div>
             </div>
         </div>
 
-        <script src="{% static 'scripts/ppAcceptance.js' %}?v=2"></script>
+        <script src="{% static 'scripts/ppAcceptance.js' %}?v=4"></script>
     </div>
     {% endblock %}
 

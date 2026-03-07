@@ -7,13 +7,22 @@
     var closeBtn = document.getElementById('barcode-modal-close');
     var copyBtn = document.getElementById('barcode-copy-btn');
     var downloadLink = document.getElementById('barcode-download-link');
+    var paymentLinkEl = document.getElementById('barcode-payment-link');
 
-    function openModal(barcodeText, imgData) {
-        title.textContent = 'Штрихкод ' + barcodeText;
+    function openModal(barcodeText, imgData, paymentUrl) {
+        title.textContent = 'QR-код ' + barcodeText;
         codeEl.textContent = barcodeText;
         img.src = imgData;
         downloadLink.href = imgData;
         downloadLink.setAttribute('download', barcodeText + '.png');
+        if (paymentLinkEl) {
+            if (paymentUrl) {
+                paymentLinkEl.href = paymentUrl;
+                paymentLinkEl.classList.remove('hidden');
+            } else {
+                paymentLinkEl.classList.add('hidden');
+            }
+        }
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -22,6 +31,7 @@
         modal.classList.remove('flex');
         modal.classList.add('hidden');
         img.src = '';
+        if (paymentLinkEl) paymentLinkEl.classList.add('hidden');
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -69,7 +79,7 @@
             .then(function(resp) { return resp.json(); })
             .then(function(data) {
                 if (data.success) {
-                    openModal(data.barcode, data.barcode_base64);
+                    openModal(data.barcode, data.qr_base64, data.payment_link);
                 } else {
                     alert(data.error || 'Ошибка');
                 }

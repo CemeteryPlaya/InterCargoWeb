@@ -75,9 +75,12 @@
                             <div class="flex-1 mb-3">
                                 <h3 class="font-semibold text-gray-800">{{ pp.address }}</h3>
                                 <p class="text-sm text-gray-500">{{ pp.premise_name }}</p>
-                                <div class="mt-2 flex items-center gap-2">
+                                <div class="mt-2 flex items-center gap-2 flex-wrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                         <i class="ri-archive-line mr-1"></i> {{ pp.track_count }} посылок
+                                    </span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="ri-user-line mr-1"></i> {{ pp.client_count }} клиентов
                                     </span>
                                 </div>
                             </div>

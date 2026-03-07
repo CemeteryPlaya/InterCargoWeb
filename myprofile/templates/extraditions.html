@@ -17,6 +17,7 @@
     <script src="{% static 'scripts/phone.js' %}"></script>
     <script src="{% static 'scripts/forms.js' %}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
@@ -64,12 +65,12 @@
 
                         <div>
                             <label for="barcode" class="block font-medium mb-2">
-                                Штрихкод пакета <span class="text-sm text-gray-400">(обязательно)</span>
+                                QR-код пакета <span class="text-sm text-gray-400">(обязательно)</span>
                             </label>
                             <div class="flex gap-2">
                                 <input type="text" name="barcode" id="barcode" required
                                     class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
-                                    placeholder="Введите штрихкод пакета" autocomplete="off">
+                                    placeholder="Введите или отсканируйте QR-код пакета" autocomplete="off">
                                 <button type="button" id="searchBtn"
                                     class="bg-secondary text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition">
                                     <i class="ri-search-line"></i>
@@ -111,15 +112,25 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
                             <button type="submit" id="submitBtn" disabled
-                                class="inline-flex items-center gap-2 bg-gray-400 text-white px-5 py-2 rounded-button transition cursor-not-allowed">
+                                class="hidden inline-flex items-center gap-2 bg-gray-400 text-white px-5 py-2 rounded-button transition cursor-not-allowed">
                                 <i class="ri-check-line"></i> Оформить выдачу
+                            </button>
+
+                            <button type="button" id="verifyBtn" disabled
+                                class="hidden inline-flex items-center gap-2 bg-green-500 text-white px-5 py-2 rounded-lg transition opacity-50 cursor-not-allowed">
+                                <i class="ri-qr-scan-2-line"></i> Проверить и выдать
                             </button>
 
                             <button type="button" id="clearBtn"
                                 class="inline-flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50">
                                 <i class="ri-delete-bin-line"></i> Очистить
+                            </button>
+
+                            <button type="button" id="scanBarcodeBtn"
+                                class="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                <i class="ri-camera-line"></i> Сканировать
                             </button>
                         </div>
                     </form>
@@ -130,10 +141,73 @@
     {% endblock %}
     {% include 'includes/footer.html' %}
 
+    <!-- Модалка сканирования штрихкода камерой -->
+    <div id="barcode-scan-modal" class="hidden fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-60 overflow-y-auto py-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="ri-camera-line mr-1"></i> Сканирование QR-кода
+                </h3>
+                <button id="barcode-modal-close" type="button" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-5 py-4">
+                <div id="barcode-reader" class="w-full rounded-lg overflow-hidden mb-4"></div>
+                <div id="barcode-scan-result" class="hidden p-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm text-center">
+                    <i class="ri-checkbox-circle-fill mr-1"></i> <span id="barcode-scan-text"></span>
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t bg-gray-50 flex gap-3">
+                <button id="barcode-cancel-btn" type="button" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка QR-верификации чеков -->
+    <div id="qr-verify-modal" class="hidden fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-60 overflow-y-auto py-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="ri-qr-scan-2-line mr-1"></i> Проверка чеков для выдачи
+                </h3>
+                <button id="qr-verify-close" type="button" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+
+            <div class="px-5 py-4">
+                <div id="qr-verify-reader" class="w-full rounded-lg overflow-hidden mb-4"></div>
+
+                <div id="qr-verify-status" class="mb-4">
+                    <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                        <span>Отсканировано: <strong id="qr-verify-scanned">0</strong> / <strong id="qr-verify-total">0</strong></span>
+                        <span id="qr-verify-percent" class="font-medium text-primary">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="qr-verify-bar" class="bg-primary h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="qr-verify-feedback" class="hidden mb-3 p-2 rounded-lg text-sm text-center"></div>
+
+                <div id="qr-verify-receipts-list" class="max-h-60 overflow-y-auto space-y-2"></div>
+            </div>
+
+            <div class="px-5 py-4 border-t bg-gray-50 flex gap-3">
+                <button id="qr-verify-cancel" type="button" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                    Отмена
+                </button>
+                <button id="qr-verify-submit" type="button" disabled
+                    class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="ri-check-line mr-1"></i> Оформить выдачу
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="extradition-config" class="hidden"
          data-search-url="{% url 'extradition_search' %}"
          data-toggle-url="{% url 'extradition_toggle_payment' %}"></div>
-    <script src="{% static 'scripts/extraditions.js' %}?v=2"></script>
+    <script src="{% static 'scripts/extraditions.js' %}?v=4"></script>
 </body>
 
 </html>

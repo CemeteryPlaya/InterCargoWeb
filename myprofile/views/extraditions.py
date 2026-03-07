@@ -137,6 +137,7 @@ def search_package(request):
 
             receipts_data.append({
                 'receipt_id': receipt.id,
+                'receipt_number': receipt.receipt_number,
                 'created_at': receipt.created_at.strftime('%d.%m.%Y') if receipt.created_at else '',
                 'is_paid': receipt.is_paid,
                 'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
