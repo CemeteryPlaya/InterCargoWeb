@@ -5,12 +5,9 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q, F
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings as django_settings
-from collections import defaultdict
 import json
 import logging
-from myprofile.models import TrackCode, Notification, DeliveryHistory, ReceiptItem
+from myprofile.models import TrackCode, ReceiptItem, StorageCell
 from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user, get_or_create_storage_cell
 from register.models import UserProfile, PickupPoint
 
@@ -36,13 +33,12 @@ def _get_worker_pickup(user):
 
 @login_required
 def pp_acceptance_view(request):
-    """Страница приёмки товара на ПВЗ."""
+    """Страница приёмки товара на ПВЗ — показывает доставленные (ready) неотсортированные посылки."""
     if not _can_accept(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
 
     pickup = _get_worker_pickup(request.user)
 
-    # Для is_staff показываем все ПВЗ, для pp_worker — только свой
     is_staff = False
     try:
         is_staff = request.user.userprofile.is_staff
@@ -56,13 +52,17 @@ def pp_acceptance_view(request):
             _normal_count=Count(
                 'userprofile__user__trackcode',
                 filter=Q(
-                    userprofile__user__trackcode__status='shipping_pp',
+                    userprofile__user__trackcode__status='ready',
+                    userprofile__user__trackcode__pp_sorted=False,
                     userprofile__user__trackcode__delivery_pickup__isnull=True,
                 ),
             ),
             _override_count=Count(
                 'delivery_tracks',
-                filter=Q(delivery_tracks__status='shipping_pp'),
+                filter=Q(
+                    delivery_tracks__status='ready',
+                    delivery_tracks__pp_sorted=False,
+                ),
             ),
         )
         .annotate(track_count=F('_normal_count') + F('_override_count'))
@@ -85,7 +85,7 @@ def pp_acceptance_view(request):
 
 @login_required
 def get_acceptance_receipts(request):
-    """AJAX: возвращает чеки ПВЗ для приёмки (треки в shipping_pp)."""
+    """AJAX: возвращает чеки ПВЗ для приёмки (треки ready, не отсортированы)."""
     if not _can_accept(request.user):
         return JsonResponse({'error': 'Нет доступа'}, status=403)
 
@@ -102,7 +102,8 @@ def get_acceptance_receipts(request):
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
-        status='shipping_pp',
+        status='ready',
+        pp_sorted=False,
     ).select_related('owner', 'temp_owner'))
 
     # Автосоздание чеков если нет
@@ -111,10 +112,10 @@ def get_acceptance_receipts(request):
     for track in tracks:
         if track.owner and track.owner_id not in owners_seen:
             owners_seen.add(track.owner_id)
-            create_receipts_for_user(track.owner, statuses=('shipping_pp',))
+            create_receipts_for_user(track.owner, statuses=('ready',))
         elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
             temp_owners_seen.add(track.temp_owner_id)
-            create_receipts_for_temp_user(track.temp_owner, statuses=('shipping_pp',))
+            create_receipts_for_temp_user(track.temp_owner, statuses=('ready',))
 
     track_ids = [t.id for t in tracks]
 
@@ -124,15 +125,21 @@ def get_acceptance_receipts(request):
         .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code')
     )
 
+    # Получаем ячейки хранения для клиентов на этом ПВЗ
+    cells = StorageCell.objects.filter(pickup_point=pickup).select_related('user')
+    cells_map = {cell.user_id: cell.cell_number for cell in cells}
+
     clients_map = {}
     for item in items:
         receipt = item.receipt
         if receipt.owner:
             username = receipt.owner.username
             full_name = receipt.owner.get_full_name() or username
+            cell_number = cells_map.get(receipt.owner_id)
         elif receipt.temp_owner:
             username = receipt.temp_owner.login
             full_name = receipt.temp_owner.login
+            cell_number = None
         else:
             continue
 
@@ -140,6 +147,7 @@ def get_acceptance_receipts(request):
             clients_map[username] = {
                 'username': username,
                 'full_name': full_name,
+                'cell_number': cell_number,
                 'receipts': {},
             }
 
@@ -154,7 +162,7 @@ def get_acceptance_receipts(request):
         clients_map[username]['receipts'][rn]['track_count'] += 1
         clients_map[username]['receipts'][rn]['total_weight'] += float(item.track_code.weight or 0)
 
-    # Треки без чеков (зарег. и временные пользователи)
+    # Треки без чеков
     tracks_with_receipts = set(item.track_code_id for item in items)
     for track in tracks:
         if track.id in tracks_with_receipts:
@@ -162,15 +170,18 @@ def get_acceptance_receipts(request):
         if track.owner:
             username = track.owner.username
             full_name = track.owner.get_full_name() or username
+            cell_number = cells_map.get(track.owner_id)
         elif track.temp_owner_id:
             username = track.temp_owner.login
             full_name = track.temp_owner.login
+            cell_number = None
         else:
             continue
         if username not in clients_map:
             clients_map[username] = {
                 'username': username,
                 'full_name': full_name,
+                'cell_number': cell_number,
                 'receipts': {},
             }
         no_receipt_key = '__no_receipt__'
@@ -188,6 +199,7 @@ def get_acceptance_receipts(request):
         result.append({
             'username': client['username'],
             'full_name': client['full_name'],
+            'cell_number': client.get('cell_number'),
             'receipts': sorted(
                 [r for r in client['receipts'].values() if r['receipt_number']],
                 key=lambda r: r['receipt_number'],
@@ -201,7 +213,7 @@ def get_acceptance_receipts(request):
 @login_required
 @require_POST
 def accept_delivery(request):
-    """Приёмка товара на ПВЗ — переводит треки из shipping_pp в ready."""
+    """Приёмка товара на ПВЗ — помечает треки как отсортированные, назначает ячейки хранения."""
     if not _can_accept(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
@@ -222,15 +234,12 @@ def accept_delivery(request):
         messages.error(request, "Пункт выдачи не найден.")
         return redirect('pp_acceptance')
 
-    now = timezone.now()
-    today = now.date()
-    notif_counts = defaultdict(int)
-
     all_tracks = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
-        status='shipping_pp',
+        status='ready',
+        pp_sorted=False,
     )
 
     if scanned_receipts:
@@ -244,71 +253,28 @@ def accept_delivery(request):
     else:
         tracks = list(all_tracks)
 
+    # Собираем владельцев для создания ячеек
+    owners_seen = set()
     for track in tracks:
-        track.status = 'ready'
-        track.update_date = today
-        track.save()
+        track.pp_sorted = True
+        track.save(skip_full_clean=True)
+        if track.owner and track.owner_id not in owners_seen:
+            owners_seen.add(track.owner_id)
+
+    # Создание/получение ячеек хранения
+    for track in tracks:
         if track.owner:
-            notif_counts[track.owner] += 1
-
-    # Ячейки хранения
-    for user in notif_counts.keys():
-        try:
-            user_pickup = user.userprofile.pickup
-            if user_pickup:
-                get_or_create_storage_cell(user_pickup, user)
-        except UserProfile.DoesNotExist:
-            pass
-
-    # Обновляем DeliveryHistory
-    history_entry = (
-        DeliveryHistory.objects
-        .filter(pickup_point=pickup, delivered_at__isnull=True)
-        .order_by('-taken_at')
-        .first()
-    )
-    if history_entry:
-        history_entry.delivered_at = now
-        history_entry.save()
-
-    # Уведомления + email
-    for user, count in notif_counts.items():
-        msg = "📦 Ваш трек-код доставлен на ПВЗ" if count == 1 else f"📦 Доставлено на ПВЗ: {count} трек-кодов"
-        Notification.objects.create(user=user, message=msg)
-
-        if user.email:
             try:
-                pickup_name = ''
-                try:
-                    pickup_name = str(user.userprofile.pickup) if user.userprofile.pickup else ''
-                except (UserProfile.DoesNotExist, AttributeError):
-                    pass
-
-                if count == 1:
-                    subject = 'Inter Cargo — Ваша посылка доставлена на ПВЗ'
-                    body = (
-                        f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
-                        f'Ваша посылка доставлена на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
-                        f'Зайдите в личный кабинет для получения.\n\n'
-                        f'С уважением,\nКоманда Inter Cargo'
-                    )
-                else:
-                    subject = f'Inter Cargo — {count} посылок доставлено на ПВЗ'
-                    body = (
-                        f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
-                        f'{count} ваших посылок доставлено на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
-                        f'Зайдите в личный кабинет для получения.\n\n'
-                        f'С уважением,\nКоманда Inter Cargo'
-                    )
-
-                send_mail(subject, body, django_settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
-            except Exception as e:
-                logger.error(f"Ошибка отправки email пользователю {user.username}: {e}")
+                user_pickup = track.owner.userprofile.pickup
+                if user_pickup:
+                    get_or_create_storage_cell(user_pickup, track.owner)
+            except UserProfile.DoesNotExist:
+                pass
 
     updated = len(tracks)
     if updated:
-        messages.success(request, f"Принято на ПВЗ: {updated} посылок")
+        messages.success(request, f"Отсортировано на ПВЗ: {updated} посылок")
     else:
-        messages.info(request, "Нет посылок для приёмки.")
+        messages.info(request, "Нет посылок для сортировки.")
 
     return redirect('pp_acceptance')

@@ -22,12 +22,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var lastScanText = document.getElementById('qr-last-scan-text');
     var errorEl = document.getElementById('qr-error');
 
+    var scannerInput = document.getElementById('qr-scanner-input');
+
     // State
     var currentPickupId = null;
     var clientsData = [];
     var allExpectedReceipts = [];
     var scannedReceipts = [];
     var receiptToClient = {};
+    var receiptToCell = {};
     var html5QrCode = null;
     var scannerActive = false;
     var scanProcessing = false;
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('beforeunload', function (e) {
         if (scanningInProgress) {
             e.preventDefault();
-            e.returnValue = 'Приёмка не завершена. Вы уверены, что хотите покинуть страницу?';
+            e.returnValue = 'Сортировка не завершена. Вы уверены, что хотите покинуть страницу?';
             return e.returnValue;
         }
     });
@@ -96,10 +99,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         allExpectedReceipts = [];
         receiptToClient = {};
+        receiptToCell = {};
         clients.forEach(function (client) {
             client.receipts.forEach(function (r) {
                 allExpectedReceipts.push(r.receipt_number);
                 receiptToClient[r.receipt_number] = client.full_name;
+                receiptToCell[r.receipt_number] = client.cell_number;
             });
         });
 
@@ -112,6 +117,9 @@ document.addEventListener('DOMContentLoaded', function () {
         renderClientsList();
         modal.classList.remove('hidden');
         startCamera();
+
+        // Фокус на поле ввода для сканера
+        setTimeout(function () { scannerInput.focus(); }, 300);
     }
 
     function closeScanner() {
@@ -119,7 +127,22 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.add('hidden');
         stopCamera();
         qrReaderDiv.innerHTML = '';
+        scannerInput.value = '';
     }
+
+    // Обработка ввода от физического сканера (вводит текст + Enter)
+    scannerInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var code = scannerInput.value.trim();
+            scannerInput.value = '';
+            if (code) {
+                onScanSuccess(code);
+            }
+            // Сохраняем фокус на поле для следующего сканирования
+            scannerInput.focus();
+        }
+    });
 
     function renderClientsList() {
         clientsListEl.innerHTML = '';
@@ -131,9 +154,22 @@ document.addEventListener('DOMContentLoaded', function () {
             clientDiv.className = 'border border-gray-200 rounded-lg overflow-hidden';
 
             var header = document.createElement('div');
-            header.className = 'px-3 py-2 bg-gray-50 font-medium text-sm text-gray-800 flex items-center gap-2';
-            header.innerHTML = '<i class="ri-user-line text-gray-400"></i> ' +
+            header.className = 'px-3 py-2 bg-gray-50 font-medium text-sm text-gray-800 flex items-center justify-between';
+
+            var headerLeft = document.createElement('div');
+            headerLeft.className = 'flex items-center gap-2';
+            headerLeft.innerHTML = '<i class="ri-user-line text-gray-400"></i> ' +
                 client.full_name + ' <span class="text-xs text-gray-400">(' + client.username + ')</span>';
+            header.appendChild(headerLeft);
+
+            // Ячейка хранения
+            if (client.cell_number) {
+                var cellBadge = document.createElement('span');
+                cellBadge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800';
+                cellBadge.innerHTML = '<i class="ri-inbox-archive-line mr-1"></i>Ячейка ' + client.cell_number;
+                header.appendChild(cellBadge);
+            }
+
             clientDiv.appendChild(header);
 
             client.receipts.forEach(function (r) {
@@ -176,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         scannedReceipts.push(code);
         markReceiptScanned(code);
+        showCellInfo(code);
         updateProgress();
 
         if (scannedReceipts.length >= allExpectedReceipts.length) {
@@ -198,6 +235,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+    }
+
+    function showCellInfo(receiptNumber) {
+        var clientName = receiptToClient[receiptNumber] || '';
+        var cellNumber = receiptToCell[receiptNumber];
+        var text = receiptNumber;
+        if (clientName) text += ' — ' + clientName;
+        if (cellNumber) text += ' → Ячейка ' + cellNumber;
+        lastScanText.textContent = text;
+        lastScanEl.classList.remove('hidden');
+        setTimeout(function () { lastScanEl.classList.add('hidden'); }, 4000);
     }
 
     // Camera
@@ -247,12 +295,8 @@ document.addEventListener('DOMContentLoaded', function () {
         scannedReceipts.push(code);
         errorEl.classList.add('hidden');
 
-        var clientName = receiptToClient[code] || '';
-        lastScanText.textContent = code + (clientName ? ' — ' + clientName : '');
-        lastScanEl.classList.remove('hidden');
-        setTimeout(function () { lastScanEl.classList.add('hidden'); }, 2500);
-
         markReceiptScanned(code);
+        showCellInfo(code);
         updateProgress();
 
         if (scannedReceipts.length >= allExpectedReceipts.length) {
@@ -294,14 +338,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Modal actions
     modalClose.addEventListener('click', function () {
         if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
-            if (!confirm('Приёмка не завершена. Вы уверены, что хотите отменить?')) return;
+            if (!confirm('Сортировка не завершена. Вы уверены, что хотите отменить?')) return;
         }
         closeScanner();
     });
 
     cancelBtn.addEventListener('click', function () {
         if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
-            if (!confirm('Приёмка не завершена. Вы уверены, что хотите отменить?')) return;
+            if (!confirm('Сортировка не завершена. Вы уверены, что хотите отменить?')) return;
         }
         closeScanner();
     });
@@ -311,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (scannedReceipts.length < allExpectedReceipts.length) {
             var remaining = allExpectedReceipts.length - scannedReceipts.length;
-            if (!confirm('Не все чеки отсканированы (' + remaining + ' осталось). Не отсканированные чеки НЕ будут приняты. Продолжить?')) {
+            if (!confirm('Не все чеки отсканированы (' + remaining + ' осталось). Не отсканированные чеки НЕ будут отсортированы. Продолжить?')) {
                 return;
             }
         }

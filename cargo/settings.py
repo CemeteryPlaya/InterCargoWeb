@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # === DEV: раскомментируй для локальной разработки ===
 DEBUG = True
 # === PROD: раскомментируй для продакшена ===
-# DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+#DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(',')
 
@@ -106,6 +106,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,
+        },
     }
 }
 

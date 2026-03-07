@@ -105,8 +105,32 @@ def delivery_view(request):
                 'delivery_tracks',
                 filter=Q(delivery_tracks__status='delivered'),
             ),
+            _normal_clients=Count(
+                'userprofile__user',
+                filter=Q(
+                    userprofile__user__trackcode__status='delivered',
+                    userprofile__user__trackcode__delivery_pickup__isnull=True,
+                ),
+                distinct=True,
+            ),
+            _temp_clients=Count(
+                'tempuser',
+                filter=Q(
+                    tempuser__track_codes__status='delivered',
+                    tempuser__track_codes__delivery_pickup__isnull=True,
+                ),
+                distinct=True,
+            ),
+            _override_clients=Count(
+                'delivery_tracks__owner',
+                filter=Q(delivery_tracks__status='delivered'),
+                distinct=True,
+            ),
         )
-        .annotate(track_count=F('_normal_count') + F('_temp_count') + F('_override_count'))
+        .annotate(
+            track_count=F('_normal_count') + F('_temp_count') + F('_override_count'),
+            client_count=F('_normal_clients') + F('_temp_clients') + F('_override_clients'),
+        )
         .filter(track_count__gt=0)
         .order_by('id')
     )
