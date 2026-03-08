@@ -8,7 +8,7 @@ from register.models import UserProfile, TempUser
 
 def cleanup_expired_temp_discounts():
     """Удаляет просроченные разовые скидки (созданные до сегодня)."""
-    today = timezone.now().date()
+    today = timezone.localdate()
     CustomerDiscount.objects.filter(
         is_temporary=True, active=True, created_at__date__lt=today
     ).delete()
@@ -17,7 +17,7 @@ def cleanup_expired_temp_discounts():
 def get_user_discount(user):
     """Возвращает активную скидку (₸/кг) для пользователя."""
     cleanup_expired_temp_discounts()
-    today = timezone.now().date()
+    today = timezone.localdate()
     discounts = CustomerDiscount.objects.filter(user=user, active=True).order_by('-created_at')
 
     # приоритет — разовая скидка (только за сегодня), потом постоянная
@@ -32,7 +32,7 @@ def get_user_discount(user):
 def get_temp_user_discount(temp_user):
     """Возвращает активную скидку (₸/кг) для временного пользователя."""
     cleanup_expired_temp_discounts()
-    today = timezone.now().date()
+    today = timezone.localdate()
     discounts = CustomerDiscount.objects.filter(temp_user=temp_user, active=True).order_by('-created_at')
 
     # приоритет — разовая скидка (только за сегодня), потом постоянная

@@ -544,7 +544,7 @@ def driver_issue(request):
         messages.info(request, "Нет посылок для выдачи этому клиенту.")
         return redirect('delivery')
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     with transaction.atomic():
         if client_user:
