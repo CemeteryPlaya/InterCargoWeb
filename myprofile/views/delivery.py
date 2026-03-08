@@ -126,10 +126,15 @@ def delivery_view(request):
                 filter=Q(delivery_tracks__status='delivered'),
                 distinct=True,
             ),
+            _override_temp_clients=Count(
+                'delivery_tracks__temp_owner',
+                filter=Q(delivery_tracks__status='delivered'),
+                distinct=True,
+            ),
         )
         .annotate(
             track_count=F('_normal_count') + F('_temp_count') + F('_override_count'),
-            client_count=F('_normal_clients') + F('_temp_clients') + F('_override_clients'),
+            client_count=F('_normal_clients') + F('_temp_clients') + F('_override_clients') + F('_override_temp_clients'),
         )
         .filter(track_count__gt=0)
         .order_by('id')

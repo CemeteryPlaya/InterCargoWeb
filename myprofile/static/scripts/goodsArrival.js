@@ -162,6 +162,13 @@ document.addEventListener('DOMContentLoaded', function () {
             inlineClear();
             return;
         }
+        // Если пользователь уже ввёл больше символов, чем было в запросе — не подставляем
+        if (!inlineAc.active || inlineAc.input !== input) {
+            if (input.value.trim().toLowerCase() !== typedQuery.toLowerCase()) {
+                inlineClear();
+                return;
+            }
+        }
         var login = results[0].login;
         if (login.toLowerCase().indexOf(typedQuery.toLowerCase()) !== 0) {
             inlineClear();
@@ -664,4 +671,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         document.addEventListener('scroll', function () { acRemove(); }, true);
     })();
+
+    // ============================================
+    // Предупреждение при закрытии/обновлении страницы
+    // ============================================
+    var formSubmitting = false;
+    formEl.addEventListener('submit', function () { formSubmitting = true; });
+
+    function hasFormData() {
+        if (isTableMode) {
+            return tracksTableBody.querySelectorAll('tr').length > 0;
+        }
+        return trackCodesArea.value.trim() !== '' ||
+               ownerUsernamesArea.value.trim() !== '' ||
+               weightsArea.value.trim() !== '';
+    }
+
+    window.addEventListener('beforeunload', function (e) {
+        if (formSubmitting || !hasFormData()) return;
+        e.preventDefault();
+        e.returnValue = '';
+    });
 });

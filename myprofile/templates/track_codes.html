@@ -50,6 +50,26 @@
             </div>
             {% endif %}
 
+            {% if duplicate_archived_codes %}
+            <div class="p-4 mb-4 rounded-lg bg-yellow-100 border border-yellow-300 text-yellow-800 text-sm">
+                <i class="ri-alert-line text-lg mr-1"></i>
+                <strong>Внимание!</strong> Следующие трек-коды есть и в архиве, и в основной таблице:
+                <span class="font-mono font-medium">
+                    {% for code in duplicate_archived_codes %}{{ code }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </span>.
+                <form method="post" action="{% url 'delete_duplicate_archived' %}" class="inline ml-2">
+                    {% csrf_token %}
+                    {% for code in duplicate_archived_codes %}
+                    <input type="hidden" name="track_codes" value="{{ code }}">
+                    {% endfor %}
+                    <button type="submit" class="text-yellow-900 underline hover:text-red-700 font-medium"
+                        onclick="return confirm('Удалить дубликаты из архива?')">
+                        Удалить из архива
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
             <div x-data="{ addModal: false, archiveMode: false, selectedIds: [], editModal: false, editTrackId: null, editDescription: '' }">
                 <!-- Кнопка -->
                 <div
@@ -193,7 +213,7 @@
                 {% endif %}
                 space-y-1 relative transition-all"
                     :class="archiveMode && selectedIds.includes({{ code.id }}) ? 'ring-2 ring-red-500 opacity-80' : ''"
-                    @click="if (archiveMode {% if code.status == 'shipping_pp' %}{% else %}&& true{% endif %}) { if (selectedIds.includes({{ code.id }})) { selectedIds = selectedIds.filter(id => id !== {{ code.id }}) } else { selectedIds.push({{ code.id }}) } }"
+                    @click="if (archiveMode {% if code.status == 'user_added' or code.status == 'claimed' %}&& true{% endif %}) { if (selectedIds.includes({{ code.id }})) { selectedIds = selectedIds.filter(id => id !== {{ code.id }}) } else { selectedIds.push({{ code.id }}) } }"
                     :style="archiveMode ? 'cursor: pointer' : ''">
                     <!-- Галочка выбора в режиме архивации -->
                     <div x-show="archiveMode" class="absolute top-2 left-2">
@@ -202,8 +222,8 @@
                             <i x-show="selectedIds.includes({{ code.id }})" class="ri-check-line text-sm"></i>
                         </div>
                     </div>
-                    <!-- Кнопка "В архив" — верхний правый угол (скрыта при статусе "В доставке" и в режиме архивации) -->
-                    {% if code.status != 'shipping_pp' %}
+                    <!-- Кнопка "В архив" — только для статусов "Добавлен пользователем" и "Выдано клиенту" -->
+                    {% if code.status == 'user_added' or code.status == 'claimed' %}
                     <form method="post" action="{% url 'archive_track_code' code.id %}" class="absolute top-2 right-2" x-show="!archiveMode">
                         {% csrf_token %}
                         <button type="submit"

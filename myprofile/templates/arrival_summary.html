@@ -54,6 +54,33 @@
                 </button>
             </form>
 
+            {% if arrivals %}
+            <div class="mb-6 space-y-2">
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">
+                    <i class="ri-inbox-archive-line text-blue-500"></i> Записи приходов за {{ selected_date }}
+                </h3>
+                {% for arrival in arrivals %}
+                <div class="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm">
+                    <span class="text-blue-800 font-medium">Приход #{{ arrival.id }}</span>
+                    {% if arrival.sorting_location %}
+                    <span class="text-gray-600">{{ arrival.sorting_location }}</span>
+                    {% endif %}
+                    <span class="text-gray-500">{{ arrival.total_tracks }} треков (обн: {{ arrival.updated_count }}, созд: {{ arrival.created_count }})</span>
+                    {% if arrival.created_by %}
+                    <span class="text-gray-400 text-xs">{{ arrival.created_by.get_full_name|default:arrival.created_by.username }}</span>
+                    {% endif %}
+                    <form method="post" action="{% url 'refresh_arrival' arrival.id %}" class="ml-auto">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition"
+                            onclick="return confirm('Актуализировать данные прихода #{{ arrival.id }}? Скидки и статусы не будут сброшены.')">
+                            <i class="ri-refresh-line"></i> Актуализировать данные
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             {% if not pickups and not home_clients and not temp_clients %}
             <div class="text-center py-12 text-gray-500">
                 <i class="ri-inbox-line text-4xl mb-2"></i>
