@@ -501,6 +501,40 @@ class PickupChangeRequest(models.Model):
         return f"{self.user.username}: {self.current_pickup} → {self.requested_pickup} ({self.get_status_display()})"
 
 
+class Arrival(models.Model):
+    """Запись о приходе товаров за определённый день."""
+    date = models.DateField(verbose_name="Дата прихода")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Создал"
+    )
+    sorting_location = models.ForeignKey(
+        SortingLocation, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Место сортировки"
+    )
+    track_codes = models.ManyToManyField(
+        TrackCode, related_name='arrivals', blank=True,
+        verbose_name="Трек-коды"
+    )
+    raw_data = models.JSONField(
+        default=dict, blank=True,
+        verbose_name="Исходные данные (трек-коды, владельцы, веса)"
+    )
+    total_tracks = models.PositiveIntegerField(default=0, verbose_name="Всего трек-кодов")
+    updated_count = models.PositiveIntegerField(default=0, verbose_name="Обновлено")
+    created_count = models.PositiveIntegerField(default=0, verbose_name="Создано")
+
+    class Meta:
+        verbose_name = "Приход"
+        verbose_name_plural = "Приходы"
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        loc = f" ({self.sorting_location})" if self.sorting_location else ""
+        return f"Приход {self.date.strftime('%d.%m.%Y')}{loc} — {self.total_tracks} треков"
+
+
 class ClientRegistry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     registry_date = models.DateField(verbose_name="Дата реестра")

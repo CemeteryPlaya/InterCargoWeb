@@ -75,6 +75,23 @@
                                         </summary>
 
                                         <div class="pl-4 pr-2 pb-2 space-y-2">
+                                        {% if day_data.arrivals %}
+                                        <div class="ml-2 mb-2 space-y-1">
+                                            {% for arrival in day_data.arrivals %}
+                                            <div class="flex items-center gap-2 text-xs bg-blue-50 border border-blue-200 rounded px-3 py-1.5">
+                                                <i class="ri-inbox-archive-line text-blue-500"></i>
+                                                <span class="text-blue-800 font-medium">Приход #{{ arrival.id }}</span>
+                                                {% if arrival.sorting_location %}
+                                                <span class="text-gray-500">| {{ arrival.sorting_location }}</span>
+                                                {% endif %}
+                                                <span class="text-gray-500">| {{ arrival.total_tracks }} треков (обн: {{ arrival.updated_count }}, созд: {{ arrival.created_count }})</span>
+                                                {% if arrival.created_by %}
+                                                <span class="text-gray-400 ml-auto">{{ arrival.created_by.get_full_name|default:arrival.created_by.username }}</span>
+                                                {% endif %}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
                                         {% for pickup_key, clients in day_data.pickups.items %}
                                             <!-- Пункт выдачи -->
                                             <details class="border border-gray-200 rounded-lg ml-2 bg-gray-50">
@@ -86,15 +103,17 @@
                                                 </summary>
 
                                                 <div class="pl-4 pr-2 pb-2 space-y-2">
-                                                {% for client_id, client in clients.items %}
+                                                {% for client_key, client in clients.items %}
                                                     <!-- Клиент -->
                                                     <details class="border border-gray-200 rounded-lg ml-2 bg-white">
                                                         <summary class="cursor-pointer px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition text-sm">
                                                             <div class="flex items-center gap-3">
                                                                 <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
-                                                                <i class="ri-user-line text-purple-500"></i>
+                                                                <i class="ri-user-line {% if client.is_temp %}text-orange-500{% else %}text-purple-500{% endif %}"></i>
                                                                 <span class="font-medium">{{ client.username }}</span>
-                                                                {% if client.full_name != client.username %}
+                                                                {% if client.is_temp %}
+                                                                <span class="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">временный</span>
+                                                                {% elif client.full_name != client.username %}
                                                                 <span class="text-gray-400 text-xs">({{ client.full_name }})</span>
                                                                 {% endif %}
                                                             </div>

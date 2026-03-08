@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - История выдачи ПВЗ</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+        <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+                <i class="ri-history-line text-red-500"></i> История выдачи
+            </h2>
+            <p class="text-sm text-gray-500 mb-6">{{ pickup_name }}</p>
+
+            {% if not dates %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="ri-inbox-line text-4xl mb-2 block"></i>
+                <p>Нет выдач</p>
+            </div>
+            {% endif %}
+
+            {% for date_str, date_data in dates.items %}
+            <details class="mb-4 border border-gray-200 rounded-lg overflow-hidden" {% if forloop.first %}open{% endif %}>
+                <summary class="bg-gray-50 px-4 py-3 cursor-pointer hover:bg-gray-100 transition flex items-center justify-between">
+                    <span class="font-semibold text-gray-800">
+                        <i class="ri-calendar-line text-red-500 mr-1"></i> {{ date_str }}
+                    </span>
+                    <span class="text-xs bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded-full">
+                        {{ date_data.total_count }} выдач
+                    </span>
+                </summary>
+
+                <div class="px-4 py-2">
+                    {% for username, client in date_data.clients.items %}
+                    <details class="mb-2 border border-gray-100 rounded-lg overflow-hidden" {% if forloop.first and forloop.parentloop.first %}open{% endif %}>
+                        <summary class="bg-white px-3 py-2 cursor-pointer hover:bg-blue-50 transition flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">
+                                <i class="ri-user-line text-blue-500 mr-1"></i>
+                                {{ client.full_name }}
+                                <span class="text-xs text-gray-400">({{ client.username }})</span>
+                            </span>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                {{ client.extraditions|length }} пакет{{ client.extraditions|length|pluralize:"ов,а,ов" }}
+                            </span>
+                        </summary>
+
+                        <div class="px-3 py-2 space-y-3">
+                            {% for ext in client.extraditions %}
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-mono text-gray-500">
+                                        <i class="ri-qr-code-line mr-1"></i>{{ ext.barcode }}
+                                    </span>
+                                    <div class="flex items-center gap-3 text-xs text-gray-500">
+                                        <span><i class="ri-time-line mr-1"></i>{{ ext.time }}</span>
+                                        <span><i class="ri-user-star-line mr-1"></i>{{ ext.issued_by }}</span>
+                                    </div>
+                                </div>
+
+                                {% for receipt in ext.receipts %}
+                                <div class="bg-white rounded border border-gray-100 p-2 mb-1 last:mb-0">
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="font-mono text-gray-600">{{ receipt.receipt_number }}</span>
+                                        <div class="flex items-center gap-2">
+                                            {% if receipt.is_paid %}
+                                            <span class="text-green-600"><i class="ri-checkbox-circle-line"></i> Оплачено</span>
+                                            {% else %}
+                                            <span class="text-red-500"><i class="ri-close-circle-line"></i> Не оплачено</span>
+                                            {% endif %}
+                                            <span class="text-gray-500">{{ receipt.total_weight }} кг</span>
+                                            <span class="font-medium text-gray-700">{{ receipt.total_price }} ₸</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for track in receipt.tracks %}
+                                        <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-mono">
+                                            {{ track.track_code }}
+                                            {% if track.weight %}<span class="text-gray-400">({{ track.weight }}кг)</span>{% endif %}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </details>
+                    {% endfor %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+
+</html>

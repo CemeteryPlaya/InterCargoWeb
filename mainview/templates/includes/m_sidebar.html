@@ -26,6 +26,9 @@
         <a href="{% url 'warehouse' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-building-2-line"></i> Склад ПВЗ
         </a>
+        <a href="{% url 'pp_extradition_history' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-file-history-line"></i> История выдачи ПВЗ
+        </a>
         {% endif %}
         {% if request.user.userprofile.is_staff %}
         <!-- Только для операторов -->

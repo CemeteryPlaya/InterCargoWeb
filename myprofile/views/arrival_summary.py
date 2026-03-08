@@ -7,7 +7,7 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from collections import OrderedDict
 
-from myprofile.models import TrackCode, CustomerDiscount
+from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint, TempUser
 from django.contrib.auth.models import User
@@ -199,6 +199,11 @@ def arrival_summary_view(request):
     # Все активные ПВЗ для выпадающего списка (временным пользователям)
     all_pickups = PickupPoint.objects.filter(is_active=True, is_home_delivery=False).order_by('id')
 
+    # Записи приходов за выбранную дату
+    arrivals = Arrival.objects.filter(
+        date=selected_date
+    ).select_related('created_by', 'sorting_location').order_by('-created_at')
+
     return render(request, 'arrival_summary.html', {
         'selected_date': selected_date,
         'pickups': pickups,
@@ -209,6 +214,7 @@ def arrival_summary_view(request):
         'warehouse_pp_id': warehouse_pp.id if warehouse_pp else None,
         'discount_threshold': discount_threshold,
         'default_rate': float(default_rate),
+        'arrivals': arrivals,
     })
 
 
@@ -386,3 +392,109 @@ def apply_discount(request):
         })
 
     return redirect(f'/profile/arrival-summary/?date={date}')
+
+
+@login_required
+@require_POST
+def refresh_arrival(request, arrival_id):
+    """Актуализирует данные прихода: обновляет веса и владельцев, не сбрасывая статусы и скидки."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    from django.shortcuts import get_object_or_404
+    from myprofile.views.utils import resolve_owner as _resolve_owner
+    from django.core.exceptions import ValidationError
+    from decimal import InvalidOperation
+
+    arrival = get_object_or_404(Arrival, id=arrival_id)
+    raw = arrival.raw_data
+    if not raw or 'track_codes' not in raw:
+        messages.error(request, "Нет исходных данных для актуализации.")
+        return redirect(f'/profile/arrival-summary/?date={arrival.date.isoformat()}')
+
+    codes = raw['track_codes']
+    usernames = raw.get('usernames', [])
+    weights = raw.get('weights', [])
+
+    if len(codes) != len(usernames) or len(codes) != len(weights):
+        messages.error(request, "Некорректные исходные данные прихода.")
+        return redirect(f'/profile/arrival-summary/?date={arrival.date.isoformat()}')
+
+    update_date = arrival.date
+    sorting_location = arrival.sorting_location
+    status = 'delivered'
+
+    updated_data = 0
+    new_created = 0
+    errors_count = 0
+    new_track_ids = list(arrival.track_codes.values_list('id', flat=True))
+
+    for i, code in enumerate(codes):
+        try:
+            track = TrackCode.objects.get(track_code=code)
+
+            # Обновляем вес и владельца, НЕ трогаем статус, delivery_pickup
+            try:
+                new_weight = Decimal(weights[i].replace(',', '.'))
+                user, temp_user = _resolve_owner(usernames[i])
+
+                changed = False
+                if track.weight != new_weight:
+                    track.weight = new_weight
+                    changed = True
+                if user and track.owner != user:
+                    track.owner = user
+                    track.temp_owner = None
+                    changed = True
+                elif temp_user and track.temp_owner != temp_user:
+                    track.owner = None
+                    track.temp_owner = temp_user
+                    changed = True
+                if sorting_location and track.sorting_location != sorting_location:
+                    track.sorting_location = sorting_location
+                    changed = True
+
+                if changed:
+                    track.save(update_fields=['weight', 'owner', 'temp_owner', 'sorting_location'])
+                    updated_data += 1
+
+                if track.id not in new_track_ids:
+                    new_track_ids.append(track.id)
+
+            except (InvalidOperation, ValueError):
+                errors_count += 1
+            except Exception:
+                errors_count += 1
+
+        except TrackCode.DoesNotExist:
+            # Новый трек-код — создаём
+            try:
+                weight = Decimal(weights[i].replace(',', '.'))
+                user, temp_user = _resolve_owner(usernames[i])
+                new_track = TrackCode.objects.create(
+                    track_code=code,
+                    status=status,
+                    update_date=update_date,
+                    delivered_date=update_date,
+                    owner=user,
+                    temp_owner=temp_user,
+                    weight=weight,
+                    sorting_location=sorting_location,
+                )
+                new_track_ids.append(new_track.id)
+                new_created += 1
+            except (ValidationError, InvalidOperation, ValueError):
+                errors_count += 1
+
+    # Обновляем запись прихода
+    arrival.track_codes.set(new_track_ids)
+    arrival.save()
+
+    if updated_data or new_created:
+        messages.success(request, f"Актуализация прихода #{arrival.id}: обновлено {updated_data}, создано новых {new_created}.")
+    else:
+        messages.info(request, "Данные прихода актуальны, изменений не требуется.")
+    if errors_count:
+        messages.warning(request, f"Ошибок при актуализации: {errors_count}")
+
+    return redirect(f'/profile/arrival-summary/?date={arrival.date.isoformat()}')

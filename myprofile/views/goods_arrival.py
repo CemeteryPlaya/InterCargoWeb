@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from myprofile.models import TrackCode, SortingLocation
+from myprofile.models import TrackCode, SortingLocation, Arrival
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages
 from decimal import Decimal, InvalidOperation
@@ -60,6 +60,7 @@ def goods_arrival_view(request):
     temp_created = 0
     errors = 0
     notif_counts = defaultdict(int)
+    processed_track_ids = []
 
     for i, code in enumerate(track_codes):
         try:
@@ -81,6 +82,7 @@ def goods_arrival_view(request):
                     if sorting_location:
                         track.sorting_location = sorting_location
                     track.save(update_fields=['update_date', 'owner', 'temp_owner', 'weight', 'sorting_location'])
+                    processed_track_ids.append(track.id)
                     partially_updated += 1
                     messages.warning(request, f"Статус трек-кода {code} НЕ изменён (уже {track.get_status_display()}). Обновлены данные.")
                 except (InvalidOperation, ValueError):
@@ -115,6 +117,7 @@ def goods_arrival_view(request):
 
             try:
                 track.save()
+                processed_track_ids.append(track.id)
                 updated += 1
                 if old_status != status and track.owner:
                     notif_counts[track.owner] += 1
@@ -128,7 +131,7 @@ def goods_arrival_view(request):
             try:
                 weight = Decimal(weights[i].replace(',', '.'))
                 user, temp_user = _resolve_owner(usernames[i])
-                TrackCode.objects.create(
+                new_track = TrackCode.objects.create(
                     track_code=code,
                     status=status,
                     update_date=update_date,
@@ -138,6 +141,7 @@ def goods_arrival_view(request):
                     weight=weight,
                     sorting_location=sorting_location,
                 )
+                processed_track_ids.append(new_track.id)
                 created += 1
                 if user:
                     notif_counts[user] += 1
@@ -154,5 +158,22 @@ def goods_arrival_view(request):
     add_bulk_result_messages(request, updated=updated, created=created,
                               partially_updated=partially_updated,
                               temp_created=temp_created, errors=errors)
+
+    # Создаём запись о приходе
+    if processed_track_ids:
+        arrival = Arrival.objects.create(
+            date=update_date,
+            created_by=request.user,
+            sorting_location=sorting_location,
+            raw_data={
+                'track_codes': track_codes,
+                'usernames': usernames,
+                'weights': weights,
+            },
+            total_tracks=len(track_codes),
+            updated_count=updated,
+            created_count=created,
+        )
+        arrival.track_codes.set(processed_track_ids)
 
     return redirect('goods_arrival')

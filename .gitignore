@@ -36,3 +36,6 @@ ngrok.exe
 
 PLAN.md
 *.md
+
+.env
+tests/

@@ -86,6 +86,7 @@ def shipped_cn_view(request):
     skipped = 0
     errors = 0
     notif_counts = defaultdict(int)
+    skipped_details = defaultdict(list)  # status_display -> [codes]
 
     for code in track_codes:
         try:
@@ -95,6 +96,7 @@ def shipped_cn_view(request):
             # Не откатываем если статус уже дальше
             if TrackCode.STATUS_ORDER.get(old_status, 0) >= TrackCode.STATUS_ORDER.get(status, 0):
                 skipped += 1
+                skipped_details[track.get_status_display()].append(code)
                 continue
 
             track.status = status
@@ -128,5 +130,12 @@ def shipped_cn_view(request):
     send_grouped_notifications(notif_counts, status)
     add_bulk_result_messages(request, updated=updated, created=created,
                               skipped=skipped, errors=errors)
+
+    # Детальный лог пропущенных трек-кодов по статусам
+    for status_display, codes in skipped_details.items():
+        codes_str = ', '.join(codes[:20])
+        if len(codes) > 20:
+            codes_str += f' ... и ещё {len(codes) - 20}'
+        messages.warning(request, f"Пропущено ({status_display}, {len(codes)} шт.): {codes_str}")
 
     return redirect('shipped_cn')

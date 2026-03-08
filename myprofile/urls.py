@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -27,6 +27,7 @@ urlpatterns = [
     path('track-codes/archive/<int:track_id>/', track_codes.archive_track_code, name='archive_track_code'),
     path('track-codes/unarchive/<int:track_id>/', track_codes.unarchive_track_code, name='unarchive_track_code'),
     path('track-codes/mass-archive/', track_codes.mass_archive_track_codes, name='mass_archive_track_codes'),
+    path('track-codes/delete-duplicate-archived/', track_codes.delete_duplicate_archived, name='delete_duplicate_archived'),
     path('settings/', profile_setting.settings, name='settings'),
     path('update/', profile_setting.update_profile, name='update_profile'),
     path('request-pickup-change/', profile_setting.request_pickup_change, name='request_pickup_change'),
@@ -64,11 +65,13 @@ urlpatterns = [
     path('arrival-summary/toggle/', arrival_summary.toggle_home_delivery, name='toggle_home_delivery'),
     path('arrival-summary/assign-temp-pickup/', arrival_summary.assign_temp_pickup, name='assign_temp_pickup'),
     path('arrival-summary/apply-discount/', arrival_summary.apply_discount, name='apply_discount'),
+    path('arrival-summary/refresh/<int:arrival_id>/', arrival_summary.refresh_arrival, name='refresh_arrival'),
     path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
     path('delivery/receipts/', delivery.get_pickup_receipts, name='get_pickup_receipts'),
     path('pp-acceptance/', pp_acceptance.pp_acceptance_view, name='pp_acceptance'),
     path('pp-acceptance/accept/', pp_acceptance.accept_delivery, name='accept_delivery'),
     path('pp-acceptance/receipts/', pp_acceptance.get_acceptance_receipts, name='get_acceptance_receipts'),
+    path('pp-extradition-history/', pp_extradition_history.pp_extradition_history_view, name='pp_extradition_history'),
 
 ]
 

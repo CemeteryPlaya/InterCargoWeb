@@ -78,11 +78,23 @@ def track_codes_view(request):
 
     archived_codes = ArchivedTrackCode.objects.filter(owner=request.user).order_by('-archived_at')
 
+    # Проверяем дубликаты: архивные трек-коды, которые есть в основной таблице
+    if archived_codes.exists():
+        archived_track_values = list(archived_codes.values_list('track_code', flat=True))
+        duplicate_codes = set(
+            TrackCode.objects.filter(
+                track_code__in=archived_track_values, owner=request.user
+            ).values_list('track_code', flat=True)
+        )
+    else:
+        duplicate_codes = set()
+
     return render(request, 'track_codes.html', {
         'track_codes': track_codes,
         'archived_codes': archived_codes,
         'form': form,
-        'current_filters': [status_filter] if status_filter else []
+        'current_filters': [status_filter] if status_filter else [],
+        'duplicate_archived_codes': duplicate_codes,
     })
 
 @login_required
@@ -147,6 +159,10 @@ def add_track_code_view(request):
 @require_POST
 def archive_track_code(request, track_id):
     track = get_object_or_404(TrackCode, id=track_id, owner=request.user)
+    ARCHIVABLE_STATUSES = ('user_added', 'claimed')
+    if track.status not in ARCHIVABLE_STATUSES:
+        messages.error(request, f"Нельзя архивировать трек-код со статусом «{track.get_status_display()}». Архивация доступна только для статусов «Добавлен пользователем» и «Выдано клиенту».")
+        return redirect('track_codes')
     ArchivedTrackCode.from_track(track)
     track.delete()
     messages.success(request, "Трек-код перемещён в архив.")
@@ -181,15 +197,43 @@ def mass_archive_track_codes(request):
         messages.info(request, "Не выбрано ни одного трек-кода.")
         return redirect('track_codes')
 
+    ARCHIVABLE_STATUSES = ('user_added', 'claimed')
     tracks = TrackCode.objects.filter(id__in=track_ids, owner=request.user)
     count = 0
+    skipped = 0
     for track in tracks:
+        if track.status not in ARCHIVABLE_STATUSES:
+            skipped += 1
+            continue
         ArchivedTrackCode.from_track(track)
         track.delete()
         count += 1
 
     if count:
         messages.success(request, f"В архив перемещено: {count} трек-кодов.")
+    if skipped:
+        messages.info(request, f"Пропущено (архивация доступна только для «Добавлен пользователем» и «Выдано клиенту»): {skipped}.")
+    return redirect('track_codes')
+
+
+@login_required
+@require_POST
+def delete_duplicate_archived(request):
+    """Удаляет архивные трек-коды, которые уже есть в основной таблице."""
+    codes = request.POST.getlist('track_codes')
+    if not codes:
+        return redirect('track_codes')
+    # Находим только те, которые реально дублируются
+    active_codes = set(
+        TrackCode.objects.filter(
+            track_code__in=codes, owner=request.user
+        ).values_list('track_code', flat=True)
+    )
+    deleted = ArchivedTrackCode.objects.filter(
+        track_code__in=active_codes, owner=request.user
+    ).delete()[0]
+    if deleted:
+        messages.success(request, f"Удалено из архива: {deleted} дубликатов.")
     return redirect('track_codes')
 
 
