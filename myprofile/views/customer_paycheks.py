@@ -86,14 +86,31 @@ def generate_daily_receipt(request):
     discount_per_kg = get_user_discount(request.user)
     effective_rate = RATE - discount_per_kg
 
+    # Определяем исторический ПВЗ из треков или профиля
+    tracks_list = list(unbilled)
+    pickup_display = ''
+    payment_link = None
+    first_with_override = next((t for t in tracks_list if t.delivery_pickup_id), None)
+    if first_with_override and first_with_override.delivery_pickup:
+        pickup_display = str(first_with_override.delivery_pickup)
+        payment_link = first_with_override.delivery_pickup.payment_link
+    else:
+        try:
+            profile = request.user.userprofile
+            if profile.pickup:
+                pickup_display = str(profile.pickup)
+                payment_link = profile.pickup.payment_link
+        except UserProfile.DoesNotExist:
+            pass
+
     receipt = Receipt.objects.create(
         owner=request.user,
         total_weight=0,
         total_price=0,
-        price_per_kg=effective_rate
+        price_per_kg=effective_rate,
+        pickup_point=pickup_display,
+        payment_link=payment_link,
     )
-
-    tracks_list = list(unbilled)
     for track in tracks_list:
         ReceiptItem.objects.create(receipt=receipt, track_code=track)
 
