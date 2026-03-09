@@ -285,6 +285,9 @@ def take_delivery(request):
             for track in tracks:
                 track.status = 'shipping_pp'
                 track.update_date = today
+                # Фиксируем исторический ПВЗ доставки на каждом треке
+                if not track.delivery_pickup_id:
+                    track.delivery_pickup = pickup
                 track.save()
                 updated += 1
                 if track.owner:
@@ -334,6 +337,9 @@ def take_delivery(request):
             for track in tracks:
                 track.status = 'shipping_pp'
                 track.update_date = today
+                # Фиксируем исторический ПВЗ (доставка на дом)
+                if not track.delivery_pickup_id:
+                    track.delivery_pickup = home_pp
                 track.save()
                 updated += 1
                 if track.owner:
@@ -400,6 +406,8 @@ def complete_delivery(request):
     today = now.date()
     updated = 0
     notif_counts = defaultdict(int)
+    # Запоминаем фактический ПВЗ доставки для каждого пользователя
+    user_pickup_map = {}  # user -> PickupPoint
 
     for pickup_id in pickup_ids:
         try:
@@ -421,6 +429,9 @@ def complete_delivery(request):
             updated += 1
             if track.owner:
                 notif_counts[track.owner] += 1
+                # Запоминаем фактический ПВЗ из трека (delivery_pickup или текущий pickup)
+                if track.owner not in user_pickup_map:
+                    user_pickup_map[track.owner] = track.delivery_pickup or pickup
 
         history_entry = (
             DeliveryHistory.objects
@@ -436,14 +447,11 @@ def complete_delivery(request):
             history_entry.delivered_at = now
             history_entry.save()
 
-    # Автоприсвоение ячеек хранения для клиентов
+    # Автоприсвоение ячеек хранения — используем фактический ПВЗ доставки
     for user in notif_counts.keys():
-        try:
-            pickup = user.userprofile.pickup
-            if pickup:
-                get_or_create_storage_cell(pickup, user)
-        except UserProfile.DoesNotExist:
-            pass
+        actual_pickup = user_pickup_map.get(user)
+        if actual_pickup:
+            get_or_create_storage_cell(actual_pickup, user)
 
     # Групповые уведомления + сбор email для пакетной отправки
     email_batch = []
@@ -461,15 +469,10 @@ def complete_delivery(request):
             skipped_no_email += 1
             continue
 
-        pickup_name = ''
-        working_hours = ''
-        try:
-            pickup_obj = user.userprofile.pickup
-            if pickup_obj:
-                pickup_name = str(pickup_obj)
-                working_hours = pickup_obj.working_hours or ''
-        except (UserProfile.DoesNotExist, AttributeError):
-            pass
+        # Используем фактический ПВЗ доставки, а не текущий из профиля
+        actual_pickup = user_pickup_map.get(user)
+        pickup_name = str(actual_pickup) if actual_pickup else ''
+        working_hours = actual_pickup.working_hours if actual_pickup else ''
 
         hours_line = f'\nВремя работы ПВЗ: {working_hours}\n' if working_hours else ''
 
