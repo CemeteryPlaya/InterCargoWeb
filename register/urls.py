@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from .views import reg, enter, exit, regConfirm, password_reset
+from .views import reg, enter, exit, regConfirm, password_reset, email_verify
 
 
 urlpatterns = [
@@ -31,6 +31,8 @@ urlpatterns = [
     path('password-reset/', password_reset.password_reset_request, name='password_reset'),
     path('password-reset/verify/', password_reset.password_reset_verify, name='password_reset_verify'),
     path('password-reset/set-password/', password_reset.password_reset_set_password, name='password_reset_set_password'),
+    path('email-verify/send/', email_verify.send_email_code, name='email_verify_send'),
+    path('email-verify/check/', email_verify.verify_email_code, name='email_verify_check'),
 ]
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

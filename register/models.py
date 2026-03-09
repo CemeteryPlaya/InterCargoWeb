@@ -29,6 +29,7 @@ class UserProfile(models.Model):
     is_hr = models.BooleanField(default=False)
     is_driver = models.BooleanField(default=False, verbose_name="Водитель")
     is_pp_worker = models.BooleanField(default=False, verbose_name="Работник ПВЗ")
+    is_accountant = models.BooleanField(default=False, verbose_name="Бухгалтер")
     profile_updated_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего изменения профиля")
 
     class Meta:
@@ -76,6 +77,21 @@ class PasswordResetCode(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.code}"
+
+
+class EmailVerificationCode(models.Model):
+    email = models.EmailField(verbose_name="Email")
+    code = models.CharField(max_length=7, verbose_name="Код подтверждения")
+    created_at = models.DateTimeField(auto_now_add=True)
+    attempts = models.IntegerField(default=0, verbose_name="Попытки ввода")
+    is_verified = models.BooleanField(default=False, verbose_name="Подтверждён")
+
+    class Meta:
+        verbose_name = "Код подтверждения email"
+        verbose_name_plural = "Коды подтверждения email"
+
+    def __str__(self):
+        return f"{self.email} — {self.code}"
 
 
 class TempUser(models.Model):

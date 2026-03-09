@@ -115,6 +115,11 @@ class RegistrationFlowTest(PickupPointMixin, TestCase):
         hr_user = User.objects.create_user(username='hr', password='pass123')
         UserProfile.objects.create(user=hr_user, phone='7000000001', pickup=self.pickup_point, is_hr=True)
 
+        # Сначала подтверждаем email через сессию
+        session = self.client.session
+        session['email_verified'] = 'brandnew@test.com'
+        session.save()
+
         response = self.client.post(reverse('register'), {
             'login': 'brandnew',
             'password': 'securepass',

@@ -397,7 +397,7 @@ def apply_discount(request):
 @login_required
 @require_POST
 def refresh_arrival(request, arrival_id):
-    """Актуализирует данные прихода: обновляет веса и владельцев, не сбрасывая статусы и скидки."""
+    """Актуализирует данные одного прихода: обновляет веса и владельцев, не сбрасывая статусы и скидки."""
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
@@ -498,3 +498,127 @@ def refresh_arrival(request, arrival_id):
         messages.warning(request, f"Ошибок при актуализации: {errors_count}")
 
     return redirect(f'/profile/arrival-summary/?date={arrival.date.isoformat()}')
+
+
+@login_required
+@require_POST
+def refresh_day_arrivals(request):
+    """Актуализирует ВСЕ приходы за выбранный день + подбирает новые треки."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    from myprofile.views.utils import resolve_owner as _resolve_owner
+    from django.core.exceptions import ValidationError
+    from decimal import InvalidOperation
+
+    date_str = request.POST.get('date', '')
+    if not date_str:
+        messages.error(request, "Не указана дата.")
+        return redirect('arrival_summary')
+
+    # 1. Актуализируем каждый существующий приход
+    arrivals = Arrival.objects.filter(date=date_str)
+    total_updated = 0
+    total_created = 0
+    total_errors = 0
+
+    for arrival in arrivals:
+        raw = arrival.raw_data
+        if not raw or 'track_codes' not in raw:
+            continue
+
+        codes = raw['track_codes']
+        usernames = raw.get('usernames', [])
+        weights = raw.get('weights', [])
+
+        if len(codes) != len(usernames) or len(codes) != len(weights):
+            continue
+
+        sorting_location = arrival.sorting_location
+        new_track_ids = list(arrival.track_codes.values_list('id', flat=True))
+
+        for i, code in enumerate(codes):
+            try:
+                track = TrackCode.objects.get(track_code=code)
+                try:
+                    new_weight = Decimal(weights[i].replace(',', '.'))
+                    user, temp_user = _resolve_owner(usernames[i])
+
+                    changed = False
+                    if track.weight != new_weight:
+                        track.weight = new_weight
+                        changed = True
+                    if user and track.owner != user:
+                        track.owner = user
+                        track.temp_owner = None
+                        changed = True
+                    elif temp_user and track.temp_owner != temp_user:
+                        track.owner = None
+                        track.temp_owner = temp_user
+                        changed = True
+                    if sorting_location and track.sorting_location != sorting_location:
+                        track.sorting_location = sorting_location
+                        changed = True
+
+                    if changed:
+                        track.save(update_fields=['weight', 'owner', 'temp_owner', 'sorting_location'])
+                        total_updated += 1
+
+                    if track.id not in new_track_ids:
+                        new_track_ids.append(track.id)
+                except (InvalidOperation, ValueError, Exception):
+                    total_errors += 1
+
+            except TrackCode.DoesNotExist:
+                try:
+                    weight = Decimal(weights[i].replace(',', '.'))
+                    user, temp_user = _resolve_owner(usernames[i])
+                    new_track = TrackCode.objects.create(
+                        track_code=code, status='delivered',
+                        update_date=arrival.date, delivered_date=arrival.date,
+                        owner=user, temp_owner=temp_user,
+                        weight=weight, sorting_location=sorting_location,
+                    )
+                    new_track_ids.append(new_track.id)
+                    total_created += 1
+                except (ValidationError, InvalidOperation, ValueError):
+                    total_errors += 1
+
+        arrival.track_codes.set(new_track_ids)
+        arrival.total_tracks = len(new_track_ids)
+        arrival.updated_count = total_updated
+        arrival.created_count = total_created
+        arrival.save()
+
+    # 2. Ищем «сиротские» треки — delivered_date=дата, но не привязаны ни к одному Arrival
+    all_arrival_track_ids = set()
+    for arrival in Arrival.objects.filter(date=date_str):
+        all_arrival_track_ids.update(arrival.track_codes.values_list('id', flat=True))
+
+    orphan_tracks = TrackCode.objects.filter(
+        delivered_date=date_str,
+        status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+    ).exclude(id__in=all_arrival_track_ids)
+
+    orphan_count = orphan_tracks.count()
+    if orphan_count > 0:
+        # Создаём новый Arrival для «сирот»
+        orphan_arrival = Arrival.objects.create(
+            date=date_str,
+            created_by=request.user,
+            total_tracks=orphan_count,
+            updated_count=0,
+            created_count=orphan_count,
+            raw_data={},
+        )
+        orphan_arrival.track_codes.set(orphan_tracks)
+        messages.info(request, f"Найдено {orphan_count} треков за {date_str}, не привязанных к приходам. Создан приход #{orphan_arrival.id}.")
+
+    if total_updated or total_created:
+        messages.success(request, f"Актуализация за {date_str}: обновлено {total_updated}, создано новых {total_created}.")
+    elif not orphan_count:
+        messages.info(request, f"Данные за {date_str} актуальны, изменений не требуется.")
+    if total_errors:
+        messages.warning(request, f"Ошибок при актуализации: {total_errors}")
+
+    return redirect(f'/profile/arrival-summary/?date={date_str}')

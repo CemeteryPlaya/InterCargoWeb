@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
-    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest
+    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -271,3 +271,25 @@ class PickupChangeRequestAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     search_fields = ('user__username',)
     readonly_fields = ('created_at',)
+
+
+@admin.register(EmailLog)
+class EmailLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'recipient', 'subject', 'status', 'short_error', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('recipient', 'subject')
+    readonly_fields = ('recipient', 'subject', 'body', 'status', 'error_message', 'created_at')
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at',)
+
+    def short_error(self, obj):
+        if obj.error_message:
+            return obj.error_message[:100] + ('...' if len(obj.error_message) > 100 else '')
+        return '—'
+    short_error.short_description = 'Ошибка'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

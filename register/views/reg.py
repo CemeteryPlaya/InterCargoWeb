@@ -69,6 +69,12 @@ def register_view(request):
             messages.error(request, "Заполните все поля.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
+        # Проверка подтверждения email
+        verified_email = request.session.get('email_verified', '')
+        if verified_email != email:
+            messages.error(request, "Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией.")
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
+
         # Проверка ПВЗ
         try:
             pickup_point = PickupPoint.objects.get(id=pickup_id, is_active=True)
@@ -129,6 +135,7 @@ def register_view(request):
             )
             temp_user.delete()
             request.session.pop('registration_data', None)
+            request.session.pop('email_verified', None)
             messages.success(request, "Регистрация прошла успешно! Вы можете войти в систему.")
             return redirect('login')
 
@@ -152,6 +159,7 @@ def register_view(request):
             )
 
         request.session.pop('registration_data', None)
+        request.session.pop('email_verified', None)
         return redirect('success')
 
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)

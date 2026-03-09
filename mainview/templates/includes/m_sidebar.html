@@ -50,6 +50,14 @@
         <a href="{% url 'print_documents' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-printer-line"></i> Печать документов
         </a>
+        <a href="{% url 'email_logs' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-mail-send-line"></i> Логи Email
+        </a>
+        {% endif %}
+        {% if request.user.userprofile.is_staff or request.user.userprofile.is_accountant %}
+        <a href="{% url 'finance_summary' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-money-dollar-circle-line"></i> Финансовая сводка
+        </a>
         {% endif %}
         {% if request.user.userprofile.is_driver %}
         <!-- Только для водителей -->

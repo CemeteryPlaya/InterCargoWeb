@@ -547,3 +547,26 @@ class ClientRegistry(models.Model):
 
     def __str__(self):
         return f"Реестр от {self.created_at.strftime('%d.%m.%Y %H:%M')} ({self.registry_date})"
+
+
+class EmailLog(models.Model):
+    """Лог отправки email-сообщений."""
+    STATUS_CHOICES = [
+        ('sent', 'Отправлено'),
+        ('failed', 'Ошибка'),
+    ]
+
+    recipient = models.EmailField(verbose_name="Получатель")
+    subject = models.CharField(max_length=255, verbose_name="Тема")
+    body = models.TextField(verbose_name="Текст письма")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, verbose_name="Статус")
+    error_message = models.TextField(blank=True, default='', verbose_name="Ошибка")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата отправки")
+
+    class Meta:
+        verbose_name = "Лог email"
+        verbose_name_plural = "Логи email"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.get_status_display()}] {self.subject} → {self.recipient}"

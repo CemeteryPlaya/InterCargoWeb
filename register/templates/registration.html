@@ -76,10 +76,31 @@
           <input type="tel" id="phone" name="phone" required value="{{ phone }}" class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="+7 (___) ___-__-__" maxlength="18">
         </div>
 
-        <!-- Email -->
+        <!-- Email с подтверждением -->
         <div class="mb-6">
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-          <input type="email" id="email" name="email" required value="{{ email }}" class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="example@mail.com">
+          <div class="flex gap-2">
+            <input type="email" id="email" name="email" required value="{{ email }}" class="flex-1 px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="example@mail.com">
+            <button type="button" id="sendCodeBtn" class="px-4 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm whitespace-nowrap">
+              Подтвердить
+            </button>
+          </div>
+          <!-- Блок ввода кода (скрыт по умолчанию) -->
+          <div id="codeBlock" class="hidden mt-3">
+            <div class="flex gap-2">
+              <input type="text" id="emailCode" maxlength="7" class="flex-1 px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition text-center tracking-widest font-mono text-lg" placeholder="___-___">
+              <button type="button" id="verifyCodeBtn" class="px-4 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm whitespace-nowrap">
+                Проверить код
+              </button>
+            </div>
+            <p id="codeStatus" class="text-sm mt-1 text-gray-500">Код отправлен на вашу почту</p>
+            <button type="button" id="resendCodeBtn" class="hidden text-sm text-blue-500 hover:underline mt-1">Отправить код повторно</button>
+          </div>
+          <!-- Статус подтверждения -->
+          <div id="emailVerified" class="hidden mt-2 flex items-center gap-1 text-green-600 text-sm">
+            <i class="ri-checkbox-circle-fill"></i> Email подтверждён
+          </div>
+          <input type="hidden" id="emailVerifiedFlag" value="">
         </div>
 
         <!-- Пункт выдачи -->
@@ -120,9 +141,10 @@
         </div>
 
         <!-- Кнопка -->
-        <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
+        <button type="submit" id="registerBtn" disabled class="w-full bg-gray-400 text-white px-6 py-3 rounded-button font-medium transition whitespace-nowrap cursor-not-allowed">
           Зарегистрироваться
         </button>
+        <p id="registerHint" class="text-center text-sm text-red-500 mt-2">Подтвердите email для завершения регистрации</p>
       </form>
     </div>
   </div>
@@ -131,5 +153,182 @@
     {% endblock %}
 
 {% include 'includes/footer.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var emailInput = document.getElementById('email');
+    var sendCodeBtn = document.getElementById('sendCodeBtn');
+    var codeBlock = document.getElementById('codeBlock');
+    var emailCode = document.getElementById('emailCode');
+    var verifyCodeBtn = document.getElementById('verifyCodeBtn');
+    var codeStatus = document.getElementById('codeStatus');
+    var resendCodeBtn = document.getElementById('resendCodeBtn');
+    var emailVerified = document.getElementById('emailVerified');
+    var emailVerifiedFlag = document.getElementById('emailVerifiedFlag');
+    var registerBtn = document.getElementById('registerBtn');
+    var registerHint = document.getElementById('registerHint');
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    var isVerified = false;
+    var cooldown = 0;
+    var cooldownTimer = null;
+
+    function enableRegister() {
+        isVerified = true;
+        emailVerifiedFlag.value = '1';
+        registerBtn.disabled = false;
+        registerBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        registerBtn.classList.add('bg-primary', 'hover:bg-opacity-90');
+        registerHint.classList.add('hidden');
+        emailVerified.classList.remove('hidden');
+        codeBlock.classList.add('hidden');
+        sendCodeBtn.textContent = 'Подтверждено';
+        sendCodeBtn.disabled = true;
+        sendCodeBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        sendCodeBtn.classList.add('bg-green-500');
+        emailInput.readOnly = true;
+        emailInput.classList.add('bg-gray-100');
+    }
+
+    function startCooldown(seconds) {
+        cooldown = seconds;
+        sendCodeBtn.disabled = true;
+        resendCodeBtn.classList.add('hidden');
+        updateCooldownText();
+        cooldownTimer = setInterval(function() {
+            cooldown--;
+            if (cooldown <= 0) {
+                clearInterval(cooldownTimer);
+                resendCodeBtn.classList.remove('hidden');
+                resendCodeBtn.textContent = 'Отправить код повторно';
+            }
+            updateCooldownText();
+        }, 1000);
+    }
+
+    function updateCooldownText() {
+        if (cooldown > 0) {
+            codeStatus.textContent = 'Код отправлен. Повторная отправка через ' + cooldown + ' сек.';
+            codeStatus.className = 'text-sm mt-1 text-gray-500';
+        }
+    }
+
+    function sendCode() {
+        var email = emailInput.value.trim();
+        if (!email) {
+            codeStatus.textContent = 'Введите email';
+            codeStatus.className = 'text-sm mt-1 text-red-500';
+            return;
+        }
+
+        sendCodeBtn.disabled = true;
+        sendCodeBtn.textContent = 'Отправка...';
+
+        fetch('{% url "email_verify_send" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: 'email=' + encodeURIComponent(email)
+        })
+        .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+        .then(function(res) {
+            if (res.data.success) {
+                codeBlock.classList.remove('hidden');
+                codeStatus.textContent = 'Код отправлен на ' + email;
+                codeStatus.className = 'text-sm mt-1 text-green-600';
+                emailCode.value = '';
+                emailCode.focus();
+                startCooldown(60);
+                sendCodeBtn.textContent = 'Отправлено';
+            } else {
+                codeStatus.textContent = res.data.error || 'Ошибка отправки';
+                codeStatus.className = 'text-sm mt-1 text-red-500';
+                codeBlock.classList.remove('hidden');
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = 'Подтвердить';
+            }
+        })
+        .catch(function() {
+            codeStatus.textContent = 'Ошибка связи с сервером';
+            codeStatus.className = 'text-sm mt-1 text-red-500';
+            sendCodeBtn.disabled = false;
+            sendCodeBtn.textContent = 'Подтвердить';
+        });
+    }
+
+    sendCodeBtn.addEventListener('click', sendCode);
+    resendCodeBtn.addEventListener('click', sendCode);
+
+    verifyCodeBtn.addEventListener('click', function() {
+        var email = emailInput.value.trim();
+        var code = emailCode.value.trim();
+        if (!code) {
+            codeStatus.textContent = 'Введите код';
+            codeStatus.className = 'text-sm mt-1 text-red-500';
+            return;
+        }
+
+        verifyCodeBtn.disabled = true;
+        verifyCodeBtn.textContent = 'Проверка...';
+
+        fetch('{% url "email_verify_check" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: 'email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code)
+        })
+        .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+        .then(function(res) {
+            if (res.data.success) {
+                enableRegister();
+            } else {
+                codeStatus.textContent = res.data.error || 'Неверный код';
+                codeStatus.className = 'text-sm mt-1 text-red-500';
+                verifyCodeBtn.disabled = false;
+                verifyCodeBtn.textContent = 'Проверить код';
+            }
+        })
+        .catch(function() {
+            codeStatus.textContent = 'Ошибка связи с сервером';
+            codeStatus.className = 'text-sm mt-1 text-red-500';
+            verifyCodeBtn.disabled = false;
+            verifyCodeBtn.textContent = 'Проверить код';
+        });
+    });
+
+    // При смене email сбрасываем верификацию
+    emailInput.addEventListener('input', function() {
+        if (isVerified) {
+            isVerified = false;
+            emailVerifiedFlag.value = '';
+            registerBtn.disabled = true;
+            registerBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            registerBtn.classList.remove('bg-primary', 'hover:bg-opacity-90');
+            registerHint.classList.remove('hidden');
+            emailVerified.classList.add('hidden');
+            sendCodeBtn.textContent = 'Подтвердить';
+            sendCodeBtn.disabled = false;
+            sendCodeBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            sendCodeBtn.classList.remove('bg-green-500');
+            emailInput.readOnly = false;
+            emailInput.classList.remove('bg-gray-100');
+            codeBlock.classList.add('hidden');
+        }
+    });
+
+    // Автоформат кода: 123-456
+    emailCode.addEventListener('input', function() {
+        var val = this.value.replace(/[^0-9]/g, '');
+        if (val.length > 3) {
+            val = val.substring(0, 3) + '-' + val.substring(3, 6);
+        }
+        this.value = val;
+    });
+});
+</script>
 </body>
 </html>

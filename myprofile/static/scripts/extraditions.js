@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var qrVerifyFeedback = document.getElementById('qr-verify-feedback');
     var qrScanner = null;
     var scannedReceipts = {}; // receipt_number → true
+    var lastScannedCode = '';
+    var lastScannedTime = 0;
 
     function openQrVerifyModal() {
         if (!currentReceipts.length) return;
@@ -109,18 +111,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function closeQrVerifyModal() {
-        if (qrScanner) {
-            qrScanner.stop().then(function () {
-                qrScanner.clear();
-                qrScanner = null;
-            }).catch(function () {
-                qrScanner = null;
-            });
-        }
+        stopQrScanner();
         qrVerifyModal.classList.add('hidden');
     }
 
     function onQrScanned(code) {
+        // Debounce: игнорируем повторные сканы того же кода в течение 2 секунд
+        var now = Date.now();
+        if (code === lastScannedCode && (now - lastScannedTime) < 2000) {
+            return;
+        }
+        lastScannedCode = code;
+        lastScannedTime = now;
+
         // Ищем чек по receipt_number
         var found = false;
         for (var i = 0; i < currentReceipts.length; i++) {
@@ -134,12 +137,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     renderQrReceiptsList();
                     updateQrProgress();
                     updateQrSubmitButton();
+
+                    // Останавливаем сканер когда все чеки отсканированы
+                    var scannedCount = Object.keys(scannedReceipts).length;
+                    if (scannedCount >= currentReceipts.length) {
+                        stopQrScanner();
+                    }
                 }
                 break;
             }
         }
         if (!found) {
             showQrFeedback('Чек ' + code + ' не относится к этому пакету', 'error');
+        }
+    }
+
+    function stopQrScanner() {
+        if (qrScanner) {
+            qrScanner.stop().then(function () {
+                qrScanner.clear();
+                qrScanner = null;
+            }).catch(function () {
+                qrScanner = null;
+            });
         }
     }
 
@@ -310,12 +330,35 @@ document.addEventListener('DOMContentLoaded', function () {
         var allPaid = currentReceipts.every(function (r) { return r.is_paid; });
         var allScanned = scanned >= total && total > 0;
 
+        // Показываем причину блокировки
+        var statusEl = document.getElementById('qr-verify-block-reason');
+        if (!statusEl) {
+            statusEl = document.createElement('p');
+            statusEl.id = 'qr-verify-block-reason';
+            statusEl.className = 'text-xs text-center mt-1';
+            qrVerifySubmit.parentNode.appendChild(statusEl);
+        }
+
         if (allScanned && allPaid) {
             qrVerifySubmit.disabled = false;
             qrVerifySubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+            statusEl.textContent = '';
+            statusEl.classList.add('hidden');
         } else {
             qrVerifySubmit.disabled = true;
             qrVerifySubmit.classList.add('opacity-50', 'cursor-not-allowed');
+
+            var reasons = [];
+            if (!allScanned) {
+                reasons.push('Отсканировано ' + scanned + ' из ' + total + ' чеков');
+            }
+            if (!allPaid) {
+                var unpaidCount = currentReceipts.filter(function (r) { return !r.is_paid; }).length;
+                reasons.push('Не оплачено: ' + unpaidCount + ' чек(ов)');
+            }
+            statusEl.textContent = reasons.join(' | ');
+            statusEl.className = 'text-xs text-center mt-1 text-red-500';
+            statusEl.classList.remove('hidden');
         }
     }
 
@@ -362,11 +405,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (hasReceipts && unpaidBadges.length === 0) {
             submitBtn.disabled = false;
-            submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            submitBtn.classList.remove('hidden', 'bg-gray-400', 'cursor-not-allowed');
             submitBtn.classList.add('bg-primary', 'hover:bg-red-600');
         } else {
             submitBtn.disabled = true;
-            submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            submitBtn.classList.add('hidden', 'bg-gray-400', 'cursor-not-allowed');
             submitBtn.classList.remove('bg-primary', 'hover:bg-red-600');
         }
 

@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -46,6 +46,7 @@ urlpatterns = [
     path('notifications/', notifications.notifications_list, name='notifications'),
     path('notifications/read/<int:notif_id>/', notifications.mark_as_read, name='mark_as_read'),
     path("notifications/mark-as-read/", notifications.mark_notifications_as_read, name="mark_notifications_as_read"),
+    path("notifications/poll/", notifications.poll_updates, name="poll_updates"),
     path('save-subscription/', push_subscribe.save_push_subscription, name='save_subscription'),
     path('extradition/', extraditions.extradition_view, name='extradition'),
     path('extradition/search/', extraditions.search_package, name='extradition_search'),
@@ -66,12 +67,16 @@ urlpatterns = [
     path('arrival-summary/assign-temp-pickup/', arrival_summary.assign_temp_pickup, name='assign_temp_pickup'),
     path('arrival-summary/apply-discount/', arrival_summary.apply_discount, name='apply_discount'),
     path('arrival-summary/refresh/<int:arrival_id>/', arrival_summary.refresh_arrival, name='refresh_arrival'),
+    path('arrival-summary/refresh-day/', arrival_summary.refresh_day_arrivals, name='refresh_day_arrivals'),
     path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
     path('delivery/receipts/', delivery.get_pickup_receipts, name='get_pickup_receipts'),
     path('pp-acceptance/', pp_acceptance.pp_acceptance_view, name='pp_acceptance'),
     path('pp-acceptance/accept/', pp_acceptance.accept_delivery, name='accept_delivery'),
     path('pp-acceptance/receipts/', pp_acceptance.get_acceptance_receipts, name='get_acceptance_receipts'),
     path('pp-extradition-history/', pp_extradition_history.pp_extradition_history_view, name='pp_extradition_history'),
+    path('email-logs/', email_logs.email_logs_view, name='email_logs'),
+    path('email-logs/resend/<int:log_id>/', email_logs.resend_email, name='resend_email'),
+    path('finance/', finance_summary.finance_summary_view, name='finance_summary'),
 
 ]
 

@@ -212,6 +212,7 @@
                 {% else %}bg-white border-gray-300
                 {% endif %}
                 space-y-1 relative transition-all"
+                    data-track-id="{{ code.id }}" data-track-status="{{ code.status }}"
                     :class="archiveMode && selectedIds.includes({{ code.id }}) ? 'ring-2 ring-red-500 opacity-80' : ''"
                     @click="if (archiveMode {% if code.status == 'user_added' or code.status == 'claimed' %}&& true{% endif %}) { if (selectedIds.includes({{ code.id }})) { selectedIds = selectedIds.filter(id => id !== {{ code.id }}) } else { selectedIds.push({{ code.id }}) } }"
                     :style="archiveMode ? 'cursor: pointer' : ''">
@@ -234,8 +235,8 @@
                     </form>
                     {% endif %}
                     <p class="pr-24" :class="archiveMode ? 'pl-8' : ''"><strong>Код:</strong> {{ code.track_code }}</p>
-                    <p><strong>Статус:</strong> {{ code.get_status_display }}</p>
-                    <p><strong>Обновлено:</strong> {{ code.update_date }}</p>
+                    <p><strong>Статус:</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
+                    <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span></p>
                     {% if code.sorting_location %}
                     <p><strong>Где отсортирован:</strong> {{ code.sorting_location }}</p>
                     {% endif %}
