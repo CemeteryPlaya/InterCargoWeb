@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Финансовая сводка</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="ri-money-dollar-circle-line text-primary"></i> Финансовая сводка
+            </h1>
+
+            <!-- Переключатель режима и фильтры -->
+            <div class="bg-white border rounded-lg shadow-sm p-4 mb-6">
+                <div class="flex flex-wrap gap-4 items-end">
+                    <!-- Табы: день / месяц -->
+                    <div class="flex gap-2">
+                        <a href="{% url 'finance_summary' %}?mode=daily&date={{ selected_date|date:'Y-m-d' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if view_mode == 'daily' %}bg-primary text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            <i class="ri-calendar-line mr-1"></i> По дням
+                        </a>
+                        <a href="{% url 'finance_summary' %}?mode=monthly&month={{ selected_month }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            {% if view_mode == 'monthly' %}bg-primary text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            <i class="ri-calendar-2-line mr-1"></i> По месяцам
+                        </a>
+                    </div>
+
+                    <!-- Выбор даты/месяца -->
+                    <form method="get" class="flex flex-wrap gap-3 items-end flex-1">
+                        <input type="hidden" name="mode" value="{{ view_mode }}">
+                        {% if view_mode == 'daily' %}
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Дата</label>
+                            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
+                                class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        {% else %}
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Месяц</label>
+                            <input type="month" name="month" value="{{ selected_month }}"
+                                class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        {% endif %}
+
+                        <!-- Фильтр по ПВЗ -->
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Пункт выдачи</label>
+                            <select name="pickup" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="">Все ПВЗ</option>
+                                {% for pp in pickups %}
+                                <option value="{{ pp.id }}" {% if selected_pickup == pp.id|stringformat:"d" %}selected{% endif %}>
+                                    {{ pp.address }} ({{ pp.premise_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 text-sm transition">
+                            <i class="ri-filter-line mr-1"></i> Показать
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Итоговые карточки -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Всего чеков</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ totals.total_receipts }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Общая сумма</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ totals.total_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
+                    <div class="text-xs text-gray-400">{{ totals.total_weight|floatformat:3 }} кг</div>
+                </div>
+                <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Оплачено</div>
+                    <div class="text-2xl font-bold text-green-600">{{ totals.paid_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
+                    <div class="text-xs text-gray-400">{{ totals.paid_count }} чеков</div>
+                </div>
+                <div class="bg-white border border-red-200 rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Не оплачено</div>
+                    <div class="text-2xl font-bold text-red-600">{{ totals.unpaid_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
+                    <div class="text-xs text-gray-400">{{ totals.unpaid_count }} чеков</div>
+                </div>
+            </div>
+
+            <!-- Сводка по ПВЗ -->
+            {% if by_pickup %}
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-map-pin-line text-primary mr-1"></i>
+                        По пунктам выдачи
+                        {% if view_mode == 'daily' %}за {{ selected_date|date:"d.m.Y" }}{% else %}за {{ selected_month }}{% endif %}
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">ПВЗ</th>
+                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
+                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
+                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in by_pickup %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-gray-800 font-medium">{{ row.pickup_point }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.total_receipts }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.total_weight|floatformat:3 }}</td>
+                                <td class="px-4 py-3 text-right text-gray-800 font-medium">{{ row.total_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600 font-medium">{{ row.paid_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right {% if row.unpaid_amount > 0 %}text-red-600 font-medium{% else %}text-gray-400{% endif %}">
+                                    {{ row.unpaid_amount|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if view_mode == 'daily' %}
+            <!-- Таблица по дням (последние 30 дней) -->
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-calendar-line text-primary mr-1"></i> Последние 30 дней
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Дата</th>
+                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
+                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in daily_rows %}
+                            <tr class="hover:bg-gray-50 cursor-pointer"
+                                onclick="window.location='{% url 'finance_summary' %}?mode=daily&date={{ row.created_at|date:'Y-m-d' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}'">
+                                <td class="px-4 py-3 text-gray-800 font-medium {% if row.created_at == selected_date %}text-primary{% endif %}">
+                                    {{ row.created_at|date:"d.m.Y" }}
+                                </td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.total_receipts }}</td>
+                                <td class="px-4 py-3 text-right text-gray-800 font-medium">{{ row.total_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600">{{ row.paid_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right {% if row.unpaid_amount > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
+                                    {{ row.unpaid_amount|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">Нет данных за этот период</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Ежемесячный режим: дни внутри месяца -->
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-calendar-line text-primary mr-1"></i> По дням за {{ selected_month }}
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Дата</th>
+                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
+                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
+                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in daily_rows %}
+                            <tr class="hover:bg-gray-50 cursor-pointer"
+                                onclick="window.location='{% url 'finance_summary' %}?mode=daily&date={{ row.created_at|date:'Y-m-d' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}'">
+                                <td class="px-4 py-3 text-gray-800 font-medium">{{ row.created_at|date:"d.m.Y" }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.total_receipts }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.total_weight|floatformat:3 }}</td>
+                                <td class="px-4 py-3 text-right text-gray-800 font-medium">{{ row.total_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600">{{ row.paid_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right {% if row.unpaid_amount > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
+                                    {{ row.unpaid_amount|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">Нет данных за этот месяц</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Сводка по месяцам (последние 12) -->
+            {% if monthly_rows %}
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-calendar-2-line text-primary mr-1"></i> Последние 12 месяцев
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Месяц</th>
+                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
+                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
+                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in monthly_rows %}
+                            <tr class="hover:bg-gray-50 cursor-pointer"
+                                onclick="window.location='{% url 'finance_summary' %}?mode=monthly&month={{ row.month|date:'Y-m' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}'">
+                                <td class="px-4 py-3 text-gray-800 font-medium {% if row.month|date:'Y-m' == selected_month %}text-primary{% endif %}">
+                                    {{ row.month|date:"F Y" }}
+                                </td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.total_receipts }}</td>
+                                <td class="px-4 py-3 text-right text-gray-800 font-medium">{{ row.total_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600">{{ row.paid_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right {% if row.unpaid_amount > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
+                                    {{ row.unpaid_amount|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

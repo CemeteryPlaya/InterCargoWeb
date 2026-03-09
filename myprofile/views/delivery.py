@@ -6,8 +6,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import Count, Sum, Q, F
 from django.db import transaction
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings as django_settings
+from myprofile.email_utils import send_mail_batch
 from django.contrib.auth.models import User
 from collections import defaultdict, OrderedDict
 import json
@@ -446,7 +445,10 @@ def complete_delivery(request):
         except UserProfile.DoesNotExist:
             pass
 
-    # Групповые уведомления + email
+    # Групповые уведомления + сбор email для пакетной отправки
+    email_batch = []
+    skipped_no_email = 0
+
     for user, count in notif_counts.items():
         if count == 1:
             msg = "📦 Ваш трек-код доставлен на ПВЗ"
@@ -455,43 +457,62 @@ def complete_delivery(request):
 
         Notification.objects.create(user=user, message=msg)
 
-        if user.email:
-            try:
-                pickup_name = ''
-                try:
-                    pickup_name = str(user.userprofile.pickup) if user.userprofile.pickup else ''
-                except (UserProfile.DoesNotExist, AttributeError):
-                    pass
+        if not user.email:
+            skipped_no_email += 1
+            continue
 
-                if count == 1:
-                    subject = 'Inter Cargo — Ваша посылка доставлена на ПВЗ'
-                    body = (
-                        f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
-                        f'Ваша посылка доставлена на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
-                        f'Зайдите в личный кабинет для получения.\n\n'
-                        f'С уважением,\nКоманда Inter Cargo'
-                    )
-                else:
-                    subject = f'Inter Cargo — {count} посылок доставлено на ПВЗ'
-                    body = (
-                        f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
-                        f'{count} ваших посылок доставлено на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
-                        f'Зайдите в личный кабинет для получения.\n\n'
-                        f'С уважением,\nКоманда Inter Cargo'
-                    )
+        pickup_name = ''
+        working_hours = ''
+        try:
+            pickup_obj = user.userprofile.pickup
+            if pickup_obj:
+                pickup_name = str(pickup_obj)
+                working_hours = pickup_obj.working_hours or ''
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
 
-                send_mail(
-                    subject,
-                    body,
-                    django_settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=True,
-                )
-            except Exception as e:
-                logger.error(f"Ошибка отправки email пользователю {user.username}: {e}")
+        hours_line = f'\nВремя работы ПВЗ: {working_hours}\n' if working_hours else ''
+
+        if count == 1:
+            subject = 'Inter Cargo — Ваша посылка доставлена на ПВЗ'
+            body = (
+                f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
+                f'Ваша посылка доставлена на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
+                f'{hours_line}'
+                f'Зайдите в личный кабинет для получения.\n\n'
+                f'С уважением,\nКоманда Inter Cargo'
+            )
+        else:
+            subject = f'Inter Cargo — {count} посылок доставлено на ПВЗ'
+            body = (
+                f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
+                f'{count} ваших посылок доставлено на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
+                f'{hours_line}'
+                f'Зайдите в личный кабинет для получения.\n\n'
+                f'С уважением,\nКоманда Inter Cargo'
+            )
+
+        email_batch.append({'recipient': user.email, 'subject': subject, 'body': body})
+
+    # Пакетная отправка email через одно SMTP-соединение
+    sent_count = 0
+    failed_count = 0
+    if email_batch:
+        sent_count, failed_list = send_mail_batch(email_batch)
+        failed_count = len(failed_list)
+        if failed_list:
+            failed_emails = ', '.join(f['recipient'] for f in failed_list)
+            logger.warning(f"Не удалось отправить email ({failed_count}): {failed_emails}")
 
     if updated:
-        messages.success(request, f"Доставлено на ПВЗ: {updated} посылок")
+        msg_parts = [f"Доставлено на ПВЗ: {updated} посылок"]
+        if sent_count:
+            msg_parts.append(f"email отправлено: {sent_count}")
+        if failed_count:
+            msg_parts.append(f"email не доставлено: {failed_count}")
+        if skipped_no_email:
+            msg_parts.append(f"без email: {skipped_no_email}")
+        messages.success(request, '. '.join(msg_parts))
     else:
         messages.info(request, "Нет посылок для завершения доставки в выбранных пунктах.")
 

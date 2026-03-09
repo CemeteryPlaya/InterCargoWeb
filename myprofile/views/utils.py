@@ -62,8 +62,20 @@ def get_discount_weight_threshold():
     return Decimal("30")
 
 
+def _recalc_receipt(receipt, effective_rate):
+    """Пересчитывает total_weight и total_price чека по его items."""
+    items = receipt.items.select_related('track_code').all()
+    total_weight = sum((item.track_code.weight or Decimal("0")) for item in items)
+    total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    receipt.total_weight = total_weight
+    receipt.total_price = total_price
+    receipt.price_per_kg = effective_rate
+    receipt.save()
+
+
 def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
-    """Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem."""
+    """Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
+    Если есть неоплаченный чек с треками за ту же дату — добавляет в него."""
     tracks = TrackCode.objects.filter(owner=user, status__in=statuses)
     already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
     new_tracks = list(tracks.exclude(id__in=already))
@@ -74,7 +86,27 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
-    # Определяем ПВЗ: если у треков есть delivery_pickup, используем его
+    # Проверяем, есть ли неоплаченный чек с треками за ту же дату
+    new_dates = set(t.update_date for t in new_tracks if t.update_date)
+    if new_dates:
+        existing_unpaid = Receipt.objects.filter(
+            owner=user, is_paid=False
+        ).prefetch_related('items__track_code').order_by('-created_at')
+
+        for receipt in existing_unpaid:
+            receipt_dates = set(
+                item.track_code.update_date
+                for item in receipt.items.select_related('track_code').all()
+                if item.track_code.update_date
+            )
+            if receipt_dates & new_dates:
+                # Совпадают даты — добавляем треки в существующий чек
+                for track in new_tracks:
+                    ReceiptItem.objects.create(receipt=receipt, track_code=track)
+                _recalc_receipt(receipt, effective_rate)
+                return receipt
+
+    # Нет подходящего чека — создаём новый
     pickup_display = ''
     payment_link = None
     first_with_override = next((t for t in new_tracks if t.delivery_pickup_id), None)
@@ -98,17 +130,13 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     for track in new_tracks:
         ReceiptItem.objects.create(receipt=receipt, track_code=track)
 
-    total_weight = sum(t.weight or Decimal("0") for t in new_tracks)
-    total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-    receipt.total_weight = total_weight
-    receipt.total_price = total_price
-    receipt.save()
-
+    _recalc_receipt(receipt, effective_rate)
     return receipt
 
 
 def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
-    """Создаёт чеки для треков временного пользователя, которые ещё не привязаны к ReceiptItem."""
+    """Создаёт чеки для треков временного пользователя, которые ещё не привязаны к ReceiptItem.
+    Если есть неоплаченный чек с треками за ту же дату — добавляет в него."""
     tracks = TrackCode.objects.filter(temp_owner=temp_user, status__in=statuses)
     already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
     new_tracks = list(tracks.exclude(id__in=already))
@@ -119,7 +147,26 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
     discount = get_temp_user_discount(temp_user)
     effective_rate = RATE - discount
 
-    # Определяем ПВЗ: если у треков есть delivery_pickup, используем его
+    # Проверяем, есть ли неоплаченный чек с треками за ту же дату
+    new_dates = set(t.update_date for t in new_tracks if t.update_date)
+    if new_dates:
+        existing_unpaid = Receipt.objects.filter(
+            temp_owner=temp_user, is_paid=False
+        ).prefetch_related('items__track_code').order_by('-created_at')
+
+        for receipt in existing_unpaid:
+            receipt_dates = set(
+                item.track_code.update_date
+                for item in receipt.items.select_related('track_code').all()
+                if item.track_code.update_date
+            )
+            if receipt_dates & new_dates:
+                for track in new_tracks:
+                    ReceiptItem.objects.create(receipt=receipt, track_code=track)
+                _recalc_receipt(receipt, effective_rate)
+                return receipt
+
+    # Нет подходящего чека — создаём новый
     pickup_display = ''
     payment_link = None
     first_with_override = next((t for t in new_tracks if t.delivery_pickup_id), None)
@@ -138,12 +185,7 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
     for track in new_tracks:
         ReceiptItem.objects.create(receipt=receipt, track_code=track)
 
-    total_weight = sum(t.weight or Decimal("0") for t in new_tracks)
-    total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-    receipt.total_weight = total_weight
-    receipt.total_price = total_price
-    receipt.save()
-
+    _recalc_receipt(receipt, effective_rate)
     return receipt
 
 
@@ -222,12 +264,13 @@ def add_bulk_result_messages(request, updated=0, created=0, partially_updated=0,
 
 
 def parse_paid_at(request):
-    """Парсит дату/время оплаты из POST. Возвращает datetime."""
+    """Парсит дату/время оплаты из POST. Возвращает timezone-aware datetime."""
     from datetime import datetime
     paid_at_str = request.POST.get('paid_at', '').strip()
     if paid_at_str:
         try:
-            return datetime.strptime(paid_at_str, "%Y-%m-%dT%H:%M")
+            naive = datetime.strptime(paid_at_str, "%Y-%m-%dT%H:%M")
+            return timezone.make_aware(naive)
         except ValueError:
             return timezone.now()
     return timezone.now()

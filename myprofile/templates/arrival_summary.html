@@ -45,14 +45,24 @@
             {% endif %}
 
             <!-- Выбор даты -->
-            <form method="get" class="flex items-center gap-3 mb-6">
-                <label for="date" class="font-medium text-gray-700">Дата:</label>
-                <input type="date" name="date" id="date" value="{{ selected_date }}"
-                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400">
-                <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
-                    Показать
-                </button>
-            </form>
+            <div class="flex items-center gap-3 mb-6 flex-wrap">
+                <form method="get" class="flex items-center gap-3">
+                    <label for="date" class="font-medium text-gray-700">Дата:</label>
+                    <input type="date" name="date" id="date" value="{{ selected_date }}"
+                        class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
+                        Показать
+                    </button>
+                </form>
+                <form method="post" action="{% url 'refresh_day_arrivals' %}" class="ml-auto">
+                    {% csrf_token %}
+                    <input type="hidden" name="date" value="{{ selected_date }}">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition text-sm"
+                        onclick="return confirm('Актуализировать все данные за {{ selected_date }}? Скидки и статусы не будут сброшены.')">
+                        <i class="ri-refresh-line"></i> Актуализировать день
+                    </button>
+                </form>
+            </div>
 
             {% if arrivals %}
             <div class="mb-6 space-y-2">

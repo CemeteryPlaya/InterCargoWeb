@@ -4,8 +4,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.conf import settings as django_settings
+from myprofile.email_utils import send_mail_logged
 from django.utils import timezone
 from register.models import UserProfile, PasswordResetCode
 
@@ -89,13 +88,12 @@ def password_reset_request(request):
         PasswordResetCode.objects.create(user=user, code=code)
 
         try:
-            send_mail(
+            send_mail_logged(
                 'Inter Cargo — Код для сброса пароля',
                 f'Здравствуйте!\n\nВаш код для сброса пароля: {code}\n\n'
                 f'Код действителен 10 минут.\n\n'
                 f'Если вы не запрашивали сброс пароля, проигнорируйте это письмо.\n\n'
                 f'С уважением,\nКоманда Inter Cargo',
-                django_settings.DEFAULT_FROM_EMAIL,
                 [user.email],
                 fail_silently=False,
             )
