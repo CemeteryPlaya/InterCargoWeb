@@ -203,22 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var right = document.createElement('div');
             right.className = 'flex items-center gap-2';
 
-            // Бейдж оплаты
-            var payBadge = document.createElement('span');
-            if (receipt.is_paid) {
-                payBadge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                payBadge.textContent = 'Оплачено';
-            } else {
-                payBadge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
-                payBadge.textContent = 'Не оплачено';
-                payBadge.title = 'Нажмите для отметки оплаты';
-                (function (r) {
-                    payBadge.addEventListener('click', function () {
-                        showQrPaymentModal(r, payBadge);
-                    });
-                })(receipt);
-            }
-            right.appendChild(payBadge);
+            /* PAYMENT COMMENTED OUT: payment badge in QR verify list removed */
 
             // Кнопка ручной отметки (если не отсканирован)
             if (!isScanned) {
@@ -327,10 +312,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateQrSubmitButton() {
         var total = currentReceipts.length;
         var scanned = Object.keys(scannedReceipts).length;
-        var allPaid = currentReceipts.every(function (r) { return r.is_paid; });
+        /* PAYMENT COMMENTED OUT: allPaid check removed */
         var allScanned = scanned >= total && total > 0;
 
-        // Показываем причину блокировки
         var statusEl = document.getElementById('qr-verify-block-reason');
         if (!statusEl) {
             statusEl = document.createElement('p');
@@ -339,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
             qrVerifySubmit.parentNode.appendChild(statusEl);
         }
 
-        if (allScanned && allPaid) {
+        if (allScanned) {
             qrVerifySubmit.disabled = false;
             qrVerifySubmit.classList.remove('opacity-50', 'cursor-not-allowed');
             statusEl.textContent = '';
@@ -347,16 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             qrVerifySubmit.disabled = true;
             qrVerifySubmit.classList.add('opacity-50', 'cursor-not-allowed');
-
-            var reasons = [];
-            if (!allScanned) {
-                reasons.push('Отсканировано ' + scanned + ' из ' + total + ' чеков');
-            }
-            if (!allPaid) {
-                var unpaidCount = currentReceipts.filter(function (r) { return !r.is_paid; }).length;
-                reasons.push('Не оплачено: ' + unpaidCount + ' чек(ов)');
-            }
-            statusEl.textContent = reasons.join(' | ');
+            statusEl.textContent = 'Отсканировано ' + scanned + ' из ' + total + ' чеков';
             statusEl.className = 'text-xs text-center mt-1 text-red-500';
             statusEl.classList.remove('hidden');
         }
@@ -372,6 +347,38 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     verifyBtn.onclick = openQrVerifyModal;
+
+    // === Поддержка аппаратного сканера в модалке QR-верификации ===
+    var hwScanBuffer = '';
+    var hwScanTimer = null;
+
+    document.addEventListener('keydown', function (e) {
+        // Работаем только когда модалка QR-верификации открыта
+        if (qrVerifyModal.classList.contains('hidden')) return;
+
+        // Игнорируем если фокус на каком-то input/textarea
+        var tag = document.activeElement ? document.activeElement.tagName : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (hwScanBuffer.length > 0) {
+                onQrScanned(hwScanBuffer.trim());
+                hwScanBuffer = '';
+            }
+            return;
+        }
+
+        // Только печатные символы
+        if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            hwScanBuffer += e.key;
+            // Сбрасываем буфер через 500мс без ввода (аппаратный сканер вводит быстро)
+            clearTimeout(hwScanTimer);
+            hwScanTimer = setTimeout(function () { hwScanBuffer = ''; }, 500);
+        }
+    });
 
     // ==================== Common Functions ====================
 
@@ -400,10 +407,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateSubmitButton() {
-        var unpaidBadges = receiptsContainer.querySelectorAll('[data-paid="false"]');
+        /* PAYMENT COMMENTED OUT: submit no longer depends on payment status */
         var hasReceipts = receiptsContainer.querySelectorAll('.receipt-block').length > 0;
 
-        if (hasReceipts && unpaidBadges.length === 0) {
+        if (hasReceipts) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('hidden', 'bg-gray-400', 'cursor-not-allowed');
             submitBtn.classList.add('bg-primary', 'hover:bg-red-600');
@@ -424,16 +431,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function updateGlobalPaymentStatus() {
-        var unpaidBadges = receiptsContainer.querySelectorAll('[data-paid="false"]');
-        if (unpaidBadges.length === 0) {
-            infoPaymentStatus.textContent = 'Оплачено';
-            infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-        } else {
-            infoPaymentStatus.textContent = 'Не оплачено';
-            infoPaymentStatus.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800';
-        }
-    }
+    /* PAYMENT COMMENTED OUT */
+    function updateGlobalPaymentStatus() { /* no-op */ }
 
     clearBtn.onclick = clearForm;
     searchBtn.onclick = performSearch;
@@ -441,6 +440,9 @@ document.addEventListener('DOMContentLoaded', function () {
     barcodeInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
+            // Не запускаем поиск если открыта модалка
+            if (!qrVerifyModal.classList.contains('hidden')) return;
+            if (!barcodeScanModal.classList.contains('hidden')) return;
             performSearch();
         }
     });
@@ -515,29 +517,8 @@ document.addEventListener('DOMContentLoaded', function () {
             headerLeft.appendChild(title);
             headerLeft.appendChild(weightInfo);
 
-            var payBadge = document.createElement('span');
-            payBadge.setAttribute('data-receipt-id', receipt.receipt_id);
-            payBadge.setAttribute('data-paid', receipt.is_paid ? 'true' : 'false');
-
-            if (receipt.is_paid) {
-                payBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                payBadge.textContent = 'Оплачено';
-                if (receipt.paid_at) {
-                    payBadge.title = receipt.paid_at;
-                }
-            } else {
-                payBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
-                payBadge.textContent = 'Не оплачено';
-                payBadge.title = 'Нажмите, чтобы отметить как оплачено';
-
-                payBadge.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    showPaymentModal(receipt.receipt_id, payBadge);
-                });
-            }
-
+            /* PAYMENT COMMENTED OUT: payment badge removed from receipt header */
             header.appendChild(headerLeft);
-            header.appendChild(payBadge);
 
             var body = document.createElement('div');
             body.className = 'hidden px-4 py-3';

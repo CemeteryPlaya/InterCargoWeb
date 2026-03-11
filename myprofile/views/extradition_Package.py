@@ -30,7 +30,6 @@ def extradition_package_view(request):
     for pkg in packages:
         package_total = Decimal("0")
         receipts_data = []
-        all_paid = True
         for receipt in pkg.receipts.all():
             rate = receipt.price_per_kg if receipt.price_per_kg else Decimal("0")
             items_list = list(receipt.items.all())
@@ -43,8 +42,9 @@ def extradition_package_view(request):
             receipt.computed_weight = computed_weight
             receipt.computed_price = int((computed_weight * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
             package_total += receipt.computed_price
-            if not receipt.is_paid:
-                all_paid = False
+            # PAYMENT COMMENTED OUT
+            # if not receipt.is_paid:
+            #     all_paid = False
             receipts_data.append(receipt)
 
         packages_with_barcodes.append({
@@ -52,7 +52,7 @@ def extradition_package_view(request):
             'qr_base64': pkg.get_qr_base64(),
             'receipts': receipts_data,
             'package_total': int(package_total),
-            'payment_link': payment_link if not all_paid else None,
+            # PAYMENT COMMENTED OUT: 'payment_link': payment_link if not all_paid else None,
         })
 
     return render(request, "extradition_package.html", {
@@ -119,15 +119,15 @@ def quick_issue(request):
 
         track_count = sum(r.items.count() for r in ready_receipts)
 
-        # Ссылка на оплату из ПВЗ пользователя
-        payment_link = None
-        all_paid = all(r.is_paid for r in ready_receipts)
-        if not all_paid:
-            try:
-                if user.userprofile.pickup and user.userprofile.pickup.payment_link:
-                    payment_link = user.userprofile.pickup.payment_link
-            except UserProfile.DoesNotExist:
-                pass
+        # PAYMENT COMMENTED OUT: payment link disabled
+        # payment_link = None
+        # all_paid = all(r.is_paid for r in ready_receipts)
+        # if not all_paid:
+        #     try:
+        #         if user.userprofile.pickup and user.userprofile.pickup.payment_link:
+        #             payment_link = user.userprofile.pickup.payment_link
+        #     except UserProfile.DoesNotExist:
+        #         pass
 
         return JsonResponse({
             'success': True,
@@ -135,7 +135,7 @@ def quick_issue(request):
             'qr_base64': package.get_qr_base64(),
             'receipt_count': len(ready_receipts),
             'track_count': track_count,
-            'payment_link': payment_link,
+            # PAYMENT COMMENTED OUT: 'payment_link': payment_link,
         })
 
     except Exception as e:

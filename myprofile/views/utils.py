@@ -89,8 +89,9 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     # Проверяем, есть ли неоплаченный чек с треками за ту же дату
     new_dates = set(t.update_date for t in new_tracks if t.update_date)
     if new_dates:
+        # PAYMENT COMMENTED OUT: was is_paid=False filter
         existing_unpaid = Receipt.objects.filter(
-            owner=user, is_paid=False
+            owner=user,
         ).prefetch_related('items__track_code').order_by('-created_at')
 
         for receipt in existing_unpaid:
@@ -124,7 +125,8 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
 
     receipt = Receipt.objects.create(
         owner=user, total_weight=0, total_price=0,
-        price_per_kg=effective_rate, is_paid=False,
+        price_per_kg=effective_rate,
+        # PAYMENT COMMENTED OUT: is_paid=False is the default
         pickup_point=pickup_display, payment_link=payment_link
     )
     for track in new_tracks:
@@ -150,8 +152,9 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
     # Проверяем, есть ли неоплаченный чек с треками за ту же дату
     new_dates = set(t.update_date for t in new_tracks if t.update_date)
     if new_dates:
+        # PAYMENT COMMENTED OUT: was is_paid=False filter
         existing_unpaid = Receipt.objects.filter(
-            temp_owner=temp_user, is_paid=False
+            temp_owner=temp_user,
         ).prefetch_related('items__track_code').order_by('-created_at')
 
         for receipt in existing_unpaid:
@@ -179,7 +182,8 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
 
     receipt = Receipt.objects.create(
         temp_owner=temp_user, total_weight=0, total_price=0,
-        price_per_kg=effective_rate, is_paid=False,
+        price_per_kg=effective_rate,
+        # PAYMENT COMMENTED OUT: is_paid=False is the default
         pickup_point=pickup_display, payment_link=payment_link
     )
     for track in new_tracks:

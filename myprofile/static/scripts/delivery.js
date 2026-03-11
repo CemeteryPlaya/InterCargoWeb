@@ -121,23 +121,29 @@ document.addEventListener('DOMContentLoaded', function () {
     // ============================================
     // Per-pickup scan buttons
     // ============================================
+    var currentDeliveredDate = '';
+
     var scanButtons = document.querySelectorAll('.scan-pickup-btn');
     scanButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
             var pickupId = this.dataset.pickupId;
             var pickupName = this.dataset.pickupName;
-            startScanForPickup(pickupId, pickupName);
+            var deliveredDate = this.dataset.deliveredDate || '';
+            startScanForPickup(pickupId, pickupName, deliveredDate);
         });
     });
 
-    function startScanForPickup(pickupId, pickupName) {
-        // Fetch receipt data for this pickup
-        fetch(receiptsUrl + '?pickup_id=' + encodeURIComponent(pickupId), { credentials: 'same-origin' })
+    function startScanForPickup(pickupId, pickupName, deliveredDate) {
+        currentDeliveredDate = deliveredDate;
+        // Fetch receipt data for this pickup (with date filter)
+        var url = receiptsUrl + '?pickup_id=' + encodeURIComponent(pickupId);
+        if (deliveredDate) url += '&delivered_date=' + encodeURIComponent(deliveredDate);
+
+        fetch(url, { credentials: 'same-origin' })
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 if (!data.clients || data.clients.length === 0) {
-                    // No clients/receipts — just take directly without scanning
-                    submitDirectly(pickupId, []);
+                    submitDirectly(pickupId, [], deliveredDate);
                     return;
                 }
 
@@ -149,14 +155,14 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    function submitDirectly(pickupId, scannedList) {
-        // Create and submit a form
+    function submitDirectly(pickupId, scannedList, deliveredDate) {
         var form = document.createElement('form');
         form.method = 'POST';
         form.action = takeUrl;
         form.innerHTML =
             '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">' +
             '<input type="hidden" name="pickup_id" value="' + pickupId + '">' +
+            '<input type="hidden" name="delivered_date" value="' + (deliveredDate || '') + '">' +
             '<input type="hidden" name="scanned_receipts" value=\'' + JSON.stringify(scannedList) + '\'>';
         document.body.appendChild(form);
         form.submit();
@@ -450,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         scanningInProgress = false;
-        submitDirectly(currentPickupId, scannedReceipts);
+        submitDirectly(currentPickupId, scannedReceipts, currentDeliveredDate);
     });
 
     document.addEventListener('keydown', function (e) {

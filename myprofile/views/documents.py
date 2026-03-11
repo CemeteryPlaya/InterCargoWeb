@@ -11,7 +11,9 @@ from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 from django.db.models import Q
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, round_price as _round_price, create_receipts_for_user, create_receipts_for_temp_user
+# RECEIPTS COMMENTED OUT: auto-creation disabled
+# from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, round_price as _round_price
 
 
 def _generate_qr_base64(text):
@@ -54,27 +56,7 @@ def print_documents_view(request):
 
                 track_ids = [t.id for t in tracks]
 
-                # Авто-создание чеков для зарег. пользователей, у которых нет ReceiptItem
-                existing_receipt_track_ids = set(
-                    ReceiptItem.objects.filter(track_code_id__in=track_ids).values_list('track_code_id', flat=True)
-                )
-                owners_seen = set()
-                temp_owners_seen = set()
-                for track in tracks:
-                    if track.owner_id and track.owner_id not in owners_seen:
-                        if track.id not in existing_receipt_track_ids:
-                            owners_seen.add(track.owner_id)
-                            create_receipts_for_user(
-                                track.owner,
-                                statuses=('delivered', 'shipping_pp', 'ready', 'claimed'),
-                            )
-                    elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
-                        if track.id not in existing_receipt_track_ids:
-                            temp_owners_seen.add(track.temp_owner_id)
-                            create_receipts_for_temp_user(
-                                track.temp_owner,
-                                statuses=('delivered', 'shipping_pp', 'ready', 'claimed'),
-                            )
+                # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
 
                 # Находим все ReceiptItem для этих треков → группируем по Receipt
                 items = (

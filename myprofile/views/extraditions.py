@@ -48,16 +48,16 @@ def extradition_view(request):
             messages.warning(request, f"Пакет '{barcode}' уже был выдан.")
             return redirect('extradition')
 
-        # Проверка оплаты всех чеков
         all_receipts = package.receipts.all()
         if not all_receipts.exists():
             messages.error(request, f"В пакете '{barcode}' нет чеков.")
             return redirect('extradition')
 
-        unpaid = all_receipts.filter(is_paid=False)
-        if unpaid.exists():
-            messages.error(request, f"Пакет '{barcode}' НЕ ОПЛАЧЕН! Выдача запрещена.")
-            return redirect('extradition')
+        # PAYMENT COMMENTED OUT: проверка оплаты убрана
+        # unpaid = all_receipts.filter(is_paid=False)
+        # if unpaid.exists():
+        #     messages.error(request, f"Пакет '{barcode}' НЕ ОПЛАЧЕН! Выдача запрещена.")
+        #     return redirect('extradition')
 
         with transaction.atomic():
             extradition = Extradition.objects.create(
@@ -132,15 +132,17 @@ def search_package(request):
 
             computed_price = int((computed_weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
-            if not receipt.is_paid:
-                all_paid = False
+            # PAYMENT COMMENTED OUT: is_paid check removed
+            # if not receipt.is_paid:
+            #     all_paid = False
 
             receipts_data.append({
                 'receipt_id': receipt.id,
                 'receipt_number': receipt.receipt_number,
                 'created_at': receipt.created_at.strftime('%d.%m.%Y') if receipt.created_at else '',
-                'is_paid': receipt.is_paid,
-                'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
+                # PAYMENT COMMENTED OUT
+                # 'is_paid': receipt.is_paid,
+                # 'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
                 'total_weight': float(computed_weight),
                 'total_price': computed_price,
                 'tracks': tracks_data,
@@ -153,7 +155,7 @@ def search_package(request):
             'barcode': package.barcode,
             'owner': package.user.username,
             'pickup_point': package.pickup_point_display,
-            'is_paid': all_paid,
+            # PAYMENT COMMENTED OUT: 'is_paid': all_paid,
             'is_issued': package.is_issued,
             'receipts': receipts_data,
             'package_total': package_total,
@@ -163,39 +165,38 @@ def search_package(request):
         return JsonResponse({'found': False, 'error': 'Пакет не найден'}, status=404)
 
 
+# PAYMENT COMMENTED OUT: toggle_payment view disabled
 @login_required
 @require_POST
 def toggle_payment(request):
-    """
-    AJAX: Переключение статуса оплаты для одного чека.
-    Принимает receipt_id, переключает is_paid.
-    """
-    if not _can_issue(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+    return JsonResponse({'error': 'Оплата временно отключена'}, status=403)
 
-    receipt_id = request.POST.get('receipt_id', '').strip()
-    if not receipt_id:
-        return JsonResponse({'error': 'Не указан ID чека'}, status=400)
-
-    try:
-        receipt = Receipt.objects.get(id=receipt_id)
-        receipt.is_paid = not receipt.is_paid
-
-        if receipt.is_paid:
-            receipt.paid_at = parse_paid_at(request)
-        else:
-            receipt.paid_at = None
-
-        receipt.save()
-
-        return JsonResponse({
-            'success': True,
-            'receipt_id': receipt.id,
-            'is_paid': receipt.is_paid,
-            'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
-        })
-
-    except Receipt.DoesNotExist:
-        return JsonResponse({'error': 'Чек не найден'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+# @login_required
+# @require_POST
+# def toggle_payment(request):
+#     """
+#     AJAX: Переключение статуса оплаты для одного чека.
+#     Принимает receipt_id, переключает is_paid.
+#     """
+#     if not _can_issue(request.user):
+#         return JsonResponse({'error': 'Нет доступа'}, status=403)
+#     receipt_id = request.POST.get('receipt_id', '').strip()
+#     if not receipt_id:
+#         return JsonResponse({'error': 'Не указан ID чека'}, status=400)
+#     try:
+#         receipt = Receipt.objects.get(id=receipt_id)
+#         receipt.is_paid = not receipt.is_paid
+#         if receipt.is_paid:
+#             receipt.paid_at = parse_paid_at(request)
+#         else:
+#             receipt.paid_at = None
+#         receipt.save()
+#         return JsonResponse({
+#             'success': True, 'receipt_id': receipt.id,
+#             'is_paid': receipt.is_paid,
+#             'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
+#         })
+#     except Receipt.DoesNotExist:
+#         return JsonResponse({'error': 'Чек не найден'}, status=404)
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=500)

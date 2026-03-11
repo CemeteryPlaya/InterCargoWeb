@@ -8,7 +8,9 @@ from django.utils import timezone
 import json
 import logging
 from myprofile.models import TrackCode, ReceiptItem, StorageCell
-from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user, get_or_create_storage_cell
+# RECEIPTS COMMENTED OUT: auto-creation disabled
+# from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
+from myprofile.views.utils import get_or_create_storage_cell
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
@@ -106,16 +108,7 @@ def get_acceptance_receipts(request):
         pp_sorted=False,
     ).select_related('owner', 'temp_owner'))
 
-    # Автосоздание чеков если нет
-    owners_seen = set()
-    temp_owners_seen = set()
-    for track in tracks:
-        if track.owner and track.owner_id not in owners_seen:
-            owners_seen.add(track.owner_id)
-            create_receipts_for_user(track.owner, statuses=('ready',))
-        elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
-            temp_owners_seen.add(track.temp_owner_id)
-            create_receipts_for_temp_user(track.temp_owner, statuses=('ready',))
+    # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
 
     track_ids = [t.id for t in tracks]
 

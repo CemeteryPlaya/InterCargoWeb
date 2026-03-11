@@ -54,12 +54,13 @@
                         Показать
                     </button>
                 </form>
-                <form method="post" action="{% url 'refresh_day_arrivals' %}" class="ml-auto">
+                <!-- Актуализация убрана -->
+                <form method="post" action="{% url 'generate_day_receipts' %}" class="inline"
+                      onsubmit="return confirm('Создать чеки по клиентам за {{ selected_date }}?');">
                     {% csrf_token %}
                     <input type="hidden" name="date" value="{{ selected_date }}">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition text-sm"
-                        onclick="return confirm('Актуализировать все данные за {{ selected_date }}? Скидки и статусы не будут сброшены.')">
-                        <i class="ri-refresh-line"></i> Актуализировать день
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">
+                        <i class="ri-receipt-line"></i> Сформировать чеки
                     </button>
                 </form>
             </div>
@@ -79,13 +80,7 @@
                     {% if arrival.created_by %}
                     <span class="text-gray-400 text-xs">{{ arrival.created_by.get_full_name|default:arrival.created_by.username }}</span>
                     {% endif %}
-                    <form method="post" action="{% url 'refresh_arrival' arrival.id %}" class="ml-auto">
-                        {% csrf_token %}
-                        <button type="submit" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition"
-                            onclick="return confirm('Актуализировать данные прихода #{{ arrival.id }}? Скидки и статусы не будут сброшены.')">
-                            <i class="ri-refresh-line"></i> Актуализировать данные
-                        </button>
-                    </form>
+                    <!-- Актуализация убрана -->
                 </div>
                 {% endfor %}
             </div>

@@ -3,9 +3,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db.models import Count, Sum, Q, F
+from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
+from requests import request
 from myprofile.email_utils import send_mail_batch
 from django.contrib.auth.models import User
 from collections import defaultdict, OrderedDict
@@ -15,7 +16,9 @@ from myprofile.models import (
     TrackCode, Notification, DeliveryHistory,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
-from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user, get_or_create_storage_cell
+# RECEIPTS COMMENTED OUT: auto-creation disabled
+# from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
+from myprofile.views.utils import get_or_create_storage_cell
 from register.models import UserProfile, PickupPoint, TempUser
 
 logger = logging.getLogger(__name__)
@@ -75,98 +78,86 @@ def _get_home_delivery_clients(status):
     return list(clients.values())
 
 
+def _build_pickup_date_groups(status):
+    """
+    Группирует треки в заданном статусе по (ПВЗ, дата прихода).
+    Возвращает список словарей: pickup, delivered_date, track_count, client_count.
+    """
+    tracks = (
+        TrackCode.objects
+        .filter(status=status)
+        .exclude(delivery_pickup__isnull=True)
+        .exclude(delivery_pickup__is_home_delivery=True)
+        .select_related('delivery_pickup', 'owner', 'temp_owner')
+    )
+
+    # Треки без delivery_pickup — используют ПВЗ из профиля
+    tracks_no_override = (
+        TrackCode.objects
+        .filter(status=status, delivery_pickup__isnull=True)
+        .select_related('owner__userprofile__pickup', 'temp_owner__pickup', 'owner', 'temp_owner')
+    )
+
+    # Группируем: (pickup_id, delivered_date) → {pickup, tracks, clients}
+    groups = {}
+
+    def add_to_group(pickup, track):
+        if not pickup or pickup.is_home_delivery:
+            return
+        date_key = track.delivered_date
+        key = (pickup.id, date_key)
+        if key not in groups:
+            groups[key] = {
+                'pickup': pickup,
+                'delivered_date': date_key,
+                'track_count': 0,
+                'client_ids': set(),
+            }
+        groups[key]['track_count'] += 1
+        if track.owner_id:
+            groups[key]['client_ids'].add(f'user_{track.owner_id}')
+        elif track.temp_owner_id:
+            groups[key]['client_ids'].add(f'temp_{track.temp_owner_id}')
+
+    for track in tracks:
+        add_to_group(track.delivery_pickup, track)
+
+    for track in tracks_no_override:
+        pickup = None
+        if track.owner:
+            try:
+                pickup = track.owner.userprofile.pickup
+            except (UserProfile.DoesNotExist, AttributeError):
+                pass
+        elif track.temp_owner:
+            pickup = track.temp_owner.pickup
+        add_to_group(pickup, track)
+
+    result = []
+    for key, g in groups.items():
+        result.append({
+            'pickup': g['pickup'],
+            'delivered_date': g['delivered_date'],
+            'track_count': g['track_count'],
+            'client_count': len(g['client_ids']),
+        })
+
+    from datetime import date as _date_cls
+    _min_date = _date_cls.min
+    result.sort(key=lambda x: (x['pickup'].id, x['delivered_date'] or _min_date))
+    return result
+
+
 @login_required
 def delivery_view(request):
     if not _is_driver(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
 
-    # Пункты с посылками в статусе 'delivered' (готовы к забору)
-    # Учитываем как обычные треки (через профиль клиента), так и переопределённые (delivery_pickup)
-    pending_pickups = (
-        PickupPoint.objects
-        .filter(is_active=True, is_home_delivery=False)
-        .annotate(
-            _normal_count=Count(
-                'userprofile__user__trackcode',
-                filter=Q(
-                    userprofile__user__trackcode__status='delivered',
-                    userprofile__user__trackcode__delivery_pickup__isnull=True,
-                ),
-            ),
-            _temp_count=Count(
-                'tempuser__track_codes',
-                filter=Q(
-                    tempuser__track_codes__status='delivered',
-                    tempuser__track_codes__delivery_pickup__isnull=True,
-                ),
-            ),
-            _override_count=Count(
-                'delivery_tracks',
-                filter=Q(delivery_tracks__status='delivered'),
-            ),
-            _normal_clients=Count(
-                'userprofile__user',
-                filter=Q(
-                    userprofile__user__trackcode__status='delivered',
-                    userprofile__user__trackcode__delivery_pickup__isnull=True,
-                ),
-                distinct=True,
-            ),
-            _temp_clients=Count(
-                'tempuser',
-                filter=Q(
-                    tempuser__track_codes__status='delivered',
-                    tempuser__track_codes__delivery_pickup__isnull=True,
-                ),
-                distinct=True,
-            ),
-            _override_clients=Count(
-                'delivery_tracks__owner',
-                filter=Q(delivery_tracks__status='delivered'),
-                distinct=True,
-            ),
-            _override_temp_clients=Count(
-                'delivery_tracks__temp_owner',
-                filter=Q(delivery_tracks__status='delivered'),
-                distinct=True,
-            ),
-        )
-        .annotate(
-            track_count=F('_normal_count') + F('_temp_count') + F('_override_count'),
-            client_count=F('_normal_clients') + F('_temp_clients') + F('_override_clients') + F('_override_temp_clients'),
-        )
-        .filter(track_count__gt=0)
-        .order_by('id')
-    )
+    # Пункты с посылками в статусе 'delivered' (готовы к забору) — группировка по дате
+    pending_pickups = _build_pickup_date_groups('delivered')
 
-    # Пункты с посылками в статусе 'shipping_pp' (в доставке)
-    in_transit_pickups = (
-        PickupPoint.objects
-        .filter(is_active=True, is_home_delivery=False)
-        .annotate(
-            _normal_count=Count(
-                'userprofile__user__trackcode',
-                filter=Q(
-                    userprofile__user__trackcode__status='shipping_pp',
-                    userprofile__user__trackcode__delivery_pickup__isnull=True,
-                ),
-            ),
-            _temp_count=Count(
-                'tempuser__track_codes',
-                filter=Q(
-                    tempuser__track_codes__status='shipping_pp',
-                    tempuser__track_codes__delivery_pickup__isnull=True,
-                ),
-            ),
-            _override_count=Count(
-                'delivery_tracks',
-                filter=Q(delivery_tracks__status='shipping_pp'),
-            ),
-        )
-        .annotate(track_count=F('_normal_count') + F('_temp_count') + F('_override_count'))
-        .filter(track_count__gt=0)
-        .order_by('id')
-    )
+    # Пункты с посылками в статусе 'shipping_pp' (в доставке) — группировка по дате
+    in_transit_pickups = _build_pickup_date_groups('shipping_pp')
 
     # Клиенты с доставкой на дом
     home_delivery_clients = _get_home_delivery_clients('delivered')
@@ -177,8 +168,13 @@ def delivery_view(request):
         DeliveryHistory.objects
         .filter(driver=request.user)
         .select_related('pickup_point')
-        .prefetch_related('track_codes', 'track_codes__owner')
-        .order_by('-taken_at')
+        .prefetch_related(
+            'track_codes',
+            'track_codes__owner',
+            'track_codes__temp_owner',       # ← добавить
+            'track_codes__owner__userprofile' # ← добавить если нужен phone
+        )
+    .order_by('-taken_at')
     )
 
     # Группируем по дате и для каждой записи считаем клиентов
@@ -189,7 +185,7 @@ def delivery_view(request):
             history_by_date[date_key] = []
 
         clients = {}
-        for track in entry.track_codes.select_related('owner', 'temp_owner'):
+        for track in entry.track_codes.all(): 
             if track.owner:
                 key = f'user_{track.owner.id}'
                 if key not in clients:
@@ -233,6 +229,7 @@ def take_delivery(request):
 
     pickup_id = request.POST.get('pickup_id')
     home_client_ids = request.POST.getlist('home_client_ids')
+    filter_date_str = request.POST.get('delivered_date', '')
 
     # Получаем список отсканированных чеков (JSON)
     scanned_raw = request.POST.get('scanned_receipts', '[]')
@@ -245,11 +242,20 @@ def take_delivery(request):
         messages.error(request, "Выберите хотя бы один пункт выдачи или клиента.")
         return redirect('delivery')
 
+    # Парсим фильтр по дате прихода
+    from datetime import datetime as _dt
+    filter_date = None
+    if filter_date_str:
+        try:
+            filter_date = _dt.strptime(filter_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
     now = timezone.now()
     today = now.date()
     updated = 0
     notif_counts = defaultdict(int)
-    temp_user_ids = set()  # Для автоформирования чеков временных пользователей
+    temp_user_ids = set()
 
     # Обычные ПВЗ — берём только треки привязанные к отсканированным чекам
     if pickup_id:
@@ -266,6 +272,9 @@ def take_delivery(request):
                 Q(delivery_pickup=pickup),
                 status='delivered',
             )
+            # Фильтр по дате прихода
+            if filter_date is not None:
+                all_tracks = all_tracks.filter(delivered_date=filter_date)
 
             if scanned_receipts:
                 # Находим track_id привязанные к отсканированным чекам
@@ -370,17 +379,15 @@ def take_delivery(request):
                 message=f"🚚 Отправлено на ПВЗ: {count} трек-кодов"
             )
 
-    # Автоформирование чеков для затронутых клиентов
-    for user in notif_counts.keys():
-        create_receipts_for_user(user, statuses=('shipping_pp',))
-
-    # Автоформирование чеков для временных пользователей
-    for temp_id in temp_user_ids:
-        try:
-            temp_user = TempUser.objects.get(id=temp_id)
-            create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
-        except TempUser.DoesNotExist:
-            pass
+    # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
+    # for user in notif_counts.keys():
+    #     create_receipts_for_user(user, statuses=('shipping_pp',))
+    # for temp_id in temp_user_ids:
+    #     try:
+    #         temp_user = TempUser.objects.get(id=temp_id)
+    #         create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
+    #     except TempUser.DoesNotExist:
+    #         pass
 
     if updated:
         messages.success(request, f"Взято в доставку: {updated} посылок")
@@ -396,11 +403,14 @@ def complete_delivery(request):
     if not _is_driver(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
-    pickup_ids = request.POST.getlist('pickup_ids')
+    # Формат значений: "pickup_id:YYYY-MM-DD" или "pickup_id:"
+    pickup_entries = request.POST.getlist('pickup_ids')
 
-    if not pickup_ids:
+    if not pickup_entries:
         messages.error(request, "Выберите хотя бы один пункт выдачи.")
         return redirect('delivery')
+
+    from datetime import datetime as _dt
 
     now = timezone.now()
     today = now.date()
@@ -409,7 +419,17 @@ def complete_delivery(request):
     # Запоминаем фактический ПВЗ доставки для каждого пользователя
     user_pickup_map = {}  # user -> PickupPoint
 
-    for pickup_id in pickup_ids:
+    for entry in pickup_entries:
+        # Парсим "pickup_id:date"
+        parts = entry.split(':', 1)
+        pickup_id = parts[0]
+        entry_date = None
+        if len(parts) > 1 and parts[1]:
+            try:
+                entry_date = _dt.strptime(parts[1], '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
         try:
             pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
         except PickupPoint.DoesNotExist:
@@ -421,6 +441,8 @@ def complete_delivery(request):
             Q(delivery_pickup=pickup),
             status='shipping_pp',
         )
+        if entry_date is not None:
+            tracks = tracks.filter(delivered_date=entry_date)
 
         for track in tracks:
             track.status = 'ready'
@@ -577,15 +599,15 @@ def driver_issue(request):
 
     with transaction.atomic():
         if client_user:
-            # Создаём чеки если ещё нет
-            create_receipts_for_user(client_user, statuses=('shipping_pp',))
+            # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
+            # create_receipts_for_user(client_user, statuses=('shipping_pp',))
 
-            # Находим все чеки для текущих треков и помечаем как оплаченные
+            # Находим все чеки для текущих треков
             track_ids = [t.id for t in tracks]
             receipts = Receipt.objects.filter(
                 items__track_code_id__in=track_ids
             ).distinct()
-            receipts.update(is_paid=True)
+            # PAYMENT COMMENTED OUT: receipts.update(is_paid=True)
 
             # Создаём пакет выдачи
             package = ExtraditionPackage.objects.create(user=client_user)
@@ -608,15 +630,15 @@ def driver_issue(request):
                 message=f"📦 Ваши посылки ({len(tracks)} шт.) доставлены курьером. Штрихкод: {package.barcode}"
             )
         elif temp_user:
-            # Создаём чеки для временного пользователя
-            create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
+            # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
+            # create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
 
-            # Находим все чеки для текущих треков и помечаем как оплаченные
+            # Находим все чеки для текущих треков
             track_ids = [t.id for t in tracks]
             receipts = Receipt.objects.filter(
                 items__track_code_id__in=track_ids
             ).distinct()
-            receipts.update(is_paid=True)
+            # PAYMENT COMMENTED OUT: receipts.update(is_paid=True)
 
         # Меняем статус треков на claimed
         for track in tracks:
@@ -635,8 +657,17 @@ def get_pickup_receipts(request):
         return JsonResponse({'error': 'Нет доступа'}, status=403)
 
     pickup_id = request.GET.get('pickup_id')
+    filter_date_str = request.GET.get('delivered_date', '')
     if not pickup_id:
         return JsonResponse({'clients': []})
+
+    from datetime import datetime as _dt
+    filter_date = None
+    if filter_date_str:
+        try:
+            filter_date = _dt.strptime(filter_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
 
     try:
         pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
@@ -644,24 +675,26 @@ def get_pickup_receipts(request):
         return JsonResponse({'clients': []})
 
     # Находим треки этого ПВЗ в статусе 'delivered'
-    # Включаем: зарег. пользователей (по профилю или delivery_pickup) и врем. пользователей (по TempUser.pickup или delivery_pickup)
-    tracks = list(TrackCode.objects.filter(
+    tracks_qs = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='delivered',
-    ).select_related('owner', 'temp_owner'))
+    )
+    if filter_date is not None:
+        tracks_qs = tracks_qs.filter(delivered_date=filter_date)
+    tracks = list(tracks_qs.select_related('owner', 'temp_owner'))
 
-    # Автосоздание чеков для треков в 'delivered', у которых ещё нет ReceiptItem
-    owners_seen = set()
-    temp_owners_seen = set()
-    for track in tracks:
-        if track.owner and track.owner_id not in owners_seen:
-            owners_seen.add(track.owner_id)
-            create_receipts_for_user(track.owner, statuses=('delivered',))
-        elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
-            temp_owners_seen.add(track.temp_owner_id)
-            create_receipts_for_temp_user(track.temp_owner, statuses=('delivered',))
+    # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
+    # owners_seen = set()
+    # temp_owners_seen = set()
+    # for track in tracks:
+    #     if track.owner and track.owner_id not in owners_seen:
+    #         owners_seen.add(track.owner_id)
+    #         create_receipts_for_user(track.owner, statuses=('delivered',))
+    #     elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
+    #         temp_owners_seen.add(track.temp_owner_id)
+    #         create_receipts_for_temp_user(track.temp_owner, statuses=('delivered',))
 
     track_ids = [t.id for t in tracks]
 

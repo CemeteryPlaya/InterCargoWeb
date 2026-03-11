@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Сессия прихода #{{ session.id }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/faq.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+    <script src="{% static 'scripts/forms.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+        <div class="flex-1 mx-auto p-6">
+            <!-- Заголовок -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        Сессия прихода #{{ session.id }}
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Дата: <strong>{{ session.date|date:"d.m.Y" }}</strong>
+                        {% if session.sorting_location %} | Сортировка: <strong>{{ session.sorting_location }}</strong>{% endif %}
+                        | Создал: <strong>{{ session.created_by.get_full_name|default:session.created_by.username }}</strong>
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="save-status" class="text-sm text-gray-400"></span>
+                    <a href="{% url 'goods_arrival' %}" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition text-sm">
+                        <i class="ri-arrow-left-line"></i> Назад
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="p-3 mb-2 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <!-- Переключение вида -->
+                <div class="flex items-center gap-3 mb-4">
+                    <button type="button" id="form_toggle_btn"
+                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition text-sm">
+                        <i class="ri-table-line"></i> Переключить на текстовый вид
+                    </button>
+                    <span id="row_counter" class="text-sm font-medium text-gray-600"></span>
+                </div>
+
+                <!-- Табличный вид (по умолчанию) -->
+                <div id="table_view">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-2 py-2 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase w-12">№</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">Трек-код</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">Владелец</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">Вес (кг)</th>
+                                <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 w-12"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracks_table_body"></tbody>
+                    </table>
+                    <button type="button" id="add_row_btn"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4 transition text-sm">
+                        <i class="ri-add-line"></i> Добавить строку
+                    </button>
+                </div>
+
+                <!-- Текстовый вид -->
+                <div id="text_view" class="hidden grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1">Трек-коды (по одному в строке)
+                            <span id="text_count_tracks" class="text-sm text-gray-500 ml-2"></span>
+                        </label>
+                        <textarea id="text_tracks" rows="15" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Владельцы (по одному в строке)
+                            <span id="text_count_owners" class="text-sm text-gray-500 ml-2"></span>
+                        </label>
+                        <textarea id="text_owners" rows="15" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Вес (кг, по одному в строке)
+                            <span id="text_count_weights" class="text-sm text-gray-500 ml-2"></span>
+                        </label>
+                        <textarea id="text_weights" rows="15" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Незаполненные ячейки -->
+                <div id="empty_cells_warning" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                    <i class="ri-error-warning-line mr-1"></i>
+                    Незаполненных ячеек: <span id="empty_cells_count" class="font-semibold">0</span>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="flex items-center gap-3 mt-6">
+                    <form method="post" action="{% url 'goods_arrival_complete' session.id %}" id="complete_form">
+                        {% csrf_token %}
+                        <button type="submit" id="complete_btn"
+                            class="bg-primary text-white px-6 py-2 rounded hover:bg-red-600 transition font-medium"
+                            onclick="return confirm('Завершить сессию и обработать все трек-коды?')">
+                            <i class="ri-check-line"></i> Завершить сессию
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var SESSION_CONFIG = {
+        saveUrl: '{% url "goods_arrival_save" session.id %}',
+        csrfToken: '{{ csrf_token }}',
+        getOwnerUrl: '{% url "get_track_owner" %}',
+        searchUsersUrl: '{% url "search_users" %}',
+        initialItems: {{ items_json|safe }}
+    };
+    </script>
+    <script src="{% static 'scripts/goodsArrivalSession.js' %}"></script>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>
