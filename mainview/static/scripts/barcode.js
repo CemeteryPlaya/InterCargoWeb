@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const copyBtn = document.getElementById('barcode-copy-btn');
     const downloadLink = document.getElementById('barcode-download-link');
 
-    const paymentLink = document.getElementById('barcode-payment-link');
+    /* PAYMENT COMMENTED OUT */
+    // const paymentLink = document.getElementById('barcode-payment-link');
 
     function openModal(barcodeText, imgData, paymentUrl) {
         title.textContent = `QR-код ${barcodeText}`;
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
         img.src = imgData;
         downloadLink.href = imgData;
         downloadLink.setAttribute('download', `${barcodeText}.png`);
+        /* PAYMENT COMMENTED OUT
         if (paymentLink) {
             if (paymentUrl) {
                 paymentLink.href = paymentUrl;
@@ -24,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 paymentLink.classList.add('hidden');
             }
         }
+        */
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -32,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.remove('flex');
         modal.classList.add('hidden');
         img.src = '';
-        if (paymentLink) paymentLink.classList.add('hidden');
+        /* PAYMENT COMMENTED OUT: if (paymentLink) paymentLink.classList.add('hidden'); */
     }
 
     document.querySelectorAll('.show-barcode-btn').forEach(btn => {

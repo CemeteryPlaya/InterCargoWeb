@@ -83,11 +83,13 @@
                                     <div class="flex items-center justify-between text-xs mb-1">
                                         <span class="font-mono text-gray-600">{{ receipt.receipt_number }}</span>
                                         <div class="flex items-center gap-2">
+                                            {% comment %}PAYMENT COMMENTED OUT
                                             {% if receipt.is_paid %}
                                             <span class="text-green-600"><i class="ri-checkbox-circle-line"></i> Оплачено</span>
                                             {% else %}
                                             <span class="text-red-500"><i class="ri-close-circle-line"></i> Не оплачено</span>
                                             {% endif %}
+                                            {% endcomment %}
                                             <span class="text-gray-500">{{ receipt.total_weight }} кг</span>
                                             <span class="font-medium text-gray-700">{{ receipt.total_price }} ₸</span>
                                         </div>

@@ -223,9 +223,11 @@ def get_track_owner(request):
         return JsonResponse({'error': 'No track code provided'}, status=400)
 
     try:
-        track = TrackCode.objects.get(track_code=track_code)
+        track = TrackCode.objects.select_related('owner', 'temp_owner').get(track_code=track_code)
         if track.owner:
             return JsonResponse({'owner': track.owner.username})
+        elif track.temp_owner:
+            return JsonResponse({'owner': track.temp_owner.login})
         else:
             return JsonResponse({'owner': None})
     except TrackCode.DoesNotExist:

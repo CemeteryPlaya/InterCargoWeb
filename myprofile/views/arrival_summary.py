@@ -396,6 +396,56 @@ def apply_discount(request):
 
 @login_required
 @require_POST
+def generate_day_receipts(request):
+    """Генерирует чеки по клиентам за выбранный день на основе треков с delivered_date."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
+
+    date_str = request.POST.get('date', '')
+    if not date_str:
+        messages.error(request, "Не указана дата.")
+        return redirect('arrival_summary')
+
+    statuses = ('delivered', 'shipping_pp', 'ready', 'claimed')
+
+    # Собираем уникальных владельцев треков за этот день
+    tracks = TrackCode.objects.filter(
+        delivered_date=date_str,
+        status__in=statuses,
+    ).select_related('owner', 'temp_owner')
+
+    users = set()
+    temp_users = set()
+    for track in tracks:
+        if track.owner_id:
+            users.add(track.owner)
+        elif track.temp_owner_id:
+            temp_users.add(track.temp_owner)
+
+    created_count = 0
+
+    for user in users:
+        receipt = create_receipts_for_user(user, statuses=statuses)
+        if receipt:
+            created_count += 1
+
+    for temp_user in temp_users:
+        receipt = create_receipts_for_temp_user(temp_user, statuses=statuses)
+        if receipt:
+            created_count += 1
+
+    if created_count:
+        messages.success(request, f"Создано чеков: {created_count}")
+    else:
+        messages.info(request, "Новых чеков не создано — все треки уже учтены в чеках.")
+
+    return redirect(f'/profile/arrival-summary/?date={date_str}')
+
+
+@login_required
+@require_POST
 def refresh_arrival(request, arrival_id):
     """Актуализирует данные одного прихода: обновляет веса и владельцев, не сбрасывая статусы и скидки."""
     if not _is_staff(request.user):

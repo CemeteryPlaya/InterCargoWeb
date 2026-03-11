@@ -535,6 +535,61 @@ class Arrival(models.Model):
         return f"Приход {self.date.strftime('%d.%m.%Y')}{loc} — {self.total_tracks} треков"
 
 
+class ArrivalSession(models.Model):
+    """Сессия прихода товаров — данные записываются в реальном времени на сервер."""
+    STATUS_CHOICES = [
+        ('active', 'Активная'),
+        ('completed', 'Завершена'),
+    ]
+    date = models.DateField(verbose_name="Дата прихода")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Статус")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Создал"
+    )
+    sorting_location = models.ForeignKey(
+        SortingLocation, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Место сортировки"
+    )
+    arrival = models.OneToOneField(
+        Arrival, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='session',
+        verbose_name="Приход (после завершения)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="Завершено")
+
+    class Meta:
+        verbose_name = "Сессия прихода"
+        verbose_name_plural = "Сессии прихода"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        loc = f" ({self.sorting_location})" if self.sorting_location else ""
+        return f"Сессия #{self.id} {self.date.strftime('%d.%m.%Y')}{loc} — {self.get_status_display()}"
+
+
+class ArrivalSessionItem(models.Model):
+    """Строка в сессии прихода — трек-код, владелец, вес."""
+    session = models.ForeignKey(
+        ArrivalSession, on_delete=models.CASCADE,
+        related_name='items', verbose_name="Сессия"
+    )
+    track_code = models.CharField(max_length=100, verbose_name="Трек-код")
+    owner_name = models.CharField(max_length=150, blank=True, default='', verbose_name="Владелец (логин)")
+    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
+    row_number = models.PositiveIntegerField(default=0, verbose_name="Номер строки")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Строка сессии прихода"
+        verbose_name_plural = "Строки сессии прихода"
+        ordering = ['row_number']
+
+    def __str__(self):
+        return f"{self.track_code} — {self.owner_name} ({self.weight} кг)"
+
+
 class ClientRegistry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     registry_date = models.DateField(verbose_name="Дата реестра")

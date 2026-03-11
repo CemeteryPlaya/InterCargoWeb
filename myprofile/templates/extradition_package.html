@@ -83,6 +83,7 @@
                             Чек #{{ receipt.id }} от {{ receipt.created_at|date:"d.m.Y" }}
                             — {{ receipt.computed_weight }} кг, {{ receipt.computed_price }} тг
                         </span>
+                        {% comment %}PAYMENT COMMENTED OUT
                         {% if receipt.is_paid %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Оплачен{% if receipt.paid_at %} {{ receipt.paid_at|date:"d.m.Y H:i" }}{% endif %}
@@ -90,6 +91,7 @@
                         {% else %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>
                         {% endif %}
+                        {% endcomment %}
                     </summary>
                     <div class="px-4 py-3">
                         <table class="w-full text-sm border-collapse">
@@ -160,10 +162,12 @@
         <div class="flex flex-col items-center">
             <img id="barcode-modal-img" src="" alt="QR-код" class="max-w-[280px] mb-4">
             <div id="barcode-modal-code" class="font-mono text-sm text-gray-700"></div>
+            {% comment %}PAYMENT COMMENTED OUT
             <a id="barcode-payment-link" href="#" target="_blank"
                 class="hidden mt-4 inline-flex items-center gap-2 bg-green-500 text-white font-medium px-6 py-2.5 rounded-button hover:bg-green-600 transition text-sm">
                 <i class="ri-bank-card-line"></i> Оплатить
             </a>
+            {% endcomment %}
             <div class="mt-4 flex gap-2">
                 <button id="barcode-copy-btn" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm">
                     Копировать код

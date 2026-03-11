@@ -146,11 +146,13 @@ class PayReceiptViewTest(TestCase):
         GlobalSettings.objects.create(price_per_kg=Decimal('1859.00'))
 
     def test_pay_receipt_marks_paid(self):
+        # PAYMENT COMMENTED OUT: pay_receipt is now a no-op, just redirects
         receipt = Receipt.objects.create(owner=self.user, is_paid=False)
         response = self.client.post(reverse('pay_receipt', args=[receipt.id]))
         self.assertEqual(response.status_code, 302)
         receipt.refresh_from_db()
-        self.assertTrue(receipt.is_paid)
+        # Оплата отключена, is_paid остаётся False
+        self.assertFalse(receipt.is_paid)
 
     def test_pay_other_user_receipt_404(self):
         other = User.objects.create_user(username='otheruser', password='pass123')

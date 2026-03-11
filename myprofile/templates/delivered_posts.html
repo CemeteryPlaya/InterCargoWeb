@@ -102,10 +102,12 @@
         <label class="mr-2 font-medium">Фильтр:</label>
         <button @click="filter = 'all'" :class="{ 'bg-red-500 text-white': filter === 'all' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Все</button>
+        {% comment %}PAYMENT COMMENTED OUT
         <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Оплаченные</button>
         <button @click="filter = 'unpaid'" :class="{ 'bg-red-500 text-white': filter === 'unpaid' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100">Неоплаченные</button>
+        {% endcomment %}
 
         {% if receipts %}
         <!-- Сетка чеков -->
@@ -125,12 +127,14 @@
               </div>
               <div class="flex items-center">
                 <div class="text-right mr-2">
+                  {% comment %}PAYMENT COMMENTED OUT
                   <span class="text-xs font-semibold {% if receipt.is_paid %}text-green-600{% else %}text-red-600{% endif %}">
                     {{ receipt.is_paid|yesno:"Оплачен,Не оплачен" }}
                   </span>
                   {% if receipt.paid_at %}
                   <div class="text-[10px] text-gray-500">{{ receipt.paid_at|date:"d.m.Y H:i" }}</div>
                   {% endif %}
+                  {% endcomment %}
                 </div>
                 <svg :class="activeReceipt === {{ receipt.id }} ? 'rotate-180' : ''"
                   class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2"
@@ -143,7 +147,7 @@
             <!-- Разворачиваемый контент -->
             <div x-bind:style="activeReceipt === {{ receipt.id }} ? 'display: block' : 'display: none'"
               class="p-3 border-t">
-              <!-- Кнопка оплаты -->
+              {% comment %}PAYMENT COMMENTED OUT
               {% if not receipt.is_paid %}
               <div class="text-center mb-3">
                 {% if receipt.payment_link %}
@@ -154,6 +158,7 @@
                 {% endif %}
               </div>
               {% endif %}
+              {% endcomment %}
 
               <!-- Таблица с товарами -->
               <table class="w-full text-xs border-collapse border border-gray-300 mb-3">

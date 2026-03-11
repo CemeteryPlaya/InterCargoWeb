@@ -90,6 +90,7 @@
                                     <p class="text-gray-500">Пункт выдачи:</p>
                                     <p class="font-medium text-gray-900" id="infoPickup">-</p>
                                 </div>
+                                {% comment %}PAYMENT COMMENTED OUT
                                 <div>
                                     <p class="text-gray-500">Статус оплаты:</p>
                                     <div id="paymentStatusContainer">
@@ -99,6 +100,7 @@
                                         </span>
                                     </div>
                                 </div>
+                                {% endcomment %}
                             </div>
 
                             <!-- Чеки клиента -->
@@ -206,7 +208,7 @@
 
     <div id="extradition-config" class="hidden"
          data-search-url="{% url 'extradition_search' %}"
-         data-toggle-url="{% url 'extradition_toggle_payment' %}"></div>
+         data-toggle-url=""><!-- PAYMENT COMMENTED OUT: was toggle_payment URL --></div>
     <script src="{% static 'scripts/extraditions.js' %}?v=5"></script>
 </body>
 

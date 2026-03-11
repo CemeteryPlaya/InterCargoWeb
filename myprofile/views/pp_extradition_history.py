@@ -69,7 +69,7 @@ def pp_extradition_history_view(request):
                 })
             receipts_data.append({
                 'receipt_number': receipt.receipt_number,
-                'is_paid': receipt.is_paid,
+                # PAYMENT COMMENTED OUT: 'is_paid': receipt.is_paid,
                 'total_weight': receipt.total_weight,
                 'total_price': receipt.total_price,
                 'tracks': tracks,
