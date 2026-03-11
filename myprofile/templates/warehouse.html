@@ -113,28 +113,45 @@
                         </div>
 
                         <div class="hidden border-t border-gray-100" id="cell-{{ item.cell.cell_number }}">
-                            <table class="w-full text-sm">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="text-left px-5 py-2 text-gray-500 font-medium">Трек-код</th>
-                                        {% if not hide_description %}
-                                        <th class="text-left px-5 py-2 text-gray-500 font-medium">Описание</th>
+                            {% for sub in item.sub_cells %}
+                            <div class="{% if not forloop.first %}border-t border-gray-200{% endif %}">
+                                <div class="flex items-center justify-between px-5 py-2 bg-blue-50">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-10 h-7 bg-primary bg-opacity-15 rounded text-primary font-bold text-sm">{{ sub.sub_number }}</span>
+                                        {% if sub.receipt %}
+                                        <span class="text-xs text-gray-500">Чек {{ sub.receipt.receipt_number }} от {{ sub.receipt.created_at|date:"d.m.Y" }}</span>
+                                        {% else %}
+                                        <span class="text-xs text-gray-400">Без чека</span>
                                         {% endif %}
-                                        <th class="text-right px-5 py-2 text-gray-500 font-medium">Вес</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for track in item.tracks %}
-                                    <tr class="border-t border-gray-50 hover:bg-gray-50">
-                                        <td class="px-5 py-2 font-mono text-gray-800">{{ track.track_code }}</td>
-                                        {% if not hide_description %}
-                                        <td class="px-5 py-2 text-gray-600">{{ track.description|default:"-" }}</td>
-                                        {% endif %}
-                                        <td class="px-5 py-2 text-right text-gray-800">{{ track.weight|default:"—"|floatformat:3 }} кг</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ sub.track_count }} шт. / {{ sub.total_weight|floatformat:2 }} кг
+                                    </div>
+                                </div>
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="text-left px-5 py-2 text-gray-500 font-medium">Трек-код</th>
+                                            {% if not hide_description %}
+                                            <th class="text-left px-5 py-2 text-gray-500 font-medium">Описание</th>
+                                            {% endif %}
+                                            <th class="text-right px-5 py-2 text-gray-500 font-medium">Вес</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for track in sub.tracks %}
+                                        <tr class="border-t border-gray-50 hover:bg-gray-50">
+                                            <td class="px-5 py-2 font-mono text-gray-800">{{ track.track_code }}</td>
+                                            {% if not hide_description %}
+                                            <td class="px-5 py-2 text-gray-600">{{ track.description|default:"-" }}</td>
+                                            {% endif %}
+                                            <td class="px-5 py-2 text-right text-gray-800">{{ track.weight|default:"—"|floatformat:3 }} кг</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endfor %}
 
                             <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex flex-wrap gap-2">
                                 <form method="post" action="{% url 'warehouse_issue_to_client' %}" class="inline">

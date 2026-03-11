@@ -150,8 +150,59 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ==================== Inline-автозаполнение (ghost text) ====================
+    var inlineAc = {
+        active: false,
+        input: null,
+        typedLen: 0,
+        suggestion: ''
+    };
+
+    function inlineClear() {
+        inlineAc.active = false;
+        inlineAc.input = null;
+        inlineAc.typedLen = 0;
+        inlineAc.suggestion = '';
+    }
+
+    function inlineApply(input, results, typedQuery) {
+        if (!results.length || !typedQuery) {
+            inlineClear();
+            return;
+        }
+        var login = results[0].login;
+        if (login.toLowerCase().indexOf(typedQuery.toLowerCase()) !== 0) {
+            inlineClear();
+            return;
+        }
+        inlineAc.active = true;
+        inlineAc.input = input;
+        inlineAc.typedLen = typedQuery.length;
+        inlineAc.suggestion = login;
+        input.value = typedQuery + login.substring(typedQuery.length);
+        input.setSelectionRange(typedQuery.length, login.length);
+    }
+
+    function inlineAccept(input, weightInput) {
+        if (!inlineAc.active || inlineAc.input !== input) return false;
+        input.value = inlineAc.suggestion;
+        input.setSelectionRange(input.value.length, input.value.length);
+        inlineClear();
+        scheduleSave();
+        if (weightInput) weightInput.focus();
+        return true;
+    }
+
+    function inlineReject(input) {
+        if (!inlineAc.active || inlineAc.input !== input) return;
+        var typed = input.value.substring(0, inlineAc.typedLen);
+        input.value = typed;
+        input.setSelectionRange(typed.length, typed.length);
+        inlineClear();
+    }
+
     // ==================== Подтягивание владельца по трек-коду ====================
-    function fetchTrackOwner(trackInput, ownerInput) {
+    function fetchTrackOwner(trackInput, ownerInput, weightInput) {
         var code = trackInput.value.trim();
         if (!code || !config.getOwnerUrl) return;
         // Не перезаписываем если уже заполнено
@@ -163,6 +214,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.owner && !ownerInput.value.trim()) {
                     ownerInput.value = data.owner;
                     scheduleSave();
+                    // Сразу переносим курсор на поле "Вес"
+                    if (weightInput) weightInput.focus();
                 }
             })
             .catch(function () {});
@@ -196,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ownerInput.value = data ? data.owner_name : '';
         ownerInput.placeholder = 'Логин владельца';
         ownerInput.addEventListener('input', scheduleSave);
-        setupOwnerAutocomplete(ownerInput);
         ownerTd.appendChild(ownerInput);
 
         var weightTd = document.createElement('td');
@@ -232,12 +284,15 @@ document.addEventListener('DOMContentLoaded', function () {
         tableBody.appendChild(tr);
         updateRowNumbers();
 
+        // Inline-автозаполнение для поля владельца
+        setupOwnerAutocomplete(ownerInput, weightInput);
+
         // Фокус на последний трек-код
         if (!data) trackInput.focus();
 
         // При потере фокуса трек-кодом — подтягиваем владельца
         trackInput.addEventListener('blur', function () {
-            fetchTrackOwner(trackInput, ownerInput);
+            fetchTrackOwner(trackInput, ownerInput, weightInput);
         });
 
         // Enter + Tab навигация
@@ -246,11 +301,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
                 ownerInput.focus();
                 // Подтягиваем владельца при переходе
-                fetchTrackOwner(trackInput, ownerInput);
+                fetchTrackOwner(trackInput, ownerInput, weightInput);
             }
             handleArrowNav(e, trackInput);
         });
         ownerInput.addEventListener('keydown', function (e) {
+            // Inline-автозаполнение: Enter/Tab подтверждает подсказку
+            if (inlineAc.active && inlineAc.input === ownerInput) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    inlineAccept(ownerInput, weightInput);
+                    return;
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    inlineReject(ownerInput);
+                    return;
+                } else if (e.key === 'Tab') {
+                    inlineAccept(ownerInput, weightInput);
+                    return;
+                }
+            }
             if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
                 e.preventDefault();
                 weightInput.focus();
@@ -294,94 +364,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
     addRowBtn.addEventListener('click', function () { addRow(); });
 
-    // ==================== Автоподсказки владельцев ====================
-    function setupOwnerAutocomplete(input) {
-        var dropdown = null;
+    // ==================== Автоподсказки владельцев (inline ghost text) ====================
+    function setupOwnerAutocomplete(input, weightInput) {
         var debounceTimer = null;
-        var selectedIndex = -1;
 
         input.addEventListener('input', function () {
+            if (inlineAc.active && inlineAc.input === input) {
+                inlineAc.active = false;
+            }
             var query = input.value.trim();
-            if (query.length < 2) {
-                removeDropdown();
+            if (query.length < 1) {
+                inlineClear();
                 return;
             }
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function () {
-                fetch(config.searchUsersUrl + '?q=' + encodeURIComponent(query))
+                var q;
+                if (inlineAc.active && inlineAc.input === input) {
+                    q = input.value.substring(0, inlineAc.typedLen).trim();
+                } else {
+                    q = input.value.trim();
+                }
+                if (q.length < 1) return;
+
+                fetch(config.searchUsersUrl + '?q=' + encodeURIComponent(q))
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
-                        removeDropdown();
-                        if (!data.results || !data.results.length) return;
-                        selectedIndex = -1;
-                        dropdown = document.createElement('div');
-                        dropdown.className = 'absolute z-50 bg-white border border-gray-200 rounded shadow-lg max-h-40 overflow-y-auto text-sm left-0 right-0 top-full';
-                        data.results.forEach(function (r, idx) {
-                            var item = document.createElement('div');
-                            item.className = 'px-3 py-1.5 cursor-pointer hover:bg-gray-100';
-                            item.textContent = r.username;
-                            item.dataset.index = idx;
-                            item.addEventListener('mousedown', function (e) {
-                                e.preventDefault();
-                                input.value = r.username;
-                                removeDropdown();
-                                scheduleSave();
-                            });
-                            dropdown.appendChild(item);
-                        });
-                        // Вставляем в ownerTd (relative) для корректного позиционирования
-                        input.parentNode.appendChild(dropdown);
+                        if (data.results && data.results.length && document.activeElement === input) {
+                            inlineApply(input, data.results, q);
+                        } else {
+                            inlineClear();
+                        }
                     })
-                    .catch(function () {});
-            }, 300);
+                    .catch(function () { inlineClear(); });
+            }, 250);
         });
-
-        // Навигация по dropdown стрелками
-        input.addEventListener('keydown', function (e) {
-            if (!dropdown) return;
-            var items = dropdown.querySelectorAll('div[data-index]');
-            if (!items.length) return;
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                highlightItem(items);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, 0);
-                highlightItem(items);
-            } else if (e.key === 'Enter' && selectedIndex >= 0) {
-                e.preventDefault();
-                e.stopPropagation();
-                input.value = items[selectedIndex].textContent;
-                removeDropdown();
-                scheduleSave();
-            } else if (e.key === 'Escape') {
-                removeDropdown();
-            }
-        });
-
-        function highlightItem(items) {
-            items.forEach(function (el, i) {
-                el.classList.toggle('bg-blue-100', i === selectedIndex);
-                el.classList.toggle('hover:bg-gray-100', i !== selectedIndex);
-            });
-            if (selectedIndex >= 0 && items[selectedIndex]) {
-                items[selectedIndex].scrollIntoView({ block: 'nearest' });
-            }
-        }
 
         input.addEventListener('blur', function () {
-            setTimeout(removeDropdown, 200);
-        });
-
-        function removeDropdown() {
-            if (dropdown) {
-                dropdown.remove();
-                dropdown = null;
-                selectedIndex = -1;
+            if (inlineAc.active && inlineAc.input === input) {
+                inlineReject(input);
             }
-        }
+        });
     }
 
     // ==================== Переключение вида ====================

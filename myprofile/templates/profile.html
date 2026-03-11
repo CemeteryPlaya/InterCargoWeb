@@ -82,9 +82,9 @@
             {% if ready > 0 %}
             <div class="mt-4">
                 <button type="button" id="quickIssueBtn"
-                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium"
-                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}" data-label="Выдать ({{ ready }})" data-ready-count="{{ ready }}">
-                    <i class="ri-hand-coin-line"></i> Выдать ({{ ready }})
+                    class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-base font-semibold"
+                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}" data-label="Получить посылки ({{ ready }})" data-ready-count="{{ ready }}">
+                    <i class="ri-hand-coin-line mr-1"></i> Получить посылки ({{ ready }})
                 </button>
             </div>
             {% endif %}

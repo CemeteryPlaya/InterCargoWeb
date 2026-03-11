@@ -52,15 +52,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function closeBarcodeScanner() {
-        if (barcodeScanner) {
-            barcodeScanner.stop().then(function () {
-                barcodeScanner.clear();
-                barcodeScanner = null;
-            }).catch(function () {
-                barcodeScanner = null;
-            });
-        }
         barcodeScanModal.classList.add('hidden');
+        if (barcodeScanner) {
+            var scanner = barcodeScanner;
+            barcodeScanner = null;
+            try {
+                scanner.stop().then(function () {
+                    try { scanner.clear(); } catch (e) { /* ignore */ }
+                }).catch(function () { /* ignore */ });
+            } catch (e) {
+                console.error('closeBarcodeScanner error:', e);
+            }
+        }
     }
 
     scanBarcodeBtn.onclick = openBarcodeScanner;
@@ -117,8 +120,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function closeQrVerifyModal() {
-        stopQrScanner();
+        // ВСЕГДА скрываем модалку первым делом, независимо от ошибок сканера
         qrVerifyModal.classList.add('hidden');
+        try {
+            stopQrScanner();
+        } catch (e) {
+            console.error('Ошибка при остановке сканера:', e);
+            qrScanner = null;
+        }
     }
 
     function onQrScanned(code) {
@@ -147,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Останавливаем сканер когда все чеки отсканированы
                     var scannedCount = Object.keys(scannedReceipts).length;
                     if (scannedCount >= currentReceipts.length) {
-                        stopQrScanner();
+                        try { stopQrScanner(); } catch (e) { /* ignore */ }
                     }
                 }
                 break;
@@ -160,12 +169,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function stopQrScanner() {
         if (qrScanner) {
-            qrScanner.stop().then(function () {
-                qrScanner.clear();
-                qrScanner = null;
-            }).catch(function () {
-                qrScanner = null;
-            });
+            var scanner = qrScanner;
+            qrScanner = null;
+            try {
+                scanner.stop().then(function () {
+                    try { scanner.clear(); } catch (e) { /* ignore */ }
+                }).catch(function () { /* ignore */ });
+            } catch (e) {
+                console.error('stopQrScanner error:', e);
+            }
         }
     }
 
@@ -346,13 +358,35 @@ document.addEventListener('DOMContentLoaded', function () {
     qrVerifyClose.onclick = closeQrVerifyModal;
     qrVerifyCancel.onclick = closeQrVerifyModal;
 
-    qrVerifySubmit.onclick = function () {
+    qrVerifySubmit.addEventListener('click', function () {
+        if (qrVerifySubmit.disabled) return;
         closeQrVerifyModal();
         // Сабмитим основную форму
-        document.getElementById('extraditionForm').submit();
-    };
+        var form = document.getElementById('extraditionForm');
+        var barcodeVal = document.getElementById('barcode').value.trim();
+        if (!barcodeVal) {
+            showMessage('Ошибка: QR-код пакета не указан');
+            return;
+        }
+        form.submit();
+    });
 
     verifyBtn.onclick = openQrVerifyModal;
+
+    // Кнопка "Выбрать все" — отмечает все чеки как отсканированные
+    var selectAllBtn = document.getElementById('qr-select-all-btn');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function () {
+            currentReceipts.forEach(function (receipt) {
+                scannedReceipts[receipt.receipt_number] = true;
+            });
+            showQrFeedback('Все чеки отмечены', 'success');
+            renderQrReceiptsList();
+            updateQrProgress();
+            updateQrSubmitButton();
+            stopQrScanner();
+        });
+    }
 
     // === Поддержка аппаратного сканера в модалке QR-верификации ===
     var qrScannerInput = document.getElementById('qr-verify-scanner-input');
