@@ -8,12 +8,14 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt
-from register.models import UserProfile
+from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import parse_paid_at
 
 
 def _can_issue(user):
-    """Проверяет, может ли пользователь выдавать посылки (is_staff или is_pp_worker)."""
+    """Проверяет, может ли пользователь выдавать посылки (superuser, is_staff или is_pp_worker)."""
+    if user.is_superuser:
+        return True
     try:
         profile = user.userprofile
         return profile.is_staff or profile.is_pp_worker
@@ -88,7 +90,12 @@ def extradition_view(request):
         messages.success(request, f"✅ Выдача пакета '{barcode}' оформлена успешно.")
         return redirect('extradition')
 
-    return render(request, "extraditions.html")
+    # Для superuser — список всех ПВЗ для выбора
+    context = {}
+    if request.user.is_superuser:
+        context['all_pickups'] = PickupPoint.objects.filter(is_active=True).order_by('id')
+
+    return render(request, "extraditions.html", context)
 
 
 @login_required

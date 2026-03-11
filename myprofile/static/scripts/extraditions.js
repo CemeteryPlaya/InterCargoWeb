@@ -95,7 +95,13 @@ document.addEventListener('DOMContentLoaded', function () {
         updateQrProgress();
         updateQrSubmitButton();
 
-        // Запускаем QR-сканер
+        // Фокус на поле сканера для аппаратного сканера
+        if (qrScannerInput) {
+            qrScannerInput.value = '';
+            qrScannerInput.focus();
+        }
+
+        // Запускаем QR-сканер (камера)
         qrScanner = new Html5Qrcode("qr-verify-reader");
         qrScanner.start(
             { facingMode: "environment" },
@@ -106,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
             function () { /* игнорируем */ }
         ).catch(function (err) {
             console.error('Ошибка камеры QR:', err);
-            showQrFeedback('Не удалось запустить камеру', 'error');
+            showQrFeedback('Камера не доступна — используйте сканер или ввод вручную', 'warning');
         });
     }
 
@@ -349,6 +355,24 @@ document.addEventListener('DOMContentLoaded', function () {
     verifyBtn.onclick = openQrVerifyModal;
 
     // === Поддержка аппаратного сканера в модалке QR-верификации ===
+    var qrScannerInput = document.getElementById('qr-verify-scanner-input');
+
+    // Обработка ввода через поле (аппаратный сканер или ручной ввод)
+    if (qrScannerInput) {
+        qrScannerInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var code = qrScannerInput.value.trim();
+                qrScannerInput.value = '';
+                if (code) {
+                    onQrScanned(code);
+                }
+                qrScannerInput.focus();
+            }
+        });
+    }
+
+    // Буфер для сканера когда фокус не на поле ввода
     var hwScanBuffer = '';
     var hwScanTimer = null;
 
@@ -356,7 +380,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Работаем только когда модалка QR-верификации открыта
         if (qrVerifyModal.classList.contains('hidden')) return;
 
-        // Игнорируем если фокус на каком-то input/textarea
+        // Если фокус на поле сканера — оно само обрабатывает ввод
+        if (document.activeElement === qrScannerInput) return;
+
+        // Игнорируем если фокус на других input/textarea
         var tag = document.activeElement ? document.activeElement.tagName : '';
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
@@ -374,7 +401,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
             e.preventDefault();
             hwScanBuffer += e.key;
-            // Сбрасываем буфер через 500мс без ввода (аппаратный сканер вводит быстро)
             clearTimeout(hwScanTimer);
             hwScanTimer = setTimeout(function () { hwScanBuffer = ''; }, 500);
         }

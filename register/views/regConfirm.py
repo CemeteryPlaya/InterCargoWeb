@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from register.models import PendingRegistration, UserProfile, TempUser
-from myprofile.models import TrackCode
+from myprofile.models import TrackCode, Receipt, CustomerDiscount
 
 
 def confirm_view(request):
@@ -35,11 +35,17 @@ def approve_registration(request, reg_id):
         pickup=reg.pickup
     )
 
-    # Переносим треки с temp_owner на нового пользователя
+    # Переносим все данные с temp_owner на нового пользователя
     temp_user = TempUser.objects.filter(login=reg.login).first()
     if temp_user:
         TrackCode.objects.filter(temp_owner=temp_user).update(
             owner=user, temp_owner=None
+        )
+        Receipt.objects.filter(temp_owner=temp_user).update(
+            owner=user, temp_owner=None
+        )
+        CustomerDiscount.objects.filter(temp_user=temp_user).update(
+            user=user, temp_user=None
         )
         temp_user.delete()
 

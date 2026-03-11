@@ -428,6 +428,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ============================================
+    // Select All button in scan modal
+    // ============================================
+    var selectAllBtn = document.getElementById('qr-select-all-btn');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function () {
+            // Отмечаем все неотсканированные чеки как отсканированные
+            allExpectedReceipts.forEach(function (receiptNumber) {
+                if (scannedReceipts.indexOf(receiptNumber) === -1) {
+                    scannedReceipts.push(receiptNumber);
+                    markReceiptScanned(receiptNumber);
+                }
+            });
+            updateProgress();
+
+            if (scannedReceipts.length >= allExpectedReceipts.length) {
+                onAllScanned();
+            }
+        });
+    }
+
+    // ============================================
     // Modal actions
     // ============================================
     modalClose.addEventListener('click', function () {
@@ -447,10 +468,21 @@ document.addEventListener('DOMContentLoaded', function () {
     submitBtn.addEventListener('click', function () {
         if (scannedReceipts.length === 0) return;
 
-        // If not all scanned, confirm
+        // Если выбраны не все клиенты — показываем подробное уведомление
         if (scannedReceipts.length < allExpectedReceipts.length) {
-            var remaining = allExpectedReceipts.length - scannedReceipts.length;
-            if (!confirm('Не все чеки отсканированы (' + remaining + ' осталось). Не отсканированные чеки НЕ будут взяты в доставку. Продолжить?')) {
+            var selectedCount = scannedReceipts.length;
+            var totalCount = allExpectedReceipts.length;
+            var remaining = totalCount - selectedCount;
+
+            var msg = 'Выбраны не все клиенты!\n\n' +
+                'Выбрано чеков: ' + selectedCount + ' из ' + totalCount + '\n' +
+                'Не выбрано: ' + remaining + '\n\n' +
+                'Если вы продолжите:\n' +
+                '• В доставку будут взяты только выбранные (' + selectedCount + ' чеков)\n' +
+                '• Не выбранные останутся со статусом "Доставлено на ПВЗ"\n\n' +
+                'Продолжить?';
+
+            if (!confirm(msg)) {
                 return;
             }
         }
