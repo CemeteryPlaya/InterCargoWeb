@@ -237,7 +237,7 @@ def warehouse_not_arrived(request):
         for track in tracks:
             track.status = 'delivered'
             track.update_date = today
-            track.save()
+            track.save(skip_full_clean=True)
 
         # Удаляем ячейку
         cell.delete()
