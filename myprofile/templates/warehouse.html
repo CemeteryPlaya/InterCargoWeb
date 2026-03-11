@@ -28,6 +28,20 @@
 
         <main class="flex-1 p-4 md:p-8">
             <div class="max-w-6xl mx-auto">
+                {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 mb-3 rounded-lg text-sm font-medium
+                                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">
@@ -121,6 +135,25 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+
+                            <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex flex-wrap gap-2">
+                                <form method="post" action="{% url 'warehouse_issue_to_client' %}" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
+                                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium"
+                                        onclick="return confirm('Подтвердить выдачу клиенту {{ item.cell.user.username }}? ({{ item.track_count }} посылок)')">
+                                        <i class="ri-hand-coin-line mr-1"></i> Выдано клиенту
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'warehouse_not_arrived' %}" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
+                                    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition text-sm font-medium"
+                                        onclick="return confirm('Вернуть посылки клиента {{ item.cell.user.username }} на сортировочный склад? ({{ item.track_count }} посылок)')">
+                                        <i class="ri-arrow-go-back-line mr-1"></i> Не доехал до склада
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}

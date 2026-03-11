@@ -215,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
         delBtn.type = 'button';
         delBtn.className = 'text-red-400 hover:text-red-600';
         delBtn.innerHTML = '<i class="ri-delete-bin-line"></i>';
+        delBtn.tabIndex = -1; // Не фокусируется через Tab/клавиши, только мышью
         delBtn.addEventListener('click', function () {
             tr.remove();
             updateRowNumbers();
@@ -254,9 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
                 weightInput.focus();
             }
-            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                handleArrowNav(e, ownerInput);
-            }
+            handleArrowNav(e, ownerInput);
         });
         weightInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
