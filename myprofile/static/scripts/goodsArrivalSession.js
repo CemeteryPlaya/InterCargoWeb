@@ -74,6 +74,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function isRowEmpty(row) {
+        var inputs = row.querySelectorAll('input');
+        if (inputs.length < 3) return true;
+        return !inputs[0].value.trim() && !inputs[1].value.trim() && !inputs[2].value.trim();
+    }
+
     function collectFromTable() {
         var rows = tableBody.querySelectorAll('tr');
         var items = [];
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==================== Таблица ====================
-    function addRow(data) {
+    function addRow(data, noFocus) {
         rowNum++;
         var tr = document.createElement('tr');
         tr.className = 'border-b border-gray-100 hover:bg-gray-50';
@@ -238,7 +244,15 @@ document.addEventListener('DOMContentLoaded', function () {
         trackInput.className = 'w-full border border-gray-200 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-red-400';
         trackInput.value = data ? data.track_code : '';
         trackInput.placeholder = 'Трек-код';
-        trackInput.addEventListener('input', scheduleSave);
+        trackInput.addEventListener('input', function () {
+            scheduleSave();
+            // Автоматически добавляем строку, если это последняя и в ней начали вводить
+            var allRows = tableBody.querySelectorAll('tr');
+            var lastRow = allRows[allRows.length - 1];
+            if (tr === lastRow && trackInput.value.trim() !== '') {
+                addRow(null, true);
+            }
+        });
         trackTd.appendChild(trackInput);
 
         var ownerTd = document.createElement('td');
@@ -287,10 +301,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Inline-автозаполнение для поля владельца
         setupOwnerAutocomplete(ownerInput, weightInput);
 
-        // Фокус на последний трек-код
-        if (!data) trackInput.focus();
+        // Фокус на последний трек-код (только если не авто-создание)
+        if (!data && !noFocus) trackInput.focus();
 
-        // При потере фокуса трек-кодом — подтягиваем владельца
+        // Подтягиваем владельца при вводе трек-кода (с debounce)
+        trackInput.addEventListener('input', debounce(function () {
+            fetchTrackOwner(trackInput, ownerInput, weightInput);
+        }, 400));
         trackInput.addEventListener('blur', function () {
             fetchTrackOwner(trackInput, ownerInput, weightInput);
         });
@@ -349,10 +366,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateEmptyCells() {
         var empty = 0;
-        tableBody.querySelectorAll('tr').forEach(function (row) {
-            row.querySelectorAll('input').forEach(function (input) {
-                if (!input.value.trim()) empty++;
-            });
+        var rows = tableBody.querySelectorAll('tr');
+        rows.forEach(function (row, idx) {
+            // Пропускаем последнюю пустую строку — она автоматическая
+            if (idx === rows.length - 1 && isRowEmpty(row)) return;
+            var inputs = row.querySelectorAll('input');
+            var hasAny = false;
+            inputs.forEach(function (input) { if (input.value.trim()) hasAny = true; });
+            if (hasAny) {
+                inputs.forEach(function (input) {
+                    if (!input.value.trim()) empty++;
+                });
+            }
         });
         if (empty > 0) {
             emptyCellsWarning.classList.remove('hidden');
@@ -365,39 +390,45 @@ document.addEventListener('DOMContentLoaded', function () {
     addRowBtn.addEventListener('click', function () { addRow(); });
 
     // ==================== Автоподсказки владельцев (inline ghost text) ====================
+    function debounce(func, wait) {
+        var timeout;
+        return function () {
+            var ctx = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function () { func.apply(ctx, args); }, wait);
+        };
+    }
+
     function setupOwnerAutocomplete(input, weightInput) {
-        var debounceTimer = null;
+        var fetchDebounced = debounce(function () {
+            var query;
+            if (inlineAc.active && inlineAc.input === input) {
+                query = input.value.substring(0, inlineAc.typedLen).trim();
+            } else {
+                query = input.value.trim();
+            }
+            if (query.length < 1) {
+                inlineClear();
+                return;
+            }
+
+            fetch(config.searchUsersUrl + '?q=' + encodeURIComponent(query))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.results && data.results.length && document.activeElement === input) {
+                        inlineApply(input, data.results, query);
+                    } else {
+                        inlineClear();
+                    }
+                })
+                .catch(function () { inlineClear(); });
+        }, 150);
 
         input.addEventListener('input', function () {
             if (inlineAc.active && inlineAc.input === input) {
                 inlineAc.active = false;
             }
-            var query = input.value.trim();
-            if (query.length < 1) {
-                inlineClear();
-                return;
-            }
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(function () {
-                var q;
-                if (inlineAc.active && inlineAc.input === input) {
-                    q = input.value.substring(0, inlineAc.typedLen).trim();
-                } else {
-                    q = input.value.trim();
-                }
-                if (q.length < 1) return;
-
-                fetch(config.searchUsersUrl + '?q=' + encodeURIComponent(q))
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        if (data.results && data.results.length && document.activeElement === input) {
-                            inlineApply(input, data.results, q);
-                        } else {
-                            inlineClear();
-                        }
-                    })
-                    .catch(function () { inlineClear(); });
-            }, 250);
+            fetchDebounced();
         });
 
         input.addEventListener('blur', function () {

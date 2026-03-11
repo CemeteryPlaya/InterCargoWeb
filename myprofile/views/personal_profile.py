@@ -35,6 +35,11 @@ def profile(request):
         is_active=True, show_in_registration=True, is_home_delivery=False,
     ).order_by('id')
 
+    # Ссылка на оплату из ПВЗ пользователя
+    payment_link = None
+    if profile and profile.pickup and profile.pickup.payment_link:
+        payment_link = profile.pickup.payment_link
+
     return render(request, 'profile.html', {
         'user': user,
         'profile': profile,
@@ -47,6 +52,7 @@ def profile(request):
         'claimed': claimed_count,
         'missing_fields': missing_fields,
         'available_pickups': available_pickups,
+        'payment_link': payment_link,
     })
 
 @login_required

@@ -66,9 +66,18 @@ def delivered_trackcodes_by_date(request):
         receipt.computed_weight = computed_weight
         receipt.computed_price = (computed_weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
 
+    # Ссылка на оплату из ПВЗ пользователя
+    payment_link = None
+    try:
+        if request.user.userprofile.pickup and request.user.userprofile.pickup.payment_link:
+            payment_link = request.user.userprofile.pickup.payment_link
+    except UserProfile.DoesNotExist:
+        pass
+
     return render(request, 'delivered_posts.html', {
         'grouped_trackcodes': result,
-        'receipts': receipts
+        'receipts': receipts,
+        'payment_link': payment_link,
     })
 
 
