@@ -5,10 +5,12 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
+from collections import OrderedDict
 from myprofile.models import (
     TrackCode, StorageCell, Notification,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
+from myprofile.views.utils import create_receipts_for_user
 from register.models import UserProfile, PickupPoint
 
 
@@ -64,11 +66,53 @@ def warehouse_view(request):
 
         if tracks.exists():
             tracks_list = list(tracks)
+
+            # Группируем треки по чекам (Receipt)
+            receipt_groups = OrderedDict()  # receipt_id -> {receipt, tracks}
+            no_receipt_tracks = []
+            for track in tracks_list:
+                try:
+                    ri = ReceiptItem.objects.select_related('receipt').get(track_code=track)
+                    rid = ri.receipt.id
+                    if rid not in receipt_groups:
+                        receipt_groups[rid] = {
+                            'receipt': ri.receipt,
+                            'tracks': [],
+                            'total_weight': 0,
+                        }
+                    receipt_groups[rid]['tracks'].append(track)
+                    receipt_groups[rid]['total_weight'] += float(track.weight or 0)
+                except ReceiptItem.DoesNotExist:
+                    no_receipt_tracks.append(track)
+
+            # Формируем подячейки: cell_number-1, cell_number-2, ...
+            sub_cells = []
+            sorted_groups = sorted(receipt_groups.values(), key=lambda g: g['receipt'].created_at)
+            for idx, group in enumerate(sorted_groups, 1):
+                sub_cells.append({
+                    'sub_number': f"{cell.cell_number}-{idx}",
+                    'receipt': group['receipt'],
+                    'tracks': group['tracks'],
+                    'total_weight': group['total_weight'],
+                    'track_count': len(group['tracks']),
+                })
+
+            # Треки без чеков — отдельная подячейка
+            if no_receipt_tracks:
+                sub_cells.append({
+                    'sub_number': f"{cell.cell_number}-0",
+                    'receipt': None,
+                    'tracks': no_receipt_tracks,
+                    'total_weight': sum(float(t.weight or 0) for t in no_receipt_tracks),
+                    'track_count': len(no_receipt_tracks),
+                })
+
             cells_data.append({
                 'cell': cell,
                 'tracks': tracks_list,
                 'total_weight': sum(float(t.weight or 0) for t in tracks_list),
                 'track_count': len(tracks_list),
+                'sub_cells': sub_cells,
             })
 
     return render(request, "warehouse.html", {
@@ -110,6 +154,14 @@ def warehouse_issue_to_client(request):
         if not tracks:
             messages.info(request, "Нет товаров для выдачи в этой ячейке.")
             return redirect('warehouse')
+
+        # Авто-создание чеков для треков без привязки к ReceiptItem
+        tracks_without_receipt = [
+            t for t in tracks
+            if not ReceiptItem.objects.filter(track_code=t).exists()
+        ]
+        if tracks_without_receipt:
+            create_receipts_for_user(client, statuses=('ready',))
 
         # Находим чеки связанные с этими треками
         track_ids = [t.id for t in tracks]
