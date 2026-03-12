@@ -74,7 +74,14 @@ def _recalc_receipt(receipt, effective_rate):
 
 
 def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
-    """Создаёт новый чек для треков пользователя, которые ещё не привязаны к ReceiptItem."""
+    """
+    Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
+    Группирует треки по delivered_date — один чек на каждую дату прихода.
+    Дата чека (created_at) = delivered_date трек-кодов.
+    Возвращает последний созданный чек или None.
+    """
+    from collections import defaultdict
+
     tracks = TrackCode.objects.filter(owner=user, status__in=statuses)
     already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
     new_tracks = list(tracks.exclude(id__in=already))
@@ -100,21 +107,36 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
         except UserProfile.DoesNotExist:
             pass
 
-    receipt = Receipt.objects.create(
-        owner=user, total_weight=0, total_price=0,
-        price_per_kg=effective_rate,
-        # PAYMENT COMMENTED OUT: is_paid=False is the default
-        pickup_point=pickup_display, payment_link=payment_link
-    )
+    # Группируем по delivered_date
+    by_date = defaultdict(list)
     for track in new_tracks:
-        ReceiptItem.objects.create(receipt=receipt, track_code=track)
+        by_date[track.delivered_date].append(track)
 
-    _recalc_receipt(receipt, effective_rate)
-    return receipt
+    last_receipt = None
+    for d_date, date_tracks in by_date.items():
+        receipt = Receipt.objects.create(
+            owner=user, total_weight=0, total_price=0,
+            price_per_kg=effective_rate,
+            created_at=d_date or timezone.localdate(),
+            pickup_point=pickup_display, payment_link=payment_link
+        )
+        for track in date_tracks:
+            ReceiptItem.objects.create(receipt=receipt, track_code=track)
+        _recalc_receipt(receipt, effective_rate)
+        last_receipt = receipt
+
+    return last_receipt
 
 
 def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
-    """Создаёт новый чек для треков временного пользователя, которые ещё не привязаны к ReceiptItem."""
+    """
+    Создаёт чеки для треков временного пользователя, которые ещё не привязаны к ReceiptItem.
+    Группирует треки по delivered_date — один чек на каждую дату прихода.
+    Дата чека (created_at) = delivered_date трек-кодов.
+    Возвращает последний созданный чек или None.
+    """
+    from collections import defaultdict
+
     tracks = TrackCode.objects.filter(temp_owner=temp_user, status__in=statuses)
     already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
     new_tracks = list(tracks.exclude(id__in=already))
@@ -135,17 +157,25 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
         pickup_display = str(temp_user.pickup)
         payment_link = temp_user.pickup.payment_link
 
-    receipt = Receipt.objects.create(
-        temp_owner=temp_user, total_weight=0, total_price=0,
-        price_per_kg=effective_rate,
-        # PAYMENT COMMENTED OUT: is_paid=False is the default
-        pickup_point=pickup_display, payment_link=payment_link
-    )
+    # Группируем по delivered_date
+    by_date = defaultdict(list)
     for track in new_tracks:
-        ReceiptItem.objects.create(receipt=receipt, track_code=track)
+        by_date[track.delivered_date].append(track)
 
-    _recalc_receipt(receipt, effective_rate)
-    return receipt
+    last_receipt = None
+    for d_date, date_tracks in by_date.items():
+        receipt = Receipt.objects.create(
+            temp_owner=temp_user, total_weight=0, total_price=0,
+            price_per_kg=effective_rate,
+            created_at=d_date or timezone.localdate(),
+            pickup_point=pickup_display, payment_link=payment_link
+        )
+        for track in date_tracks:
+            ReceiptItem.objects.create(receipt=receipt, track_code=track)
+        _recalc_receipt(receipt, effective_rate)
+        last_receipt = receipt
+
+    return last_receipt
 
 
 def get_or_create_storage_cell(pickup_point, user):

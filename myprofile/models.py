@@ -173,7 +173,7 @@ class Receipt(models.Model):
         null=True, blank=True, related_name='receipts',
         verbose_name="Временный владелец"
     )
-    created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
+    created_at = models.DateField(default=timezone.now, verbose_name="Дата создания")
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
