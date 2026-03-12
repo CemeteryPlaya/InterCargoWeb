@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -85,6 +85,10 @@ urlpatterns = [
     path('email-logs/', email_logs.email_logs_view, name='email_logs'),
     path('email-logs/resend/<int:log_id>/', email_logs.resend_email, name='resend_email'),
     path('finance/', finance_summary.finance_summary_view, name='finance_summary'),
+    path('service/', service.service_view, name='service'),
+    path('service/generate-packages/', service.service_generate_packages, name='service_generate_packages'),
+    path('service/generate-receipts/', service.service_generate_receipts, name='service_generate_receipts'),
+    path('service/normalize-receipts/', service.service_normalize_receipts, name='service_normalize_receipts'),
 
 ]
 
