@@ -95,6 +95,11 @@
             <i class="ri-shield-user-line"></i> Панель персонала
         </a>
         {% endif %}
+        {% if request.user.is_superuser or request.user.userprofile.is_staff %}
+        <a href="{% url 'service' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-tools-line"></i> Сервис
+        </a>
+        {% endif %}
     </nav>
 
     <!-- Нижняя панель (фиксированная) -->

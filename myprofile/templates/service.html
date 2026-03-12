@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Сервис</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold mb-6">
+                    <i class="ri-tools-line mr-2"></i>Сервис
+                </h1>
+
+                <!-- Сообщения -->
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-lg text-sm font-medium
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800
+                        {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                        {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 1. Прогрузить все QR-коды -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-2">
+                        <i class="ri-qr-code-line mr-1 text-blue-500"></i>
+                        Прогрузить все QR-коды
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Для всех клиентов, у которых есть чеки с трек-кодами в статусе «Доставлено на ПВЗ»,
+                        но нет пакета выдачи — создаёт пакет выдачи (QR-код).
+                        Также предварительно создаёт чеки для ready-треков без чеков.
+                    </p>
+                    <form method="post" action="{% url 'service_generate_packages' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition font-medium"
+                            onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
+                            <i class="ri-qr-code-line mr-1"></i> Прогрузить все QR-коды
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 2. Подгрузить чеки -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-2">
+                        <i class="ri-file-list-3-line mr-1 text-green-500"></i>
+                        Подгрузить чеки
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        За выбранную дату прихода товаров создаёт чеки для клиентов (UserProfile и TempUser),
+                        у которых есть трек-коды со статусом «Доставлено на сортировочный склад» и выше,
+                        но без чеков.
+                    </p>
+                    <form method="post" action="{% url 'service_generate_receipts' %}" class="flex flex-wrap items-end gap-4">
+                        {% csrf_token %}
+                        <div>
+                            <label for="receipts-date" class="block text-sm font-medium text-gray-700 mb-1">Дата прихода</label>
+                            <input type="date" id="receipts-date" name="date" required
+                                class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-300 focus:border-green-500">
+                        </div>
+                        <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition font-medium"
+                            onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
+                            <i class="ri-file-list-3-line mr-1"></i> Подгрузить чеки
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 3. Нормализовать чеки -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-2">
+                        <i class="ri-exchange-line mr-1 text-orange-500"></i>
+                        Нормализовать чеки
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        За выбранную дату: трек-коды одного клиента, получившие статус «Доставлено на сортировочный склад» в одну дату,
+                        должны быть в одном чеке. Если несколько чеков за одну дату — объединяет.
+                        Если в чеке есть треки за другие даты — выносит их.
+                    </p>
+                    <form method="post" action="{% url 'service_normalize_receipts' %}" class="flex flex-wrap items-end gap-4">
+                        {% csrf_token %}
+                        <div>
+                            <label for="normalize-date" class="block text-sm font-medium text-gray-700 mb-1">Дата прихода</label>
+                            <input type="date" id="normalize-date" name="date" required
+                                class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-orange-300 focus:border-orange-500">
+                        </div>
+                        <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition font-medium"
+                            onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
+                            <i class="ri-exchange-line mr-1"></i> Нормализовать чеки
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    {% endblock %}
+</body>
+</html>
