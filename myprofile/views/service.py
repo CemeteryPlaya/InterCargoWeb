@@ -281,23 +281,33 @@ def _split_foreign_items(receipt, foreign_items, owner_key, RATE):
         discount = get_temp_user_discount(temp_user)
         effective_rate = RATE - discount
 
-    # Создаём новый чек для «чужих» items
-    new_receipt = Receipt.objects.create(
-        owner_id=owner_id if owner_type == 'user' else None,
-        temp_owner_id=owner_id if owner_type == 'temp' else None,
-        total_weight=0, total_price=0,
-        price_per_kg=effective_rate,
-        pickup_point=receipt.pickup_point,
-        payment_link=receipt.payment_link,
-    )
-
+    # Группируем foreign items по их delivered_date
+    from collections import defaultdict as _dd
+    by_date = _dd(list)
     for item in foreign_items:
-        item.receipt = new_receipt
-        item.save()
+        by_date[item.track_code.delivered_date].append(item)
 
-    # Пересчитываем оба чека
+    for f_date, date_items in by_date.items():
+        new_receipt = Receipt.objects.create(
+            owner_id=owner_id if owner_type == 'user' else None,
+            temp_owner_id=owner_id if owner_type == 'temp' else None,
+            total_weight=0, total_price=0,
+            price_per_kg=effective_rate,
+            created_at=f_date or receipt.created_at,
+            pickup_point=receipt.pickup_point,
+            payment_link=receipt.payment_link,
+        )
+        for item in date_items:
+            item.receipt = new_receipt
+            item.save()
+        _recalc_receipt(new_receipt, effective_rate)
+
+    # Пересчитываем и устанавливаем дату основного чека
+    remaining_items = list(receipt.items.select_related('track_code').all())
+    if remaining_items:
+        receipt.created_at = remaining_items[0].track_code.delivered_date or receipt.created_at
+        receipt.save(update_fields=['created_at'])
     _recalc_receipt(receipt, receipt.price_per_kg or effective_rate)
-    _recalc_receipt(new_receipt, effective_rate)
 
 
 def _merge_receipts(receipt_ids, items_for_date, owner_key, target_date, RATE):
@@ -330,15 +340,23 @@ def _merge_receipts(receipt_ids, items_for_date, owner_key, target_date, RATE):
             track_code_id__in=target_track_ids,
         ).update(receipt=main_receipt)
 
+        # Устанавливаем дату чека = delivered_date треков
+        main_receipt.created_at = target_date
+        main_receipt.save(update_fields=['created_at'])
+
         # Проверяем остались ли items в «старых» чеках
         for rid in other_receipt_ids:
-            remaining = ReceiptItem.objects.filter(receipt_id=rid).count()
-            if remaining == 0:
+            remaining_items = list(
+                ReceiptItem.objects.filter(receipt_id=rid).select_related('track_code')
+            )
+            if not remaining_items:
                 # Удаляем пустой чек (и его связи с ExtraditionPackage)
                 Receipt.objects.filter(id=rid).delete()
             else:
-                # Пересчитываем оставшийся чек
+                # Пересчитываем оставшийся чек и устанавливаем дату
                 r = Receipt.objects.get(id=rid)
+                r.created_at = remaining_items[0].track_code.delivered_date or r.created_at
+                r.save(update_fields=['created_at'])
                 _recalc_receipt(r, r.price_per_kg or effective_rate)
 
         # Пересчитываем основной чек
