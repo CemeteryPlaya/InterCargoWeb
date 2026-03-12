@@ -74,8 +74,7 @@ def _recalc_receipt(receipt, effective_rate):
 
 
 def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
-    """Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
-    Если есть неоплаченный чек с треками за ту же дату — добавляет в него."""
+    """Создаёт новый чек для треков пользователя, которые ещё не привязаны к ReceiptItem."""
     tracks = TrackCode.objects.filter(owner=user, status__in=statuses)
     already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
     new_tracks = list(tracks.exclude(id__in=already))
@@ -86,28 +85,6 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
-    # Проверяем, есть ли неоплаченный чек с треками за ту же дату
-    new_dates = set(t.update_date for t in new_tracks if t.update_date)
-    if new_dates:
-        # PAYMENT COMMENTED OUT: was is_paid=False filter
-        existing_unpaid = Receipt.objects.filter(
-            owner=user,
-        ).prefetch_related('items__track_code').order_by('-created_at')
-
-        for receipt in existing_unpaid:
-            receipt_dates = set(
-                item.track_code.update_date
-                for item in receipt.items.select_related('track_code').all()
-                if item.track_code.update_date
-            )
-            if receipt_dates & new_dates:
-                # Совпадают даты — добавляем треки в существующий чек
-                for track in new_tracks:
-                    ReceiptItem.objects.create(receipt=receipt, track_code=track)
-                _recalc_receipt(receipt, effective_rate)
-                return receipt
-
-    # Нет подходящего чека — создаём новый
     pickup_display = ''
     payment_link = None
     first_with_override = next((t for t in new_tracks if t.delivery_pickup_id), None)
@@ -137,8 +114,7 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
 
 
 def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
-    """Создаёт чеки для треков временного пользователя, которые ещё не привязаны к ReceiptItem.
-    Если есть неоплаченный чек с треками за ту же дату — добавляет в него."""
+    """Создаёт новый чек для треков временного пользователя, которые ещё не привязаны к ReceiptItem."""
     tracks = TrackCode.objects.filter(temp_owner=temp_user, status__in=statuses)
     already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
     new_tracks = list(tracks.exclude(id__in=already))
@@ -149,27 +125,6 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
     discount = get_temp_user_discount(temp_user)
     effective_rate = RATE - discount
 
-    # Проверяем, есть ли неоплаченный чек с треками за ту же дату
-    new_dates = set(t.update_date for t in new_tracks if t.update_date)
-    if new_dates:
-        # PAYMENT COMMENTED OUT: was is_paid=False filter
-        existing_unpaid = Receipt.objects.filter(
-            temp_owner=temp_user,
-        ).prefetch_related('items__track_code').order_by('-created_at')
-
-        for receipt in existing_unpaid:
-            receipt_dates = set(
-                item.track_code.update_date
-                for item in receipt.items.select_related('track_code').all()
-                if item.track_code.update_date
-            )
-            if receipt_dates & new_dates:
-                for track in new_tracks:
-                    ReceiptItem.objects.create(receipt=receipt, track_code=track)
-                _recalc_receipt(receipt, effective_rate)
-                return receipt
-
-    # Нет подходящего чека — создаём новый
     pickup_display = ''
     payment_link = None
     first_with_override = next((t for t in new_tracks if t.delivery_pickup_id), None)
