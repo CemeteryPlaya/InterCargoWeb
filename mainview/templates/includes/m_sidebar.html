@@ -75,6 +75,9 @@
         </a>
         {% endif %}
         <!-- Общие разделы -->
+        <a href="javascript:void(0)" onclick="document.getElementById('mobile-sidebar').classList.add('hidden');if(window.InterCargoTutorial)InterCargoTutorial.showMenu()" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-graduation-cap-line"></i> Обучение по сайту
+        </a>
         <a href="{% url 'track_codes' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-barcode-line"></i> Трек-коды
         </a>

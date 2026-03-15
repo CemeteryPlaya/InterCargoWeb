@@ -414,3 +414,45 @@
         body.theme-dark .bg-black\/50 {
             background-color: rgba(0, 0, 0, 0.7) !important;
         }
+
+        /* Tutorial system — dark theme */
+        body.theme-dark #tutorial-tooltip {
+            background: #1e293b !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        body.theme-dark #tutorial-tooltip #tutorial-prev {
+            background: #334155 !important;
+            color: #e2e8f0 !important;
+            border-color: #475569 !important;
+        }
+
+        body.theme-dark #tutorial-menu-modal > div:last-child {
+            background: #1e293b !important;
+            color: #e2e8f0 !important;
+        }
+
+        body.theme-dark #tutorial-menu-modal button[style*="border"] {
+            background: #0f172a !important;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
+        }
+
+        body.theme-dark #tutorial-menu-modal button[style*="border"]:hover {
+            background: #1e293b !important;
+            border-color: #ef4444 !important;
+        }
+
+        body.theme-dark #tutorial-banner {
+            background-color: #1e3a5f !important;
+            border-color: #1e40af !important;
+        }
+
+        body.theme-dark #tutorial-banner p {
+            color: #93c5fd !important;
+        }
+
+        body.theme-dark #tutorial-banner:hover {
+            background-color: #1e3a6f !important;
+        }
