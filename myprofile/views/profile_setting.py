@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from register.models import UserProfile, PickupPoint
 from myprofile.models import PickupChangeRequest, Notification
+from tgbot.models import UserNotificationSettings
 
 EDIT_COOLDOWN_DAYS = 30
 PICKUP_CHANGE_COOLDOWN_DAYS = 30
@@ -40,6 +41,9 @@ def settings(request):
             can_change_pickup = False
             pickup_days_left = PICKUP_CHANGE_COOLDOWN_DAYS - delta.days
 
+    # Настройки уведомлений
+    notif_settings, _ = UserNotificationSettings.objects.get_or_create(user=user)
+
     return render(request, "settings.html", {
         'user': user,
         'profile': profile,
@@ -50,6 +54,7 @@ def settings(request):
         'pending_request': pending_request,
         'can_change_pickup': can_change_pickup,
         'pickup_days_left': pickup_days_left,
+        'notif_settings': notif_settings,
     })
 
 @login_required
@@ -160,6 +165,26 @@ def request_pickup_change(request):
         requested_pickup=new_pickup,
     )
     messages.success(request, "Заявка на смену пункта выдачи отправлена.")
+    return redirect('settings')
+
+
+@login_required
+@require_POST
+def save_notification_settings(request):
+    """Сохраняет настройки уведомлений пользователя (email + Telegram)."""
+    settings_obj, _ = UserNotificationSettings.objects.get_or_create(user=request.user)
+
+    level = request.POST.get('notif_level', 'only_ready')
+    if level not in ('all', 'only_ready', 'selective'):
+        level = 'only_ready'
+    settings_obj.level = level
+
+    settings_obj.notify_shipped_cn = request.POST.get('notify_shipped_cn') == 'on'
+    settings_obj.notify_delivered_sort = request.POST.get('notify_delivered_sort') == 'on'
+    settings_obj.notify_shipping_pp = request.POST.get('notify_shipping_pp') == 'on'
+
+    settings_obj.save()
+    messages.success(request, "Настройки уведомлений сохранены.")
     return redirect('settings')
 
 

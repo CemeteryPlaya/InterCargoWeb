@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inter Cargo - Доставленные товары</title>
+  <title>Inter Cargo - Чеки</title>
   <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
   <script src="https://cdn.tailwindcss.com/3.4.16"></script>
   <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
@@ -47,55 +47,7 @@
         {% endfor %}
       </div>
       {% endif %}
-      <h1 class="text-2xl font-bold mb-6 ml-2">Доставленные заказы</h1>
-
-      {% for date, data in grouped_trackcodes.items %}
-      <div x-data="{ open: false }" class="border rounded-lg shadow mb-4 w-full">
-        <!-- Заголовок блока -->
-        <div @click="open = !open"
-          class="flex items-center justify-between px-4 py-3 cursor-pointer bg-gray-100 hover:bg-gray-200 transition">
-          <span class="font-semibold text-lg">{{ date|date:"d.m.Y" }}</span>
-          <svg :class="open ? 'rotate-180' : ''" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor"
-            stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-
-        <!-- Контент -->
-        <div x-show="open" x-transition class="px-4 py-3 border-t">
-          <p class="mb-2 text-sm text-gray-600">Общий вес: <strong>{{ data.total_weight }} кг</strong></p>
-          <p class="mb-2 text-sm text-gray-600">Общая сумма: <strong>{{ data.total_price|floatformat:0 }} ₸</strong></p>
-
-          <!-- Таблица трек-кодов -->
-          <div class="overflow-x-auto mt-4">
-            <table class="min-w-full bg-white border border-gray-300 text-sm">
-              <thead class="bg-gray-50">
-                <tr class="text-left">
-                  <th class="py-2 px-3 border-b">Трек-код</th>
-                  <th class="py-2 px-3 border-b">Описание</th>
-                  <th class="py-2 px-3 border-b">Вес (кг)</th>
-                  <th class="py-2 px-3 border-b">Цена (₸)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for track in data.tracks %}
-                <tr>
-                  <td class="py-2 px-3 border-b">{{ track.track_code }}</td>
-                  <td class="py-2 px-3 border-b">{{ track.description }}</td>
-                  <td class="py-2 px-3 border-b">{{ track.weight }}</td>
-                  <td class="py-2 px-3 border-b">{{ track.price|floatformat:0 }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      {% empty %}
-      <p class="text-gray-500 ml-2">Нет доставленных трек-кодов.</p>
-      {% endfor %}
-
-      <hr class="my-6">
+      <h1 class="text-2xl font-bold mb-6 ml-2">Чеки</h1>
 
       {% if payment_link %}
       <div class="mb-4 ml-2">
@@ -105,8 +57,6 @@
           </button>
       </div>
       {% endif %}
-
-      <h2 class="text-xl font-bold mb-4 ml-2">Сформированные чеки</h2>
 
       <div x-data="{ filter: 'all', activeReceipt: null }" class="mb-4 ml-2">
         <label class="mr-2 font-medium">Фильтр:</label>
@@ -182,8 +132,8 @@
                 <tbody>
                   {% for item in receipt.items_list %}
                   <tr>
-                    <td class="border border-gray-300 px-1 py-1">{{ item.track_code.track_code }}</td>
-                    <td class="border border-gray-300 px-1 py-1 text-center">{{ item.track_code.weight }}</td>
+                    <td class="border border-gray-300 px-1 py-1">{{ item.display_track_code }}</td>
+                    <td class="border border-gray-300 px-1 py-1 text-center">{{ item.display_weight }}</td>
                     <td class="border border-gray-300 px-1 py-1 text-center">{{ item.price|floatformat:0 }}</td>
                   </tr>
                   {% endfor %}

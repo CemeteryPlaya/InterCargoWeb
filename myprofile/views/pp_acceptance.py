@@ -153,7 +153,7 @@ def get_acceptance_receipts(request):
             }
 
         clients_map[username]['receipts'][rn]['track_count'] += 1
-        clients_map[username]['receipts'][rn]['total_weight'] += float(item.track_code.weight or 0)
+        clients_map[username]['receipts'][rn]['total_weight'] += float(item.display_weight or 0)
 
     # Треки без чеков
     tracks_with_receipts = set(item.track_code_id for item in items)

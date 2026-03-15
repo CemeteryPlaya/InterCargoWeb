@@ -1,0 +1,210 @@
+2026-03-14 21:06:12,731 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-14 21:06:12,731 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-14 21:06:12,735 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-14 21:06:12,736 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-14 21:06:16,360 - aiogram.dispatcher - INFO - Start polling
+2026-03-14 21:06:16,458 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-14 21:06:24,857 - aiogram.event - INFO - Update id=61603369 is handled. Duration 519 ms by bot id=8209475252
+2026-03-14 21:06:31,895 - aiogram.event - INFO - Update id=61603370 is handled. Duration 141 ms by bot id=8209475252
+2026-03-14 21:06:39,576 - aiogram.event - INFO - Update id=61603371 is handled. Duration 156 ms by bot id=8209475252
+2026-03-14 21:06:45,308 - aiogram.event - INFO - Update id=61603372 is handled. Duration 126 ms by bot id=8209475252
+2026-03-14 21:06:47,639 - aiogram.event - INFO - Update id=61603373 is handled. Duration 228 ms by bot id=8209475252
+2026-03-14 21:07:45,735 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-14 21:07:45,736 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-14 21:07:45,736 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-14 21:07:45,996 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-14 21:07:49,020 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-14 21:07:49,020 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-14 21:07:49,021 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-14 21:07:49,023 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-14 21:07:49,344 - aiogram.dispatcher - INFO - Start polling
+2026-03-14 21:07:49,460 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-14 21:08:16,153 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-14 21:08:16,153 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-14 21:08:16,154 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-14 21:08:16,404 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-14 21:08:19,480 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-14 21:08:19,480 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-14 21:08:19,481 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-14 21:08:19,482 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-14 21:08:19,786 - aiogram.dispatcher - INFO - Start polling
+2026-03-14 21:08:19,886 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-14 21:08:32,285 - tgbot.bot.handlers - INFO - Linked user 1 to chat 733256345
+2026-03-14 21:08:32,622 - aiogram.event - INFO - Update id=61603374 is handled. Duration 349 ms by bot id=8209475252
+2026-03-14 21:13:13,400 - aiogram.event - INFO - Update id=61603375 is handled. Duration 372 ms by bot id=8209475252
+2026-03-14 21:13:17,272 - aiogram.event - INFO - Update id=61603376 is handled. Duration 132 ms by bot id=8209475252
+2026-03-14 21:13:22,513 - aiogram.event - INFO - Update id=61603377 is handled. Duration 301 ms by bot id=8209475252
+2026-03-14 21:13:57,642 - tgbot.bot.handlers - INFO - Linked user 5 to chat 1292145172
+2026-03-14 21:13:57,854 - aiogram.event - INFO - Update id=61603378 is handled. Duration 222 ms by bot id=8209475252
+2026-03-14 21:14:07,345 - aiogram.event - INFO - Update id=61603379 is handled. Duration 132 ms by bot id=8209475252
+2026-03-14 21:14:12,179 - aiogram.event - INFO - Update id=61603380 is handled. Duration 127 ms by bot id=8209475252
+2026-03-14 21:14:13,627 - aiogram.event - INFO - Update id=61603381 is handled. Duration 194 ms by bot id=8209475252
+2026-03-14 21:14:18,465 - aiogram.event - INFO - Update id=61603382 is handled. Duration 135 ms by bot id=8209475252
+2026-03-14 21:14:19,959 - aiogram.event - INFO - Update id=61603383 is handled. Duration 135 ms by bot id=8209475252
+2026-03-14 21:14:20,980 - aiogram.event - INFO - Update id=61603384 is handled. Duration 262 ms by bot id=8209475252
+2026-03-14 21:14:22,372 - aiogram.event - INFO - Update id=61603385 is handled. Duration 148 ms by bot id=8209475252
+2026-03-14 21:14:27,504 - aiogram.event - INFO - Update id=61603386 is handled. Duration 135 ms by bot id=8209475252
+2026-03-14 21:14:29,294 - aiogram.event - INFO - Update id=61603387 is handled. Duration 229 ms by bot id=8209475252
+2026-03-14 21:14:32,045 - aiogram.event - INFO - Update id=61603388 is handled. Duration 241 ms by bot id=8209475252
+2026-03-14 21:14:56,269 - aiogram.event - INFO - Update id=61603389 is handled. Duration 123 ms by bot id=8209475252
+2026-03-14 21:15:15,562 - aiogram.event - INFO - Update id=61603390 is handled. Duration 222 ms by bot id=8209475252
+2026-03-14 21:15:17,784 - aiogram.event - INFO - Update id=61603391 is handled. Duration 138 ms by bot id=8209475252
+2026-03-14 21:15:18,756 - aiogram.event - INFO - Update id=61603392 is handled. Duration 131 ms by bot id=8209475252
+2026-03-14 21:15:20,820 - aiogram.event - INFO - Update id=61603393 is handled. Duration 311 ms by bot id=8209475252
+2026-03-14 21:15:23,306 - aiogram.event - INFO - Update id=61603394 is handled. Duration 127 ms by bot id=8209475252
+2026-03-14 21:15:59,992 - aiogram.event - INFO - Update id=61603395 is handled. Duration 141 ms by bot id=8209475252
+2026-03-14 21:16:32,186 - aiogram.event - INFO - Update id=61603396 is handled. Duration 132 ms by bot id=8209475252
+2026-03-14 21:16:37,583 - aiogram.event - INFO - Update id=61603397 is handled. Duration 134 ms by bot id=8209475252
+2026-03-14 21:16:38,995 - aiogram.event - INFO - Update id=61603398 is handled. Duration 241 ms by bot id=8209475252
+2026-03-14 21:18:17,806 - aiogram.event - INFO - Update id=61603399 is handled. Duration 212 ms by bot id=8209475252
+2026-03-14 21:19:50,339 - tgbot.bot.workers.notifications - INFO - Sent notification #1 to chat 1292145172
+2026-03-14 21:19:50,567 - tgbot.bot.workers.notifications - INFO - Sent notification #2 to chat 1292145172
+2026-03-14 21:19:50,567 - tgbot.bot.workers.notifications - INFO - Worker sent 2 notifications.
+2026-03-14 21:21:15,676 - aiogram.event - INFO - Update id=61603400 is handled. Duration 263 ms by bot id=8209475252
+2026-03-14 21:27:21,167 - tgbot.bot.workers.notifications - INFO - Sent notification #3 to chat 1292145172
+2026-03-14 21:27:21,415 - tgbot.bot.workers.notifications - INFO - Sent notification #4 to chat 1292145172
+2026-03-14 21:27:21,881 - tgbot.bot.workers.notifications - INFO - Sent notification #5 to chat 1292145172
+2026-03-14 21:27:22,177 - tgbot.bot.workers.notifications - INFO - Sent notification #6 to chat 1292145172
+2026-03-14 21:27:22,379 - tgbot.bot.workers.notifications - INFO - Sent notification #7 to chat 1292145172
+2026-03-14 21:27:22,565 - tgbot.bot.workers.notifications - INFO - Sent notification #8 to chat 1292145172
+2026-03-14 21:27:22,752 - tgbot.bot.workers.notifications - INFO - Sent notification #9 to chat 1292145172
+2026-03-14 21:27:22,941 - tgbot.bot.workers.notifications - INFO - Sent notification #10 to chat 1292145172
+2026-03-14 21:27:22,941 - tgbot.bot.workers.notifications - INFO - Worker sent 8 notifications.
+2026-03-14 21:28:11,838 - aiogram.event - INFO - Update id=61603401 is handled. Duration 440 ms by bot id=8209475252
+2026-03-14 21:47:07,990 - tgbot.bot.handlers - INFO - Linked user 8 to chat 36909393
+2026-03-14 21:47:08,364 - aiogram.event - INFO - Update id=61603402 is handled. Duration 385 ms by bot id=8209475252
+2026-03-14 21:49:44,511 - tgbot.bot.workers.notifications - INFO - Sent notification #11 to chat 36909393
+2026-03-14 21:49:44,730 - tgbot.bot.workers.notifications - INFO - Sent notification #12 to chat 36909393
+2026-03-14 21:49:44,930 - tgbot.bot.workers.notifications - INFO - Sent notification #13 to chat 36909393
+2026-03-14 21:49:45,131 - tgbot.bot.workers.notifications - INFO - Sent notification #14 to chat 36909393
+2026-03-14 21:49:45,131 - tgbot.bot.workers.notifications - INFO - Worker sent 4 notifications.
+2026-03-14 21:54:29,174 - aiogram.event - INFO - Update id=61603403 is handled. Duration 154 ms by bot id=8209475252
+2026-03-14 21:54:40,506 - aiogram.event - INFO - Update id=61603404 is handled. Duration 267 ms by bot id=8209475252
+2026-03-14 21:54:50,426 - aiogram.event - INFO - Update id=61603405 is handled. Duration 140 ms by bot id=8209475252
+2026-03-15 01:08:19,865 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2300 to 1292145172
+2026-03-15 01:08:20,107 - tgbot.bot.workers.reminders - INFO - Sent 5-day reminder for track 2300 to 1292145172
+2026-03-15 01:08:20,336 - tgbot.bot.workers.reminders - INFO - Sent 7-day reminder for track 2300 to 1292145172
+2026-03-15 10:48:30,448 - aiogram.event - INFO - Update id=61603406 is handled. Duration 341 ms by bot id=8209475252
+2026-03-15 12:02:34,852 - tgbot.bot.workers.notifications - INFO - Sent notification #15 to chat 733256345
+2026-03-15 12:02:35,051 - tgbot.bot.workers.notifications - INFO - Sent notification #16 to chat 733256345
+2026-03-15 12:02:35,251 - tgbot.bot.workers.notifications - INFO - Sent notification #17 to chat 733256345
+2026-03-15 12:02:35,452 - tgbot.bot.workers.notifications - INFO - Sent notification #18 to chat 733256345
+2026-03-15 12:02:35,452 - tgbot.bot.workers.notifications - INFO - Worker sent 4 notifications.
+2026-03-15 12:02:45,662 - tgbot.bot.workers.notifications - INFO - Sent notification #19 to chat 733256345
+2026-03-15 12:02:45,863 - tgbot.bot.workers.notifications - INFO - Sent notification #20 to chat 733256345
+2026-03-15 12:02:46,050 - tgbot.bot.workers.notifications - INFO - Sent notification #21 to chat 733256345
+2026-03-15 12:02:46,249 - tgbot.bot.workers.notifications - INFO - Sent notification #22 to chat 733256345
+2026-03-15 12:02:46,249 - tgbot.bot.workers.notifications - INFO - Worker sent 4 notifications.
+2026-03-15 12:03:48,755 - aiogram.event - INFO - Update id=61603407 is handled. Duration 167 ms by bot id=8209475252
+2026-03-15 12:03:57,014 - aiogram.event - INFO - Update id=61603408 is handled. Duration 502 ms by bot id=8209475252
+2026-03-15 12:04:03,614 - aiogram.event - INFO - Update id=61603409 is handled. Duration 263 ms by bot id=8209475252
+2026-03-15 12:04:05,132 - aiogram.event - INFO - Update id=61603410 is handled. Duration 236 ms by bot id=8209475252
+2026-03-15 12:04:05,904 - aiogram.event - INFO - Update id=61603411 is handled. Duration 305 ms by bot id=8209475252
+2026-03-15 12:04:06,521 - aiogram.event - INFO - Update id=61603412 is handled. Duration 230 ms by bot id=8209475252
+2026-03-15 12:04:07,014 - aiogram.event - INFO - Update id=61603413 is handled. Duration 221 ms by bot id=8209475252
+2026-03-15 12:04:09,644 - aiogram.event - INFO - Update id=61603414 is handled. Duration 232 ms by bot id=8209475252
+2026-03-15 12:04:10,799 - aiogram.event - INFO - Update id=61603415 is handled. Duration 224 ms by bot id=8209475252
+2026-03-15 12:04:11,228 - aiogram.event - INFO - Update id=61603416 is handled. Duration 239 ms by bot id=8209475252
+2026-03-15 12:04:11,535 - aiogram.event - INFO - Update id=61603417 is handled. Duration 424 ms by bot id=8209475252
+2026-03-15 12:04:12,779 - aiogram.event - INFO - Update id=61603418 is handled. Duration 224 ms by bot id=8209475252
+2026-03-15 12:04:14,698 - aiogram.event - INFO - Update id=61603419 is handled. Duration 228 ms by bot id=8209475252
+2026-03-15 12:04:16,532 - aiogram.event - INFO - Update id=61603420 is handled. Duration 238 ms by bot id=8209475252
+2026-03-15 12:04:16,986 - aiogram.event - INFO - Update id=61603421 is handled. Duration 237 ms by bot id=8209475252
+2026-03-15 12:04:17,390 - aiogram.event - INFO - Update id=61603422 is handled. Duration 226 ms by bot id=8209475252
+2026-03-15 12:23:01,703 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-15 12:23:01,712 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-15 12:23:01,713 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-15 12:23:01,985 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 12:23:07,142 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-15 12:23:07,142 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-15 12:23:07,143 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-15 12:23:07,144 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-15 12:23:07,493 - aiogram.dispatcher - INFO - Start polling
+2026-03-15 12:23:07,596 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 12:38:48,445 - tgbot.bot.workers.notifications - INFO - Sent grouped ready notification (4 tracks) to chat 733256345
+2026-03-15 12:38:48,646 - tgbot.bot.workers.notifications - INFO - Sent notification #23 to chat 733256345
+2026-03-15 12:38:48,830 - tgbot.bot.workers.notifications - INFO - Sent notification #24 to chat 733256345
+2026-03-15 12:38:49,003 - tgbot.bot.workers.notifications - INFO - Sent notification #25 to chat 733256345
+2026-03-15 12:38:49,201 - tgbot.bot.workers.notifications - INFO - Sent notification #26 to chat 733256345
+2026-03-15 12:38:49,201 - tgbot.bot.workers.notifications - INFO - Worker sent 5 notifications.
+2026-03-15 12:38:58,538 - aiogram.event - INFO - Update id=61603423 is handled. Duration 137 ms by bot id=8209475252
+2026-03-15 12:39:00,710 - aiogram.event - INFO - Update id=61603424 is handled. Duration 272 ms by bot id=8209475252
+2026-03-15 12:39:07,139 - aiogram.event - INFO - Update id=61603425 is handled. Duration 234 ms by bot id=8209475252
+2026-03-15 12:42:39,827 - tgbot.bot.workers.notifications - INFO - Sent grouped ready notification (3 tracks) to chat 733256345
+2026-03-15 12:42:40,027 - tgbot.bot.workers.notifications - INFO - Sent notification #31 to chat 733256345
+2026-03-15 12:42:40,228 - tgbot.bot.workers.notifications - INFO - Sent notification #32 to chat 733256345
+2026-03-15 12:42:40,427 - tgbot.bot.workers.notifications - INFO - Sent notification #33 to chat 733256345
+2026-03-15 12:42:40,427 - tgbot.bot.workers.notifications - INFO - Worker sent 4 notifications.
+2026-03-15 13:04:43,610 - aiogram.event - INFO - Update id=61603426 is handled. Duration 297 ms by bot id=8209475252
+2026-03-15 13:04:46,710 - aiogram.event - INFO - Update id=61603427 is handled. Duration 232 ms by bot id=8209475252
+2026-03-15 13:04:50,128 - aiogram.event - INFO - Update id=61603428 is handled. Duration 391 ms by bot id=8209475252
+2026-03-15 13:04:50,817 - aiogram.event - INFO - Update id=61603429 is handled. Duration 451 ms by bot id=8209475252
+2026-03-15 13:04:51,340 - aiogram.event - INFO - Update id=61603430 is handled. Duration 250 ms by bot id=8209475252
+2026-03-15 14:29:06,836 - tgbot.bot.workers.notifications - INFO - Sent notification #45 to chat 733256345
+2026-03-15 14:29:06,836 - tgbot.bot.workers.notifications - INFO - Worker sent 1 notifications.
+2026-03-15 14:30:03,542 - aiogram.event - INFO - Update id=61603431 is not handled. Duration 2 ms by bot id=8209475252
+2026-03-15 14:30:06,124 - aiogram.event - INFO - Update id=61603432 is handled. Duration 248 ms by bot id=8209475252
+2026-03-15 14:40:47,921 - tgbot.bot.workers.notifications - INFO - Sent notification #50 to chat 733256345
+2026-03-15 14:40:48,106 - tgbot.bot.workers.notifications - INFO - Sent notification #51 to chat 733256345
+2026-03-15 14:40:48,289 - tgbot.bot.workers.notifications - INFO - Sent notification #52 to chat 733256345
+2026-03-15 14:40:48,289 - tgbot.bot.workers.notifications - INFO - Worker sent 3 notifications.
+2026-03-15 14:41:00,517 - aiogram.event - INFO - Update id=61603433 is handled. Duration 223 ms by bot id=8209475252
+2026-03-15 14:41:01,297 - aiogram.event - INFO - Update id=61603434 is handled. Duration 266 ms by bot id=8209475252
+2026-03-15 14:41:04,030 - aiogram.event - INFO - Update id=61603435 is handled. Duration 234 ms by bot id=8209475252
+2026-03-15 14:41:10,030 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-15 14:41:10,031 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-15 14:41:10,031 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-15 14:41:10,283 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 14:41:13,831 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-15 14:41:13,831 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-15 14:41:13,832 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-15 14:41:13,833 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-15 14:41:14,173 - aiogram.dispatcher - INFO - Start polling
+2026-03-15 14:41:14,270 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 14:41:44,435 - tgbot.bot.workers.notifications - INFO - Sent receipt notification (1 receipts) to chat 733256345
+2026-03-15 14:41:44,435 - tgbot.bot.workers.notifications - INFO - Worker sent 1 notifications.
+2026-03-15 14:42:01,439 - aiogram.event - INFO - Update id=61603436 is handled. Duration 128 ms by bot id=8209475252
+2026-03-15 14:42:54,696 - tgbot.bot.workers.notifications - INFO - Sent notification #54 to chat 733256345
+2026-03-15 14:42:54,696 - tgbot.bot.workers.notifications - INFO - Worker sent 1 notifications.
+2026-03-15 21:35:45,379 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-15 21:35:45,380 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-15 21:35:45,382 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-15 21:35:45,383 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-15 21:35:45,774 - aiogram.dispatcher - INFO - Start polling
+2026-03-15 21:35:45,882 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 22:16:37,890 - tgbot.bot.workers.notifications - INFO - Sent receipt notification (1 receipts) to chat 733256345
+2026-03-15 22:16:37,890 - tgbot.bot.workers.notifications - INFO - Worker sent 1 notifications.
+2026-03-15 22:16:48,141 - tgbot.bot.workers.notifications - INFO - Sent notification #56 to chat 733256345
+2026-03-15 22:16:48,383 - tgbot.bot.workers.notifications - INFO - Sent notification #57 to chat 733256345
+2026-03-15 22:16:48,383 - tgbot.bot.workers.notifications - INFO - Worker sent 2 notifications.
+2026-03-15 22:17:36,487 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-15 22:17:36,488 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-15 22:17:36,489 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-15 22:17:36,749 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 22:17:40,914 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-15 22:17:40,915 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-15 22:17:40,916 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-15 22:17:40,917 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-15 22:17:42,375 - aiogram.dispatcher - INFO - Start polling
+2026-03-15 22:17:42,484 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 22:23:26,386 - aiogram.event - INFO - Update id=61603437 is handled. Duration 329 ms by bot id=8209475252
+2026-03-15 22:23:28,279 - aiogram.event - INFO - Update id=61603438 is handled. Duration 148 ms by bot id=8209475252
+2026-03-15 22:23:30,075 - aiogram.event - INFO - Update id=61603439 is handled. Duration 131 ms by bot id=8209475252
+2026-03-15 22:23:33,044 - aiogram.event - INFO - Update id=61603440 is handled. Duration 137 ms by bot id=8209475252
+2026-03-15 22:23:35,701 - aiogram.event - INFO - Update id=61603441 is handled. Duration 126 ms by bot id=8209475252
+2026-03-15 22:23:41,013 - aiogram.event - INFO - Update id=61603442 is handled. Duration 137 ms by bot id=8209475252
+2026-03-15 22:23:58,677 - aiogram.event - INFO - Update id=61603443 is handled. Duration 253 ms by bot id=8209475252
+2026-03-15 22:23:59,887 - aiogram.event - INFO - Update id=61603444 is handled. Duration 120 ms by bot id=8209475252
+2026-03-15 22:24:07,498 - aiogram.event - INFO - Update id=61603445 is handled. Duration 135 ms by bot id=8209475252
+2026-03-15 22:24:10,726 - aiogram.event - INFO - Update id=61603446 is handled. Duration 134 ms by bot id=8209475252
+2026-03-15 22:25:28,407 - aiogram.event - INFO - Update id=61603447 is handled. Duration 128 ms by bot id=8209475252
+2026-03-15 22:45:44,134 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-15 22:45:44,135 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-15 22:45:44,135 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-15 22:45:44,398 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 22:45:47,786 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-15 22:45:47,786 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-15 22:45:47,787 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-15 22:45:47,789 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-15 22:45:48,144 - aiogram.dispatcher - INFO - Start polling
+2026-03-15 22:45:48,243 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'

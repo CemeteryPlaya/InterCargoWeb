@@ -31,6 +31,7 @@ urlpatterns = [
     path('settings/', profile_setting.settings, name='settings'),
     path('update/', profile_setting.update_profile, name='update_profile'),
     path('request-pickup-change/', profile_setting.request_pickup_change, name='request_pickup_change'),
+    path('save-notification-settings/', profile_setting.save_notification_settings, name='save_notification_settings'),
     path('pickup-change-requests/', profile_setting.pickup_change_requests_view, name='pickup_change_requests'),
     path('pickup-change-requests/<int:req_id>/review/', profile_setting.review_pickup_change, name='review_pickup_change'),
     path('', personal_profile.profile, name='profile'),

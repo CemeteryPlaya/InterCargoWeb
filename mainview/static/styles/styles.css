@@ -49,6 +49,14 @@
             background-color: #111827 !important;
         }
 
+        body.theme-dark .bg-gray-300 {
+            background-color: #1e293b !important;
+        }
+
+        body.theme-dark .bg-gray-400 {
+            background-color: #334155 !important;
+        }
+
         body.theme-dark .bg-gray-500 {
             background-color: #4b5563 !important;
         }
@@ -68,17 +76,30 @@
             color: #9ca3af !important;
         }
 
-        body.theme-dark .text-gray-400 {
+        body.theme-dark .text-gray-400,
+        body.theme-dark .text-gray-300 {
             color: #9ca3af !important;
         }
 
+        body.theme-dark .text-black {
+            color: #e5e7eb !important;
+        }
+
         /* Границы и карточки */
+        body.theme-dark .border-gray-100 {
+            border-color: #1e293b !important;
+        }
+
         body.theme-dark .border-gray-200 {
             border-color: #1f2937 !important;
         }
 
         body.theme-dark .border-gray-300 {
             border-color: #374151 !important;
+        }
+
+        body.theme-dark .border-gray-400 {
+            border-color: #4b5563 !important;
         }
 
         body.theme-dark .shadow,
@@ -289,4 +310,107 @@
         body.theme-dark .pickup-item:hover,
         body.theme-dark .registry-item:hover {
              background-color: #1e293b !important;
+        }
+
+        /* Таблицы: bg-gray-50 в thead (общий случай, не только table.bg-white) */
+        body.theme-dark thead .bg-gray-50,
+        body.theme-dark thead.bg-gray-50 {
+            background-color: #0f172a !important;
+        }
+
+        body.theme-dark tfoot .bg-gray-50,
+        body.theme-dark tfoot.bg-gray-50 {
+            background-color: #0f172a !important;
+        }
+
+        /* Стили чередования строк */
+        body.theme-dark tr.bg-gray-50 {
+            background-color: #0f172a !important;
+        }
+
+        /* Дефолтный цвет бордеров (border-t, border-b, border без цвета) */
+        body.theme-dark .border-t,
+        body.theme-dark .border-b,
+        body.theme-dark .border-l,
+        body.theme-dark .border-r,
+        body.theme-dark .border {
+            border-color: #1f2937;
+        }
+
+        /* Цветные bg-*-50 фоны → тёмные варианты */
+        body.theme-dark .bg-blue-50 {
+            background-color: #1e3a5f !important;
+            color: #bfdbfe !important;
+        }
+
+        body.theme-dark .bg-orange-50 {
+            background-color: #431407 !important;
+            color: #fed7aa !important;
+        }
+
+        body.theme-dark .bg-green-50 {
+            background-color: #052e16 !important;
+            color: #bbf7d0 !important;
+        }
+
+        body.theme-dark .bg-red-50 {
+            background-color: #450a0a !important;
+            color: #fecaca !important;
+        }
+
+        /* Текст внутри цветных bg-*-50 блоков */
+        body.theme-dark .bg-blue-50 .text-blue-700,
+        body.theme-dark .bg-blue-50 .text-blue-600,
+        body.theme-dark .bg-blue-50 .text-blue-500 {
+            color: #93c5fd !important;
+        }
+
+        body.theme-dark .bg-orange-50 .text-orange-800 {
+            color: #fdba74 !important;
+        }
+
+        body.theme-dark .bg-green-50 .text-green-800 {
+            color: #86efac !important;
+        }
+
+        /* Цветные бордеры в тёмной теме */
+        body.theme-dark .border-blue-200 {
+            border-color: #1e40af !important;
+        }
+
+        body.theme-dark .border-orange-200 {
+            border-color: #9a3412 !important;
+        }
+
+        body.theme-dark .border-green-200 {
+            border-color: #166534 !important;
+        }
+
+        body.theme-dark .border-red-200 {
+            border-color: #991b1b !important;
+        }
+
+        /* details/summary элементы в тёмной теме */
+        body.theme-dark details.bg-gray-50,
+        body.theme-dark details > summary:hover {
+            background-color: #0f172a !important;
+        }
+
+        body.theme-dark details.bg-white {
+            background-color: #020617 !important;
+        }
+
+        body.theme-dark summary .bg-orange-100 {
+            background-color: #431407 !important;
+            color: #fdba74 !important;
+        }
+
+        body.theme-dark summary .bg-green-100 {
+            background-color: #052e16 !important;
+            color: #86efac !important;
+        }
+
+        /* Модальные окна */
+        body.theme-dark .bg-black\/50 {
+            background-color: rgba(0, 0, 0, 0.7) !important;
         }

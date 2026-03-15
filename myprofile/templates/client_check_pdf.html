@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Чеки {{ date|date:"d.m.Y" }}</title>
-    <link rel="stylesheet" href="{% static 'styles/pdf-check.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'styles/pdf-check.css' %}?v=3">
 </head>
 
 <body>
@@ -15,28 +15,28 @@
     {% for check in checks %}
     <div class="check-container">
         <div class="check-header">
-            <div class="logo">
-                <span class="logo-red">INTER</span>
-                <span class="logo-black">CARGO</span>
+            <div class="header-left">
+                <div class="logo">
+                    <span>INTER</span>
+                    <span>CARGO</span>
+                </div>
+                <div class="client-name">{{ check.username }}</div>
+                <div class="client-address">{{ check.address }}</div>
+            </div>
+            <div class="header-center">
+                <div class="date-block">
+                    <span class="date-label">Дата</span>
+                    <span class="date-value">{{ date|date:"d.m.Y" }}</span>
+                </div>
             </div>
             {% if check.qr_image %}
-            <div class="qr-section">
-                <div class="qr-item">
+            <div class="header-right">
+                <div class="qr-block">
                     <img src="{{ check.qr_image }}" alt="QR {{ check.qr_number }}">
                     <span class="qr-number">{{ check.qr_number }}</span>
                 </div>
             </div>
             {% endif %}
-        </div>
-
-        <div class="header-row">
-            <span style="color: #718096;">Дата</span>
-            <span>{{ date|date:"d.m.Y" }}</span>
-        </div>
-
-        <div class="client-row">
-            <span>{{ check.username }}</span>
-            <span class="address">{{ check.address }}</span>
         </div>
 
         <table>
@@ -60,11 +60,9 @@
 
         <div class="total-row">
             <span class="total-label">Итого</span>
-            <div class="total-values">
-                <span class="total-count">{{ check.total_count }}</span>
-                <span class="total-weight">{{ check.total_weight|floatformat:3 }}</span>
-                <span class="total-sum">{{ check.total_sum|floatformat:0 }}</span>
-            </div>
+            <span class="total-count">{{ check.total_count }}</span>
+            <span class="total-weight">{{ check.total_weight|floatformat:3 }}</span>
+            <span class="total-sum">{{ check.total_sum|floatformat:0 }}</span>
         </div>
     </div>
     {% endfor %}

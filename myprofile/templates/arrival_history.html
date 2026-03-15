@@ -172,8 +172,8 @@
                                                                             {% for item in rd.items %}
                                                                             <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
                                                                                 <td class="border border-gray-300 px-2 py-1">{{ forloop.counter }}</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 font-mono">{{ item.track_code.track_code }}</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ item.track_code.weight|default:"—" }}</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 font-mono">{{ item.display_track_code }}</td>
+                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ item.display_weight|default:"—" }}</td>
                                                                                 <td class="border border-gray-300 px-2 py-1 text-right">{{ item.price }}</td>
                                                                             </tr>
                                                                             {% endfor %}

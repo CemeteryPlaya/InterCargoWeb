@@ -143,6 +143,94 @@
                 </form>
                 {% endif %}
             </section>
+            <section class="bg-white p-6 rounded-lg shadow border border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">
+                    <i class="ri-notification-3-line text-red-500"></i> Настройки уведомлений
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">Настройки распространяются на Email и Telegram уведомления.</p>
+
+                <form method="post" action="{% url 'save_notification_settings' %}" class="space-y-4">
+                    {% csrf_token %}
+
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
+                            {% if notif_settings.level == 'only_ready' %}border-red-400 bg-red-50{% else %}border-gray-200{% endif %}">
+                            <input type="radio" name="notif_level" value="only_ready"
+                                {% if notif_settings.level == 'only_ready' %}checked{% endif %}
+                                class="accent-red-500" onchange="toggleSelective(this)">
+                            <div>
+                                <span class="font-medium text-gray-800">Только ПВЗ</span>
+                                <p class="text-sm text-gray-500">Уведомления только о доставке на пункт выдачи</p>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
+                            {% if notif_settings.level == 'all' %}border-red-400 bg-red-50{% else %}border-gray-200{% endif %}">
+                            <input type="radio" name="notif_level" value="all"
+                                {% if notif_settings.level == 'all' %}checked{% endif %}
+                                class="accent-red-500" onchange="toggleSelective(this)">
+                            <div>
+                                <span class="font-medium text-gray-800">Все статусы</span>
+                                <p class="text-sm text-gray-500">Уведомления о каждом изменении статуса трек-кода</p>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition
+                            {% if notif_settings.level == 'selective' %}border-red-400 bg-red-50{% else %}border-gray-200{% endif %}">
+                            <input type="radio" name="notif_level" value="selective"
+                                {% if notif_settings.level == 'selective' %}checked{% endif %}
+                                class="accent-red-500" onchange="toggleSelective(this)">
+                            <div>
+                                <span class="font-medium text-gray-800">Выборочно</span>
+                                <p class="text-sm text-gray-500">Выберите, о каких статусах получать уведомления</p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="selective-options" class="ml-6 space-y-2 {% if notif_settings.level != 'selective' %}hidden{% endif %}">
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="notify_shipped_cn" class="accent-red-500"
+                                {% if notif_settings.notify_shipped_cn %}checked{% endif %}>
+                            Отправлено из Китая
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="notify_delivered_sort" class="accent-red-500"
+                                {% if notif_settings.notify_delivered_sort %}checked{% endif %}>
+                            Сортировочный склад
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="notify_shipping_pp" class="accent-red-500"
+                                {% if notif_settings.notify_shipping_pp %}checked{% endif %}>
+                            В доставке до ПВЗ
+                        </label>
+                        <p class="text-xs text-gray-400 mt-1">Уведомление о доставке на ПВЗ приходит всегда.</p>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition">
+                            Сохранить настройки
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <script>
+            function toggleSelective(radio) {
+                const opts = document.getElementById('selective-options');
+                opts.classList.toggle('hidden', radio.value !== 'selective');
+                // Подсветка выбранного
+                document.querySelectorAll('input[name="notif_level"]').forEach(r => {
+                    const label = r.closest('label');
+                    if (r.checked) {
+                        label.classList.add('border-red-400', 'bg-red-50');
+                        label.classList.remove('border-gray-200');
+                    } else {
+                        label.classList.remove('border-red-400', 'bg-red-50');
+                        label.classList.add('border-gray-200');
+                    }
+                });
+            }
+            </script>
             </div>
         </div>
         {% endblock %}

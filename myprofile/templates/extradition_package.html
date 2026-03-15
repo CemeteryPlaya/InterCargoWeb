@@ -107,8 +107,8 @@
                                 {% for ri in receipt.items_list %}
                                 <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
                                     <td class="border border-gray-300 px-3 py-1.5">{{ forloop.counter }}</td>
-                                    <td class="border border-gray-300 px-3 py-1.5 font-mono text-xs">{{ ri.track_code.track_code }}</td>
-                                    <td class="border border-gray-300 px-3 py-1.5 text-right">{{ ri.track_code.weight }}</td>
+                                    <td class="border border-gray-300 px-3 py-1.5 font-mono text-xs">{{ ri.display_track_code }}</td>
+                                    <td class="border border-gray-300 px-3 py-1.5 text-right">{{ ri.display_weight }}</td>
                                     <td class="border border-gray-300 px-3 py-1.5 text-right">{{ ri.computed_price }}</td>
                                 </tr>
                                 {% endfor %}
