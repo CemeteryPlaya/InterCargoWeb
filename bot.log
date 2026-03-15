@@ -208,3 +208,23 @@
 2026-03-15 22:45:47,789 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
 2026-03-15 22:45:48,144 - aiogram.dispatcher - INFO - Start polling
 2026-03-15 22:45:48,243 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-15 22:46:48,281 - tgbot.bot.workers.notifications - INFO - Sent delivery notification (2 tracks) to chat 733256345
+2026-03-15 22:46:48,284 - tgbot.bot.workers.notifications - INFO - Worker sent 1 notifications.
+2026-03-15 22:57:26,943 - aiogram.event - INFO - Update id=61603448 is handled. Duration 164 ms by bot id=8209475252
+2026-03-15 22:57:28,815 - aiogram.event - INFO - Update id=61603449 is handled. Duration 132 ms by bot id=8209475252
+2026-03-15 22:59:12,432 - aiogram.event - INFO - Update id=61603450 is handled. Duration 231 ms by bot id=8209475252
+2026-03-15 22:59:16,831 - aiogram.event - INFO - Update id=61603451 is handled. Duration 354 ms by bot id=8209475252
+2026-03-15 22:59:18,870 - aiogram.event - INFO - Update id=61603452 is handled. Duration 246 ms by bot id=8209475252
+2026-03-15 22:59:19,855 - aiogram.event - INFO - Update id=61603453 is handled. Duration 330 ms by bot id=8209475252
+2026-03-15 22:59:20,498 - aiogram.event - INFO - Update id=61603454 is handled. Duration 316 ms by bot id=8209475252
+2026-03-15 22:59:21,092 - aiogram.event - INFO - Update id=61603455 is handled. Duration 368 ms by bot id=8209475252
+2026-03-15 22:59:21,662 - aiogram.event - INFO - Update id=61603456 is handled. Duration 320 ms by bot id=8209475252
+2026-03-15 22:59:24,562 - aiogram.event - INFO - Update id=61603457 is handled. Duration 251 ms by bot id=8209475252
+2026-03-15 22:59:25,426 - aiogram.event - INFO - Update id=61603458 is handled. Duration 244 ms by bot id=8209475252
+2026-03-15 22:59:25,759 - aiogram.event - INFO - Update id=61603459 is handled. Duration 466 ms by bot id=8209475252
+2026-03-15 22:59:26,562 - aiogram.event - INFO - Update id=61603460 is handled. Duration 237 ms by bot id=8209475252
+2026-03-15 22:59:26,782 - aiogram.event - INFO - Update id=61603461 is handled. Duration 252 ms by bot id=8209475252
+2026-03-15 22:59:30,684 - aiogram.event - INFO - Update id=61603462 is handled. Duration 236 ms by bot id=8209475252
+2026-03-15 22:59:31,206 - aiogram.event - INFO - Update id=61603463 is handled. Duration 236 ms by bot id=8209475252
+2026-03-15 22:59:32,213 - aiogram.event - INFO - Update id=61603464 is handled. Duration 242 ms by bot id=8209475252
+2026-03-15 22:59:32,884 - aiogram.event - INFO - Update id=61603465 is handled. Duration 252 ms by bot id=8209475252
