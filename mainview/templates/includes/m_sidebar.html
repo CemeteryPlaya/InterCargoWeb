@@ -54,7 +54,7 @@
             <i class="ri-mail-send-line"></i> Логи Email
         </a>
         {% endif %}
-        {% if request.user.userprofile.is_staff or request.user.userprofile.is_accountant %}
+        {% if request.user.userprofile.is_staff or request.user.userprofile.is_accountant or request.user.userprofile.is_driver %}
         <a href="{% url 'finance_summary' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-money-dollar-circle-line"></i> Финансовая сводка
         </a>

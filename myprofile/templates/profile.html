@@ -67,6 +67,51 @@
             {% endif %}
         </section>
 
+        <!-- Telegram привязка -->
+        <div class="mt-4">
+            {% if telegram_linked %}
+            <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+                <div class="flex items-center gap-2">
+                    <i class="ri-telegram-line text-blue-500 text-xl"></i>
+                    <span class="text-blue-700 text-sm font-medium">Telegram подключён</span>
+                </div>
+                <button type="button" id="telegram-relink-btn"
+                    class="text-sm text-blue-600 hover:text-blue-800 underline transition"
+                    data-url="{% url 'telegram_relink' %}" data-csrf="{{ csrf_token }}">
+                    Перепривязать
+                </button>
+            </div>
+            {% elif telegram_link_url %}
+            <a href="{{ telegram_link_url }}" target="_blank"
+                class="w-full flex items-center justify-center gap-2 bg-[#2AABEE] text-white px-4 py-3 rounded-lg hover:bg-[#229ED9] transition text-base font-semibold">
+                <i class="ri-telegram-line text-xl"></i> Привязать Telegram
+            </a>
+            {% endif %}
+        </div>
+        <script>
+        (function() {
+            var relinkBtn = document.getElementById('telegram-relink-btn');
+            if (!relinkBtn) return;
+            relinkBtn.addEventListener('click', function() {
+                if (!confirm('Текущая привязка Telegram будет удалена. Продолжить?')) return;
+                fetch(relinkBtn.dataset.url, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': relinkBtn.dataset.csrf }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.link) {
+                        window.open(data.link, '_blank');
+                        location.reload();
+                    } else {
+                        alert(data.error || 'Ошибка');
+                    }
+                })
+                .catch(function() { alert('Ошибка связи'); });
+            });
+        })();
+        </script>
+
         <!-- Track Codes Section -->
         <section id="trackcodes">
             <h2 class="text-xl font-semibold mb-4"><i class="ri-barcode-line text-red-500"></i> Трек-коды</h2>
@@ -80,15 +125,27 @@
             </div>
 
             {% if ready > 0 %}
-            <div class="mt-4">
-                <button type="button" id="quickIssueBtn"
-                    class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-base font-semibold"
-                    data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}" data-label="Получить посылки ({{ ready }})" data-ready-count="{{ ready }}">
-                    <i class="ri-hand-coin-line mr-1"></i> Получить посылки ({{ ready }})
-                </button>
+            <div class="mt-4 space-y-2">
+                {% if ready_pickup_groups|length > 1 %}
+                    {% for group in ready_pickup_groups %}
+                    <button type="button" class="quickIssueBtn w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-base font-semibold"
+                        data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}"
+                        data-label="Получить посылки — {{ group.pickup_point|default:'Не указан' }} ({{ group.count }})"
+                        data-ready-count="{{ group.count }}"
+                        data-pickup-point="{{ group.pickup_point }}">
+                        <i class="ri-hand-coin-line mr-1"></i> Получить посылки — {{ group.pickup_point|default:"Не указан" }} ({{ group.count }})
+                    </button>
+                    {% endfor %}
+                {% else %}
+                    <button type="button" class="quickIssueBtn w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-base font-semibold"
+                        data-url="{% url 'quick_issue' %}" data-csrf="{{ csrf_token }}"
+                        data-label="Получить посылки ({{ ready }})" data-ready-count="{{ ready }}">
+                        <i class="ri-hand-coin-line mr-1"></i> Получить посылки ({{ ready }})
+                    </button>
+                {% endif %}
                 {% if payment_link %}
                 <button type="button" id="pay-btn"
-                    class="w-full mt-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition text-base font-semibold">
+                    class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition text-base font-semibold">
                     <i class="ri-bank-card-line mr-1"></i> Оплатить
                 </button>
                 {% endif %}

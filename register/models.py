@@ -10,6 +10,7 @@ class PickupPoint(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     show_in_registration = models.BooleanField(default=True, verbose_name="Показывать в регистрации/футере")
     is_home_delivery = models.BooleanField(default=False, verbose_name="Доставка на дом")
+    reminder_enabled = models.BooleanField(default=False, verbose_name="Напоминания включены")
 
     class Meta:
         verbose_name = "Пункт выдачи"
@@ -30,6 +31,10 @@ class UserProfile(models.Model):
     is_driver = models.BooleanField(default=False, verbose_name="Водитель")
     is_pp_worker = models.BooleanField(default=False, verbose_name="Работник ПВЗ")
     is_accountant = models.BooleanField(default=False, verbose_name="Бухгалтер")
+    delivery_rate = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0,
+        verbose_name="Цена за 1 кг доставки (₸)"
+    )
     profile_updated_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего изменения профиля")
 
     class Meta:

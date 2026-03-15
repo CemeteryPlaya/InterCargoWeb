@@ -37,7 +37,6 @@
             <!-- Переключатель режима и фильтры -->
             <div class="bg-white border rounded-lg shadow-sm p-4 mb-6">
                 <div class="flex flex-wrap gap-4 items-end">
-                    <!-- Табы: день / месяц -->
                     <div class="flex gap-2">
                         <a href="{% url 'finance_summary' %}?mode=daily&date={{ selected_date|date:'Y-m-d' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
@@ -51,7 +50,6 @@
                         </a>
                     </div>
 
-                    <!-- Выбор даты/месяца -->
                     <form method="get" class="flex flex-wrap gap-3 items-end flex-1">
                         <input type="hidden" name="mode" value="{{ view_mode }}">
                         {% if view_mode == 'daily' %}
@@ -68,7 +66,7 @@
                         </div>
                         {% endif %}
 
-                        <!-- Фильтр по ПВЗ -->
+                        {% if show_accountant %}
                         <div>
                             <label class="block text-xs text-gray-500 mb-1">Пункт выдачи</label>
                             <select name="pickup" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -80,6 +78,7 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        {% endif %}
 
                         <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 text-sm transition">
                             <i class="ri-filter-line mr-1"></i> Показать
@@ -87,6 +86,13 @@
                     </form>
                 </div>
             </div>
+            {% if show_accountant %}
+            <!-- ==================== СВОДКА ДЛЯ БУХГАЛТЕРА/ОПЕРАТОРА ==================== -->
+            {% if show_driver %}
+            <h2 class="text-lg font-bold text-gray-800 mb-4 mt-2">
+                <i class="ri-money-dollar-circle-line text-primary"></i> Финансовая сводка по чекам
+            </h2>
+            {% endif %}
 
             <!-- Итоговые карточки -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -270,6 +276,116 @@
                                 <td class="px-4 py-3 text-right {% if row.unpaid_amount > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
                                     {{ row.unpaid_amount|floatformat:0 }}
                                 </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+            {% endif %}
+            {% if show_driver %}
+            <!-- ==================== БЛОК ДОСТАВЩИКА ==================== -->
+            <h2 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="ri-truck-line text-primary"></i> Оплата за доставку
+            </h2>
+
+            <!-- Итоговые карточки водителя -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Доставок</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_deliveries }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Общий вес</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_weight|floatformat:3 }} <span class="text-sm font-normal text-gray-500">кг</span></div>
+                </div>
+                <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">К выплате</div>
+                    <div class="text-2xl font-bold text-green-600">{{ driver_totals.total_earnings|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
+                    <div class="text-xs text-gray-400">Ставка: {{ delivery_rate|floatformat:0 }} ₸/кг</div>
+                </div>
+            </div>
+
+            <!-- Таблица: Оплата за доставку по Дата-Пункт -->
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h3 class="font-semibold text-gray-700">
+                        <i class="ri-wallet-3-line text-primary mr-1"></i>
+                        Детализация
+                        {% if view_mode == 'daily' %}за {{ selected_date|date:"d.m.Y" }}{% else %}за {{ selected_month }}{% endif %}
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Дата</th>
+                                <th class="px-4 py-3 text-left font-medium">Пункт выдачи</th>
+                                <th class="px-4 py-3 text-right font-medium">Посылок</th>
+                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
+                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for group in driver_groups %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-gray-800 font-medium">{{ group.date|date:"d.m.Y" }}</td>
+                                <td class="px-4 py-3 text-gray-700">{{ group.pickup_point }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ group.total_tracks }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ group.total_weight|floatformat:3 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600 font-medium">{{ group.total_earnings|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">Нет доставок за выбранный период</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% if driver_groups %}
+                        <tfoot>
+                            <tr class="bg-gray-50 border-t-2 border-gray-300 font-bold">
+                                <td class="px-4 py-3 text-gray-800" colspan="2">Итого</td>
+                                <td class="px-4 py-3 text-right text-gray-800">{{ driver_totals.total_tracks }}</td>
+                                <td class="px-4 py-3 text-right text-gray-800">{{ driver_totals.total_weight|floatformat:3 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600">{{ driver_totals.total_earnings|floatformat:0 }}</td>
+                            </tr>
+                        </tfoot>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <!-- Сводная таблица доставок по дням -->
+            {% if driver_daily_summary %}
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h3 class="font-semibold text-gray-700">
+                        <i class="ri-calendar-line text-primary mr-1"></i>
+                        {% if view_mode == 'daily' %}Доставки за последние 30 дней{% else %}Доставки по дням за {{ selected_month }}{% endif %}
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Дата</th>
+                                <th class="px-4 py-3 text-right font-medium">Доставок</th>
+                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
+                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in driver_daily_summary %}
+                            <tr class="hover:bg-gray-50 cursor-pointer"
+                                onclick="window.location='{% url 'finance_summary' %}?mode=daily&date={{ row.day|date:'Y-m-d' }}'">
+                                <td class="px-4 py-3 text-gray-800 font-medium {% if row.day == selected_date %}text-primary{% endif %}">
+                                    {{ row.day|date:"d.m.Y" }}
+                                </td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.deliveries }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ row.weight|floatformat:3 }}</td>
+                                <td class="px-4 py-3 text-right text-green-600 font-medium">{{ row.earnings|floatformat:0 }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

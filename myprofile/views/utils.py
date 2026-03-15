@@ -65,7 +65,7 @@ def get_discount_weight_threshold():
 def _recalc_receipt(receipt, effective_rate):
     """Пересчитывает total_weight и total_price чека по его items."""
     items = receipt.items.select_related('track_code').all()
-    total_weight = sum((item.track_code.weight or Decimal("0")) for item in items)
+    total_weight = sum((item.display_weight or Decimal("0")) for item in items)
     total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
     receipt.total_weight = total_weight
     receipt.total_price = total_price
@@ -113,6 +113,7 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
         by_date[track.delivered_date].append(track)
 
     last_receipt = None
+    created_receipt_ids = []
     for d_date, date_tracks in by_date.items():
         receipt = Receipt.objects.create(
             owner=user, total_weight=0, total_price=0,
@@ -124,6 +125,7 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
             ReceiptItem.objects.create(receipt=receipt, track_code=track)
         _recalc_receipt(receipt, effective_rate)
         last_receipt = receipt
+        created_receipt_ids.append(receipt.id)
 
     return last_receipt
 

@@ -59,19 +59,19 @@
         });
     });
 
-    var btn = document.getElementById('quickIssueBtn');
-    if (btn) {
-        var btnLabel = btn.dataset.label || 'Выдать';
-        var readyCount = btn.dataset.readyCount || '0';
+    var buttons = document.querySelectorAll('.quickIssueBtn');
+    if (buttons.length > 0) {
         var MAX_RETRIES = 3;
-
         var confirmModal = document.getElementById('issue-confirm-modal');
         var confirmBackdrop = document.getElementById('issue-confirm-backdrop');
         var confirmText = document.getElementById('issue-confirm-text');
         var confirmOk = document.getElementById('issue-confirm-ok');
+        var activeBtn = null;
 
-        function doIssue(attempt) {
+        function doIssue(btn, attempt) {
             if (typeof attempt === 'undefined') attempt = 1;
+            var btnLabel = btn.dataset.label || 'Выдать';
+            var pickupPoint = btn.dataset.pickupPoint;
 
             confirmModal.classList.remove('flex');
             confirmModal.classList.add('hidden');
@@ -79,28 +79,31 @@
             btn.disabled = true;
             btn.textContent = attempt > 1 ? 'Повторная попытка (' + attempt + ')...' : 'Создание...';
 
+            var body = '';
+            if (pickupPoint !== undefined && pickupPoint !== '') {
+                body = 'pickup_point=' + encodeURIComponent(pickupPoint);
+            }
+
             fetch(btn.dataset.url, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': btn.dataset.csrf,
                     'Content-Type': 'application/x-www-form-urlencoded'
-                }
+                },
+                body: body
             })
             .then(function(resp) { return resp.json(); })
             .then(function(data) {
                 if (data.success && data.qr_base64) {
-                    // Проверяем что QR-код изображение валидно через Image
                     var testImg = new Image();
                     testImg.onload = function() {
-                        // QR загрузился — открываем модалку
                         btn.disabled = false;
                         btn.innerHTML = '<i class="ri-hand-coin-line"></i> ' + btnLabel;
                         openModal(data.barcode, data.qr_base64);
                     };
                     testImg.onerror = function() {
-                        // QR не загрузился — повторяем
                         if (attempt < MAX_RETRIES) {
-                            setTimeout(function() { doIssue(attempt + 1); }, 500);
+                            setTimeout(function() { doIssue(btn, attempt + 1); }, 500);
                         } else {
                             btn.disabled = false;
                             btn.innerHTML = '<i class="ri-hand-coin-line"></i> ' + btnLabel;
@@ -109,9 +112,8 @@
                     };
                     testImg.src = data.qr_base64;
                 } else if (data.success && !data.qr_base64) {
-                    // Сервер вернул success, но без QR — повторяем
                     if (attempt < MAX_RETRIES) {
-                        setTimeout(function() { doIssue(attempt + 1); }, 500);
+                        setTimeout(function() { doIssue(btn, attempt + 1); }, 500);
                     } else {
                         btn.disabled = false;
                         btn.innerHTML = '<i class="ri-hand-coin-line"></i> ' + btnLabel;
@@ -124,9 +126,8 @@
                 }
             })
             .catch(function() {
-                // Ошибка сети — повторяем
                 if (attempt < MAX_RETRIES) {
-                    setTimeout(function() { doIssue(attempt + 1); }, 1000);
+                    setTimeout(function() { doIssue(btn, attempt + 1); }, 1000);
                 } else {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="ri-hand-coin-line"></i> ' + btnLabel;
@@ -135,13 +136,19 @@
             });
         }
 
-        btn.addEventListener('click', function() {
-            confirmText.textContent = 'Проверяйте количество ваших товаров на пункте выдачи, у вас их ' + readyCount;
-            confirmModal.classList.remove('hidden');
-            confirmModal.classList.add('flex');
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                activeBtn = btn;
+                var readyCount = btn.dataset.readyCount || '0';
+                confirmText.textContent = 'Проверяйте количество ваших товаров на пункте выдачи, у вас их ' + readyCount;
+                confirmModal.classList.remove('hidden');
+                confirmModal.classList.add('flex');
+            });
         });
 
-        confirmOk.addEventListener('click', function() { doIssue(1); });
+        confirmOk.addEventListener('click', function() {
+            if (activeBtn) doIssue(activeBtn, 1);
+        });
         confirmBackdrop.addEventListener('click', function() {
             confirmModal.classList.remove('flex');
             confirmModal.classList.add('hidden');

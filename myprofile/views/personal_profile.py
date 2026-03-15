@@ -1,6 +1,9 @@
+from collections import defaultdict
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from myprofile.models import TrackCode
+from django.conf import settings as django_settings
+from myprofile.models import TrackCode, Receipt, ReceiptItem
 from register.models import UserProfile, PickupPoint
 
 @login_required
@@ -40,6 +43,37 @@ def profile(request):
     if profile and profile.pickup and profile.pickup.payment_link:
         payment_link = profile.pickup.payment_link
 
+    # Группы ПВЗ для кнопок получения посылок
+    ready_pickup_groups = []
+    if ready_count > 0:
+        ready_receipts = (
+            Receipt.objects.filter(owner=user, items__track_code__status='ready')
+            .distinct()
+            .values_list('pickup_point', flat=True)
+        )
+        pp_counts = defaultdict(int)
+        for r in Receipt.objects.filter(owner=user, items__track_code__status='ready').distinct():
+            pp = r.pickup_point or ''
+            pp_counts[pp] += r.items.filter(track_code__status='ready').count()
+        for pp, count in pp_counts.items():
+            ready_pickup_groups.append({'pickup_point': pp, 'count': count})
+
+    # Telegram привязка
+    telegram_linked = False
+    telegram_link_url = None
+    try:
+        from tgbot.models import TelegramProfile, TelegramLinkToken
+        telegram_linked = TelegramProfile.objects.filter(user=user).exists()
+        if not telegram_linked:
+            # Создаём/обновляем токен для deep link
+            TelegramLinkToken.objects.filter(user=user, is_used=False).delete()
+            token = TelegramLinkToken.objects.create(user=user)
+            bot_username = getattr(django_settings, 'TELEGRAM_BOT_USERNAME', '')
+            if bot_username:
+                telegram_link_url = f'https://t.me/{bot_username}?start={token.token}'
+    except Exception:
+        pass
+
     return render(request, 'profile.html', {
         'user': user,
         'profile': profile,
@@ -53,6 +87,9 @@ def profile(request):
         'missing_fields': missing_fields,
         'available_pickups': available_pickups,
         'payment_link': payment_link,
+        'telegram_linked': telegram_linked,
+        'telegram_link_url': telegram_link_url,
+        'ready_pickup_groups': ready_pickup_groups,
     })
 
 @login_required

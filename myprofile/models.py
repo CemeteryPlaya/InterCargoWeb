@@ -209,14 +209,38 @@ class Receipt(models.Model):
 
 class ReceiptItem(models.Model):
     receipt = models.ForeignKey(Receipt, related_name='items', on_delete=models.CASCADE)
-    track_code = models.OneToOneField(TrackCode, on_delete=models.CASCADE)
+    track_code = models.OneToOneField(TrackCode, on_delete=models.SET_NULL, null=True, blank=True)
+    # Сохранённые данные — остаются после архивации трек-кода
+    track_code_str = models.CharField(max_length=100, blank=True, verbose_name="Трек-код (текст)")
+    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
 
     class Meta:
         verbose_name = "Позиция чека"
         verbose_name_plural = "Позиции чеков"
 
+    def save(self, *args, **kwargs):
+        # При первом сохранении копируем данные из track_code
+        if self.track_code and not self.track_code_str:
+            self.track_code_str = self.track_code.track_code
+            self.weight = self.track_code.weight
+        super().save(*args, **kwargs)
+
+    @property
+    def display_track_code(self):
+        """Возвращает текст трек-кода (из связи или сохранённый)."""
+        if self.track_code:
+            return self.track_code.track_code
+        return self.track_code_str
+
+    @property
+    def display_weight(self):
+        """Возвращает вес (из связи или сохранённый)."""
+        if self.track_code:
+            return self.track_code.weight
+        return self.weight
+
     def __str__(self):
-        return str(self.track_code)
+        return self.display_track_code or str(self.id)
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")

@@ -1,0 +1,10 @@
+from django.apps import AppConfig
+
+
+class TgbotConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'tgbot'
+    verbose_name = 'Telegram Бот'
+
+    def ready(self):
+        import tgbot.signals  # noqa: F401

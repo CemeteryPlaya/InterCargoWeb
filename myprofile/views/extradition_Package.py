@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.db import transaction
@@ -36,7 +38,7 @@ def extradition_package_view(request):
             items_list = list(receipt.items.all())
             computed_weight = Decimal("0")
             for item in items_list:
-                weight = item.track_code.weight or Decimal("0")
+                weight = item.display_weight or Decimal("0")
                 item.computed_price = int((weight * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
                 computed_weight += weight
             receipt.items_list = items_list
@@ -86,12 +88,17 @@ def quick_issue(request):
     # Находим чеки, у которых все трек-коды в статусе 'ready'
     user_receipts = Receipt.objects.filter(owner=user).prefetch_related('items__track_code')
 
+    # Опциональный фильтр по ПВЗ
+    filter_pickup = request.POST.get('pickup_point')
+
     ready_receipts = []
     for receipt in user_receipts:
         items = list(receipt.items.all())
         if not items:
             continue
-        if all(item.track_code.status == 'ready' for item in items):
+        if all(item.track_code and item.track_code.status == 'ready' for item in items):
+            if filter_pickup is not None and (receipt.pickup_point or '') != filter_pickup:
+                continue
             ready_receipts.append(receipt)
 
     if not ready_receipts:
@@ -101,53 +108,79 @@ def quick_issue(request):
         with transaction.atomic():
             today = timezone.localdate()
 
-            # Ищем невыданный пакет, созданный сегодня
-            today_package = ExtraditionPackage.objects.filter(
-                user=user,
-                is_issued=False,
+            # Группируем чеки по пункту выдачи (pickup_point)
+            by_pickup = defaultdict(list)
+            for receipt in ready_receipts:
+                pp = receipt.pickup_point or ''
+                by_pickup[pp].append(receipt)
+
+            packages_created = []
+
+            for pickup_key, pickup_receipts in by_pickup.items():
+                # Ищем невыданный пакет за сегодня с тем же набором ПВЗ
+                today_packages = ExtraditionPackage.objects.filter(
+                    user=user,
+                    is_issued=False,
+                    created_at__date=today
+                )
+
+                # Находим пакет, соответствующий этому ПВЗ
+                matched_package = None
+                for tp in today_packages:
+                    existing_pp = set(tp.receipts.values_list('pickup_point', flat=True))
+                    if existing_pp == {pickup_key}:
+                        matched_package = tp
+                        break
+
+                if matched_package:
+                    matched_package.receipts.set(pickup_receipts)
+                    packages_created.append(matched_package)
+                else:
+                    comment = f"Быстрая выдача — {pickup_key}" if pickup_key else "Быстрая выдача"
+                    package = ExtraditionPackage.objects.create(
+                        user=user,
+                        comment=comment,
+                        is_issued=False
+                    )
+                    package.receipts.add(*pickup_receipts)
+                    packages_created.append(package)
+
+                    track_count = sum(r.items.count() for r in pickup_receipts)
+                    Notification.objects.create(
+                        user=user,
+                        message=f"📦 Создан пакет {package.barcode} — ожидает выдачи ({len(pickup_receipts)} чеков, {track_count} треков)."
+                    )
+
+            # Удаляем старые невыданные пакеты (за прошлые дни)
+            ExtraditionPackage.objects.filter(
+                user=user, is_issued=False
+            ).exclude(
                 created_at__date=today
-            ).first()
+            ).delete()
 
-            if today_package:
-                today_package.receipts.set(ready_receipts)
-                package = today_package
-            else:
-                # Удаляем старые невыданные пакеты (за прошлые дни)
-                ExtraditionPackage.objects.filter(user=user, is_issued=False).delete()
+        # Возвращаем данные первого пакета (или всех)
+        total_tracks = sum(r.items.count() for r in ready_receipts)
+        first_pkg = packages_created[0]
 
-                package = ExtraditionPackage.objects.create(
-                    user=user,
-                    comment="Быстрая выдача",
-                    is_issued=False
-                )
-                package.receipts.add(*ready_receipts)
-
-                track_count = sum(r.items.count() for r in ready_receipts)
-                Notification.objects.create(
-                    user=user,
-                    message=f"📦 Создан пакет {package.barcode} — ожидает выдачи ({len(ready_receipts)} чеков, {track_count} треков)."
-                )
-
-        track_count = sum(r.items.count() for r in ready_receipts)
-
-        # PAYMENT COMMENTED OUT: payment link disabled
-        # payment_link = None
-        # all_paid = all(r.is_paid for r in ready_receipts)
-        # if not all_paid:
-        #     try:
-        #         if user.userprofile.pickup and user.userprofile.pickup.payment_link:
-        #             payment_link = user.userprofile.pickup.payment_link
-        #     except UserProfile.DoesNotExist:
-        #         pass
-
-        return JsonResponse({
+        result = {
             'success': True,
-            'barcode': package.barcode,
-            'qr_base64': package.get_qr_base64(),
+            'barcode': first_pkg.barcode,
+            'qr_base64': first_pkg.get_qr_base64(),
             'receipt_count': len(ready_receipts),
-            'track_count': track_count,
-            # PAYMENT COMMENTED OUT: 'payment_link': payment_link,
-        })
+            'track_count': total_tracks,
+        }
+
+        if len(packages_created) > 1:
+            result['packages'] = [
+                {
+                    'barcode': p.barcode,
+                    'qr_base64': p.get_qr_base64(),
+                    'pickup_point': p.comment,
+                }
+                for p in packages_created
+            ]
+
+        return JsonResponse(result)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

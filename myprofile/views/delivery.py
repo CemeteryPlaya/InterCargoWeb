@@ -418,6 +418,8 @@ def complete_delivery(request):
     notif_counts = defaultdict(int)
     # Запоминаем фактический ПВЗ доставки для каждого пользователя
     user_pickup_map = {}  # user -> PickupPoint
+    # Данные треков для Telegram-уведомлений: user_id -> [(track_code, weight)]
+    tg_track_data = defaultdict(list)
 
     for entry in pickup_entries:
         # Парсим "pickup_id:date"
@@ -451,6 +453,9 @@ def complete_delivery(request):
             updated += 1
             if track.owner:
                 notif_counts[track.owner] += 1
+                tg_track_data[track.owner_id].append(
+                    (track.track_code, float(track.weight or 0))
+                )
                 # Запоминаем фактический ПВЗ из трека (delivery_pickup или текущий pickup)
                 if track.owner not in user_pickup_map:
                     user_pickup_map[track.owner] = track.delivery_pickup or pickup
@@ -528,6 +533,20 @@ def complete_delivery(request):
         if failed_list:
             failed_emails = ', '.join(f['recipient'] for f in failed_list)
             logger.warning(f"Не удалось отправить email ({failed_count}): {failed_emails}")
+
+    # Telegram-уведомления о доставке на ПВЗ
+    try:
+        from tgbot.models import TelegramNotification
+        for user_id, track_list in tg_track_data.items():
+            for track_code, weight in track_list:
+                TelegramNotification.objects.create(
+                    user_id=user_id,
+                    title='ready',
+                    message=f'{track_code}|{weight}',
+                    notification_type='tracking',
+                )
+    except Exception as e:
+        logger.error(f"Error creating telegram notifications: {e}")
 
     if updated:
         msg_parts = [f"Доставлено на ПВЗ: {updated} посылок"]
@@ -734,7 +753,7 @@ def get_pickup_receipts(request):
             }
 
         clients_map[username]['receipts'][rn]['track_count'] += 1
-        clients_map[username]['receipts'][rn]['total_weight'] += float(item.track_code.weight or 0)
+        clients_map[username]['receipts'][rn]['total_weight'] += float(item.display_weight or 0)
 
     # Треки без чеков — считаем отдельно по клиентам (зарег. и временные)
     tracks_with_receipts = set(item.track_code_id for item in items)

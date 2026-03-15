@@ -7,3 +7,4 @@ pillow
 python-dotenv
 gunicorn
 qrcode
+aiogram~=3.4.1

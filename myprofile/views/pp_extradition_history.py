@@ -64,8 +64,8 @@ def pp_extradition_history_view(request):
             tracks = []
             for item in receipt.items.all():
                 tracks.append({
-                    'track_code': item.track_code.track_code,
-                    'weight': item.track_code.weight,
+                    'track_code': item.display_track_code,
+                    'weight': item.display_weight,
                 })
             receipts_data.append({
                 'receipt_number': receipt.receipt_number,

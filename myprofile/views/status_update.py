@@ -190,9 +190,8 @@ def search_users(request):
     results = []
     seen = set()
 
-    # Поиск в User (зарегистрированные)
-    users = User.objects.filter(username__icontains=query)[:10]
-    for u in users:
+    # Сначала ищем по началу строки (istartswith) — приоритет
+    for u in User.objects.filter(username__istartswith=query)[:10]:
         if u.username not in seen:
             seen.add(u.username)
             full_name = u.get_full_name()
@@ -202,9 +201,7 @@ def search_users(request):
                 'type': 'user',
             })
 
-    # Поиск в TempUser
-    temp_users = TempUser.objects.filter(login__icontains=query)[:10]
-    for tu in temp_users:
+    for tu in TempUser.objects.filter(login__istartswith=query)[:10]:
         if tu.login not in seen:
             seen.add(tu.login)
             results.append({
@@ -212,6 +209,27 @@ def search_users(request):
                 'label': tu.login,
                 'type': 'temp',
             })
+
+    # Дополняем результатами icontains (если мало совпадений)
+    if len(results) < 10:
+        for u in User.objects.filter(username__icontains=query).exclude(username__istartswith=query)[:10]:
+            if u.username not in seen:
+                seen.add(u.username)
+                full_name = u.get_full_name()
+                results.append({
+                    'login': u.username,
+                    'label': f"{u.username} ({full_name})" if full_name else u.username,
+                    'type': 'user',
+                })
+
+        for tu in TempUser.objects.filter(login__icontains=query).exclude(login__istartswith=query)[:10]:
+            if tu.login not in seen:
+                seen.add(tu.login)
+                results.append({
+                    'login': tu.login,
+                    'label': tu.login,
+                    'type': 'temp',
+                })
 
     return JsonResponse({'results': results[:15]})
 
