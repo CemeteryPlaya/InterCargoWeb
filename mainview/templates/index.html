@@ -41,11 +41,18 @@
                     {% if user.is_authenticated %}
                     <h1 class="text-4xl md:text-5xl font-bold mb-6">Добро пожаловать, {{ user.get_full_name|default:user.username }}!</h1>
                     <p class="text-xl mb-8">Тариф: {{ price_per_kg }}₸/кг</p>
-                    <a href="{% url 'profile' %}"
-                        class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
-                        Личный кабинет
-                        <i class="ri-arrow-right-line ml-2"></i>
-                    </a>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="{% url 'profile' %}"
+                            class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
+                            Личный кабинет
+                            <i class="ri-arrow-right-line ml-2"></i>
+                        </a>
+                        <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()"
+                            class="inline-flex items-center bg-white/20 backdrop-blur text-white px-6 py-3 !rounded-button font-medium hover:bg-white/30 transition w-fit border border-white/30">
+                            <i class="ri-graduation-cap-line mr-2"></i>
+                            Обучение по сайту
+                        </button>
+                    </div>
                     {% else %}
                     <div class="text-primary font-medium mb-2">КАЛЬКУЛЯТОР</div>
                     <h1 class="text-4xl md:text-5xl font-bold mb-6">Узнайте цену доставки груза из Китая в Казахстан
