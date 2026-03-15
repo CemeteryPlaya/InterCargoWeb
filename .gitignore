@@ -40,4 +40,4 @@ PLAN.md
 .env
 tests/
 
-TGBOTINTER
+bot.log
