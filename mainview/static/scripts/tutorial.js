@@ -289,7 +289,8 @@
         tooltip = document.createElement('div');
         tooltip.id = 'tutorial-tooltip';
         tooltip.style.cssText =
-            'position:fixed;z-index:10001;max-width:380px;width:calc(100vw - 32px);' +
+            'position:fixed;z-index:10001;max-width:380px;width:calc(100vw - 16px);' +
+            'box-sizing:border-box;' +
             'background:white;border-radius:12px;padding:20px;' +
             'box-shadow:0 10px 40px rgba(0,0,0,0.3);' +
             'font-size:14px;line-height:1.6;color:#1f2937;' +
@@ -350,6 +351,10 @@
         activeElOrigStyles = null;
     }
 
+    /** Viewport dimensions safe for iOS Safari / Telegram WebView */
+    function vw() { return document.documentElement.clientWidth  || window.innerWidth; }
+    function vh() { return document.documentElement.clientHeight || window.innerHeight; }
+
     function positionTooltip(el, step, stepIndex, totalSteps) {
         var pos = step.position || 'bottom';
         if (isMobile() && step.mobilePosition) pos = step.mobilePosition;
@@ -389,64 +394,132 @@
 
         tooltip.innerHTML = html;
 
-        // Position the tooltip relative to element
-        if (!el || pos === 'center') {
-            tooltip.style.top = '50%';
-            tooltip.style.left = '50%';
-            tooltip.style.transform = 'translate(-50%, -50%)';
-            tooltip.style.right = '';
-            tooltip.style.bottom = '';
-            return;
-        }
-
-        tooltip.style.transform = '';
-        var rect = el.getBoundingClientRect();
-        var pad = 16;
-
-        // Reset
+        // Reset all positioning before measuring
         tooltip.style.top = '';
         tooltip.style.left = '';
         tooltip.style.right = '';
         tooltip.style.bottom = '';
+        tooltip.style.transform = '';
+
+        // Center mode (no target element)
+        if (!el || pos === 'center') {
+            tooltip.style.top = '50%';
+            tooltip.style.left = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+            clampTooltip();
+            return;
+        }
+
+        var rect = el.getBoundingClientRect();
+        var pad = 12;
+        var W = vw();
+        var H = vh();
+        var margin = 8; // minimum distance from any viewport edge
+
+        // Measure tooltip size (needs to be in DOM first — it already is)
+        var tw = tooltip.offsetWidth;
+        var th = tooltip.offsetHeight;
+
+        var top, left;
 
         if (pos === 'bottom') {
-            tooltip.style.top = (rect.bottom + pad) + 'px';
-            tooltip.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - 396)) + 'px';
+            top = rect.bottom + pad;
+            left = rect.left;
         } else if (pos === 'top') {
-            tooltip.style.bottom = (window.innerHeight - rect.top + pad) + 'px';
-            tooltip.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - 396)) + 'px';
+            top = rect.top - pad - th;
+            left = rect.left;
         } else if (pos === 'right') {
-            tooltip.style.top = Math.max(16, rect.top) + 'px';
-            tooltip.style.left = (rect.right + pad) + 'px';
-            // If goes off-screen, fallback to bottom
-            if (rect.right + pad + 380 > window.innerWidth) {
-                tooltip.style.top = (rect.bottom + pad) + 'px';
-                tooltip.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - 396)) + 'px';
+            top = rect.top;
+            left = rect.right + pad;
+            // Fallback to bottom if no room on right
+            if (left + tw > W - margin) {
+                top = rect.bottom + pad;
+                left = rect.left;
+                pos = 'bottom'; // for overflow checks below
             }
         } else if (pos === 'left') {
-            tooltip.style.top = Math.max(16, rect.top) + 'px';
-            tooltip.style.right = (window.innerWidth - rect.left + pad) + 'px';
-            tooltip.style.left = '';
-            if (rect.left - pad - 380 < 0) {
-                tooltip.style.right = '';
-                tooltip.style.top = (rect.bottom + pad) + 'px';
-                tooltip.style.left = '16px';
+            top = rect.top;
+            left = rect.left - pad - tw;
+            // Fallback to bottom if no room on left
+            if (left < margin) {
+                top = rect.bottom + pad;
+                left = rect.left;
+                pos = 'bottom';
             }
         }
 
-        // After render, check if tooltip is off-screen and adjust
+        // If goes below viewport, try placing above the element
+        if (top + th > H - margin) {
+            var aboveTop = rect.top - pad - th;
+            if (aboveTop >= margin) {
+                top = aboveTop;
+            } else {
+                // Neither above nor below fits — pin to bottom of viewport
+                top = H - th - margin;
+            }
+        }
+        // If goes above viewport
+        if (top < margin) {
+            top = margin;
+        }
+
+        // Clamp horizontal: keep fully within viewport
+        if (left + tw > W - margin) {
+            left = W - tw - margin;
+        }
+        if (left < margin) {
+            left = margin;
+        }
+
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+
+        // Extra safety: after paint, re-clamp in case fonts/images shifted layout
+        clampTooltip();
+    }
+
+    /** Final clamp — ensures tooltip never overflows viewport on any browser */
+    function clampTooltip() {
         requestAnimationFrame(function () {
             if (!tooltip) return;
+            var W = vw();
+            var H = vh();
+            var margin = 8;
             var tr = tooltip.getBoundingClientRect();
-            // If tooltip goes below viewport, try placing above
-            if (tr.bottom > window.innerHeight - 10 && pos !== 'top') {
-                tooltip.style.top = '';
-                tooltip.style.bottom = (window.innerHeight - rect.top + pad) + 'px';
-            }
-            // If goes above, place below
-            if (tr.top < 10 && pos !== 'bottom') {
+            var needsFix = (tr.left < margin || tr.right > W - margin ||
+                            tr.top < margin || tr.bottom > H - margin);
+
+            if (!needsFix) return;
+
+            // Drop any transform (e.g. center mode translate) and switch to pixel coords
+            if (tooltip.style.transform) {
+                // Compute current visual position before removing transform
+                var curLeft = tr.left;
+                var curTop = tr.top;
+                tooltip.style.transform = 'none';
+                tooltip.style.left = curLeft + 'px';
+                tooltip.style.top = curTop + 'px';
+                tooltip.style.right = '';
                 tooltip.style.bottom = '';
-                tooltip.style.top = (rect.bottom + pad) + 'px';
+                // Re-measure after transform removal
+                tr = tooltip.getBoundingClientRect();
+            }
+
+            // Clamp horizontal
+            if (tr.right > W - margin) {
+                tooltip.style.left = Math.max(margin, W - tr.width - margin) + 'px';
+            }
+            if (tr.left < margin) {
+                tooltip.style.left = margin + 'px';
+            }
+
+            // Clamp vertical
+            tr = tooltip.getBoundingClientRect();
+            if (tr.bottom > H - margin) {
+                tooltip.style.top = Math.max(margin, H - tr.height - margin) + 'px';
+            }
+            if (tr.top < margin) {
+                tooltip.style.top = margin + 'px';
             }
         });
     }
