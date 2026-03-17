@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction
@@ -250,3 +250,52 @@ def warehouse_not_arrived(request):
 
     messages.success(request, f"Посылки клиента {client.username} ({len(tracks)} шт.) возвращены на сортировочный склад.")
     return redirect('warehouse')
+
+
+@login_required
+@require_POST
+def update_cell_number(request):
+    """AJAX: изменить номер ячейки хранения."""
+    if not _is_warehouse_worker(request.user):
+        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+
+    import json
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Неверный формат данных.'}, status=400)
+
+    cell_id = data.get('cell_id')
+    new_number = data.get('cell_number')
+
+    if not cell_id or new_number is None:
+        return JsonResponse({'error': 'Не указаны параметры.'}, status=400)
+
+    try:
+        new_number = int(new_number)
+        if new_number < 1:
+            raise ValueError
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Номер ячейки должен быть положительным числом.'}, status=400)
+
+    try:
+        cell = StorageCell.objects.select_related('pickup_point').get(id=cell_id)
+    except StorageCell.DoesNotExist:
+        return JsonResponse({'error': 'Ячейка не найдена.'}, status=404)
+
+    if cell.cell_number == new_number:
+        return JsonResponse({'ok': True, 'cell_number': new_number})
+
+    # Проверяем: не занят ли этот номер другим клиентом на том же ПВЗ
+    conflict = StorageCell.objects.filter(
+        pickup_point=cell.pickup_point, cell_number=new_number,
+    ).exclude(id=cell.id).first()
+
+    if conflict:
+        return JsonResponse({
+            'error': f'Номер ячейки {new_number} уже занят клиентом {conflict.user.username}.',
+        }, status=409)
+
+    cell.cell_number = new_number
+    cell.save(update_fields=['cell_number'])
+    return JsonResponse({'ok': True, 'cell_number': new_number})

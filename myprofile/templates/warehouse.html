@@ -89,8 +89,11 @@
                         <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
                              onclick="toggleCell({{ item.cell.cell_number }})">
                             <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
-                                    <span class="text-primary font-bold text-xl">{{ item.cell.cell_number }}</span>
+                                <div class="w-14 h-14 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center cursor-pointer group relative"
+                                     onclick="event.stopPropagation(); editCellNumber({{ item.cell.id }}, {{ item.cell.cell_number }}, this)"
+                                     title="Нажмите чтобы изменить номер ячейки">
+                                    <span class="text-primary font-bold text-xl" id="cell-num-{{ item.cell.id }}">{{ item.cell.cell_number }}</span>
+                                    <i class="ri-pencil-line absolute -top-1 -right-1 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition"></i>
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-900">{{ item.cell.user.username }}</div>
