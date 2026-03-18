@@ -169,6 +169,15 @@ def warehouse_issue_to_client(request):
             items__track_code_id__in=track_ids
         ).distinct()
 
+        # Отмечаем чеки как оплаченные и выданные
+        now = timezone.now()
+        receipts.update(
+            is_paid=True,
+            paid_at=now,
+            is_claimed=True,
+            claimed_at=now,
+        )
+
         # Создаём пакет выдачи
         package = ExtraditionPackage.objects.create(user=client, is_issued=True)
         package.receipts.set(receipts)

@@ -615,6 +615,7 @@ def driver_issue(request):
         return redirect('delivery')
 
     today = timezone.localdate()
+    now = timezone.now()
 
     with transaction.atomic():
         if client_user:
@@ -626,7 +627,14 @@ def driver_issue(request):
             receipts = Receipt.objects.filter(
                 items__track_code_id__in=track_ids
             ).distinct()
-            # PAYMENT COMMENTED OUT: receipts.update(is_paid=True)
+
+            # Отмечаем чеки как оплаченные и выданные
+            receipts.update(
+                is_paid=True,
+                paid_at=now,
+                is_claimed=True,
+                claimed_at=now,
+            )
 
             # Создаём пакет выдачи
             package = ExtraditionPackage.objects.create(user=client_user)
@@ -657,7 +665,14 @@ def driver_issue(request):
             receipts = Receipt.objects.filter(
                 items__track_code_id__in=track_ids
             ).distinct()
-            # PAYMENT COMMENTED OUT: receipts.update(is_paid=True)
+
+            # Отмечаем чеки как оплаченные и выданные
+            receipts.update(
+                is_paid=True,
+                paid_at=now,
+                is_claimed=True,
+                claimed_at=now,
+            )
 
         # Меняем статус треков на claimed
         for track in tracks:

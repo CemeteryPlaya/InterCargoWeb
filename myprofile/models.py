@@ -176,6 +176,8 @@ class Receipt(models.Model):
     created_at = models.DateField(default=timezone.now, verbose_name="Дата создания")
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
+    is_claimed = models.BooleanField(default=False, verbose_name="Выдано клиенту")
+    claimed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время выдачи")
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
     total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
     price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")

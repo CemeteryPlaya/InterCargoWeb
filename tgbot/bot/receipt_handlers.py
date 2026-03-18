@@ -24,7 +24,7 @@ async def show_my_receipts(message: Message):
     receipts = await _get_user_receipts(profile.user_id)
 
     if not receipts:
-        await message.answer("✅ У вас нет активных чеков.")
+        await message.answer("✅ У вас нет невыданных чеков.")
         return
 
     site_url = getattr(django_settings, 'TELEGRAM_SITE_URL', '')
@@ -75,7 +75,7 @@ def _get_user_receipts(user_id):
 
     receipts = (
         Receipt.objects
-        .filter(owner_id=user_id)
+        .filter(owner_id=user_id, is_claimed=False)
         .prefetch_related('items__track_code')
         .order_by('-created_at')[:10]
     )
