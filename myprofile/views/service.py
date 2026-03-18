@@ -267,6 +267,51 @@ def service_normalize_receipts(request):
     return redirect('service')
 
 
+@login_required
+@require_POST
+def service_mark_claimed(request):
+    """
+    Отметить чеки как «Выдано клиенту»:
+    Находит все трек-коды со статусом 'claimed' (Выдано клиенту),
+    и отмечает связанные чеки как is_claimed=True и is_paid=True.
+    """
+    if not _can_access_service(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    now = timezone.now()
+
+    # Все трек-коды со статусом 'claimed'
+    claimed_track_ids = list(
+        TrackCode.objects.filter(status='claimed').values_list('id', flat=True)
+    )
+
+    if not claimed_track_ids:
+        messages.info(request, "Нет трек-кодов со статусом «Выдано клиенту».")
+        return redirect('service')
+
+    # Находим чеки, содержащие эти треки и ещё не отмеченные
+    receipts_to_update = Receipt.objects.filter(
+        items__track_code_id__in=claimed_track_ids,
+        is_claimed=False,
+    ).distinct()
+
+    count = receipts_to_update.count()
+
+    if count == 0:
+        messages.info(request, "Все чеки уже отмечены как «Выдано клиенту».")
+        return redirect('service')
+
+    receipts_to_update.update(
+        is_claimed=True,
+        claimed_at=now,
+        is_paid=True,
+        paid_at=now,
+    )
+
+    messages.success(request, f"Отмечено как «Выдано клиенту»: {count} чеков.")
+    return redirect('service')
+
+
 def _split_foreign_items(receipt, foreign_items, owner_key, RATE):
     """Выносит items за другие даты из чека в новый чек."""
     owner_type, owner_id = owner_key

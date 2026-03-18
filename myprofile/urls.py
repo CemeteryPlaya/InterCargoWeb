@@ -90,6 +90,7 @@ urlpatterns = [
     path('service/generate-packages/', service.service_generate_packages, name='service_generate_packages'),
     path('service/generate-receipts/', service.service_generate_receipts, name='service_generate_receipts'),
     path('service/normalize-receipts/', service.service_normalize_receipts, name='service_normalize_receipts'),
+    path('service/mark-claimed/', service.service_mark_claimed, name='service_mark_claimed'),
 
 ]
 
