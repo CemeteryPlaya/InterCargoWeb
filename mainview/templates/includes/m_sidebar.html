@@ -32,6 +32,9 @@
         {% endif %}
         {% if request.user.userprofile.is_staff %}
         <!-- Только для операторов -->
+        <a href="{% url 'attention_required' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-alarm-warning-line"></i> Требует внимания
+        </a>
         <a href="{% url 'shipped_cn' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-flight-takeoff-line"></i> Отправлено из Китая
         </a>

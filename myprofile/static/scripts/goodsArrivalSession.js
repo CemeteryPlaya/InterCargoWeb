@@ -22,15 +22,104 @@ document.addEventListener('DOMContentLoaded', function () {
     var isSaving = false;
     var rowNum = 0;
 
+    // ==================== Состояние соединения ====================
+    var connectionState = {
+        failCount: 0,
+        isLost: false,
+        retryTimer: null,
+        retryInterval: 5000,  // начальный интервал повтора (мс)
+        maxRetryInterval: 60000,
+        countdownTimer: null
+    };
+
+    var lostBanner = document.getElementById('connection-lost-banner');
+    var restoredBanner = document.getElementById('connection-restored-banner');
+    var reconnectBtn = document.getElementById('reconnect-btn');
+    var reconnectCountdown = document.getElementById('reconnect-countdown');
+
+    function showConnectionLost() {
+        if (connectionState.isLost) return;
+        connectionState.isLost = true;
+        lostBanner.classList.remove('hidden');
+        restoredBanner.classList.add('hidden');
+        scheduleAutoRetry();
+    }
+
+    function showConnectionRestored() {
+        if (!connectionState.isLost) return;
+        connectionState.isLost = false;
+        connectionState.failCount = 0;
+        connectionState.retryInterval = 5000;
+        clearAutoRetry();
+        lostBanner.classList.add('hidden');
+        restoredBanner.classList.remove('hidden');
+        setTimeout(function () {
+            restoredBanner.classList.add('hidden');
+        }, 5000);
+    }
+
+    function scheduleAutoRetry() {
+        clearAutoRetry();
+        var seconds = Math.round(connectionState.retryInterval / 1000);
+        var remaining = seconds;
+        reconnectCountdown.classList.remove('hidden');
+        reconnectCountdown.textContent = 'Повтор через ' + remaining + ' сек.';
+
+        connectionState.countdownTimer = setInterval(function () {
+            remaining--;
+            if (remaining > 0) {
+                reconnectCountdown.textContent = 'Повтор через ' + remaining + ' сек.';
+            } else {
+                reconnectCountdown.textContent = '';
+            }
+        }, 1000);
+
+        connectionState.retryTimer = setTimeout(function () {
+            reconnectCountdown.classList.add('hidden');
+            clearInterval(connectionState.countdownTimer);
+            doSave();
+        }, connectionState.retryInterval);
+
+        // Экспоненциальный backoff
+        connectionState.retryInterval = Math.min(
+            connectionState.retryInterval * 2,
+            connectionState.maxRetryInterval
+        );
+    }
+
+    function clearAutoRetry() {
+        if (connectionState.retryTimer) {
+            clearTimeout(connectionState.retryTimer);
+            connectionState.retryTimer = null;
+        }
+        if (connectionState.countdownTimer) {
+            clearInterval(connectionState.countdownTimer);
+            connectionState.countdownTimer = null;
+        }
+        reconnectCountdown.classList.add('hidden');
+    }
+
+    // Глобальная функция для кнопки «Переподключиться»
+    window.manualReconnect = function () {
+        clearAutoRetry();
+        reconnectBtn.disabled = true;
+        reconnectBtn.innerHTML = '<i class="ri-loader-4-line mr-1 animate-spin"></i> Подключение...';
+        doSave(function () {
+            reconnectBtn.disabled = false;
+            reconnectBtn.innerHTML = '<i class="ri-refresh-line mr-1"></i> Переподключиться';
+        });
+    };
+
     // ==================== Автосохранение ====================
     function scheduleSave() {
         if (saveTimer) clearTimeout(saveTimer);
         saveTimer = setTimeout(doSave, 2000);
     }
 
-    function doSave() {
+    function doSave(callback) {
         if (isSaving) {
             scheduleSave();
+            if (callback) callback();
             return;
         }
         isSaving = true;
@@ -47,22 +136,31 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({ items: items })
         })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
         .then(function (data) {
             if (data.success) {
                 saveStatus.textContent = 'Сохранено (' + data.count + ' строк)';
                 saveStatus.className = 'text-sm text-green-600';
+                connectionState.failCount = 0;
+                if (connectionState.isLost) showConnectionRestored();
             } else {
-                saveStatus.textContent = 'Ошибка сохранения';
-                saveStatus.className = 'text-sm text-red-600';
+                throw new Error('save failed');
             }
         })
         .catch(function () {
+            connectionState.failCount++;
             saveStatus.textContent = 'Ошибка связи';
             saveStatus.className = 'text-sm text-red-600';
+            if (connectionState.failCount >= 2) {
+                showConnectionLost();
+            }
         })
         .finally(function () {
             isSaving = false;
+            if (callback) callback();
         });
     }
 

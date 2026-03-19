@@ -1,16 +1,19 @@
+from collections import defaultdict
+from datetime import date as _date_cls
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db.models import Count, Q, F
+from django.db.models import Q
 from django.utils import timezone
 import json
 import logging
-from myprofile.models import TrackCode, ReceiptItem, StorageCell
+from myprofile.models import TrackCode, ReceiptItem, StorageCell, Receipt
 # RECEIPTS COMMENTED OUT: auto-creation disabled
 # from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
-from myprofile.views.utils import get_or_create_storage_cell
+from myprofile.views.utils import get_or_create_storage_cell, get_or_create_storage_cell_for_temp_user
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
@@ -47,37 +50,66 @@ def pp_acceptance_view(request):
     except UserProfile.DoesNotExist:
         pass
 
-    base_qs = (
-        PickupPoint.objects
-        .filter(is_active=True, is_home_delivery=False)
-        .annotate(
-            _normal_count=Count(
-                'userprofile__user__trackcode',
-                filter=Q(
-                    userprofile__user__trackcode__status='ready',
-                    userprofile__user__trackcode__pp_sorted=False,
-                    userprofile__user__trackcode__delivery_pickup__isnull=True,
-                ),
-            ),
-            _override_count=Count(
-                'delivery_tracks',
-                filter=Q(
-                    delivery_tracks__status='ready',
-                    delivery_tracks__pp_sorted=False,
-                ),
-            ),
-        )
-        .annotate(track_count=F('_normal_count') + F('_override_count'))
-        .filter(track_count__gt=0)
-        .order_by('id')
+    # Находим все неотсортированные ready-треки
+    tracks_qs = TrackCode.objects.filter(
+        status='ready', pp_sorted=False,
+    ).select_related(
+        'owner', 'owner__userprofile__pickup',
+        'temp_owner', 'temp_owner__pickup',
+        'delivery_pickup',
     )
 
+    # Группируем по (ПВЗ, дата прихода)
+    groups = {}  # (pickup_id, delivered_date) -> {pickup, date, track_count, client_ids}
+
+    def _add_track(pickup_obj, track):
+        if not pickup_obj or pickup_obj.is_home_delivery:
+            return
+        key = (pickup_obj.id, track.delivered_date)
+        if key not in groups:
+            groups[key] = {
+                'pickup': pickup_obj,
+                'delivered_date': track.delivered_date,
+                'track_count': 0,
+                'client_ids': set(),
+            }
+        groups[key]['track_count'] += 1
+        if track.owner_id:
+            groups[key]['client_ids'].add(f'user_{track.owner_id}')
+        elif track.temp_owner_id:
+            groups[key]['client_ids'].add(f'temp_{track.temp_owner_id}')
+
+    for track in tracks_qs:
+        if track.delivery_pickup_id:
+            _add_track(track.delivery_pickup, track)
+        elif track.owner:
+            try:
+                _add_track(track.owner.userprofile.pickup, track)
+            except (UserProfile.DoesNotExist, AttributeError):
+                pass
+        elif track.temp_owner:
+            _add_track(track.temp_owner.pickup, track)
+
+    # Фильтр по ПВЗ работника
     if not is_staff and pickup:
-        pending_pickups = base_qs.filter(id=pickup.id)
-    elif is_staff:
-        pending_pickups = base_qs
-    else:
-        pending_pickups = PickupPoint.objects.none()
+        groups = {k: v for k, v in groups.items() if k[0] == pickup.id}
+    elif not is_staff:
+        groups = {}
+
+    # Преобразуем в список
+    _min_date = _date_cls.min
+    pending_pickups = sorted(
+        [
+            {
+                'pickup': g['pickup'],
+                'delivered_date': g['delivered_date'],
+                'track_count': g['track_count'],
+                'client_count': len(g['client_ids']),
+            }
+            for g in groups.values()
+        ],
+        key=lambda x: (x['pickup'].id, x['delivered_date'] or _min_date),
+    )
 
     return render(request, "pp_acceptance.html", {
         'pending_pickups': pending_pickups,
@@ -92,6 +124,7 @@ def get_acceptance_receipts(request):
         return JsonResponse({'error': 'Нет доступа'}, status=403)
 
     pickup_id = request.GET.get('pickup_id')
+    delivered_date_str = request.GET.get('delivered_date', '')
     if not pickup_id:
         return JsonResponse({'clients': []})
 
@@ -100,13 +133,25 @@ def get_acceptance_receipts(request):
     except PickupPoint.DoesNotExist:
         return JsonResponse({'clients': []})
 
-    tracks = list(TrackCode.objects.filter(
+    from datetime import datetime as _dt
+    filter_date = None
+    if delivered_date_str:
+        try:
+            filter_date = _dt.strptime(delivered_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    tracks_qs = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
         pp_sorted=False,
-    ).select_related('owner', 'temp_owner'))
+    )
+    if filter_date is not None:
+        tracks_qs = tracks_qs.filter(delivered_date=filter_date)
+
+    tracks = list(tracks_qs.select_related('owner', 'temp_owner'))
 
     # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
 
@@ -119,8 +164,9 @@ def get_acceptance_receipts(request):
     )
 
     # Получаем ячейки хранения для клиентов на этом ПВЗ
-    cells = StorageCell.objects.filter(pickup_point=pickup).select_related('user')
-    cells_map = {cell.user_id: cell.cell_number for cell in cells}
+    cells = StorageCell.objects.filter(pickup_point=pickup).select_related('user', 'temp_user')
+    cells_by_user = {cell.user_id: cell.cell_number for cell in cells if cell.user_id}
+    cells_by_temp = {cell.temp_user_id: cell.cell_number for cell in cells if cell.temp_user_id}
 
     clients_map = {}
     for item in items:
@@ -128,11 +174,11 @@ def get_acceptance_receipts(request):
         if receipt.owner:
             username = receipt.owner.username
             full_name = receipt.owner.get_full_name() or username
-            cell_number = cells_map.get(receipt.owner_id)
+            cell_number = cells_by_user.get(receipt.owner_id)
         elif receipt.temp_owner:
             username = receipt.temp_owner.login
             full_name = receipt.temp_owner.login
-            cell_number = None
+            cell_number = cells_by_temp.get(receipt.temp_owner_id)
         else:
             continue
 
@@ -163,11 +209,11 @@ def get_acceptance_receipts(request):
         if track.owner:
             username = track.owner.username
             full_name = track.owner.get_full_name() or username
-            cell_number = cells_map.get(track.owner_id)
+            cell_number = cells_by_user.get(track.owner_id)
         elif track.temp_owner_id:
             username = track.temp_owner.login
             full_name = track.temp_owner.login
-            cell_number = None
+            cell_number = cells_by_temp.get(track.temp_owner_id)
         else:
             continue
         if username not in clients_map:
@@ -211,6 +257,7 @@ def accept_delivery(request):
         return HttpResponseForbidden("У вас нет доступа.")
 
     pickup_id = request.POST.get('pickup_id')
+    delivered_date_str = request.POST.get('delivered_date', '')
     scanned_raw = request.POST.get('scanned_receipts', '[]')
     try:
         scanned_receipts = json.loads(scanned_raw) if scanned_raw else []
@@ -227,6 +274,14 @@ def accept_delivery(request):
         messages.error(request, "Пункт выдачи не найден.")
         return redirect('pp_acceptance')
 
+    from datetime import datetime as _dt
+    filter_date = None
+    if delivered_date_str:
+        try:
+            filter_date = _dt.strptime(delivered_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
     all_tracks = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
@@ -234,6 +289,8 @@ def accept_delivery(request):
         status='ready',
         pp_sorted=False,
     )
+    if filter_date is not None:
+        all_tracks = all_tracks.filter(delivered_date=filter_date)
 
     if scanned_receipts:
         scanned_track_ids = set(
@@ -255,6 +312,7 @@ def accept_delivery(request):
             owners_seen.add(track.owner_id)
 
     # Создание/получение ячеек хранения
+    temp_owners_seen = set()
     for track in tracks:
         if track.owner:
             try:
@@ -263,6 +321,11 @@ def accept_delivery(request):
                     get_or_create_storage_cell(user_pickup, track.owner)
             except UserProfile.DoesNotExist:
                 pass
+        elif track.temp_owner and track.temp_owner_id not in temp_owners_seen:
+            temp_owners_seen.add(track.temp_owner_id)
+            temp_pickup = track.temp_owner.pickup
+            if temp_pickup:
+                get_or_create_storage_cell_for_temp_user(temp_pickup, track.temp_owner)
 
     updated = len(tracks)
     if updated:
@@ -271,3 +334,179 @@ def accept_delivery(request):
         messages.info(request, "Нет посылок для сортировки.")
 
     return redirect('pp_acceptance')
+
+
+@login_required
+@require_POST
+def finish_acceptance_session(request):
+    """
+    Завершение сессии приёмки: все неотсортированные ready-треки данного ПВЗ
+    возвращаются в статус 'delivered' (Доставлено на сортировочный склад).
+    """
+    if not _can_accept(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    pickup_id = request.POST.get('pickup_id')
+    delivered_date_str = request.POST.get('delivered_date', '')
+
+    if not pickup_id:
+        messages.error(request, "Не указан пункт выдачи.")
+        return redirect('pp_acceptance')
+
+    try:
+        pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
+    except PickupPoint.DoesNotExist:
+        messages.error(request, "Пункт выдачи не найден.")
+        return redirect('pp_acceptance')
+
+    from datetime import datetime as _dt
+    filter_date = None
+    if delivered_date_str:
+        try:
+            filter_date = _dt.strptime(delivered_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    unsorted_tracks = TrackCode.objects.filter(
+        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(delivery_pickup=pickup),
+        status='ready',
+        pp_sorted=False,
+    )
+    if filter_date is not None:
+        unsorted_tracks = unsorted_tracks.filter(delivered_date=filter_date)
+
+    today = timezone.localdate()
+    count = 0
+    returned_track_ids = []
+    for track in unsorted_tracks:
+        track.status = 'delivered'
+        track.update_date = today
+        track.save(skip_full_clean=True)
+        returned_track_ids.append(track.id)
+        count += 1
+
+    # Помечаем связанные чеки как "Требует внимания"
+    if returned_track_ids:
+        Receipt.objects.filter(
+            items__track_code_id__in=returned_track_ids
+        ).distinct().update(
+            needs_attention=True,
+            attention_reason='Не принято при приёмке на ПВЗ',
+        )
+
+    if count:
+        messages.warning(
+            request,
+            f"Сессия приёмки завершена. {count} неотсортированных посылок возвращены на сортировочный склад."
+        )
+    else:
+        messages.success(request, "Сессия приёмки завершена. Все посылки отсортированы.")
+
+    return redirect('pp_acceptance')
+
+
+@login_required
+def attention_required_view(request):
+    """
+    Требует внимания: показывает чеки с флагом needs_attention=True.
+    Источники: возврат со склада ПВЗ, непринятые при приёмке, непринятые водителем.
+    """
+    try:
+        is_staff_user = request.user.userprofile.is_staff or request.user.is_superuser
+    except UserProfile.DoesNotExist:
+        is_staff_user = request.user.is_superuser
+
+    if not is_staff_user:
+        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+
+    # Чеки, требующие внимания
+    receipts = Receipt.objects.filter(
+        needs_attention=True,
+    ).select_related('owner', 'temp_owner').prefetch_related('items__track_code')
+
+    # Группируем по причине → клиент
+    reasons = defaultdict(lambda: defaultdict(lambda: {
+        'name': '', 'owner_id': None, 'owner_type': None,
+        'receipts': [], 'track_count': 0, 'total_weight': 0.0,
+    }))
+
+    for receipt in receipts:
+        reason = receipt.attention_reason or 'Не указана'
+        if receipt.owner:
+            client_key = f'user_{receipt.owner.id}'
+            client_name = receipt.owner.get_full_name() or receipt.owner.username
+            owner_type = 'user'
+            owner_id = receipt.owner.id
+        elif receipt.temp_owner:
+            client_key = f'temp_{receipt.temp_owner.id}'
+            client_name = receipt.temp_owner.login
+            owner_type = 'temp'
+            owner_id = receipt.temp_owner.id
+        else:
+            continue
+
+        client = reasons[reason][client_key]
+        client['name'] = client_name
+        client['owner_id'] = owner_id
+        client['owner_type'] = owner_type
+        client['receipts'].append(receipt)
+
+        for item in receipt.items.all():
+            client['track_count'] += 1
+            w = item.display_weight if hasattr(item, 'display_weight') else (item.weight or 0)
+            client['total_weight'] += float(w or 0)
+
+    attention_data = []
+    for reason, clients in reasons.items():
+        clients_list = sorted(clients.values(), key=lambda c: c['name'])
+        attention_data.append({
+            'reason': reason,
+            'clients': clients_list,
+            'total_tracks': sum(c['track_count'] for c in clients_list),
+        })
+
+    attention_data.sort(key=lambda x: x['reason'])
+
+    return render(request, "attention_required.html", {
+        'attention_data': attention_data,
+    })
+
+
+@login_required
+@require_POST
+def resolve_attention(request):
+    """Проблемы устранены: снимает флаг needs_attention с чеков клиента."""
+    try:
+        is_staff_user = request.user.userprofile.is_staff or request.user.is_superuser
+    except UserProfile.DoesNotExist:
+        is_staff_user = request.user.is_superuser
+
+    if not is_staff_user:
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    owner_type = request.POST.get('owner_type')
+    owner_id = request.POST.get('owner_id')
+    reason = request.POST.get('reason', '')
+
+    if not owner_type or not owner_id:
+        messages.error(request, "Не указан клиент.")
+        return redirect('attention_required')
+
+    qs = Receipt.objects.filter(needs_attention=True)
+    if reason:
+        qs = qs.filter(attention_reason=reason)
+
+    if owner_type == 'user':
+        qs = qs.filter(owner_id=owner_id)
+    elif owner_type == 'temp':
+        qs = qs.filter(temp_owner_id=owner_id)
+    else:
+        messages.error(request, "Неверный тип клиента.")
+        return redirect('attention_required')
+
+    count = qs.update(needs_attention=False, attention_reason='')
+
+    messages.success(request, f"Проблемы устранены: {count} чеков обновлено.")
+    return redirect('attention_required')

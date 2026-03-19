@@ -180,18 +180,36 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
     return last_receipt
 
 
+def _next_cell_number(pickup_point):
+    """Возвращает следующий целый номер ячейки для ПВЗ."""
+    existing = StorageCell.objects.filter(pickup_point=pickup_point).values_list('cell_number', flat=True)
+    max_int = 0
+    for cn in existing:
+        try:
+            val = int(cn.split('.')[0])
+            if val > max_int:
+                max_int = val
+        except (ValueError, AttributeError):
+            pass
+    return str(max_int + 1)
+
+
 def get_or_create_storage_cell(pickup_point, user):
-    """Возвращает/создаёт ячейку для клиента на данном ПВЗ."""
+    """Возвращает/создаёт ячейку для зарегистрированного клиента на данном ПВЗ."""
     cell = StorageCell.objects.filter(pickup_point=pickup_point, user=user).first()
     if cell:
         return cell
-
-    # Последовательная нумерация: следующий номер = max + 1
-    from django.db.models import Max
-    max_number = StorageCell.objects.filter(pickup_point=pickup_point).aggregate(Max('cell_number'))['cell_number__max']
-    number = (max_number or 0) + 1
-
+    number = _next_cell_number(pickup_point)
     return StorageCell.objects.create(pickup_point=pickup_point, cell_number=number, user=user)
+
+
+def get_or_create_storage_cell_for_temp_user(pickup_point, temp_user):
+    """Возвращает/создаёт ячейку для временного клиента на данном ПВЗ."""
+    cell = StorageCell.objects.filter(pickup_point=pickup_point, temp_user=temp_user).first()
+    if cell:
+        return cell
+    number = _next_cell_number(pickup_point)
+    return StorageCell.objects.create(pickup_point=pickup_point, cell_number=number, temp_user=temp_user)
 
 
 def is_staff(user):

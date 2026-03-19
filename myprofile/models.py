@@ -178,6 +178,8 @@ class Receipt(models.Model):
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
     is_claimed = models.BooleanField(default=False, verbose_name="Выдано клиенту")
     claimed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время выдачи")
+    needs_attention = models.BooleanField(default=False, verbose_name="Требует внимания")
+    attention_reason = models.CharField(max_length=100, blank=True, default='', verbose_name="Причина внимания")
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
     total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
     price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")
@@ -444,22 +446,51 @@ class StorageCell(models.Model):
         related_name='storage_cells',
         verbose_name="Пункт выдачи"
     )
-    cell_number = models.PositiveIntegerField(verbose_name="Номер ячейки")
+    cell_number = models.CharField(max_length=10, verbose_name="Номер ячейки")
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        null=True, blank=True,
         related_name='storage_cells',
         verbose_name="Клиент"
+    )
+    temp_user = models.ForeignKey(
+        'register.TempUser',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='storage_cells',
+        verbose_name="Временный клиент"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = [('pickup_point', 'cell_number'), ('pickup_point', 'user')]
+        unique_together = [('pickup_point', 'cell_number')]
         verbose_name = "Ячейка хранения"
         verbose_name_plural = "Ячейки хранения"
 
+    @property
+    def display_number(self):
+        """Возвращает отображаемый номер ячейки ('0' → 'Пол')."""
+        return 'Пол' if self.cell_number == '0' else self.cell_number
+
+    @property
+    def client_name(self):
+        """Возвращает отображаемое имя клиента."""
+        if self.user:
+            return self.user.username
+        if self.temp_user:
+            return self.temp_user.login
+        return '—'
+
+    @property
+    def client_full_name(self):
+        """Возвращает полное имя клиента (если есть)."""
+        if self.user:
+            return self.user.get_full_name() or ''
+        return ''
+
     def __str__(self):
-        return f"Ячейка #{self.cell_number} — {self.user.username} ({self.pickup_point})"
+        return f"Ячейка #{self.display_number} — {self.client_name} ({self.pickup_point})"
 
 
 class DeliveryHistory(models.Model):

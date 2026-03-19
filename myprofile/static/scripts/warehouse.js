@@ -1,6 +1,6 @@
-function toggleCell(cellNumber) {
-    var content = document.getElementById('cell-' + cellNumber);
-    var arrow = document.getElementById('arrow-' + cellNumber);
+function toggleCell(cellId) {
+    var content = document.getElementById('cell-' + cellId);
+    var arrow = document.getElementById('arrow-' + cellId);
     if (content.classList.contains('hidden')) {
         content.classList.remove('hidden');
         arrow.style.transform = 'rotate(180deg)';
@@ -10,13 +10,17 @@ function toggleCell(cellNumber) {
     }
 }
 
+function cellDisplayNumber(num) {
+    return num === '0' ? 'Пол' : num;
+}
+
 function editCellNumber(cellId, currentNumber, el) {
-    var newNumber = prompt('Введите новый номер ячейки:', currentNumber);
+    var newNumber = prompt('Введите новый номер ячейки (например: 1, 2.1, 0 для «Пол»):', currentNumber);
     if (newNumber === null) return;
 
-    newNumber = parseInt(newNumber, 10);
-    if (isNaN(newNumber) || newNumber < 1) {
-        alert('Номер ячейки должен быть положительным числом.');
+    newNumber = newNumber.trim();
+    if (!/^\d+(\.\d+)?$/.test(newNumber)) {
+        alert('Номер ячейки должен быть числом (например: 1, 2.1, 0).');
         return;
     }
     if (newNumber === currentNumber) return;
@@ -37,13 +41,11 @@ function editCellNumber(cellId, currentNumber, el) {
             alert(result.data.error || 'Ошибка при обновлении.');
             return;
         }
-        // Обновляем номер в UI
         var numSpan = document.getElementById('cell-num-' + cellId);
-        if (numSpan) numSpan.textContent = result.data.cell_number;
+        if (numSpan) numSpan.textContent = cellDisplayNumber(result.data.cell_number);
 
-        // Обновляем onclick с новым номером
         el.setAttribute('onclick',
-            'event.stopPropagation(); editCellNumber(' + cellId + ', ' + result.data.cell_number + ', this)');
+            "event.stopPropagation(); editCellNumber(" + cellId + ", '" + result.data.cell_number + "', this)");
     })
     .catch(function () {
         alert('Ошибка сети. Попробуйте ещё раз.');
