@@ -470,8 +470,13 @@ class StorageCell(models.Model):
 
     @property
     def display_number(self):
-        """Возвращает отображаемый номер ячейки ('0' → 'Пол')."""
-        return 'Пол' if self.cell_number == '0' else self.cell_number
+        """Возвращает отображаемый номер ячейки ('0' → 'Пол', '0.1' → 'Пол 1')."""
+        if self.cell_number == '0':
+            return 'Пол'
+        if self.cell_number.startswith('0.'):
+            suffix = self.cell_number[2:]
+            return 'Пол ' + suffix
+        return self.cell_number
 
     @property
     def client_name(self):

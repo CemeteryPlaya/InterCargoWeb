@@ -236,7 +236,7 @@
                     {% endif %}
                     <p class="pr-24" :class="archiveMode ? 'pl-8' : ''"><strong>Код:</strong> {{ code.track_code }}</p>
                     <p><strong>Статус:</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
-                    <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-600">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
+                    <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-500 dark:text-gray-500">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
                     {% if code.sorting_location %}
                     <p><strong>Где отсортирован:</strong> {{ code.sorting_location }}</p>
                     {% endif %}
