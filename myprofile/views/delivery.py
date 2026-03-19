@@ -389,6 +389,27 @@ def take_delivery(request):
     #     except TempUser.DoesNotExist:
     #         pass
 
+    # Помечаем чеки НЕпринятых треков как "Требует внимания"
+    if pickup_id and scanned_receipts and pickup:
+        # Треки, оставшиеся в статусе 'delivered' на этом ПВЗ (не взятые в доставку)
+        remaining_tracks = TrackCode.objects.filter(
+            Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+            Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
+            Q(delivery_pickup=pickup),
+            status='delivered',
+        )
+        if filter_date is not None:
+            remaining_tracks = remaining_tracks.filter(delivered_date=filter_date)
+
+        remaining_ids = list(remaining_tracks.values_list('id', flat=True))
+        if remaining_ids:
+            Receipt.objects.filter(
+                items__track_code_id__in=remaining_ids
+            ).distinct().update(
+                needs_attention=True,
+                attention_reason='Не принято в доставку водителем',
+            )
+
     if updated:
         messages.success(request, f"Взято в доставку: {updated} посылок")
     else:

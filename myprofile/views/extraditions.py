@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt
+from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt, StorageCell
 from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import parse_paid_at
 
@@ -157,11 +157,25 @@ def search_package(request):
 
         package_total = sum(r['total_price'] for r in receipts_data)
 
+        # Ячейка хранения клиента
+        cell_display = None
+        try:
+            user_pickup = package.user.userprofile.pickup
+            if user_pickup:
+                cell = StorageCell.objects.filter(
+                    pickup_point=user_pickup, user=package.user
+                ).first()
+                if cell:
+                    cell_display = cell.display_number
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
+
         return JsonResponse({
             'found': True,
             'barcode': package.barcode,
             'owner': package.user.username,
             'pickup_point': package.pickup_point_display,
+            'cell_number': cell_display,
             # PAYMENT COMMENTED OUT: 'is_paid': all_paid,
             'is_issued': package.is_issued,
             'receipts': receipts_data,

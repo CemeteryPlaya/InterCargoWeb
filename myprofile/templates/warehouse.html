@@ -68,6 +68,24 @@
                     {% endif %}
                 </div>
 
+                {% if pickup_point and cells %}
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <a href="{% url 'warehouse_inventory' %}{% if pickup_point %}?pickup={{ pickup_point.id }}{% endif %}"
+                        class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                        <i class="ri-file-list-3-line"></i> Инвентаризация склада
+                    </a>
+                    <form method="post" action="{% url 'warehouse_restructure' %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="pickup_id" value="{{ pickup_point.id }}">
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition text-sm font-medium"
+                            onclick="return confirm('Реструктуризация склада удалит ВСЕ номера ячеек на данном ПВЗ.\n\nВам нужно будет назначить ячейки заново.\n\nПродолжить?')">
+                            <i class="ri-refresh-line"></i> Реструктуризация склада
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
                 {% if not pickup_point %}
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
                     <i class="ri-information-line text-yellow-500 text-3xl"></i>
@@ -87,18 +105,21 @@
                     {% for item in cells %}
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                         <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
-                             onclick="toggleCell({{ item.cell.cell_number }})">
+                             onclick="toggleCell('{{ item.cell.id }}')">
                             <div class="flex items-center gap-4">
                                 <div class="w-14 h-14 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center cursor-pointer group relative"
-                                     onclick="event.stopPropagation(); editCellNumber({{ item.cell.id }}, {{ item.cell.cell_number }}, this)"
+                                     onclick="event.stopPropagation(); editCellNumber({{ item.cell.id }}, '{{ item.cell.cell_number }}', this)"
                                      title="Нажмите чтобы изменить номер ячейки">
-                                    <span class="text-primary font-bold text-xl" id="cell-num-{{ item.cell.id }}">{{ item.cell.cell_number }}</span>
+                                    <span class="text-primary font-bold text-xl" id="cell-num-{{ item.cell.id }}">{{ item.cell.display_number }}</span>
                                     <i class="ri-pencil-line absolute -top-1 -right-1 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">{{ item.cell.user.username }}</div>
-                                    {% if item.cell.user.get_full_name %}
-                                    <div class="text-sm text-gray-500">{{ item.cell.user.get_full_name }}</div>
+                                    <div class="font-semibold text-gray-900">{{ item.cell.client_name }}</div>
+                                    {% if item.cell.client_full_name %}
+                                    <div class="text-sm text-gray-500">{{ item.cell.client_full_name }}</div>
+                                    {% endif %}
+                                    {% if item.cell.temp_user %}
+                                    <div class="text-xs text-orange-500 font-medium">Временный клиент</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -111,11 +132,11 @@
                                     <div class="font-semibold text-gray-900">{{ item.total_weight|floatformat:2 }} кг</div>
                                     <div class="text-xs text-gray-400">вес</div>
                                 </div>
-                                <i class="ri-arrow-down-s-line text-xl text-gray-400 transition-transform" id="arrow-{{ item.cell.cell_number }}"></i>
+                                <i class="ri-arrow-down-s-line text-xl text-gray-400 transition-transform" id="arrow-{{ item.cell.id }}"></i>
                             </div>
                         </div>
 
-                        <div class="hidden border-t border-gray-100" id="cell-{{ item.cell.cell_number }}">
+                        <div class="hidden border-t border-gray-100" id="cell-{{ item.cell.id }}">
                             {% for sub in item.sub_cells %}
                             <div class="{% if not forloop.first %}border-t border-gray-200{% endif %}">
                                 <div class="flex items-center justify-between px-5 py-2 bg-blue-50">
@@ -161,7 +182,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
                                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium"
-                                        onclick="return confirm('Подтвердить выдачу клиенту {{ item.cell.user.username }}? ({{ item.track_count }} посылок)')">
+                                        onclick="return confirm('Подтвердить выдачу клиенту {{ item.cell.client_name }}? ({{ item.track_count }} посылок)')">
                                         <i class="ri-hand-coin-line mr-1"></i> Выдано клиенту
                                     </button>
                                 </form>
@@ -169,7 +190,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
                                     <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition text-sm font-medium"
-                                        onclick="return confirm('Вернуть посылки клиента {{ item.cell.user.username }} на сортировочный склад? ({{ item.track_count }} посылок)')">
+                                        onclick="return confirm('Вернуть посылки клиента {{ item.cell.client_name }} на сортировочный склад? ({{ item.track_count }} посылок)')">
                                         <i class="ri-arrow-go-back-line mr-1"></i> Не доехал до склада
                                     </button>
                                 </form>

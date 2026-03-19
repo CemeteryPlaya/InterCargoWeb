@@ -52,21 +52,40 @@
                     <i class="ri-map-pin-line text-yellow-500"></i> Ожидают приёмки
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    {% for pp in pending_pickups %}
+                    {% for item in pending_pickups %}
                     <div class="block border-2 border-yellow-400 rounded-lg p-4 hover:border-green-500 hover:shadow-md transition-all bg-white">
                         <div class="flex-1 mb-3">
-                            <h3 class="font-semibold text-gray-800">{{ pp.address }}</h3>
-                            <p class="text-sm text-gray-500">{{ pp.premise_name }}</p>
-                            <div class="mt-2 flex items-center gap-2">
+                            <h3 class="font-semibold text-gray-800">{{ item.pickup.address }}</h3>
+                            <p class="text-sm text-gray-500">{{ item.pickup.premise_name }}</p>
+                            {% if item.delivered_date %}
+                            <p class="text-xs text-gray-400 mt-1">
+                                <i class="ri-calendar-line mr-1"></i> Приход: {{ item.delivered_date|date:"d.m.Y" }}
+                            </p>
+                            {% endif %}
+                            <div class="mt-2 flex items-center gap-2 flex-wrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <i class="ri-inbox-archive-line mr-1"></i> {{ pp.track_count }} для сортировки
+                                    <i class="ri-inbox-archive-line mr-1"></i> {{ item.track_count }} для сортировки
+                                </span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="ri-user-line mr-1"></i> {{ item.client_count }} клиентов
                                 </span>
                             </div>
                         </div>
-                        <button type="button" class="scan-accept-btn w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm"
-                                data-pickup-id="{{ pp.id }}" data-pickup-name="{{ pp.address }} — {{ pp.premise_name }}">
+                        <button type="button" class="scan-accept-btn w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm mb-2"
+                                data-pickup-id="{{ item.pickup.id }}"
+                                data-pickup-name="{{ item.pickup.address }} — {{ item.pickup.premise_name }}"
+                                data-delivered-date="{{ item.delivered_date|date:'Y-m-d'|default:'' }}">
                             <i class="ri-qr-scan-2-line mr-1"></i> Сканировать и отсортировать
                         </button>
+                        <form method="post" action="{% url 'finish_acceptance_session' %}" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="pickup_id" value="{{ item.pickup.id }}">
+                            <input type="hidden" name="delivered_date" value="{{ item.delivered_date|date:'Y-m-d'|default:'' }}">
+                            <button type="submit" class="w-full bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition text-sm"
+                                    onclick="return confirm('Завершить сессию приёмки? Неотсортированные посылки будут возвращены на сортировочный склад.')">
+                                <i class="ri-stop-circle-line mr-1"></i> Завершить сессию
+                            </button>
+                        </form>
                     </div>
                     {% endfor %}
                 </div>

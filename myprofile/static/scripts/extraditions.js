@@ -528,6 +528,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentReceipts = data.receipts || [];
                 infoOwner.textContent = data.owner;
                 infoPickup.textContent = data.pickup_point;
+
+                // Ячейка хранения
+                var cellBlock = document.getElementById('cellNumberBlock');
+                var cellEl = document.getElementById('infoCellNumber');
+                if (data.cell_number && cellBlock && cellEl) {
+                    cellEl.textContent = data.cell_number;
+                    cellBlock.classList.remove('hidden');
+                } else if (cellBlock) {
+                    cellBlock.classList.add('hidden');
+                }
+
                 renderReceipts(currentReceipts);
                 updateGlobalPaymentStatus();
                 updateSubmitButton();

@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django import forms
-from myprofile.models import TrackCode, ArchivedTrackCode
+from myprofile.models import TrackCode, ArchivedTrackCode, ReceiptItem
 
 class TrackCodeForm(forms.ModelForm):
     class Meta:
@@ -68,13 +68,29 @@ def track_codes_view(request):
     else:
         form = TrackCodeForm()
 
-    track_codes = TrackCode.objects.filter(owner=request.user).order_by('-update_date')
-    
+    track_codes_qs = TrackCode.objects.filter(owner=request.user).order_by('-update_date')
+
     # Filter by status (single select)
     status_filter = request.GET.get('status', '')
 
     if status_filter:
-        track_codes = track_codes.filter(status=status_filter)
+        track_codes_qs = track_codes_qs.filter(status=status_filter)
+
+    track_codes = list(track_codes_qs)
+
+    # Для треков со статусом ready — получаем дату чека (приход)
+    ready_track_ids = [t.id for t in track_codes if t.status == 'ready']
+    receipt_dates = {}
+    if ready_track_ids:
+        items = ReceiptItem.objects.filter(
+            track_code_id__in=ready_track_ids
+        ).select_related('receipt')
+        for item in items:
+            if item.receipt and item.receipt.created_at:
+                receipt_dates[item.track_code_id] = item.receipt.created_at
+
+    for code in track_codes:
+        code.receipt_date = receipt_dates.get(code.id)
 
     archived_codes = ArchivedTrackCode.objects.filter(owner=request.user).order_by('-archived_at')
 

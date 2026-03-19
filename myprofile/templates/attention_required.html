@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Требует внимания</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
+    <script src="{% static 'scripts/core.js' %}"></script>
+    <script src="{% static 'scripts/menu.js' %}"></script>
+    <script src="{% static 'scripts/notifications.js' %}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+                {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                    <div class="p-4 mb-3 rounded-lg text-sm font-medium
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800
+                        {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                        {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="ri-alarm-warning-line text-orange-500 mr-2"></i>Требует внимания
+                </h1>
+                <p class="text-sm text-gray-500 mb-6">
+                    Посылки клиентов, которые требуют внимания: возвращены со склада ПВЗ, не приняты при приёмке или не приняты в доставку водителем.
+                </p>
+
+                {% if attention_data %}
+                <div class="space-y-6">
+                    {% for group in attention_data %}
+                    <div class="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-orange-50 border-b border-orange-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="font-semibold text-gray-800">
+                                        <i class="ri-error-warning-line text-orange-500 mr-1"></i>
+                                        {{ group.reason }}
+                                    </h2>
+                                </div>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    {{ group.total_tracks }} посылок
+                                </span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-100">
+                            {% for client in group.clients %}
+                            <div class="px-5 py-3 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <i class="ri-user-line text-gray-400 flex-shrink-0"></i>
+                                    <span class="font-medium text-gray-800 truncate">{{ client.name }}</span>
+                                    {% if client.owner_type == 'temp' %}
+                                    <span class="text-xs text-orange-500 flex-shrink-0">(вр.)</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center gap-4 flex-shrink-0">
+                                    <div class="text-sm text-gray-500">
+                                        {{ client.track_count }} шт. / {{ client.total_weight|floatformat:2 }} кг
+                                    </div>
+                                    <form method="post" action="{% url 'resolve_attention' %}" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="owner_type" value="{{ client.owner_type }}">
+                                        <input type="hidden" name="owner_id" value="{{ client.owner_id }}">
+                                        <input type="hidden" name="reason" value="{{ group.reason }}">
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition text-xs font-medium"
+                                            onclick="return confirm('Отметить проблемы клиента {{ client.name }} как устранённые?')">
+                                            <i class="ri-check-line"></i> Проблемы устранены
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                    <i class="ri-checkbox-circle-line text-green-500 text-4xl"></i>
+                    <p class="text-gray-600 mt-2">Все посылки приняты. Нет проблем, требующих внимания.</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

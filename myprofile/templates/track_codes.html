@@ -76,7 +76,7 @@
                     class="grid grid-cols-2 md:grid-cols-2 gap-1 mt-4 bg-white p-4 rounded-lg shadow border border-gray-200 items-center">
                     <div class="flex items-center">
                         <p class="text-gray-800 font-medium">
-                            <strong>Количество ваших трек-кодов: {{ track_codes.count }}</strong>
+                            <strong>Количество ваших трек-кодов: {{ track_codes|length }}</strong>
                         </p>
                     </div>
                     <div class="flex items-center justify-end gap-2">
@@ -236,7 +236,7 @@
                     {% endif %}
                     <p class="pr-24" :class="archiveMode ? 'pl-8' : ''"><strong>Код:</strong> {{ code.track_code }}</p>
                     <p><strong>Статус:</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
-                    <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span></p>
+                    <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-600">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
                     {% if code.sorting_location %}
                     <p><strong>Где отсортирован:</strong> {{ code.sorting_location }}</p>
                     {% endif %}

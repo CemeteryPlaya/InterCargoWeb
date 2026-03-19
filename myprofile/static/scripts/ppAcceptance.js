@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // State
     var currentPickupId = null;
+    var currentDeliveredDate = null;
     var clientsData = [];
     var allExpectedReceipts = [];
     var scannedReceipts = [];
@@ -54,12 +55,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var scanButtons = document.querySelectorAll('.scan-accept-btn');
     scanButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
-            startScan(this.dataset.pickupId, this.dataset.pickupName);
+            startScan(this.dataset.pickupId, this.dataset.pickupName, this.dataset.deliveredDate || '');
         });
     });
 
-    function startScan(pickupId, pickupName) {
-        fetch(receiptsUrl + '?pickup_id=' + encodeURIComponent(pickupId), { credentials: 'same-origin' })
+    function startScan(pickupId, pickupName, deliveredDate) {
+        currentDeliveredDate = deliveredDate;
+        var url = receiptsUrl + '?pickup_id=' + encodeURIComponent(pickupId);
+        if (deliveredDate) url += '&delivered_date=' + encodeURIComponent(deliveredDate);
+        fetch(url, { credentials: 'same-origin' })
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 if (!data.clients || data.clients.length === 0) {
@@ -86,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
         form.innerHTML =
             '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">' +
             '<input type="hidden" name="pickup_id" value="' + pickupId + '">' +
+            '<input type="hidden" name="delivered_date" value="' + (currentDeliveredDate || '') + '">' +
             '<input type="hidden" name="scanned_receipts" value=\'' + JSON.stringify(scannedList) + '\'>';
         document.body.appendChild(form);
         form.submit();

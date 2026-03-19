@@ -49,6 +49,34 @@
                 </div>
             </div>
 
+            <!-- Панель потери связи -->
+            <div id="connection-lost-banner" class="hidden mb-4 p-4 rounded-lg bg-red-50 border border-red-300">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class="ri-wifi-off-line text-red-500 text-xl"></i>
+                        <div>
+                            <p class="font-semibold text-red-800">Потеряна связь с сессией</p>
+                            <p class="text-sm text-red-600" id="connection-lost-detail">Автосохранение не работает. Данные в браузере сохранены.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span id="reconnect-countdown" class="text-xs text-red-500 hidden"></span>
+                        <button type="button" id="reconnect-btn" onclick="manualReconnect()"
+                            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                            <i class="ri-refresh-line mr-1"></i> Переподключиться
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Панель успешного переподключения -->
+            <div id="connection-restored-banner" class="hidden mb-4 p-3 rounded-lg bg-green-50 border border-green-300">
+                <div class="flex items-center gap-2">
+                    <i class="ri-wifi-line text-green-500 text-lg"></i>
+                    <p class="font-medium text-green-800">Связь восстановлена. Данные сохранены.</p>
+                </div>
+            </div>
+
             {% if messages %}
             <div class="mb-4">
                 {% for message in messages %}
