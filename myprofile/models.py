@@ -180,6 +180,12 @@ class Receipt(models.Model):
     claimed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время выдачи")
     needs_attention = models.BooleanField(default=False, verbose_name="Требует внимания")
     attention_reason = models.CharField(max_length=100, blank=True, default='', verbose_name="Причина внимания")
+    attention_added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='attention_added_receipts',
+        verbose_name="Кто добавил в внимание"
+    )
+    attention_pickup = models.CharField(max_length=255, blank=True, default='', verbose_name="ПВЗ внимания")
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
     total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
     price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")
@@ -195,9 +201,54 @@ class Receipt(models.Model):
         verbose_name = "Чек"
         verbose_name_plural = "Чеки"
 
+    # Поля, которые разрешено менять после финализации чека (операционные флаги).
+    _MUTABLE_FIELDS = frozenset({
+        'is_paid', 'paid_at', 'is_claimed', 'claimed_at',
+        'needs_attention', 'attention_reason',
+        'attention_added_by', 'attention_added_by_id', 'attention_pickup',
+    })
+
+    @property
+    def is_finalized(self):
+        """Чек финализирован, если у него есть номер и уже посчитан вес."""
+        return bool(self.receipt_number and self.total_weight > 0)
+
     def save(self, *args, **kwargs):
         if not self.receipt_number:
             self.receipt_number = f"IC-{uuid.uuid4().hex[:8].upper()}"
+
+        # Защита от изменения содержимого финализированного чека
+        if self.pk and not getattr(self, '_allow_content_update', False):
+            update_fields = kwargs.get('update_fields')
+            if update_fields:
+                # Если указаны конкретные поля — проверяем, что все в списке разрешённых
+                forbidden = set(update_fields) - self._MUTABLE_FIELDS - {'receipt_number'}
+                if forbidden and self.is_finalized:
+                    raise ValueError(
+                        f"Чек {self.receipt_number} финализирован. "
+                        f"Изменение полей {forbidden} запрещено."
+                    )
+            elif self.is_finalized:
+                # Полный save() — проверяем, не менялись ли контентные поля
+                try:
+                    old = Receipt.objects.get(pk=self.pk)
+                    content_fields = [
+                        'total_weight', 'total_price', 'price_per_kg',
+                        'owner_id', 'temp_owner_id', 'pickup_point',
+                        'payment_link', 'created_at',
+                    ]
+                    changed = [
+                        f for f in content_fields
+                        if getattr(self, f) != getattr(old, f)
+                    ]
+                    if changed:
+                        raise ValueError(
+                            f"Чек {self.receipt_number} финализирован. "
+                            f"Изменение полей {changed} запрещено."
+                        )
+                except Receipt.DoesNotExist:
+                    pass
+
         super().save(*args, **kwargs)
 
     def get_qr_base64(self):

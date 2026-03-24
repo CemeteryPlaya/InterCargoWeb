@@ -351,6 +351,7 @@ def _split_foreign_items(receipt, foreign_items, owner_key, RATE):
     remaining_items = list(receipt.items.select_related('track_code').all())
     if remaining_items:
         receipt.created_at = remaining_items[0].track_code.delivered_date or receipt.created_at
+        receipt._allow_content_update = True
         receipt.save(update_fields=['created_at'])
     _recalc_receipt(receipt, receipt.price_per_kg or effective_rate)
 
@@ -387,6 +388,7 @@ def _merge_receipts(receipt_ids, items_for_date, owner_key, target_date, RATE):
 
         # Устанавливаем дату чека = delivered_date треков
         main_receipt.created_at = target_date
+        main_receipt._allow_content_update = True
         main_receipt.save(update_fields=['created_at'])
 
         # Проверяем остались ли items в «старых» чеках
@@ -401,6 +403,7 @@ def _merge_receipts(receipt_ids, items_for_date, owner_key, target_date, RATE):
                 # Пересчитываем оставшийся чек и устанавливаем дату
                 r = Receipt.objects.get(id=rid)
                 r.created_at = remaining_items[0].track_code.delivered_date or r.created_at
+                r._allow_content_update = True
                 r.save(update_fields=['created_at'])
                 _recalc_receipt(r, r.price_per_kg or effective_rate)
 

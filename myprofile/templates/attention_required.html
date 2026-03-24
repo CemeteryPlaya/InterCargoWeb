@@ -27,7 +27,7 @@
         {% include 'includes/sidebar.html' %}
 
         <main class="flex-1 p-4 md:p-8">
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-5xl mx-auto">
                 {% if messages %}
                 <div class="mb-6">
                     {% for message in messages %}
@@ -50,47 +50,73 @@
                 </p>
 
                 {% if attention_data %}
-                <div class="space-y-6">
-                    {% for group in attention_data %}
-                    <div class="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden">
-                        <div class="px-5 py-4 bg-orange-50 border-b border-orange-200">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h2 class="font-semibold text-gray-800">
-                                        <i class="ri-error-warning-line text-orange-500 mr-1"></i>
-                                        {{ group.reason }}
-                                    </h2>
-                                </div>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                    {{ group.total_tracks }} посылок
-                                </span>
-                            </div>
+                <div class="space-y-8">
+                    {% for pickup_group in attention_data %}
+                    <!-- Группа по ПВЗ -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <h2 class="text-lg font-bold text-gray-800">
+                                <i class="ri-map-pin-line text-red-500 mr-1"></i>{{ pickup_group.pickup_name }}
+                            </h2>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                {{ pickup_group.total_tracks }} посылок
+                            </span>
                         </div>
-                        <div class="divide-y divide-gray-100">
-                            {% for client in group.clients %}
-                            <div class="px-5 py-3 flex items-center justify-between gap-4">
-                                <div class="flex items-center gap-2 flex-1 min-w-0">
-                                    <i class="ri-user-line text-gray-400 flex-shrink-0"></i>
-                                    <span class="font-medium text-gray-800 truncate">{{ client.name }}</span>
-                                    {% if client.owner_type == 'temp' %}
-                                    <span class="text-xs text-orange-500 flex-shrink-0">(вр.)</span>
-                                    {% endif %}
-                                </div>
-                                <div class="flex items-center gap-4 flex-shrink-0">
-                                    <div class="text-sm text-gray-500">
-                                        {{ client.track_count }} шт. / {{ client.total_weight|floatformat:2 }} кг
+
+                        <div class="space-y-4">
+                            {% for reason_group in pickup_group.reasons %}
+                            <div class="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden">
+                                <div class="px-5 py-3 bg-orange-50 border-b border-orange-200">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-800 text-sm">
+                                            <i class="ri-error-warning-line text-orange-500 mr-1"></i>
+                                            {{ reason_group.reason }}
+                                        </h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                            {{ reason_group.total_tracks }} посылок
+                                        </span>
                                     </div>
-                                    <form method="post" action="{% url 'resolve_attention' %}" class="inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="owner_type" value="{{ client.owner_type }}">
-                                        <input type="hidden" name="owner_id" value="{{ client.owner_id }}">
-                                        <input type="hidden" name="reason" value="{{ group.reason }}">
-                                        <button type="submit"
-                                            class="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition text-xs font-medium"
-                                            onclick="return confirm('Отметить проблемы клиента {{ client.name }} как устранённые?')">
-                                            <i class="ri-check-line"></i> Проблемы устранены
-                                        </button>
-                                    </form>
+                                </div>
+                                <div class="divide-y divide-gray-100">
+                                    {% for client in reason_group.clients %}
+                                    <div class="px-5 py-3 flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                                            <i class="ri-user-line text-gray-400 flex-shrink-0"></i>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-medium text-gray-800">{{ client.login }}</span>
+                                                    {% if client.name != client.login %}
+                                                    <span class="text-xs text-gray-400">({{ client.name }})</span>
+                                                    {% endif %}
+                                                    {% if client.owner_type == 'temp' %}
+                                                    <span class="text-xs text-orange-500 flex-shrink-0">(вр.)</span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if client.added_by %}
+                                                <div class="text-xs text-gray-400 mt-0.5">
+                                                    <i class="ri-user-star-line mr-0.5"></i>Добавил: {{ client.added_by }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 flex-shrink-0">
+                                            <div class="text-sm text-gray-500">
+                                                {{ client.track_count }} шт. / {{ client.total_weight|floatformat:2 }} кг
+                                            </div>
+                                            <form method="post" action="{% url 'resolve_attention' %}" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="owner_type" value="{{ client.owner_type }}">
+                                                <input type="hidden" name="owner_id" value="{{ client.owner_id }}">
+                                                <input type="hidden" name="reason" value="{{ reason_group.reason }}">
+                                                <button type="submit"
+                                                    class="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition text-xs font-medium"
+                                                    onclick="return confirm('Отметить проблемы клиента {{ client.login }} как устранённые?')">
+                                                    <i class="ri-check-line"></i> Проблемы устранены
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                             {% endfor %}

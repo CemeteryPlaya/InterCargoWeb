@@ -80,23 +80,29 @@ def _get_user_receipts(user_id):
         .order_by('-created_at')[:10]
     )
 
+    # Получаем working_hours один раз
+    working_hours = ''
+    try:
+        from register.models import UserProfile
+        up = UserProfile.objects.select_related('pickup').get(user_id=user_id)
+        if up.pickup:
+            working_hours = up.pickup.working_hours or ''
+    except Exception:
+        pass
+
     result = []
     for receipt in receipts:
         items = list(receipt.items.select_related('track_code').all())
+
+        # Используем сохранённый вес из ReceiptItem (надёжнее — не зависит от архивации)
         total_weight = sum(
-            (item.track_code.weight or Decimal('0'))
-            for item in items if item.track_code
+            (item.weight or (item.track_code.weight if item.track_code else None) or Decimal('0'))
+            for item in items
         )
 
-        # Получаем working_hours из PickupPoint пользователя
-        working_hours = ''
-        try:
-            from register.models import UserProfile
-            up = UserProfile.objects.select_related('pickup').get(user_id=user_id)
-            if up.pickup:
-                working_hours = up.pickup.working_hours or ''
-        except Exception:
-            pass
+        # Если в модели чека уже есть рассчитанные значения — используем их
+        if receipt.total_weight and receipt.total_weight > 0:
+            total_weight = receipt.total_weight
 
         try:
             price = int(receipt.total_price) if receipt.total_price is not None else 0

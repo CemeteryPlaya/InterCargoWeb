@@ -31,7 +31,29 @@
             <h2 class="text-2xl font-semibold text-gray-800 mb-2">
                 <i class="ri-history-line text-red-500"></i> История выдачи
             </h2>
-            <p class="text-sm text-gray-500 mb-6">{{ pickup_name }}</p>
+            <p class="text-sm text-gray-500 mb-4">{{ pickup_name }}</p>
+
+            <!-- Фильтр по диапазону дат -->
+            <form method="get" class="flex flex-wrap items-end gap-3 mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Дата от</label>
+                    <input type="date" name="date_from" value="{{ date_from }}"
+                        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-red-400 focus:border-red-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Дата до</label>
+                    <input type="date" name="date_to" value="{{ date_to }}"
+                        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-red-400 focus:border-red-400">
+                </div>
+                <button type="submit"
+                    class="bg-red-500 text-white px-4 py-1.5 rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                    <i class="ri-filter-line mr-1"></i>Применить
+                </button>
+                {% if date_from or date_to %}
+                <a href="{% url 'pp_extradition_history' %}"
+                    class="text-sm text-gray-500 hover:text-red-500 transition underline">Сбросить</a>
+                {% endif %}
+            </form>
 
             {% if not dates %}
             <div class="text-center py-12 text-gray-400">

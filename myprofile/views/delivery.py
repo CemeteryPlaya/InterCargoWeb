@@ -408,6 +408,8 @@ def take_delivery(request):
             ).distinct().update(
                 needs_attention=True,
                 attention_reason='Не принято в доставку водителем',
+                attention_added_by=request.user,
+                attention_pickup=str(pickup),
             )
 
     if updated:
@@ -470,6 +472,8 @@ def complete_delivery(request):
         for track in tracks:
             track.status = 'ready'
             track.update_date = today
+            track.delivered_date = today
+            track.pp_sorted = False
             track.save()
             updated += 1
             if track.owner:
@@ -700,6 +704,14 @@ def driver_issue(request):
             track.status = 'claimed'
             track.update_date = today
             track.save()
+
+        # Обновляем DeliveryHistory — отмечаем как доставлено
+        track_ids = [t.id for t in tracks]
+        DeliveryHistory.objects.filter(
+            driver=request.user,
+            track_codes__id__in=track_ids,
+            delivered_at__isnull=True,
+        ).distinct().update(delivered_at=now)
 
     messages.success(request, f"Выдано клиенту {client_name}: {len(tracks)} посылок")
     return redirect('delivery')
