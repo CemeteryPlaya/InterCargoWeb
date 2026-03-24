@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Реестр {{ registry.registry_date|date:"d.m.Y" }}</title>
-    <link rel="stylesheet" href="{% static 'styles/pdf-registry.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/pdf-registry.css' %}?v={{ APP_VERSION }}">
 </head>
 
 <body>
@@ -96,7 +96,7 @@
         </table>
     </div>
 
-    <script src="{% static 'scripts/registryPdf.js' %}"></script>
+    <script src="{% static 'scripts/registryPdf.js' %}?v={{ APP_VERSION }}"></script>
 </body>
 
 </html>

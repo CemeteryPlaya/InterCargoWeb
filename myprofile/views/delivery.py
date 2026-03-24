@@ -180,7 +180,7 @@ def delivery_view(request):
     # Группируем по дате и для каждой записи считаем клиентов
     history_by_date = OrderedDict()
     for entry in history_qs:
-        date_key = entry.taken_at.date()
+        date_key = timezone.localdate(entry.taken_at)
         if date_key not in history_by_date:
             history_by_date[date_key] = []
 
@@ -252,7 +252,7 @@ def take_delivery(request):
             pass
 
     now = timezone.now()
-    today = now.date()
+    today = timezone.localdate()
     updated = 0
     notif_counts = defaultdict(int)
     temp_user_ids = set()
@@ -436,7 +436,7 @@ def complete_delivery(request):
     from datetime import datetime as _dt
 
     now = timezone.now()
-    today = now.date()
+    today = timezone.localdate()
     updated = 0
     notif_counts = defaultdict(int)
     # Запоминаем фактический ПВЗ доставки для каждого пользователя

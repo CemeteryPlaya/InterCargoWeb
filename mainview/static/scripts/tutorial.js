@@ -172,6 +172,356 @@
                 },
             ],
         },
+
+        /* ─── Tutorials for unauthenticated users ────────────────────────── */
+
+        guest_register: {
+            name: 'Как зарегистрироваться',
+            guest: true,
+            steps: [
+                {
+                    page: '/register/',
+                    selector: null,
+                    text: 'Добро пожаловать! Сейчас мы покажем, как зарегистрироваться на сайте Inter Cargo. Нажмите "Далее" чтобы начать.',
+                    position: 'center',
+                    icon: 'ri-user-add-line',
+                    navigateTo: '/register/',
+                },
+                {
+                    page: '/register/',
+                    selector: 'input[name="login"]',
+                    text: 'Введите логин латинскими буквами. Этот логин будет использоваться для входа на сайт и для идентификации ваших посылок.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/register/',
+                    selector: 'input[name="phone"]',
+                    text: 'Укажите ваш номер телефона. По нему вы также сможете входить на сайт.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/register/',
+                    selector: 'input[name="email"]',
+                    text: 'Укажите ваш email. На него будут приходить уведомления о статусе посылок.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/register/',
+                    selector: 'select[name="pickup"]',
+                    text: 'Выберите удобный для вас пункт выдачи (ПВЗ), где вы будете получать свои посылки.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/register/',
+                    selector: 'input[name="password1"]',
+                    text: 'Придумайте надёжный пароль. Минимум 8 символов, используйте буквы и цифры.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/register/',
+                    selector: 'button[type="submit"]',
+                    text: 'После заполнения всех полей нажмите кнопку "Зарегистрироваться". Готово!',
+                    position: 'top',
+                },
+            ],
+        },
+
+        guest_login: {
+            name: 'Как войти на сайт',
+            guest: true,
+            steps: [
+                {
+                    page: '/login/',
+                    selector: null,
+                    text: 'Сейчас мы покажем, как войти в свой аккаунт. Вы можете войти по логину, телефону или email.',
+                    position: 'center',
+                    icon: 'ri-login-box-line',
+                    navigateTo: '/login/',
+                },
+                {
+                    page: '/login/',
+                    selector: '.flex.border-b',
+                    fallbackSelector: 'h2',
+                    text: 'Выберите способ входа: по логину, по номеру телефона или по email. Нажмите на нужную вкладку.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/login/',
+                    selector: 'input[name="password"]',
+                    text: 'Введите пароль, который вы указали при регистрации, и нажмите "Войти".',
+                    position: 'bottom',
+                },
+            ],
+        },
+
+        guest_how_to_order: {
+            name: 'Как начать заказывать',
+            guest: true,
+            steps: [
+                {
+                    page: null,
+                    selector: null,
+                    text: 'Хотите начать заказывать товары из Китая? Вот порядок действий. Нажмите "Далее".',
+                    position: 'center',
+                    icon: 'ri-shopping-bag-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: '1. Напишите менеджеру Inter Cargo в WhatsApp. Он расскажет о тарифах, условиях доставки и ответит на ваши вопросы.',
+                    position: 'center',
+                    icon: 'ri-whatsapp-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: '2. Получите от менеджера инструкции: адрес склада в Китае и правила оформления заказа.',
+                    position: 'center',
+                    icon: 'ri-file-text-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: '3. Зарегистрируйтесь на нашем сайте — это необходимо для отслеживания посылок и получения чеков.',
+                    position: 'center',
+                    icon: 'ri-user-add-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: '4. Оформите заказ на китайской торговой площадке (Taobao, Pinduoduo, 1688 и др.).',
+                    position: 'center',
+                    icon: 'ri-global-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: '5. При оформлении укажите адрес нашего склада в Китае и ваш логин с сайта — так мы определим, чья это посылка.',
+                    position: 'center',
+                    icon: 'ri-map-pin-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: '6. Добавьте трек-код посылки в личном кабинете. Отслеживайте статус доставки — от Китая до вашего ПВЗ.',
+                    position: 'center',
+                    icon: 'ri-barcode-line',
+                },
+                {
+                    page: null,
+                    selector: null,
+                    text: 'Готово! Когда посылка прибудет на ПВЗ, вы получите уведомление. Приходите, оплатите и заберите.',
+                    position: 'center',
+                    icon: 'ri-checkbox-circle-line',
+                },
+            ],
+        },
+
+        /* ─── Tutorials for ПВЗ employees ────────────────────────────────── */
+
+        pp_acceptance_tutorial: {
+            name: 'Приёмка товара',
+            ppWorker: true,
+            steps: [
+                {
+                    page: '/profile/pp-acceptance/',
+                    mobile: true,
+                    selector: '#mobile-menu-toggle',
+                    text: 'Нажмите на иконку меню, чтобы открыть боковую панель.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: 'a[href*="pp-acceptance"]',
+                    selectorScope: 'sidebar',
+                    text: 'Перейдите в раздел "Приёмка товара" в боковом меню.',
+                    position: 'right',
+                    mobilePosition: 'bottom',
+                    navigateTo: '/profile/pp-acceptance/',
+                    beforeShow: function () { openMobileSidebar(); },
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: '.border-yellow-400',
+                    fallbackSelector: 'h2',
+                    text: 'Здесь отображаются ожидающие приёмки доставки. Каждая карточка — одна доставка от водителя с количеством чеков.',
+                    position: 'bottom',
+                    beforeShow: function () { closeMobileSidebar(); },
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: null,
+                    text: 'Когда водитель нажимает "Начать выдачу" — на карточке появляется кнопка "Приёмка". Нажмите её, чтобы начать принимать посылки.',
+                    position: 'center',
+                    icon: 'ri-inbox-archive-line',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: null,
+                    text: 'Отсканируйте QR-код каждого чека сканером или камерой. Система автоматически проверит чек и отметит его как принятый.',
+                    position: 'center',
+                    icon: 'ri-qr-code-line',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: null,
+                    text: 'После приёмки всех чеков нажмите "Завершить сессию". Посылки переместятся на склад вашего ПВЗ.',
+                    position: 'center',
+                    icon: 'ri-checkbox-circle-line',
+                },
+            ],
+        },
+
+        pp_extradition_tutorial: {
+            name: 'Выдача посылок',
+            ppWorker: true,
+            steps: [
+                {
+                    page: '/profile/warehouse/',
+                    mobile: true,
+                    selector: '#mobile-menu-toggle',
+                    text: 'Нажмите на иконку меню для навигации.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'a[href*="warehouse"]',
+                    selectorScope: 'sidebar',
+                    text: 'Перейдите в раздел "Склад ПВЗ" — здесь находятся все ячейки с посылками клиентов.',
+                    position: 'right',
+                    mobilePosition: 'bottom',
+                    navigateTo: '/profile/warehouse/',
+                    beforeShow: function () { openMobileSidebar(); },
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: '.bg-white.rounded-lg.shadow-sm',
+                    fallbackSelector: 'h1',
+                    text: 'Каждая карточка — ячейка одного клиента. Нажмите на неё, чтобы развернуть список посылок и чеков.',
+                    position: 'bottom',
+                    beforeShow: function () { closeMobileSidebar(); },
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Когда клиент приходит за посылками, найдите его ячейку. Убедитесь, что все чеки оплачены.',
+                    position: 'center',
+                    icon: 'ri-bank-card-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Нажмите "Выдано клиенту" — посылки будут отмечены как выданные, а ячейка освободится.',
+                    position: 'center',
+                    icon: 'ri-hand-coin-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Если клиент не забрал посылки (например, ошибочная сортировка), нажмите "Не доехал до склада" — посылки вернутся на сортировочный склад.',
+                    position: 'center',
+                    icon: 'ri-arrow-go-back-line',
+                },
+            ],
+        },
+
+        pp_warehouse_tutorial: {
+            name: 'Склад ПВЗ',
+            ppWorker: true,
+            steps: [
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'h1',
+                    text: 'Это страница "Склад ПВЗ". Здесь отображаются все ячейки с посылками, ожидающими выдачи клиентам.',
+                    position: 'bottom',
+                    navigateTo: '/profile/warehouse/',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: '.w-14.h-14',
+                    fallbackSelector: 'h1',
+                    text: 'Номер ячейки отображается в квадрате. Нажмите на него, чтобы изменить номер ячейки. "Пол" означает ячейку 0.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Каждая ячейка разделена на подячейки по чекам. Это позволяет легко найти конкретные посылки клиента.',
+                    position: 'center',
+                    icon: 'ri-layout-grid-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'a[href*="inventory"]',
+                    fallbackSelector: 'h1',
+                    text: 'Кнопка "Инвентаризация" создаёт печатный документ со списком всех клиентов, ячеек и посылок на складе.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Используйте инвентаризацию для сверки реального содержимого склада с данными в системе.',
+                    position: 'center',
+                    icon: 'ri-file-list-3-line',
+                },
+            ],
+        },
+
+        pp_restructure_tutorial: {
+            name: 'Реструктуризация склада',
+            ppWorker: true,
+            steps: [
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'h1',
+                    text: 'Реструктуризация позволяет переназначить все ячейки на складе. Используйте её, когда нужно переорганизовать склад.',
+                    position: 'bottom',
+                    navigateTo: '/profile/warehouse/',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'button[type="submit"]',
+                    fallbackSelector: '.animate-pulse',
+                    text: 'Нажмите "Реструктуризация склада". Все номера ячеек будут удалены, а посылки останутся в системе.',
+                    position: 'bottom',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'После нажатия откроется страница назначения ячеек. Здесь 3 способа назначить ячейки: вручную, сканером или камерой.',
+                    position: 'center',
+                    icon: 'ri-refresh-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Сканер: отсканируйте QR-код чека — система найдёт клиента и назначит ячейку автоматически.',
+                    position: 'center',
+                    icon: 'ri-barcode-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Камера: если нет аппаратного сканера, откройте камеру телефона и наведите на QR-код чека.',
+                    position: 'center',
+                    icon: 'ri-camera-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Вручную: выберите клиента из списка и укажите номер ячейки (или оставьте пустым для автоназначения).',
+                    position: 'center',
+                    icon: 'ri-edit-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Когда все ячейки назначены, нажмите "Завершить реструктуризацию". До завершения на складе будет мигать кнопка "Продолжить реструктуризацию".',
+                    position: 'center',
+                    icon: 'ri-checkbox-circle-line',
+                },
+            ],
+        },
     };
 
     /* ─── Mobile sidebar helpers ────────────────────────────────────────── */
@@ -687,13 +1037,48 @@
 
         var itemsContainer = card.querySelector('#tutorial-menu-items');
 
-        var tutorials = [
-            { id: 'add_track', icon: 'ri-add-circle-line', color: '#16a34a' },
-            { id: 'view_receipts', icon: 'ri-bill-line', color: '#2563eb' },
-            { id: 'receive_parcels', icon: 'ri-hand-coin-line', color: '#ea580c' },
-        ];
+        var user = window.__IC_USER || {};
+        var isAuth = user.isAuthenticated;
+        var isPpWorker = user.isPpWorker || user.isStaff;
+
+        var tutorials = [];
+
+        if (!isAuth) {
+            // Tutorials for guests
+            tutorials = [
+                { id: 'guest_register', icon: 'ri-user-add-line', color: '#2563eb' },
+                { id: 'guest_login', icon: 'ri-login-box-line', color: '#16a34a' },
+                { id: 'guest_how_to_order', icon: 'ri-shopping-bag-line', color: '#ea580c' },
+            ];
+        } else {
+            // Common tutorials for all authenticated users
+            tutorials = [
+                { id: 'add_track', icon: 'ri-add-circle-line', color: '#16a34a' },
+                { id: 'view_receipts', icon: 'ri-bill-line', color: '#2563eb' },
+                { id: 'receive_parcels', icon: 'ri-hand-coin-line', color: '#ea580c' },
+            ];
+            // Additional tutorials for ПВЗ workers
+            if (isPpWorker) {
+                tutorials.push(
+                    { id: 'pp_acceptance_tutorial', icon: 'ri-inbox-archive-line', color: '#16a34a', separator: true },
+                    { id: 'pp_extradition_tutorial', icon: 'ri-hand-coin-line', color: '#2563eb' },
+                    { id: 'pp_warehouse_tutorial', icon: 'ri-building-2-line', color: '#7c3aed' },
+                    { id: 'pp_restructure_tutorial', icon: 'ri-refresh-line', color: '#ea580c' }
+                );
+            }
+        }
 
         tutorials.forEach(function (t) {
+            // Add separator before ПВЗ section
+            if (t.separator) {
+                var sep = document.createElement('div');
+                sep.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;';
+                sep.innerHTML = '<div style="flex:1;height:1px;background:#e5e7eb;"></div>' +
+                    '<span style="font-size:11px;color:#9ca3af;white-space:nowrap;">Для сотрудников ПВЗ</span>' +
+                    '<div style="flex:1;height:1px;background:#e5e7eb;"></div>';
+                itemsContainer.appendChild(sep);
+            }
+
             var btn = document.createElement('button');
             btn.className = 'tutorial-menu-btn';
             btn.style.cssText =

@@ -47,7 +47,7 @@ def login_view(request):
         phone = request.POST.get('phone', '').strip()
         email = request.POST.get('email', '').strip().lower()
         username = request.POST.get('login', '').strip().upper()
-        password = request.POST.get('password')
+        password = request.POST.get('password', '').strip()
 
         # Определяем идентификатор для rate limiting
         identifier = phone or email or username
@@ -60,18 +60,30 @@ def login_view(request):
             return render(request, 'login.html', {'login_method': login_method})
 
         if phone:
-            # Вход по номеру телефона
+            # Вход по номеру телефона (ищем с нормализацией)
             try:
                 profile = UserProfile.objects.get(phone=phone)
                 username = profile.user.username
             except UserProfile.DoesNotExist:
-                _record_failed_attempt(identifier)
-                messages.error(request, "Пользователь с таким номером телефона не найден.")
-                return render(request, 'login.html', {'login_method': 'phone'})
+                # Пробуем найти по цифрам (без форматирования)
+                import re
+                phone_digits = re.sub(r'\D', '', phone)
+                profile = None
+                if phone_digits:
+                    for p in UserProfile.objects.filter(phone__isnull=False).exclude(phone=''):
+                        if re.sub(r'\D', '', p.phone) == phone_digits:
+                            profile = p
+                            break
+                if profile:
+                    username = profile.user.username
+                else:
+                    _record_failed_attempt(identifier)
+                    messages.error(request, "Пользователь с таким номером телефона не найден.")
+                    return render(request, 'login.html', {'login_method': 'phone'})
         elif email:
             # Вход по email
             try:
-                user_obj = User.objects.get(email=email)
+                user_obj = User.objects.get(email__iexact=email)
                 username = user_obj.username
             except User.DoesNotExist:
                 _record_failed_attempt(identifier)

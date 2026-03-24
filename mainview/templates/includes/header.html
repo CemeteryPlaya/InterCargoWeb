@@ -1,5 +1,6 @@
 {% load static %}
 <meta name="vapid-key" content="{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}">
+<script src="{% static 'scripts/coockiesAndPush.js' %}?v={{ APP_VERSION }}" defer></script>
 <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center">
@@ -189,6 +190,13 @@
     <!-- Включаем мобильный сайдбар -->
     {% include 'includes/m_sidebar.html' %}
 
-    <script src="{% static 'scripts/headerNotifications.js' %}"></script>
-    <script src="{% static 'scripts/tutorial.js' %}" defer></script>
+    <script src="{% static 'scripts/headerNotifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script>
+        window.__IC_USER = {
+            isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
+            isPpWorker: {% if user.is_authenticated and user.userprofile.is_pp_worker %}true{% else %}false{% endif %},
+            isStaff: {% if user.is_authenticated and user.userprofile.is_staff %}true{% else %}false{% endif %}
+        };
+    </script>
+    <script src="{% static 'scripts/tutorial.js' %}?v={{ APP_VERSION }}" defer></script>
 </header>

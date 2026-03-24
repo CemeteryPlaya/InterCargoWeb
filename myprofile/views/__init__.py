@@ -4,7 +4,7 @@ from .profile_setting import settings, update_profile
 from .personal_profile import profile
 from .status_update import update_tracks, get_track_owner
 from .track_codes import track_codes_view, edit_track_code_description, add_track_code_view
-from .push_subscribe import save_push_subscription, send_push, create_notification
+from .push_subscribe import save_push_subscription, send_push
 from .utils import get_user_discount, get_global_price_per_kg
 from .extraditions import extradition_view, search_package, toggle_payment
 from .extradition_Package import extradition_package_view, quick_issue

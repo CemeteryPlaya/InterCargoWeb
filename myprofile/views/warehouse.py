@@ -9,6 +9,7 @@ from collections import OrderedDict, defaultdict
 from myprofile.models import (
     TrackCode, StorageCell, Notification,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
+    RestructureSession,
 )
 from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
 from register.models import UserProfile, PickupPoint, TempUser
@@ -133,11 +134,17 @@ def warehouse_view(request):
                 'sub_cells': sub_cells,
             })
 
+    # Проверяем наличие активной сессии реструктуризации
+    active_restructure = RestructureSession.objects.filter(
+        pickup_point=pickup_point, status='active'
+    ).exists()
+
     return render(request, "warehouse.html", {
         'pickup_point': pickup_point,
         'cells': cells_data,
         'all_pickups': PickupPoint.objects.filter(is_active=True) if user_profile.is_staff else None,
         'hide_description': is_pp_worker_only,
+        'active_restructure': active_restructure,
     })
 
 
@@ -458,7 +465,7 @@ def warehouse_inventory(request):
 @login_required
 @require_POST
 def warehouse_restructure(request):
-    """Реструктуризация склада: удаляет все ячейки на текущем ПВЗ."""
+    """Реструктуризация склада: создаёт сессию, бэкапит ячейки, удаляет все ячейки."""
     if not _is_warehouse_worker(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
@@ -480,10 +487,35 @@ def warehouse_restructure(request):
         messages.error(request, "Не выбран пункт выдачи.")
         return redirect('warehouse')
 
-    deleted_count = StorageCell.objects.filter(pickup_point=pickup_point).count()
-    StorageCell.objects.filter(pickup_point=pickup_point).delete()
+    # Проверяем: нет ли уже активной сессии
+    if RestructureSession.objects.filter(pickup_point=pickup_point, status='active').exists():
+        messages.warning(request, "Уже есть активная реструктуризация. Завершите её сначала.")
+        return redirect('warehouse_reassign', pickup_id=pickup_point.id)
 
-    messages.success(request, f"Реструктуризация: удалено {deleted_count} ячеек. Назначьте ячейки заново.")
+    with transaction.atomic():
+        # Бэкап ячеек
+        cells = StorageCell.objects.filter(pickup_point=pickup_point)
+        backup = []
+        for cell in cells:
+            backup.append({
+                'cell_number': cell.cell_number,
+                'user_id': cell.user_id,
+                'temp_user_id': cell.temp_user_id,
+                'client_name': cell.client_name,
+            })
+
+        # Создаём сессию
+        RestructureSession.objects.create(
+            pickup_point=pickup_point,
+            created_by=request.user,
+            cells_backup=backup,
+        )
+
+        # Удаляем все ячейки
+        deleted_count = cells.count()
+        cells.delete()
+
+    messages.success(request, f"Реструктуризация начата: удалено {deleted_count} ячеек. Назначьте ячейки заново.")
     return redirect('warehouse_reassign', pickup_id=pickup_point.id)
 
 
@@ -547,9 +579,14 @@ def warehouse_reassign(request, pickup_id):
             'cell_id': cell.id if cell else None,
         })
 
+    active_session = RestructureSession.objects.filter(
+        pickup_point=pickup_point, status='active'
+    ).first()
+
     return render(request, "warehouse_reassign.html", {
         'pickup_point': pickup_point,
         'clients': clients,
+        'active_session': active_session,
     })
 
 
@@ -665,3 +702,29 @@ def warehouse_find_client_by_receipt(request):
         })
     else:
         return JsonResponse({'found': False, 'error': 'Чек не привязан к клиенту.'}, status=404)
+
+
+@login_required
+@require_POST
+def finish_restructure(request):
+    """Завершить сессию реструктуризации."""
+    if not _is_warehouse_worker(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    session_id = request.POST.get('session_id')
+    if not session_id:
+        messages.error(request, "Не указана сессия.")
+        return redirect('warehouse')
+
+    try:
+        session = RestructureSession.objects.get(id=session_id, status='active')
+    except RestructureSession.DoesNotExist:
+        messages.error(request, "Сессия не найдена или уже завершена.")
+        return redirect('warehouse')
+
+    session.status = 'completed'
+    session.completed_at = timezone.now()
+    session.save(update_fields=['status', 'completed_at'])
+
+    messages.success(request, "Реструктуризация завершена.")
+    return redirect('warehouse')

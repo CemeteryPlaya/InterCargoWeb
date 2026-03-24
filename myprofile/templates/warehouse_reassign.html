@@ -8,16 +8,16 @@
     <title>Inter Cargo - Реструктуризация склада</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
-    <script src="{% static 'scripts/core.js' %}"></script>
-    <script src="{% static 'scripts/menu.js' %}"></script>
-    <script src="{% static 'scripts/notifications.js' %}"></script>
-    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -51,10 +51,23 @@
                         </h1>
                         <p class="text-gray-500 mt-1">{{ pickup_point }}</p>
                     </div>
-                    <a href="{% url 'warehouse' %}?pickup={{ pickup_point.id }}"
-                        class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm font-medium">
-                        <i class="ri-arrow-left-line"></i> Вернуться на склад
-                    </a>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{% url 'warehouse' %}?pickup={{ pickup_point.id }}"
+                            class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm font-medium">
+                            <i class="ri-arrow-left-line"></i> Вернуться на склад
+                        </a>
+                        {% if active_session %}
+                        <form method="post" action="{% url 'finish_restructure' %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="session_id" value="{{ active_session.id }}">
+                            <button type="submit"
+                                class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium"
+                                onclick="return confirm('Завершить реструктуризацию склада?')">
+                                <i class="ri-check-line"></i> Завершить реструктуризацию
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Способы назначения -->

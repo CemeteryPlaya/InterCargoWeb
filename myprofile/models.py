@@ -703,6 +703,34 @@ class ArrivalSessionItem(models.Model):
         return f"{self.track_code} — {self.owner_name} ({self.weight} кг)"
 
 
+class RestructureSession(models.Model):
+    """Сессия реструктуризации склада ПВЗ."""
+    STATUS_CHOICES = [
+        ('active', 'Активная'),
+        ('completed', 'Завершена'),
+    ]
+    pickup_point = models.ForeignKey(
+        'register.PickupPoint', on_delete=models.CASCADE,
+        verbose_name="Пункт выдачи"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Статус")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Создал"
+    )
+    cells_backup = models.JSONField(default=list, blank=True, verbose_name="Бэкап ячеек")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Начало")
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="Завершено")
+
+    class Meta:
+        verbose_name = "Сессия реструктуризации"
+        verbose_name_plural = "Сессии реструктуризации"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Реструктуризация {self.pickup_point} — {self.get_status_display()}"
+
+
 class ClientRegistry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     registry_date = models.DateField(verbose_name="Дата реестра")

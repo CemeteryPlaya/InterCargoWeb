@@ -2,7 +2,9 @@
 
 import asyncio
 import logging
+from collections import defaultdict
 from datetime import timedelta
+from decimal import Decimal
 
 from aiogram import Bot
 from asgiref.sync import sync_to_async
@@ -29,30 +31,54 @@ async def check_and_send_reminders(bot: Bot):
     if not settings or not settings['is_active']:
         return
 
-    intervals = settings['intervals']
+    global_intervals = settings['intervals']
+    pickup_configs = await _get_pickup_configs(global_intervals)
 
-    for day in intervals:
-        targets = await _get_reminder_targets(day)
+    for pickup_id, config in pickup_configs.items():
+        for day in config['intervals']:
+            targets = await _get_reminder_targets(day, pickup_id)
+            if not targets:
+                continue
 
-        for t in targets:
-            try:
-                text_msg = (
-                    f"📦 <b>Напоминание</b>\n\n"
-                    f"Ваш товар находится на пункте выдачи.\n"
-                    f"Пожалуйста, заберите его.\n\n"
-                    f"📍 Пункт выдачи: <b>{t['pvz_name']}</b>\n"
-                )
-                if t.get('working_hours'):
-                    text_msg += f"🕒 Время работы: <b>{t['working_hours']}</b>\n"
+            # Группируем по пользователю — одно сообщение на все треки
+            by_user = defaultdict(lambda: {
+                'chat_id': None, 'user_id': None,
+                'track_ids': [], 'track_count': 0,
+                'pvz_name': '', 'working_hours': '',
+            })
 
-                await bot.send_message(chat_id=t['chat_id'], text=text_msg)
-                await _log_sent_reminder(t['user_id'], t['track_id'], day)
+            for t in targets:
+                u = by_user[t['user_id']]
+                u['chat_id'] = t['chat_id']
+                u['user_id'] = t['user_id']
+                u['track_ids'].append(t['track_id'])
+                u['track_count'] += 1
+                u['pvz_name'] = t['pvz_name']
+                u['working_hours'] = t['working_hours']
 
-                logger.info(f"Sent {day}-day reminder for track {t['track_id']} to {t['chat_id']}")
-                await asyncio.sleep(0.1)
+            for user_id, data in by_user.items():
+                try:
+                    text_msg = (
+                        f"📦 <b>Напоминание</b>\n\n"
+                        f"У вас {data['track_count']} посылок на пункте выдачи.\n"
+                        f"Пожалуйста, заберите их.\n\n"
+                        f"📍 Пункт выдачи: <b>{data['pvz_name']}</b>\n"
+                    )
+                    if data.get('working_hours'):
+                        text_msg += f"🕒 Время работы: <b>{data['working_hours']}</b>\n"
 
-            except Exception as e:
-                logger.error(f"Error sending reminder to {t['chat_id']}: {e}")
+                    await bot.send_message(chat_id=data['chat_id'], text=text_msg, parse_mode='HTML')
+
+                    for track_id in data['track_ids']:
+                        await _log_sent_reminder(user_id, track_id, day)
+
+                    logger.info(
+                        f"Sent {day}-day reminder ({data['track_count']} tracks) to chat {data['chat_id']}"
+                    )
+                    await asyncio.sleep(0.1)
+
+                except Exception as e:
+                    logger.error(f"Error sending reminder to {data['chat_id']}: {e}")
 
 
 @sync_to_async
@@ -75,17 +101,44 @@ def _get_reminder_settings():
 
 
 @sync_to_async
-def _get_reminder_targets(day):
-    """Находит треки для напоминания — ready > N дней, ПВЗ с reminder_enabled."""
+def _get_pickup_configs(global_intervals):
+    """Возвращает конфигурацию напоминаний для каждого ПВЗ с reminder_enabled."""
+    from register.models import PickupPoint
+
+    configs = {}
+    for pp in PickupPoint.objects.filter(is_active=True, reminder_enabled=True):
+        # Используем интервалы ПВЗ или глобальные
+        if pp.reminder_intervals and pp.reminder_intervals.strip():
+            intervals = []
+            for x in pp.reminder_intervals.split(','):
+                x = x.strip()
+                if x.isdigit():
+                    intervals.append(int(x))
+        else:
+            intervals = global_intervals
+
+        configs[pp.id] = {
+            'pickup': pp,
+            'intervals': intervals,
+        }
+
+    return configs
+
+
+@sync_to_async
+def _get_reminder_targets(day, pickup_id):
+    """Находит треки для напоминания — ready > N дней на конкретном ПВЗ."""
     from myprofile.models import TrackCode
     from tgbot.models import TelegramProfile, SentReminder
-    from register.models import PickupPoint
 
     target_date = (timezone.localdate() - timedelta(days=day))
 
     tracks = (
         TrackCode.objects
-        .filter(status='ready', update_date__lte=target_date)
+        .filter(
+            status='ready', update_date__lte=target_date,
+            owner__userprofile__pickup_id=pickup_id,
+        )
         .exclude(owner__isnull=True)
         .select_related('owner__userprofile__pickup')
     )
@@ -94,14 +147,12 @@ def _get_reminder_targets(day):
     for track in tracks:
         try:
             pickup = track.owner.userprofile.pickup
-            if not pickup or not getattr(pickup, 'reminder_enabled', False):
+            if not pickup:
                 continue
 
-            # Проверяем что ещё не отправляли
             if SentReminder.objects.filter(track_code=track, interval_day=day).exists():
                 continue
 
-            # Проверяем что есть Telegram привязка
             tp = TelegramProfile.objects.filter(user=track.owner).first()
             if not tp:
                 continue

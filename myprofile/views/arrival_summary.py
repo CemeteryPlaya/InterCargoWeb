@@ -34,7 +34,7 @@ def arrival_summary_view(request):
 
     selected_date = request.GET.get('date', '')
     if not selected_date:
-        selected_date = timezone.now().date().isoformat()
+        selected_date = timezone.localdate().isoformat()
 
     tracks = TrackCode.objects.filter(
         delivered_date=selected_date,
