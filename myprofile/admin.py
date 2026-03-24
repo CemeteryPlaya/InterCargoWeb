@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
-    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog
+    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog, RestructureSession
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -300,3 +300,10 @@ class EmailLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(RestructureSession)
+class RestructureSessionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'pickup_point', 'status', 'created_by', 'created_at', 'completed_at')
+    list_filter = ('status', 'pickup_point')
+    readonly_fields = ('created_at', 'cells_backup')

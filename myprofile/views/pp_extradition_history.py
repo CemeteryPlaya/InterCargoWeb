@@ -45,6 +45,16 @@ def pp_extradition_history_view(request):
         except ValueError:
             pass
 
+    # Если даты не указаны — не загружаем данные
+    dates = OrderedDict()
+    if not date_from and not date_to:
+        return render(request, 'pp_extradition_history.html', {
+            'dates': dates,
+            'pickup_name': str(pickup) if pickup else 'Все ПВЗ',
+            'date_from': date_from_str,
+            'date_to': date_to_str,
+        })
+
     # Получаем все выдачи для данного ПВЗ
     extraditions = Extradition.objects.select_related(
         'user', 'package', 'issued_by',
@@ -65,7 +75,6 @@ def pp_extradition_history_view(request):
         extraditions = extraditions.filter(created_at__date__lte=date_to)
 
     # Группируем: дата → клиент → выдачи
-    dates = OrderedDict()
     for ext in extraditions:
         date_key = timezone.localdate(ext.created_at)
         date_str = date_key.strftime('%d.%m.%Y')

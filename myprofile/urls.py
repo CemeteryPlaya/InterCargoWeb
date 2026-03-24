@@ -73,6 +73,7 @@ urlpatterns = [
     path('warehouse/reassign/<int:pickup_id>/', warehouse.warehouse_reassign, name='warehouse_reassign'),
     path('warehouse/assign-cell/', warehouse.warehouse_assign_cell, name='warehouse_assign_cell'),
     path('warehouse/find-client/', warehouse.warehouse_find_client_by_receipt, name='warehouse_find_client_by_receipt'),
+    path('warehouse/finish-restructure/', warehouse.finish_restructure, name='finish_restructure'),
     path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
     path('arrival-summary/', arrival_summary.arrival_summary_view, name='arrival_summary'),
     path('arrival-summary/toggle/', arrival_summary.toggle_home_delivery, name='toggle_home_delivery'),

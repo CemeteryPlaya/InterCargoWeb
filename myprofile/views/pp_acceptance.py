@@ -431,7 +431,7 @@ def attention_required_view(request):
     # Группируем по ПВЗ → причина → клиент
     pickups = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {
         'name': '', 'login': '', 'owner_id': None, 'owner_type': None,
-        'added_by': '', 'receipts': [], 'track_count': 0, 'total_weight': 0.0,
+        'added_by': '', 'added_by_set': set(), 'receipts': [], 'track_count': 0, 'total_weight': 0.0,
     })))
 
     for receipt in receipts:
@@ -439,7 +439,9 @@ def attention_required_view(request):
         pickup_name = receipt.attention_pickup or 'Не указан'
         added_by = ''
         if receipt.attention_added_by:
-            added_by = receipt.attention_added_by.get_full_name() or receipt.attention_added_by.username
+            name = receipt.attention_added_by.get_full_name()
+            login = receipt.attention_added_by.username
+            added_by = f"{login} ({name})" if name and name != login else login
 
         if receipt.owner:
             client_key = f'user_{receipt.owner.id}'
@@ -461,7 +463,9 @@ def attention_required_view(request):
         client['login'] = client_login
         client['owner_id'] = owner_id
         client['owner_type'] = owner_type
-        client['added_by'] = added_by
+        if added_by:
+            client['added_by_set'].add(added_by)
+        client['added_by'] = ', '.join(sorted(client['added_by_set'])) if client['added_by_set'] else ''
         client['receipts'].append(receipt)
 
         for item in receipt.items.all():

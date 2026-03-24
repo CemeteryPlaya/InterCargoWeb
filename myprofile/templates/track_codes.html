@@ -8,19 +8,19 @@
     <title>Inter Cargo - Трек-коды</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
-    <script src="{% static 'scripts/core.js' %}"></script>
-    <script src="{% static 'scripts/menu.js' %}"></script>
-    <script src="{% static 'scripts/trackFilter.js' %}"></script>
-    <script src="{% static 'scripts/notifications.js' %}"></script>
-    <script src="{% static 'scripts/faq.js' %}"></script>
-    <script src="{% static 'scripts/phone.js' %}"></script>
-    <script src="{% static 'scripts/forms.js' %}"></script>
-    <script defer src="{% static 'scripts/cdn.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/trackFilter.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/faq.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
+    <script defer src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -329,7 +329,7 @@
     {% endblock %}
 
     {% include 'includes/footer.html' %}
-<script src="{% static 'scripts/trackCodeValidation.js' %}?v=2"></script>
+<script src="{% static 'scripts/trackCodeValidation.js' %}?v={{ APP_VERSION }}"></script>
 </body>
 
 </html>

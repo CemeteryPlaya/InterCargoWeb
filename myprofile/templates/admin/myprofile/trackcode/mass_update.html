@@ -4,7 +4,7 @@
 {% block extrahead %}
 {{ block.super }}
 {{ media }}
-<script src="{% static 'admin/js/cancel.js' %}" async></script>
+<script src="{% static 'admin/js/cancel.js' %}?v={{ APP_VERSION }}" async></script>
 {% endblock %}
 
 {% block breadcrumbs %}

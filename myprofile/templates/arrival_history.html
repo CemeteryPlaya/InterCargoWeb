@@ -8,15 +8,15 @@
     <title>Inter Cargo - История приходов</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
-    <script src="{% static 'scripts/core.js' %}"></script>
-    <script src="{% static 'scripts/menu.js' %}"></script>
-    <script src="{% static 'scripts/notifications.js' %}"></script>
-    <script src="{% static 'scripts/cdn.min.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
     <style>
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }

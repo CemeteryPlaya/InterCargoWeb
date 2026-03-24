@@ -11,20 +11,19 @@
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <link rel="manifest" href="/static/manifest.json">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script src="{% static 'scripts/tailwindConfig.js' %}"></script>
-    <script src="{% static 'scripts/core.js' %}"></script>
-    <script src="{% static 'scripts/faq.js' %}"></script>
-    <script src="{% static 'scripts/menu.js' %}"></script>
-    <script src="{% static 'scripts/notifications.js' %}"></script>
-    <script src="{% static 'scripts/notifyButton.js' %}"></script>
-    <script src="{% static 'scripts/calculator.js' %}?v=1"></script>
-    <script src="{% static 'scripts/forms.js' %}"></script>
-    <script src="{% static 'scripts/phone.js' %}"></script>
-    <script src="{% static 'scripts/coockiesAndPush.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'styles/css2.css' %}" />
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/faq.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifyButton.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/calculator.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
-    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -69,6 +68,11 @@
                             Войти
                             <i class="ri-arrow-right-line ml-2"></i>
                         </a>
+                        <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()"
+                            class="inline-flex items-center bg-white/20 backdrop-blur text-white px-6 py-3 !rounded-button font-medium hover:bg-white/30 transition w-fit border border-white/30">
+                            <i class="ri-graduation-cap-line mr-2"></i>
+                            Обучение по сайту
+                        </button>
                     </div>
                     {% endif %}
                 </div>
@@ -421,8 +425,8 @@
         </div>
     </section>
 
-    <script src="{% static 'scripts/tabSwitcher.js' %}"></script>
-    <script src="{% static 'scripts/indexLogin.js' %}"></script>
+    <script src="{% static 'scripts/tabSwitcher.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/indexLogin.js' %}?v={{ APP_VERSION }}"></script>
     {% endif %}
 
 

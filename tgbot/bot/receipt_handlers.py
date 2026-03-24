@@ -94,15 +94,14 @@ def _get_user_receipts(user_id):
     for receipt in receipts:
         items = list(receipt.items.select_related('track_code').all())
 
-        # Используем сохранённый вес из ReceiptItem (надёжнее — не зависит от архивации)
-        total_weight = sum(
-            (item.weight or (item.track_code.weight if item.track_code else None) or Decimal('0'))
-            for item in items
-        )
-
-        # Если в модели чека уже есть рассчитанные значения — используем их
+        # Приоритет: receipt.total_weight > сумма display_weight > 0
         if receipt.total_weight and receipt.total_weight > 0:
             total_weight = receipt.total_weight
+        else:
+            total_weight = sum(
+                (item.display_weight or Decimal('0'))
+                for item in items
+            )
 
         try:
             price = int(receipt.total_price) if receipt.total_price is not None else 0

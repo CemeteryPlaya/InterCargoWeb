@@ -11,6 +11,11 @@ class PickupPoint(models.Model):
     show_in_registration = models.BooleanField(default=True, verbose_name="Показывать в регистрации/футере")
     is_home_delivery = models.BooleanField(default=False, verbose_name="Доставка на дом")
     reminder_enabled = models.BooleanField(default=False, verbose_name="Напоминания включены")
+    reminder_intervals = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name="Интервалы напоминаний (дни)",
+        help_text="Через запятую, например: 3,5,7. Если пусто — используются глобальные настройки."
+    )
 
     class Meta:
         verbose_name = "Пункт выдачи"

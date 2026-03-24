@@ -231,7 +231,7 @@ def print_documents_view(request):
     return render(request, 'print_documents.html', {
         'pickup_choices': pickup_choices,
         'registries': registries,
-        'today': timezone.now().date()
+        'today': timezone.localdate()
     })
 
 @login_required
@@ -321,7 +321,7 @@ def client_registry_pdf(request, registry_id):
     return render(request, 'client_registry_pdf.html', {
         'registry': registry,
         'data': data,
-        'today': timezone.now().date(),
+        'today': timezone.localdate(),
         'all_clients_count': all_clients_count,
         'all_weight_total': all_weight_total,
         'all_sum_total': all_sum_total
