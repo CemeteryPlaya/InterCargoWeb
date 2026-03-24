@@ -87,14 +87,12 @@
               </div>
               <div class="flex items-center">
                 <div class="text-right mr-2">
-                  {% comment %}PAYMENT COMMENTED OUT
-                  <span class="text-xs font-semibold {% if receipt.is_paid %}text-green-600{% else %}text-red-600{% endif %}">
-                    {{ receipt.is_paid|yesno:"Оплачен,Не оплачен" }}
+                  <span class="text-xs font-semibold {% if receipt.is_claimed %}text-green-600{% else %}text-orange-500{% endif %}">
+                    {% if receipt.is_claimed %}Выдано{% else %}Не выдано{% endif %}
                   </span>
-                  {% if receipt.paid_at %}
-                  <div class="text-[10px] text-gray-500">{{ receipt.paid_at|date:"d.m.Y H:i" }}</div>
+                  {% if receipt.claimed_at %}
+                  <div class="text-[10px] text-gray-500">{{ receipt.claimed_at|date:"d.m.Y H:i" }}</div>
                   {% endif %}
-                  {% endcomment %}
                 </div>
                 <svg :class="activeReceipt === {{ receipt.id }} ? 'rotate-180' : ''"
                   class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2"

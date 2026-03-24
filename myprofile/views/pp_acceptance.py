@@ -394,6 +394,8 @@ def finish_acceptance_session(request):
         ).distinct().update(
             needs_attention=True,
             attention_reason='Не принято при приёмке на ПВЗ',
+            attention_added_by=request.user,
+            attention_pickup=str(pickup),
         )
 
     if count:
@@ -424,33 +426,42 @@ def attention_required_view(request):
     # Чеки, требующие внимания
     receipts = Receipt.objects.filter(
         needs_attention=True,
-    ).select_related('owner', 'temp_owner').prefetch_related('items__track_code')
+    ).select_related('owner', 'temp_owner', 'attention_added_by').prefetch_related('items__track_code')
 
-    # Группируем по причине → клиент
-    reasons = defaultdict(lambda: defaultdict(lambda: {
-        'name': '', 'owner_id': None, 'owner_type': None,
-        'receipts': [], 'track_count': 0, 'total_weight': 0.0,
-    }))
+    # Группируем по ПВЗ → причина → клиент
+    pickups = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {
+        'name': '', 'login': '', 'owner_id': None, 'owner_type': None,
+        'added_by': '', 'receipts': [], 'track_count': 0, 'total_weight': 0.0,
+    })))
 
     for receipt in receipts:
         reason = receipt.attention_reason or 'Не указана'
+        pickup_name = receipt.attention_pickup or 'Не указан'
+        added_by = ''
+        if receipt.attention_added_by:
+            added_by = receipt.attention_added_by.get_full_name() or receipt.attention_added_by.username
+
         if receipt.owner:
             client_key = f'user_{receipt.owner.id}'
             client_name = receipt.owner.get_full_name() or receipt.owner.username
+            client_login = receipt.owner.username
             owner_type = 'user'
             owner_id = receipt.owner.id
         elif receipt.temp_owner:
             client_key = f'temp_{receipt.temp_owner.id}'
             client_name = receipt.temp_owner.login
+            client_login = receipt.temp_owner.login
             owner_type = 'temp'
             owner_id = receipt.temp_owner.id
         else:
             continue
 
-        client = reasons[reason][client_key]
+        client = pickups[pickup_name][reason][client_key]
         client['name'] = client_name
+        client['login'] = client_login
         client['owner_id'] = owner_id
         client['owner_type'] = owner_type
+        client['added_by'] = added_by
         client['receipts'].append(receipt)
 
         for item in receipt.items.all():
@@ -459,15 +470,20 @@ def attention_required_view(request):
             client['total_weight'] += float(w or 0)
 
     attention_data = []
-    for reason, clients in reasons.items():
-        clients_list = sorted(clients.values(), key=lambda c: c['name'])
+    for pickup_name, reasons in sorted(pickups.items()):
+        reasons_list = []
+        for reason, clients in sorted(reasons.items()):
+            clients_list = sorted(clients.values(), key=lambda c: c['login'])
+            reasons_list.append({
+                'reason': reason,
+                'clients': clients_list,
+                'total_tracks': sum(c['track_count'] for c in clients_list),
+            })
         attention_data.append({
-            'reason': reason,
-            'clients': clients_list,
-            'total_tracks': sum(c['track_count'] for c in clients_list),
+            'pickup_name': pickup_name,
+            'reasons': reasons_list,
+            'total_tracks': sum(r['total_tracks'] for r in reasons_list),
         })
-
-    attention_data.sort(key=lambda x: x['reason'])
 
     return render(request, "attention_required.html", {
         'attention_data': attention_data,
@@ -506,7 +522,7 @@ def resolve_attention(request):
         messages.error(request, "Неверный тип клиента.")
         return redirect('attention_required')
 
-    count = qs.update(needs_attention=False, attention_reason='')
+    count = qs.update(needs_attention=False, attention_reason='', attention_added_by=None, attention_pickup='')
 
     messages.success(request, f"Проблемы устранены: {count} чеков обновлено.")
     return redirect('attention_required')

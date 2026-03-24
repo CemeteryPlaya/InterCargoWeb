@@ -30,11 +30,11 @@ async def notification_worker(bot: Bot, interval: int = 10):
 
 async def send_pending_notifications(bot: Bot) -> int:
     """Ищет неотправленные уведомления и отправляет их."""
-    grouped_ready, other_ids = await _get_and_group_pending()
+    grouped_ready, status_notifications, skip_ids = await _get_and_group_pending()
 
     sent_count = 0
 
-    # Отправляем уведомления о доставке на ПВЗ
+    # 1) Групповые уведомления о доставке на ПВЗ (ready)
     for user_id, group_data in grouped_ready.items():
         try:
             chat_id = group_data['chat_id']
@@ -64,9 +64,30 @@ async def send_pending_notifications(bot: Bot) -> int:
         except Exception as e:
             logger.error(f"Failed to send delivery notification to user {user_id}: {e}")
 
-    # Все остальные уведомления — помечаем как обработанные без отправки
-    if other_ids:
-        await _mark_sent_bulk(other_ids)
+    # 2) Уведомления об изменении статуса (shipped_cn, delivered, shipping_pp и т.д.)
+    for notif_data in status_notifications:
+        try:
+            chat_id = notif_data['chat_id']
+            if not chat_id:
+                await _mark_sent_bulk([notif_data['id']])
+                continue
+
+            await bot.send_message(
+                chat_id=chat_id,
+                text=notif_data['text'],
+                parse_mode='HTML',
+                link_preview_options=LinkPreviewOptions(is_disabled=True),
+            )
+            await asyncio.sleep(0.05)
+            await _mark_sent_bulk([notif_data['id']])
+            sent_count += 1
+
+        except Exception as e:
+            logger.error(f"Failed to send status notification {notif_data['id']}: {e}")
+
+    # 3) Уведомления, которые не нужно отправлять (настройки пользователя)
+    if skip_ids:
+        await _mark_sent_bulk(skip_ids)
 
     return sent_count
 
@@ -75,10 +96,10 @@ async def send_pending_notifications(bot: Bot) -> int:
 def _get_and_group_pending():
     """
     Получает неотправленные уведомления.
-    Группирует 'ready' по пользователю для отправки.
-    Остальные — собирает ID для пометки как обработанные.
+    Группирует 'ready' по пользователю.
+    Проверяет настройки пользователя для остальных.
     """
-    from tgbot.models import TelegramNotification, TelegramProfile
+    from tgbot.models import TelegramNotification, TelegramProfile, UserNotificationSettings
 
     pending = list(
         TelegramNotification.objects
@@ -87,6 +108,7 @@ def _get_and_group_pending():
     )
 
     profiles_cache = {}
+    settings_cache = {}
 
     def get_chat_id(user_id):
         if user_id not in profiles_cache:
@@ -94,11 +116,42 @@ def _get_and_group_pending():
             profiles_cache[user_id] = tp.telegram_chat_id if tp else None
         return profiles_cache[user_id]
 
+    def get_user_settings(user_id):
+        if user_id not in settings_cache:
+            s = UserNotificationSettings.objects.filter(user_id=user_id).first()
+            settings_cache[user_id] = s
+        return settings_cache[user_id]
+
+    def should_send_status(user_id, title):
+        """Проверяет, нужно ли отправлять уведомление по настройкам пользователя."""
+        s = get_user_settings(user_id)
+        if not s:
+            # Нет настроек — по умолчанию only_ready, не отправляем статусные
+            return False
+
+        if s.level == 'all':
+            return True
+        elif s.level == 'only_ready':
+            return False
+        elif s.level == 'selective':
+            # Проверяем конкретный статус из title
+            title_lower = title.lower() if title else ''
+            if 'отправлен' in title_lower and 'китай' in title_lower:
+                return s.notify_shipped_cn
+            elif 'сортировочн' in title_lower:
+                return s.notify_delivered_sort
+            elif 'доставке до пвз' in title_lower or 'shipping_pp' in title_lower:
+                return s.notify_shipping_pp
+            return True
+        return False
+
     grouped_ready = defaultdict(lambda: {'chat_id': None, 'ids': [], 'tracks': []})
-    other_ids = []
+    status_notifications = []
+    skip_ids = []
 
     for n in pending:
         if n.title == 'ready' and n.notification_type == 'tracking':
+            # Группируем уведомления о доставке на ПВЗ
             chat_id = get_chat_id(n.user_id)
             parts = n.message.split('|', 1)
             track_code = parts[0] if parts else ''
@@ -115,10 +168,30 @@ def _get_and_group_pending():
                 'track_code': track_code,
                 'weight': weight,
             })
+        elif n.notification_type == 'tracking':
+            # Статусные уведомления — проверяем настройки
+            if should_send_status(n.user_id, n.title):
+                chat_id = get_chat_id(n.user_id)
+                status_notifications.append({
+                    'id': n.id,
+                    'chat_id': chat_id,
+                    'text': f"{n.type_emoji} <b>{n.title}</b>\n\n{n.message}",
+                })
+            else:
+                skip_ids.append(n.id)
         else:
-            other_ids.append(n.id)
+            # Прочие типы (info, warning и т.д.) — отправляем всегда
+            chat_id = get_chat_id(n.user_id)
+            if chat_id:
+                status_notifications.append({
+                    'id': n.id,
+                    'chat_id': chat_id,
+                    'text': f"{n.type_emoji} <b>{n.title}</b>\n\n{n.message}",
+                })
+            else:
+                skip_ids.append(n.id)
 
-    return dict(grouped_ready), other_ids
+    return dict(grouped_ready), status_notifications, skip_ids
 
 
 @sync_to_async

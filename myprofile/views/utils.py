@@ -70,6 +70,7 @@ def _recalc_receipt(receipt, effective_rate):
     receipt.total_weight = total_weight
     receipt.total_price = total_price
     receipt.price_per_kg = effective_rate
+    receipt._allow_content_update = True
     receipt.save()
 
 

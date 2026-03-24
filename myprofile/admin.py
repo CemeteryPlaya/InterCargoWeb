@@ -119,9 +119,16 @@ class ReceiptAdmin(admin.ModelAdmin):
         return "—"
     client_display.short_description = "Клиент"
 
+    def save_model(self, request, obj, form, change):
+        """Разрешаем администраторам изменять чеки через панель администратора."""
+        obj._allow_content_update = True
+        super().save_model(request, obj, form, change)
+
 @admin.register(ReceiptItem)
 class ReceiptItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'receipt', 'track_code')
+    list_display = ('id', 'receipt', 'track_code', 'weight')
+    search_fields = ('track_code__track_code', 'receipt__owner__username', 'receipt__temp_owner__login', 'receipt__receipt_number')
+    list_filter = ('receipt__created_at',)
 
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):

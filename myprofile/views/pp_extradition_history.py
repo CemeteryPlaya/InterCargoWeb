@@ -1,3 +1,5 @@
+from datetime import datetime as _dt
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponseForbidden
@@ -27,6 +29,22 @@ def pp_extradition_history_view(request):
     except UserProfile.DoesNotExist:
         pickup = None
 
+    # Фильтр по диапазону дат
+    date_from_str = request.GET.get('date_from', '')
+    date_to_str = request.GET.get('date_to', '')
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = _dt.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+    if date_to_str:
+        try:
+            date_to = _dt.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
     # Получаем все выдачи для данного ПВЗ
     extraditions = Extradition.objects.select_related(
         'user', 'package', 'issued_by',
@@ -39,6 +57,12 @@ def pp_extradition_history_view(request):
     # Для is_staff показываем все, для pp_worker — только свой ПВЗ
     if not request.user.userprofile.is_staff and pickup:
         extraditions = extraditions.filter(pickup_point=str(pickup))
+
+    # Применяем фильтр по датам
+    if date_from:
+        extraditions = extraditions.filter(created_at__date__gte=date_from)
+    if date_to:
+        extraditions = extraditions.filter(created_at__date__lte=date_to)
 
     # Группируем: дата → клиент → выдачи
     dates = OrderedDict()
@@ -86,4 +110,6 @@ def pp_extradition_history_view(request):
     return render(request, 'pp_extradition_history.html', {
         'dates': dates,
         'pickup_name': str(pickup) if pickup else 'Все ПВЗ',
+        'date_from': date_from_str,
+        'date_to': date_to_str,
     })

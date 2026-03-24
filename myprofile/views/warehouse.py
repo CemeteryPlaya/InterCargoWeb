@@ -298,6 +298,8 @@ def warehouse_not_arrived(request):
         ).distinct().update(
             needs_attention=True,
             attention_reason='Возвращено со склада ПВЗ',
+            attention_added_by=request.user,
+            attention_pickup=str(pickup_point),
         )
 
         # Удаляем ячейку

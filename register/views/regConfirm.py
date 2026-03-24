@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from register.models import PendingRegistration, UserProfile, TempUser
-from myprofile.models import TrackCode, Receipt, CustomerDiscount
+from myprofile.models import TrackCode, Receipt, CustomerDiscount, StorageCell
 
 
 def confirm_view(request):
@@ -45,6 +45,10 @@ def approve_registration(request, reg_id):
             owner=user, temp_owner=None
         )
         CustomerDiscount.objects.filter(temp_user=temp_user).update(
+            user=user, temp_user=None
+        )
+        # Переносим ячейки хранения: привязываем к новому пользователю
+        StorageCell.objects.filter(temp_user=temp_user).update(
             user=user, temp_user=None
         )
         temp_user.delete()

@@ -9,7 +9,6 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt, StorageCell
 from register.models import UserProfile, PickupPoint
-from myprofile.views.utils import parse_paid_at
 
 
 def _can_issue(user):
@@ -71,6 +70,15 @@ def extradition_view(request):
                 confirmed=True
             )
 
+            # Отмечаем чеки как оплаченные и выданные
+            now = timezone.now()
+            all_receipts.update(
+                is_paid=True,
+                paid_at=now,
+                is_claimed=True,
+                claimed_at=now,
+            )
+
             # Меняем статус всех трек-кодов через чеки
             for receipt in all_receipts:
                 for item in receipt.items.all():
@@ -78,11 +86,22 @@ def extradition_view(request):
                     track.status = 'claimed'
                     track.save()
 
-                    Notification.objects.create(
-                        user=track.owner,
-                        message=f"📦 Ваш трек {track.track_code} выдан в пункте: {extradition.pickup_point}. "
-                                f"Штрих-код выдачи: {package.barcode}"
-                    )
+                    if track.owner:
+                        Notification.objects.create(
+                            user=track.owner,
+                            message=f"📦 Ваш трек {track.track_code} выдан в пункте: {extradition.pickup_point}. "
+                                    f"Штрих-код выдачи: {package.barcode}"
+                        )
+
+            # Удаляем ячейку хранения клиента (если есть)
+            try:
+                user_pickup = package.user.userprofile.pickup
+                if user_pickup:
+                    StorageCell.objects.filter(
+                        pickup_point=user_pickup, user=package.user
+                    ).delete()
+            except (UserProfile.DoesNotExist, AttributeError):
+                pass
 
             package.is_issued = True
             package.save()

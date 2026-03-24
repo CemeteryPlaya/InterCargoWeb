@@ -228,3 +228,35 @@
 2026-03-15 22:59:31,206 - aiogram.event - INFO - Update id=61603463 is handled. Duration 236 ms by bot id=8209475252
 2026-03-15 22:59:32,213 - aiogram.event - INFO - Update id=61603464 is handled. Duration 242 ms by bot id=8209475252
 2026-03-15 22:59:32,884 - aiogram.event - INFO - Update id=61603465 is handled. Duration 252 ms by bot id=8209475252
+2026-03-24 20:48:50,203 - tgbot.management.commands.run_bot - INFO - Background workers started
+2026-03-24 20:48:50,204 - tgbot.management.commands.run_bot - INFO - Bot starting in polling mode...
+2026-03-24 20:48:50,211 - tgbot.bot.workers.notifications - INFO - Notification worker started.
+2026-03-24 20:48:50,212 - tgbot.bot.workers.reminders - INFO - Reminders worker started (check every 4h)
+2026-03-24 20:48:50,583 - aiogram.dispatcher - INFO - Start polling
+2026-03-24 20:48:50,679 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2803 to 36909393
+2026-03-24 20:48:50,683 - aiogram.dispatcher - INFO - Run polling for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
+2026-03-24 20:48:50,941 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2804 to 36909393
+2026-03-24 20:48:51,212 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2813 to 733256345
+2026-03-24 20:48:51,442 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2814 to 733256345
+2026-03-24 20:48:51,673 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2815 to 733256345
+2026-03-24 20:48:51,911 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2816 to 733256345
+2026-03-24 20:48:52,154 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2817 to 733256345
+2026-03-24 20:48:52,391 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2818 to 733256345
+2026-03-24 20:48:52,652 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2819 to 733256345
+2026-03-24 20:48:52,885 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2820 to 733256345
+2026-03-24 20:48:53,130 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2821 to 733256345
+2026-03-24 20:48:53,469 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2822 to 733256345
+2026-03-24 20:48:53,738 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2823 to 733256345
+2026-03-24 20:48:53,982 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2824 to 733256345
+2026-03-24 20:48:54,253 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2825 to 733256345
+2026-03-24 20:48:54,518 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2826 to 733256345
+2026-03-24 20:48:54,810 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2827 to 733256345
+2026-03-24 20:48:55,056 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2828 to 733256345
+2026-03-24 20:48:55,284 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2829 to 733256345
+2026-03-24 20:48:55,516 - tgbot.bot.workers.reminders - INFO - Sent 3-day reminder for track 2830 to 733256345
+2026-03-24 21:05:47,038 - aiogram.event - INFO - Update id=61603466 is handled. Duration 234 ms by bot id=8209475252
+2026-03-24 21:05:48,922 - aiogram.event - INFO - Update id=61603467 is handled. Duration 555 ms by bot id=8209475252
+2026-03-24 21:43:20,598 - aiogram.dispatcher - INFO - Polling stopped
+2026-03-24 21:43:20,599 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2026-03-24 21:43:20,599 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8209475252)
+2026-03-24 21:43:20,862 - aiogram.dispatcher - INFO - Polling stopped for bot @intercargotestbot id=8209475252 - 'Inter Cargo Bot Test'
