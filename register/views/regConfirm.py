@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 from register.models import PendingRegistration, UserProfile, TempUser
 from myprofile.models import TrackCode, Receipt, CustomerDiscount, StorageCell
 
@@ -38,7 +40,7 @@ def approve_registration(request, reg_id):
     # Переносим все данные с temp_owner на нового пользователя
     temp_user = TempUser.objects.filter(login=reg.login).first()
     if temp_user:
-        TrackCode.objects.filter(temp_owner=temp_user).update(
+        TrackCode.all_objects.filter(temp_owner=temp_user).update(
             owner=user, temp_owner=None
         )
         Receipt.objects.filter(temp_owner=temp_user).update(
@@ -53,6 +55,24 @@ def approve_registration(request, reg_id):
         )
         temp_user.delete()
 
+    # Отправляем email о подтверждении
+    if reg.email:
+        try:
+            send_mail(
+                subject='Inter Cargo — Ваша заявка одобрена',
+                message=(
+                    f'Здравствуйте, {reg.first_name}!\n\n'
+                    f'Ваша заявка на регистрацию в Inter Cargo одобрена.\n'
+                    f'Теперь вы можете войти в личный кабинет, используя ваш логин: {reg.login}\n\n'
+                    f'С уважением,\nКоманда Inter Cargo'
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[reg.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
     reg.delete()
     messages.success(request, "Пользователь успешно подтверждён.")
     return redirect('confirm')
@@ -63,7 +83,28 @@ def reject_registration(request, reg_id):
         return redirect('profile')
 
     reg = PendingRegistration.objects.get(id=reg_id)
-    reg.delete()
+    reason = request.POST.get('reason', '').strip() if request.method == 'POST' else ''
 
+    # Отправляем email об отклонении
+    if reg.email:
+        try:
+            reason_text = f'\nПричина: {reason}\n' if reason else '\n'
+            send_mail(
+                subject='Inter Cargo — Ваша заявка отклонена',
+                message=(
+                    f'Здравствуйте, {reg.first_name}!\n\n'
+                    f'К сожалению, ваша заявка на регистрацию в Inter Cargo была отклонена.\n'
+                    f'{reason_text}\n'
+                    f'Вы можете попробовать зарегистрироваться повторно или связаться с нами.\n\n'
+                    f'С уважением,\nКоманда Inter Cargo'
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[reg.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    reg.delete()
     messages.success(request, "Заявка отклонена.")
     return redirect('confirm')

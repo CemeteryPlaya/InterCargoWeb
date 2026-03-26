@@ -7,7 +7,9 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from collections import OrderedDict
 
-from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation
+from django.db.models import Q
+
+from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation, ReceiptItem
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint, TempUser
 from django.contrib.auth.models import User
@@ -36,13 +38,15 @@ def arrival_summary_view(request):
     if not selected_date:
         selected_date = timezone.localdate().isoformat()
 
-    tracks = TrackCode.objects.filter(
-        delivered_date=selected_date,
+    # Ищем треки по delivered_date ИЛИ по привязке к Arrival за эту дату
+    arrival_track_ids = Arrival.objects.filter(date=selected_date).values_list('track_codes', flat=True)
+    tracks = TrackCode.all_objects.filter(
+        Q(delivered_date=selected_date) | Q(id__in=arrival_track_ids),
         status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
     ).select_related(
         'owner', 'owner__userprofile', 'owner__userprofile__pickup',
         'delivery_pickup', 'temp_owner', 'temp_owner__pickup',
-    )
+    ).distinct()
 
     default_rate = get_global_price_per_kg()
     discount_threshold = float(get_discount_weight_threshold())
@@ -179,6 +183,85 @@ def arrival_summary_view(request):
             pp_name = str(pp) if pp else 'Не указан'
             _add_to_pickup(pickups, pp_id, pp_name, uid, base_client, weight)
 
+    # === Архивированные треки (track_code удалён, данные в ReceiptItem) ===
+    # Находим ReceiptItem без track_code, но с receipt.created_at = selected_date
+    active_track_ids = set(t.id for t in tracks)
+    archived_items = (
+        ReceiptItem.objects
+        .filter(track_code__isnull=True, receipt__created_at=selected_date)
+        .select_related('receipt', 'receipt__owner', 'receipt__owner__userprofile',
+                        'receipt__owner__userprofile__pickup', 'receipt__temp_owner',
+                        'receipt__temp_owner__pickup')
+    )
+    for item in archived_items:
+        receipt = item.receipt
+        weight = item.display_weight or Decimal("0")
+        owner = receipt.owner
+        temp_owner = receipt.temp_owner
+
+        if owner:
+            discount = get_user_discount(owner)
+            effective_rate = default_rate - discount
+            phone = ''
+            try:
+                phone = owner.userprofile.phone
+            except (UserProfile.DoesNotExist, AttributeError):
+                pass
+            base_client = {
+                'username': owner.username,
+                'full_name': owner.get_full_name() or owner.username,
+                'phone': phone,
+                'track_count': 0,
+                'total_weight': Decimal("0"),
+                'effective_rate': effective_rate,
+                'total_price': 0,
+            }
+            uid = owner.id
+            # Определяем ПВЗ из чека
+            try:
+                pp = owner.userprofile.pickup
+            except (UserProfile.DoesNotExist, AttributeError):
+                pp = None
+            pp_id = pp.id if pp else 0
+            pp_name = str(pp) if pp else 'Не указан'
+            # Проверяем домашнюю доставку
+            if home_pp and receipt.pickup_point == str(home_pp):
+                if uid not in home_clients:
+                    home_clients[uid] = {**base_client, 'is_override': True}
+                home_clients[uid]['track_count'] += 1
+                home_clients[uid]['total_weight'] += weight
+            else:
+                _add_to_pickup(pickups, pp_id, pp_name, uid, base_client, weight)
+        elif temp_owner:
+            temp_discount = get_temp_user_discount(temp_owner)
+            temp_effective_rate = default_rate - temp_discount
+            if temp_owner.pickup_id:
+                pp = temp_owner.pickup
+                key = f'temp_{temp_owner.id}'
+                _add_to_pickup(pickups, pp.id, str(pp), key, {
+                    'username': temp_owner.login,
+                    'full_name': temp_owner.login,
+                    'phone': temp_owner.phone or '',
+                    'track_count': 0,
+                    'total_weight': Decimal("0"),
+                    'effective_rate': temp_effective_rate,
+                    'total_price': 0,
+                    'is_temp': True,
+                    'temp_user_id': temp_owner.id,
+                }, weight)
+            else:
+                tid = temp_owner.id
+                if tid not in temp_clients:
+                    temp_clients[tid] = {
+                        'login': temp_owner.login,
+                        'track_count': 0,
+                        'total_weight': Decimal("0"),
+                        'effective_rate': temp_effective_rate,
+                        'total_price': 0,
+                    }
+                temp_clients[tid]['track_count'] += 1
+                temp_clients[tid]['total_weight'] += weight
+
     # Считаем total_price от общего веса
     for pp_data in pickups.values():
         for client in pp_data['clients'].values():
@@ -235,13 +318,13 @@ def toggle_home_delivery(request):
 
     # Выбираем треки по владельцу (зарегистрированному или временному)
     if temp_user_id:
-        tracks = TrackCode.objects.filter(
+        tracks = TrackCode.all_objects.filter(
             temp_owner_id=temp_user_id,
             delivered_date=date,
             status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
         )
     else:
-        tracks = TrackCode.objects.filter(
+        tracks = TrackCode.all_objects.filter(
             owner_id=user_id,
             delivered_date=date,
             status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
@@ -410,11 +493,12 @@ def generate_day_receipts(request):
 
     statuses = ('delivered', 'shipping_pp', 'ready', 'claimed')
 
-    # Собираем уникальных владельцев треков за этот день
-    tracks = TrackCode.objects.filter(
-        delivered_date=date_str,
+    # Собираем уникальных владельцев треков за этот день (по delivered_date или Arrival)
+    arrival_track_ids = Arrival.objects.filter(date=date_str).values_list('track_codes', flat=True)
+    tracks = TrackCode.all_objects.filter(
+        Q(delivered_date=date_str) | Q(id__in=arrival_track_ids),
         status__in=statuses,
-    ).select_related('owner', 'temp_owner')
+    ).select_related('owner', 'temp_owner').distinct()
 
     users = set()
     temp_users = set()
@@ -481,7 +565,7 @@ def refresh_arrival(request, arrival_id):
 
     for i, code in enumerate(codes):
         try:
-            track = TrackCode.objects.get(track_code=code)
+            track = TrackCode.all_objects.get(track_code=code)
 
             # Обновляем вес и владельца, НЕ трогаем статус, delivery_pickup
             try:
@@ -489,7 +573,8 @@ def refresh_arrival(request, arrival_id):
                 user, temp_user = _resolve_owner(usernames[i])
 
                 changed = False
-                if track.weight != new_weight:
+                has_receipt = ReceiptItem.objects.filter(track_code=track).exists()
+                if track.weight != new_weight and not has_receipt:
                     track.weight = new_weight
                     changed = True
                 if user and track.owner != user:
@@ -521,7 +606,7 @@ def refresh_arrival(request, arrival_id):
             try:
                 weight = Decimal(weights[i].replace(',', '.'))
                 user, temp_user = _resolve_owner(usernames[i])
-                new_track = TrackCode.objects.create(
+                new_track = TrackCode.all_objects.create(
                     track_code=code,
                     status=status,
                     update_date=update_date,
@@ -589,13 +674,14 @@ def refresh_day_arrivals(request):
 
         for i, code in enumerate(codes):
             try:
-                track = TrackCode.objects.get(track_code=code)
+                track = TrackCode.all_objects.get(track_code=code)
                 try:
                     new_weight = Decimal(weights[i].replace(',', '.'))
                     user, temp_user = _resolve_owner(usernames[i])
 
                     changed = False
-                    if track.weight != new_weight:
+                    has_receipt = ReceiptItem.objects.filter(track_code=track).exists()
+                    if track.weight != new_weight and not has_receipt:
                         track.weight = new_weight
                         changed = True
                     if user and track.owner != user:
@@ -623,7 +709,7 @@ def refresh_day_arrivals(request):
                 try:
                     weight = Decimal(weights[i].replace(',', '.'))
                     user, temp_user = _resolve_owner(usernames[i])
-                    new_track = TrackCode.objects.create(
+                    new_track = TrackCode.all_objects.create(
                         track_code=code, status='delivered',
                         update_date=arrival.date, delivered_date=arrival.date,
                         owner=user, temp_owner=temp_user,
@@ -645,7 +731,7 @@ def refresh_day_arrivals(request):
     for arrival in Arrival.objects.filter(date=date_str):
         all_arrival_track_ids.update(arrival.track_codes.values_list('id', flat=True))
 
-    orphan_tracks = TrackCode.objects.filter(
+    orphan_tracks = TrackCode.all_objects.filter(
         delivered_date=date_str,
         status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
     ).exclude(id__in=all_arrival_track_ids)

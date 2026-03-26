@@ -15,7 +15,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from myprofile.models import (
-    TrackCode, Receipt, ReceiptItem, ExtraditionPackage, Notification
+    TrackCode, Receipt, ReceiptItem, ExtraditionPackage, Notification, Arrival
 )
 from myprofile.views.utils import (
     get_global_price_per_kg, get_user_discount, get_temp_user_discount,
@@ -139,12 +139,13 @@ def service_generate_receipts(request):
         messages.error(request, "Некорректный формат даты.")
         return redirect('service')
 
-    # Треки за выбранную дату в статусах от delivered и выше
+    # Треки за выбранную дату в статусах от delivered и выше (по delivered_date или Arrival)
     statuses = ('delivered', 'shipping_pp', 'ready', 'claimed')
-    tracks = TrackCode.objects.filter(
-        delivered_date=target_date,
+    arrival_track_ids = Arrival.objects.filter(date=target_date).values_list('track_codes', flat=True)
+    tracks = TrackCode.all_objects.filter(
+        Q(delivered_date=target_date) | Q(id__in=arrival_track_ids),
         status__in=statuses,
-    ).select_related('owner', 'temp_owner')
+    ).select_related('owner', 'temp_owner').distinct()
 
     # Собираем уникальных владельцев
     users = set()
@@ -215,8 +216,11 @@ def service_normalize_receipts(request):
     errors = []
 
     # Находим все ReceiptItem, чьи track_code имеют delivered_date = target_date
+    # или привязаны к Arrival за эту дату
+    arrival_track_ids = Arrival.objects.filter(date=target_date).values_list('track_codes', flat=True)
     items_for_date = ReceiptItem.objects.filter(
-        track_code__delivered_date=target_date
+        Q(track_code__delivered_date=target_date) | Q(track_code_id__in=arrival_track_ids),
+        track_code__isnull=False,
     ).select_related('receipt', 'track_code', 'track_code__owner', 'track_code__temp_owner')
 
     # Группируем по владельцу

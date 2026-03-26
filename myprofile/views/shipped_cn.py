@@ -90,7 +90,7 @@ def shipped_cn_view(request):
 
     for code in track_codes:
         try:
-            track = TrackCode.objects.get(track_code=code)
+            track = TrackCode.all_objects.get(track_code=code)
             old_status = track.status
 
             # Не откатываем если статус уже дальше

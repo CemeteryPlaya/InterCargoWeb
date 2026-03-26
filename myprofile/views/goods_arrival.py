@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem
+from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages
 from decimal import Decimal, InvalidOperation
@@ -182,13 +182,17 @@ def complete_session(request, session_id):
             continue
 
         try:
-            track = TrackCode.objects.get(track_code=code)
+            track = TrackCode.all_objects.get(track_code=code)
+            # Если трек был архивирован — восстанавливаем при повторном приходе
+            if track.is_archived:
+                track.is_archived = False
+                track.archived_at = None
             old_status = track.status
 
             if TrackCode.STATUS_ORDER.get(old_status, 0) >= TrackCode.STATUS_ORDER.get(status, 0):
                 try:
                     track.update_date = update_date
-                    if weight_val is not None:
+                    if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                         track.weight = weight_val
                     if owner_name:
                         user, temp_user = _resolve_owner(owner_name)
@@ -200,7 +204,7 @@ def complete_session(request, session_id):
                             track.temp_owner = temp_user
                     if sorting_location:
                         track.sorting_location = sorting_location
-                    track.save(update_fields=['update_date', 'owner', 'temp_owner', 'weight', 'sorting_location'])
+                    track.save(update_fields=['update_date', 'owner', 'temp_owner', 'weight', 'sorting_location', 'is_archived', 'archived_at'])
                     processed_track_ids.append(track.id)
                     partially_updated += 1
                 except Exception as e:
@@ -210,8 +214,9 @@ def complete_session(request, session_id):
 
             track.status = status
             track.update_date = update_date
-            track.delivered_date = update_date
-            if weight_val is not None:
+            if not track.delivered_date:
+                track.delivered_date = update_date
+            if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                 track.weight = weight_val
             if owner_name:
                 user, temp_user = _resolve_owner(owner_name)

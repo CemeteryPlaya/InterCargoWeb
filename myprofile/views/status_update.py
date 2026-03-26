@@ -55,7 +55,11 @@ def update_tracks(request):
 
     for i, code in enumerate(track_codes):
         try:
-            track = TrackCode.objects.get(track_code=code)
+            track = TrackCode.all_objects.get(track_code=code)
+            # Если трек был архивирован — восстанавливаем при обновлении статуса
+            if track.is_archived:
+                track.is_archived = False
+                track.archived_at = None
             old_status = track.status
 
             # Попытка отката: если текущий статус 'delivered' и пользователь хочет поставить НЕ 'delivered'
@@ -82,7 +86,8 @@ def update_tracks(request):
 
             if status == 'delivered':
                 # для delivered требуется имя пользователя и вес
-                track.delivered_date = update_date
+                if not track.delivered_date:
+                    track.delivered_date = update_date
                 try:
                     user = User.objects.get(username=usernames[i])
                     UserProfile.objects.get(user=user)  # проверяем профиль

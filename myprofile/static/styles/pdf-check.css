@@ -58,16 +58,22 @@ body {
     display: block;
 }
 
+.client-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
 .client-name {
     font-weight: bold;
     font-size: 16px;
-    margin-top: 4px;
+    white-space: nowrap;
 }
 
 .client-address {
     font-size: 16px;
     color: #444;
-    margin-top: 1px;
 }
 
 .date-block {
