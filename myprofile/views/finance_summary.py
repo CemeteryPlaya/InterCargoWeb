@@ -5,8 +5,8 @@ from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponseForbidden
-from django.db.models import Sum, Count, Q, F, DecimalField, Value
-from django.db.models.functions import Coalesce, TruncMonth, TruncDate
+from django.db.models import Sum, Count, Q, F, DecimalField, Value, CharField, Case, When
+from django.db.models.functions import Coalesce, TruncMonth, TruncDate, Concat
 from django.utils import timezone
 from myprofile.models import Receipt, DeliveryHistory
 from register.models import UserProfile, PickupPoint
@@ -52,6 +52,29 @@ def _aggregate_receipts(qs):
     return agg
 
 
+def _home_delivery_clients(home_qs):
+    """Группирует чеки доставки на дом по клиентам (owner + temp_owner)."""
+    return list(
+        home_qs.annotate(
+            client_name=Case(
+                When(owner__isnull=False, then=Concat(
+                    'owner__username',
+                    Value(' ('), 'owner__last_name', Value(' '), 'owner__first_name', Value(')'),
+                    output_field=CharField(),
+                )),
+                When(temp_owner__isnull=False, then='temp_owner__login'),
+                default=Value('—'),
+                output_field=CharField(),
+            ),
+        ).values('client_name').annotate(
+            total_receipts=Count('id'),
+            total_amount=Coalesce(Sum('total_price'), 0, output_field=DecimalField()),
+            total_weight=Coalesce(Sum('total_weight'), 0, output_field=DecimalField()),
+            paid_amount=Coalesce(Sum('total_price', filter=Q(is_paid=True)), 0, output_field=DecimalField()),
+        ).order_by('-total_amount')
+    )
+
+
 @login_required
 def finance_summary_view(request):
     """Финансовая сводка по чекам: ежедневная и ежемесячная, по ПВЗ."""
@@ -81,6 +104,7 @@ def finance_summary_view(request):
     if show_accountant:
         base_qs = Receipt.objects.all()
         pickups = PickupPoint.objects.filter(is_active=True, is_home_delivery=False).order_by('id')
+        home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
         if pickup_id:
             try:
                 pickup_obj = PickupPoint.objects.get(id=pickup_id)
@@ -89,6 +113,8 @@ def finance_summary_view(request):
                 pass
 
         context['pickups'] = pickups
+        context['home_pp'] = home_pp
+        context['home_pp_name'] = str(home_pp) if home_pp else ''
 
         if view_mode == 'monthly':
             try:
@@ -123,6 +149,15 @@ def finance_summary_view(request):
                     unpaid_amount=Coalesce(Sum('total_price', filter=Q(is_paid=False)), 0, output_field=DecimalField()),
                 ).order_by('-total_amount')
             )
+            # Доставка на дом
+            if home_pp and not pickup_id:
+                home_qs = Receipt.objects.filter(
+                    created_at__year=year, created_at__month=month,
+                    pickup_point=str(home_pp),
+                )
+                context['home_delivery_totals'] = _aggregate_receipts(home_qs)
+                context['home_delivery_clients'] = _home_delivery_clients(home_qs)
+
             context['monthly_rows'] = (
                 base_qs.annotate(month=TruncMonth('created_at'))
                 .values('month')
@@ -155,6 +190,15 @@ def finance_summary_view(request):
                     unpaid_amount=Coalesce(Sum('total_price', filter=Q(is_paid=False)), 0, output_field=DecimalField()),
                 ).order_by('-total_amount')
             )
+            # Доставка на дом
+            if home_pp and not pickup_id:
+                home_qs = Receipt.objects.filter(
+                    created_at=sel_date,
+                    pickup_point=str(home_pp),
+                )
+                context['home_delivery_totals'] = _aggregate_receipts(home_qs)
+                context['home_delivery_clients'] = _home_delivery_clients(home_qs)
+
             last_30 = today - timedelta(days=30)
             context['daily_rows'] = (
                 base_qs.filter(created_at__gte=last_30)

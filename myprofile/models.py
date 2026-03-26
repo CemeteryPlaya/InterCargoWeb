@@ -21,6 +21,12 @@ class SortingLocation(models.Model):
         return self.name
 
 
+class ActiveTrackCodeManager(models.Manager):
+    """Менеджер, исключающий архивные трек-коды из запросов."""
+    def get_queryset(self):
+        return super().get_queryset().filter(is_archived=False)
+
+
 class TrackCode(models.Model):
     STATUS_CHOICES = [
         ('no_owner', 'Нет владельца товара'),
@@ -78,6 +84,12 @@ class TrackCode(models.Model):
         verbose_name="Дата прихода на сорт. склад"
     )
     pp_sorted = models.BooleanField(default=False, verbose_name="Отсортирован на ПВЗ")
+    is_archived = models.BooleanField(default=False, verbose_name="Архивирован")
+    archived_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата архивации")
+
+    # Менеджеры: objects — только активные, all_objects — все (включая архивные)
+    objects = ActiveTrackCodeManager()
+    all_objects = models.Manager()
 
     def clean(self):
         """
@@ -106,7 +118,7 @@ class TrackCode(models.Model):
             
         if self.pk:
             try:
-                old = TrackCode.objects.get(pk=self.pk)
+                old = TrackCode.all_objects.get(pk=self.pk)
             except TrackCode.DoesNotExist:
                 old = None
 
@@ -128,6 +140,7 @@ class TrackCode(models.Model):
     class Meta:
         verbose_name = "Трек-код"
         verbose_name_plural = "Трек-коды"
+        default_manager_name = 'all_objects'
 
     def __str__(self):
         return f"{self.track_code} - {self.get_status_display()}"
@@ -251,6 +264,16 @@ class Receipt(models.Model):
 
         super().save(*args, **kwargs)
 
+    @property
+    def client_display_name(self):
+        """Отображаемое имя клиента чека."""
+        if self.owner:
+            full = self.owner.get_full_name()
+            return f"{self.owner.username} ({full})" if full else self.owner.username
+        if self.temp_owner:
+            return self.temp_owner.login
+        return '—'
+
     def get_qr_base64(self):
         """Генерирует QR-код из номера чека и возвращает base64-строку."""
         qr = qrcode.make(self.receipt_number, box_size=4, border=1)
@@ -275,9 +298,11 @@ class ReceiptItem(models.Model):
 
     def save(self, *args, **kwargs):
         # При первом сохранении копируем данные из track_code
-        if self.track_code and not self.track_code_str:
-            self.track_code_str = self.track_code.track_code
-            self.weight = self.track_code.weight
+        if self.track_code:
+            if not self.track_code_str:
+                self.track_code_str = self.track_code.track_code
+            if self.weight is None:
+                self.weight = self.track_code.weight
         super().save(*args, **kwargs)
 
     @property
@@ -289,9 +314,7 @@ class ReceiptItem(models.Model):
 
     @property
     def display_weight(self):
-        """Возвращает вес (из связи или сохранённый)."""
-        if self.track_code:
-            return self.track_code.weight
+        """Возвращает зафиксированный вес позиции (не из живого трек-кода)."""
         return self.weight
 
     def __str__(self):
@@ -493,21 +516,21 @@ class GlobalSettings(models.Model):
 class StorageCell(models.Model):
     pickup_point = models.ForeignKey(
         'register.PickupPoint',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='storage_cells',
         verbose_name="Пункт выдачи"
     )
     cell_number = models.CharField(max_length=10, verbose_name="Номер ячейки")
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='storage_cells',
         verbose_name="Клиент"
     )
     temp_user = models.ForeignKey(
         'register.TempUser',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='storage_cells',
         verbose_name="Временный клиент"
@@ -553,13 +576,13 @@ class DeliveryHistory(models.Model):
     """Запись истории доставки: какой водитель доставил какой пункт выдачи."""
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="delivery_history",
         verbose_name="Доставщик"
     )
     pickup_point = models.ForeignKey(
         'register.PickupPoint',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="delivery_history",
         verbose_name="Пункт выдачи"
     )
@@ -710,7 +733,7 @@ class RestructureSession(models.Model):
         ('completed', 'Завершена'),
     ]
     pickup_point = models.ForeignKey(
-        'register.PickupPoint', on_delete=models.CASCADE,
+        'register.PickupPoint', on_delete=models.PROTECT,
         verbose_name="Пункт выдачи"
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Статус")

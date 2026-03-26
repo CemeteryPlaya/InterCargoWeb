@@ -37,9 +37,9 @@ class TrackCodeAdminForm(forms.ModelForm):
 @admin.register(TrackCode)
 class TrackCodeAdmin(admin.ModelAdmin):
     form = TrackCodeAdminForm
-    list_display = ('id', 'track_code', 'owner', 'temp_owner', 'update_date', 'status', 'sorting_location', 'description', 'weight')
+    list_display = ('id', 'track_code', 'owner', 'temp_owner', 'update_date', 'status', 'is_archived', 'sorting_location', 'description', 'weight')
     search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name', 'temp_owner__login')
-    list_filter = ('status', 'update_date', 'sorting_location')
+    list_filter = ('status', 'is_archived', 'update_date', 'sorting_location')
     actions = ['update_status_action']
 
     def update_status_action(self, request, queryset):

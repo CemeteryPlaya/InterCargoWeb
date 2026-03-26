@@ -141,8 +141,19 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             {% for row in by_pickup %}
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-gray-800 font-medium">{{ row.pickup_point }}</td>
+                            <tr class="hover:bg-gray-50{% if row.pickup_point == home_pp_name and home_delivery_clients %} cursor-pointer{% endif %}"
+                                {% if row.pickup_point == home_pp_name and home_delivery_clients %}
+                                onclick="document.getElementById('home-clients-inline').classList.toggle('hidden'); this.querySelector('.expand-icon')?.classList.toggle('rotate-180')"
+                                {% endif %}>
+                                <td class="px-4 py-3 text-gray-800 font-medium">
+                                    {% if row.pickup_point == home_pp_name %}
+                                    <i class="ri-home-line text-purple-500 mr-1"></i>
+                                    {% endif %}
+                                    {{ row.pickup_point }}
+                                    {% if row.pickup_point == home_pp_name and home_delivery_clients %}
+                                    <i class="ri-arrow-down-s-line text-gray-400 ml-1 expand-icon transition-transform inline-block"></i>
+                                    {% endif %}
+                                </td>
                                 <td class="px-4 py-3 text-right text-gray-700">{{ row.total_receipts }}</td>
                                 <td class="px-4 py-3 text-right text-gray-700">{{ row.total_weight|floatformat:3 }}</td>
                                 <td class="px-4 py-3 text-right text-gray-800 font-medium">{{ row.total_amount|floatformat:0 }}</td>
@@ -150,6 +161,74 @@
                                 <td class="px-4 py-3 text-right {% if row.unpaid_amount > 0 %}text-red-600 font-medium{% else %}text-gray-400{% endif %}">
                                     {{ row.unpaid_amount|floatformat:0 }}
                                 </td>
+                            </tr>
+                            {% if row.pickup_point == home_pp_name and home_delivery_clients %}
+                            <tr id="home-clients-inline" class="hidden">
+                                <td colspan="6" class="p-0">
+                                    <div class="bg-purple-50 border-t border-purple-200">
+                                        <table class="w-full text-sm">
+                                            <thead>
+                                                <tr class="text-gray-500 text-xs border-b border-purple-100">
+                                                    <th class="px-6 py-2 text-left font-medium">Клиент</th>
+                                                    <th class="px-4 py-2 text-right font-medium">Чеков</th>
+                                                    <th class="px-4 py-2 text-right font-medium">Вес (кг)</th>
+                                                    <th class="px-4 py-2 text-right font-medium">Сумма (₸)</th>
+                                                    <th class="px-4 py-2 text-right font-medium">Оплачено (₸)</th>
+                                                    <th class="px-4 py-2"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-purple-100">
+                                                {% for client in home_delivery_clients %}
+                                                <tr class="hover:bg-purple-100">
+                                                    <td class="px-6 py-2 text-gray-800">{{ client.client_name }}</td>
+                                                    <td class="px-4 py-2 text-right text-gray-700">{{ client.total_receipts }}</td>
+                                                    <td class="px-4 py-2 text-right text-gray-700">{{ client.total_weight|floatformat:3 }}</td>
+                                                    <td class="px-4 py-2 text-right text-gray-800 font-medium">{{ client.total_amount|floatformat:0 }}</td>
+                                                    <td class="px-4 py-2 text-right text-green-600 font-medium">{{ client.paid_amount|floatformat:0 }}</td>
+                                                    <td class="px-4 py-2"></td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Доставка на дом (отдельный блок если нет в by_pickup) -->
+            {% if home_delivery_clients and not by_pickup %}
+            <div class="bg-white border border-purple-200 rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-purple-50 border-b border-purple-200">
+                    <h2 class="font-semibold text-purple-800">
+                        <i class="ri-home-line text-purple-600 mr-1"></i>
+                        Доставка на дом
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-gray-500 text-xs border-b">
+                                <th class="px-4 py-2 text-left font-medium">Клиент</th>
+                                <th class="px-4 py-2 text-right font-medium">Чеков</th>
+                                <th class="px-4 py-2 text-right font-medium">Вес (кг)</th>
+                                <th class="px-4 py-2 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-2 text-right font-medium">Оплачено (₸)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for client in home_delivery_clients %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 text-gray-800 font-medium">{{ client.client_name }}</td>
+                                <td class="px-4 py-2 text-right text-gray-700">{{ client.total_receipts }}</td>
+                                <td class="px-4 py-2 text-right text-gray-700">{{ client.total_weight|floatformat:3 }}</td>
+                                <td class="px-4 py-2 text-right text-gray-800 font-medium">{{ client.total_amount|floatformat:0 }}</td>
+                                <td class="px-4 py-2 text-right text-green-600 font-medium">{{ client.paid_amount|floatformat:0 }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -5,7 +5,7 @@ from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem
+from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem, Arrival
 from register.models import UserProfile, PickupPoint, TempUser
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
@@ -45,8 +45,9 @@ def print_documents_view(request):
                 check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
 
                 # Треки, пришедшие на сорт. склад в выбранную дату (любой статус >= delivered)
-                tracks = TrackCode.objects.filter(
-                    delivered_date=check_date,
+                arrival_track_ids = Arrival.objects.filter(date=check_date).values_list('track_codes', flat=True)
+                tracks = TrackCode.all_objects.filter(
+                    Q(delivered_date=check_date) | Q(id__in=arrival_track_ids),
                     status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
                 ).filter(
                     Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
@@ -56,25 +57,29 @@ def print_documents_view(request):
 
                 track_ids = [t.id for t in tracks]
 
-                # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
-
-                # Находим все ReceiptItem для этих треков → группируем по Receipt
+                # Находим ReceiptItem через треки И через чеки за эту дату
+                # (для архивированных треков track_code_id = NULL, но receipt.created_at = дата)
+                pickup_names = [str(pp) for pp in PickupPoint.objects.filter(id__in=pickup_point_ids)]
                 items = (
                     ReceiptItem.objects
-                    .filter(track_code_id__in=track_ids)
-                    .select_related('receipt', 'receipt__owner', 'track_code',
+                    .filter(
+                        Q(track_code_id__in=track_ids) |
+                        Q(track_code__isnull=True, receipt__created_at=check_date, receipt__pickup_point__in=pickup_names)
+                    )
+                    .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code',
                                     'track_code__owner__userprofile__pickup', 'track_code__delivery_pickup')
                 )
 
-                # receipt_id → { receipt, tracks[] }
+                # receipt_id → { receipt, items[] }
                 receipts_map = {}
                 tracks_with_receipt = set()
                 for item in items:
                     r = item.receipt
-                    tracks_with_receipt.add(item.track_code_id)
+                    if item.track_code_id:
+                        tracks_with_receipt.add(item.track_code_id)
                     if r.id not in receipts_map:
-                        receipts_map[r.id] = {'receipt': r, 'tracks': []}
-                    receipts_map[r.id]['tracks'].append(item.track_code)
+                        receipts_map[r.id] = {'receipt': r, 'items': []}
+                    receipts_map[r.id]['items'].append(item)
 
                 # Формируем список чеков для печати
                 checks = []
@@ -85,7 +90,7 @@ def print_documents_view(request):
 
                 for entry in sorted(receipts_map.values(), key=_receipt_sort_key):
                     receipt = entry['receipt']
-                    receipt_tracks = entry['tracks']
+                    receipt_items = entry['items']
 
                     # Имя клиента
                     if receipt.owner:
@@ -112,11 +117,11 @@ def print_documents_view(request):
                     effective_rate = receipt.price_per_kg or get_global_price_per_kg()
                     total_weight = Decimal("0")
                     track_rows = []
-                    for track in receipt_tracks:
-                        weight = track.weight or Decimal("0")
+                    for item in receipt_items:
+                        weight = item.display_weight or Decimal("0")
                         price = _round_price(weight * effective_rate)
                         track_rows.append({
-                            'track_code': track.track_code,
+                            'track_code': item.display_track_code,
                             'weight': float(weight),
                             'price': price,
                         })
@@ -208,8 +213,9 @@ def print_documents_view(request):
 
             registry_date = datetime.strptime(registry_date_str, '%Y-%m-%d').date()
 
-            tracks = TrackCode.objects.filter(
-                delivered_date=registry_date,
+            arrival_track_ids2 = Arrival.objects.filter(date=registry_date).values_list('track_codes', flat=True)
+            tracks = TrackCode.all_objects.filter(
+                Q(delivered_date=registry_date) | Q(id__in=arrival_track_ids2),
                 status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
             ).filter(
                 Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |

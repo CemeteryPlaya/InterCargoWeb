@@ -122,7 +122,7 @@ def register_view(request):
                 pickup=pickup_point,
             )
             # Переносим все треки с temp_owner на нового пользователя
-            TrackCode.objects.filter(temp_owner=temp_user).update(
+            TrackCode.all_objects.filter(temp_owner=temp_user).update(
                 owner=user, temp_owner=None
             )
             # Переносим чеки

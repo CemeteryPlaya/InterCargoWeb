@@ -472,7 +472,6 @@ def complete_delivery(request):
         for track in tracks:
             track.status = 'ready'
             track.update_date = today
-            track.delivered_date = today
             track.pp_sorted = False
             track.save()
             updated += 1

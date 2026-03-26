@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django import forms
+from django.utils import timezone
 from myprofile.models import TrackCode, ArchivedTrackCode, ReceiptItem
 
 class TrackCodeForm(forms.ModelForm):
@@ -29,8 +30,8 @@ def track_codes_view(request):
 
         if track_code_str:
             try:
-                # Проверяем, существует ли уже такой трек-код
-                existing_track = TrackCode.objects.get(track_code=track_code_str)
+                # Проверяем, существует ли уже такой трек-код (включая архивные)
+                existing_track = TrackCode.all_objects.get(track_code=track_code_str)
 
                 if existing_track.owner is None:
                     # Если трек-код существует, но без владельца, присваиваем его текущему пользователю
@@ -92,25 +93,16 @@ def track_codes_view(request):
     for code in track_codes:
         code.receipt_date = receipt_dates.get(code.id)
 
-    archived_codes = ArchivedTrackCode.objects.filter(owner=request.user).order_by('-archived_at')
-
-    # Проверяем дубликаты: архивные трек-коды, которые есть в основной таблице
-    if archived_codes.exists():
-        archived_track_values = list(archived_codes.values_list('track_code', flat=True))
-        duplicate_codes = set(
-            TrackCode.objects.filter(
-                track_code__in=archived_track_values, owner=request.user
-            ).values_list('track_code', flat=True)
-        )
-    else:
-        duplicate_codes = set()
+    archived_codes = TrackCode.all_objects.filter(
+        owner=request.user, is_archived=True
+    ).order_by('-archived_at')
 
     return render(request, 'track_codes.html', {
         'track_codes': track_codes,
         'archived_codes': archived_codes,
         'form': form,
         'current_filters': [status_filter] if status_filter else [],
-        'duplicate_archived_codes': duplicate_codes,
+        'duplicate_archived_codes': set(),
     })
 
 @login_required
@@ -134,7 +126,7 @@ def add_track_code_view(request):
 
         if track_code_str:
             try:
-                existing_track = TrackCode.objects.get(track_code=track_code_str)
+                existing_track = TrackCode.all_objects.get(track_code=track_code_str)
 
                 if existing_track.owner is None:
                     existing_track.owner = request.user
@@ -179,8 +171,10 @@ def archive_track_code(request, track_id):
     if track.status not in ARCHIVABLE_STATUSES:
         messages.error(request, f"Нельзя архивировать трек-код со статусом «{track.get_status_display()}». Архивация доступна только для статусов «Добавлен пользователем» и «Выдано клиенту».")
         return redirect('track_codes')
-    ArchivedTrackCode.from_track(track)
-    track.delete()
+    track.is_archived = True
+    track.archived_at = timezone.now()
+    track._skip_status_validation = True
+    track.save(update_fields=['is_archived', 'archived_at'])
     messages.success(request, "Трек-код перемещён в архив.")
     return redirect('track_codes')
 
@@ -188,18 +182,11 @@ def archive_track_code(request, track_id):
 @login_required
 @require_POST
 def unarchive_track_code(request, track_id):
-    archived = get_object_or_404(ArchivedTrackCode, id=track_id, owner=request.user)
-    track = TrackCode(
-        track_code=archived.track_code,
-        update_date=archived.update_date,
-        status=archived.status,
-        owner=archived.owner,
-        description=archived.description,
-        weight=archived.weight,
-    )
+    track = get_object_or_404(TrackCode.all_objects, id=track_id, owner=request.user, is_archived=True)
+    track.is_archived = False
+    track.archived_at = None
     track._skip_status_validation = True
-    track.save()
-    archived.delete()
+    track.save(update_fields=['is_archived', 'archived_at'])
     messages.success(request, "Трек-код восстановлен из архива.")
     return redirect('track_codes')
 
@@ -215,14 +202,17 @@ def mass_archive_track_codes(request):
 
     ARCHIVABLE_STATUSES = ('user_added', 'claimed')
     tracks = TrackCode.objects.filter(id__in=track_ids, owner=request.user)
+    now = timezone.now()
     count = 0
     skipped = 0
     for track in tracks:
         if track.status not in ARCHIVABLE_STATUSES:
             skipped += 1
             continue
-        ArchivedTrackCode.from_track(track)
-        track.delete()
+        track.is_archived = True
+        track.archived_at = now
+        track._skip_status_validation = True
+        track.save(update_fields=['is_archived', 'archived_at'])
         count += 1
 
     if count:
