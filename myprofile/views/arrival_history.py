@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from collections import OrderedDict
 from decimal import Decimal, ROUND_HALF_UP
 from myprofile.models import TrackCode, Receipt, ReceiptItem, Arrival
@@ -14,41 +14,111 @@ MONTH_NAMES = {
     9: 'Сентябрь', 10: 'Октябрь', 11: 'Ноябрь', 12: 'Декабрь',
 }
 
+ARRIVAL_STATUSES = ['delivered', 'shipping_pp', 'ready', 'claimed']
 
-@login_required
+
+def _staff_required(view_func):
+    """Декоратор: login_required + проверка is_staff."""
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if not _is_staff(request.user):
+            return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return view_func(request, *args, **kwargs)
+    wrapper.__name__ = view_func.__name__
+    wrapper.__doc__ = view_func.__doc__
+    return wrapper
+
+
+@_staff_required
 def arrival_history_view(request):
-    """История приходов: трек-коды со статусом >= delivered, сгруппированные по дате/ПВЗ/клиенту."""
-    if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+    """Главная страница: загружает только список годов."""
+    years = (
+        TrackCode.objects
+        .filter(status__in=ARRIVAL_STATUSES, update_date__isnull=False)
+        .dates('update_date', 'year', order='DESC')
+    )
+    year_list = sorted(set(d.year for d in years), reverse=True)
+    return render(request, 'arrival_history.html', {'years': year_list})
 
-    # Все треки, прошедшие приход (статус delivered и выше)
+
+@_staff_required
+def arrival_history_months(request, year):
+    """API: месяцы с приходами за указанный год."""
+    months = (
+        TrackCode.objects
+        .filter(
+            status__in=ARRIVAL_STATUSES,
+            update_date__isnull=False,
+            update_date__year=year,
+        )
+        .dates('update_date', 'month', order='DESC')
+    )
+    result = []
+    for d in months:
+        result.append({
+            'month': d.month,
+            'name': MONTH_NAMES.get(d.month, str(d.month)),
+        })
+    # убираем дубликаты и сортируем по убыванию
+    seen = set()
+    unique = []
+    for m in result:
+        if m['month'] not in seen:
+            seen.add(m['month'])
+            unique.append(m)
+    unique.sort(key=lambda x: x['month'], reverse=True)
+    return JsonResponse({'months': unique})
+
+
+@_staff_required
+def arrival_history_days(request, year, month):
+    """API: даты с приходами за указанный год и месяц."""
+    days = (
+        TrackCode.objects
+        .filter(
+            status__in=ARRIVAL_STATUSES,
+            update_date__isnull=False,
+            update_date__year=year,
+            update_date__month=month,
+        )
+        .dates('update_date', 'day', order='DESC')
+    )
+    result = []
+    seen = set()
+    for d in days:
+        day_key = d.strftime('%d.%m.%Y')
+        if day_key not in seen:
+            seen.add(day_key)
+            result.append({'day_key': day_key, 'day': d.day})
+    return JsonResponse({'days': result})
+
+
+@_staff_required
+def arrival_history_day_detail(request, year, month, day):
+    """API: полные данные за конкретный день (приходы, ПВЗ, клиенты, треки, чеки)."""
+    from datetime import date
+    target_date = date(year, month, day)
+
     tracks = (
         TrackCode.objects
-        .filter(status__in=['delivered', 'shipping_pp', 'ready', 'claimed'])
+        .filter(
+            status__in=ARRIVAL_STATUSES,
+            update_date=target_date,
+        )
         .select_related('owner', 'temp_owner', 'temp_owner__pickup')
-        .order_by('-update_date', 'owner__username')
+        .order_by('owner__username')
     )
 
-    # Строим иерархию: year -> month -> day -> pickup -> client -> {tracks, receipts}
-    hierarchy = OrderedDict()
+    # Группируем по ПВЗ -> клиент
+    pickups = OrderedDict()
 
     for track in tracks:
-        date = track.update_date
-        if not date:
-            continue
-
-        # Определяем клиента (зарегистрированный или временный)
         owner = track.owner
         temp_owner = track.temp_owner if not owner else None
 
         if not owner and not temp_owner:
             continue
 
-        year = date.year
-        month = date.month
-        day_key = date.strftime('%d.%m.%Y')
-
-        # Получаем ПВЗ клиента
         if owner:
             try:
                 pickup = owner.userprofile.pickup
@@ -70,33 +140,16 @@ def arrival_history_view(request):
             client_full_name = temp_owner.login
             is_temp = True
 
-        # Year
-        if year not in hierarchy:
-            hierarchy[year] = OrderedDict()
-
-        # Month
-        if month not in hierarchy[year]:
-            hierarchy[year][month] = {
-                'name': MONTH_NAMES.get(month, str(month)),
-                'days': OrderedDict(),
+        p_key = f'{pickup_id}_{pickup_name}'
+        if p_key not in pickups:
+            pickups[p_key] = {
+                'pickup_id': pickup_id,
+                'pickup_name': pickup_name,
+                'clients': OrderedDict(),
             }
 
-        # Day
-        if day_key not in hierarchy[year][month]['days']:
-            hierarchy[year][month]['days'][day_key] = {
-                'date': date,
-                'pickups': OrderedDict(),
-            }
-
-        # Pickup
-        pickup_key = (pickup_id, pickup_name)
-        day_data = hierarchy[year][month]['days'][day_key]
-        if pickup_key not in day_data['pickups']:
-            day_data['pickups'][pickup_key] = OrderedDict()
-
-        # Client
-        if client_key not in day_data['pickups'][pickup_key]:
-            day_data['pickups'][pickup_key][client_key] = {
+        if client_key not in pickups[p_key]['clients']:
+            pickups[p_key]['clients'][client_key] = {
                 'username': client_username,
                 'full_name': client_full_name,
                 'is_temp': is_temp,
@@ -104,63 +157,100 @@ def arrival_history_view(request):
                 'total_weight': Decimal('0'),
             }
 
-        client = day_data['pickups'][pickup_key][client_key]
+        client = pickups[p_key]['clients'][client_key]
         client['tracks'].append(track)
         client['total_weight'] += track.weight or Decimal('0')
 
-    # Для каждого клиента находим связанные чеки через ReceiptItem
-    for year_data in hierarchy.values():
-        for month_data in year_data.values():
-            for day_data in month_data['days'].values():
-                for pickup_clients in day_data['pickups'].values():
-                    for client in pickup_clients.values():
-                        track_ids = [t.id for t in client['tracks']]
-                        receipt_items = (
-                            ReceiptItem.objects
-                            .filter(track_code_id__in=track_ids)
-                            .select_related('receipt')
-                        )
-                        # Группируем по чеку
-                        receipts_dict = {}
-                        for ri in receipt_items:
-                            r = ri.receipt
-                            if r.id not in receipts_dict:
-                                rate = r.price_per_kg if r.price_per_kg else Decimal('0')
-                                receipts_dict[r.id] = {
-                                    'receipt': r,
-                                    'items': [],
-                                    'computed_weight': Decimal('0'),
-                                    'computed_price': Decimal('0'),
-                                    'rate': rate,
-                                }
-                            weight = ri.track_code.weight or Decimal('0')
-                            price = (weight * receipts_dict[r.id]['rate']).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
-                            receipts_dict[r.id]['items'].append({
-                                'track_code': ri.track_code,
-                                'price': price,
-                            })
-                            receipts_dict[r.id]['computed_weight'] += weight
+    # Собираем чеки для каждого клиента
+    for pickup_data in pickups.values():
+        for client in pickup_data['clients'].values():
+            track_ids = [t.id for t in client['tracks']]
+            receipt_items = (
+                ReceiptItem.objects
+                .filter(track_code_id__in=track_ids)
+                .select_related('receipt', 'track_code')
+            )
+            receipts_dict = {}
+            for ri in receipt_items:
+                r = ri.receipt
+                if r.id not in receipts_dict:
+                    rate = r.price_per_kg if r.price_per_kg else Decimal('0')
+                    receipts_dict[r.id] = {
+                        'receipt_id': r.id,
+                        'created_at': r.created_at.strftime('%d.%m.%Y') if r.created_at else '',
+                        'is_paid': r.is_paid,
+                        'items': [],
+                        'computed_weight': Decimal('0'),
+                        'computed_price': Decimal('0'),
+                        'rate': rate,
+                    }
+                weight = ri.track_code.weight or Decimal('0')
+                price = (weight * receipts_dict[r.id]['rate']).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+                receipts_dict[r.id]['items'].append({
+                    'track_code': str(ri.track_code.track_code) if ri.track_code else (ri.track_code_str or '—'),
+                    'weight': float(weight) if weight else None,
+                    'price': float(price),
+                })
+                receipts_dict[r.id]['computed_weight'] += weight
 
-                        for rd in receipts_dict.values():
-                            rd['computed_price'] = (rd['computed_weight'] * rd['rate']).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+            for rd in receipts_dict.values():
+                rd['computed_price'] = float(
+                    (rd['computed_weight'] * rd['rate']).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+                )
+                rd['computed_weight'] = float(rd['computed_weight'])
+                rd['rate'] = float(rd['rate'])
 
-                        client['receipts'] = list(receipts_dict.values())
-                        client['total_weight'] = float(client['total_weight'])
+            client['receipts'] = list(receipts_dict.values())
+            client['total_weight'] = float(client['total_weight'])
 
-    # Привязываем записи приходов к дням в иерархии
-    arrivals = Arrival.objects.select_related('created_by', 'sorting_location').all()
-    arrivals_by_date = {}
-    for arrival in arrivals:
-        date_key = arrival.date.strftime('%d.%m.%Y')
-        if date_key not in arrivals_by_date:
-            arrivals_by_date[date_key] = []
-        arrivals_by_date[date_key].append(arrival)
+    # Приходы за этот день
+    arrivals = (
+        Arrival.objects
+        .filter(date=target_date)
+        .select_related('created_by', 'sorting_location')
+    )
+    arrivals_data = []
+    for a in arrivals:
+        arrivals_data.append({
+            'id': a.id,
+            'sorting_location': str(a.sorting_location) if a.sorting_location else None,
+            'total_tracks': a.total_tracks,
+            'updated_count': a.updated_count,
+            'created_count': a.created_count,
+            'created_by': (
+                a.created_by.get_full_name() or a.created_by.username
+            ) if a.created_by else None,
+        })
 
-    for year_data in hierarchy.values():
-        for month_data in year_data.values():
-            for day_key, day_data in month_data['days'].items():
-                day_data['arrivals'] = arrivals_by_date.get(day_key, [])
+    # Сериализуем pickups
+    pickups_data = []
+    for p_key, p_data in pickups.items():
+        clients_list = []
+        for c_key, c_data in p_data['clients'].items():
+            tracks_list = []
+            for t in c_data['tracks']:
+                tracks_list.append({
+                    'track_code': t.track_code,
+                    'weight': float(t.weight) if t.weight else None,
+                    'status': t.status,
+                })
+            clients_list.append({
+                'key': c_key,
+                'username': c_data['username'],
+                'full_name': c_data['full_name'],
+                'is_temp': c_data['is_temp'],
+                'tracks': tracks_list,
+                'total_weight': c_data['total_weight'],
+                'receipts': c_data['receipts'],
+            })
+        pickups_data.append({
+            'pickup_id': p_data['pickup_id'],
+            'pickup_name': p_data['pickup_name'],
+            'clients': clients_list,
+            'client_count': len(clients_list),
+        })
 
-    return render(request, 'arrival_history.html', {
-        'hierarchy': hierarchy,
+    return JsonResponse({
+        'arrivals': arrivals_data,
+        'pickups': pickups_data,
     })

@@ -22,22 +22,47 @@ def approve_registration(request, reg_id):
 
     reg = PendingRegistration.objects.get(id=reg_id)
 
-    # создаём User
-    user = User.objects.create_user(
-        username=reg.login,
-        password=reg.password,
-        first_name=reg.first_name,
-        last_name=reg.last_name,
-        email=reg.email
-    )
+    # Проверяем: есть ли неактивный User (созданный при приходе товаров)
+    existing_user = User.objects.filter(username=reg.login).first()
+    if existing_user and not existing_user.is_active:
+        # Обновляем существующего пользователя
+        existing_user.set_password(reg.password)
+        existing_user.first_name = reg.first_name
+        existing_user.last_name = reg.last_name
+        existing_user.email = reg.email
+        existing_user.is_active = True
+        existing_user.save()
+        user = existing_user
 
-    UserProfile.objects.create(
-        user=user,
-        phone=reg.phone,
-        pickup=reg.pickup
-    )
+        try:
+            profile = user.userprofile
+            profile.phone = reg.phone
+            profile.pickup = reg.pickup
+            profile.is_registered = True
+            profile.save()
+        except UserProfile.DoesNotExist:
+            UserProfile.objects.create(
+                user=user,
+                phone=reg.phone,
+                pickup=reg.pickup,
+                is_registered=True,
+            )
+    else:
+        # Создаём нового User
+        user = User.objects.create_user(
+            username=reg.login,
+            password=reg.password,
+            first_name=reg.first_name,
+            last_name=reg.last_name,
+            email=reg.email
+        )
+        UserProfile.objects.create(
+            user=user,
+            phone=reg.phone,
+            pickup=reg.pickup
+        )
 
-    # Переносим все данные с temp_owner на нового пользователя
+    # Обратная совместимость: переносим данные с TempUser (если остались)
     temp_user = TempUser.objects.filter(login=reg.login).first()
     if temp_user:
         TrackCode.all_objects.filter(temp_owner=temp_user).update(
@@ -49,7 +74,6 @@ def approve_registration(request, reg_id):
         CustomerDiscount.objects.filter(temp_user=temp_user).update(
             user=user, temp_user=None
         )
-        # Переносим ячейки хранения: привязываем к новому пользователю
         StorageCell.objects.filter(temp_user=temp_user).update(
             user=user, temp_user=None
         )

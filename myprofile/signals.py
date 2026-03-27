@@ -1,12 +1,176 @@
 import logging
 
-from django.db.models.signals import post_delete, post_save, pre_delete
+from decimal import Decimal, ROUND_HALF_UP
+from django.db.models.signals import post_delete, post_save, pre_save, pre_delete
 from django.dispatch import receiver
 
 from myprofile.models import Notification, Receipt, ReceiptItem, StorageCell, TrackCode
 
 logger = logging.getLogger(__name__)
 
+
+# ─────────────────────────────────────────────────────────────
+# Каскадное обновление при изменении TrackCode
+# ─────────────────────────────────────────────────────────────
+
+@receiver(pre_save, sender=TrackCode)
+def track_code_capture_old_state(sender, instance, **kwargs):
+    """Сохраняем старые значения TrackCode перед сохранением для сравнения в post_save."""
+    if not instance.pk:
+        return
+    try:
+        old = TrackCode.all_objects.get(pk=instance.pk)
+        instance._old_weight = old.weight
+        instance._old_delivered_date = old.delivered_date
+        instance._old_owner_id = old.owner_id
+        instance._old_temp_owner_id = old.temp_owner_id
+    except TrackCode.DoesNotExist:
+        instance._old_weight = None
+        instance._old_delivered_date = None
+        instance._old_owner_id = None
+        instance._old_temp_owner_id = None
+
+
+@receiver(post_save, sender=TrackCode)
+def track_code_cascade_updates(sender, instance, created, **kwargs):
+    """
+    Каскадное обновление зависимостей при изменении TrackCode:
+    - Вес → ReceiptItem.weight → ReceiptItem.item_price → Receipt totals
+    - delivered_date → перенос ReceiptItem в чек за новую дату
+    - owner → перенос ReceiptItem в чек нового владельца
+    """
+    if created:
+        return
+
+    old_weight = getattr(instance, '_old_weight', None)
+    old_delivered_date = getattr(instance, '_old_delivered_date', None)
+    old_owner_id = getattr(instance, '_old_owner_id', None)
+
+    weight_changed = old_weight != instance.weight
+    date_changed = old_delivered_date != instance.delivered_date
+    owner_changed = old_owner_id != instance.owner_id
+
+    if not (weight_changed or date_changed or owner_changed):
+        return
+
+    # Ищем ReceiptItem, привязанный к этому треку
+    try:
+        item = ReceiptItem.objects.select_related('receipt').get(track_code=instance)
+    except ReceiptItem.DoesNotExist:
+        return
+
+    old_receipt = item.receipt
+
+    # --- 1. Смена владельца или даты → нужно перенести item в другой чек ---
+    if owner_changed or date_changed:
+        _relocate_receipt_item(instance, item, old_receipt, weight_changed)
+        return  # relocate уже обновляет вес и пересчитывает чеки
+
+    # --- 2. Только изменение веса → обновляем item и пересчитываем чек ---
+    if weight_changed:
+        _update_item_weight(item, instance.weight)
+        _recalc_receipt_safe(old_receipt)
+
+
+def _update_item_weight(item, new_weight):
+    """Обновляет вес и стоимость позиции чека."""
+    w = new_weight or Decimal('0')
+    rate = item.item_rate or Decimal('0')
+    item.weight = new_weight
+    item.item_price = (w * rate).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    item.save(update_fields=['weight', 'item_price'])
+
+
+def _recalc_receipt_safe(receipt):
+    """Пересчитывает total_weight и total_price чека. Удаляет пустой чек."""
+    items = list(receipt.items.all())
+    if not items:
+        receipt.delete()
+        return
+
+    total_weight = sum((i.weight or Decimal('0')) for i in items)
+    rate = receipt.price_per_kg or Decimal('0')
+    total_price = (total_weight * rate).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+
+    receipt.total_weight = total_weight
+    receipt.total_price = total_price
+    receipt._allow_content_update = True
+    receipt.save()
+
+
+def _relocate_receipt_item(track, item, old_receipt, weight_changed):
+    """
+    Переносит ReceiptItem в подходящий чек (по владельцу + delivered_date).
+    Если подходящего чека нет — создаёт новый.
+    Пересчитывает старый и новый чеки.
+    """
+    owner = track.owner
+    delivered_date = track.delivered_date
+
+    # Определяем владельца чека
+    owner_id = owner.id if owner else None
+    temp_owner_id = track.temp_owner_id
+
+    # Ищем существующий чек за нужную дату для этого владельца
+    target_receipt = None
+    receipt_qs = Receipt.objects.exclude(pk=old_receipt.pk)
+    if owner_id:
+        receipt_qs = receipt_qs.filter(owner_id=owner_id, temp_owner__isnull=True)
+    elif temp_owner_id:
+        receipt_qs = receipt_qs.filter(temp_owner_id=temp_owner_id, owner__isnull=True)
+    else:
+        # Нет владельца — не переносим
+        if weight_changed:
+            _update_item_weight(item, track.weight)
+            _recalc_receipt_safe(old_receipt)
+        return
+
+    if delivered_date:
+        target_receipt = receipt_qs.filter(created_at=delivered_date).first()
+
+    # Проверяем: может item уже в правильном чеке
+    same_owner = (
+        (owner_id and old_receipt.owner_id == owner_id) or
+        (temp_owner_id and old_receipt.temp_owner_id == temp_owner_id)
+    )
+    same_date = (old_receipt.created_at == delivered_date) if delivered_date else True
+
+    if same_owner and same_date:
+        # Чек уже правильный — только обновляем вес
+        if weight_changed:
+            _update_item_weight(item, track.weight)
+            _recalc_receipt_safe(old_receipt)
+        return
+
+    if not target_receipt:
+        # Создаём новый чек
+        target_receipt = Receipt.objects.create(
+            owner_id=owner_id,
+            temp_owner_id=temp_owner_id,
+            total_weight=0,
+            total_price=0,
+            price_per_kg=old_receipt.price_per_kg,
+            created_at=delivered_date or old_receipt.created_at,
+            pickup_point=old_receipt.pickup_point,
+            payment_link=old_receipt.payment_link,
+        )
+
+    # Обновляем вес item если изменился
+    w = track.weight or Decimal('0')
+    rate = item.item_rate or Decimal('0')
+    item.receipt = target_receipt
+    item.weight = track.weight
+    item.item_price = (w * rate).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    item.save(update_fields=['receipt', 'weight', 'item_price'])
+
+    # Пересчитываем оба чека
+    _recalc_receipt_safe(old_receipt)
+    _recalc_receipt_safe(target_receipt)
+
+
+# ─────────────────────────────────────────────────────────────
+# Существующие сигналы
+# ─────────────────────────────────────────────────────────────
 
 @receiver(post_delete, sender=Receipt)
 def cleanup_storage_cell_on_receipt_delete(sender, instance, **kwargs):

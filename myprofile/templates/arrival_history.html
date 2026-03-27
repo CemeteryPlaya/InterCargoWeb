@@ -21,6 +21,15 @@
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] > summary .arrow-icon { transform: rotate(90deg); }
+        .ah-spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: ah-spin .6s linear infinite;
+        }
+        @keyframes ah-spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
@@ -37,173 +46,25 @@
                     <i class="ri-archive-line text-primary"></i> История приходов
                 </h1>
 
-                {% if not hierarchy %}
+                {% if not years %}
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                     <i class="ri-inbox-line text-gray-400 text-4xl"></i>
                     <p class="text-gray-500 mt-2">Нет данных о приходах.</p>
                 </div>
                 {% else %}
 
-                <div class="space-y-3">
-                {% for year, months in hierarchy.items %}
-                    <!-- Год -->
-                    <details class="border border-gray-300 rounded-lg bg-white shadow-sm" open>
+                <div class="space-y-3" id="ah-root">
+                {% for year in years %}
+                    <details class="border border-gray-300 rounded-lg bg-white shadow-sm" data-year="{{ year }}">
                         <summary class="cursor-pointer px-5 py-3 flex items-center gap-3 hover:bg-gray-50 transition font-bold text-lg text-gray-900">
                             <i class="ri-arrow-right-s-line text-xl text-gray-400 arrow-icon transition-transform"></i>
                             <i class="ri-calendar-line text-primary"></i>
                             {{ year }}
                         </summary>
-
-                        <div class="pl-4 pr-2 pb-3 space-y-2">
-                        {% for month_num, month_data in months.items %}
-                            <!-- Месяц -->
-                            <details class="border border-gray-200 rounded-lg ml-2">
-                                <summary class="cursor-pointer px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition font-semibold text-gray-800">
-                                    <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
-                                    <i class="ri-calendar-2-line text-blue-500"></i>
-                                    {{ month_data.name }}
-                                </summary>
-
-                                <div class="pl-4 pr-2 pb-2 space-y-2">
-                                {% for day_key, day_data in month_data.days.items %}
-                                    <!-- День -->
-                                    <details class="border border-gray-200 rounded-lg ml-2">
-                                        <summary class="cursor-pointer px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition font-medium text-gray-700">
-                                            <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
-                                            <i class="ri-calendar-event-line text-green-500"></i>
-                                            {{ day_key }}
-                                        </summary>
-
-                                        <div class="pl-4 pr-2 pb-2 space-y-2">
-                                        {% if day_data.arrivals %}
-                                        <div class="ml-2 mb-2 space-y-1">
-                                            {% for arrival in day_data.arrivals %}
-                                            <div class="flex items-center gap-2 text-xs bg-blue-50 border border-blue-200 rounded px-3 py-1.5">
-                                                <i class="ri-inbox-archive-line text-blue-500"></i>
-                                                <span class="text-blue-800 font-medium">Приход #{{ arrival.id }}</span>
-                                                {% if arrival.sorting_location %}
-                                                <span class="text-gray-500">| {{ arrival.sorting_location }}</span>
-                                                {% endif %}
-                                                <span class="text-gray-500">| {{ arrival.total_tracks }} треков (обн: {{ arrival.updated_count }}, созд: {{ arrival.created_count }})</span>
-                                                {% if arrival.created_by %}
-                                                <span class="text-gray-400 ml-auto">{{ arrival.created_by.get_full_name|default:arrival.created_by.username }}</span>
-                                                {% endif %}
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                        {% for pickup_key, clients in day_data.pickups.items %}
-                                            <!-- Пункт выдачи -->
-                                            <details class="border border-gray-200 rounded-lg ml-2 bg-gray-50">
-                                                <summary class="cursor-pointer px-4 py-2 flex items-center gap-3 hover:bg-gray-100 transition text-sm font-medium text-gray-700">
-                                                    <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
-                                                    <i class="ri-map-pin-line text-orange-500"></i>
-                                                    {{ pickup_key.1 }}
-                                                    <span class="text-xs text-gray-400 ml-auto">{{ clients|length }} клиентов</span>
-                                                </summary>
-
-                                                <div class="pl-4 pr-2 pb-2 space-y-2">
-                                                {% for client_key, client in clients.items %}
-                                                    <!-- Клиент -->
-                                                    <details class="border border-gray-200 rounded-lg ml-2 bg-white">
-                                                        <summary class="cursor-pointer px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition text-sm">
-                                                            <div class="flex items-center gap-3">
-                                                                <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
-                                                                <i class="ri-user-line {% if client.is_temp %}text-orange-500{% else %}text-purple-500{% endif %}"></i>
-                                                                <span class="font-medium">{{ client.username }}</span>
-                                                                {% if client.is_temp %}
-                                                                <span class="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">временный</span>
-                                                                {% elif client.full_name != client.username %}
-                                                                <span class="text-gray-400 text-xs">({{ client.full_name }})</span>
-                                                                {% endif %}
-                                                            </div>
-                                                            <div class="flex items-center gap-4 text-xs text-gray-500">
-                                                                <span>{{ client.tracks|length }} треков</span>
-                                                                <span>{{ client.total_weight }} кг</span>
-                                                            </div>
-                                                        </summary>
-
-                                                        <div class="px-4 pb-3 pt-2">
-                                                            <!-- Список трек-кодов -->
-                                                            <div class="mb-3">
-                                                                <p class="text-xs font-medium text-gray-500 mb-1">Трек-коды:</p>
-                                                                <div class="flex flex-wrap gap-1">
-                                                                    {% for track in client.tracks %}
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono
-                                                                        {% if track.status == 'delivered' %}bg-purple-100 text-purple-700
-                                                                        {% elif track.status == 'shipping_pp' %}bg-gray-200 text-gray-700
-                                                                        {% elif track.status == 'ready' %}bg-green-100 text-green-700
-                                                                        {% elif track.status == 'claimed' %}bg-blue-100 text-blue-700
-                                                                        {% endif %}">
-                                                                        {{ track.track_code }}
-                                                                        <span class="ml-1 text-gray-400">{{ track.weight|default:"—" }}кг</span>
-                                                                    </span>
-                                                                    {% endfor %}
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Чеки клиента -->
-                                                            {% if client.receipts %}
-                                                            {% for rd in client.receipts %}
-                                                            <details class="border border-gray-200 rounded-lg overflow-hidden mb-2">
-                                                                <summary class="cursor-pointer px-3 py-2 bg-gray-100 hover:bg-gray-200 transition flex items-center justify-between text-xs">
-                                                                    <span class="font-medium">
-                                                                        <i class="ri-arrow-right-s-line text-gray-400 arrow-icon transition-transform"></i>
-                                                                        Чек #{{ rd.receipt.id }} от {{ rd.receipt.created_at|date:"d.m.Y" }}
-                                                                        — {{ rd.computed_weight }} кг, {{ rd.computed_price }} тг
-                                                                    </span>
-                                                                    {% if rd.receipt.is_paid %}
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Оплачен</span>
-                                                                    {% else %}
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>
-                                                                    {% endif %}
-                                                                </summary>
-                                                                <div class="px-3 py-2">
-                                                                    <table class="w-full text-xs border-collapse">
-                                                                        <thead>
-                                                                            <tr class="bg-gray-200 text-gray-700">
-                                                                                <th class="border border-gray-300 px-2 py-1 text-left">#</th>
-                                                                                <th class="border border-gray-300 px-2 py-1 text-left">Трек-код</th>
-                                                                                <th class="border border-gray-300 px-2 py-1 text-right">Вес (кг)</th>
-                                                                                <th class="border border-gray-300 px-2 py-1 text-right">Стоимость (тг)</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            {% for item in rd.items %}
-                                                                            <tr class="{% cycle 'bg-white' 'bg-gray-50' %}">
-                                                                                <td class="border border-gray-300 px-2 py-1">{{ forloop.counter }}</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 font-mono">{{ item.display_track_code }}</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ item.display_weight|default:"—" }}</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ item.price }}</td>
-                                                                            </tr>
-                                                                            {% endfor %}
-                                                                        </tbody>
-                                                                        <tfoot>
-                                                                            <tr class="bg-gray-100 font-semibold">
-                                                                                <td class="border border-gray-300 px-2 py-1" colspan="2">Итого: {{ rd.items|length }} шт.</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ rd.computed_weight }}</td>
-                                                                                <td class="border border-gray-300 px-2 py-1 text-right">{{ rd.computed_price }}</td>
-                                                                            </tr>
-                                                                        </tfoot>
-                                                                    </table>
-                                                                </div>
-                                                            </details>
-                                                            {% endfor %}
-                                                            {% else %}
-                                                            <p class="text-xs text-gray-400 italic">Чек ещё не сформирован</p>
-                                                            {% endif %}
-                                                        </div>
-                                                    </details>
-                                                {% endfor %}
-                                                </div>
-                                            </details>
-                                        {% endfor %}
-                                        </div>
-                                    </details>
-                                {% endfor %}
-                                </div>
-                            </details>
-                        {% endfor %}
+                        <div class="pl-4 pr-2 pb-3 space-y-2 ah-content">
+                            <div class="flex items-center gap-2 px-4 py-2 text-sm text-gray-400">
+                                <span class="ah-spinner"></span> Загрузка месяцев...
+                            </div>
                         </div>
                     </details>
                 {% endfor %}
@@ -216,5 +77,255 @@
     {% endblock %}
 
     {% include 'includes/footer.html' %}
+
+    <script>
+    (function() {
+        const BASE = '/profile/arrival-history';
+
+        function getCookie(name) {
+            const v = document.cookie.match('(^|;)\\s*' + name + '=([^;]*)');
+            return v ? decodeURIComponent(v[2]) : null;
+        }
+
+        async function fetchJSON(url) {
+            const resp = await fetch(url, {
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken')},
+            });
+            if (!resp.ok) throw new Error(resp.statusText);
+            return resp.json();
+        }
+
+        function spinner(text) {
+            return `<div class="flex items-center gap-2 px-4 py-2 text-sm text-gray-400"><span class="ah-spinner"></span> ${text}</div>`;
+        }
+
+        const STATUS_CLASSES = {
+            delivered: 'bg-purple-100 text-purple-700',
+            shipping_pp: 'bg-gray-200 text-gray-700',
+            ready: 'bg-green-100 text-green-700',
+            claimed: 'bg-blue-100 text-blue-700',
+        };
+
+        // --- Год: загрузка месяцев ---
+        document.querySelectorAll('#ah-root > details[data-year]').forEach(el => {
+            let loaded = false;
+            el.addEventListener('toggle', async function() {
+                if (!this.open || loaded) return;
+                loaded = true;
+                const year = this.dataset.year;
+                const container = this.querySelector('.ah-content');
+                try {
+                    const data = await fetchJSON(`${BASE}/months/${year}/`);
+                    if (!data.months.length) {
+                        container.innerHTML = '<p class="px-4 py-2 text-sm text-gray-400">Нет данных за этот год.</p>';
+                        return;
+                    }
+                    container.innerHTML = data.months.map(m => `
+                        <details class="border border-gray-200 rounded-lg ml-2" data-year="${year}" data-month="${m.month}">
+                            <summary class="cursor-pointer px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition font-semibold text-gray-800">
+                                <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                                <i class="ri-calendar-2-line text-blue-500"></i>
+                                ${m.name}
+                            </summary>
+                            <div class="pl-4 pr-2 pb-2 space-y-2 ah-content">
+                                ${spinner('Загрузка дат...')}
+                            </div>
+                        </details>
+                    `).join('');
+                    bindMonths(container);
+                } catch(e) {
+                    container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">Ошибка загрузки данных.</p>';
+                }
+            });
+        });
+
+        // --- Месяц: загрузка дней ---
+        function bindMonths(parent) {
+            parent.querySelectorAll('details[data-month]').forEach(el => {
+                let loaded = false;
+                el.addEventListener('toggle', async function() {
+                    if (!this.open || loaded) return;
+                    loaded = true;
+                    const year = this.dataset.year;
+                    const month = this.dataset.month;
+                    const container = this.querySelector('.ah-content');
+                    try {
+                        const data = await fetchJSON(`${BASE}/days/${year}/${month}/`);
+                        if (!data.days.length) {
+                            container.innerHTML = '<p class="px-4 py-2 text-sm text-gray-400">Нет данных за этот месяц.</p>';
+                            return;
+                        }
+                        container.innerHTML = data.days.map(d => `
+                            <details class="border border-gray-200 rounded-lg ml-2" data-year="${year}" data-month="${month}" data-day="${d.day}" data-day-key="${d.day_key}">
+                                <summary class="cursor-pointer px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition font-medium text-gray-700">
+                                    <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                                    <i class="ri-calendar-event-line text-green-500"></i>
+                                    ${d.day_key}
+                                </summary>
+                                <div class="pl-4 pr-2 pb-2 space-y-2 ah-content">
+                                    ${spinner('Загрузка данных...')}
+                                </div>
+                            </details>
+                        `).join('');
+                        bindDays(container);
+                    } catch(e) {
+                        container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">Ошибка загрузки данных.</p>';
+                    }
+                });
+            });
+        }
+
+        // --- День: загрузка деталей ---
+        function bindDays(parent) {
+            parent.querySelectorAll('details[data-day]').forEach(el => {
+                let loaded = false;
+                el.addEventListener('toggle', async function() {
+                    if (!this.open || loaded) return;
+                    loaded = true;
+                    const {year, month, day} = this.dataset;
+                    const container = this.querySelector('.ah-content');
+                    try {
+                        const data = await fetchJSON(`${BASE}/day/${year}/${month}/${day}/`);
+                        container.innerHTML = renderDayDetail(data);
+                    } catch(e) {
+                        container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">Ошибка загрузки данных.</p>';
+                    }
+                });
+            });
+        }
+
+        // --- Рендер содержимого дня ---
+        function renderDayDetail(data) {
+            let html = '';
+
+            // Приходы
+            if (data.arrivals && data.arrivals.length) {
+                html += '<div class="ml-2 mb-2 space-y-1">';
+                data.arrivals.forEach(a => {
+                    html += `<div class="flex items-center gap-2 text-xs bg-blue-50 border border-blue-200 rounded px-3 py-1.5">
+                        <i class="ri-inbox-archive-line text-blue-500"></i>
+                        <span class="text-blue-800 font-medium">Приход #${a.id}</span>`;
+                    if (a.sorting_location) html += `<span class="text-gray-500">| ${a.sorting_location}</span>`;
+                    html += `<span class="text-gray-500">| ${a.total_tracks} треков (обн: ${a.updated_count}, созд: ${a.created_count})</span>`;
+                    if (a.created_by) html += `<span class="text-gray-400 ml-auto">${a.created_by}</span>`;
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // ПВЗ
+            if (data.pickups && data.pickups.length) {
+                data.pickups.forEach(p => {
+                    html += `
+                    <details class="border border-gray-200 rounded-lg ml-2 bg-gray-50">
+                        <summary class="cursor-pointer px-4 py-2 flex items-center gap-3 hover:bg-gray-100 transition text-sm font-medium text-gray-700">
+                            <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                            <i class="ri-map-pin-line text-orange-500"></i>
+                            ${p.pickup_name}
+                            <span class="text-xs text-gray-400 ml-auto">${p.client_count} клиентов</span>
+                        </summary>
+                        <div class="pl-4 pr-2 pb-2 space-y-2">`;
+                    p.clients.forEach(c => {
+                        html += renderClient(c);
+                    });
+                    html += '</div></details>';
+                });
+            }
+
+            if (!html) {
+                html = '<p class="px-4 py-2 text-sm text-gray-400">Нет данных за эту дату.</p>';
+            }
+            return html;
+        }
+
+        function renderClient(c) {
+            const iconClass = c.is_temp ? 'text-orange-500' : 'text-purple-500';
+            const badge = c.is_temp
+                ? '<span class="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">временный</span>'
+                : (c.full_name !== c.username ? `<span class="text-gray-400 text-xs">(${c.full_name})</span>` : '');
+            const weight = c.total_weight != null ? c.total_weight : 0;
+
+            let html = `
+            <details class="border border-gray-200 rounded-lg ml-2 bg-white">
+                <summary class="cursor-pointer px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition text-sm">
+                    <div class="flex items-center gap-3">
+                        <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
+                        <i class="ri-user-line ${iconClass}"></i>
+                        <span class="font-medium">${c.username}</span>
+                        ${badge}
+                    </div>
+                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                        <span>${c.tracks.length} треков</span>
+                        <span>${weight} кг</span>
+                    </div>
+                </summary>
+                <div class="px-4 pb-3 pt-2">
+                    <div class="mb-3">
+                        <p class="text-xs font-medium text-gray-500 mb-1">Трек-коды:</p>
+                        <div class="flex flex-wrap gap-1">`;
+
+            c.tracks.forEach(t => {
+                const cls = STATUS_CLASSES[t.status] || 'bg-gray-100 text-gray-700';
+                const w = t.weight != null ? t.weight + 'кг' : '—кг';
+                html += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono ${cls}">
+                    ${t.track_code}<span class="ml-1 text-gray-400">${w}</span></span>`;
+            });
+
+            html += '</div></div>';
+
+            // Чеки
+            if (c.receipts && c.receipts.length) {
+                c.receipts.forEach(rd => {
+                    const paidBadge = rd.is_paid
+                        ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Оплачен</span>'
+                        : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>';
+                    html += `
+                    <details class="border border-gray-200 rounded-lg overflow-hidden mb-2">
+                        <summary class="cursor-pointer px-3 py-2 bg-gray-100 hover:bg-gray-200 transition flex items-center justify-between text-xs">
+                            <span class="font-medium">
+                                <i class="ri-arrow-right-s-line text-gray-400 arrow-icon transition-transform"></i>
+                                Чек #${rd.receipt_id} от ${rd.created_at} — ${rd.computed_weight} кг, ${rd.computed_price} тг
+                            </span>
+                            ${paidBadge}
+                        </summary>
+                        <div class="px-3 py-2">
+                            <table class="w-full text-xs border-collapse">
+                                <thead><tr class="bg-gray-200 text-gray-700">
+                                    <th class="border border-gray-300 px-2 py-1 text-left">#</th>
+                                    <th class="border border-gray-300 px-2 py-1 text-left">Трек-код</th>
+                                    <th class="border border-gray-300 px-2 py-1 text-right">Вес (кг)</th>
+                                    <th class="border border-gray-300 px-2 py-1 text-right">Стоимость (тг)</th>
+                                </tr></thead>
+                                <tbody>`;
+                    rd.items.forEach((item, i) => {
+                        const rowCls = i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                        const w = item.weight != null ? item.weight : '—';
+                        html += `<tr class="${rowCls}">
+                            <td class="border border-gray-300 px-2 py-1">${i + 1}</td>
+                            <td class="border border-gray-300 px-2 py-1 font-mono">${item.track_code}</td>
+                            <td class="border border-gray-300 px-2 py-1 text-right">${w}</td>
+                            <td class="border border-gray-300 px-2 py-1 text-right">${item.price}</td>
+                        </tr>`;
+                    });
+                    html += `</tbody>
+                                <tfoot><tr class="bg-gray-100 font-semibold">
+                                    <td class="border border-gray-300 px-2 py-1" colspan="2">Итого: ${rd.items.length} шт.</td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">${rd.computed_weight}</td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">${rd.computed_price}</td>
+                                </tr></tfoot>
+                            </table>
+                        </div>
+                    </details>`;
+                });
+            } else {
+                html += '<p class="text-xs text-gray-400 italic">Чек ещё не сформирован</p>';
+            }
+
+            html += '</div></details>';
+            return html;
+        }
+
+    })();
+    </script>
 </body>
 </html>

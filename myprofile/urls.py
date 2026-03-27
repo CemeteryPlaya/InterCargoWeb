@@ -75,6 +75,9 @@ urlpatterns = [
     path('warehouse/find-client/', warehouse.warehouse_find_client_by_receipt, name='warehouse_find_client_by_receipt'),
     path('warehouse/finish-restructure/', warehouse.finish_restructure, name='finish_restructure'),
     path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
+    path('arrival-history/months/<int:year>/', arrival_history.arrival_history_months, name='arrival_history_months'),
+    path('arrival-history/days/<int:year>/<int:month>/', arrival_history.arrival_history_days, name='arrival_history_days'),
+    path('arrival-history/day/<int:year>/<int:month>/<int:day>/', arrival_history.arrival_history_day_detail, name='arrival_history_day_detail'),
     path('arrival-summary/', arrival_summary.arrival_summary_view, name='arrival_summary'),
     path('arrival-summary/toggle/', arrival_summary.toggle_home_delivery, name='toggle_home_delivery'),
     path('arrival-summary/assign-temp-pickup/', arrival_summary.assign_temp_pickup, name='assign_temp_pickup'),
@@ -100,6 +103,8 @@ urlpatterns = [
     path('service/generate-receipts/', service.service_generate_receipts, name='service_generate_receipts'),
     path('service/normalize-receipts/', service.service_normalize_receipts, name='service_normalize_receipts'),
     path('service/mark-claimed/', service.service_mark_claimed, name='service_mark_claimed'),
+    path('service/restore-archived-tracks/', service.service_restore_archived_tracks, name='service_restore_archived_tracks'),
+    path('service/migrate-temp-users/', service.service_migrate_temp_users, name='service_migrate_temp_users'),
 
 ]
 
