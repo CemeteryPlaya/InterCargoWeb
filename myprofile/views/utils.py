@@ -123,7 +123,12 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
             pickup_point=pickup_display, payment_link=payment_link
         )
         for track in date_tracks:
-            ReceiptItem.objects.create(receipt=receipt, track_code=track)
+            w = track.weight or Decimal("0")
+            ReceiptItem.objects.create(
+                receipt=receipt, track_code=track,
+                item_rate=effective_rate,
+                item_price=(w * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
+            )
         _recalc_receipt(receipt, effective_rate)
         last_receipt = receipt
         created_receipt_ids.append(receipt.id)
@@ -174,7 +179,12 @@ def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
             pickup_point=pickup_display, payment_link=payment_link
         )
         for track in date_tracks:
-            ReceiptItem.objects.create(receipt=receipt, track_code=track)
+            w = track.weight or Decimal("0")
+            ReceiptItem.objects.create(
+                receipt=receipt, track_code=track,
+                item_rate=effective_rate,
+                item_price=(w * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
+            )
         _recalc_receipt(receipt, effective_rate)
         last_receipt = receipt
 

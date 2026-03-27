@@ -84,6 +84,8 @@ def extradition_view(request):
                 for item in receipt.items.all():
                     track = item.track_code
                     track.status = 'claimed'
+                    track.set_status_date()
+                    track.log_status_change(request.user)
                     track.save()
 
                     if track.owner:

@@ -37,9 +37,10 @@ class TrackCodeAdminForm(forms.ModelForm):
 @admin.register(TrackCode)
 class TrackCodeAdmin(admin.ModelAdmin):
     form = TrackCodeAdminForm
-    list_display = ('id', 'track_code', 'owner', 'temp_owner', 'update_date', 'status', 'is_archived', 'sorting_location', 'description', 'weight')
+    list_display = ('id', 'track_code', 'owner', 'temp_owner', 'update_date', 'status', 'is_archived', 'is_accepted_pp', 'sorting_location', 'weight', 'historical_price_per_kg')
     search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name', 'temp_owner__login')
-    list_filter = ('status', 'is_archived', 'update_date', 'sorting_location')
+    list_filter = ('status', 'is_archived', 'is_accepted_pp', 'update_date', 'sorting_location')
+    readonly_fields = ('status_history',)
     actions = ['update_status_action']
 
     def update_status_action(self, request, queryset):
@@ -107,8 +108,8 @@ class TrackCodeAdmin(admin.ModelAdmin):
 
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display = ('id', 'client_display', 'created_at', 'is_paid', 'paid_at', 'total_weight', 'total_price')
-    list_filter = ('is_paid', 'created_at')
+    list_display = ('id', 'client_display', 'created_at', 'is_paid', 'paid_at', 'is_accepted_pp', 'total_weight', 'total_price')
+    list_filter = ('is_paid', 'is_accepted_pp', 'needs_attention', 'created_at')
     search_fields = ('owner__username', 'temp_owner__login')
 
     def client_display(self, obj):
@@ -126,7 +127,7 @@ class ReceiptAdmin(admin.ModelAdmin):
 
 @admin.register(ReceiptItem)
 class ReceiptItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'receipt', 'track_code', 'weight')
+    list_display = ('id', 'receipt', 'track_code', 'weight', 'item_rate', 'item_price')
     search_fields = ('track_code__track_code', 'receipt__owner__username', 'receipt__temp_owner__login', 'receipt__receipt_number')
     list_filter = ('receipt__created_at',)
 

@@ -101,6 +101,8 @@ def shipped_cn_view(request):
 
             track.status = status
             track.update_date = update_date
+            track.set_status_date()
+            track.log_status_change(request.user)
 
             try:
                 track.save()
@@ -115,13 +117,16 @@ def shipped_cn_view(request):
         except TrackCode.DoesNotExist:
             # Создаём трек-код без владельца
             try:
-                TrackCode.objects.create(
+                new_track = TrackCode.objects.create(
                     track_code=code,
                     status=status,
                     update_date=update_date,
                     owner=None,
                     weight=None
                 )
+                new_track.set_status_date()
+                new_track.log_status_change(request.user)
+                new_track.save()
                 created += 1
             except ValidationError as e:
                 messages.error(request, f"Не удалось создать трек-код {code}: {e}")

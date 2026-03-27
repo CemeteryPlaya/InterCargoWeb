@@ -297,6 +297,8 @@ def take_delivery(request):
                 # Фиксируем исторический ПВЗ доставки на каждом треке
                 if not track.delivery_pickup_id:
                     track.delivery_pickup = pickup
+                track.set_status_date()
+                track.log_status_change(request.user)
                 track.save()
                 updated += 1
                 if track.owner:
@@ -349,6 +351,8 @@ def take_delivery(request):
                 # Фиксируем исторический ПВЗ (доставка на дом)
                 if not track.delivery_pickup_id:
                     track.delivery_pickup = home_pp
+                track.set_status_date()
+                track.log_status_change(request.user)
                 track.save()
                 updated += 1
                 if track.owner:
@@ -472,7 +476,9 @@ def complete_delivery(request):
         for track in tracks:
             track.status = 'ready'
             track.update_date = today
-            track.pp_sorted = False
+            track.is_accepted_pp = False
+            track.set_status_date()
+            track.log_status_change(request.user)
             track.save()
             updated += 1
             if track.owner:
@@ -702,6 +708,8 @@ def driver_issue(request):
         for track in tracks:
             track.status = 'claimed'
             track.update_date = today
+            track.set_status_date()
+            track.log_status_change(request.user)
             track.save()
 
         # Обновляем DeliveryHistory — отмечаем как доставлено

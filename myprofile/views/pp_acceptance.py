@@ -52,7 +52,7 @@ def pp_acceptance_view(request):
 
     # Находим все неотсортированные ready-треки
     tracks_qs = TrackCode.objects.filter(
-        status='ready', pp_sorted=False,
+        status='ready', is_accepted_pp=False,
     ).select_related(
         'owner', 'owner__userprofile__pickup',
         'temp_owner', 'temp_owner__pickup',
@@ -146,7 +146,7 @@ def get_acceptance_receipts(request):
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
-        pp_sorted=False,
+        is_accepted_pp=False,
     )
     if filter_date is not None:
         tracks_qs = tracks_qs.filter(delivered_date=filter_date)
@@ -287,7 +287,7 @@ def accept_delivery(request):
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
-        pp_sorted=False,
+        is_accepted_pp=False,
     )
     if filter_date is not None:
         all_tracks = all_tracks.filter(delivered_date=filter_date)
@@ -305,8 +305,11 @@ def accept_delivery(request):
 
     # Собираем владельцев для создания ячеек
     owners_seen = set()
+    now = timezone.now()
     for track in tracks:
-        track.pp_sorted = True
+        track.is_accepted_pp = True
+        track.accepted_pp_at = now
+        track.accepted_pp_by = request.user
         track.save(skip_full_clean=True)
         if track.owner and track.owner_id not in owners_seen:
             owners_seen.add(track.owner_id)
@@ -372,7 +375,7 @@ def finish_acceptance_session(request):
         Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
-        pp_sorted=False,
+        is_accepted_pp=False,
     )
     if filter_date is not None:
         unsorted_tracks = unsorted_tracks.filter(delivered_date=filter_date)

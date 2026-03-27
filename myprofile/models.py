@@ -79,11 +79,31 @@ class TrackCode(models.Model):
         null=True, blank=True, related_name='track_codes',
         verbose_name="Где отсортирован"
     )
-    delivered_date = models.DateField(
-        null=True, blank=True,
-        verbose_name="Дата прихода на сорт. склад"
+    # Даты по этапам жизненного цикла
+    date_user_added = models.DateField(null=True, blank=True, verbose_name="Дата добавления пользователем")
+    date_shipped_cn = models.DateField(null=True, blank=True, verbose_name="Дата отправки со склада (Китай)")
+    delivered_date = models.DateField(null=True, blank=True, verbose_name="Дата прихода на сорт. склад")
+    date_shipping_pp = models.DateField(null=True, blank=True, verbose_name="Дата принятия в доставку")
+    date_ready = models.DateField(null=True, blank=True, verbose_name="Дата прибытия на ПВЗ")
+    date_claimed = models.DateField(null=True, blank=True, verbose_name="Дата выдачи клиенту")
+
+    # Историческая стоимость и история статусов
+    historical_price_per_kg = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True,
+        verbose_name="Тариф на момент доставки (₸/кг)"
     )
-    pp_sorted = models.BooleanField(default=False, verbose_name="Отсортирован на ПВЗ")
+    status_history = models.JSONField(default=list, blank=True, verbose_name="История статусов")
+
+    # Принятие на ПВЗ / складе
+    is_accepted_pp = models.BooleanField(default=False, verbose_name="Принят на ПВЗ")
+    accepted_pp_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата принятия на ПВЗ")
+    accepted_pp_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='accepted_tracks',
+        verbose_name="Кто принял на ПВЗ"
+    )
+
+    # Архивация
     is_archived = models.BooleanField(default=False, verbose_name="Архивирован")
     archived_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата архивации")
 
@@ -129,6 +149,34 @@ class TrackCode(models.Model):
                     raise ValidationError({
                         'status': f"Нельзя откатить статус с '{old.get_status_display()}' на '{dict(self.STATUS_CHOICES).get(self.status)}'."
                     })
+
+    # Маппинг статуса → поле даты
+    STATUS_DATE_FIELD = {
+        'user_added': 'date_user_added',
+        'shipped_cn': 'date_shipped_cn',
+        'delivered': 'delivered_date',
+        'shipping_pp': 'date_shipping_pp',
+        'ready': 'date_ready',
+        'claimed': 'date_claimed',
+    }
+
+    def log_status_change(self, changed_by=None):
+        """Записывает текущий статус в историю."""
+        entry = {
+            'status': self.status,
+            'date': timezone.localdate().isoformat(),
+        }
+        if changed_by:
+            entry['changed_by'] = changed_by if isinstance(changed_by, str) else changed_by.username
+        if not isinstance(self.status_history, list):
+            self.status_history = []
+        self.status_history.append(entry)
+
+    def set_status_date(self):
+        """Устанавливает дату для текущего статуса, если ещё не заполнена."""
+        field = self.STATUS_DATE_FIELD.get(self.status)
+        if field and not getattr(self, field, None):
+            setattr(self, field, timezone.localdate())
 
     def save(self, *args, **kwargs):
         # Если установлен флаг пропуска валидации (для админ-панели), пропускаем full_clean
@@ -199,6 +247,17 @@ class Receipt(models.Model):
         verbose_name="Кто добавил в внимание"
     )
     attention_pickup = models.CharField(max_length=255, blank=True, default='', verbose_name="ПВЗ внимания")
+    attention_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата установки «Требует внимания»")
+
+    # Принятие на ПВЗ / складе
+    is_accepted_pp = models.BooleanField(default=False, verbose_name="Принят на ПВЗ")
+    accepted_pp_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата принятия на ПВЗ")
+    accepted_pp_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='accepted_receipts',
+        verbose_name="Кто принял на ПВЗ"
+    )
+
     total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
     total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
     price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")
@@ -218,7 +277,8 @@ class Receipt(models.Model):
     _MUTABLE_FIELDS = frozenset({
         'is_paid', 'paid_at', 'is_claimed', 'claimed_at',
         'needs_attention', 'attention_reason',
-        'attention_added_by', 'attention_added_by_id', 'attention_pickup',
+        'attention_added_by', 'attention_added_by_id', 'attention_pickup', 'attention_at',
+        'is_accepted_pp', 'accepted_pp_at', 'accepted_pp_by', 'accepted_pp_by_id',
     })
 
     @property
@@ -227,8 +287,15 @@ class Receipt(models.Model):
         return bool(self.receipt_number and self.total_weight > 0)
 
     def save(self, *args, **kwargs):
-        if not self.receipt_number:
-            self.receipt_number = f"IC-{uuid.uuid4().hex[:8].upper()}"
+        is_new = not self.pk
+
+        if is_new and not self.receipt_number:
+            # Первое сохранение: получим pk, затем сгенерируем номер
+            self.receipt_number = f"IC-TEMP-{uuid.uuid4().hex[:8].upper()}"
+            super().save(*args, **kwargs)
+            self.receipt_number = f"IC-{self.pk:06d}"
+            super().save(update_fields=['receipt_number'])
+            return
 
         # Защита от изменения содержимого финализированного чека
         if self.pk and not getattr(self, '_allow_content_update', False):
@@ -291,6 +358,8 @@ class ReceiptItem(models.Model):
     # Сохранённые данные — остаются после архивации трек-кода
     track_code_str = models.CharField(max_length=100, blank=True, verbose_name="Трек-код (текст)")
     weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
+    item_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Стоимость позиции (₸)")
+    item_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Тариф за кг (₸/кг)")
 
     class Meta:
         verbose_name = "Позиция чека"

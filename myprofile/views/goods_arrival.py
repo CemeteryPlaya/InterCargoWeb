@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
-from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages
+from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages, get_global_price_per_kg, get_user_discount, get_temp_user_discount
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
@@ -230,6 +230,19 @@ def complete_session(request, session_id):
             if sorting_location:
                 track.sorting_location = sorting_location
 
+            # Set historical price per kg for delivered status
+            if track.owner:
+                _discount = get_user_discount(track.owner)
+                track.historical_price_per_kg = get_global_price_per_kg() - _discount
+            elif track.temp_owner:
+                _discount = get_temp_user_discount(track.temp_owner)
+                track.historical_price_per_kg = get_global_price_per_kg() - _discount
+            else:
+                track.historical_price_per_kg = get_global_price_per_kg()
+
+            track.set_status_date()
+            track.log_status_change(request.user)
+
             try:
                 track.save()
                 processed_track_ids.append(track.id)
@@ -253,6 +266,18 @@ def complete_session(request, session_id):
                     weight=weight_val,
                     sorting_location=sorting_location,
                 )
+                # Set historical price per kg for delivered status
+                if user:
+                    _discount = get_user_discount(user)
+                    new_track.historical_price_per_kg = get_global_price_per_kg() - _discount
+                elif temp_user:
+                    _discount = get_temp_user_discount(temp_user)
+                    new_track.historical_price_per_kg = get_global_price_per_kg() - _discount
+                else:
+                    new_track.historical_price_per_kg = get_global_price_per_kg()
+                new_track.set_status_date()
+                new_track.log_status_change(request.user)
+                new_track.save()
                 processed_track_ids.append(new_track.id)
                 created += 1
                 if user:
