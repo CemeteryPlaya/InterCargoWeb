@@ -4,7 +4,10 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.db.models.signals import post_delete, post_save, pre_save, pre_delete
 from django.dispatch import receiver
 
-from myprofile.models import Notification, Receipt, ReceiptItem, StorageCell, TrackCode
+from myprofile.models import (
+    Arrival, ArrivalSessionItem, Notification, Receipt, ReceiptItem,
+    StorageCell, TrackCode,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +27,13 @@ def track_code_capture_old_state(sender, instance, **kwargs):
         instance._old_delivered_date = old.delivered_date
         instance._old_owner_id = old.owner_id
         instance._old_temp_owner_id = old.temp_owner_id
+        instance._old_track_code_str = old.track_code
     except TrackCode.DoesNotExist:
         instance._old_weight = None
         instance._old_delivered_date = None
         instance._old_owner_id = None
         instance._old_temp_owner_id = None
+        instance._old_track_code_str = None
 
 
 @receiver(post_save, sender=TrackCode)
@@ -166,6 +171,131 @@ def _relocate_receipt_item(track, item, old_receipt, weight_changed):
     # Пересчитываем оба чека
     _recalc_receipt_safe(old_receipt)
     _recalc_receipt_safe(target_receipt)
+
+
+# ─────────────────────────────────────────────────────────────
+# Каскадное обновление Arrival / ArrivalSessionItem
+# ─────────────────────────────────────────────────────────────
+
+@receiver(pre_delete, sender=TrackCode)
+def track_code_capture_arrivals_before_delete(sender, instance, **kwargs):
+    """Запоминаем связанные Arrival до удаления (M2M будет очищен Django)."""
+    instance._arrival_ids = list(
+        instance.arrivals.values_list('id', flat=True)
+    )
+
+
+@receiver(post_delete, sender=TrackCode)
+def track_code_cascade_to_arrival_on_delete(sender, instance, **kwargs):
+    """
+    После удаления TrackCode:
+    - Удаляем соответствующие ArrivalSessionItem
+    - Обновляем total_tracks и raw_data в связанных Arrival
+    """
+    # Удаляем строки сессий прихода с этим трек-кодом
+    ArrivalSessionItem.objects.filter(track_code=instance.track_code).delete()
+
+    # Обновляем статистику и raw_data в связанных Arrival
+    arrival_ids = getattr(instance, '_arrival_ids', [])
+    for arrival in Arrival.objects.filter(id__in=arrival_ids):
+        _sync_arrival_after_track_removal(arrival, instance.track_code)
+
+
+def _sync_arrival_after_track_removal(arrival, removed_code):
+    """Обновляет total_tracks и raw_data после удаления трек-кода из Arrival."""
+    arrival.total_tracks = arrival.track_codes.count()
+
+    raw = arrival.raw_data
+    if raw and 'track_codes' in raw:
+        indices_to_keep = [
+            i for i, tc in enumerate(raw['track_codes'])
+            if tc != removed_code
+        ]
+        raw['track_codes'] = [raw['track_codes'][i] for i in indices_to_keep]
+        if 'usernames' in raw:
+            raw['usernames'] = [raw['usernames'][i] for i in indices_to_keep]
+        if 'weights' in raw:
+            raw['weights'] = [raw['weights'][i] for i in indices_to_keep]
+        arrival.raw_data = raw
+
+    arrival.save(update_fields=['total_tracks', 'raw_data'])
+
+
+@receiver(post_save, sender=TrackCode)
+def track_code_cascade_to_arrival_on_save(sender, instance, created, **kwargs):
+    """
+    При изменении TrackCode синхронизируем данные
+    в ArrivalSessionItem и Arrival.raw_data.
+    """
+    if created:
+        return
+
+    old_code = getattr(instance, '_old_track_code_str', None)
+    old_weight = getattr(instance, '_old_weight', None)
+    old_owner_id = getattr(instance, '_old_owner_id', None)
+    old_temp_owner_id = getattr(instance, '_old_temp_owner_id', None)
+
+    code_changed = old_code is not None and old_code != instance.track_code
+    weight_changed = old_weight != instance.weight
+    owner_changed = (
+        old_owner_id != instance.owner_id or
+        old_temp_owner_id != instance.temp_owner_id
+    )
+
+    if not (code_changed or weight_changed or owner_changed):
+        return
+
+    # Определяем текущее имя владельца
+    owner_name = ''
+    if instance.owner:
+        owner_name = instance.owner.username
+    elif instance.temp_owner:
+        owner_name = instance.temp_owner.login
+
+    lookup_code = old_code if code_changed else instance.track_code
+
+    # --- Обновляем ArrivalSessionItem ---
+    session_items = ArrivalSessionItem.objects.filter(track_code=lookup_code)
+    update_fields_si = {}
+    if code_changed:
+        update_fields_si['track_code'] = instance.track_code
+    if weight_changed:
+        update_fields_si['weight'] = instance.weight
+    if owner_changed:
+        update_fields_si['owner_name'] = owner_name
+    if update_fields_si:
+        session_items.update(**update_fields_si)
+
+    # --- Обновляем raw_data в связанных Arrival ---
+    for arrival in instance.arrivals.all():
+        _sync_arrival_raw_data(arrival, lookup_code, instance, owner_name,
+                               code_changed, weight_changed, owner_changed)
+
+
+def _sync_arrival_raw_data(arrival, lookup_code, track, owner_name,
+                           code_changed, weight_changed, owner_changed):
+    """Обновляет raw_data в Arrival при изменении данных трек-кода."""
+    raw = arrival.raw_data
+    if not raw or 'track_codes' not in raw:
+        return
+
+    updated = False
+    for i, tc in enumerate(raw['track_codes']):
+        if tc != lookup_code:
+            continue
+        if code_changed:
+            raw['track_codes'][i] = track.track_code
+            updated = True
+        if owner_changed and 'usernames' in raw and i < len(raw['usernames']):
+            raw['usernames'][i] = owner_name
+            updated = True
+        if weight_changed and 'weights' in raw and i < len(raw['weights']):
+            raw['weights'][i] = str(track.weight) if track.weight else '0'
+            updated = True
+
+    if updated:
+        arrival.raw_data = raw
+        arrival.save(update_fields=['raw_data'])
 
 
 # ─────────────────────────────────────────────────────────────
