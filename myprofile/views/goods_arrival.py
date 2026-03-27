@@ -195,13 +195,9 @@ def complete_session(request, session_id):
                     if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                         track.weight = weight_val
                     if owner_name:
-                        user, temp_user = _resolve_owner(owner_name)
-                        if user:
-                            track.owner = user
-                            track.temp_owner = None
-                        else:
-                            track.owner = None
-                            track.temp_owner = temp_user
+                        user, _ = _resolve_owner(owner_name)
+                        track.owner = user
+                        track.temp_owner = None
                     if sorting_location:
                         track.sorting_location = sorting_location
                     track.save(update_fields=['update_date', 'owner', 'temp_owner', 'weight', 'sorting_location', 'is_archived', 'archived_at'])
@@ -219,13 +215,10 @@ def complete_session(request, session_id):
             if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                 track.weight = weight_val
             if owner_name:
-                user, temp_user = _resolve_owner(owner_name)
-                if user:
-                    track.owner = user
-                    track.temp_owner = None
-                else:
-                    track.owner = None
-                    track.temp_owner = temp_user
+                user, _ = _resolve_owner(owner_name)
+                track.owner = user
+                track.temp_owner = None
+                if user and not user.is_active:
                     temp_created += 1
             if sorting_location:
                 track.sorting_location = sorting_location
@@ -233,9 +226,6 @@ def complete_session(request, session_id):
             # Set historical price per kg for delivered status
             if track.owner:
                 _discount = get_user_discount(track.owner)
-                track.historical_price_per_kg = get_global_price_per_kg() - _discount
-            elif track.temp_owner:
-                _discount = get_temp_user_discount(track.temp_owner)
                 track.historical_price_per_kg = get_global_price_per_kg() - _discount
             else:
                 track.historical_price_per_kg = get_global_price_per_kg()
@@ -247,7 +237,7 @@ def complete_session(request, session_id):
                 track.save()
                 processed_track_ids.append(track.id)
                 updated += 1
-                if old_status != status and track.owner:
+                if old_status != status and track.owner and track.owner.is_active:
                     notif_counts[track.owner] += 1
             except ValidationError as e:
                 messages.error(request, f"Не удалось обновить трек-код {code}: {e}")
@@ -255,23 +245,19 @@ def complete_session(request, session_id):
 
         except TrackCode.DoesNotExist:
             try:
-                user, temp_user = _resolve_owner(owner_name) if owner_name else (None, None)
+                user, _ = _resolve_owner(owner_name) if owner_name else (None, None)
                 new_track = TrackCode.objects.create(
                     track_code=code,
                     status=status,
                     update_date=update_date,
                     delivered_date=update_date,
                     owner=user,
-                    temp_owner=temp_user,
                     weight=weight_val,
                     sorting_location=sorting_location,
                 )
                 # Set historical price per kg for delivered status
                 if user:
                     _discount = get_user_discount(user)
-                    new_track.historical_price_per_kg = get_global_price_per_kg() - _discount
-                elif temp_user:
-                    _discount = get_temp_user_discount(temp_user)
                     new_track.historical_price_per_kg = get_global_price_per_kg() - _discount
                 else:
                     new_track.historical_price_per_kg = get_global_price_per_kg()
@@ -280,9 +266,9 @@ def complete_session(request, session_id):
                 new_track.save()
                 processed_track_ids.append(new_track.id)
                 created += 1
-                if user:
+                if user and user.is_active:
                     notif_counts[user] += 1
-                elif temp_user:
+                elif user and not user.is_active:
                     temp_created += 1
             except ValidationError as e:
                 messages.error(request, f"Не удалось создать трек-код {code}: {e}")

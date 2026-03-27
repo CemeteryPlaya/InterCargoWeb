@@ -238,16 +238,24 @@ def round_price(value):
 
 def resolve_owner(username):
     """
-    Ищет пользователя по логину. Возвращает (user, temp_user).
-    Если зарегистрирован — (user, None). Иначе создаёт/находит TempUser — (None, temp_user).
+    Ищет пользователя по логину. Возвращает (user, None).
+    Если пользователь не существует — создаёт неактивного User + UserProfile(is_registered=False).
+    Для обратной совместимости второй элемент всегда None (ранее возвращал TempUser).
     """
     try:
         user = User.objects.get(username=username)
-        UserProfile.objects.get(user=user)
+    except User.DoesNotExist:
+        user = User.objects.create_user(username=username, is_active=False)
+        UserProfile.objects.create(user=user, phone='', is_registered=False)
         return user, None
-    except (User.DoesNotExist, UserProfile.DoesNotExist):
-        temp_user, _ = TempUser.objects.get_or_create(login=username)
-        return None, temp_user
+
+    # User существует — убеждаемся что есть UserProfile
+    try:
+        UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist:
+        UserProfile.objects.create(user=user, phone='', is_registered=False)
+
+    return user, None
 
 
 def send_grouped_notifications(notif_counts, status):

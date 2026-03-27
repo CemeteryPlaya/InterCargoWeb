@@ -15,7 +15,8 @@ from collections import defaultdict
 from datetime import datetime
 
 from myprofile.models import (
-    TrackCode, Receipt, ReceiptItem, ExtraditionPackage, Notification, Arrival
+    TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, ExtraditionPackage,
+    Notification, Arrival, CustomerDiscount, StorageCell,
 )
 from myprofile.views.utils import (
     get_global_price_per_kg, get_user_discount, get_temp_user_discount,
@@ -413,3 +414,130 @@ def _merge_receipts(receipt_ids, items_for_date, owner_key, target_date, RATE):
 
         # Пересчитываем основной чек
         _recalc_receipt(main_receipt, effective_rate)
+
+
+@login_required
+@require_POST
+def service_restore_archived_tracks(request):
+    """
+    Перенос Архивных трек-кодов обратно в основную таблицу TrackCode с пометкой is_archived=True.
+    Если трек-код уже существует в TrackCode — пропускаем.
+    """
+    if not _can_access_service(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    archived = ArchivedTrackCode.objects.all()
+    restored = 0
+    skipped = 0
+    errors = []
+
+    for arc in archived:
+        try:
+            # Проверяем нет ли уже такого трек-кода
+            existing = TrackCode.all_objects.filter(track_code=arc.track_code).first()
+            if existing:
+                skipped += 1
+                continue
+
+            TrackCode.objects.create(
+                track_code=arc.track_code,
+                update_date=arc.update_date,
+                status=arc.status,
+                owner=arc.owner,
+                description=arc.description,
+                weight=arc.weight,
+                is_archived=True,
+                archived_at=arc.archived_at,
+            )
+            restored += 1
+        except Exception as e:
+            errors.append(f"{arc.track_code}: {e}")
+
+    msg = f"Восстановлено из архива: {restored}. Пропущено (уже существуют): {skipped}."
+    if errors:
+        msg += f" Ошибок: {len(errors)}."
+    messages.success(request, msg)
+    for err in errors[:10]:
+        messages.warning(request, err)
+
+    return redirect('service')
+
+
+@login_required
+@require_POST
+def service_migrate_temp_users(request):
+    """
+    Перенос временных пользователей (TempUser) в User + UserProfile.
+    Создаёт неактивного User (is_active=False) и UserProfile (is_registered=False).
+    Переносит все связанные данные: TrackCode, Receipt, CustomerDiscount, StorageCell.
+    """
+    if not _can_access_service(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    from django.contrib.auth.models import User
+
+    migrated = 0
+    skipped = 0
+    errors = []
+
+    for temp_user in TempUser.objects.all():
+        try:
+            # Проверяем не существует ли уже User с таким username
+            existing_user = User.objects.filter(username=temp_user.login).first()
+            if existing_user:
+                # User уже есть — просто переносим данные и удаляем TempUser
+                user = existing_user
+                # Убеждаемся что есть UserProfile
+                profile, created = UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'phone': temp_user.phone or '', 'is_registered': False}
+                )
+                if created and temp_user.pickup:
+                    profile.pickup = temp_user.pickup
+                    profile.save(update_fields=['pickup'])
+            else:
+                # Создаём нового User + UserProfile
+                user = User.objects.create_user(
+                    username=temp_user.login,
+                    is_active=False,
+                )
+                UserProfile.objects.create(
+                    user=user,
+                    phone=temp_user.phone or '',
+                    pickup=temp_user.pickup,
+                    is_registered=False,
+                )
+
+            # Переносим TrackCode
+            TrackCode.all_objects.filter(temp_owner=temp_user).update(
+                owner=user, temp_owner=None
+            )
+            # Переносим Receipt
+            Receipt.objects.filter(temp_owner=temp_user).update(
+                owner=user, temp_owner=None
+            )
+            # Переносим CustomerDiscount
+            CustomerDiscount.objects.filter(temp_user=temp_user).update(
+                user=user, temp_user=None
+            )
+            # Переносим StorageCell
+            StorageCell.objects.filter(temp_user=temp_user).update(
+                user=user, temp_user=None
+            )
+
+            temp_user.delete()
+            migrated += 1
+
+        except Exception as e:
+            errors.append(f"{temp_user.login}: {e}")
+
+    msg = f"Временных пользователей перенесено: {migrated}."
+    if skipped:
+        msg += f" Пропущено: {skipped}."
+    if errors:
+        msg += f" Ошибок: {len(errors)}."
+    messages.success(request, msg)
+    for err in errors[:10]:
+        messages.warning(request, err)
+
+    return redirect('service')

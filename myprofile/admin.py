@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
-    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog, RestructureSession
+    DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog, RestructureSession,
+    Arrival, ArrivalSession, ArrivalSessionItem
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -301,6 +302,53 @@ class EmailLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+class ArrivalSessionItemInline(admin.TabularInline):
+    model = ArrivalSessionItem
+    extra = 0
+    readonly_fields = ('track_code', 'owner_name', 'weight', 'row_number', 'created_at')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Arrival)
+class ArrivalAdmin(admin.ModelAdmin):
+    list_display = ('id', 'date', 'sorting_location', 'total_tracks', 'updated_count', 'created_count', 'created_by', 'created_at')
+    list_filter = ('date', 'sorting_location', 'created_at')
+    search_fields = ('id', 'created_by__username')
+    readonly_fields = ('created_at', 'raw_data')
+    filter_horizontal = ('track_codes',)
+    date_hierarchy = 'date'
+    ordering = ('-date', '-created_at')
+
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('date', 'sorting_location', 'created_by')
+        }),
+        ('Статистика', {
+            'fields': ('total_tracks', 'updated_count', 'created_count')
+        }),
+        ('Трек-коды', {
+            'fields': ('track_codes',)
+        }),
+        ('Исходные данные', {
+            'classes': ('collapse',),
+            'fields': ('raw_data', 'created_at')
+        }),
+    )
+
+
+@admin.register(ArrivalSession)
+class ArrivalSessionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'date', 'status', 'sorting_location', 'created_by', 'created_at', 'completed_at', 'arrival')
+    list_filter = ('status', 'date', 'sorting_location')
+    search_fields = ('id', 'created_by__username')
+    readonly_fields = ('created_at',)
+    date_hierarchy = 'date'
+    ordering = ('-created_at',)
+    inlines = [ArrivalSessionItemInline]
 
 
 @admin.register(RestructureSession)

@@ -82,15 +82,17 @@ def register_view(request):
             messages.error(request, "Выбранный пункт выдачи не найден.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
-        if User.objects.filter(username=username).exists():
+        # Проверяем существующего пользователя
+        existing_user = User.objects.filter(username=username).first()
+        if existing_user and existing_user.is_active:
             messages.error(request, "Пользователь с таким логином уже существует.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
-        if UserProfile.objects.filter(phone=phone).exists():
+        if UserProfile.objects.filter(phone=phone).exclude(user=existing_user).exists():
             messages.error(request, "Пользователь с таким номером телефона уже существует.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
-        if User.objects.filter(email=email).exists():
+        if User.objects.filter(email=email).exclude(username=username).exists():
             messages.error(request, "Пользователь с таким email уже существует.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
@@ -106,7 +108,35 @@ def register_view(request):
             messages.error(request, "Заявка с таким email уже существует.")
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
-        # Проверяем наличие в TempUser — если есть, регистрируем сразу
+        # Проверяем: есть ли неактивный User (созданный при приходе товаров) — регистрируем сразу
+        if existing_user and not existing_user.is_active:
+            existing_user.set_password(password)
+            existing_user.first_name = first_name
+            existing_user.last_name = last_name
+            existing_user.email = email
+            existing_user.is_active = True
+            existing_user.save()
+
+            try:
+                profile = existing_user.userprofile
+                profile.phone = phone
+                profile.pickup = pickup_point
+                profile.is_registered = True
+                profile.save()
+            except UserProfile.DoesNotExist:
+                UserProfile.objects.create(
+                    user=existing_user,
+                    phone=phone,
+                    pickup=pickup_point,
+                    is_registered=True,
+                )
+
+            request.session.pop('registration_data', None)
+            request.session.pop('email_verified', None)
+            messages.success(request, "Регистрация прошла успешно! Вы можете войти в систему.")
+            return redirect('login')
+
+        # Обратная совместимость: проверяем TempUser
         temp_user = TempUser.objects.filter(login=username).first()
         if temp_user:
             user = User.objects.create_user(
