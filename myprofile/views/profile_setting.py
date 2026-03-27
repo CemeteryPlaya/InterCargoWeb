@@ -109,6 +109,7 @@ def update_profile(request):
             new_pickup = PickupPoint.objects.get(id=pickup_id, is_active=True, is_home_delivery=False)
             if profile.pickup_id != new_pickup.id:
                 profile.pickup = new_pickup
+                profile.pickup_changed_at = timezone.now()
                 changed = True
         except PickupPoint.DoesNotExist:
             pass
@@ -231,7 +232,8 @@ def review_pickup_change(request, req_id):
         # Обновляем ПВЗ пользователя
         profile = change_req.user.userprofile
         profile.pickup = change_req.requested_pickup
-        profile.save(update_fields=['pickup'])
+        profile.pickup_changed_at = timezone.now()
+        profile.save(update_fields=['pickup', 'pickup_changed_at'])
 
         Notification.objects.create(
             user=change_req.user,

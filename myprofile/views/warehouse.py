@@ -72,12 +72,12 @@ def warehouse_view(request):
     for cell in cells:
         if cell.user:
             tracks = TrackCode.objects.filter(
-                owner=cell.user, status='ready', pp_sorted=True,
+                owner=cell.user, status='ready', is_accepted_pp=True,
                 owner__userprofile__pickup=pickup_point
             ).order_by('track_code')
         elif cell.temp_user:
             tracks = TrackCode.objects.filter(
-                temp_owner=cell.temp_user, status='ready', pp_sorted=True,
+                temp_owner=cell.temp_user, status='ready', is_accepted_pp=True,
                 temp_owner__pickup=pickup_point
             ).order_by('track_code')
         else:
@@ -175,12 +175,12 @@ def warehouse_issue_to_client(request):
     with transaction.atomic():
         if client_user:
             tracks = list(TrackCode.objects.filter(
-                owner=client_user, status='ready', pp_sorted=True,
+                owner=client_user, status='ready', is_accepted_pp=True,
                 owner__userprofile__pickup=pickup_point
             ))
         elif client_temp:
             tracks = list(TrackCode.objects.filter(
-                temp_owner=client_temp, status='ready', pp_sorted=True,
+                temp_owner=client_temp, status='ready', is_accepted_pp=True,
                 temp_owner__pickup=pickup_point
             ))
         else:
@@ -276,12 +276,12 @@ def warehouse_not_arrived(request):
     with transaction.atomic():
         if client_user:
             tracks = list(TrackCode.objects.filter(
-                owner=client_user, status='ready', pp_sorted=True,
+                owner=client_user, status='ready', is_accepted_pp=True,
                 owner__userprofile__pickup=pickup_point
             ))
         elif client_temp:
             tracks = list(TrackCode.objects.filter(
-                temp_owner=client_temp, status='ready', pp_sorted=True,
+                temp_owner=client_temp, status='ready', is_accepted_pp=True,
                 temp_owner__pickup=pickup_point
             ))
         else:
@@ -413,12 +413,12 @@ def warehouse_inventory(request):
     for cell in cells:
         if cell.user:
             tracks = TrackCode.objects.filter(
-                owner=cell.user, status='ready', pp_sorted=True,
+                owner=cell.user, status='ready', is_accepted_pp=True,
                 owner__userprofile__pickup=pickup_point
             )
         elif cell.temp_user:
             tracks = TrackCode.objects.filter(
-                temp_owner=cell.temp_user, status='ready', pp_sorted=True,
+                temp_owner=cell.temp_user, status='ready', is_accepted_pp=True,
                 temp_owner__pickup=pickup_point
             )
         else:
@@ -531,12 +531,12 @@ def warehouse_reassign(request, pickup_id):
         messages.error(request, "Пункт выдачи не найден.")
         return redirect('warehouse')
 
-    # Получаем клиентов с товарами на складе (ready + pp_sorted)
+    # Получаем клиентов с товарами на складе (ready + is_accepted_pp)
     from django.db.models import Q, Sum, Count
 
     # Зарегистрированные клиенты
     user_tracks = TrackCode.objects.filter(
-        status='ready', pp_sorted=True,
+        status='ready', is_accepted_pp=True,
         owner__userprofile__pickup=pickup_point,
         owner__isnull=False,
     ).values('owner__id', 'owner__username').annotate(
@@ -546,7 +546,7 @@ def warehouse_reassign(request, pickup_id):
 
     # Временные клиенты
     temp_tracks = TrackCode.objects.filter(
-        status='ready', pp_sorted=True,
+        status='ready', is_accepted_pp=True,
         temp_owner__pickup=pickup_point,
         temp_owner__isnull=False,
     ).values('temp_owner__id', 'temp_owner__login').annotate(

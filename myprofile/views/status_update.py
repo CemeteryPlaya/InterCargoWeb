@@ -102,6 +102,9 @@ def update_tracks(request):
                     errors += 1
                     continue
 
+            track.set_status_date()
+            track.log_status_change(request.user)
+
             # Попробуем сохранить (model.save может вызвать full_clean и ValidationError)
             try:
                 track.save()
@@ -146,6 +149,9 @@ def update_tracks(request):
                         owner=user,
                         weight=Decimal(weights[i].replace(',', '.'))
                     )
+                    track.set_status_date()
+                    track.log_status_change(request.user)
+                    track.save()
                     created += 1
                     notif_counts[user] += 1
                 except (User.DoesNotExist, UserProfile.DoesNotExist):
@@ -170,6 +176,9 @@ def update_tracks(request):
                         owner=None,  # Владельца нет
                         weight=None
                     )
+                    track.set_status_date()
+                    track.log_status_change(request.user)
+                    track.save()
                     created += 1
                     # Уведомление некому отправлять
                 except ValidationError as e:

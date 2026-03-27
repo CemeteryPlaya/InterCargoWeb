@@ -45,6 +45,8 @@ def track_codes_view(request):
                     if current_order < user_added_order:
                         existing_track.status = 'user_added'
 
+                    existing_track.set_status_date()
+                    existing_track.log_status_change(request.user)
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
                 elif existing_track.owner == request.user:
@@ -60,6 +62,8 @@ def track_codes_view(request):
                     track_code = form.save(commit=False)
                     track_code.owner = request.user
                     track_code.status = 'user_added'
+                    track_code.set_status_date()
+                    track_code.log_status_change(request.user)
                     track_code.save()
                     messages.success(request, "Трек-код успешно добавлен.")
                     return redirect('track_codes')
@@ -139,6 +143,8 @@ def add_track_code_view(request):
                     if current_order < user_added_order:
                         existing_track.status = 'user_added'
 
+                    existing_track.set_status_date()
+                    existing_track.log_status_change(request.user)
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
                 elif existing_track.owner == request.user:
@@ -153,6 +159,8 @@ def add_track_code_view(request):
                     track_code = form.save(commit=False)
                     track_code.owner = request.user
                     track_code.status = 'user_added'
+                    track_code.set_status_date()
+                    track_code.log_status_change(request.user)
                     track_code.save()
                     messages.success(request, "Трек-код успешно добавлен.")
                     return redirect('track_codes')
@@ -167,10 +175,6 @@ def add_track_code_view(request):
 @require_POST
 def archive_track_code(request, track_id):
     track = get_object_or_404(TrackCode, id=track_id, owner=request.user)
-    ARCHIVABLE_STATUSES = ('user_added', 'claimed')
-    if track.status not in ARCHIVABLE_STATUSES:
-        messages.error(request, f"Нельзя архивировать трек-код со статусом «{track.get_status_display()}». Архивация доступна только для статусов «Добавлен пользователем» и «Выдано клиенту».")
-        return redirect('track_codes')
     track.is_archived = True
     track.archived_at = timezone.now()
     track._skip_status_validation = True
@@ -200,15 +204,10 @@ def mass_archive_track_codes(request):
         messages.info(request, "Не выбрано ни одного трек-кода.")
         return redirect('track_codes')
 
-    ARCHIVABLE_STATUSES = ('user_added', 'claimed')
     tracks = TrackCode.objects.filter(id__in=track_ids, owner=request.user)
     now = timezone.now()
     count = 0
-    skipped = 0
     for track in tracks:
-        if track.status not in ARCHIVABLE_STATUSES:
-            skipped += 1
-            continue
         track.is_archived = True
         track.archived_at = now
         track._skip_status_validation = True
@@ -217,8 +216,6 @@ def mass_archive_track_codes(request):
 
     if count:
         messages.success(request, f"В архив перемещено: {count} трек-кодов.")
-    if skipped:
-        messages.info(request, f"Пропущено (архивация доступна только для «Добавлен пользователем» и «Выдано клиенту»): {skipped}.")
     return redirect('track_codes')
 
 

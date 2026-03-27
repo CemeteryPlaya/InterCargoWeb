@@ -10,6 +10,8 @@ class PickupPoint(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     show_in_registration = models.BooleanField(default=True, verbose_name="Показывать в регистрации/футере")
     is_home_delivery = models.BooleanField(default=False, verbose_name="Доставка на дом")
+    short_info = models.TextField(blank=True, default='', verbose_name="Краткая информация")
+    map_widget_code = models.TextField(blank=True, default='', verbose_name="2GIS виджет-код")
     reminder_enabled = models.BooleanField(default=False, verbose_name="Напоминания включены")
     reminder_intervals = models.CharField(
         max_length=100, blank=True, default='',
@@ -31,16 +33,19 @@ class UserProfile(models.Model):
     pickup = models.ForeignKey(
         PickupPoint, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ПВЗ"
     )
-    is_staff = models.BooleanField(default=False)
-    is_hr = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False, verbose_name="Персонал")
+    is_hr = models.BooleanField(default=False, verbose_name="HR")
     is_driver = models.BooleanField(default=False, verbose_name="Водитель")
     is_pp_worker = models.BooleanField(default=False, verbose_name="Работник ПВЗ")
+    is_pp_owner = models.BooleanField(default=False, verbose_name="Владелец ПВЗ")
     is_accountant = models.BooleanField(default=False, verbose_name="Бухгалтер")
+    is_registered = models.BooleanField(default=True, verbose_name="Регистрация подтверждена")
     delivery_rate = models.DecimalField(
         max_digits=8, decimal_places=2, default=0,
         verbose_name="Цена за 1 кг доставки (₸)"
     )
     profile_updated_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего изменения профиля")
+    pickup_changed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата последней смены ПВЗ")
 
     class Meta:
         verbose_name = "Профиль пользователя"

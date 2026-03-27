@@ -111,8 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showLoader();
     });
 
-    // Перехват отправки форм
-    document.addEventListener('submit', function () {
+    // Перехват отправки форм (кроме AJAX-форм с data-ajax)
+    document.addEventListener('submit', function (e) {
+      if (e.target.dataset.ajax !== undefined) return;
       showLoader();
     });
 

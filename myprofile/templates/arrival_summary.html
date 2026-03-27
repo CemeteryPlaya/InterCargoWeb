@@ -377,7 +377,7 @@
                         <i class="ri-percent-line text-green-600"></i> Ввести разовую скидку
                     </h3>
                     <p class="text-sm text-gray-500 mb-4">Клиент: <span id="discountClientName" class="font-medium text-gray-700"></span></p>
-                    <form method="post" action="{% url 'apply_discount' %}" id="discountForm">
+                    <form method="post" action="{% url 'apply_discount' %}" id="discountForm" data-ajax>
                         {% csrf_token %}
                         <input type="hidden" name="date" value="{{ selected_date }}">
                         <input type="hidden" name="user_id" id="discountUserId" value="">
@@ -588,15 +588,23 @@
 
             // AJAX-отправка скидки
             var discountForm = document.getElementById('discountForm');
+            var discountSubmitBtn = discountForm.querySelector('button[type="submit"]');
             discountForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+                // Блокируем кнопку и показываем загрузку
+                discountSubmitBtn.disabled = true;
+                discountSubmitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Применение...';
                 var formData = new FormData(discountForm);
                 fetch(discountForm.action, {
                     method: 'POST',
                     body: formData,
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 }).then(function(resp) {
-                    if (!resp.ok) throw new Error('Ошибка сервера: ' + resp.status);
+                    if (!resp.ok) {
+                        return resp.json().catch(function() {
+                            return { error: 'Ошибка сервера: ' + resp.status };
+                        }).then(function(data) { throw data; });
+                    }
                     return resp.json();
                 }).then(function(data) {
                     if (data.error) {
@@ -630,8 +638,13 @@
                         setTimeout(function() { row.classList.remove('bg-green-50'); }, 2000);
                     });
                     discountModal.classList.add('hidden');
-                }).catch(function() {
-                    alert('Ошибка при применении скидки');
+                }).catch(function(err) {
+                    var msg = (err && err.error) ? err.error : 'Ошибка при применении скидки';
+                    alert(msg);
+                }).finally(function() {
+                    // Восстанавливаем кнопку
+                    discountSubmitBtn.disabled = false;
+                    discountSubmitBtn.innerHTML = '<i class="ri-check-line"></i> Применить';
                 });
             });
         }

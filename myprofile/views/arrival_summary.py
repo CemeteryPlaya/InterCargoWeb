@@ -440,6 +440,12 @@ def apply_discount(request):
         )
         effective_rate = default_rate - amount
         client_name = target_user.username
+        # Обновляем historical_price_per_kg на треках клиента за эту дату
+        if date:
+            TrackCode.all_objects.filter(
+                owner=target_user, delivered_date=date,
+                status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+            ).update(historical_price_per_kg=effective_rate)
         messages.success(request, f"Скидка {amount} ₸/кг применена для {target_user.username}")
     elif temp_user_id:
         try:
@@ -459,6 +465,12 @@ def apply_discount(request):
         )
         effective_rate = default_rate - amount
         client_name = temp_user.login
+        # Обновляем historical_price_per_kg на треках временного клиента за эту дату
+        if date:
+            TrackCode.all_objects.filter(
+                temp_owner=temp_user, delivered_date=date,
+                status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+            ).update(historical_price_per_kg=effective_rate)
         messages.success(request, f"Скидка {amount} ₸/кг применена для {temp_user.login}")
     else:
         if is_ajax:
@@ -616,6 +628,9 @@ def refresh_arrival(request, arrival_id):
                     weight=weight,
                     sorting_location=sorting_location,
                 )
+                new_track.set_status_date()
+                new_track.log_status_change(request.user)
+                new_track.save()
                 new_track_ids.append(new_track.id)
                 new_created += 1
             except (ValidationError, InvalidOperation, ValueError):
@@ -715,6 +730,9 @@ def refresh_day_arrivals(request):
                         owner=user, temp_owner=temp_user,
                         weight=weight, sorting_location=sorting_location,
                     )
+                    new_track.set_status_date()
+                    new_track.log_status_change(request.user)
+                    new_track.save()
                     new_track_ids.append(new_track.id)
                     total_created += 1
                 except (ValidationError, InvalidOperation, ValueError):
