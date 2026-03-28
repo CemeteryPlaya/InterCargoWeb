@@ -7,11 +7,21 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
-from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages, get_global_price_per_kg, get_user_discount, get_temp_user_discount
+from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages, get_global_price_per_kg, get_user_discount
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
 import json
+
+
+def _expire_stale_sessions():
+    """Помечает активные/приостановленные сессии старше 48 часов как неактивные."""
+    from datetime import timedelta
+    cutoff = timezone.now() - timedelta(hours=ArrivalSession.ACTIVE_HOURS_LIMIT)
+    ArrivalSession.objects.filter(
+        status__in=['active', 'paused'],
+        created_at__lt=cutoff,
+    ).update(status='inactive')
 
 
 @login_required
@@ -19,6 +29,8 @@ def goods_arrival_view(request):
     """Главная страница прихода товаров — список сессий и кнопка создания."""
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
+
+    _expire_stale_sessions()
 
     selected_date = request.GET.get('date', timezone.localdate().strftime('%Y-%m-%d'))
     try:
@@ -32,20 +44,29 @@ def goods_arrival_view(request):
     # Активные сессии (все, не только за выбранную дату)
     active_sessions = ArrivalSession.objects.filter(status='active').select_related('created_by', 'sorting_location')
 
+    # Приостановленные сессии
+    paused_sessions = ArrivalSession.objects.filter(status='paused').select_related('created_by', 'sorting_location')
+
+    # Неактивные сессии за последние 7 дней
+    from datetime import timedelta
+    inactive_cutoff = timezone.localdate() - timedelta(days=7)
+    inactive_sessions = ArrivalSession.objects.filter(
+        status='inactive', date__gte=inactive_cutoff
+    ).select_related('created_by', 'sorting_location')
+
     # Завершённые сессии за выбранную дату
     completed_sessions = ArrivalSession.objects.filter(
         status='completed', date=sel_date
     ).select_related('created_by', 'sorting_location', 'arrival')
 
-    # Считаем количество items в каждой сессии
-    for s in active_sessions:
-        s.item_count = s.items.count()
-    for s in completed_sessions:
+    for s in list(active_sessions) + list(paused_sessions) + list(inactive_sessions) + list(completed_sessions):
         s.item_count = s.items.count()
 
     return render(request, "goods_arrival.html", {
         'sorting_locations': sorting_locations,
         'active_sessions': active_sessions,
+        'paused_sessions': paused_sessions,
+        'inactive_sessions': inactive_sessions,
         'completed_sessions': completed_sessions,
         'selected_date': selected_date,
     })
@@ -89,18 +110,23 @@ def session_form(request, session_id):
     if not _is_staff(request.user):
         return HttpResponseForbidden("У вас нет доступа.")
 
+    _expire_stale_sessions()
     session = get_object_or_404(ArrivalSession, id=session_id)
-    if session.status != 'active':
+
+    if session.status == 'completed':
         messages.info(request, "Эта сессия уже завершена.")
         return redirect('goods_arrival')
 
     sorting_locations = SortingLocation.objects.filter(is_active=True).order_by('id')
     items = list(session.items.order_by('row_number').values('id', 'track_code', 'owner_name', 'weight', 'row_number'))
 
+    can_edit = session.status == 'active'
+
     return render(request, "goods_arrival_session.html", {
         'session': session,
         'sorting_locations': sorting_locations,
         'items_json': json.dumps(items, default=str),
+        'can_edit': can_edit,
     })
 
 
@@ -146,6 +172,45 @@ def session_save_items(request, session_id):
         ArrivalSessionItem.objects.bulk_create(new_items)
 
     return JsonResponse({'success': True, 'count': len(new_items)})
+
+
+@login_required
+@require_POST
+def pause_session(request, session_id):
+    """Ставит сессию на паузу."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    session = get_object_or_404(ArrivalSession, id=session_id, status='active')
+    session.status = 'paused'
+    session.paused_at = timezone.now()
+    session.save(update_fields=['status', 'paused_at'])
+    messages.info(request, f"Сессия #{session.id} поставлена на паузу.")
+    return redirect('goods_arrival')
+
+
+@login_required
+@require_POST
+def resume_session(request, session_id):
+    """Возобновляет приостановленную или неактивную сессию."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    session = get_object_or_404(ArrivalSession, id=session_id)
+    if session.status not in ('paused', 'inactive'):
+        messages.error(request, "Эту сессию нельзя возобновить.")
+        return redirect('goods_arrival')
+
+    from datetime import timedelta
+    if timezone.now() - session.created_at > timedelta(hours=ArrivalSession.ACTIVE_HOURS_LIMIT):
+        # Сессия уже старше 48 часов — сбрасываем отсчёт, продлевая created_at до сейчас - 0h
+        # Фактически позволяем продолжить, но предупреждаем
+        messages.warning(request, f"Сессия #{session.id} была неактивна более 48 часов. Продолжайте внимательно.")
+
+    session.status = 'active'
+    session.paused_at = None
+    session.save(update_fields=['status', 'paused_at'])
+    return redirect('goods_arrival_session', session_id=session.id)
 
 
 @login_required
@@ -197,10 +262,9 @@ def complete_session(request, session_id):
                     if owner_name:
                         user, _ = _resolve_owner(owner_name)
                         track.owner = user
-                        track.temp_owner = None
                     if sorting_location:
                         track.sorting_location = sorting_location
-                    track.save(update_fields=['update_date', 'owner', 'temp_owner', 'weight', 'sorting_location', 'is_archived', 'archived_at'])
+                    track.save(update_fields=['update_date', 'owner', 'weight', 'sorting_location', 'is_archived', 'archived_at'])
                     processed_track_ids.append(track.id)
                     partially_updated += 1
                 except Exception as e:
@@ -217,7 +281,6 @@ def complete_session(request, session_id):
             if owner_name:
                 user, _ = _resolve_owner(owner_name)
                 track.owner = user
-                track.temp_owner = None
                 if user and not user.is_active:
                     temp_created += 1
             if sorting_location:

@@ -16,10 +16,7 @@ from myprofile.models import (
     TrackCode, Notification, DeliveryHistory,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
-# RECEIPTS COMMENTED OUT: auto-creation disabled
-# from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
-from myprofile.views.utils import get_or_create_storage_cell
-from register.models import UserProfile, PickupPoint, TempUser
+from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
 
@@ -36,41 +33,27 @@ def _get_home_delivery_clients(status):
     tracks = TrackCode.objects.filter(
         status=status,
         delivery_pickup__is_home_delivery=True,
-    ).select_related('owner', 'owner__userprofile', 'temp_owner')
+    ).select_related('owner', 'owner__userprofile')
 
     clients = {}
     for track in tracks:
-        if track.owner:
-            key = f'user_{track.owner.id}'
-            if key not in clients:
-                phone = ''
-                try:
-                    phone = track.owner.userprofile.phone
-                except (UserProfile.DoesNotExist, AttributeError):
-                    pass
-                clients[key] = {
-                    'user_id': track.owner.id,
-                    'username': track.owner.username,
-                    'full_name': track.owner.get_full_name() or track.owner.username,
-                    'phone': phone,
-                    'track_count': 0,
-                    'total_weight': 0,
-                    'is_temp': False,
-                }
-        elif track.temp_owner:
-            key = f'temp_{track.temp_owner.id}'
-            if key not in clients:
-                clients[key] = {
-                    'user_id': track.temp_owner.id,
-                    'username': track.temp_owner.login,
-                    'full_name': track.temp_owner.login,
-                    'phone': track.temp_owner.phone or '',
-                    'track_count': 0,
-                    'total_weight': 0,
-                    'is_temp': True,
-                }
-        else:
+        if not track.owner:
             continue
+        key = f'user_{track.owner.id}'
+        if key not in clients:
+            phone = ''
+            try:
+                phone = track.owner.userprofile.phone
+            except (UserProfile.DoesNotExist, AttributeError):
+                pass
+            clients[key] = {
+                'user_id': track.owner.id,
+                'username': track.owner.username,
+                'full_name': track.owner.get_full_name() or track.owner.username,
+                'phone': phone,
+                'track_count': 0,
+                'total_weight': 0,
+            }
 
         clients[key]['track_count'] += 1
         clients[key]['total_weight'] += float(track.weight or 0)
@@ -88,14 +71,14 @@ def _build_pickup_date_groups(status):
         .filter(status=status)
         .exclude(delivery_pickup__isnull=True)
         .exclude(delivery_pickup__is_home_delivery=True)
-        .select_related('delivery_pickup', 'owner', 'temp_owner')
+        .select_related('delivery_pickup', 'owner')
     )
 
     # Треки без delivery_pickup — используют ПВЗ из профиля
     tracks_no_override = (
         TrackCode.objects
         .filter(status=status, delivery_pickup__isnull=True)
-        .select_related('owner__userprofile__pickup', 'temp_owner__pickup', 'owner', 'temp_owner')
+        .select_related('owner__userprofile__pickup', 'owner')
     )
 
     # Группируем: (pickup_id, delivered_date) → {pickup, tracks, clients}
@@ -116,8 +99,6 @@ def _build_pickup_date_groups(status):
         groups[key]['track_count'] += 1
         if track.owner_id:
             groups[key]['client_ids'].add(f'user_{track.owner_id}')
-        elif track.temp_owner_id:
-            groups[key]['client_ids'].add(f'temp_{track.temp_owner_id}')
 
     for track in tracks:
         add_to_group(track.delivery_pickup, track)
@@ -129,8 +110,6 @@ def _build_pickup_date_groups(status):
                 pickup = track.owner.userprofile.pickup
             except (UserProfile.DoesNotExist, AttributeError):
                 pass
-        elif track.temp_owner:
-            pickup = track.temp_owner.pickup
         add_to_group(pickup, track)
 
     result = []
@@ -171,8 +150,7 @@ def delivery_view(request):
         .prefetch_related(
             'track_codes',
             'track_codes__owner',
-            'track_codes__temp_owner',       # ← добавить
-            'track_codes__owner__userprofile' # ← добавить если нужен phone
+            'track_codes__owner__userprofile',
         )
     .order_by('-taken_at')
     )
@@ -185,27 +163,17 @@ def delivery_view(request):
             history_by_date[date_key] = []
 
         clients = {}
-        for track in entry.track_codes.all(): 
-            if track.owner:
-                key = f'user_{track.owner.id}'
-                if key not in clients:
-                    clients[key] = {
-                        'username': track.owner.username,
-                        'full_name': track.owner.get_full_name() or track.owner.username,
-                        'track_count': 0,
-                        'total_weight': 0,
-                    }
-            elif track.temp_owner:
-                key = f'temp_{track.temp_owner.id}'
-                if key not in clients:
-                    clients[key] = {
-                        'username': track.temp_owner.login,
-                        'full_name': track.temp_owner.login,
-                        'track_count': 0,
-                        'total_weight': 0,
-                    }
-            else:
+        for track in entry.track_codes.all():
+            if not track.owner:
                 continue
+            key = f'user_{track.owner.id}'
+            if key not in clients:
+                clients[key] = {
+                    'username': track.owner.username,
+                    'full_name': track.owner.get_full_name() or track.owner.username,
+                    'track_count': 0,
+                    'total_weight': 0,
+                }
             clients[key]['track_count'] += 1
             clients[key]['total_weight'] += float(track.weight or 0)
 
@@ -255,7 +223,6 @@ def take_delivery(request):
     today = timezone.localdate()
     updated = 0
     notif_counts = defaultdict(int)
-    temp_user_ids = set()
 
     # Обычные ПВЗ — берём только треки привязанные к отсканированным чекам
     if pickup_id:
@@ -265,10 +232,9 @@ def take_delivery(request):
             pickup = None
 
         if pickup:
-            # Все треки этого ПВЗ в статусе 'delivered' (зарег. и врем. пользователи)
+            # Все треки этого ПВЗ в статусе 'delivered'
             all_tracks = TrackCode.objects.filter(
                 Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-                Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
                 Q(delivery_pickup=pickup),
                 status='delivered',
             )
@@ -303,8 +269,6 @@ def take_delivery(request):
                 updated += 1
                 if track.owner:
                     notif_counts[track.owner] += 1
-                elif track.temp_owner_id:
-                    temp_user_ids.add(track.temp_owner_id)
 
             if tracks:
                 history = DeliveryHistory.objects.create(
@@ -320,28 +284,15 @@ def take_delivery(request):
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
     if home_client_ids and home_pp:
         for client_id_raw in home_client_ids:
-            # Определяем тип клиента: temp_123 или просто 123
-            if str(client_id_raw).startswith('temp_'):
-                temp_id = str(client_id_raw).replace('temp_', '')
-                try:
-                    temp_user = TempUser.objects.get(id=temp_id)
-                except TempUser.DoesNotExist:
-                    continue
-                tracks = list(TrackCode.objects.filter(
-                    status='delivered',
-                    temp_owner=temp_user,
-                    delivery_pickup=home_pp,
-                ))
-            else:
-                try:
-                    client_user = User.objects.get(id=client_id_raw)
-                except User.DoesNotExist:
-                    continue
-                tracks = list(TrackCode.objects.filter(
-                    status='delivered',
-                    owner=client_user,
-                    delivery_pickup=home_pp,
-                ))
+            try:
+                client_user = User.objects.get(id=client_id_raw)
+            except User.DoesNotExist:
+                continue
+            tracks = list(TrackCode.objects.filter(
+                status='delivered',
+                owner=client_user,
+                delivery_pickup=home_pp,
+            ))
 
             total_weight = sum(t.weight or 0 for t in tracks)
 
@@ -357,8 +308,6 @@ def take_delivery(request):
                 updated += 1
                 if track.owner:
                     notif_counts[track.owner] += 1
-                elif track.temp_owner_id:
-                    temp_user_ids.add(track.temp_owner_id)
 
             if tracks:
                 history = DeliveryHistory.objects.create(
@@ -383,22 +332,11 @@ def take_delivery(request):
                 message=f"🚚 Отправлено на ПВЗ: {count} трек-кодов"
             )
 
-    # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
-    # for user in notif_counts.keys():
-    #     create_receipts_for_user(user, statuses=('shipping_pp',))
-    # for temp_id in temp_user_ids:
-    #     try:
-    #         temp_user = TempUser.objects.get(id=temp_id)
-    #         create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
-    #     except TempUser.DoesNotExist:
-    #         pass
-
     # Помечаем чеки НЕпринятых треков как "Требует внимания"
     if pickup_id and scanned_receipts and pickup:
         # Треки, оставшиеся в статусе 'delivered' на этом ПВЗ (не взятые в доставку)
         remaining_tracks = TrackCode.objects.filter(
             Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-            Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
             Q(delivery_pickup=pickup),
             status='delivered',
         )
@@ -424,6 +362,84 @@ def take_delivery(request):
     return redirect('delivery')
 
 
+def _build_email_batch(notif_counts, user_pickup_map):
+    """Формирует список писем для пакетной отправки."""
+    batch = []
+    for user, count in notif_counts.items():
+        if not user.email:
+            continue
+        actual_pickup = user_pickup_map.get(user)
+        pickup_name = str(actual_pickup) if actual_pickup else ''
+        working_hours = actual_pickup.working_hours if actual_pickup else ''
+        hours_line = f'\nВремя работы ПВЗ: {working_hours}\n' if working_hours else ''
+        greeting = user.get_full_name() or user.username
+        if count == 1:
+            subject = 'Inter Cargo — Ваша посылка доставлена на ПВЗ'
+            body = (
+                f'Здравствуйте, {greeting}!\n\n'
+                f'Ваша посылка доставлена на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
+                f'{hours_line}'
+                f'Зайдите в личный кабинет для получения.\n\nС уважением,\nКоманда Inter Cargo'
+            )
+        else:
+            subject = f'Inter Cargo — {count} посылок доставлено на ПВЗ'
+            body = (
+                f'Здравствуйте, {greeting}!\n\n'
+                f'{count} ваших посылок доставлено на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
+                f'{hours_line}'
+                f'Зайдите в личный кабинет для получения.\n\nС уважением,\nКоманда Inter Cargo'
+            )
+        batch.append({'recipient': user.email, 'subject': subject, 'body': body})
+    return batch
+
+
+def _send_delivery_notifications_bg(email_batch, tg_track_data):
+    """
+    Фоновая задача: отправка email и Telegram-уведомлений.
+    Запускается в отдельном потоке, не блокирует ответ водителю.
+    """
+    import threading
+    from django.db import close_old_connections
+
+    def _run():
+        close_old_connections()
+        try:
+            # Email
+            if email_batch:
+                _, failed = send_mail_batch(email_batch)
+                if failed:
+                    logger.warning(
+                        "complete_delivery email failures (%d): %s",
+                        len(failed),
+                        ', '.join(f['recipient'] for f in failed),
+                    )
+        except Exception:
+            logger.exception("complete_delivery: ошибка при отправке email")
+
+        try:
+            # Telegram
+            if tg_track_data:
+                from tgbot.models import TelegramNotification
+                tg_objects = [
+                    TelegramNotification(
+                        user_id=user_id,
+                        title='ready',
+                        message=f'{code}|{weight}',
+                        notification_type='tracking',
+                    )
+                    for user_id, tracks in tg_track_data.items()
+                    for code, weight in tracks
+                ]
+                if tg_objects:
+                    TelegramNotification.objects.bulk_create(tg_objects, ignore_conflicts=True)
+        except Exception:
+            logger.exception("complete_delivery: ошибка при создании Telegram-уведомлений")
+        finally:
+            close_old_connections()
+
+    threading.Thread(target=_run, daemon=True).start()
+
+
 @login_required
 @require_POST
 def complete_delivery(request):
@@ -432,24 +448,18 @@ def complete_delivery(request):
 
     # Формат значений: "pickup_id:YYYY-MM-DD" или "pickup_id:"
     pickup_entries = request.POST.getlist('pickup_ids')
-
     if not pickup_entries:
         messages.error(request, "Выберите хотя бы один пункт выдачи.")
         return redirect('delivery')
 
     from datetime import datetime as _dt
-
     now = timezone.now()
     today = timezone.localdate()
-    updated = 0
-    notif_counts = defaultdict(int)
-    # Запоминаем фактический ПВЗ доставки для каждого пользователя
-    user_pickup_map = {}  # user -> PickupPoint
-    # Данные треков для Telegram-уведомлений: user_id -> [(track_code, weight)]
-    tg_track_data = defaultdict(list)
+    username = request.user.username
 
+    # --- 1. Сбор всех треков по каждому ПВЗ (с select_related, до транзакции) ---
+    entries_data = []   # list of (pickup, tracks_list, entry_date)
     for entry in pickup_entries:
-        # Парсим "pickup_id:date"
         parts = entry.split(':', 1)
         pickup_id = parts[0]
         entry_date = None
@@ -458,135 +468,82 @@ def complete_delivery(request):
                 entry_date = _dt.strptime(parts[1], '%Y-%m-%d').date()
             except ValueError:
                 pass
-
         try:
             pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
         except PickupPoint.DoesNotExist:
             continue
 
-        tracks = TrackCode.objects.filter(
-            Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-            Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
-            Q(delivery_pickup=pickup),
-            status='shipping_pp',
+        qs = (
+            TrackCode.all_objects
+            .filter(
+                Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+                Q(delivery_pickup=pickup),
+                status='shipping_pp',
+            )
+            .select_related('owner', 'owner__userprofile', 'delivery_pickup')
         )
         if entry_date is not None:
-            tracks = tracks.filter(delivered_date=entry_date)
+            qs = qs.filter(delivered_date=entry_date)
+        entries_data.append((pickup, list(qs), entry_date))
 
-        for track in tracks:
-            track.status = 'ready'
-            track.update_date = today
-            track.is_accepted_pp = False
-            track.set_status_date()
-            track.log_status_change(request.user)
-            track.save()
-            updated += 1
-            if track.owner:
-                notif_counts[track.owner] += 1
-                tg_track_data[track.owner_id].append(
-                    (track.track_code, float(track.weight or 0))
-                )
-                # Запоминаем фактический ПВЗ из трека (delivery_pickup или текущий pickup)
-                if track.owner not in user_pickup_map:
-                    user_pickup_map[track.owner] = track.delivery_pickup or pickup
+    # --- 2. Вся работа с БД в одной транзакции ---
+    all_tracks_to_update = []
+    notif_counts = defaultdict(int)
+    user_pickup_map = {}          # User → PickupPoint (фактический ПВЗ)
+    tg_track_data = defaultdict(list)   # user_id → [(code, weight)]
+    updated = 0
 
-        history_entry = (
-            DeliveryHistory.objects
-            .filter(
+    with transaction.atomic():
+        for pickup, tracks, _entry_date in entries_data:
+            for track in tracks:
+                track.status = 'ready'
+                track.update_date = today
+                track.is_accepted_pp = False
+                track.set_status_date()
+                track.log_status_change(username)   # передаём строку, не объект
+                all_tracks_to_update.append(track)
+                updated += 1
+                if track.owner:
+                    notif_counts[track.owner] += 1
+                    tg_track_data[track.owner_id].append(
+                        (track.track_code, float(track.weight or 0))
+                    )
+                    if track.owner not in user_pickup_map:
+                        user_pickup_map[track.owner] = track.delivery_pickup or pickup
+
+            # Обновляем историю доставки одним запросом
+            DeliveryHistory.objects.filter(
                 driver=request.user,
                 pickup_point=pickup,
                 delivered_at__isnull=True,
-            )
-            .order_by('-taken_at')
-            .first()
-        )
-        if history_entry:
-            history_entry.delivered_at = now
-            history_entry.save()
+            ).order_by('-taken_at')[:1].update(delivered_at=now)
 
-    # Автоприсвоение ячеек хранения — используем фактический ПВЗ доставки
-    for user in notif_counts.keys():
-        actual_pickup = user_pickup_map.get(user)
-        if actual_pickup:
-            get_or_create_storage_cell(actual_pickup, user)
-
-    # Групповые уведомления + сбор email для пакетной отправки
-    email_batch = []
-    skipped_no_email = 0
-
-    for user, count in notif_counts.items():
-        if count == 1:
-            msg = "📦 Ваш трек-код доставлен на ПВЗ"
-        else:
-            msg = f"📦 Доставлено на ПВЗ: {count} трек-кодов"
-
-        Notification.objects.create(user=user, message=msg)
-
-        if not user.email:
-            skipped_no_email += 1
-            continue
-
-        # Используем фактический ПВЗ доставки, а не текущий из профиля
-        actual_pickup = user_pickup_map.get(user)
-        pickup_name = str(actual_pickup) if actual_pickup else ''
-        working_hours = actual_pickup.working_hours if actual_pickup else ''
-
-        hours_line = f'\nВремя работы ПВЗ: {working_hours}\n' if working_hours else ''
-
-        if count == 1:
-            subject = 'Inter Cargo — Ваша посылка доставлена на ПВЗ'
-            body = (
-                f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
-                f'Ваша посылка доставлена на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
-                f'{hours_line}'
-                f'Зайдите в личный кабинет для получения.\n\n'
-                f'С уважением,\nКоманда Inter Cargo'
-            )
-        else:
-            subject = f'Inter Cargo — {count} посылок доставлено на ПВЗ'
-            body = (
-                f'Здравствуйте, {user.get_full_name() or user.username}!\n\n'
-                f'{count} ваших посылок доставлено на пункт выдачи{" " + pickup_name if pickup_name else ""}.\n'
-                f'{hours_line}'
-                f'Зайдите в личный кабинет для получения.\n\n'
-                f'С уважением,\nКоманда Inter Cargo'
+        # Один bulk_update вместо N отдельных track.save()
+        if all_tracks_to_update:
+            TrackCode.all_objects.bulk_update(
+                all_tracks_to_update,
+                ['status', 'update_date', 'is_accepted_pp',
+                 'date_ready', 'status_history'],
             )
 
-        email_batch.append({'recipient': user.email, 'subject': subject, 'body': body})
-
-    # Пакетная отправка email через одно SMTP-соединение
-    sent_count = 0
-    failed_count = 0
-    if email_batch:
-        sent_count, failed_list = send_mail_batch(email_batch)
-        failed_count = len(failed_list)
-        if failed_list:
-            failed_emails = ', '.join(f['recipient'] for f in failed_list)
-            logger.warning(f"Не удалось отправить email ({failed_count}): {failed_emails}")
-
-    # Telegram-уведомления о доставке на ПВЗ
-    try:
-        from tgbot.models import TelegramNotification
-        for user_id, track_list in tg_track_data.items():
-            for track_code, weight in track_list:
-                TelegramNotification.objects.create(
-                    user_id=user_id,
-                    title='ready',
-                    message=f'{track_code}|{weight}',
-                    notification_type='tracking',
+        # In-app уведомления — один bulk_create
+        if notif_counts:
+            Notification.objects.bulk_create([
+                Notification(
+                    user=user,
+                    message="📦 Ваш трек-код доставлен на ПВЗ" if count == 1
+                            else f"📦 Доставлено на ПВЗ: {count} трек-кодов",
                 )
-    except Exception as e:
-        logger.error(f"Error creating telegram notifications: {e}")
+                for user, count in notif_counts.items()
+            ])
+
+    # --- 3. Email + Telegram в фоновом потоке (не блокируют ответ) ---
+    if notif_counts:
+        email_batch = _build_email_batch(notif_counts, user_pickup_map)
+        _send_delivery_notifications_bg(email_batch, dict(tg_track_data))
 
     if updated:
-        msg_parts = [f"Доставлено на ПВЗ: {updated} посылок"]
-        if sent_count:
-            msg_parts.append(f"email отправлено: {sent_count}")
-        if failed_count:
-            msg_parts.append(f"email не доставлено: {failed_count}")
-        if skipped_no_email:
-            msg_parts.append(f"без email: {skipped_no_email}")
-        messages.success(request, '. '.join(msg_parts))
+        messages.success(request, f"Доставлено на ПВЗ: {updated} посылок. Уведомления отправляются.")
     else:
         messages.info(request, "Нет посылок для завершения доставки в выбранных пунктах.")
 
@@ -610,35 +567,17 @@ def driver_issue(request):
         messages.error(request, "Пункт 'Доставка на дом' не настроен.")
         return redirect('delivery')
 
-    is_temp = str(user_id_raw).startswith('temp_')
-    client_user = None
-    temp_user = None
-
-    if is_temp:
-        temp_id = str(user_id_raw).replace('temp_', '')
-        try:
-            temp_user = TempUser.objects.get(id=temp_id)
-        except TempUser.DoesNotExist:
-            messages.error(request, "Клиент не найден.")
-            return redirect('delivery')
-        tracks = list(TrackCode.objects.filter(
-            status='shipping_pp',
-            temp_owner=temp_user,
-            delivery_pickup=home_pp,
-        ))
-        client_name = temp_user.login
-    else:
-        try:
-            client_user = User.objects.get(id=user_id_raw)
-        except User.DoesNotExist:
-            messages.error(request, "Клиент не найден.")
-            return redirect('delivery')
-        tracks = list(TrackCode.objects.filter(
-            status='shipping_pp',
-            owner=client_user,
-            delivery_pickup=home_pp,
-        ))
-        client_name = client_user.username
+    try:
+        client_user = User.objects.get(id=user_id_raw)
+    except User.DoesNotExist:
+        messages.error(request, "Клиент не найден.")
+        return redirect('delivery')
+    tracks = list(TrackCode.objects.filter(
+        status='shipping_pp',
+        owner=client_user,
+        delivery_pickup=home_pp,
+    ))
+    client_name = client_user.username
 
     if not tracks:
         messages.info(request, "Нет посылок для выдачи этому клиенту.")
@@ -648,61 +587,40 @@ def driver_issue(request):
     now = timezone.now()
 
     with transaction.atomic():
-        if client_user:
-            # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
-            # create_receipts_for_user(client_user, statuses=('shipping_pp',))
+        # Находим все чеки для текущих треков
+        track_ids = [t.id for t in tracks]
+        receipts = Receipt.objects.filter(
+            items__track_code_id__in=track_ids
+        ).distinct()
 
-            # Находим все чеки для текущих треков
-            track_ids = [t.id for t in tracks]
-            receipts = Receipt.objects.filter(
-                items__track_code_id__in=track_ids
-            ).distinct()
+        # Отмечаем чеки как оплаченные и выданные
+        receipts.update(
+            is_paid=True,
+            paid_at=now,
+            is_claimed=True,
+            claimed_at=now,
+        )
 
-            # Отмечаем чеки как оплаченные и выданные
-            receipts.update(
-                is_paid=True,
-                paid_at=now,
-                is_claimed=True,
-                claimed_at=now,
-            )
+        # Создаём пакет выдачи
+        package = ExtraditionPackage.objects.create(user=client_user)
+        package.receipts.set(receipts)
 
-            # Создаём пакет выдачи
-            package = ExtraditionPackage.objects.create(user=client_user)
-            package.receipts.set(receipts)
+        # Создаём запись выдачи
+        Extradition.objects.create(
+            package=package,
+            user=client_user,
+            issued_by=request.user,
+            pickup_point="Доставка на дом (Курьер)",
+            confirmed=True,
+        )
+        package.is_issued = True
+        package.save()
 
-            # Создаём запись выдачи
-            Extradition.objects.create(
-                package=package,
-                user=client_user,
-                issued_by=request.user,
-                pickup_point="Доставка на дом (Курьер)",
-                confirmed=True,
-            )
-            package.is_issued = True
-            package.save()
-
-            # Уведомление клиенту
-            Notification.objects.create(
-                user=client_user,
-                message=f"📦 Ваши посылки ({len(tracks)} шт.) доставлены курьером. Штрихкод: {package.barcode}"
-            )
-        elif temp_user:
-            # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
-            # create_receipts_for_temp_user(temp_user, statuses=('shipping_pp',))
-
-            # Находим все чеки для текущих треков
-            track_ids = [t.id for t in tracks]
-            receipts = Receipt.objects.filter(
-                items__track_code_id__in=track_ids
-            ).distinct()
-
-            # Отмечаем чеки как оплаченные и выданные
-            receipts.update(
-                is_paid=True,
-                paid_at=now,
-                is_claimed=True,
-                claimed_at=now,
-            )
+        # Уведомление клиенту
+        Notification.objects.create(
+            user=client_user,
+            message=f"📦 Ваши посылки ({len(tracks)} шт.) доставлены курьером. Штрихкод: {package.barcode}"
+        )
 
         # Меняем статус треков на claimed
         for track in tracks:
@@ -751,24 +669,12 @@ def get_pickup_receipts(request):
     # Находим треки этого ПВЗ в статусе 'delivered'
     tracks_qs = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='delivered',
     )
     if filter_date is not None:
         tracks_qs = tracks_qs.filter(delivered_date=filter_date)
-    tracks = list(tracks_qs.select_related('owner', 'temp_owner'))
-
-    # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
-    # owners_seen = set()
-    # temp_owners_seen = set()
-    # for track in tracks:
-    #     if track.owner and track.owner_id not in owners_seen:
-    #         owners_seen.add(track.owner_id)
-    #         create_receipts_for_user(track.owner, statuses=('delivered',))
-    #     elif track.temp_owner_id and track.temp_owner_id not in temp_owners_seen:
-    #         temp_owners_seen.add(track.temp_owner_id)
-    #         create_receipts_for_temp_user(track.temp_owner, statuses=('delivered',))
+    tracks = list(tracks_qs.select_related('owner'))
 
     track_ids = [t.id for t in tracks]
 
@@ -776,21 +682,17 @@ def get_pickup_receipts(request):
     items = (
         ReceiptItem.objects
         .filter(track_code_id__in=track_ids)
-        .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code')
+        .select_related('receipt', 'receipt__owner', 'track_code')
     )
 
     # Группируем: клиент → список чеков
     clients_map = {}  # username → { ... , receipts: { number → { tracks, weight } } }
     for item in items:
         receipt = item.receipt
-        if receipt.owner:
-            username = receipt.owner.username
-            full_name = receipt.owner.get_full_name() or username
-        elif receipt.temp_owner:
-            username = receipt.temp_owner.login
-            full_name = receipt.temp_owner.login
-        else:
+        if not receipt.owner:
             continue
+        username = receipt.owner.username
+        full_name = receipt.owner.get_full_name() or username
 
         if username not in clients_map:
             clients_map[username] = {
@@ -810,19 +712,15 @@ def get_pickup_receipts(request):
         clients_map[username]['receipts'][rn]['track_count'] += 1
         clients_map[username]['receipts'][rn]['total_weight'] += float(item.display_weight or 0)
 
-    # Треки без чеков — считаем отдельно по клиентам (зарег. и временные)
+    # Треки без чеков — считаем отдельно по клиентам
     tracks_with_receipts = set(item.track_code_id for item in items)
     for track in tracks:
         if track.id in tracks_with_receipts:
             continue
-        if track.owner:
-            username = track.owner.username
-            full_name = track.owner.get_full_name() or username
-        elif track.temp_owner_id:
-            username = track.temp_owner.login
-            full_name = track.temp_owner.login
-        else:
+        if not track.owner:
             continue
+        username = track.owner.username
+        full_name = track.owner.get_full_name() or username
         if username not in clients_map:
             clients_map[username] = {
                 'username': username,

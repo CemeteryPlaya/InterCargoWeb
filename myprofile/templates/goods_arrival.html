@@ -81,7 +81,7 @@
                 <div class="space-y-2">
                     {% for s in active_sessions %}
                     <div class="flex items-center justify-between border border-orange-200 bg-orange-50 rounded-lg px-4 py-3">
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                 Активная
                             </span>
@@ -94,11 +94,88 @@
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
                             {% endif %}
+                            <span class="text-xs text-gray-400">с {{ s.created_at|date:"d.m H:i" }}</span>
                         </div>
                         <a href="{% url 'goods_arrival_session' s.id %}"
-                            class="bg-orange-500 text-white px-4 py-1.5 rounded hover:bg-orange-600 transition text-sm font-medium">
+                            class="bg-orange-500 text-white px-4 py-1.5 rounded hover:bg-orange-600 transition text-sm font-medium flex-shrink-0">
                             <i class="ri-edit-line"></i> Продолжить
                         </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Приостановленные сессии -->
+            {% if paused_sessions %}
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    <i class="ri-pause-circle-line text-yellow-500"></i> На паузе
+                    <span class="text-sm font-normal text-gray-500">({{ paused_sessions|length }})</span>
+                </h3>
+                <div class="space-y-2">
+                    {% for s in paused_sessions %}
+                    <div class="flex items-center justify-between border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3">
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                На паузе
+                            </span>
+                            <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
+                            <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
+                            {% if s.sorting_location %}
+                            <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
+                            {% endif %}
+                            <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            {% if s.created_by %}
+                            <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
+                            {% endif %}
+                            {% if s.paused_at %}
+                            <span class="text-xs text-gray-400">пауза с {{ s.paused_at|date:"d.m H:i" }}</span>
+                            {% endif %}
+                        </div>
+                        <form method="post" action="{% url 'goods_arrival_resume' s.id %}" class="flex-shrink-0">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-yellow-500 text-white px-4 py-1.5 rounded hover:bg-yellow-600 transition text-sm font-medium">
+                                <i class="ri-play-line"></i> Продолжить
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Неактивные сессии (истёк 48-часовой лимит) -->
+            {% if inactive_sessions %}
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    <i class="ri-timer-flash-line text-gray-400"></i> Неактивные сессии
+                    <span class="text-sm font-normal text-gray-500">(превышен 48-часовой лимит)</span>
+                </h3>
+                <div class="space-y-2">
+                    {% for s in inactive_sessions %}
+                    <div class="flex items-center justify-between border border-gray-200 bg-gray-50 rounded-lg px-4 py-3">
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
+                                Неактивная
+                            </span>
+                            <span class="font-medium text-gray-700">Сессия #{{ s.id }}</span>
+                            <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
+                            {% if s.sorting_location %}
+                            <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
+                            {% endif %}
+                            <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            {% if s.created_by %}
+                            <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
+                            {% endif %}
+                            <span class="text-xs text-gray-400">создана {{ s.created_at|date:"d.m H:i" }}</span>
+                        </div>
+                        <form method="post" action="{% url 'goods_arrival_resume' s.id %}" class="flex-shrink-0">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-gray-500 text-white px-4 py-1.5 rounded hover:bg-gray-600 transition text-sm font-medium">
+                                <i class="ri-refresh-line"></i> Возобновить
+                            </button>
+                        </form>
                     </div>
                     {% endfor %}
                 </div>

@@ -29,7 +29,7 @@ class PickupPoint(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Имя пользователя")
-    phone = models.CharField(max_length=20, verbose_name="Телефон")
+    phone = models.CharField(max_length=20, blank=True, default='', verbose_name="Телефон")
     pickup = models.ForeignKey(
         PickupPoint, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ПВЗ"
     )
@@ -108,22 +108,6 @@ class EmailVerificationCode(models.Model):
     def __str__(self):
         return f"{self.email} — {self.code}"
 
-
-class TempUser(models.Model):
-    """Временные пользователи — клиенты, на которых пришли посылки, но которые ещё не зарегистрированы."""
-    login = models.CharField(max_length=150, unique=True, verbose_name="Логин")
-    phone = models.CharField(max_length=20, blank=True, default='', verbose_name="Телефон")
-    pickup = models.ForeignKey(
-        PickupPoint, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ПВЗ"
-    )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-
-    class Meta:
-        verbose_name = "Временный пользователь"
-        verbose_name_plural = "Временные пользователи"
-
-    def __str__(self):
-        return self.login
 
 
 class LoginAttempt(models.Model):

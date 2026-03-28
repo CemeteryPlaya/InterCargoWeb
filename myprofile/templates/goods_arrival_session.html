@@ -34,20 +34,61 @@
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-800">
                         Сессия прихода #{{ session.id }}
+                        {% if session.status == 'paused' %}
+                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            <i class="ri-pause-circle-line mr-1"></i> На паузе
+                        </span>
+                        {% elif session.status == 'inactive' %}
+                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-200 text-gray-600">
+                            <i class="ri-timer-flash-line mr-1"></i> Неактивная
+                        </span>
+                        {% endif %}
                     </h2>
                     <p class="text-sm text-gray-500 mt-1">
                         Дата: <strong>{{ session.date|date:"d.m.Y" }}</strong>
                         {% if session.sorting_location %} | Сортировка: <strong>{{ session.sorting_location }}</strong>{% endif %}
                         | Создал: <strong>{{ session.created_by.get_full_name|default:session.created_by.username }}</strong>
+                        | Начата: <strong>{{ session.created_at|date:"d.m.Y H:i" }}</strong>
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
+                    {% if can_edit %}
                     <span id="save-status" class="text-sm text-gray-400"></span>
+                    {% endif %}
                     <a href="{% url 'goods_arrival' %}" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition text-sm">
                         <i class="ri-arrow-left-line"></i> Назад
                     </a>
                 </div>
             </div>
+
+            <!-- Баннер: сессия на паузе или неактивна -->
+            {% if not can_edit %}
+            <div class="mb-6 p-4 rounded-lg {% if session.status == 'paused' %}bg-yellow-50 border border-yellow-300{% else %}bg-gray-100 border border-gray-300{% endif %}">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        {% if session.status == 'paused' %}
+                        <i class="ri-pause-circle-line text-yellow-500 text-2xl"></i>
+                        <div>
+                            <p class="font-semibold {% if session.status == 'paused' %}text-yellow-800{% else %}text-gray-700{% endif %}">Сессия на паузе</p>
+                            <p class="text-sm text-yellow-700">Редактирование недоступно. Нажмите «Продолжить», чтобы возобновить работу.</p>
+                        </div>
+                        {% else %}
+                        <i class="ri-timer-flash-line text-gray-400 text-2xl"></i>
+                        <div>
+                            <p class="font-semibold text-gray-700">Сессия неактивна</p>
+                            <p class="text-sm text-gray-500">Превышен 48-часовой лимит активности. Нажмите «Возобновить» для продолжения.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <form method="post" action="{% url 'goods_arrival_resume' session.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="{% if session.status == 'paused' %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-gray-500 hover:bg-gray-600{% endif %} text-white px-5 py-2 rounded transition font-medium flex-shrink-0">
+                            <i class="ri-play-line mr-1"></i>{% if session.status == 'paused' %}Продолжить{% else %}Возобновить{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Панель потери связи -->
             <div id="connection-lost-banner" class="hidden mb-4 p-4 rounded-lg bg-red-50 border border-red-300">
@@ -151,6 +192,7 @@
 
                 <!-- Кнопки -->
                 <div class="flex items-center gap-3 mt-6">
+                    {% if can_edit %}
                     <form method="post" action="{% url 'goods_arrival_complete' session.id %}" id="complete_form">
                         {% csrf_token %}
                         <button type="submit" id="complete_btn"
@@ -159,6 +201,15 @@
                             <i class="ri-check-line"></i> Завершить сессию
                         </button>
                     </form>
+                    <form method="post" action="{% url 'goods_arrival_pause' session.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="bg-yellow-500 text-white px-5 py-2 rounded hover:bg-yellow-600 transition font-medium"
+                            onclick="return confirm('Поставить сессию на паузу?')">
+                            <i class="ri-pause-line"></i> Пауза
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -170,7 +221,8 @@
         csrfToken: '{{ csrf_token }}',
         getOwnerUrl: '{% url "get_track_owner" %}',
         searchUsersUrl: '{% url "search_users" %}',
-        initialItems: {{ items_json|safe }}
+        initialItems: {{ items_json|safe }},
+        canEdit: {{ can_edit|yesno:"true,false" }}
     };
     </script>
     <script src="{% static 'scripts/goodsArrivalSession.js' %}?v={{ APP_VERSION }}"></script>

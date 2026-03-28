@@ -46,7 +46,7 @@
                 {% endif %}
 
                 {% if requests %}
-                <div class="space-y-4">
+                <div class="space-y-4" id="requests-list">
                     {% for req in requests %}
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -87,6 +87,32 @@
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                     <i class="ri-inbox-line text-gray-400 text-4xl"></i>
                     <p class="text-gray-500 mt-2">Нет заявок на рассмотрении.</p>
+                </div>
+                {% endif %}
+
+                <!-- Блокирующая модалка при активной сессии сортировки -->
+                {% if has_active_session %}
+                <div id="session-block-overlay"
+                    class="fixed inset-0 z-50 flex items-center justify-center"
+                    style="background: rgba(0,0,0,0.55);">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center">
+                        <div class="flex justify-center mb-4">
+                            <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100">
+                                <i class="ri-loader-4-line text-orange-500 text-4xl animate-spin"></i>
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">Идёт сессия сортировки</h2>
+                        <p class="text-gray-600 mb-6">
+                            Сейчас активна сессия прихода товаров. Изменение ПВЗ пользователям заблокировано на время сортировки.
+                        </p>
+                        <p class="text-sm text-gray-400 mb-6">
+                            Дождитесь завершения или паузы всех активных сессий, чтобы рассмотреть заявки.
+                        </p>
+                        <a href="{% url 'goods_arrival' %}"
+                            class="inline-block bg-orange-500 text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 transition font-medium text-sm">
+                            <i class="ri-arrow-right-line mr-1"></i> Перейти к сессиям прихода
+                        </a>
+                    </div>
                 </div>
                 {% endif %}
             </div>

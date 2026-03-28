@@ -3,8 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
-from register.models import PendingRegistration, UserProfile, TempUser
-from myprofile.models import TrackCode, Receipt, CustomerDiscount, StorageCell
+from register.models import PendingRegistration, UserProfile
 
 
 def confirm_view(request):
@@ -61,23 +60,6 @@ def approve_registration(request, reg_id):
             phone=reg.phone,
             pickup=reg.pickup
         )
-
-    # Обратная совместимость: переносим данные с TempUser (если остались)
-    temp_user = TempUser.objects.filter(login=reg.login).first()
-    if temp_user:
-        TrackCode.all_objects.filter(temp_owner=temp_user).update(
-            owner=user, temp_owner=None
-        )
-        Receipt.objects.filter(temp_owner=temp_user).update(
-            owner=user, temp_owner=None
-        )
-        CustomerDiscount.objects.filter(temp_user=temp_user).update(
-            user=user, temp_user=None
-        )
-        StorageCell.objects.filter(temp_user=temp_user).update(
-            user=user, temp_user=None
-        )
-        temp_user.delete()
 
     # Отправляем email о подтверждении
     if reg.email:

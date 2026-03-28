@@ -6,14 +6,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem, Arrival
-from register.models import UserProfile, PickupPoint, TempUser
+from register.models import UserProfile, PickupPoint
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 from django.db.models import Q
 # RECEIPTS COMMENTED OUT: auto-creation disabled
-# from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_temp_user_discount, round_price as _round_price
+# from myprofile.views.utils import create_receipts_for_user
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, round_price as _round_price
 
 
 def _generate_qr_base64(text):
@@ -51,9 +51,8 @@ def print_documents_view(request):
                     status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
                 ).filter(
                     Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
-                    Q(delivery_pickup__isnull=True, temp_owner__pickup_id__in=pickup_point_ids) |
                     Q(delivery_pickup_id__in=pickup_point_ids)
-                ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup', 'temp_owner', 'temp_owner__pickup')
+                ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
 
                 track_ids = [t.id for t in tracks]
 
@@ -66,7 +65,7 @@ def print_documents_view(request):
                         Q(track_code_id__in=track_ids) |
                         Q(track_code__isnull=True, receipt__created_at=check_date, receipt__pickup_point__in=pickup_names)
                     )
-                    .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code',
+                    .select_related('receipt', 'receipt__owner', 'track_code',
                                     'track_code__owner__userprofile__pickup', 'track_code__delivery_pickup')
                 )
 
@@ -85,7 +84,7 @@ def print_documents_view(request):
                 checks = []
                 def _receipt_sort_key(e):
                     r = e['receipt']
-                    name = r.owner.username if r.owner else (r.temp_owner.login if r.temp_owner else '')
+                    name = r.owner.username if r.owner else ''
                     return (name, r.id)
 
                 for entry in sorted(receipts_map.values(), key=_receipt_sort_key):
@@ -95,8 +94,6 @@ def print_documents_view(request):
                     # Имя клиента
                     if receipt.owner:
                         client_username = receipt.owner.username
-                    elif receipt.temp_owner:
-                        client_username = receipt.temp_owner.login
                     else:
                         client_username = ''
 
@@ -107,8 +104,6 @@ def print_documents_view(request):
                         try:
                             if receipt.owner:
                                 address = str(receipt.owner.userprofile.pickup) if receipt.owner.userprofile.pickup else ''
-                            elif receipt.temp_owner and receipt.temp_owner.pickup:
-                                address = str(receipt.temp_owner.pickup)
                             else:
                                 address = ''
                         except (UserProfile.DoesNotExist, AttributeError):
@@ -155,15 +150,6 @@ def print_documents_view(request):
                                 address = str(track.owner.userprofile.pickup) if track.owner.userprofile.pickup else ''
                             except (UserProfile.DoesNotExist, AttributeError):
                                 address = ''
-                    elif track.temp_owner_id:
-                        username = track.temp_owner.login
-                        discount = get_temp_user_discount(track.temp_owner)
-                        if track.delivery_pickup_id and track.delivery_pickup:
-                            address = str(track.delivery_pickup)
-                        elif track.temp_owner.pickup:
-                            address = str(track.temp_owner.pickup)
-                        else:
-                            address = ''
                     else:
                         continue
                     if username not in no_receipt_clients:
@@ -219,7 +205,6 @@ def print_documents_view(request):
                 status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
             ).filter(
                 Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
-                Q(delivery_pickup__isnull=True, temp_owner__pickup_id__in=pickup_point_ids) |
                 Q(delivery_pickup_id__in=pickup_point_ids)
             )
 
@@ -244,7 +229,7 @@ def print_documents_view(request):
 def client_registry_pdf(request, registry_id):
     registry = get_object_or_404(ClientRegistry, id=registry_id)
 
-    tracks = registry.track_codes.all().select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup', 'temp_owner', 'temp_owner__pickup')
+    tracks = registry.track_codes.all().select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
     default_price_per_kg = get_global_price_per_kg()
 
     data = {}
@@ -265,17 +250,6 @@ def client_registry_pdf(request, registry_id):
                     pickup_obj = None
             if client_username not in user_rates:
                 discount_per_kg = get_user_discount(owner)
-                user_rates[client_username] = default_price_per_kg - discount_per_kg
-        elif track.temp_owner_id:
-            client_username = track.temp_owner.login
-            if track.delivery_pickup_id and track.delivery_pickup:
-                pickup_obj = track.delivery_pickup
-            elif track.temp_owner.pickup:
-                pickup_obj = track.temp_owner.pickup
-            else:
-                pickup_obj = None
-            if client_username not in user_rates:
-                discount_per_kg = get_temp_user_discount(track.temp_owner)
                 user_rates[client_username] = default_price_per_kg - discount_per_kg
         else:
             continue

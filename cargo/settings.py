@@ -28,9 +28,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # === DEV: раскомментируй для локальной разработки ===
-#DEBUG = True
+DEBUG = True
 # === PROD: раскомментируй для продакшена ===
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+#DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(',')
 
@@ -174,6 +174,9 @@ MEDIA_ROOT = '/var/www/cargointer/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ArrivalSession может содержать >1000 inline-элементов в админке
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+
 SESSION_COOKIE_SECURE = False
 
 SESSION_COOKIE_HTTPONLY = True
@@ -234,6 +237,10 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security.DisallowedHost': {
+            'handlers': [],
             'propagate': False,
         },
     },

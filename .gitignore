@@ -41,3 +41,4 @@ PLAN.md
 tests/
 
 bot.log
+test_delivery_perf.py

@@ -155,25 +155,6 @@
                     </form>
                 </div>
 
-                <!-- 6. Перенос временных пользователей -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                    <h2 class="text-lg font-semibold mb-2">
-                        <i class="ri-user-shared-line mr-1 text-indigo-500"></i>
-                        Перенос временных пользователей
-                    </h2>
-                    <p class="text-sm text-gray-600 mb-4">
-                        Переносит всех временных пользователей (TempUser) в систему User + UserProfile.
-                        Создаёт неактивного пользователя Django (без галочки «Активный») и профиль без отметки
-                        «Зарегистрирован». Все связанные данные (трек-коды, чеки, скидки, ячейки) переносятся автоматически.
-                    </p>
-                    <form method="post" action="{% url 'service_migrate_temp_users' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition font-medium"
-                            onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
-                            <i class="ri-user-shared-line mr-1"></i> Перенести временных пользователей
-                        </button>
-                    </form>
-                </div>
 
             </div>
         </main>

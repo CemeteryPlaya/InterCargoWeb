@@ -5,7 +5,7 @@ from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.utils import timezone
 from register.models import UserProfile, PickupPoint
-from myprofile.models import PickupChangeRequest, Notification
+from myprofile.models import PickupChangeRequest, Notification, ArrivalSession
 from tgbot.models import UserNotificationSettings
 
 EDIT_COOLDOWN_DAYS = 30
@@ -199,6 +199,11 @@ def _require_hr(user):
     return None
 
 
+def _has_active_sorting_session():
+    """Возвращает True если есть активная или приостановленная сессия сортировки."""
+    return ArrivalSession.objects.filter(status__in=['active', 'paused']).exists()
+
+
 @login_required
 def pickup_change_requests_view(request):
     """Страница для HR: список заявок на смену ПВЗ."""
@@ -209,7 +214,10 @@ def pickup_change_requests_view(request):
     requests_list = PickupChangeRequest.objects.filter(status='pending').select_related(
         'user', 'current_pickup', 'requested_pickup'
     )
-    return render(request, "pickup_change_requests.html", {'requests': requests_list})
+    return render(request, "pickup_change_requests.html", {
+        'requests': requests_list,
+        'has_active_session': _has_active_sorting_session(),
+    })
 
 
 @login_required
@@ -219,6 +227,10 @@ def review_pickup_change(request, req_id):
     forbidden = _require_hr(request.user)
     if forbidden:
         return forbidden
+
+    if _has_active_sorting_session():
+        messages.error(request, "Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её завершения или паузы.")
+        return redirect('pickup_change_requests')
 
     change_req = get_object_or_404(PickupChangeRequest, id=req_id, status='pending')
     action = request.POST.get('action')

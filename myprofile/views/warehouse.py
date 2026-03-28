@@ -11,8 +11,8 @@ from myprofile.models import (
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
     RestructureSession,
 )
-from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
-from register.models import UserProfile, PickupPoint, TempUser
+from myprofile.views.utils import create_receipts_for_user
+from register.models import UserProfile, PickupPoint
 
 
 def _is_warehouse_worker(user):
@@ -54,7 +54,7 @@ def warehouse_view(request):
             'hide_description': is_pp_worker_only,
         })
 
-    cells_qs = StorageCell.objects.filter(pickup_point=pickup_point).select_related('user', 'temp_user')
+    cells_qs = StorageCell.objects.filter(pickup_point=pickup_point).select_related('user')
 
     def _cell_sort_key(cell):
         """Сортировка: 0, 1, 2, 2.1, 2.2, 3, ..."""
@@ -70,18 +70,13 @@ def warehouse_view(request):
 
     cells_data = []
     for cell in cells:
-        if cell.user:
-            tracks = TrackCode.objects.filter(
-                owner=cell.user, status='ready', is_accepted_pp=True,
-                owner__userprofile__pickup=pickup_point
-            ).order_by('track_code')
-        elif cell.temp_user:
-            tracks = TrackCode.objects.filter(
-                temp_owner=cell.temp_user, status='ready', is_accepted_pp=True,
-                temp_owner__pickup=pickup_point
-            ).order_by('track_code')
-        else:
+        if not cell.user:
             continue
+
+        tracks = TrackCode.objects.filter(
+            owner=cell.user, status='ready', is_accepted_pp=True,
+            owner__userprofile__pickup=pickup_point
+        ).order_by('track_code')
 
         if tracks.exists():
             tracks_list = list(tracks)
@@ -161,31 +156,25 @@ def warehouse_issue_to_client(request):
         return redirect('warehouse')
 
     try:
-        cell = StorageCell.objects.select_related('user', 'temp_user', 'pickup_point').get(id=cell_id)
+        cell = StorageCell.objects.select_related('user', 'pickup_point').get(id=cell_id)
     except StorageCell.DoesNotExist:
         messages.error(request, "Ячейка не найдена.")
         return redirect('warehouse')
 
     pickup_point = cell.pickup_point
     client_user = cell.user
-    client_temp = cell.temp_user
     client_name = cell.client_name
     today = timezone.localdate()
 
     with transaction.atomic():
-        if client_user:
-            tracks = list(TrackCode.objects.filter(
-                owner=client_user, status='ready', is_accepted_pp=True,
-                owner__userprofile__pickup=pickup_point
-            ))
-        elif client_temp:
-            tracks = list(TrackCode.objects.filter(
-                temp_owner=client_temp, status='ready', is_accepted_pp=True,
-                temp_owner__pickup=pickup_point
-            ))
-        else:
+        if not client_user:
             messages.error(request, "Ячейка не привязана к клиенту.")
             return redirect('warehouse')
+
+        tracks = list(TrackCode.objects.filter(
+            owner=client_user, status='ready', is_accepted_pp=True,
+            owner__userprofile__pickup=pickup_point
+        ))
 
         if not tracks:
             messages.info(request, "Нет товаров для выдачи в этой ячейке.")
@@ -197,10 +186,7 @@ def warehouse_issue_to_client(request):
             if not ReceiptItem.objects.filter(track_code=t).exists()
         ]
         if tracks_without_receipt:
-            if client_user:
-                create_receipts_for_user(client_user, statuses=('ready',))
-            elif client_temp:
-                create_receipts_for_temp_user(client_temp, statuses=('ready',))
+            create_receipts_for_user(client_user, statuses=('ready',))
 
         # Находим чеки связанные с этими треками
         track_ids = [t.id for t in tracks]
@@ -217,17 +203,16 @@ def warehouse_issue_to_client(request):
             claimed_at=now,
         )
 
-        # Создаём пакет и запись выдачи (только для зарегистрированных)
-        if client_user:
-            package = ExtraditionPackage.objects.create(user=client_user, is_issued=True)
-            package.receipts.set(receipts)
-            Extradition.objects.create(
-                package=package,
-                user=client_user,
-                issued_by=request.user,
-                pickup_point=str(pickup_point),
-                confirmed=True,
-            )
+        # Создаём пакет и запись выдачи
+        package = ExtraditionPackage.objects.create(user=client_user, is_issued=True)
+        package.receipts.set(receipts)
+        Extradition.objects.create(
+            package=package,
+            user=client_user,
+            issued_by=request.user,
+            pickup_point=str(pickup_point),
+            confirmed=True,
+        )
 
         # Меняем статус треков на claimed
         for track in tracks:
@@ -238,12 +223,11 @@ def warehouse_issue_to_client(request):
         # Удаляем ячейку
         cell.delete()
 
-        # Уведомление клиенту (только зарегистрированным)
-        if client_user:
-            Notification.objects.create(
-                user=client_user,
-                message=f"Ваши посылки ({len(tracks)} шт.) выданы на ПВЗ."
-            )
+        # Уведомление клиенту
+        Notification.objects.create(
+            user=client_user,
+            message=f"Ваши посылки ({len(tracks)} шт.) выданы на ПВЗ."
+        )
 
     messages.success(request, f"Выдано клиенту {client_name}: {len(tracks)} посылок")
     return redirect('warehouse')
@@ -262,31 +246,25 @@ def warehouse_not_arrived(request):
         return redirect('warehouse')
 
     try:
-        cell = StorageCell.objects.select_related('user', 'temp_user', 'pickup_point').get(id=cell_id)
+        cell = StorageCell.objects.select_related('user', 'pickup_point').get(id=cell_id)
     except StorageCell.DoesNotExist:
         messages.error(request, "Ячейка не найдена.")
         return redirect('warehouse')
 
     pickup_point = cell.pickup_point
     client_user = cell.user
-    client_temp = cell.temp_user
     client_name = cell.client_name
     today = timezone.localdate()
 
     with transaction.atomic():
-        if client_user:
-            tracks = list(TrackCode.objects.filter(
-                owner=client_user, status='ready', is_accepted_pp=True,
-                owner__userprofile__pickup=pickup_point
-            ))
-        elif client_temp:
-            tracks = list(TrackCode.objects.filter(
-                temp_owner=client_temp, status='ready', is_accepted_pp=True,
-                temp_owner__pickup=pickup_point
-            ))
-        else:
+        if not client_user:
             messages.error(request, "Ячейка не привязана к клиенту.")
             return redirect('warehouse')
+
+        tracks = list(TrackCode.objects.filter(
+            owner=client_user, status='ready', is_accepted_pp=True,
+            owner__userprofile__pickup=pickup_point
+        ))
 
         if not tracks:
             messages.info(request, "Нет товаров в этой ячейке.")
@@ -312,12 +290,11 @@ def warehouse_not_arrived(request):
         # Удаляем ячейку
         cell.delete()
 
-        # Уведомление клиенту (только зарегистрированным)
-        if client_user:
-            Notification.objects.create(
-                user=client_user,
-                message=f"Ваши посылки ({len(tracks)} шт.) возвращены на сортировочный склад."
-            )
+        # Уведомление клиенту
+        Notification.objects.create(
+            user=client_user,
+            message=f"Ваши посылки ({len(tracks)} шт.) возвращены на сортировочный склад."
+        )
 
     messages.success(request, f"Посылки клиента {client_name} ({len(tracks)} шт.) возвращены на сортировочный склад.")
     return redirect('warehouse')
@@ -393,7 +370,7 @@ def warehouse_inventory(request):
     if not pickup_point:
         return HttpResponseForbidden("Не выбран пункт выдачи.")
 
-    cells_qs = StorageCell.objects.filter(pickup_point=pickup_point).select_related('user', 'temp_user')
+    cells_qs = StorageCell.objects.filter(pickup_point=pickup_point).select_related('user')
 
     def _cell_sort_key(cell):
         parts = cell.cell_number.split('.')
@@ -411,18 +388,13 @@ def warehouse_inventory(request):
     total_weight_all = 0.0
 
     for cell in cells:
-        if cell.user:
-            tracks = TrackCode.objects.filter(
-                owner=cell.user, status='ready', is_accepted_pp=True,
-                owner__userprofile__pickup=pickup_point
-            )
-        elif cell.temp_user:
-            tracks = TrackCode.objects.filter(
-                temp_owner=cell.temp_user, status='ready', is_accepted_pp=True,
-                temp_owner__pickup=pickup_point
-            )
-        else:
+        if not cell.user:
             continue
+
+        tracks = TrackCode.objects.filter(
+            owner=cell.user, status='ready', is_accepted_pp=True,
+            owner__userprofile__pickup=pickup_point
+        )
 
         tracks_list = list(tracks)
         if not tracks_list:
@@ -500,7 +472,6 @@ def warehouse_restructure(request):
             backup.append({
                 'cell_number': cell.cell_number,
                 'user_id': cell.user_id,
-                'temp_user_id': cell.temp_user_id,
                 'client_name': cell.client_name,
             })
 
@@ -532,9 +503,9 @@ def warehouse_reassign(request, pickup_id):
         return redirect('warehouse')
 
     # Получаем клиентов с товарами на складе (ready + is_accepted_pp)
-    from django.db.models import Q, Sum, Count
+    from django.db.models import Sum, Count
 
-    # Зарегистрированные клиенты
+    # Клиенты с товарами на складе
     user_tracks = TrackCode.objects.filter(
         status='ready', is_accepted_pp=True,
         owner__userprofile__pickup=pickup_point,
@@ -543,16 +514,6 @@ def warehouse_reassign(request, pickup_id):
         track_count=Count('id'),
         total_weight=Sum('weight'),
     ).order_by('owner__username')
-
-    # Временные клиенты
-    temp_tracks = TrackCode.objects.filter(
-        status='ready', is_accepted_pp=True,
-        temp_owner__pickup=pickup_point,
-        temp_owner__isnull=False,
-    ).values('temp_owner__id', 'temp_owner__login').annotate(
-        track_count=Count('id'),
-        total_weight=Sum('weight'),
-    ).order_by('temp_owner__login')
 
     clients = []
     for ut in user_tracks:
@@ -563,18 +524,6 @@ def warehouse_reassign(request, pickup_id):
             'name': ut['owner__username'],
             'track_count': ut['track_count'],
             'total_weight': float(ut['total_weight'] or 0),
-            'cell_number': cell.cell_number if cell else None,
-            'cell_id': cell.id if cell else None,
-        })
-
-    for tt in temp_tracks:
-        cell = StorageCell.objects.filter(pickup_point=pickup_point, temp_user_id=tt['temp_owner__id']).first()
-        clients.append({
-            'type': 'temp',
-            'id': tt['temp_owner__id'],
-            'name': tt['temp_owner__login'],
-            'track_count': tt['track_count'],
-            'total_weight': float(tt['total_weight'] or 0),
             'cell_number': cell.cell_number if cell else None,
             'cell_id': cell.id if cell else None,
         })
@@ -603,7 +552,6 @@ def warehouse_assign_cell(request):
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Неверный формат данных.'}, status=400)
 
-    client_type = data.get('client_type')  # 'user' or 'temp'
     client_id = data.get('client_id')
     pickup_id = data.get('pickup_id')
     cell_number = data.get('cell_number')  # None = auto
@@ -642,24 +590,14 @@ def warehouse_assign_cell(request):
         }, status=409)
 
     # Создаём/обновляем ячейку
-    if client_type == 'user':
-        from django.contrib.auth.models import User
-        try:
-            user = User.objects.get(id=client_id)
-        except User.DoesNotExist:
-            return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
-        # Удаляем старую ячейку если есть
-        StorageCell.objects.filter(pickup_point=pickup_point, user=user).delete()
-        cell = StorageCell.objects.create(pickup_point=pickup_point, cell_number=cell_number, user=user)
-    elif client_type == 'temp':
-        try:
-            temp_user = TempUser.objects.get(id=client_id)
-        except TempUser.DoesNotExist:
-            return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
-        StorageCell.objects.filter(pickup_point=pickup_point, temp_user=temp_user).delete()
-        cell = StorageCell.objects.create(pickup_point=pickup_point, cell_number=cell_number, temp_user=temp_user)
-    else:
-        return JsonResponse({'error': 'Неверный тип клиента.'}, status=400)
+    from django.contrib.auth.models import User
+    try:
+        user = User.objects.get(id=client_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
+    # Удаляем старую ячейку если есть
+    StorageCell.objects.filter(pickup_point=pickup_point, user=user).delete()
+    cell = StorageCell.objects.create(pickup_point=pickup_point, cell_number=cell_number, user=user)
 
     return JsonResponse({
         'ok': True,
@@ -682,7 +620,7 @@ def warehouse_find_client_by_receipt(request):
         return JsonResponse({'found': False, 'error': 'Не указан номер чека.'}, status=400)
 
     try:
-        receipt = Receipt.objects.select_related('owner', 'temp_owner').get(receipt_number=receipt_number)
+        receipt = Receipt.objects.select_related('owner').get(receipt_number=receipt_number)
     except Receipt.DoesNotExist:
         return JsonResponse({'found': False, 'error': f'Чек {receipt_number} не найден.'}, status=404)
 
@@ -692,13 +630,6 @@ def warehouse_find_client_by_receipt(request):
             'client_type': 'user',
             'client_id': receipt.owner.id,
             'client_name': receipt.owner.username,
-        })
-    elif receipt.temp_owner:
-        return JsonResponse({
-            'found': True,
-            'client_type': 'temp',
-            'client_id': receipt.temp_owner.id,
-            'client_name': receipt.temp_owner.login,
         })
     else:
         return JsonResponse({'found': False, 'error': 'Чек не привязан к клиенту.'}, status=404)

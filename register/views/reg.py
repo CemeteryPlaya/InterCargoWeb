@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from register.models import PendingRegistration, UserProfile, PickupPoint, TempUser
-from myprofile.models import Notification, TrackCode, Receipt, CustomerDiscount
+from register.models import PendingRegistration, UserProfile, PickupPoint
+from myprofile.models import Notification
 
 
 def pre_register(request):
@@ -131,39 +131,6 @@ def register_view(request):
                     is_registered=True,
                 )
 
-            request.session.pop('registration_data', None)
-            request.session.pop('email_verified', None)
-            messages.success(request, "Регистрация прошла успешно! Вы можете войти в систему.")
-            return redirect('login')
-
-        # Обратная совместимость: проверяем TempUser
-        temp_user = TempUser.objects.filter(login=username).first()
-        if temp_user:
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-            )
-            UserProfile.objects.create(
-                user=user,
-                phone=phone,
-                pickup=pickup_point,
-            )
-            # Переносим все треки с temp_owner на нового пользователя
-            TrackCode.all_objects.filter(temp_owner=temp_user).update(
-                owner=user, temp_owner=None
-            )
-            # Переносим чеки
-            Receipt.objects.filter(temp_owner=temp_user).update(
-                owner=user, temp_owner=None
-            )
-            # Переносим скидки
-            CustomerDiscount.objects.filter(temp_user=temp_user).update(
-                user=user, temp_user=None
-            )
-            temp_user.delete()
             request.session.pop('registration_data', None)
             request.session.pop('email_verified', None)
             messages.success(request, "Регистрация прошла успешно! Вы можете войти в систему.")

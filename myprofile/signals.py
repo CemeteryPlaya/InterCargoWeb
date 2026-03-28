@@ -26,13 +26,11 @@ def track_code_capture_old_state(sender, instance, **kwargs):
         instance._old_weight = old.weight
         instance._old_delivered_date = old.delivered_date
         instance._old_owner_id = old.owner_id
-        instance._old_temp_owner_id = old.temp_owner_id
         instance._old_track_code_str = old.track_code
     except TrackCode.DoesNotExist:
         instance._old_weight = None
         instance._old_delivered_date = None
         instance._old_owner_id = None
-        instance._old_temp_owner_id = None
         instance._old_track_code_str = None
 
 
@@ -112,32 +110,24 @@ def _relocate_receipt_item(track, item, old_receipt, weight_changed):
     owner = track.owner
     delivered_date = track.delivered_date
 
-    # Определяем владельца чека
     owner_id = owner.id if owner else None
-    temp_owner_id = track.temp_owner_id
 
-    # Ищем существующий чек за нужную дату для этого владельца
-    target_receipt = None
-    receipt_qs = Receipt.objects.exclude(pk=old_receipt.pk)
-    if owner_id:
-        receipt_qs = receipt_qs.filter(owner_id=owner_id, temp_owner__isnull=True)
-    elif temp_owner_id:
-        receipt_qs = receipt_qs.filter(temp_owner_id=temp_owner_id, owner__isnull=True)
-    else:
+    if not owner_id:
         # Нет владельца — не переносим
         if weight_changed:
             _update_item_weight(item, track.weight)
             _recalc_receipt_safe(old_receipt)
         return
 
+    # Ищем существующий чек за нужную дату для этого владельца
+    target_receipt = None
+    receipt_qs = Receipt.objects.exclude(pk=old_receipt.pk).filter(owner_id=owner_id)
+
     if delivered_date:
         target_receipt = receipt_qs.filter(created_at=delivered_date).first()
 
     # Проверяем: может item уже в правильном чеке
-    same_owner = (
-        (owner_id and old_receipt.owner_id == owner_id) or
-        (temp_owner_id and old_receipt.temp_owner_id == temp_owner_id)
-    )
+    same_owner = old_receipt.owner_id == owner_id
     same_date = (old_receipt.created_at == delivered_date) if delivered_date else True
 
     if same_owner and same_date:
@@ -151,7 +141,6 @@ def _relocate_receipt_item(track, item, old_receipt, weight_changed):
         # Создаём новый чек
         target_receipt = Receipt.objects.create(
             owner_id=owner_id,
-            temp_owner_id=temp_owner_id,
             total_weight=0,
             total_price=0,
             price_per_kg=old_receipt.price_per_kg,
@@ -233,24 +222,16 @@ def track_code_cascade_to_arrival_on_save(sender, instance, created, **kwargs):
     old_code = getattr(instance, '_old_track_code_str', None)
     old_weight = getattr(instance, '_old_weight', None)
     old_owner_id = getattr(instance, '_old_owner_id', None)
-    old_temp_owner_id = getattr(instance, '_old_temp_owner_id', None)
 
     code_changed = old_code is not None and old_code != instance.track_code
     weight_changed = old_weight != instance.weight
-    owner_changed = (
-        old_owner_id != instance.owner_id or
-        old_temp_owner_id != instance.temp_owner_id
-    )
+    owner_changed = old_owner_id != instance.owner_id
 
     if not (code_changed or weight_changed or owner_changed):
         return
 
     # Определяем текущее имя владельца
-    owner_name = ''
-    if instance.owner:
-        owner_name = instance.owner.username
-    elif instance.temp_owner:
-        owner_name = instance.temp_owner.login
+    owner_name = instance.owner.username if instance.owner else ''
 
     lookup_code = old_code if code_changed else instance.track_code
 
@@ -329,25 +310,19 @@ def cleanup_storage_cell_on_receipt_delete(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=TrackCode)
-def preserve_receipt_item_data(sender, instance, **kwargs):
+def remove_receipt_item_on_track_delete(sender, instance, **kwargs):
     """
-    Перед удалением TrackCode (при архивации) — сохраняем track_code и weight
-    в связанный ReceiptItem, чтобы данные не потерялись после SET_NULL.
+    Перед удалением TrackCode — удаляем связанный ReceiptItem
+    и пересчитываем (или удаляем) чек.
     """
     try:
-        item = ReceiptItem.objects.get(track_code=instance)
+        item = ReceiptItem.objects.select_related('receipt').get(track_code=instance)
     except ReceiptItem.DoesNotExist:
         return
 
-    changed = False
-    if not item.track_code_str:
-        item.track_code_str = instance.track_code
-        changed = True
-    if item.weight is None:
-        item.weight = instance.weight
-        changed = True
-    if changed:
-        item.save(update_fields=['track_code_str', 'weight'])
+    receipt = item.receipt
+    item.delete()
+    _recalc_receipt_safe(receipt)
 
 
 @receiver(post_save, sender=Notification)

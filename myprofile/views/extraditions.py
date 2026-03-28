@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from myprofile.models import Extradition, ExtraditionPackage, Notification, Receipt, StorageCell
+from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Notification, Receipt, StorageCell, TrackCode
 from register.models import UserProfile, PickupPoint
 
 
@@ -108,6 +108,9 @@ def extradition_view(request):
             package.is_issued = True
             package.save()
 
+            # Закрываем сессию выдачи
+            ExtraditionSession.objects.filter(package=package).delete()
+
         messages.success(request, f"✅ Выдача пакета '{barcode}' оформлена успешно.")
         return redirect('extradition')
 
@@ -115,6 +118,19 @@ def extradition_view(request):
     context = {}
     if request.user.is_superuser:
         context['all_pickups'] = PickupPoint.objects.filter(is_active=True).order_by('id')
+
+    # Открытые сессии выдачи для этого ПВЗ
+    try:
+        worker_pickup = request.user.userprofile.pickup if not request.user.is_superuser else None
+    except (UserProfile.DoesNotExist, AttributeError):
+        worker_pickup = None
+
+    sessions_qs = ExtraditionSession.objects.select_related(
+        'package__user', 'opened_by', 'pickup_point'
+    ).order_by('-opened_at')
+    if worker_pickup:
+        sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
+    context['sessions'] = list(sessions_qs)
 
     return render(request, "extraditions.html", context)
 
@@ -188,13 +204,32 @@ def search_package(request):
                 ).first()
                 if cell:
                     cell_display = cell.display_number
+                elif TrackCode.objects.filter(
+                    owner=package.user, status='ready', is_accepted_pp=False
+                ).exists():
+                    cell_display = 'Доставлено, но не приняли на склад'
         except (UserProfile.DoesNotExist, AttributeError):
             pass
+
+        # Открываем / обновляем сессию выдачи (только для невыданных пакетов)
+        if not package.is_issued:
+            try:
+                session_pickup = package.user.userprofile.pickup
+            except (UserProfile.DoesNotExist, AttributeError):
+                session_pickup = None
+            ExtraditionSession.objects.update_or_create(
+                package=package,
+                defaults={
+                    'pickup_point': session_pickup,
+                    'opened_by': request.user,
+                },
+            )
 
         return JsonResponse({
             'found': True,
             'barcode': package.barcode,
             'owner': package.user.username,
+            'owner_full_name': package.user.get_full_name() or '',
             'pickup_point': package.pickup_point_display,
             'cell_number': cell_display,
             # PAYMENT COMMENTED OUT: 'is_paid': all_paid,
@@ -205,6 +240,55 @@ def search_package(request):
 
     except ExtraditionPackage.DoesNotExist:
         return JsonResponse({'found': False, 'error': 'Пакет не найден'}, status=404)
+
+
+@login_required
+def get_sessions(request):
+    """AJAX: Возвращает список открытых сессий выдачи для ПВЗ сотрудника."""
+    if not _can_issue(request.user):
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    try:
+        worker_pickup = request.user.userprofile.pickup if not request.user.is_superuser else None
+    except (UserProfile.DoesNotExist, AttributeError):
+        worker_pickup = None
+
+    sessions_qs = ExtraditionSession.objects.select_related(
+        'package__user', 'opened_by'
+    ).order_by('-opened_at')
+    if worker_pickup:
+        sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
+
+    result = []
+    for s in sessions_qs:
+        pkg = s.package
+        receipt_count = pkg.receipts.count()
+        result.append({
+            'session_id': s.id,
+            'barcode': pkg.barcode,
+            'owner': pkg.user.username,
+            'owner_full_name': pkg.user.get_full_name() or '',
+            'receipt_count': receipt_count,
+            'opened_by': s.opened_by.username if s.opened_by else '',
+            'opened_at': s.opened_at.strftime('%H:%M'),
+        })
+
+    return JsonResponse({'sessions': result})
+
+
+@login_required
+@require_POST
+def close_session(request):
+    """AJAX: Закрывает (удаляет) сессию выдачи без оформления выдачи."""
+    if not _can_issue(request.user):
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    session_id = request.POST.get('session_id')
+    if not session_id:
+        return JsonResponse({'error': 'Не указан ID сессии'}, status=400)
+
+    ExtraditionSession.objects.filter(id=session_id).delete()
+    return JsonResponse({'success': True})
 
 
 # PAYMENT COMMENTED OUT: toggle_payment view disabled
