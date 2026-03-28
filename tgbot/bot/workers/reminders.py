@@ -7,6 +7,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 
@@ -76,6 +77,17 @@ async def check_and_send_reminders(bot: Bot):
                         f"Sent {day}-day reminder ({data['track_count']} tracks) to chat {data['chat_id']}"
                     )
                     await asyncio.sleep(0.1)
+
+                except TelegramForbiddenError:
+                    logger.warning(f"User {user_id} blocked bot, deactivating profile")
+                    await _deactivate_profile(user_id)
+                    # Логируем напоминания как отправленные, чтобы не повторять
+                    for track_id in data['track_ids']:
+                        await _log_sent_reminder(user_id, track_id, day)
+
+                except TelegramRetryAfter as e:
+                    logger.warning(f"Rate limited in reminders, waiting {e.retry_after}s")
+                    await asyncio.sleep(e.retry_after)
 
                 except Exception as e:
                     logger.error(f"Error sending reminder to {data['chat_id']}: {e}")
@@ -153,7 +165,7 @@ def _get_reminder_targets(day, pickup_id):
             if SentReminder.objects.filter(track_code=track, interval_day=day).exists():
                 continue
 
-            tp = TelegramProfile.objects.filter(user=track.owner).first()
+            tp = TelegramProfile.objects.filter(user=track.owner, is_active=True).first()
             if not tp:
                 continue
 
@@ -178,3 +190,11 @@ def _log_sent_reminder(user_id, track_id, day):
         interval_day=day,
         defaults={'user_id': user_id},
     )
+
+
+@sync_to_async
+def _deactivate_profile(user_id):
+    """Деактивирует Telegram-профиль (бот заблокирован)."""
+    from tgbot.models import TelegramProfile
+    TelegramProfile.objects.filter(user_id=user_id).update(is_active=False)
+    logger.info(f"Deactivated Telegram profile for user {user_id} (via reminders)")

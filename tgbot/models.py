@@ -118,6 +118,8 @@ class TelegramNotification(models.Model):
     )
     url = models.URLField(blank=True, null=True, verbose_name='Ссылка')
     is_sent = models.BooleanField(default=False, verbose_name='Отправлено', db_index=True)
+    retry_count = models.PositiveSmallIntegerField(default=0, verbose_name='Число попыток')
+    last_error = models.TextField(blank=True, default='', verbose_name='Последняя ошибка')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     sent_at = models.DateTimeField(blank=True, null=True, verbose_name='Отправлено в')
 
