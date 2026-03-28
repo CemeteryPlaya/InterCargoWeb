@@ -84,9 +84,6 @@
                     {% if item.cell.client_full_name %}
                     <br><span style="font-size:10px;color:#888;">{{ item.cell.client_full_name }}</span>
                     {% endif %}
-                    {% if item.cell.temp_user %}
-                    <br><span style="font-size:10px;color:#c2410c;">Вр. клиент</span>
-                    {% endif %}
                 </td>
                 <td>{{ item.track_count }}</td>
                 <td>{{ item.total_weight|floatformat:2 }}</td>

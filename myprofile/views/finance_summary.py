@@ -53,7 +53,7 @@ def _aggregate_receipts(qs):
 
 
 def _home_delivery_clients(home_qs):
-    """Группирует чеки доставки на дом по клиентам (owner + temp_owner)."""
+    """Группирует чеки доставки на дом по клиентам."""
     return list(
         home_qs.annotate(
             client_name=Case(
@@ -62,7 +62,6 @@ def _home_delivery_clients(home_qs):
                     Value(' ('), 'owner__last_name', Value(' '), 'owner__first_name', Value(')'),
                     output_field=CharField(),
                 )),
-                When(temp_owner__isnull=False, then='temp_owner__login'),
                 default=Value('—'),
                 output_field=CharField(),
             ),

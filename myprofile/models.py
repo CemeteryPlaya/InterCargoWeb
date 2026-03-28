@@ -69,11 +69,6 @@ class TrackCode(models.Model):
         null=True, blank=True, related_name='delivery_tracks',
         verbose_name="Переопределённый ПВЗ доставки"
     )
-    temp_owner = models.ForeignKey(
-        'register.TempUser', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='track_codes',
-        verbose_name="Временный владелец"
-    )
     sorting_location = models.ForeignKey(
         SortingLocation, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='track_codes',
@@ -229,11 +224,6 @@ class ArchivedTrackCode(models.Model):
 
 class Receipt(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Владелец")
-    temp_owner = models.ForeignKey(
-        'register.TempUser', on_delete=models.CASCADE,
-        null=True, blank=True, related_name='receipts',
-        verbose_name="Временный владелец"
-    )
     created_at = models.DateField(default=timezone.now, verbose_name="Дата создания")
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
@@ -314,7 +304,7 @@ class Receipt(models.Model):
                     old = Receipt.objects.get(pk=self.pk)
                     content_fields = [
                         'total_weight', 'total_price', 'price_per_kg',
-                        'owner_id', 'temp_owner_id', 'pickup_point',
+                        'owner_id', 'pickup_point',
                         'payment_link', 'created_at',
                     ]
                     changed = [
@@ -337,8 +327,6 @@ class Receipt(models.Model):
         if self.owner:
             full = self.owner.get_full_name()
             return f"{self.owner.username} ({full})" if full else self.owner.username
-        if self.temp_owner:
-            return self.temp_owner.login
         return '—'
 
     def get_qr_base64(self):
@@ -412,14 +400,6 @@ class CustomerDiscount(models.Model):
         null=True,
         blank=True,
     )
-    temp_user = models.ForeignKey(
-        'register.TempUser',
-        on_delete=models.CASCADE,
-        related_name="discounts",
-        verbose_name="Временный пользователь",
-        null=True,
-        blank=True,
-    )
     amount_per_kg = models.DecimalField(
         max_digits=6,
         decimal_places=2,
@@ -436,7 +416,7 @@ class CustomerDiscount(models.Model):
 
     def __str__(self):
         type_label = "Разовая" if self.is_temporary else "Постоянная"
-        owner_name = self.user.username if self.user else (self.temp_user.login if self.temp_user else "—")
+        owner_name = self.user.username if self.user else "—"
         return f"{type_label} скидка {self.amount_per_kg} ₸/кг ({owner_name})"
 
 class UserPushSubscription(models.Model):
@@ -597,13 +577,6 @@ class StorageCell(models.Model):
         related_name='storage_cells',
         verbose_name="Клиент"
     )
-    temp_user = models.ForeignKey(
-        'register.TempUser',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='storage_cells',
-        verbose_name="Временный клиент"
-    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -626,8 +599,6 @@ class StorageCell(models.Model):
         """Возвращает отображаемое имя клиента."""
         if self.user:
             return self.user.username
-        if self.temp_user:
-            return self.temp_user.login
         return '—'
 
     @property
@@ -744,8 +715,12 @@ class ArrivalSession(models.Model):
     """Сессия прихода товаров — данные записываются в реальном времени на сервер."""
     STATUS_CHOICES = [
         ('active', 'Активная'),
+        ('paused', 'На паузе'),
+        ('inactive', 'Неактивная'),
         ('completed', 'Завершена'),
     ]
+    ACTIVE_HOURS_LIMIT = 48  # сессия старше этого числа часов автоматически становится неактивной
+
     date = models.DateField(verbose_name="Дата прихода")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Статус")
     created_by = models.ForeignKey(
@@ -762,6 +737,7 @@ class ArrivalSession(models.Model):
         verbose_name="Приход (после завершения)"
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    paused_at = models.DateTimeField(null=True, blank=True, verbose_name="Поставлена на паузу")
     completed_at = models.DateTimeField(null=True, blank=True, verbose_name="Завершено")
 
     class Meta:
@@ -858,3 +834,40 @@ class EmailLog(models.Model):
 
     def __str__(self):
         return f"[{self.get_status_display()}] {self.subject} → {self.recipient}"
+
+
+class ExtraditionSession(models.Model):
+    """
+    Сессия выдачи посылки: открывается когда сотрудник ПВЗ сканирует штрихкод пакета,
+    закрывается (удаляется) после оформления выдачи.
+    Видна всем сотрудникам одного ПВЗ.
+    """
+    package = models.OneToOneField(
+        'ExtraditionPackage',
+        on_delete=models.CASCADE,
+        related_name='extradition_session',
+        verbose_name="Пакет выдачи",
+    )
+    pickup_point = models.ForeignKey(
+        'register.PickupPoint',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='extradition_sessions',
+        verbose_name="ПВЗ",
+    )
+    opened_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='opened_extradition_sessions',
+        verbose_name="Открыл",
+    )
+    opened_at = models.DateTimeField(auto_now_add=True, verbose_name="Открыта в")
+
+    class Meta:
+        verbose_name = "Сессия выдачи"
+        verbose_name_plural = "Сессии выдачи"
+        ordering = ['-opened_at']
+
+    def __str__(self):
+        return f"Сессия: {self.package.barcode} ({self.package.user.username})"

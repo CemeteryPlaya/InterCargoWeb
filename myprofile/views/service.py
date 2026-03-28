@@ -19,11 +19,11 @@ from myprofile.models import (
     Notification, Arrival, CustomerDiscount, StorageCell,
 )
 from myprofile.views.utils import (
-    get_global_price_per_kg, get_user_discount, get_temp_user_discount,
-    is_staff as _is_staff, create_receipts_for_user, create_receipts_for_temp_user,
+    get_global_price_per_kg, get_user_discount,
+    is_staff as _is_staff, create_receipts_for_user,
     _recalc_receipt,
 )
-from register.models import UserProfile, TempUser
+from register.models import UserProfile
 
 
 def _can_access_service(user):
@@ -123,7 +123,7 @@ def service_generate_packages(request):
 def service_generate_receipts(request):
     """
     Подгрузить чеки:
-    За выбранную дату (delivered_date), для каждого владельца (User и TempUser),
+    За выбранную дату (delivered_date), для каждого владельца (User),
     создаёт чеки для треков, у которых нет ReceiptItem.
     """
     if not _can_access_service(request.user):
@@ -146,16 +146,13 @@ def service_generate_receipts(request):
     tracks = TrackCode.all_objects.filter(
         Q(delivered_date=target_date) | Q(id__in=arrival_track_ids),
         status__in=statuses,
-    ).select_related('owner', 'temp_owner').distinct()
+    ).select_related('owner').distinct()
 
     # Собираем уникальных владельцев
     users = set()
-    temp_users = set()
     for track in tracks:
         if track.owner_id:
             users.add(track.owner)
-        elif track.temp_owner_id:
-            temp_users.add(track.temp_owner)
 
     created_count = 0
     errors = []
@@ -167,14 +164,6 @@ def service_generate_receipts(request):
                 created_count += 1
         except Exception as e:
             errors.append(f"User {user.username}: {e}")
-
-    for temp_user in temp_users:
-        try:
-            receipt = create_receipts_for_temp_user(temp_user, statuses=statuses)
-            if receipt:
-                created_count += 1
-        except Exception as e:
-            errors.append(f"TempUser {temp_user.login}: {e}")
 
     msg = f"Чеки за {target_date.strftime('%d.%m.%Y')}: создано {created_count}."
     if errors:
@@ -222,17 +211,14 @@ def service_normalize_receipts(request):
     items_for_date = ReceiptItem.objects.filter(
         Q(track_code__delivered_date=target_date) | Q(track_code_id__in=arrival_track_ids),
         track_code__isnull=False,
-    ).select_related('receipt', 'track_code', 'track_code__owner', 'track_code__temp_owner')
+    ).select_related('receipt', 'track_code', 'track_code__owner')
 
     # Группируем по владельцу
-    # key: ('user', user_id) или ('temp', temp_user_id)
     owner_items = defaultdict(list)
     for item in items_for_date:
         track = item.track_code
         if track.owner_id:
-            owner_items[('user', track.owner_id)].append(item)
-        elif track.temp_owner_id:
-            owner_items[('temp', track.temp_owner_id)].append(item)
+            owner_items[track.owner_id].append(item)
 
     for owner_key, items in owner_items.items():
         try:
@@ -317,19 +303,12 @@ def service_mark_claimed(request):
     return redirect('service')
 
 
-def _split_foreign_items(receipt, foreign_items, owner_key, RATE):
+def _split_foreign_items(receipt, foreign_items, owner_id, RATE):
     """Выносит items за другие даты из чека в новый чек."""
-    owner_type, owner_id = owner_key
-
-    if owner_type == 'user':
-        from django.contrib.auth.models import User
-        user = User.objects.get(id=owner_id)
-        discount = get_user_discount(user)
-        effective_rate = RATE - discount
-    else:
-        temp_user = TempUser.objects.get(id=owner_id)
-        discount = get_temp_user_discount(temp_user)
-        effective_rate = RATE - discount
+    from django.contrib.auth.models import User
+    user = User.objects.get(id=owner_id)
+    discount = get_user_discount(user)
+    effective_rate = RATE - discount
 
     # Группируем foreign items по их delivered_date
     from collections import defaultdict as _dd
@@ -339,8 +318,7 @@ def _split_foreign_items(receipt, foreign_items, owner_key, RATE):
 
     for f_date, date_items in by_date.items():
         new_receipt = Receipt.objects.create(
-            owner_id=owner_id if owner_type == 'user' else None,
-            temp_owner_id=owner_id if owner_type == 'temp' else None,
+            owner_id=owner_id,
             total_weight=0, total_price=0,
             price_per_kg=effective_rate,
             created_at=f_date or receipt.created_at,
@@ -361,19 +339,12 @@ def _split_foreign_items(receipt, foreign_items, owner_key, RATE):
     _recalc_receipt(receipt, receipt.price_per_kg or effective_rate)
 
 
-def _merge_receipts(receipt_ids, items_for_date, owner_key, target_date, RATE):
+def _merge_receipts(receipt_ids, items_for_date, owner_id, target_date, RATE):
     """Объединяет несколько чеков владельца за одну дату в один."""
-    owner_type, owner_id = owner_key
-
-    if owner_type == 'user':
-        from django.contrib.auth.models import User
-        user = User.objects.get(id=owner_id)
-        discount = get_user_discount(user)
-        effective_rate = RATE - discount
-    else:
-        temp_user = TempUser.objects.get(id=owner_id)
-        discount = get_temp_user_discount(temp_user)
-        effective_rate = RATE - discount
+    from django.contrib.auth.models import User
+    user = User.objects.get(id=owner_id)
+    discount = get_user_discount(user)
+    effective_rate = RATE - discount
 
     receipts = Receipt.objects.filter(id__in=receipt_ids)
 
@@ -463,81 +434,3 @@ def service_restore_archived_tracks(request):
     return redirect('service')
 
 
-@login_required
-@require_POST
-def service_migrate_temp_users(request):
-    """
-    Перенос временных пользователей (TempUser) в User + UserProfile.
-    Создаёт неактивного User (is_active=False) и UserProfile (is_registered=False).
-    Переносит все связанные данные: TrackCode, Receipt, CustomerDiscount, StorageCell.
-    """
-    if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
-
-    from django.contrib.auth.models import User
-
-    migrated = 0
-    skipped = 0
-    errors = []
-
-    for temp_user in TempUser.objects.all():
-        try:
-            # Проверяем не существует ли уже User с таким username
-            existing_user = User.objects.filter(username=temp_user.login).first()
-            if existing_user:
-                # User уже есть — просто переносим данные и удаляем TempUser
-                user = existing_user
-                # Убеждаемся что есть UserProfile
-                profile, created = UserProfile.objects.get_or_create(
-                    user=user,
-                    defaults={'phone': temp_user.phone or '', 'is_registered': False}
-                )
-                if created and temp_user.pickup:
-                    profile.pickup = temp_user.pickup
-                    profile.save(update_fields=['pickup'])
-            else:
-                # Создаём нового User + UserProfile
-                user = User.objects.create_user(
-                    username=temp_user.login,
-                    is_active=False,
-                )
-                UserProfile.objects.create(
-                    user=user,
-                    phone=temp_user.phone or '',
-                    pickup=temp_user.pickup,
-                    is_registered=False,
-                )
-
-            # Переносим TrackCode
-            TrackCode.all_objects.filter(temp_owner=temp_user).update(
-                owner=user, temp_owner=None
-            )
-            # Переносим Receipt
-            Receipt.objects.filter(temp_owner=temp_user).update(
-                owner=user, temp_owner=None
-            )
-            # Переносим CustomerDiscount
-            CustomerDiscount.objects.filter(temp_user=temp_user).update(
-                user=user, temp_user=None
-            )
-            # Переносим StorageCell
-            StorageCell.objects.filter(temp_user=temp_user).update(
-                user=user, temp_user=None
-            )
-
-            temp_user.delete()
-            migrated += 1
-
-        except Exception as e:
-            errors.append(f"{temp_user.login}: {e}")
-
-    msg = f"Временных пользователей перенесено: {migrated}."
-    if skipped:
-        msg += f" Пропущено: {skipped}."
-    if errors:
-        msg += f" Ошибок: {len(errors)}."
-    messages.success(request, msg)
-    for err in errors[:10]:
-        messages.warning(request, err)
-
-    return redirect('service')

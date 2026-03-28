@@ -239,10 +239,8 @@
         }
 
         function renderClient(c) {
-            const iconClass = c.is_temp ? 'text-orange-500' : 'text-purple-500';
-            const badge = c.is_temp
-                ? '<span class="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">временный</span>'
-                : (c.full_name !== c.username ? `<span class="text-gray-400 text-xs">(${c.full_name})</span>` : '');
+            const iconClass = 'text-purple-500';
+            const badge = c.full_name !== c.username ? `<span class="text-gray-400 text-xs">(${c.full_name})</span>` : '';
             const weight = c.total_weight != null ? c.total_weight : 0;
 
             let html = `

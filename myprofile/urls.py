@@ -51,6 +51,8 @@ urlpatterns = [
     path('extradition/', extraditions.extradition_view, name='extradition'),
     path('extradition/search/', extraditions.search_package, name='extradition_search'),
     path('extradition/toggle-payment/', extraditions.toggle_payment, name='extradition_toggle_payment'),
+    path('extradition/sessions/', extraditions.get_sessions, name='extradition_sessions'),
+    path('extradition/close-session/', extraditions.close_session, name='extradition_close_session'),
     path('extradition-package/', extradition_Package.extradition_package_view, name='extradition_package'),
     path('quick-issue/', extradition_Package.quick_issue, name='quick_issue'),
     path('documents/', documents.print_documents_view, name='print_documents'),
@@ -60,6 +62,8 @@ urlpatterns = [
     path('goods-arrival/session/<int:session_id>/', goods_arrival.session_form, name='goods_arrival_session'),
     path('goods-arrival/session/<int:session_id>/save/', goods_arrival.session_save_items, name='goods_arrival_save'),
     path('goods-arrival/session/<int:session_id>/complete/', goods_arrival.complete_session, name='goods_arrival_complete'),
+    path('goods-arrival/session/<int:session_id>/pause/', goods_arrival.pause_session, name='goods_arrival_pause'),
+    path('goods-arrival/session/<int:session_id>/resume/', goods_arrival.resume_session, name='goods_arrival_resume'),
     path('delivery/', delivery.delivery_view, name='delivery'),
     path('delivery/take/', delivery.take_delivery, name='take_delivery'),
     path('delivery/complete/', delivery.complete_delivery, name='complete_delivery'),
@@ -104,8 +108,6 @@ urlpatterns = [
     path('service/normalize-receipts/', service.service_normalize_receipts, name='service_normalize_receipts'),
     path('service/mark-claimed/', service.service_mark_claimed, name='service_mark_claimed'),
     path('service/restore-archived-tracks/', service.service_restore_archived_tracks, name='service_restore_archived_tracks'),
-    path('service/migrate-temp-users/', service.service_migrate_temp_users, name='service_migrate_temp_users'),
-
 ]
 
 # Подключение медиа-файлов при DEBUG=True

@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     var config = document.getElementById('extradition-config');
     var searchUrl = config.dataset.searchUrl;
+    var sessionsUrl = config.dataset.sessionsUrl;
+    var closeSessionUrl = config.dataset.closeSessionUrl;
     var toggleUrl = config.dataset.toggleUrl;
 
     var barcodeInput = document.getElementById('barcode');
@@ -526,8 +528,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 messagesContainer.innerHTML = '';
                 currentBarcode = data.barcode;
                 currentReceipts = data.receipts || [];
-                infoOwner.textContent = data.owner;
+                infoOwner.textContent = data.owner_full_name
+                    ? data.owner_full_name + ' (' + data.owner + ')'
+                    : data.owner;
                 infoPickup.textContent = data.pickup_point;
+                // Refresh sessions list since a new session was just created server-side
+                setTimeout(loadSessions, 500);
 
                 // Ячейка хранения
                 var cellBlock = document.getElementById('cellNumberBlock');
@@ -714,6 +720,117 @@ document.addEventListener('DOMContentLoaded', function () {
             togglePayment(receiptId, badgeEl, paidAt);
         };
     }
+
+    // ==================== Sessions ====================
+
+    var sessionsList = document.getElementById('sessions-list');
+    var sessionsEmpty = document.getElementById('sessions-empty');
+    var sessionsCountBadge = document.getElementById('sessions-count-badge');
+    var refreshSessionsBtn = document.getElementById('refreshSessionsBtn');
+
+    function loadSessions() {
+        if (!sessionsUrl) return;
+        fetch(sessionsUrl)
+            .then(function (r) { return r.json(); })
+            .then(function (data) { renderSessions(data.sessions || []); })
+            .catch(function () { /* silently ignore */ });
+    }
+
+    function renderSessions(sessions) {
+        // Remove existing session cards (keep the empty placeholder)
+        var cards = sessionsList.querySelectorAll('.session-card');
+        cards.forEach(function (c) { c.remove(); });
+
+        if (sessions.length === 0) {
+            sessionsEmpty.classList.remove('hidden');
+            sessionsCountBadge.classList.add('hidden');
+            return;
+        }
+
+        sessionsEmpty.classList.add('hidden');
+        sessionsCountBadge.textContent = sessions.length;
+        sessionsCountBadge.classList.remove('hidden');
+
+        sessions.forEach(function (s) {
+            var card = document.createElement('div');
+            card.className = 'session-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden';
+            card.dataset.sessionId = s.session_id;
+            card.dataset.barcode = s.barcode;
+
+            var clientName = s.owner_full_name
+                ? s.owner_full_name + ' (' + s.owner + ')'
+                : s.owner;
+
+            card.innerHTML =
+                '<div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition session-card-header">' +
+                    '<div class="flex items-center gap-3">' +
+                        '<div class="w-9 h-9 rounded-full bg-primary bg-opacity-10 flex items-center justify-center flex-shrink-0">' +
+                            '<i class="ri-user-line text-primary"></i>' +
+                        '</div>' +
+                        '<div>' +
+                            '<p class="font-semibold text-sm text-gray-900">' + clientName + '</p>' +
+                            '<p class="text-xs text-gray-500 font-mono">' + s.barcode +
+                                ' &bull; ' + s.receipt_count + ' чек.' +
+                                ' &bull; открыта в ' + s.opened_at +
+                                (s.opened_by ? ' (' + s.opened_by + ')' : '') +
+                            '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex items-center gap-2">' +
+                        '<button type="button" class="session-load-btn bg-primary text-white text-xs px-3 py-1.5 rounded-lg hover:bg-red-600 transition flex items-center gap-1">' +
+                            '<i class="ri-arrow-up-line"></i> Открыть' +
+                        '</button>' +
+                        '<button type="button" class="session-close-btn text-gray-400 hover:text-red-500 transition p-1" title="Закрыть сессию">' +
+                            '<i class="ri-close-line text-lg"></i>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>';
+
+            // Load barcode into main form
+            card.querySelector('.session-load-btn').addEventListener('click', function (e) {
+                e.stopPropagation();
+                barcodeInput.value = s.barcode;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                performSearch();
+            });
+
+            // Also click on card header loads barcode
+            card.querySelector('.session-card-header').addEventListener('click', function (e) {
+                if (e.target.closest('.session-close-btn') || e.target.closest('.session-load-btn')) return;
+                barcodeInput.value = s.barcode;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                performSearch();
+            });
+
+            // Close session
+            card.querySelector('.session-close-btn').addEventListener('click', function (e) {
+                e.stopPropagation();
+                var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                fetch(closeSessionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: 'session_id=' + encodeURIComponent(s.session_id),
+                })
+                .then(function () { loadSessions(); })
+                .catch(function () { loadSessions(); });
+            });
+
+            sessionsList.appendChild(card);
+        });
+    }
+
+    if (refreshSessionsBtn) {
+        refreshSessionsBtn.addEventListener('click', loadSessions);
+    }
+
+    // Initial load + auto-refresh every 30s
+    loadSessions();
+    setInterval(loadSessions, 30000);
+
+    // ==================== END Sessions ====================
 
     function togglePayment(receiptId, badgeEl, paidAt) {
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;

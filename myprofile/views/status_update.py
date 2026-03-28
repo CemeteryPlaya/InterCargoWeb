@@ -195,8 +195,7 @@ def update_tracks(request):
 
 @login_required
 def search_users(request):
-    """AJAX: поиск пользователей по логину из User, UserProfile и TempUser."""
-    from register.models import TempUser
+    """AJAX: поиск пользователей по логину из User и UserProfile."""
     query = request.GET.get('q', '').strip()
     if not query or len(query) < 1:
         return JsonResponse({'results': []})
@@ -215,15 +214,6 @@ def search_users(request):
                 'type': 'user',
             })
 
-    for tu in TempUser.objects.filter(login__istartswith=query)[:10]:
-        if tu.login not in seen:
-            seen.add(tu.login)
-            results.append({
-                'login': tu.login,
-                'label': tu.login,
-                'type': 'temp',
-            })
-
     # Дополняем результатами icontains (если мало совпадений)
     if len(results) < 10:
         for u in User.objects.filter(username__icontains=query).exclude(username__istartswith=query)[:10]:
@@ -236,15 +226,6 @@ def search_users(request):
                     'type': 'user',
                 })
 
-        for tu in TempUser.objects.filter(login__icontains=query).exclude(login__istartswith=query)[:10]:
-            if tu.login not in seen:
-                seen.add(tu.login)
-                results.append({
-                    'login': tu.login,
-                    'label': tu.login,
-                    'type': 'temp',
-                })
-
     return JsonResponse({'results': results[:15]})
 
 
@@ -255,11 +236,9 @@ def get_track_owner(request):
         return JsonResponse({'error': 'No track code provided'}, status=400)
 
     try:
-        track = TrackCode.objects.select_related('owner', 'temp_owner').get(track_code=track_code)
+        track = TrackCode.objects.select_related('owner').get(track_code=track_code)
         if track.owner:
             return JsonResponse({'owner': track.owner.username})
-        elif track.temp_owner:
-            return JsonResponse({'owner': track.temp_owner.login})
         else:
             return JsonResponse({'owner': None})
     except TrackCode.DoesNotExist:

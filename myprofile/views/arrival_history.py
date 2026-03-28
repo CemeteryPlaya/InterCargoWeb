@@ -105,7 +105,7 @@ def arrival_history_day_detail(request, year, month, day):
             status__in=ARRIVAL_STATUSES,
             update_date=target_date,
         )
-        .select_related('owner', 'temp_owner', 'temp_owner__pickup')
+        .select_related('owner')
         .order_by('owner__username')
     )
 
@@ -114,31 +114,20 @@ def arrival_history_day_detail(request, year, month, day):
 
     for track in tracks:
         owner = track.owner
-        temp_owner = track.temp_owner if not owner else None
 
-        if not owner and not temp_owner:
+        if not owner:
             continue
 
-        if owner:
-            try:
-                pickup = owner.userprofile.pickup
-                pickup_name = str(pickup) if pickup else 'Без ПВЗ'
-                pickup_id = pickup.id if pickup else 0
-            except (UserProfile.DoesNotExist, AttributeError):
-                pickup_name = 'Без ПВЗ'
-                pickup_id = 0
-            client_key = f'user_{owner.id}'
-            client_username = owner.username
-            client_full_name = owner.get_full_name() or owner.username
-            is_temp = False
-        else:
-            pickup = temp_owner.pickup if temp_owner.pickup_id else None
+        try:
+            pickup = owner.userprofile.pickup
             pickup_name = str(pickup) if pickup else 'Без ПВЗ'
             pickup_id = pickup.id if pickup else 0
-            client_key = f'temp_{temp_owner.id}'
-            client_username = temp_owner.login
-            client_full_name = temp_owner.login
-            is_temp = True
+        except (UserProfile.DoesNotExist, AttributeError):
+            pickup_name = 'Без ПВЗ'
+            pickup_id = 0
+        client_key = f'user_{owner.id}'
+        client_username = owner.username
+        client_full_name = owner.get_full_name() or owner.username
 
         p_key = f'{pickup_id}_{pickup_name}'
         if p_key not in pickups:
@@ -152,7 +141,6 @@ def arrival_history_day_detail(request, year, month, day):
             pickups[p_key]['clients'][client_key] = {
                 'username': client_username,
                 'full_name': client_full_name,
-                'is_temp': is_temp,
                 'tracks': [],
                 'total_weight': Decimal('0'),
             }
@@ -238,7 +226,6 @@ def arrival_history_day_detail(request, year, month, day):
                 'key': c_key,
                 'username': c_data['username'],
                 'full_name': c_data['full_name'],
-                'is_temp': c_data['is_temp'],
                 'tracks': tracks_list,
                 'total_weight': c_data['total_weight'],
                 'receipts': c_data['receipts'],

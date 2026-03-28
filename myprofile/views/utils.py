@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib import messages as django_messages
 from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell, Notification
-from register.models import UserProfile, TempUser
+from register.models import UserProfile
 
 def cleanup_expired_temp_discounts():
     """Удаляет просроченные разовые скидки (созданные до сегодня)."""
@@ -28,20 +28,6 @@ def get_user_discount(user):
     const = discounts.filter(is_temporary=False).first()
     return Decimal(const.amount_per_kg) if const else Decimal("0")
 
-
-def get_temp_user_discount(temp_user):
-    """Возвращает активную скидку (₸/кг) для временного пользователя."""
-    cleanup_expired_temp_discounts()
-    today = timezone.localdate()
-    discounts = CustomerDiscount.objects.filter(temp_user=temp_user, active=True).order_by('-created_at')
-
-    # приоритет — разовая скидка (только за сегодня), потом постоянная
-    temp = discounts.filter(is_temporary=True, created_at__date=today).first()
-    if temp:
-        return Decimal(temp.amount_per_kg)
-
-    const = discounts.filter(is_temporary=False).first()
-    return Decimal(const.amount_per_kg) if const else Decimal("0")
 
 
 def get_global_price_per_kg():
@@ -136,60 +122,6 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     return last_receipt
 
 
-def create_receipts_for_temp_user(temp_user, statuses=('shipping_pp', 'ready')):
-    """
-    Создаёт чеки для треков временного пользователя, которые ещё не привязаны к ReceiptItem.
-    Группирует треки по delivered_date — один чек на каждую дату прихода.
-    Дата чека (created_at) = delivered_date трек-кодов.
-    Возвращает последний созданный чек или None.
-    """
-    from collections import defaultdict
-
-    tracks = TrackCode.objects.filter(temp_owner=temp_user, status__in=statuses)
-    already = ReceiptItem.objects.filter(track_code__in=tracks).values_list('track_code_id', flat=True)
-    new_tracks = list(tracks.exclude(id__in=already))
-    if not new_tracks:
-        return None
-
-    RATE = get_global_price_per_kg()
-    discount = get_temp_user_discount(temp_user)
-    effective_rate = RATE - discount
-
-    pickup_display = ''
-    payment_link = None
-    first_with_override = next((t for t in new_tracks if t.delivery_pickup_id), None)
-    if first_with_override and first_with_override.delivery_pickup:
-        pickup_display = str(first_with_override.delivery_pickup)
-        payment_link = first_with_override.delivery_pickup.payment_link
-    elif temp_user.pickup:
-        pickup_display = str(temp_user.pickup)
-        payment_link = temp_user.pickup.payment_link
-
-    # Группируем по delivered_date
-    by_date = defaultdict(list)
-    for track in new_tracks:
-        by_date[track.delivered_date].append(track)
-
-    last_receipt = None
-    for d_date, date_tracks in by_date.items():
-        receipt = Receipt.objects.create(
-            temp_owner=temp_user, total_weight=0, total_price=0,
-            price_per_kg=effective_rate,
-            created_at=d_date or timezone.localdate(),
-            pickup_point=pickup_display, payment_link=payment_link
-        )
-        for track in date_tracks:
-            w = track.weight or Decimal("0")
-            ReceiptItem.objects.create(
-                receipt=receipt, track_code=track,
-                item_rate=effective_rate,
-                item_price=(w * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
-            )
-        _recalc_receipt(receipt, effective_rate)
-        last_receipt = receipt
-
-    return last_receipt
-
 
 def _next_cell_number(pickup_point):
     """Возвращает следующий целый номер ячейки для ПВЗ."""
@@ -214,13 +146,52 @@ def get_or_create_storage_cell(pickup_point, user):
     return StorageCell.objects.create(pickup_point=pickup_point, cell_number=number, user=user)
 
 
-def get_or_create_storage_cell_for_temp_user(pickup_point, temp_user):
-    """Возвращает/создаёт ячейку для временного клиента на данном ПВЗ."""
-    cell = StorageCell.objects.filter(pickup_point=pickup_point, temp_user=temp_user).first()
-    if cell:
-        return cell
-    number = _next_cell_number(pickup_point)
-    return StorageCell.objects.create(pickup_point=pickup_point, cell_number=number, temp_user=temp_user)
+def bulk_get_or_create_storage_cells(pickup_point, users):
+    """
+    Пакетно создаёт ячейки для пользователей на ПВЗ, у которых их ещё нет.
+    users — итерируемый набор объектов User.
+    Возвращает словарь {user_id: cell}.
+    """
+    users = list(users)
+    if not users:
+        return {}
+
+    existing = StorageCell.objects.filter(
+        pickup_point=pickup_point, user__in=users
+    ).select_related('user')
+    existing_by_user = {cell.user_id: cell for cell in existing}
+
+    new_users = [u for u in users if u.id not in existing_by_user]
+    if new_users:
+        # Определяем следующий номер один раз, чтобы избежать N запросов
+        all_cells = StorageCell.objects.filter(pickup_point=pickup_point).values_list('cell_number', flat=True)
+        max_int = 0
+        for cn in all_cells:
+            try:
+                val = int(cn.split('.')[0])
+                if val > max_int:
+                    max_int = val
+            except (ValueError, AttributeError):
+                pass
+
+        new_cells = []
+        for idx, user in enumerate(new_users, start=1):
+            new_cells.append(StorageCell(
+                pickup_point=pickup_point,
+                cell_number=str(max_int + idx),
+                user=user,
+            ))
+
+        created = StorageCell.objects.bulk_create(new_cells, ignore_conflicts=True)
+        # bulk_create may not return ids on all backends; re-fetch created cells
+        re_fetched = StorageCell.objects.filter(
+            pickup_point=pickup_point, user__in=new_users
+        ).select_related('user')
+        for cell in re_fetched:
+            existing_by_user[cell.user_id] = cell
+
+    return existing_by_user
+
 
 
 def is_staff(user):
@@ -240,7 +211,7 @@ def resolve_owner(username):
     """
     Ищет пользователя по логину. Возвращает (user, None).
     Если пользователь не существует — создаёт неактивного User + UserProfile(is_registered=False).
-    Для обратной совместимости второй элемент всегда None (ранее возвращал TempUser).
+    Второй элемент всегда None (для обратной совместимости).
     """
     try:
         user = User.objects.get(username=username)

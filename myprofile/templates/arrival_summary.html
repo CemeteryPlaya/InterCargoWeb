@@ -86,7 +86,7 @@
             </div>
             {% endif %}
 
-            {% if not pickups and not home_clients and not temp_clients %}
+            {% if not pickups and not home_clients and not no_pickup_clients %}
             <div class="text-center py-12 text-gray-500">
                 <i class="ri-inbox-line text-4xl mb-2"></i>
                 <p>Нет посылок со статусом "Доставлен на сортировочный склад" за эту дату</p>
@@ -114,7 +114,7 @@
                         </thead>
                         <tbody>
                             {% for uid, client in home_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0" data-user-id="{% if client.is_temp %}{% else %}{{ uid }}{% endif %}" data-temp-user-id="{% if client.is_temp %}{{ client.temp_user_id }}{% endif %}" data-weight="{{ client.total_weight }}">
+                            <tr class="border-b border-gray-100 last:border-0" data-user-id="{{ uid }}" data-weight="{{ client.total_weight }}">
                                 <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                     <i class="ri-user-line text-gray-400 mr-1"></i>
                                     {{ client.full_name }}
@@ -132,11 +132,7 @@
                                 <td class="py-3 px-4 text-center">
                                     <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                         {% csrf_token %}
-                                        {% if client.is_temp %}
-                                        <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
-                                        {% else %}
                                         <input type="hidden" name="user_id" value="{{ uid }}">
-                                        {% endif %}
                                         <input type="hidden" name="date" value="{{ selected_date }}">
                                         <input type="hidden" name="action" value="unset">
                                         <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
@@ -152,12 +148,12 @@
             </div>
             {% endif %}
 
-            <!-- Временные пользователи (без пункта) -->
-            {% if temp_clients %}
+            <!-- Клиенты без пункта -->
+            {% if no_pickup_clients %}
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-semibold text-purple-700">
-                        <i class="ri-user-unfollow-line"></i> Без пункта (незарегистрированные)
+                        <i class="ri-user-unfollow-line"></i> Без пункта
                     </h3>
                     <div class="flex items-center gap-2">
                         <button type="button" id="copyLoginsBtn" class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition">
@@ -189,6 +185,7 @@
                             <tr class="bg-purple-50 text-gray-600 border-b border-purple-200">
                                 <th class="py-3 px-4 text-left font-medium bulk-col hidden w-8"></th>
                                 <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Логин <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-left font-medium">Телефон</th>
                                 <th class="py-3 px-4 text-left font-medium">Назначить ПВЗ</th>
                                 <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                                 <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
@@ -197,19 +194,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for tid, client in temp_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ tid }}" data-login="{{ client.login }}" data-temp-user-id="{{ tid }}" data-weight="{{ client.total_weight }}">
+                            {% for key, client in no_pickup_clients.items %}
+                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ key }}" data-login="{{ client.login }}" data-user-id="{{ client.user_id }}" data-weight="{{ client.total_weight }}">
                                 <td class="py-3 px-4 bulk-col hidden">
-                                    <input type="checkbox" class="bulk-check rounded border-gray-300 text-purple-600 focus:ring-purple-400" value="{{ tid }}">
+                                    <input type="checkbox" class="bulk-check rounded border-gray-300 text-purple-600 focus:ring-purple-400" value="{{ key }}" data-user-id="{{ client.user_id }}">
                                 </td>
                                 <td class="py-3 px-4 text-gray-800" data-val="{{ client.login }}">
                                     <i class="ri-user-line text-purple-400 mr-1"></i>
                                     {{ client.login }}
                                 </td>
                                 <td class="py-3 px-4">
+                                    {% if client.phone %}
+                                    <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline">{{ client.phone }}</a>
+                                    {% else %}-{% endif %}
+                                </td>
+                                <td class="py-3 px-4">
                                     <form method="post" action="{% url 'assign_temp_pickup' %}" class="flex items-center gap-2">
                                         {% csrf_token %}
-                                        <input type="hidden" name="temp_user_id" value="{{ tid }}">
+                                        <input type="hidden" name="user_id" value="{{ client.user_id }}">
                                         <input type="hidden" name="date" value="{{ selected_date }}">
                                         <select name="pickup_id" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-purple-400">
                                             {% for pp in all_pickups %}
@@ -289,7 +291,7 @@
                             </thead>
                             <tbody>
                                 {% for uid, client in pp_data.clients.items %}
-                                <tr class="border-b border-gray-100 last:border-0" data-user-id="{% if client.is_temp %}{% else %}{{ uid }}{% endif %}" data-temp-user-id="{% if client.is_temp %}{{ client.temp_user_id }}{% endif %}" data-weight="{{ client.total_weight }}">
+                                <tr class="border-b border-gray-100 last:border-0" data-user-id="{{ uid }}" data-weight="{{ client.total_weight }}">
                                     <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                         <i class="ri-user-line text-gray-400 mr-1"></i>
                                         {{ client.full_name }}
@@ -309,11 +311,7 @@
                                         {% if client.is_override %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
-                                            {% if client.is_temp %}
-                                            <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
-                                            {% else %}
                                             <input type="hidden" name="user_id" value="{{ uid }}">
-                                            {% endif %}
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="unset">
                                             <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
@@ -323,19 +321,14 @@
                                         {% else %}
                                         {% if client.total_weight >= discount_threshold %}
                                         <button type="button" class="discount-btn text-xs bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200 transition"
-                                            data-user-id="{% if client.is_temp %}{% else %}{{ uid }}{% endif %}"
-                                            data-temp-user-id="{% if client.is_temp %}{{ client.temp_user_id }}{% endif %}"
+                                            data-user-id="{{ uid }}"
                                             data-client-name="{{ client.full_name }}">
                                             <i class="ri-percent-line"></i> Ввести скидку
                                         </button>
                                         {% endif %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
-                                            {% if client.is_temp %}
-                                            <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
-                                            {% else %}
                                             <input type="hidden" name="user_id" value="{{ uid }}">
-                                            {% endif %}
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="home">
                                             <button type="submit" class="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded hover:bg-orange-200 transition">
@@ -345,11 +338,7 @@
                                         {% if warehouse_pp_id %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
                                             {% csrf_token %}
-                                            {% if client.is_temp %}
-                                            <input type="hidden" name="temp_user_id" value="{{ client.temp_user_id }}">
-                                            {% else %}
                                             <input type="hidden" name="user_id" value="{{ uid }}">
-                                            {% endif %}
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="warehouse">
                                             <input type="hidden" name="pickup_id" value="{{ warehouse_pp_id }}">
@@ -381,7 +370,6 @@
                         {% csrf_token %}
                         <input type="hidden" name="date" value="{{ selected_date }}">
                         <input type="hidden" name="user_id" id="discountUserId" value="">
-                        <input type="hidden" name="temp_user_id" id="discountTempUserId" value="">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Скидка (₸/кг)</label>
                         <input type="number" name="amount_per_kg" step="0.01" min="1" required
                             class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -538,8 +526,8 @@
                 checked.forEach(function(cb) {
                     var inp = document.createElement('input');
                     inp.type = 'hidden';
-                    inp.name = 'temp_user_id';
-                    inp.value = cb.value;
+                    inp.name = 'user_id';
+                    inp.value = cb.dataset.userId;
                     bulkHiddenInputs.appendChild(inp);
                 });
                 bulkPickupModal.classList.remove('hidden');
@@ -573,7 +561,6 @@
                 var btn = e.target.closest('.discount-btn');
                 if (!btn) return;
                 document.getElementById('discountUserId').value = btn.dataset.userId || '';
-                document.getElementById('discountTempUserId').value = btn.dataset.tempUserId || '';
                 document.getElementById('discountClientName').textContent = btn.dataset.clientName || '';
                 discountModal.querySelector('input[name="amount_per_kg"]').value = '';
                 discountModal.classList.remove('hidden');
@@ -613,14 +600,10 @@
                     }
                     // Обновляем цену и стоимость в строке клиента
                     var userId = formData.get('user_id');
-                    var tempUserId = formData.get('temp_user_id');
                     var newRate = data.effective_rate;
-                    var rows = document.querySelectorAll('tr[data-user-id], tr[data-temp-user-id]');
+                    var rows = document.querySelectorAll('tr[data-user-id]');
                     rows.forEach(function(row) {
-                        var match = false;
-                        if (userId && row.dataset.userId === userId) match = true;
-                        if (tempUserId && row.dataset.tempUserId === tempUserId) match = true;
-                        if (!match) return;
+                        if (!userId || row.dataset.userId !== userId) return;
                         var rateCell = row.querySelector('.client-rate');
                         var priceCell = row.querySelector('.client-price');
                         var weight = parseFloat(row.dataset.weight) || 0;

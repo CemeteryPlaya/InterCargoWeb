@@ -11,9 +11,7 @@ from django.utils import timezone
 import json
 import logging
 from myprofile.models import TrackCode, ReceiptItem, StorageCell, Receipt
-# RECEIPTS COMMENTED OUT: auto-creation disabled
-# from myprofile.views.utils import create_receipts_for_user, create_receipts_for_temp_user
-from myprofile.views.utils import get_or_create_storage_cell, get_or_create_storage_cell_for_temp_user
+from myprofile.views.utils import bulk_get_or_create_storage_cells
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
@@ -55,7 +53,6 @@ def pp_acceptance_view(request):
         status='ready', is_accepted_pp=False,
     ).select_related(
         'owner', 'owner__userprofile__pickup',
-        'temp_owner', 'temp_owner__pickup',
         'delivery_pickup',
     )
 
@@ -76,8 +73,6 @@ def pp_acceptance_view(request):
         groups[key]['track_count'] += 1
         if track.owner_id:
             groups[key]['client_ids'].add(f'user_{track.owner_id}')
-        elif track.temp_owner_id:
-            groups[key]['client_ids'].add(f'temp_{track.temp_owner_id}')
 
     for track in tracks_qs:
         if track.delivery_pickup_id:
@@ -87,8 +82,6 @@ def pp_acceptance_view(request):
                 _add_track(track.owner.userprofile.pickup, track)
             except (UserProfile.DoesNotExist, AttributeError):
                 pass
-        elif track.temp_owner:
-            _add_track(track.temp_owner.pickup, track)
 
     # Фильтр по ПВЗ работника
     if not is_staff and pickup:
@@ -143,7 +136,6 @@ def get_acceptance_receipts(request):
 
     tracks_qs = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
         is_accepted_pp=False,
@@ -151,7 +143,7 @@ def get_acceptance_receipts(request):
     if filter_date is not None:
         tracks_qs = tracks_qs.filter(delivered_date=filter_date)
 
-    tracks = list(tracks_qs.select_related('owner', 'temp_owner'))
+    tracks = list(tracks_qs.select_related('owner'))
 
     # RECEIPTS COMMENTED OUT: чеки теперь создаются только через кнопку в сводке прихода
 
@@ -160,13 +152,12 @@ def get_acceptance_receipts(request):
     items = (
         ReceiptItem.objects
         .filter(track_code_id__in=track_ids)
-        .select_related('receipt', 'receipt__owner', 'receipt__temp_owner', 'track_code')
+        .select_related('receipt', 'receipt__owner', 'track_code')
     )
 
     # Получаем ячейки хранения для клиентов на этом ПВЗ
-    cells = StorageCell.objects.filter(pickup_point=pickup).select_related('user', 'temp_user')
+    cells = StorageCell.objects.filter(pickup_point=pickup).select_related('user')
     cells_by_user = {cell.user_id: cell.cell_number for cell in cells if cell.user_id}
-    cells_by_temp = {cell.temp_user_id: cell.cell_number for cell in cells if cell.temp_user_id}
 
     clients_map = {}
     for item in items:
@@ -175,10 +166,6 @@ def get_acceptance_receipts(request):
             username = receipt.owner.username
             full_name = receipt.owner.get_full_name() or username
             cell_number = cells_by_user.get(receipt.owner_id)
-        elif receipt.temp_owner:
-            username = receipt.temp_owner.login
-            full_name = receipt.temp_owner.login
-            cell_number = cells_by_temp.get(receipt.temp_owner_id)
         else:
             continue
 
@@ -210,10 +197,6 @@ def get_acceptance_receipts(request):
             username = track.owner.username
             full_name = track.owner.get_full_name() or username
             cell_number = cells_by_user.get(track.owner_id)
-        elif track.temp_owner_id:
-            username = track.temp_owner.login
-            full_name = track.temp_owner.login
-            cell_number = cells_by_temp.get(track.temp_owner_id)
         else:
             continue
         if username not in clients_map:
@@ -282,60 +265,64 @@ def accept_delivery(request):
         except ValueError:
             pass
 
-    all_tracks = TrackCode.objects.filter(
+    all_tracks_qs = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
         is_accepted_pp=False,
-    )
+    ).select_related('owner', 'owner__userprofile__pickup')
     if filter_date is not None:
-        all_tracks = all_tracks.filter(delivered_date=filter_date)
+        all_tracks_qs = all_tracks_qs.filter(delivered_date=filter_date)
 
     if scanned_receipts:
         scanned_track_ids = set(
             ReceiptItem.objects.filter(
                 receipt__receipt_number__in=scanned_receipts,
-                track_code__in=all_tracks,
+                track_code__in=all_tracks_qs,
             ).values_list('track_code_id', flat=True)
         )
-        tracks = list(all_tracks.filter(id__in=scanned_track_ids))
+        tracks = list(all_tracks_qs.filter(id__in=scanned_track_ids))
     else:
-        tracks = list(all_tracks)
+        tracks = list(all_tracks_qs)
 
-    # Собираем владельцев для создания ячеек
-    owners_seen = set()
+    if not tracks:
+        messages.info(request, "Нет посылок для сортировки.")
+        return redirect('pp_acceptance')
+
+    # Устанавливаем поля принятия в памяти, затем один bulk_update
     now = timezone.now()
     for track in tracks:
         track.is_accepted_pp = True
         track.accepted_pp_at = now
-        track.accepted_pp_by = request.user
-        track.save(skip_full_clean=True)
-        if track.owner and track.owner_id not in owners_seen:
-            owners_seen.add(track.owner_id)
+        track.accepted_pp_by_id = request.user.id
 
-    # Создание/получение ячеек хранения
-    temp_owners_seen = set()
+    TrackCode.objects.bulk_update(
+        tracks,
+        ['is_accepted_pp', 'accepted_pp_at', 'accepted_pp_by_id'],
+    )
+
+    # Создаём ячейки хранения пакетно — группируем владельцев по ПВЗ
+    from collections import defaultdict
+    owners_by_pickup = defaultdict(list)
+    seen_user_pickup = set()
     for track in tracks:
-        if track.owner:
-            try:
-                user_pickup = track.owner.userprofile.pickup
-                if user_pickup:
-                    get_or_create_storage_cell(user_pickup, track.owner)
-            except UserProfile.DoesNotExist:
-                pass
-        elif track.temp_owner and track.temp_owner_id not in temp_owners_seen:
-            temp_owners_seen.add(track.temp_owner_id)
-            temp_pickup = track.temp_owner.pickup
-            if temp_pickup:
-                get_or_create_storage_cell_for_temp_user(temp_pickup, track.temp_owner)
+        if not track.owner:
+            continue
+        try:
+            user_pickup = track.owner.userprofile.pickup
+        except (UserProfile.DoesNotExist, AttributeError):
+            user_pickup = None
+        if user_pickup:
+            key = (user_pickup.id, track.owner_id)
+            if key not in seen_user_pickup:
+                seen_user_pickup.add(key)
+                owners_by_pickup[user_pickup].append(track.owner)
+
+    for user_pickup, owners in owners_by_pickup.items():
+        bulk_get_or_create_storage_cells(user_pickup, owners)
 
     updated = len(tracks)
-    if updated:
-        messages.success(request, f"Отсортировано на ПВЗ: {updated} посылок")
-    else:
-        messages.info(request, "Нет посылок для сортировки.")
-
+    messages.success(request, f"Отсортировано на ПВЗ: {updated} посылок")
     return redirect('pp_acceptance')
 
 
@@ -372,7 +359,6 @@ def finish_acceptance_session(request):
 
     unsorted_tracks = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(temp_owner__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='ready',
         is_accepted_pp=False,
@@ -429,7 +415,7 @@ def attention_required_view(request):
     # Чеки, требующие внимания
     receipts = Receipt.objects.filter(
         needs_attention=True,
-    ).select_related('owner', 'temp_owner', 'attention_added_by').prefetch_related('items__track_code')
+    ).select_related('owner', 'attention_added_by').prefetch_related('items__track_code')
 
     # Группируем по ПВЗ → причина → клиент
     pickups = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {
@@ -452,12 +438,6 @@ def attention_required_view(request):
             client_login = receipt.owner.username
             owner_type = 'user'
             owner_id = receipt.owner.id
-        elif receipt.temp_owner:
-            client_key = f'temp_{receipt.temp_owner.id}'
-            client_name = receipt.temp_owner.login
-            client_login = receipt.temp_owner.login
-            owner_type = 'temp'
-            owner_id = receipt.temp_owner.id
         else:
             continue
 
@@ -523,8 +503,6 @@ def resolve_attention(request):
 
     if owner_type == 'user':
         qs = qs.filter(owner_id=owner_id)
-    elif owner_type == 'temp':
-        qs = qs.filter(temp_owner_id=owner_id)
     else:
         messages.error(request, "Неверный тип клиента.")
         return redirect('attention_required')
