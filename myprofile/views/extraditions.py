@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -9,6 +11,8 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Notification, Receipt, StorageCell, TrackCode
 from register.models import UserProfile, PickupPoint
+
+logger = logging.getLogger(__name__)
 
 
 def _can_issue(user):
@@ -125,12 +129,15 @@ def extradition_view(request):
     except (UserProfile.DoesNotExist, AttributeError):
         worker_pickup = None
 
-    sessions_qs = ExtraditionSession.objects.select_related(
-        'package__user', 'opened_by', 'pickup_point'
-    ).order_by('-opened_at')
-    if worker_pickup:
-        sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
-    context['sessions'] = list(sessions_qs)
+    try:
+        sessions_qs = ExtraditionSession.objects.select_related(
+            'package__user', 'opened_by', 'pickup_point'
+        ).order_by('-opened_at')
+        if worker_pickup:
+            sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
+        context['sessions'] = list(sessions_qs)
+    except Exception:
+        context['sessions'] = []
 
     return render(request, "extraditions.html", context)
 
@@ -217,13 +224,16 @@ def search_package(request):
                 session_pickup = package.user.userprofile.pickup
             except (UserProfile.DoesNotExist, AttributeError):
                 session_pickup = None
-            ExtraditionSession.objects.update_or_create(
-                package=package,
-                defaults={
-                    'pickup_point': session_pickup,
-                    'opened_by': request.user,
-                },
-            )
+            try:
+                ExtraditionSession.objects.update_or_create(
+                    package=package,
+                    defaults={
+                        'pickup_point': session_pickup,
+                        'opened_by': request.user,
+                    },
+                )
+            except Exception as e:
+                logger.warning("Не удалось создать сессию выдачи: %s", e)
 
         return JsonResponse({
             'found': True,
@@ -253,25 +263,29 @@ def get_sessions(request):
     except (UserProfile.DoesNotExist, AttributeError):
         worker_pickup = None
 
-    sessions_qs = ExtraditionSession.objects.select_related(
-        'package__user', 'opened_by'
-    ).order_by('-opened_at')
-    if worker_pickup:
-        sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
+    try:
+        sessions_qs = ExtraditionSession.objects.select_related(
+            'package__user', 'opened_by'
+        ).order_by('-opened_at')
+        if worker_pickup:
+            sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
 
-    result = []
-    for s in sessions_qs:
-        pkg = s.package
-        receipt_count = pkg.receipts.count()
-        result.append({
-            'session_id': s.id,
-            'barcode': pkg.barcode,
-            'owner': pkg.user.username,
-            'owner_full_name': pkg.user.get_full_name() or '',
-            'receipt_count': receipt_count,
-            'opened_by': s.opened_by.username if s.opened_by else '',
-            'opened_at': s.opened_at.strftime('%H:%M'),
-        })
+        result = []
+        for s in sessions_qs:
+            pkg = s.package
+            receipt_count = pkg.receipts.count()
+            result.append({
+                'session_id': s.id,
+                'barcode': pkg.barcode,
+                'owner': pkg.user.username,
+                'owner_full_name': pkg.user.get_full_name() or '',
+                'receipt_count': receipt_count,
+                'opened_by': s.opened_by.username if s.opened_by else '',
+                'opened_at': s.opened_at.strftime('%H:%M'),
+            })
+    except Exception as e:
+        logger.warning("Ошибка загрузки сессий: %s", e)
+        result = []
 
     return JsonResponse({'sessions': result})
 
@@ -287,7 +301,10 @@ def close_session(request):
     if not session_id:
         return JsonResponse({'error': 'Не указан ID сессии'}, status=400)
 
-    ExtraditionSession.objects.filter(id=session_id).delete()
+    try:
+        ExtraditionSession.objects.filter(id=session_id).delete()
+    except Exception as e:
+        logger.warning("Ошибка закрытия сессии %s: %s", session_id, e)
     return JsonResponse({'success': True})
 
 

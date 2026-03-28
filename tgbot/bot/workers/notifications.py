@@ -6,12 +6,15 @@ from collections import defaultdict
 from decimal import Decimal
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter, TelegramBadRequest
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 from asgiref.sync import sync_to_async
 from django.conf import settings as django_settings
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+MAX_RETRY_COUNT = 5  # После этого числа попыток уведомление помечается как failed
 
 
 async def notification_worker(bot: Bot, interval: int = 10):
@@ -61,8 +64,23 @@ async def send_pending_notifications(bot: Bot) -> int:
                 f"to chat {chat_id}"
             )
 
+        except TelegramForbiddenError:
+            logger.warning(f"User {user_id} blocked the bot, marking notifications as sent")
+            await _mark_permanently_failed(group_data['ids'], "Пользователь заблокировал бота")
+            await _deactivate_profile(user_id)
+
+        except TelegramRetryAfter as e:
+            logger.warning(f"Rate limited, waiting {e.retry_after}s")
+            await asyncio.sleep(e.retry_after)
+            await _increment_retry(group_data['ids'], str(e))
+
+        except TelegramBadRequest as e:
+            logger.error(f"Bad request for user {user_id}: {e}")
+            await _mark_permanently_failed(group_data['ids'], str(e))
+
         except Exception as e:
             logger.error(f"Failed to send delivery notification to user {user_id}: {e}")
+            await _increment_retry(group_data['ids'], str(e))
 
     # 2) Уведомления об изменении статуса (shipped_cn, delivered, shipping_pp и т.д.)
     for notif_data in status_notifications:
@@ -82,8 +100,25 @@ async def send_pending_notifications(bot: Bot) -> int:
             await _mark_sent_bulk([notif_data['id']])
             sent_count += 1
 
+        except TelegramForbiddenError:
+            logger.warning(
+                f"User blocked bot, marking notification {notif_data['id']} as failed"
+            )
+            await _mark_permanently_failed([notif_data['id']], "Пользователь заблокировал бота")
+            await _deactivate_profile_by_chat(notif_data['chat_id'])
+
+        except TelegramRetryAfter as e:
+            logger.warning(f"Rate limited, waiting {e.retry_after}s")
+            await asyncio.sleep(e.retry_after)
+            await _increment_retry([notif_data['id']], str(e))
+
+        except TelegramBadRequest as e:
+            logger.error(f"Bad request for notification {notif_data['id']}: {e}")
+            await _mark_permanently_failed([notif_data['id']], str(e))
+
         except Exception as e:
             logger.error(f"Failed to send status notification {notif_data['id']}: {e}")
+            await _increment_retry([notif_data['id']], str(e))
 
     # 3) Уведомления, которые не нужно отправлять (настройки пользователя)
     if skip_ids:
@@ -103,18 +138,22 @@ def _get_and_group_pending():
 
     pending = list(
         TelegramNotification.objects
-        .filter(is_sent=False)
+        .filter(is_sent=False, retry_count__lt=MAX_RETRY_COUNT)
         .order_by('created_at')[:100]
     )
 
     profiles_cache = {}
     settings_cache = {}
 
-    def get_chat_id(user_id):
+    def get_profile(user_id):
         if user_id not in profiles_cache:
-            tp = TelegramProfile.objects.filter(user_id=user_id).first()
-            profiles_cache[user_id] = tp.telegram_chat_id if tp else None
+            tp = TelegramProfile.objects.filter(user_id=user_id, is_active=True).first()
+            profiles_cache[user_id] = tp
         return profiles_cache[user_id]
+
+    def get_chat_id(user_id):
+        tp = get_profile(user_id)
+        return tp.telegram_chat_id if tp else None
 
     def get_user_settings(user_id):
         if user_id not in settings_cache:
@@ -281,3 +320,47 @@ def _mark_sent_bulk(notification_ids):
     TelegramNotification.objects.filter(id__in=notification_ids).update(
         is_sent=True, sent_at=timezone.now(),
     )
+
+
+@sync_to_async
+def _increment_retry(notification_ids, error_msg):
+    """Увеличивает счётчик повторов. Если превышен лимит — помечает как отправленное (failed)."""
+    from tgbot.models import TelegramNotification
+    from django.db.models import F
+
+    TelegramNotification.objects.filter(id__in=notification_ids).update(
+        retry_count=F('retry_count') + 1,
+        last_error=error_msg[:500],
+    )
+    # Помечаем уведомления с исчерпанными попытками как отправленные (чтобы не блокировали очередь)
+    TelegramNotification.objects.filter(
+        id__in=notification_ids, retry_count__gte=MAX_RETRY_COUNT,
+    ).update(is_sent=True, sent_at=timezone.now(), last_error=f"FAILED: {error_msg[:450]}")
+
+
+@sync_to_async
+def _mark_permanently_failed(notification_ids, error_msg):
+    """Помечает уведомления как окончательно неудавшиеся (бот заблокирован и т.п.)."""
+    from tgbot.models import TelegramNotification
+    TelegramNotification.objects.filter(id__in=notification_ids).update(
+        is_sent=True,
+        sent_at=timezone.now(),
+        retry_count=MAX_RETRY_COUNT,
+        last_error=f"PERMANENT: {error_msg[:450]}",
+    )
+
+
+@sync_to_async
+def _deactivate_profile(user_id):
+    """Деактивирует Telegram-профиль пользователя (бот заблокирован)."""
+    from tgbot.models import TelegramProfile
+    TelegramProfile.objects.filter(user_id=user_id).update(is_active=False)
+    logger.info(f"Deactivated Telegram profile for user {user_id}")
+
+
+@sync_to_async
+def _deactivate_profile_by_chat(chat_id):
+    """Деактивирует Telegram-профиль по chat_id."""
+    from tgbot.models import TelegramProfile
+    TelegramProfile.objects.filter(telegram_chat_id=chat_id).update(is_active=False)
+    logger.info(f"Deactivated Telegram profile for chat {chat_id}")
