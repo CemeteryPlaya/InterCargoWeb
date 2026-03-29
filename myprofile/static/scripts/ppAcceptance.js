@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var errorEl = document.getElementById('qr-error');
 
     var scannerInput = document.getElementById('qr-scanner-input');
+    var selectAllBtn = document.getElementById('qr-select-all-btn');
 
     // State
     var currentPickupId = null;
@@ -338,6 +339,24 @@ document.addEventListener('DOMContentLoaded', function () {
         errorEl.textContent = msg;
         errorEl.classList.remove('hidden');
         setTimeout(function () { errorEl.classList.add('hidden'); }, 3000);
+    }
+
+    // Select all receipts
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function () {
+            var unscanned = allExpectedReceipts.filter(function (r) {
+                return scannedReceipts.indexOf(r) === -1;
+            });
+            if (unscanned.length === 0) return;
+            unscanned.forEach(function (code) {
+                scannedReceipts.push(code);
+                markReceiptScanned(code);
+            });
+            updateProgress();
+            if (scannedReceipts.length >= allExpectedReceipts.length) {
+                onAllScanned();
+            }
+        });
     }
 
     // Modal actions

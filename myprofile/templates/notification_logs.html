@@ -46,7 +46,7 @@
             </h1>
 
             <!-- Вкладки -->
-            <div class="flex gap-1 mb-6 bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-fit">
+            <div class="flex gap-1 mb-6 bg-white border border-gray-200 rounded-xl p-1 shadow-sm overflow-x-auto">
                 <a href="?tab=site{% if search %}&q={{ search }}{% endif %}"
                     class="px-5 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if tab == 'site' %}bg-gray-800 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -73,17 +73,17 @@
             {% if tab == 'site' %}
 
             <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-gray-800">{{ site_total }}</div>
-                    <div class="text-sm text-gray-500">Всего</div>
+                <div class="bg-white border rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-gray-800">{{ site_total }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Всего</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-green-600">{{ site_read }}</div>
-                    <div class="text-sm text-gray-500">Прочитано</div>
+                <div class="bg-white border border-green-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-green-600">{{ site_read }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Прочитано</div>
                 </div>
-                <div class="bg-white border border-yellow-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-yellow-600">{{ site_unread }}</div>
-                    <div class="text-sm text-gray-500">Не прочитано</div>
+                <div class="bg-white border border-yellow-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-yellow-600">{{ site_unread }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Не прочитано</div>
                 </div>
             </div>
 
@@ -170,22 +170,22 @@
             ══════════════════════════════════════════════════════════ -->
             {% if tab == 'telegram' %}
 
-            <div class="grid grid-cols-4 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-gray-800">{{ tg_total }}</div>
-                    <div class="text-sm text-gray-500">Всего</div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-gray-800">{{ tg_total }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Всего</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-green-600">{{ tg_sent }}</div>
-                    <div class="text-sm text-gray-500">Отправлено</div>
+                <div class="bg-white border border-green-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-green-600">{{ tg_sent }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Отправлено</div>
                 </div>
-                <div class="bg-white border border-yellow-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-yellow-600">{{ tg_pending }}</div>
-                    <div class="text-sm text-gray-500">В очереди</div>
+                <div class="bg-white border border-yellow-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-yellow-600">{{ tg_pending }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">В очереди</div>
                 </div>
-                <div class="bg-white border border-red-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-red-600">{{ tg_failed }}</div>
-                    <div class="text-sm text-gray-500">Ошибки</div>
+                <div class="bg-white border border-red-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-red-600">{{ tg_failed }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Ошибки</div>
                 </div>
             </div>
 
@@ -307,17 +307,17 @@
             {% if tab == 'email' %}
 
             <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-gray-800">{{ email_total }}</div>
-                    <div class="text-sm text-gray-500">Всего писем</div>
+                <div class="bg-white border rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-gray-800">{{ email_total }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Всего писем</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-green-600">{{ email_sent }}</div>
-                    <div class="text-sm text-gray-500">Отправлено</div>
+                <div class="bg-white border border-green-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-green-600">{{ email_sent }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Отправлено</div>
                 </div>
-                <div class="bg-white border border-red-200 rounded-lg p-4 text-center shadow-sm">
-                    <div class="text-2xl font-bold text-red-600">{{ email_failed }}</div>
-                    <div class="text-sm text-gray-500">Ошибки</div>
+                <div class="bg-white border border-red-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                    <div class="text-xl md:text-2xl font-bold text-red-600">{{ email_failed }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">Ошибки</div>
                 </div>
             </div>
 

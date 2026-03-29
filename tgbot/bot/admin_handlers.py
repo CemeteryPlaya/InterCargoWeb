@@ -241,7 +241,7 @@ async def broadcast_start(message: Message, state: FSMContext):
 @sync_to_async
 def _get_active_pvz_names():
     from register.models import PickupPoint
-    return list(PickupPoint.objects.filter(is_active=True).values_list('premise_name', flat=True))
+    return list(PickupPoint.objects.filter(is_active=True).values_list('address', flat=True))
 
 
 @router.message(F.text == '❌ Отмена', StateFilter(BroadcastStates))

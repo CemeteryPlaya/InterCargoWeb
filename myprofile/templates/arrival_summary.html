@@ -45,9 +45,9 @@
             {% endif %}
 
             <!-- Выбор даты -->
-            <div class="flex items-center gap-3 mb-6 flex-wrap">
-                <form method="get" class="flex items-center gap-3">
-                    <label for="date" class="font-medium text-gray-700">Дата:</label>
+            <div class="flex flex-wrap gap-3 mb-6">
+                <form method="get" class="flex flex-wrap items-center gap-2">
+                    <label for="date" class="font-medium text-gray-700 self-center">Дата:</label>
                     <input type="date" name="date" id="date" value="{{ selected_date }}"
                         class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400">
                     <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
@@ -55,7 +55,7 @@
                     </button>
                 </form>
                 <!-- Актуализация убрана -->
-                <form method="post" action="{% url 'generate_day_receipts' %}" class="inline"
+                <form method="post" action="{% url 'generate_day_receipts' %}"
                       onsubmit="return confirm('Создать чеки по клиентам за {{ selected_date }}?');">
                     {% csrf_token %}
                     <input type="hidden" name="date" value="{{ selected_date }}">
