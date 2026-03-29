@@ -37,12 +37,26 @@ class TrackCodeAdminForm(forms.ModelForm):
 
 class ArrivalSessionItemReadonlyInline(admin.TabularInline):
     model = ArrivalSessionItem
-    fk_name = 'track_obj'
+    fk_name = 'session'
     extra = 0
-    fields = ('session', 'owner_name', 'weight', 'row_number', 'created_at')
-    readonly_fields = ('session', 'owner_name', 'weight', 'row_number', 'created_at')
+    max_num = 0
+    fields = ('session', 'track_code', 'owner_name', 'weight', 'row_number', 'created_at')
+    readonly_fields = ('session', 'track_code', 'owner_name', 'weight', 'row_number', 'created_at')
     verbose_name = "Сессия прихода"
     verbose_name_plural = "Сессии прихода (в которых числится трек)"
+
+    def get_queryset(self, request):
+        # Получаем track_code из URL (object_id) — ищем по строке, не FK
+        object_id = request.resolver_match.kwargs.get('object_id')
+        if object_id:
+            try:
+                tc = TrackCode.objects.get(pk=object_id)
+                return ArrivalSessionItem.objects.filter(
+                    track_code=tc.track_code
+                ).select_related('session')
+            except TrackCode.DoesNotExist:
+                pass
+        return ArrivalSessionItem.objects.none()
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -320,9 +334,17 @@ class EmailLogAdmin(admin.ModelAdmin):
 class ArrivalSessionItemInline(admin.TabularInline):
     model = ArrivalSessionItem
     extra = 0
+    max_num = 0
+    per_page = 100
+    show_change_link = False
     readonly_fields = ('track_code', 'owner_name', 'weight', 'row_number', 'created_at')
+    fields = ('row_number', 'track_code', 'owner_name', 'weight', 'created_at')
+    ordering = ('row_number',)
 
     def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False
 
 

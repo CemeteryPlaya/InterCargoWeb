@@ -28,9 +28,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # === DEV: раскомментируй для локальной разработки ===
-DEBUG = True
+#DEBUG = True
 # === PROD: раскомментируй для продакшена ===
-#DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(',')
 
@@ -77,7 +77,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-APP_VERSION = '1.3.2'
+APP_VERSION = '1.3.2.1'
 
 ROOT_URLCONF = 'cargo.urls'
 
