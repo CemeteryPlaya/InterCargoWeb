@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from myprofile.models import Receipt
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.views.utils import get_user_discount, get_global_price_per_kg, create_receipts_for_user
+from myprofile.views.utils import get_user_discount, get_global_price_per_kg
 from register.models import UserProfile
 
 
@@ -13,12 +13,6 @@ def delivered_trackcodes_by_date(request):
     RATE = get_global_price_per_kg()
     discount_per_kg = get_user_discount(request.user)
     effective_rate = RATE - discount_per_kg
-
-    # Автоматическое формирование чека (fallback — если чек не был создан при take_delivery)
-    receipt = create_receipts_for_user(request.user, statuses=('delivered', 'shipping_pp', 'ready'))
-    if receipt:
-        messages.success(request, f"Чек #{receipt.id} создан.")
-        return redirect('delivered_posts')
 
     receipts = Receipt.objects.filter(owner=request.user).order_by('-created_at')
 

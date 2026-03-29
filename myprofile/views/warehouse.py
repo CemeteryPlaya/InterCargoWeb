@@ -11,7 +11,7 @@ from myprofile.models import (
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
     RestructureSession,
 )
-from myprofile.views.utils import create_receipts_for_user
+
 from register.models import UserProfile, PickupPoint
 
 
@@ -179,14 +179,6 @@ def warehouse_issue_to_client(request):
         if not tracks:
             messages.info(request, "Нет товаров для выдачи в этой ячейке.")
             return redirect('warehouse')
-
-        # Авто-создание чеков для треков без привязки к ReceiptItem
-        tracks_without_receipt = [
-            t for t in tracks
-            if not ReceiptItem.objects.filter(track_code=t).exists()
-        ]
-        if tracks_without_receipt:
-            create_receipts_for_user(client_user, statuses=('ready',))
 
         # Находим чеки связанные с этими треками
         track_ids = [t.id for t in tracks]

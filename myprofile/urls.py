@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -99,8 +99,8 @@ urlpatterns = [
     path('attention/', pp_acceptance.attention_required_view, name='attention_required'),
     path('attention/resolve/', pp_acceptance.resolve_attention, name='resolve_attention'),
     path('pp-extradition-history/', pp_extradition_history.pp_extradition_history_view, name='pp_extradition_history'),
-    path('email-logs/', email_logs.email_logs_view, name='email_logs'),
     path('email-logs/resend/<int:log_id>/', email_logs.resend_email, name='resend_email'),
+    path('notification-logs/', notification_logs.notification_logs_view, name='notification_logs'),
     path('finance/', finance_summary.finance_summary_view, name='finance_summary'),
     path('service/', service.service_view, name='service'),
     path('service/generate-packages/', service.service_generate_packages, name='service_generate_packages'),
@@ -108,6 +108,7 @@ urlpatterns = [
     path('service/normalize-receipts/', service.service_normalize_receipts, name='service_normalize_receipts'),
     path('service/mark-claimed/', service.service_mark_claimed, name='service_mark_claimed'),
     path('service/restore-archived-tracks/', service.service_restore_archived_tracks, name='service_restore_archived_tracks'),
+    path('service/test-notification/', service.service_test_notification, name='service_test_notification'),
 ]
 
 # Подключение медиа-файлов при DEBUG=True

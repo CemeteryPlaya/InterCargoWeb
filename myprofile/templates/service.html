@@ -155,6 +155,49 @@
                     </form>
                 </div>
 
+                <!-- 6. Тест уведомлений -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-2">
+                        <i class="ri-notification-3-line mr-1 text-rose-500"></i>
+                        Тест уведомлений
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Отправляет пробное уведомление <strong>вам лично</strong> по всем каналам:
+                        уведомление на сайте, браузерный Push, Telegram-бот и email.
+                        Используйте для проверки текстов и корректности доставки уведомлений.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <form method="post" action="{% url 'service_test_notification' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="notif_type" value="delivered">
+                            <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
+                                <i class="ri-truck-line mr-1"></i> Доставлено на склад сортировки
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'service_test_notification' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="notif_type" value="receipt">
+                            <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
+                                <i class="ri-file-list-3-line mr-1"></i> Создан чек
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'service_test_notification' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="notif_type" value="ready">
+                            <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
+                                <i class="ri-store-2-line mr-1"></i> Доставлено на ПВЗ
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'service_test_notification' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="notif_type" value="shipped_cn">
+                            <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
+                                <i class="ri-flight-takeoff-line mr-1"></i> Отправлен из Китая
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
 
             </div>
         </main>

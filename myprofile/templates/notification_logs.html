@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Логи Уведомлений</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-6xl">
+
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                <div class="p-4 mb-3 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="ri-notification-3-line text-primary"></i> Логи Уведомлений
+            </h1>
+
+            <!-- Вкладки -->
+            <div class="flex gap-1 mb-6 bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-fit">
+                <a href="?tab=site{% if search %}&q={{ search }}{% endif %}"
+                    class="px-5 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if tab == 'site' %}bg-gray-800 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
+                    <i class="ri-global-line mr-1"></i> Сайт
+                    <span class="ml-1 text-xs {% if tab == 'site' %}text-gray-300{% else %}text-gray-400{% endif %}">{{ site_total }}</span>
+                </a>
+                <a href="?tab=telegram{% if search %}&q={{ search }}{% endif %}"
+                    class="px-5 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if tab == 'telegram' %}bg-blue-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
+                    <i class="ri-telegram-line mr-1"></i> Telegram
+                    <span class="ml-1 text-xs {% if tab == 'telegram' %}text-blue-200{% else %}text-gray-400{% endif %}">{{ tg_total }}</span>
+                </a>
+                <a href="?tab=email{% if search %}&q={{ search }}{% endif %}"
+                    class="px-5 py-2 rounded-lg text-sm font-medium transition-colors
+                    {% if tab == 'email' %}bg-rose-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
+                    <i class="ri-mail-send-line mr-1"></i> Email
+                    <span class="ml-1 text-xs {% if tab == 'email' %}text-rose-200{% else %}text-gray-400{% endif %}">{{ email_total }}</span>
+                </a>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════
+                 ВКЛАДКА: САЙТ
+            ══════════════════════════════════════════════════════════ -->
+            {% if tab == 'site' %}
+
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-gray-800">{{ site_total }}</div>
+                    <div class="text-sm text-gray-500">Всего</div>
+                </div>
+                <div class="bg-white border border-green-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-green-600">{{ site_read }}</div>
+                    <div class="text-sm text-gray-500">Прочитано</div>
+                </div>
+                <div class="bg-white border border-yellow-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-yellow-600">{{ site_unread }}</div>
+                    <div class="text-sm text-gray-500">Не прочитано</div>
+                </div>
+            </div>
+
+            <form method="get" class="flex flex-wrap gap-3 mb-6 items-center">
+                <input type="hidden" name="tab" value="site">
+                <div class="flex gap-2">
+                    <a href="?tab=site{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if not status_filter %}bg-gray-800 text-white{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+                        Все
+                    </a>
+                    <a href="?tab=site&status=unread{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'unread' %}bg-yellow-500 text-white{% else %}bg-white text-gray-700 border border-yellow-200 hover:bg-yellow-50{% endif %}">
+                        Непрочитанные
+                    </a>
+                    <a href="?tab=site&status=read{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'read' %}bg-green-600 text-white{% else %}bg-white text-gray-700 border border-green-200 hover:bg-green-50{% endif %}">
+                        Прочитанные
+                    </a>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="q" value="{{ search }}" placeholder="Поиск по пользователю или тексту..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-primary focus:border-primary">
+                    {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 text-sm transition">
+                    <i class="ri-search-line"></i> Найти
+                </button>
+            </form>
+
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Статус</th>
+                                <th class="px-4 py-3 text-left font-medium">Пользователь</th>
+                                <th class="px-4 py-3 text-left font-medium">Сообщение</th>
+                                <th class="px-4 py-3 text-left font-medium whitespace-nowrap">Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for n in site_logs %}
+                            <tr class="hover:bg-gray-50 transition-colors {% if not n.is_read %}bg-yellow-50{% endif %}">
+                                <td class="px-4 py-3">
+                                    {% if n.is_read %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="ri-eye-line mr-1"></i> Прочитано
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="ri-eye-off-line mr-1"></i> Не прочитано
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-700 font-medium">{{ n.user.username }}</td>
+                                <td class="px-4 py-3 text-gray-700 max-w-sm">{{ n.message }}</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ n.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                    <i class="ri-notification-off-line text-3xl mb-2 block"></i>
+                                    Уведомлений пока нет
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if site_logs|length >= 200 %}
+            <p class="text-sm text-gray-400 mt-3 text-center">Показаны последние 200 записей</p>
+            {% endif %}
+
+            {% endif %}
+            <!-- /site -->
+
+
+            <!-- ══════════════════════════════════════════════════════════
+                 ВКЛАДКА: TELEGRAM
+            ══════════════════════════════════════════════════════════ -->
+            {% if tab == 'telegram' %}
+
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-gray-800">{{ tg_total }}</div>
+                    <div class="text-sm text-gray-500">Всего</div>
+                </div>
+                <div class="bg-white border border-green-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-green-600">{{ tg_sent }}</div>
+                    <div class="text-sm text-gray-500">Отправлено</div>
+                </div>
+                <div class="bg-white border border-yellow-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-yellow-600">{{ tg_pending }}</div>
+                    <div class="text-sm text-gray-500">В очереди</div>
+                </div>
+                <div class="bg-white border border-red-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-red-600">{{ tg_failed }}</div>
+                    <div class="text-sm text-gray-500">Ошибки</div>
+                </div>
+            </div>
+
+            <form method="get" class="flex flex-wrap gap-3 mb-6 items-center">
+                <input type="hidden" name="tab" value="telegram">
+                <div class="flex gap-2 flex-wrap">
+                    <a href="?tab=telegram{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if not status_filter %}bg-gray-800 text-white{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+                        Все
+                    </a>
+                    <a href="?tab=telegram&status=sent{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'sent' %}bg-green-600 text-white{% else %}bg-white text-gray-700 border border-green-200 hover:bg-green-50{% endif %}">
+                        Отправлено
+                    </a>
+                    <a href="?tab=telegram&status=pending{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'pending' %}bg-yellow-500 text-white{% else %}bg-white text-gray-700 border border-yellow-200 hover:bg-yellow-50{% endif %}">
+                        В очереди
+                    </a>
+                    <a href="?tab=telegram&status=failed{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'failed' %}bg-red-600 text-white{% else %}bg-white text-gray-700 border border-red-200 hover:bg-red-50{% endif %}">
+                        Ошибки
+                    </a>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="q" value="{{ search }}" placeholder="Поиск по пользователю или тексту..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-primary focus:border-primary">
+                    {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 text-sm transition">
+                    <i class="ri-search-line"></i> Найти
+                </button>
+            </form>
+
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Статус</th>
+                                <th class="px-4 py-3 text-left font-medium">Пользователь</th>
+                                <th class="px-4 py-3 text-left font-medium">Заголовок</th>
+                                <th class="px-4 py-3 text-left font-medium">Сообщение</th>
+                                <th class="px-4 py-3 text-left font-medium whitespace-nowrap">Создано</th>
+                                <th class="px-4 py-3 text-left font-medium whitespace-nowrap">Отправлено</th>
+                                <th class="px-4 py-3 text-left font-medium">Попыток</th>
+                                <th class="px-4 py-3 text-left font-medium">Ошибка</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for n in tg_logs %}
+                            <tr class="hover:bg-gray-50 transition-colors
+                                {% if n.tg_status == 'failed' %}bg-red-50
+                                {% elif n.tg_status == 'pending' %}bg-yellow-50
+                                {% endif %}"
+                                x-data="{ expanded: false }">
+                                <td class="px-4 py-3">
+                                    {% if n.tg_status == 'sent' %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="ri-checkbox-circle-fill mr-1"></i> Отправлено
+                                    </span>
+                                    {% elif n.tg_status == 'pending' %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="ri-time-line mr-1"></i> В очереди
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="ri-error-warning-fill mr-1"></i> Ошибка
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-700 font-medium">{{ n.user.username }}</td>
+                                <td class="px-4 py-3 text-gray-700 max-w-[160px] truncate" title="{{ n.title }}">{{ n.title }}</td>
+                                <td class="px-4 py-3 text-gray-600 max-w-xs">
+                                    <div class="truncate max-w-[220px]" title="{{ n.message }}">{{ n.message }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ n.created_at|date:"d.m.Y H:i" }}</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
+                                    {% if n.sent_at %}{{ n.sent_at|date:"d.m.Y H:i" }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-center text-gray-600">{{ n.retry_count }}</td>
+                                <td class="px-4 py-3 text-red-600 text-xs max-w-[180px]">
+                                    {% if n.last_error %}
+                                    <button @click="expanded = !expanded" class="text-left hover:underline cursor-pointer">
+                                        <span x-show="!expanded">{{ n.last_error|truncatechars:50 }}</span>
+                                        <span x-show="expanded" class="whitespace-pre-wrap break-all">{{ n.last_error }}</span>
+                                    </button>
+                                    {% else %}
+                                    <span class="text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                                    <i class="ri-telegram-line text-3xl mb-2 block"></i>
+                                    Telegram-уведомлений пока нет
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if tg_logs|length >= 200 %}
+            <p class="text-sm text-gray-400 mt-3 text-center">Показаны последние 200 записей</p>
+            {% endif %}
+
+            {% endif %}
+            <!-- /telegram -->
+
+
+            <!-- ══════════════════════════════════════════════════════════
+                 ВКЛАДКА: EMAIL
+            ══════════════════════════════════════════════════════════ -->
+            {% if tab == 'email' %}
+
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-gray-800">{{ email_total }}</div>
+                    <div class="text-sm text-gray-500">Всего писем</div>
+                </div>
+                <div class="bg-white border border-green-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-green-600">{{ email_sent }}</div>
+                    <div class="text-sm text-gray-500">Отправлено</div>
+                </div>
+                <div class="bg-white border border-red-200 rounded-lg p-4 text-center shadow-sm">
+                    <div class="text-2xl font-bold text-red-600">{{ email_failed }}</div>
+                    <div class="text-sm text-gray-500">Ошибки</div>
+                </div>
+            </div>
+
+            <form method="get" class="flex flex-wrap gap-3 mb-6 items-center">
+                <input type="hidden" name="tab" value="email">
+                <div class="flex gap-2">
+                    <a href="?tab=email{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if not status_filter %}bg-gray-800 text-white{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-100{% endif %}">
+                        Все
+                    </a>
+                    <a href="?tab=email&status=sent{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'sent' %}bg-green-600 text-white{% else %}bg-white text-gray-700 border border-green-200 hover:bg-green-50{% endif %}">
+                        Отправлено
+                    </a>
+                    <a href="?tab=email&status=failed{% if search %}&q={{ search }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if status_filter == 'failed' %}bg-red-600 text-white{% else %}bg-white text-gray-700 border border-red-200 hover:bg-red-50{% endif %}">
+                        Ошибки
+                    </a>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="q" value="{{ search }}" placeholder="Поиск по email или теме..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-primary focus:border-primary">
+                    {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 text-sm transition">
+                    <i class="ri-search-line"></i> Найти
+                </button>
+            </form>
+
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">Статус</th>
+                                <th class="px-4 py-3 text-left font-medium">Получатель</th>
+                                <th class="px-4 py-3 text-left font-medium">Тема</th>
+                                <th class="px-4 py-3 text-left font-medium whitespace-nowrap">Дата</th>
+                                <th class="px-4 py-3 text-left font-medium">Ошибка</th>
+                                <th class="px-4 py-3 text-center font-medium">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for log in email_logs %}
+                            <tr class="hover:bg-gray-50 transition-colors {% if log.status == 'failed' %}bg-red-50{% endif %}"
+                                x-data="{ expanded: false }">
+                                <td class="px-4 py-3">
+                                    {% if log.status == 'sent' %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="ri-checkbox-circle-fill mr-1"></i> Отправлено
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="ri-error-warning-fill mr-1"></i> Ошибка
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-800 font-mono text-xs">{{ log.recipient }}</td>
+                                <td class="px-4 py-3 text-gray-700 max-w-xs truncate">{{ log.subject }}</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ log.created_at|date:"d.m.Y H:i" }}</td>
+                                <td class="px-4 py-3 text-red-600 text-xs max-w-xs">
+                                    {% if log.error_message %}
+                                    <button @click="expanded = !expanded" class="text-left hover:underline cursor-pointer">
+                                        <span x-show="!expanded">{{ log.error_message|truncatechars:60 }}</span>
+                                        <span x-show="expanded" class="whitespace-pre-wrap break-all">{{ log.error_message }}</span>
+                                    </button>
+                                    {% else %}
+                                    <span class="text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    {% if log.status == 'failed' %}
+                                    <form method="post" action="{% url 'resend_email' log.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-xs font-medium"
+                                            onclick="return confirm('Переотправить письмо на {{ log.recipient }}?')">
+                                            <i class="ri-refresh-line mr-1"></i> Переотправить
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-gray-400 text-xs">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                    <i class="ri-mail-line text-3xl mb-2 block"></i>
+                                    Логов email пока нет
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if email_logs|length >= 200 %}
+            <p class="text-sm text-gray-400 mt-3 text-center">Показаны последние 200 записей</p>
+            {% endif %}
+
+            {% endif %}
+            <!-- /email -->
+
+        </div>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+</body>
+</html>

@@ -9,7 +9,7 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 
 from myprofile.models import Receipt, ReceiptItem, ExtraditionPackage, Notification, TrackCode
-from myprofile.views.utils import create_receipts_for_user
+
 from register.models import UserProfile
 
 
@@ -74,16 +74,6 @@ def quick_issue(request):
     Возвращает JSON с barcode и base64-картинкой штрихкода.
     """
     user = request.user
-
-    # Авто-создание чеков для треков без привязки к ReceiptItem
-    # Это гарантирует, что все ready-треки будут иметь чеки
-    ready_tracks_without_receipt = TrackCode.objects.filter(
-        owner=user, status='ready'
-    ).exclude(
-        id__in=ReceiptItem.objects.values_list('track_code_id', flat=True)
-    )
-    if ready_tracks_without_receipt.exists():
-        create_receipts_for_user(user, statuses=('ready',))
 
     # Находим чеки, у которых все трек-коды в статусе 'ready'
     user_receipts = Receipt.objects.filter(owner=user).prefetch_related('items__track_code')

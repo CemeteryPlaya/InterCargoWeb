@@ -144,6 +144,7 @@
 
                 <!-- Табличный вид (по умолчанию) -->
                 <div id="table_view">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full bg-white border border-gray-200">
                         <thead>
                             <tr>
@@ -156,6 +157,7 @@
                         </thead>
                         <tbody id="tracks_table_body"></tbody>
                     </table>
+                    </div>
                     <button type="button" id="add_row_btn"
                         class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4 transition text-sm">
                         <i class="ri-add-line"></i> Добавить строку
@@ -163,7 +165,7 @@
                 </div>
 
                 <!-- Текстовый вид -->
-                <div id="text_view" class="hidden grid grid-cols-3 gap-4">
+                <div id="text_view" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block font-medium mb-1">Трек-коды (по одному в строке)
                             <span id="text_count_tracks" class="text-sm text-gray-500 ml-2"></span>
