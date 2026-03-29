@@ -677,16 +677,19 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!looksLikeWeight(v) || looksLikeOwner(v) || looksLikeTrack(v)) suspicious = true;
         }
         if (suspicious) {
+            input.dataset.suspicious = '1';
             input.style.outline = '2px solid #f59e0b';
             input.style.backgroundColor = '#fefce8';
             input.title = 'Возможно данные введены не в ту колонку';
         } else {
+            delete input.dataset.suspicious;
             clearCellWarning(input);
         }
         updateSuspiciousCounter();
     }
 
     function clearCellWarning(input) {
+        delete input.dataset.suspicious;
         // Если трек помечен как существующий — восстанавливаем его стиль, а не просто чистим
         if (input.dataset.trackExists) {
             input.title = 'Трек уже в базе: ' + (input.dataset.trackStatusLabel || '');
@@ -704,20 +707,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateSuspiciousCounter() {
         suspiciousInputs = Array.prototype.slice.call(
-            tableBody.querySelectorAll('input[style*="fefce8"], input[style*="f59e0b"]')
-        ).filter(function (inp) {
-            return inp.style.backgroundColor === 'rgb(254, 252, 232)' || inp.style.outline.indexOf('f59e0b') !== -1;
-        });
-        // Собираем заново через data-атрибут для надёжности
-        suspiciousInputs = [];
-        tableBody.querySelectorAll('tr').forEach(function (tr) {
-            var inputs = tr.querySelectorAll('input');
-            inputs.forEach(function (inp) {
-                if (inp.style.outline && inp.style.outline.indexOf('f59e0b') !== -1) {
-                    suspiciousInputs.push(inp);
-                }
-            });
-        });
+            tableBody.querySelectorAll('input[data-suspicious="1"]')
+        );
         var cnt = suspiciousInputs.length;
         if (cnt > 0) {
             suspiciousWarning.classList.remove('hidden');
