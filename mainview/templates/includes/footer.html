@@ -1,7 +1,25 @@
-{% load static %} 
-<footer class="bg-gray-900 text-white py-12">
+{% load static %}
+<footer class="bg-gray-900 text-white py-6 md:py-12 w-full">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Мобильный футер: только лого, соцсети и копирайт -->
+            <div class="flex flex-col items-center gap-4 md:hidden">
+                <a href="/" class="inline-block"><img src="{% static 'images/logo.png' %}" style="height: 44px; width: 44px;" alt="Inter Cargo"></a>
+                <div class="flex items-center space-x-4">
+                    <a href="https://www.instagram.com/inter_cargo_trz/" class="w-10 h-10 flex items-center justify-center" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'images/instagram.svg' %}" style="height: 35px; width: 35px;" alt="Instagram">
+                    </a>
+                    <a href="https://t.me/inter_cargo" class="w-10 h-10 flex items-center justify-center" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'images/telegram.svg' %}" style="height: 35px; width: 35px;" alt="Telegram">
+                    </a>
+                    <a href="https://wa.me/77066440624" class="w-10 h-10 flex items-center justify-center" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'images/whatsapp.svg' %}" style="height: 35px; width: 35px;" alt="WhatsApp">
+                    </a>
+                </div>
+                <p class="text-gray-500 text-xs text-center">© 2026 Inter Cargo. Все права защищены. <span class="text-gray-600">v{{ APP_VERSION }}</span></p>
+            </div>
+
+            <!-- Десктопный футер: полная версия -->
+            <div class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
                     <a href="/" class="text-2xl font-['Pacifico'] text-white mb-4 inline-block"><img src="{% static 'images/logo.png' %}" style="height: 50px; width: 50px;"></a>
                     <p class="text-gray-400 mb-6">Надежная доставка грузов из Китая в Казахстан по выгодным тарифам.</p>
@@ -17,7 +35,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <div>
                     <h3 class="text-lg font-bold mb-4">Навигация</h3>
                     <ul class="space-y-2">
@@ -27,7 +45,7 @@
                         <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition">О компании</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h3 class="text-lg font-bold mb-4">Пункты выдачи</h3>
                     <ul class="space-y-2">
@@ -42,7 +60,7 @@
                         <li><a href="{% url 'about' %}" class="text-primary hover:text-primary-light transition">Смотреть все пункты</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h3 class="text-lg font-bold mb-4">Контакты</h3>
                     <ul class="space-y-4">
@@ -73,8 +91,8 @@
                     </ul>
                 </div>
             </div>
-            
-            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+
+            <div class="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 hidden md:flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-500 text-sm mb-4 md:mb-0">© 2026 Inter Cargo. Все права защищены. <span class="text-gray-600">v{{ APP_VERSION }}</span></p>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-500 text-sm">Способы оплаты:</span>

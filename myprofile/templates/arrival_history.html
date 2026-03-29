@@ -245,14 +245,14 @@
 
             let html = `
             <details class="border border-gray-200 rounded-lg ml-2 bg-white">
-                <summary class="cursor-pointer px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition text-sm">
-                    <div class="flex items-center gap-3">
-                        <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform"></i>
-                        <i class="ri-user-line ${iconClass}"></i>
-                        <span class="font-medium">${c.username}</span>
+                <summary class="cursor-pointer px-4 py-2 flex flex-wrap items-center gap-2 hover:bg-gray-50 transition text-sm">
+                    <div class="flex items-center gap-2 flex-1 min-w-0">
+                        <i class="ri-arrow-right-s-line text-lg text-gray-400 arrow-icon transition-transform flex-shrink-0"></i>
+                        <i class="ri-user-line ${iconClass} flex-shrink-0"></i>
+                        <span class="font-medium truncate">${c.username}</span>
                         ${badge}
                     </div>
-                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <div class="flex items-center gap-3 text-xs text-gray-500 flex-shrink-0">
                         <span>${c.tracks.length} треков</span>
                         <span>${weight} кг</span>
                     </div>

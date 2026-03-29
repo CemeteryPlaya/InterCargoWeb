@@ -28,7 +28,7 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'includes/sidebar.html' %}
-        <div class="flex-1 mx-auto p-6">
+        <div class="flex-1 mx-auto p-4 md:p-6">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Приход товаров</h2>
 
             {% if messages %}
@@ -80,7 +80,7 @@
                 </h3>
                 <div class="space-y-2">
                     {% for s in active_sessions %}
-                    <div class="flex items-center justify-between border border-orange-200 bg-orange-50 rounded-lg px-4 py-3">
+                    <div class="flex flex-wrap items-center justify-between border border-orange-200 bg-orange-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                 Активная
@@ -115,7 +115,7 @@
                 </h3>
                 <div class="space-y-2">
                     {% for s in paused_sessions %}
-                    <div class="flex items-center justify-between border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3">
+                    <div class="flex flex-wrap items-center justify-between border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 На паузе
@@ -154,7 +154,7 @@
                 </h3>
                 <div class="space-y-2">
                     {% for s in inactive_sessions %}
-                    <div class="flex items-center justify-between border border-gray-200 bg-gray-50 rounded-lg px-4 py-3">
+                    <div class="flex flex-wrap items-center justify-between border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
                                 Неактивная
@@ -184,7 +184,7 @@
 
             <!-- Выбор даты для завершённых сессий -->
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center gap-4 mb-4">
+                <div class="flex flex-wrap items-center gap-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700">
                         <i class="ri-check-double-line text-green-500"></i> Завершённые сессии
                     </h3>
@@ -200,7 +200,7 @@
                 {% if completed_sessions %}
                 <div class="space-y-2">
                     {% for s in completed_sessions %}
-                    <div class="flex items-center justify-between border border-green-200 bg-green-50 rounded-lg px-4 py-3">
+                    <div class="flex flex-wrap items-center justify-between border border-green-200 bg-green-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Завершена

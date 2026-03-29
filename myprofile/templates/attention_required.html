@@ -79,17 +79,17 @@
                                 </div>
                                 <div class="divide-y divide-gray-100">
                                     {% for client in reason_group.clients %}
-                                    <div class="px-5 py-3 flex items-center justify-between gap-4">
-                                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <div class="px-5 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                        <div class="flex items-center gap-2 min-w-0">
                                             <i class="ri-user-line text-gray-400 flex-shrink-0"></i>
                                             <div class="min-w-0">
-                                                <div class="flex items-center gap-2">
+                                                <div class="flex flex-wrap items-center gap-1">
                                                     <span class="font-medium text-gray-800">{{ client.login }}</span>
                                                     {% if client.name != client.login %}
                                                     <span class="text-xs text-gray-400">({{ client.name }})</span>
                                                     {% endif %}
                                                     {% if client.owner_type == 'temp' %}
-                                                    <span class="text-xs text-orange-500 flex-shrink-0">(вр.)</span>
+                                                    <span class="text-xs text-orange-500">(вр.)</span>
                                                     {% endif %}
                                                 </div>
                                                 {% if client.added_by %}
@@ -99,8 +99,8 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-4 flex-shrink-0">
-                                            <div class="text-sm text-gray-500">
+                                        <div class="flex items-center justify-between sm:justify-end gap-4 flex-shrink-0">
+                                            <div class="text-sm text-gray-500 whitespace-nowrap">
                                                 {{ client.track_count }} шт. / {{ client.total_weight|floatformat:2 }} кг
                                             </div>
                                             <form method="post" action="{% url 'resolve_attention' %}" class="inline">
@@ -109,7 +109,7 @@
                                                 <input type="hidden" name="owner_id" value="{{ client.owner_id }}">
                                                 <input type="hidden" name="reason" value="{{ reason_group.reason }}">
                                                 <button type="submit"
-                                                    class="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition text-xs font-medium"
+                                                    class="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition text-xs font-medium whitespace-nowrap"
                                                     onclick="return confirm('Отметить проблемы клиента {{ client.login }} как устранённые?')">
                                                     <i class="ri-check-line"></i> Проблемы устранены
                                                 </button>

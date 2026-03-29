@@ -60,12 +60,15 @@
 
       <div x-data="{ filter: 'all', activeReceipt: null }" class="mb-4 ml-2">
         <label class="mr-2 font-medium">Фильтр:</label>
-        <button @click="filter = 'all'" :class="{ 'bg-red-500 text-white': filter === 'all' }"
-          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Все</button>
-        <button @click="filter = 'claimed'" :class="{ 'bg-red-500 text-white': filter === 'claimed' }"
-          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Выдано</button>
-        <button @click="filter = 'unclaimed'" :class="{ 'bg-red-500 text-white': filter === 'unclaimed' }"
-          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Не выдано</button>
+        <button @click="filter = 'all'"
+          :class="filter === 'all' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">Все</button>
+        <button @click="filter = 'claimed'"
+          :class="filter === 'claimed' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">Выдано</button>
+        <button @click="filter = 'unclaimed'"
+          :class="filter === 'unclaimed' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">Не выдано</button>
         {% comment %}PAYMENT COMMENTED OUT
         <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Оплаченные</button>
