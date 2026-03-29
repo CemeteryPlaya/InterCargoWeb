@@ -190,6 +190,14 @@
                     Незаполненных ячеек: <span id="empty_cells_count" class="font-semibold">0</span>
                 </div>
 
+                <!-- Подозрительные ячейки -->
+                <div id="suspicious_cells_warning" class="hidden mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-800 flex items-center gap-3">
+                    <i class="ri-alert-line"></i>
+                    <span>Подозрительных ячеек: <span id="suspicious_cells_count" class="font-semibold">0</span></span>
+                    <button type="button" id="suspicious_prev_btn" class="px-2 py-0.5 rounded border border-yellow-400 hover:bg-yellow-100 text-xs" title="Предыдущая">&#8593; Пред.</button>
+                    <button type="button" id="suspicious_next_btn" class="px-2 py-0.5 rounded border border-yellow-400 hover:bg-yellow-100 text-xs" title="Следующая">&#8595; След.</button>
+                </div>
+
                 <!-- Кнопки -->
                 <div class="flex items-center gap-3 mt-6">
                     {% if can_edit %}
@@ -222,6 +230,7 @@
         getOwnerUrl: '{% url "get_track_owner" %}',
         searchUsersUrl: '{% url "search_users" %}',
         initialItems: {{ items_json|safe }},
+        knownTracks: {{ known_tracks_json|safe }},
         canEdit: {{ can_edit|yesno:"true,false" }}
     };
     </script>

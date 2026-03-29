@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var saveStatus = document.getElementById('save-status');
     var emptyCellsWarning = document.getElementById('empty_cells_warning');
     var emptyCellsCount = document.getElementById('empty_cells_count');
+    var suspiciousWarning = document.getElementById('suspicious_cells_warning');
+    var suspiciousCount = document.getElementById('suspicious_cells_count');
+    var suspiciousPrevBtn = document.getElementById('suspicious_prev_btn');
+    var suspiciousNextBtn = document.getElementById('suspicious_next_btn');
+    var suspiciousInputs = [];
+    var suspiciousCursor = -1;
 
     var textTracks = document.getElementById('text_tracks');
     var textOwners = document.getElementById('text_owners');
@@ -146,6 +152,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 saveStatus.className = 'text-sm text-green-600';
                 connectionState.failCount = 0;
                 if (connectionState.isLost) showConnectionRestored();
+                if (data.occupied && data.occupied.length > 0) {
+                    showOccupiedWarning(data.occupied);
+                } else {
+                    hideOccupiedWarning();
+                }
             } else {
                 throw new Error('save failed');
             }
@@ -253,15 +264,60 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ==================== Метка "трек уже был" ====================
+    var STATUS_COLORS = {
+        'no_owner':     { border: '#94a3b8', bg: '#f8fafc' },  // серый
+        'user_added':   { border: '#60a5fa', bg: '#eff6ff' },  // голубой
+        'warehouse_cn': { border: '#34d399', bg: '#f0fdf4' },  // зелёный
+        'shipped_cn':   { border: '#34d399', bg: '#f0fdf4' },
+        'delivered':    { border: '#a78bfa', bg: '#f5f3ff' },  // фиолетовый
+        'shipping_pp':  { border: '#f97316', bg: '#fff7ed' },  // оранжевый
+        'ready':        { border: '#22c55e', bg: '#f0fdf4' },  // зелёный
+        'claimed':      { border: '#6b7280', bg: '#f9fafb' },  // тёмно-серый
+    };
+
+    function markTrackExists(trackInput, statusKey, statusLabel) {
+        trackInput.dataset.trackExists = '1';
+        trackInput.dataset.trackStatusKey = statusKey || '';
+        trackInput.dataset.trackStatusLabel = statusLabel || '';
+        // Не перезаписываем жёлтую метку «подозрительная ячейка»
+        if (trackInput.style.outline && trackInput.style.outline.indexOf('f59e0b') !== -1) return;
+        var colors = STATUS_COLORS[statusKey] || { border: '#60a5fa', bg: '#eff6ff' };
+        trackInput.style.outline = '2px solid ' + colors.border;
+        trackInput.style.backgroundColor = colors.bg;
+        trackInput.title = 'Трек уже в базе: ' + statusLabel;
+    }
+
+    function clearTrackExistsMark(trackInput) {
+        if (trackInput.dataset.trackExists) {
+            trackInput.style.outline = '';
+            trackInput.style.backgroundColor = '';
+            trackInput.title = '';
+            delete trackInput.dataset.trackExists;
+        }
+    }
+
     // ==================== Подтягивание владельца по трек-коду ====================
     function fetchTrackOwner(trackInput, ownerInput, weightInput) {
         var code = trackInput.value.trim();
         if (!code || !config.getOwnerUrl) return;
+
+        // Сначала проверяем кеш начальных данных
+        if (config.knownTracks && config.knownTracks[code]) {
+            var kt = config.knownTracks[code];
+            markTrackExists(trackInput, kt.status, kt.status_label);
+        }
+
         if (ownerInput.value.trim()) return;
 
         fetch(config.getOwnerUrl + '?track_code=' + encodeURIComponent(code))
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                if (data.exists) {
+                    markTrackExists(trackInput, data.status, data.status_label);
+                } else {
+                    clearTrackExistsMark(trackInput);
+                }
                 if (data.owner && !ownerInput.value.trim()) {
                     ownerInput.value = data.owner;
                     scheduleSave();
@@ -424,8 +480,17 @@ document.addEventListener('DOMContentLoaded', function () {
         trackInput.className = 'w-full border border-gray-200 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-red-400';
         trackInput.value = data ? data.track_code : '';
         trackInput.placeholder = 'Трек-код';
+
+        // Сразу метим если трек уже известен из начальных данных
+        if (data && data.track_code && config.knownTracks && config.knownTracks[data.track_code]) {
+            var kt = config.knownTracks[data.track_code];
+            markTrackExists(trackInput, kt.status, kt.status_label);
+        }
+
         trackInput.addEventListener('input', function () {
+            clearTrackExistsMark(trackInput);
             scheduleSave();
+            validateCell(trackInput, 0);
             var allRows = tableBody.querySelectorAll('tr');
             var lastRow = allRows[allRows.length - 1];
             if (tr === lastRow && trackInput.value.trim() !== '') {
@@ -442,7 +507,10 @@ document.addEventListener('DOMContentLoaded', function () {
         ownerInput.value = data ? data.owner_name : '';
         ownerInput.placeholder = 'Логин владельца';
         ownerInput.setAttribute('autocomplete', 'off');
-        ownerInput.addEventListener('input', scheduleSave);
+        ownerInput.addEventListener('input', function () {
+            scheduleSave();
+            validateCell(ownerInput, 1);
+        });
         ownerTd.appendChild(ownerInput);
 
         var weightTd = document.createElement('td');
@@ -452,7 +520,23 @@ document.addEventListener('DOMContentLoaded', function () {
         weightInput.className = 'w-full border border-gray-200 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-red-400';
         weightInput.value = data ? data.weight || '' : '';
         weightInput.placeholder = '0.000';
-        weightInput.addEventListener('input', scheduleSave);
+        weightInput.addEventListener('keydown', function (e) {
+            // Разрешаем: цифры, точку, запятую, Backspace, Delete, стрелки, Tab, Enter, Home, End
+            var allowed = [
+                'Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight',
+                'ArrowUp', 'ArrowDown', 'Home', 'End', '.', ','
+            ];
+            var isDigit = (e.key >= '0' && e.key <= '9');
+            var isAllowed = allowed.indexOf(e.key) !== -1;
+            var isCtrl = e.ctrlKey || e.metaKey; // Ctrl+A, Ctrl+C, Ctrl+V и т.д.
+            if (!isDigit && !isAllowed && !isCtrl) {
+                e.preventDefault();
+            }
+        });
+        weightInput.addEventListener('input', function () {
+            scheduleSave();
+            validateCell(weightInput, 2);
+        });
         weightTd.appendChild(weightInput);
 
         var actionTd = document.createElement('td');
@@ -566,6 +650,132 @@ document.addEventListener('DOMContentLoaded', function () {
 
     addRowBtn.addEventListener('click', function () { addRow(); });
 
+    // ==================== Валидация ячеек ====================
+    // Клиент: буквы верхнего регистра + 4 цифры на конце
+    var RE_OWNER   = /^[A-ZА-ЯЁ]{2,16}\d{4}$/;
+    // Вес: число до 3 знаков после точки/запятой, < 1000
+    var RE_WEIGHT  = /^\d{1,3}([.,]\d{1,3})?$/;
+    // Трек-код: только цифры (8+), или буквы+цифры
+    var RE_TRACK   = /^([A-Z]{2}\d{6,}|[A-Z]{1,5}\d{4,}[\w-]*|\d{8,})$/i;
+
+    function looksLikeOwner(v) { return RE_OWNER.test(v); }
+    function looksLikeWeight(v) { return RE_WEIGHT.test(v) && parseFloat(v.replace(',', '.')) < 1000; }
+    function looksLikeTrack(v)  { return RE_TRACK.test(v) && !looksLikeOwner(v) && !looksLikeWeight(v); }
+
+    function validateCell(input, col) {
+        var v = input.value.trim();
+        if (!v) {
+            clearCellWarning(input);
+            return;
+        }
+        var suspicious = false;
+        if (col === 0) {
+            if (looksLikeOwner(v) || looksLikeWeight(v)) suspicious = true;
+        } else if (col === 1) {
+            if (looksLikeTrack(v) || looksLikeWeight(v)) suspicious = true;
+        } else if (col === 2) {
+            if (!looksLikeWeight(v) || looksLikeOwner(v) || looksLikeTrack(v)) suspicious = true;
+        }
+        if (suspicious) {
+            input.style.outline = '2px solid #f59e0b';
+            input.style.backgroundColor = '#fefce8';
+            input.title = 'Возможно данные введены не в ту колонку';
+        } else {
+            clearCellWarning(input);
+        }
+        updateSuspiciousCounter();
+    }
+
+    function clearCellWarning(input) {
+        // Если трек помечен как существующий — восстанавливаем его стиль, а не просто чистим
+        if (input.dataset.trackExists) {
+            input.title = 'Трек уже в базе: ' + (input.dataset.trackStatusLabel || '');
+            // Перерисуем цвет по сохранённому статусу
+            var col = input.dataset.trackStatusKey;
+            var colors = (col && STATUS_COLORS[col]) ? STATUS_COLORS[col] : { border: '#60a5fa', bg: '#eff6ff' };
+            input.style.outline = '2px solid ' + colors.border;
+            input.style.backgroundColor = colors.bg;
+        } else {
+            input.style.outline = '';
+            input.style.backgroundColor = '';
+            input.title = '';
+        }
+    }
+
+    function updateSuspiciousCounter() {
+        suspiciousInputs = Array.prototype.slice.call(
+            tableBody.querySelectorAll('input[style*="fefce8"], input[style*="f59e0b"]')
+        ).filter(function (inp) {
+            return inp.style.backgroundColor === 'rgb(254, 252, 232)' || inp.style.outline.indexOf('f59e0b') !== -1;
+        });
+        // Собираем заново через data-атрибут для надёжности
+        suspiciousInputs = [];
+        tableBody.querySelectorAll('tr').forEach(function (tr) {
+            var inputs = tr.querySelectorAll('input');
+            inputs.forEach(function (inp) {
+                if (inp.style.outline && inp.style.outline.indexOf('f59e0b') !== -1) {
+                    suspiciousInputs.push(inp);
+                }
+            });
+        });
+        var cnt = suspiciousInputs.length;
+        if (cnt > 0) {
+            suspiciousWarning.classList.remove('hidden');
+            suspiciousCount.textContent = cnt;
+            // Обновляем курсор если вышел за пределы
+            if (suspiciousCursor >= cnt) suspiciousCursor = cnt - 1;
+        } else {
+            suspiciousWarning.classList.add('hidden');
+            suspiciousCursor = -1;
+        }
+    }
+
+    function navigateSuspicious(dir) {
+        if (!suspiciousInputs.length) return;
+        suspiciousCursor += dir;
+        if (suspiciousCursor < 0) suspiciousCursor = suspiciousInputs.length - 1;
+        if (suspiciousCursor >= suspiciousInputs.length) suspiciousCursor = 0;
+        var inp = suspiciousInputs[suspiciousCursor];
+        inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inp.focus();
+        inp.select();
+    }
+
+    suspiciousNextBtn.addEventListener('click', function () { navigateSuspicious(1); });
+    suspiciousPrevBtn.addEventListener('click', function () { navigateSuspicious(-1); });
+
+    // ==================== Занятые треки (уже в другой сессии) ====================
+    var occupiedWarning = (function () {
+        var el = document.createElement('div');
+        el.className = 'hidden mt-2 p-3 bg-orange-50 border border-orange-300 rounded-lg text-sm text-orange-800';
+        el.innerHTML = '<i class="ri-error-warning-line mr-1"></i> <span id="occupied_text"></span>';
+        suspiciousWarning.parentNode.insertBefore(el, suspiciousWarning.nextSibling);
+        return el;
+    }());
+    var occupiedText = document.getElementById('occupied_text');
+
+    function showOccupiedWarning(codes) {
+        occupiedText.textContent = 'Треки уже в другой сессии (пропущены): ' + codes.join(', ');
+        occupiedWarning.classList.remove('hidden');
+    }
+    function hideOccupiedWarning() {
+        occupiedWarning.classList.add('hidden');
+    }
+
+    function validateRow(tr) {
+        var inputs = tr.querySelectorAll('input');
+        inputs.forEach(function (inp, idx) {
+            validateCell(inp, idx);
+        });
+    }
+
+    function validateAllRows() {
+        tableBody.querySelectorAll('tr').forEach(function (tr) {
+            validateRow(tr);
+        });
+        updateSuspiciousCounter();
+    }
+
     // ==================== Переключение вида ====================
     toggleBtn.addEventListener('click', function () {
         if (isTableView) {
@@ -625,6 +835,7 @@ document.addEventListener('DOMContentLoaded', function () {
         config.initialItems.forEach(function (item) {
             addRow(item);
         });
+        validateAllRows();
     } else {
         addRow();
     }

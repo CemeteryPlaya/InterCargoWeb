@@ -120,12 +120,20 @@ def session_form(request, session_id):
     sorting_locations = SortingLocation.objects.filter(is_active=True).order_by('id')
     items = list(session.items.order_by('row_number').values('id', 'track_code', 'owner_name', 'weight', 'row_number'))
 
+    # Определяем какие трек-коды из сессии уже есть в базе
+    item_codes = [it['track_code'] for it in items if it['track_code']]
+    known_tracks = {
+        tc.track_code: {'status': tc.status, 'status_label': tc.get_status_display()}
+        for tc in TrackCode.objects.filter(track_code__in=item_codes).only('track_code', 'status')
+    }
+
     can_edit = session.status == 'active'
 
     return render(request, "goods_arrival_session.html", {
         'session': session,
         'sorting_locations': sorting_locations,
         'items_json': json.dumps(items, default=str),
+        'known_tracks_json': json.dumps(known_tracks),
         'can_edit': can_edit,
     })
 
@@ -145,33 +153,69 @@ def session_save_items(request, session_id):
     except (json.JSONDecodeError, AttributeError):
         return JsonResponse({'error': 'Неверные данные'}, status=400)
 
-    # Удаляем старые строки и создаём новые
-    session.items.all().delete()
-
-    new_items = []
+    # Собираем трек-коды из запроса (без пустых, без дублей внутри сессии)
+    seen = set()
+    parsed = []
     for i, item in enumerate(items):
         track_code = str(item.get('track_code', '')).strip()
-        if not track_code:
+        if not track_code or track_code in seen:
             continue
+        seen.add(track_code)
         weight_str = str(item.get('weight', '') or '').replace(',', '.').strip()
         weight_val = None
         if weight_str:
             try:
-                weight_val = Decimal(weight_str)
+                w = Decimal(weight_str)
+                if 0 < w < 1000:
+                    weight_val = w
             except (InvalidOperation, ValueError):
                 pass
+        parsed.append({
+            'track_code': track_code,
+            'owner_name': str(item.get('owner_name', '')).strip(),
+            'weight': weight_val,
+            'row_number': i,
+        })
+
+    # Проверяем: какие трек-коды уже заняты ДРУГОЙ сессией
+    incoming_codes = [p['track_code'] for p in parsed]
+    occupied = set(
+        ArrivalSessionItem.objects
+        .filter(track_code__in=incoming_codes)
+        .exclude(session=session)
+        .values_list('track_code', flat=True)
+    )
+
+    # Ищем соответствующие TrackCode объекты для FK
+    track_objs = {
+        tc.track_code: tc
+        for tc in TrackCode.objects.filter(track_code__in=incoming_codes)
+    }
+
+    # Удаляем старые строки только текущей сессии
+    session.items.all().delete()
+
+    new_items = []
+    for p in parsed:
+        if p['track_code'] in occupied:
+            continue  # пропускаем трек, занятый другой сессией
         new_items.append(ArrivalSessionItem(
             session=session,
-            track_code=track_code,
-            owner_name=str(item.get('owner_name', '')).strip(),
-            weight=weight_val,
-            row_number=i,
+            track_code=p['track_code'],
+            track_obj=track_objs.get(p['track_code']),
+            owner_name=p['owner_name'],
+            weight=p['weight'],
+            row_number=p['row_number'],
         ))
 
     if new_items:
         ArrivalSessionItem.objects.bulk_create(new_items)
 
-    return JsonResponse({'success': True, 'count': len(new_items)})
+    return JsonResponse({
+        'success': True,
+        'count': len(new_items),
+        'occupied': sorted(occupied),
+    })
 
 
 @login_required

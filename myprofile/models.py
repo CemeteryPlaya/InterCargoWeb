@@ -756,7 +756,12 @@ class ArrivalSessionItem(models.Model):
         ArrivalSession, on_delete=models.CASCADE,
         related_name='items', verbose_name="Сессия"
     )
-    track_code = models.CharField(max_length=100, verbose_name="Трек-код")
+    track_code = models.CharField(max_length=100, unique=True, verbose_name="Трек-код")
+    track_obj = models.ForeignKey(
+        'TrackCode', on_delete=models.CASCADE,
+        null=True, blank=True, related_name='session_items',
+        verbose_name="Трек (объект)"
+    )
     owner_name = models.CharField(max_length=150, blank=True, default='', verbose_name="Владелец (логин)")
     weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
     row_number = models.PositiveIntegerField(default=0, verbose_name="Номер строки")

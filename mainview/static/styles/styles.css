@@ -139,6 +139,14 @@
             background-color: #f9fafb !important;
         }
 
+        body.theme-dark .bg-amber-50 {
+            background-color: #fffbeb !important;
+        }
+
+        body.theme-dark .bg-gray-200 {
+            background-color: #e5e7eb !important;
+        }
+
         /* Контрастный тёмный текст внутри этих карточек */
         body.theme-dark .bg-green-100,
         body.theme-dark .bg-red-100,
@@ -146,9 +154,10 @@
         body.theme-dark .bg-orange-100,
         body.theme-dark .bg-purple-100,
         body.theme-dark .bg-blue-100,
-        body.theme-dark .bg-white-100 {
+        body.theme-dark .bg-white-100,
+        body.theme-dark .bg-amber-50,
+        body.theme-dark .bg-gray-200 {
             color: #111827 !important;
-            /* почти чёрный */
         }
 
         body.theme-dark .bg-green-100 p,
@@ -158,13 +167,17 @@
         body.theme-dark .bg-purple-100 p,
         body.theme-dark .bg-blue-100 p,
         body.theme-dark .bg-white-100 p,
+        body.theme-dark .bg-amber-50 p,
+        body.theme-dark .bg-gray-200 p,
         body.theme-dark .bg-green-100 strong,
         body.theme-dark .bg-red-100 strong,
         body.theme-dark .bg-yellow-100 strong,
         body.theme-dark .bg-orange-100 strong,
         body.theme-dark .bg-purple-100 strong,
         body.theme-dark .bg-blue-100 strong,
-        body.theme-dark .bg-white-100 strong {
+        body.theme-dark .bg-white-100 strong,
+        body.theme-dark .bg-amber-50 strong,
+        body.theme-dark .bg-gray-200 strong {
             color: #111827 !important;
         }
 
