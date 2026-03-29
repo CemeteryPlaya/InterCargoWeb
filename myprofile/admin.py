@@ -37,7 +37,7 @@ class TrackCodeAdminForm(forms.ModelForm):
 
 class ArrivalSessionItemReadonlyInline(admin.TabularInline):
     model = ArrivalSessionItem
-    fk_name = 'session'
+    fk_name = 'track_obj'
     extra = 0
     max_num = 0
     fields = ('session', 'track_code', 'owner_name', 'weight', 'row_number', 'created_at')
