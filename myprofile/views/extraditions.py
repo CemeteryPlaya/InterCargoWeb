@@ -212,9 +212,9 @@ def search_package(request):
                 if cell:
                     cell_display = cell.display_number
                 elif TrackCode.objects.filter(
-                    owner=package.user, status='ready', is_accepted_pp=False
+                    owner=package.user, status='ready',
                 ).exists():
-                    cell_display = 'Доставлено, но не приняли на склад'
+                    cell_display = 'Доставлено на ПВЗ'
         except (UserProfile.DoesNotExist, AttributeError):
             pass
 

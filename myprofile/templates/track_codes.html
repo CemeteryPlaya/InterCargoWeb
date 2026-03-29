@@ -202,8 +202,7 @@
             <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% for code in track_codes %}
                 <div class="p-4 rounded-lg shadow border text-gray-800
-                {% if code.status == 'ready' and not code.is_accepted_pp %}bg-amber-50 border-amber-300
-                {% elif code.status == 'ready' %}bg-green-100 border-green-300
+                {% if code.status == 'ready' %}bg-green-100 border-green-300
                 {% elif code.status == 'user_added' %}bg-red-100 border-red-300
                 {% elif code.status == 'warehouse_cn' %}bg-orange-100 border-orange-300
                 {% elif code.status == 'shipped_cn' %}bg-yellow-100 border-yellow-300
@@ -236,7 +235,7 @@
                     </form>
                     {% endif %}
                     <p class="pr-24" :class="archiveMode ? 'pl-8' : ''"><strong>Код:</strong> {{ code.track_code }}</p>
-                    <p><strong>Статус:</strong> <span data-track-status>{% if code.status == 'ready' and not code.is_accepted_pp %}Доставлен, но не принят на склад{% else %}{{ code.get_status_display }}{% endif %}</span></p>
+                    <p><strong>Статус:</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
                     <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-500 dark:text-gray-500">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
                     {% if code.sorting_location %}
                     <p><strong>Где отсортирован:</strong> {{ code.sorting_location }}</p>

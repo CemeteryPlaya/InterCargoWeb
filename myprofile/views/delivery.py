@@ -512,11 +512,14 @@ def complete_delivery(request):
                         user_pickup_map[track.owner] = track.delivery_pickup or pickup
 
             # Обновляем историю доставки одним запросом
-            DeliveryHistory.objects.filter(
+            dh = DeliveryHistory.objects.filter(
                 driver=request.user,
                 pickup_point=pickup,
                 delivered_at__isnull=True,
-            ).order_by('-taken_at')[:1].update(delivered_at=now)
+            ).order_by('-taken_at').first()
+            if dh:
+                dh.delivered_at = now
+                dh.save(update_fields=['delivered_at'])
 
         # Один bulk_update вместо N отдельных track.save()
         if all_tracks_to_update:

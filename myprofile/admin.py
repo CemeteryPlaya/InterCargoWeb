@@ -35,6 +35,22 @@ class TrackCodeAdminForm(forms.ModelForm):
             self.instance._skip_status_validation = True
         return super().clean()
 
+class ArrivalSessionItemReadonlyInline(admin.TabularInline):
+    model = ArrivalSessionItem
+    fk_name = 'track_obj'
+    extra = 0
+    fields = ('session', 'owner_name', 'weight', 'row_number', 'created_at')
+    readonly_fields = ('session', 'owner_name', 'weight', 'row_number', 'created_at')
+    verbose_name = "Сессия прихода"
+    verbose_name_plural = "Сессии прихода (в которых числится трек)"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(TrackCode)
 class TrackCodeAdmin(admin.ModelAdmin):
     form = TrackCodeAdminForm
@@ -43,6 +59,7 @@ class TrackCodeAdmin(admin.ModelAdmin):
     list_filter = ('status', 'is_archived', 'is_accepted_pp', 'update_date', 'sorting_location')
     readonly_fields = ('status_history',)
     actions = ['update_status_action']
+    inlines = [ArrivalSessionItemReadonlyInline]
 
     def update_status_action(self, request, queryset):
         if 'post' in request.POST:
