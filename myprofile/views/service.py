@@ -64,15 +64,6 @@ def service_generate_packages(request):
             from django.contrib.auth.models import User
             user = User.objects.get(id=user_id)
 
-            # Сначала создаём чеки для ready треков без ReceiptItem
-            tracks_without_receipt = TrackCode.objects.filter(
-                owner=user, status='ready'
-            ).exclude(
-                id__in=ReceiptItem.objects.values_list('track_code_id', flat=True)
-            )
-            if tracks_without_receipt.exists():
-                create_receipts_for_user(user, statuses=('ready',))
-
             # Находим чеки, где ВСЕ треки в ready
             user_receipts = Receipt.objects.filter(owner=user).prefetch_related('items__track_code')
             ready_receipts = []
@@ -385,6 +376,88 @@ def _merge_receipts(receipt_ids, items_for_date, owner_id, target_date, RATE):
 
         # Пересчитываем основной чек
         _recalc_receipt(main_receipt, effective_rate)
+
+
+@login_required
+@require_POST
+def service_test_notification(request):
+    """
+    Тест уведомлений: отправляет пробное уведомление себе по всем каналам
+    (in-app, browser push, Telegram, email).
+    """
+    if not _can_access_service(request.user):
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    notif_type = request.POST.get('notif_type', 'delivered')
+    user = request.user
+
+    TEST_CONFIGS = {
+        'delivered': {
+            'title': '[ТЕСТ] Доставлено на склад сортировки',
+            'message': '📦 [ТЕСТ] Ваши товары (3 посылки) доставлены на склад сортировки',
+        },
+        'receipt': {
+            'title': '[ТЕСТ] Создан чек',
+            'message': '🧾 [ТЕСТ] Создан чек №999: 3 трек-кода, сумма 5 577 тг.',
+        },
+        'ready': {
+            'title': '[ТЕСТ] Доставлено на ПВЗ',
+            'message': (
+                '📦 [ТЕСТ] Ваши посылки доставлены на ПВЗ!\n'
+                '• TEST-TRACK-001 — 1.500 кг — 2 789 ₸\n'
+                '• TEST-TRACK-002 — 0.800 кг — 1 487 ₸\n\n'
+                '📊 Итого: 2 посылки\n'
+                '⚖️ Общий вес: 2.300 кг\n'
+                '💰 Общая стоимость: 4 276 ₸'
+            ),
+        },
+        'shipped_cn': {
+            'title': '[ТЕСТ] Отправлен из Китая',
+            'message': '📦 [ТЕСТ] Ваш трек-код TEST-TRACK-001 отправлен со склада в Китае.',
+        },
+    }
+
+    cfg = TEST_CONFIGS.get(notif_type, TEST_CONFIGS['delivered'])
+
+    # 1. In-app уведомление (+ browser push автоматически через сигнал)
+    from myprofile.models import Notification as _Notification
+    _Notification.objects.create(user=user, message=cfg['message'])
+    channels = ['in-app ✓', 'push ✓ (если подписан)']
+
+    # 2. Telegram
+    try:
+        from tgbot.models import TelegramNotification, TelegramProfile
+        if TelegramProfile.objects.filter(user=user, is_active=True).exists():
+            TelegramNotification.objects.create(
+                user=user,
+                title=cfg['title'],
+                message=cfg['message'],
+                notification_type='info',
+            )
+            channels.append('Telegram ✓ (в очереди)')
+        else:
+            channels.append('Telegram — нет привязки')
+    except Exception as e:
+        channels.append(f'Telegram — ошибка: {e}')
+
+    # 3. Email
+    if user.email:
+        try:
+            from myprofile.email_utils import send_mail_logged
+            send_mail_logged(
+                subject=f'[Inter Cargo] {cfg["title"]}',
+                body=cfg['message'],
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+            channels.append(f'Email ✓ → {user.email}')
+        except Exception as e:
+            channels.append(f'Email — ошибка: {e}')
+    else:
+        channels.append('Email — нет адреса')
+
+    messages.success(request, f'Тест «{cfg["title"]}» отправлен: {", ".join(channels)}.')
+    return redirect('service')
 
 
 @login_required

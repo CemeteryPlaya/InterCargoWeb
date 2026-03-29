@@ -231,18 +231,19 @@ def resolve_owner(username):
 
 def send_grouped_notifications(notif_counts, status):
     """Отправляет групповые уведомления после обновления трек-кодов."""
-    status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
     for user, count in notif_counts.items():
-        if count == 1:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Ваш трек-код обновлён: {status_display}"
-            )
+        if status == 'delivered':
+            if count == 1:
+                msg = "📦 Ваша посылка доставлена на склад сортировки."
+            else:
+                msg = f"📦 Ваши товары ({count} посылок) доставлены на склад сортировки."
         else:
-            Notification.objects.create(
-                user=user,
-                message=f"📦 Обновлено {count} трек-кодов: {status_display}"
-            )
+            status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
+            if count == 1:
+                msg = f"📦 Ваш трек-код обновлён: {status_display}"
+            else:
+                msg = f"📦 Обновлено {count} трек-кодов: {status_display}"
+        Notification.objects.create(user=user, message=msg)
 
 
 def add_bulk_result_messages(request, updated=0, created=0, partially_updated=0,

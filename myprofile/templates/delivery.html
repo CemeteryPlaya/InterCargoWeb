@@ -29,7 +29,7 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'includes/sidebar.html' %}
-        <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
+        <div class="flex-1 mx-auto p-4 md:p-6 bg-white rounded-lg shadow mt-10">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Доставка</h2>
 
             {% if messages %}
@@ -294,6 +294,7 @@
                                     </div>
                                     <div id="history-pp-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" class="hidden bg-gray-50 px-4 pb-3">
                                         {% if entry.clients_list %}
+                                        <div class="overflow-x-auto">
                                         <table class="w-full text-sm">
                                             <thead>
                                                 <tr class="text-gray-500 border-b border-gray-200">
@@ -316,6 +317,7 @@
                                                 {% endfor %}
                                             </tbody>
                                         </table>
+                                        </div>
                                         {% else %}
                                         <p class="text-sm text-gray-400 py-2">Нет данных о клиентах</p>
                                         {% endif %}

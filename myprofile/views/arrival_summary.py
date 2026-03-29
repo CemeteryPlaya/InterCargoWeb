@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from django.db.models import Q
 
-from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation, ReceiptItem
+from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation, ReceiptItem, Notification
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
@@ -401,6 +401,11 @@ def generate_day_receipts(request):
         receipt = create_receipts_for_user(user, statuses=statuses)
         if receipt:
             created_count += 1
+            track_count = receipt.items.count()
+            Notification.objects.create(
+                user=user,
+                message=f"🧾 Создан чек №{receipt.id}: {track_count} трек-код{'а' if 2 <= track_count <= 4 else 'ов' if track_count != 1 else ''}, сумма {receipt.total_price} тг."
+            )
 
     if created_count:
         messages.success(request, f"Создано чеков: {created_count}")
