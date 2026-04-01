@@ -38,10 +38,6 @@ def unidentified_view(request):
             messages.error(request, "Введите трек-код.")
             return redirect('unidentified')
 
-        if TrackCode.all_objects.filter(track_code=track_code_str).exists():
-            messages.error(request, f"Трек-код «{track_code_str}» уже существует в системе.")
-            return redirect('unidentified')
-
         from decimal import Decimal, InvalidOperation
         weight = None
         if weight_raw:
@@ -59,6 +55,34 @@ def unidentified_view(request):
                 sorting_location = SortingLocation.objects.get(id=sorting_location_id)
             except SortingLocation.DoesNotExist:
                 pass
+
+        existing = TrackCode.all_objects.filter(track_code=track_code_str).first()
+        if existing is not None:
+            existing_order = TrackCode.STATUS_ORDER.get(existing.status, 0)
+            unidentified_order = TrackCode.STATUS_ORDER.get('unidentified', 0)
+
+            if existing_order >= unidentified_order:
+                messages.error(
+                    request,
+                    f"Трек-код «{track_code_str}» уже имеет статус «{existing.get_status_display()}»."
+                )
+                return redirect('unidentified')
+
+            # Обновляем статус с shipped_cn на unidentified
+            existing.status = 'unidentified'
+            existing.update_date = timezone.localdate()
+            if weight is not None:
+                existing.weight = weight
+            if sorting_location is not None:
+                existing.sorting_location = sorting_location
+            if note:
+                existing.description = note
+            existing.set_status_date()
+            existing.log_status_change(request.user)
+            existing.save(skip_full_clean=True)
+
+            messages.success(request, f"Трек-код «{track_code_str}» переведён в статус «Неопознанные».")
+            return redirect('unidentified')
 
         track = TrackCode(
             track_code=track_code_str,

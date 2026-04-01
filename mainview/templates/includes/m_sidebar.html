@@ -41,6 +41,12 @@
         <a href="{% url 'goods_arrival' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-inbox-archive-line"></i> Приход товаров
         </a>
+        <a href="{% url 'unidentified' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-question-mark"></i> Неопознанные посылки
+        </a>
+        <a href="{% url 'reschedule_arrival' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-calendar-line"></i> Перенос прихода
+        </a>
         <a href="{% url 'arrival_history' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-archive-line"></i> История приходов
         </a>
@@ -55,6 +61,9 @@
         </a>
         <a href="{% url 'notification_logs' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
             <i class="ri-notification-3-line"></i> Логи Уведомлений
+        </a>
+        <a href="{% url 'notification_mutes' %}" class="flex items-center gap-2 hover:text-red-500 py-2">
+            <i class="ri-notification-off-line"></i> Настройка уведомлений
         </a>
         {% endif %}
         {% if request.user.userprofile.is_staff or request.user.userprofile.is_accountant or request.user.userprofile.is_driver %}
