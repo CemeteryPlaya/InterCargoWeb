@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
@@ -13,6 +14,7 @@ from myprofile.models import (
 )
 
 from register.models import UserProfile, PickupPoint
+from myprofile.views.utils import notify_receipt_claimed_telegram
 
 
 def _is_warehouse_worker(user):
@@ -121,13 +123,47 @@ def warehouse_view(request):
                     'track_count': len(no_receipt_tracks),
                 })
 
+            # Проверяем, есть ли заявка на возврат для этой ячейки
+            receipt_ids_in_cell = [g['receipt'].id for g in receipt_groups.values()]
+            has_pending_return = Receipt.objects.filter(
+                id__in=receipt_ids_in_cell,
+                needs_attention=True,
+                attention_reason='Возвращено со склада ПВЗ',
+            ).exists() if receipt_ids_in_cell else False
+
             cells_data.append({
                 'cell': cell,
                 'tracks': tracks_list,
                 'total_weight': sum(float(t.weight or 0) for t in tracks_list),
                 'track_count': len(tracks_list),
                 'sub_cells': sub_cells,
+                'has_pending_return': has_pending_return,
             })
+
+    # Клиенты с товарами на ПВЗ, но без назначенной ячейки (после finish_acceptance_session)
+    users_with_cells = {cd['cell'].user_id for cd in cells_data if cd['cell'].user_id}
+    no_cell_tracks_qs = TrackCode.objects.filter(
+        status='ready',
+        is_accepted_pp=True,
+        owner__userprofile__pickup=pickup_point,
+    ).exclude(
+        owner_id__in=users_with_cells,
+    ).select_related('owner').order_by('owner__username', 'track_code')
+
+    no_cell_clients = {}
+    for track in no_cell_tracks_qs:
+        if not track.owner:
+            continue
+        uid = track.owner_id
+        if uid not in no_cell_clients:
+            no_cell_clients[uid] = {
+                'user': track.owner,
+                'tracks': [],
+                'total_weight': 0,
+            }
+        no_cell_clients[uid]['tracks'].append(track)
+        no_cell_clients[uid]['total_weight'] += float(track.weight or 0)
+    no_cell_data = sorted(no_cell_clients.values(), key=lambda x: x['user'].username)
 
     # Проверяем наличие активной сессии реструктуризации
     active_restructure = RestructureSession.objects.filter(
@@ -137,6 +173,7 @@ def warehouse_view(request):
     return render(request, "warehouse.html", {
         'pickup_point': pickup_point,
         'cells': cells_data,
+        'no_cell_data': no_cell_data,
         'all_pickups': PickupPoint.objects.filter(is_active=True) if user_profile.is_staff else None,
         'hide_description': is_pp_worker_only,
         'active_restructure': active_restructure,
@@ -194,6 +231,9 @@ def warehouse_issue_to_client(request):
             is_claimed=True,
             claimed_at=now,
         )
+        for receipt in receipts:
+            receipt.refresh_from_db()
+            notify_receipt_claimed_telegram(receipt, pickup_label=str(pickup_point))
 
         # Создаём пакет и запись выдачи
         package = ExtraditionPackage.objects.create(user=client_user, is_issued=True)
@@ -210,6 +250,8 @@ def warehouse_issue_to_client(request):
         for track in tracks:
             track.status = 'claimed'
             track.update_date = today
+            track.set_status_date()
+            track.log_status_change(request.user)
             track.save()
 
         # Удаляем ячейку
@@ -262,13 +304,8 @@ def warehouse_not_arrived(request):
             messages.info(request, "Нет товаров в этой ячейке.")
             return redirect('warehouse')
 
-        # Возвращаем статус треков на 'delivered' (Доставлено на сортировочный склад)
-        for track in tracks:
-            track.status = 'delivered'
-            track.update_date = today
-            track.save(skip_full_clean=True)
-
-        # Помечаем связанные чеки как "Требует внимания"
+        # Создаём заявку на возврат: помечаем чеки как "Требует внимания"
+        # Треки и ячейка НЕ изменяются — до подтверждения на странице "Требует внимания"
         track_ids = [t.id for t in tracks]
         Receipt.objects.filter(
             items__track_code_id__in=track_ids
@@ -277,18 +314,20 @@ def warehouse_not_arrived(request):
             attention_reason='Возвращено со склада ПВЗ',
             attention_added_by=request.user,
             attention_pickup=str(pickup_point),
+            attention_at=timezone.now(),
         )
-
-        # Удаляем ячейку
-        cell.delete()
 
         # Уведомление клиенту
         Notification.objects.create(
             user=client_user,
-            message=f"Ваши посылки ({len(tracks)} шт.) возвращены на сортировочный склад."
+            message=f"Создана заявка на возврат ваших посылок ({len(tracks)} шт.) на сортировочный склад."
         )
 
-    messages.success(request, f"Посылки клиента {client_name} ({len(tracks)} шт.) возвращены на сортировочный склад.")
+    messages.success(
+        request,
+        f"Заявка на возврат создана: {len(tracks)} посылок клиента {client_name}. "
+        f"Подтвердите возврат на странице «Требует внимания»."
+    )
     return redirect('warehouse')
 
 
@@ -600,6 +639,87 @@ def warehouse_assign_cell(request):
 
 
 @login_required
+@require_POST
+def confirm_return_to_sorting(request):
+    """Подтвердить возврат посылок со склада ПВЗ на сортировочный склад (из страницы «Требует внимания»)."""
+    try:
+        is_staff_user = request.user.userprofile.is_staff or request.user.is_superuser
+    except UserProfile.DoesNotExist:
+        is_staff_user = request.user.is_superuser
+
+    if not is_staff_user:
+        return HttpResponseForbidden("У вас нет доступа.")
+
+    owner_id = request.POST.get('owner_id')
+    if not owner_id:
+        messages.error(request, "Не указан клиент.")
+        return redirect('attention_required')
+
+    try:
+        owner = User.objects.get(id=owner_id)
+    except User.DoesNotExist:
+        messages.error(request, "Клиент не найден.")
+        return redirect('attention_required')
+
+    today = timezone.localdate()
+    with transaction.atomic():
+        # Находим треки по чекам с флагом "Возвращено со склада ПВЗ"
+        track_ids = set(
+            Receipt.objects.filter(
+                owner=owner,
+                needs_attention=True,
+                attention_reason='Возвращено со склада ПВЗ',
+            ).values_list('items__track_code_id', flat=True)
+        )
+        track_ids.discard(None)
+
+        if not track_ids:
+            messages.error(request, "Нет треков для подтверждения возврата.")
+            return redirect('attention_required')
+
+        tracks = list(TrackCode.objects.filter(id__in=track_ids, status='ready'))
+
+        # Определяем ПВЗ клиента
+        pickup_point = None
+        try:
+            pickup_point = owner.userprofile.pickup
+        except (UserProfile.DoesNotExist, AttributeError):
+            pass
+
+        # Возвращаем треки на сортировочный склад
+        for track in tracks:
+            track.status = 'delivered'
+            track.update_date = today
+            track.save(skip_full_clean=True)
+
+        # Удаляем ячейку хранения
+        if pickup_point:
+            StorageCell.objects.filter(pickup_point=pickup_point, user=owner).delete()
+
+        # Снимаем флаг внимания
+        Receipt.objects.filter(
+            owner=owner,
+            needs_attention=True,
+            attention_reason='Возвращено со склада ПВЗ',
+        ).update(
+            needs_attention=False,
+            attention_reason='',
+            attention_added_by=None,
+            attention_pickup='',
+            attention_at=None,
+        )
+
+        # Уведомление клиенту
+        Notification.objects.create(
+            user=owner,
+            message=f"Ваши посылки ({len(tracks)} шт.) возвращены на сортировочный склад.",
+        )
+
+    messages.success(request, f"Возврат подтверждён: {len(tracks)} посылок клиента {owner.username}.")
+    return redirect('attention_required')
+
+
+@login_required
 def warehouse_find_client_by_receipt(request):
     """AJAX: найти клиента по номеру чека для реструктуризации."""
     if not _is_warehouse_worker(request.user):
@@ -645,9 +765,49 @@ def finish_restructure(request):
         messages.error(request, "Сессия не найдена или уже завершена.")
         return redirect('warehouse')
 
-    session.status = 'completed'
-    session.completed_at = timezone.now()
-    session.save(update_fields=['status', 'completed_at'])
+    pickup_point = session.pickup_point
 
-    messages.success(request, "Реструктуризация завершена.")
+    with transaction.atomic():
+        session.status = 'completed'
+        session.completed_at = timezone.now()
+        session.save(update_fields=['status', 'completed_at'])
+
+        # Авто-назначение ячеек клиентам без ячейки
+        clients_with_cell = set(
+            StorageCell.objects.filter(pickup_point=pickup_point).values_list('user_id', flat=True)
+        )
+        # Клиенты с товарами на этом ПВЗ (статус ready, принято на ПВЗ)
+        clients_without_cell = list(
+            TrackCode.objects.filter(
+                status='ready',
+                is_accepted_pp=True,
+                owner__userprofile__pickup=pickup_point,
+            ).exclude(
+                owner_id__in=clients_with_cell,
+            ).values_list('owner_id', flat=True).distinct()
+        )
+
+        if clients_without_cell:
+            existing_numbers = set(
+                StorageCell.objects.filter(pickup_point=pickup_point).values_list('cell_number', flat=True)
+            )
+            from django.contrib.auth.models import User
+            auto_cells = []
+            next_num = 0
+            for user_id in clients_without_cell:
+                while str(next_num) in existing_numbers:
+                    next_num += 1
+                cell_number = str(next_num)
+                existing_numbers.add(cell_number)
+                auto_cells.append(StorageCell(
+                    pickup_point=pickup_point,
+                    user_id=user_id,
+                    cell_number=cell_number,
+                ))
+                next_num += 1
+            StorageCell.objects.bulk_create(auto_cells)
+            messages.success(request, f"Реструктуризация завершена. Автоматически назначено ячеек: {len(auto_cells)}.")
+        else:
+            messages.success(request, "Реструктуризация завершена.")
+
     return redirect('warehouse')

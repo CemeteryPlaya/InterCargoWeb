@@ -97,12 +97,28 @@
                                                     <i class="ri-user-star-line mr-0.5"></i>Сотрудник: {{ client.added_by }}
                                                 </div>
                                                 {% endif %}
+                                                {% if client.attention_at %}
+                                                <div class="text-xs text-gray-400 mt-0.5">
+                                                    <i class="ri-time-line mr-0.5"></i>{{ client.attention_at|date:"d.m.Y H:i" }}
+                                                </div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="flex items-center justify-between sm:justify-end gap-4 flex-shrink-0">
                                             <div class="text-sm text-gray-500 whitespace-nowrap">
                                                 {{ client.track_count }} шт. / {{ client.total_weight|floatformat:2 }} кг
                                             </div>
+                                            {% if reason_group.reason == 'Возвращено со склада ПВЗ' %}
+                                            <form method="post" action="{% url 'confirm_return_to_sorting' %}" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="owner_id" value="{{ client.owner_id }}">
+                                                <button type="submit"
+                                                    class="inline-flex items-center gap-1 bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition text-xs font-medium whitespace-nowrap"
+                                                    onclick="return confirm('Подтвердить возврат посылок клиента {{ client.login }} на сортировочный склад?\nПосылки получат статус «Доставлено на сортировочный склад», ячейка будет удалена.')">
+                                                    <i class="ri-arrow-go-back-line"></i> Подтвердить возврат
+                                                </button>
+                                            </form>
+                                            {% else %}
                                             <form method="post" action="{% url 'resolve_attention' %}" class="inline">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="owner_type" value="{{ client.owner_type }}">
@@ -114,6 +130,7 @@
                                                     <i class="ri-check-line"></i> Проблемы устранены
                                                 </button>
                                             </form>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     {% endfor %}

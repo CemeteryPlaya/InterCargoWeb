@@ -17,6 +17,7 @@ from myprofile.models import (
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
 from register.models import UserProfile, PickupPoint
+from myprofile.views.utils import notify_receipt_claimed_telegram
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def _get_home_delivery_clients(status):
     tracks = TrackCode.objects.filter(
         status=status,
         delivery_pickup__is_home_delivery=True,
-    ).select_related('owner', 'owner__userprofile')
+    ).exclude(needs_pickup_reschedule=True).select_related('owner', 'owner__userprofile')
 
     clients = {}
     for track in tracks:
@@ -71,6 +72,7 @@ def _build_pickup_date_groups(status):
         .filter(status=status)
         .exclude(delivery_pickup__isnull=True)
         .exclude(delivery_pickup__is_home_delivery=True)
+        .exclude(needs_pickup_reschedule=True)
         .select_related('delivery_pickup', 'owner')
     )
 
@@ -78,6 +80,7 @@ def _build_pickup_date_groups(status):
     tracks_no_override = (
         TrackCode.objects
         .filter(status=status, delivery_pickup__isnull=True)
+        .exclude(needs_pickup_reschedule=True)
         .select_related('owner__userprofile__pickup', 'owner')
     )
 
@@ -232,12 +235,12 @@ def take_delivery(request):
             pickup = None
 
         if pickup:
-            # Все треки этого ПВЗ в статусе 'delivered'
+            # Все треки этого ПВЗ в статусе 'delivered' (кроме тех, что ожидают переноса)
             all_tracks = TrackCode.objects.filter(
                 Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
                 Q(delivery_pickup=pickup),
                 status='delivered',
-            )
+            ).exclude(needs_pickup_reschedule=True)
             # Фильтр по дате прихода
             if filter_date is not None:
                 all_tracks = all_tracks.filter(delivered_date=filter_date)
@@ -349,9 +352,10 @@ def take_delivery(request):
                 items__track_code_id__in=remaining_ids
             ).distinct().update(
                 needs_attention=True,
-                attention_reason='Не принято в доставку водителем',
+                attention_reason='Не принят в доставку Доставщиком',
                 attention_added_by=request.user,
                 attention_pickup=str(pickup),
+                attention_at=timezone.now(),
             )
 
     if updated:
@@ -420,6 +424,7 @@ def _send_delivery_notifications_bg(email_batch, tg_track_data):
             # Telegram
             if tg_track_data:
                 from tgbot.models import TelegramNotification
+                from myprofile.views.utils import is_notification_muted
                 tg_objects = [
                     TelegramNotification(
                         user_id=user_id,
@@ -428,6 +433,7 @@ def _send_delivery_notifications_bg(email_batch, tg_track_data):
                         notification_type='tracking',
                     )
                     for user_id, tracks in tg_track_data.items()
+                    if not is_notification_muted(user_id, 'telegram')
                     for code, weight in tracks
                 ]
                 if tg_objects:
@@ -603,6 +609,9 @@ def driver_issue(request):
             is_claimed=True,
             claimed_at=now,
         )
+        for receipt in receipts:
+            receipt.refresh_from_db()
+            notify_receipt_claimed_telegram(receipt, pickup_label="Доставка на дом (Курьер)")
 
         # Создаём пакет выдачи
         package = ExtraditionPackage.objects.create(user=client_user)
@@ -669,12 +678,12 @@ def get_pickup_receipts(request):
     except PickupPoint.DoesNotExist:
         return JsonResponse({'clients': []})
 
-    # Находим треки этого ПВЗ в статусе 'delivered'
+    # Находим треки этого ПВЗ в статусе 'delivered' (кроме ожидающих переноса)
     tracks_qs = TrackCode.objects.filter(
         Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
         Q(delivery_pickup=pickup),
         status='delivered',
-    )
+    ).exclude(needs_pickup_reschedule=True)
     if filter_date is not None:
         tracks_qs = tracks_qs.filter(delivered_date=filter_date)
     tracks = list(tracks_qs.select_related('owner'))
@@ -686,6 +695,15 @@ def get_pickup_receipts(request):
         ReceiptItem.objects
         .filter(track_code_id__in=track_ids)
         .select_related('receipt', 'receipt__owner', 'track_code')
+    )
+
+    # Чеки, не принятые ранее доставщиком
+    rejected_receipt_numbers = set(
+        Receipt.objects.filter(
+            items__track_code_id__in=track_ids,
+            needs_attention=True,
+            attention_reason='Не принят в доставку Доставщиком',
+        ).values_list('receipt_number', flat=True)
     )
 
     # Группируем: клиент → список чеков
@@ -710,6 +728,7 @@ def get_pickup_receipts(request):
                 'receipt_number': rn,
                 'track_count': 0,
                 'total_weight': 0,
+                'needs_attention': rn in rejected_receipt_numbers,
             }
 
         clients_map[username]['receipts'][rn]['track_count'] += 1

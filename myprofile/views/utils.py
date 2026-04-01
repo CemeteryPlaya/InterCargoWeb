@@ -1,9 +1,10 @@
 # utils.py
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.models import User
+from django.db.models import Q as models_q
 from django.utils import timezone
 from django.contrib import messages as django_messages
-from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell, Notification
+from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell, Notification, NotificationMute
 from register.models import UserProfile
 
 def cleanup_expired_temp_discounts():
@@ -57,7 +58,7 @@ def _recalc_receipt(receipt, effective_rate):
     receipt.total_price = total_price
     receipt.price_per_kg = effective_rate
     receipt._allow_content_update = True
-    receipt.save()
+    receipt.save(update_fields=['total_weight', 'total_price', 'price_per_kg'])
 
 
 def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
@@ -274,3 +275,66 @@ def parse_paid_at(request):
         except ValueError:
             return timezone.now()
     return timezone.now()
+
+
+def is_notification_muted(user_id, channel):
+    """
+    Проверяет, заглушены ли уведомления для пользователя по указанному каналу.
+    channel: 'telegram' | 'email'
+    Возвращает True, если есть активная не-просроченная заглушка
+    (глобальная или на конкретного пользователя).
+    """
+    now = timezone.now()
+    return NotificationMute.objects.filter(
+        is_active=True,
+    ).filter(
+        # Глобальная заглушка или на конкретного пользователя
+        models_q(user__isnull=True) | models_q(user_id=user_id)
+    ).filter(
+        # Канал совпадает или заглушены все каналы
+        models_q(channel=channel) | models_q(channel='all')
+    ).filter(
+        # Не истекла
+        models_q(expires_at__isnull=True) | models_q(expires_at__gt=now)
+    ).exists()
+
+
+def notify_receipt_claimed_telegram(receipt, pickup_label=None):
+    """
+    Создаёт Telegram-уведомление о выдаче посылок по чеку.
+    Вызывается из вьюх выдачи вместо per-track уведомлений.
+    """
+    try:
+        from tgbot.models import TelegramNotification
+
+        if not receipt.owner_id:
+            return
+        if is_notification_muted(receipt.owner_id, 'telegram'):
+            return
+
+        weight = receipt.total_weight or Decimal('0')
+        price = int(receipt.total_price) if receipt.total_price else 0
+        items_count = receipt.items.count()
+        pickup = pickup_label or receipt.pickup_point or 'Не указан'
+
+        msg = (
+            f"📄 Чек №{receipt.receipt_number}\n"
+            f"📦 Количество позиций: <b>{items_count}</b>\n"
+            f"⚖️ Общий вес: <b>{weight:.3f} кг</b>\n"
+            f"💰 Сумма: <b>{price} ₸</b>\n"
+            f"📍 Пункт выдачи: <b>{pickup}</b>"
+        )
+
+        TelegramNotification.objects.create(
+            user_id=receipt.owner_id,
+            title='Посылки выданы на ПВЗ',
+            message=msg,
+            notification_type='info',
+        )
+    except Exception as e:
+        import logging as _logging
+        _logging.getLogger(__name__).error(
+            'notify_receipt_claimed_telegram error for receipt %s: %s',
+            getattr(receipt, 'id', '?'), e,
+        )
+

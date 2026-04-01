@@ -34,6 +34,23 @@ def track_codes_view(request):
                 existing_track = TrackCode.all_objects.get(track_code=track_code_str)
 
                 if existing_track.owner is None:
+                    if existing_track.status == 'unidentified':
+                        # Неопознанная посылка — назначаем клиента, статус остаётся "Неопознанка"
+                        existing_track.owner = request.user
+                        if description:
+                            existing_track.description = description
+                        existing_track.log_status_change(request.user)
+                        existing_track.save()
+                        location_info = ''
+                        if existing_track.sorting_location:
+                            location_info = f' ({existing_track.sorting_location.name})'
+                        messages.success(
+                            request,
+                            f"Трек-код добавлен как неопознанная посылка{location_info}. "
+                            f"Ожидайте подтверждения оператором — после этого посылка будет обработана."
+                        )
+                        return redirect('track_codes')
+
                     # Если трек-код существует, но без владельца, присваиваем его текущему пользователю
                     existing_track.owner = request.user
                     existing_track.description = description

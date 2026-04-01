@@ -12,6 +12,17 @@ from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
 import json
+import re
+
+_INVALID_TRACK_CODE_RE = re.compile(
+    r'['
+    r'\u4E00-\u9FFF'
+    r'\u3400-\u4DBF'
+    r'\uF900-\uFAFF'
+    r'\u3000-\u303F'
+    r'\u0400-\u04FF'
+    r']'
+)
 
 
 def _expire_stale_sessions():
@@ -155,10 +166,14 @@ def session_save_items(request, session_id):
 
     # Собираем трек-коды из запроса (без пустых, без дублей внутри сессии)
     seen = set()
+    invalid_codes = []
     parsed = []
     for i, item in enumerate(items):
         track_code = str(item.get('track_code', '')).strip()
         if not track_code or track_code in seen:
+            continue
+        if _INVALID_TRACK_CODE_RE.search(track_code):
+            invalid_codes.append(track_code)
             continue
         seen.add(track_code)
         weight_str = str(item.get('weight', '') or '').replace(',', '.').strip()
@@ -215,6 +230,7 @@ def session_save_items(request, session_id):
         'success': True,
         'count': len(new_items),
         'occupied': sorted(occupied),
+        'invalid_chars': sorted(invalid_codes),
     })
 
 
@@ -337,6 +353,14 @@ def complete_session(request, session_id):
             else:
                 track.historical_price_per_kg = get_global_price_per_kg()
 
+            # Если у активного клиента нет ПВЗ — помечаем для переноса через "Перенос прихода"
+            if track.owner and track.owner.is_active:
+                try:
+                    _has_pickup = track.owner.userprofile.pickup_id is not None
+                except UserProfile.DoesNotExist:
+                    _has_pickup = False
+                track.needs_pickup_reschedule = not _has_pickup
+
             track.set_status_date()
             track.log_status_change(request.user)
 
@@ -368,6 +392,15 @@ def complete_session(request, session_id):
                     new_track.historical_price_per_kg = get_global_price_per_kg() - _discount
                 else:
                     new_track.historical_price_per_kg = get_global_price_per_kg()
+
+                # Если у активного клиента нет ПВЗ — помечаем для переноса
+                if user and user.is_active:
+                    try:
+                        _has_pickup = user.userprofile.pickup_id is not None
+                    except UserProfile.DoesNotExist:
+                        _has_pickup = False
+                    new_track.needs_pickup_reschedule = not _has_pickup
+
                 new_track.set_status_date()
                 new_track.log_status_change(request.user)
                 new_track.save()

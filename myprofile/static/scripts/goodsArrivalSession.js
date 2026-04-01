@@ -157,6 +157,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     hideOccupiedWarning();
                 }
+                if (data.invalid_chars && data.invalid_chars.length > 0) {
+                    showInvalidCharsWarning(data.invalid_chars);
+                } else {
+                    hideInvalidCharsWarning();
+                }
             } else {
                 throw new Error('save failed');
             }
@@ -751,6 +756,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function hideOccupiedWarning() {
         occupiedWarning.classList.add('hidden');
+    }
+
+    // ==================== Запрещённые символы в трек-кодах ====================
+    var invalidCharsWarning = (function () {
+        var el = document.createElement('div');
+        el.className = 'hidden mt-2 p-3 bg-red-50 border border-red-300 rounded-lg text-sm text-red-800';
+        el.innerHTML = '<i class="ri-forbid-line mr-1"></i> <span id="invalid_chars_text"></span>';
+        occupiedWarning.parentNode.insertBefore(el, occupiedWarning.nextSibling);
+        return el;
+    }());
+    var invalidCharsText = document.getElementById('invalid_chars_text');
+
+    function showInvalidCharsWarning(codes) {
+        invalidCharsText.textContent = 'Трек-коды с запрещёнными символами (пропущены): ' + codes.join(', ');
+        invalidCharsWarning.classList.remove('hidden');
+    }
+    function hideInvalidCharsWarning() {
+        invalidCharsWarning.classList.add('hidden');
     }
 
     function validateRow(tr) {

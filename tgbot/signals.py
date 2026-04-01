@@ -45,17 +45,26 @@ def track_status_changed(sender, instance, **kwargs):
 
     try:
         from tgbot.models import TelegramNotification
+        from myprofile.views.utils import is_notification_muted
 
-        if instance.status == 'ready':
-            # Уведомление о "Доставлен на ПВЗ" не отправляем —
-            # вместо этого отправляется чек при его создании (из create_receipts_for_user)
+        if instance.status in ('ready', 'claimed'):
+            # 'ready'   — вместо этого отправляется чек при создании (create_receipts_for_user)
+            # 'claimed' — вместо этого отправляется уведомление по чеку из вьюх выдачи
             return
-        else:
-            TelegramNotification.objects.create(
-                user_id=instance.owner_id,
-                title=f'📦 Статус обновлён: {new_display}',
-                message=f'Трек-код {track_code} — {new_display}',
-                notification_type='tracking',
-            )
+
+        if instance.status == 'shipping_pp':
+            # Уведомление "В доставке до ПВЗ" полностью отключено
+            return
+
+        if is_notification_muted(instance.owner_id, 'telegram'):
+            logger.debug('Telegram notification muted for user_id=%s, track=%s', instance.owner_id, track_code)
+            return
+
+        TelegramNotification.objects.create(
+            user_id=instance.owner_id,
+            title=f'📦 Статус обновлён: {new_display}',
+            message=f'Трек-код {track_code} — {new_display}',
+            notification_type='tracking',
+        )
     except Exception as e:
         logger.error(f'Error creating telegram notification for {track_code}: {e}')

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo — Управление уведомлениями</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+</head>
+<body class="bg-gray-50 min-h-screen">
+{% include 'includes/header.html' %}
+
+{% block content %}
+<div class="flex min-h-screen">
+    {% include 'includes/sidebar.html' %}
+
+    <main class="flex-1 p-4 md:p-6 max-w-5xl">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+            <i class="ri-notification-off-line text-red-500"></i> Управление уведомлениями
+        </h2>
+
+        {% if messages %}
+        <div class="mb-4 space-y-2">
+            {% for message in messages %}
+            <div class="p-3 rounded-lg text-sm font-medium
+                {% if message.tags == 'success' %}bg-green-100 text-green-800
+                {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Форма создания заглушки -->
+        <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="ri-add-circle-line text-red-500"></i> Отключить уведомления
+            </h3>
+
+            <form id="createMuteForm" class="space-y-4">
+                {% csrf_token %}
+
+                <!-- Кому -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Для кого</label>
+                    <div class="flex gap-3 mb-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="scope" value="all" checked class="accent-red-500">
+                            <span class="text-sm text-gray-700">Все клиенты</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="scope" value="user" class="accent-red-500">
+                            <span class="text-sm text-gray-700">Конкретный клиент</span>
+                        </label>
+                    </div>
+                    <!-- Поиск клиента -->
+                    <div id="userSearchBlock" class="hidden">
+                        <div class="relative">
+                            <input type="text" id="userSearchInput"
+                                   placeholder="Введите логин или имя..."
+                                   autocomplete="off"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400">
+                            <div id="userSearchResults"
+                                 class="hidden absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            </div>
+                        </div>
+                        <input type="hidden" name="user_id" id="selectedUserId">
+                        <p id="selectedUserDisplay" class="hidden mt-1 text-xs text-green-700 font-medium">
+                            <i class="ri-user-line"></i> <span id="selectedUserName"></span>
+                            <button type="button" id="clearUserBtn" class="ml-2 text-gray-400 hover:text-red-500">&times;</button>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Канал -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Канал</label>
+                    <div class="flex gap-4 flex-wrap">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="channel" value="all" checked class="accent-red-500">
+                            <span class="text-sm text-gray-700"><i class="ri-notification-off-line"></i> Все каналы</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="channel" value="telegram" class="accent-blue-500">
+                            <span class="text-sm text-gray-700"><i class="ri-telegram-line text-blue-500"></i> Только Telegram</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="channel" value="email" class="accent-orange-500">
+                            <span class="text-sm text-gray-700"><i class="ri-mail-line text-orange-500"></i> Только Email</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Длительность -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Длительность</label>
+                    <div class="flex gap-4 flex-wrap mb-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="duration_type" value="manual" checked class="accent-red-500">
+                            <span class="text-sm text-gray-700">Вручную (до ручного включения)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="duration_type" value="hours" class="accent-red-500">
+                            <span class="text-sm text-gray-700">На определённое время</span>
+                        </label>
+                    </div>
+                    <div id="hoursBlock" class="hidden">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <input type="number" name="hours" id="hoursInput"
+                                   min="0.5" max="720" step="0.5"
+                                   placeholder="Количество часов"
+                                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-red-400">
+                            <span class="text-sm text-gray-500">часов</span>
+                        </div>
+                        <!-- Быстрые кнопки -->
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            {% for h_val in quick_hours %}
+                            <button type="button" class="quick-hours text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded hover:bg-red-100 hover:text-red-700 transition"
+                                    data-hours="{{ h_val }}">{{ h_val }}ч</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Причина -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Причина <span class="text-gray-400 font-normal">(необязательно)</span></label>
+                    <input type="text" name="reason" maxlength="255"
+                           placeholder="Например: технические работы, просьба клиента..."
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                        <i class="ri-notification-off-line mr-1"></i> Отключить уведомления
+                    </button>
+                    <span id="createMuteStatus" class="text-sm hidden"></span>
+                </div>
+            </form>
+        </div>
+
+        <!-- Активные заглушки -->
+        <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden mb-6">
+            <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800">
+                    <i class="ri-pause-circle-line text-red-500"></i>
+                    Активные заглушки
+                    <span class="ml-1 text-sm font-normal text-red-600 bg-red-50 rounded-full px-2 py-0.5">{{ active_mutes|length }}</span>
+                </h3>
+            </div>
+
+            {% if active_mutes %}
+            <div class="divide-y divide-gray-100">
+                {% for mute in active_mutes %}
+                <div class="px-5 py-3 flex items-start justify-between gap-4 flex-wrap" id="mute-row-{{ mute.id }}">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                            <!-- Кому -->
+                            {% if mute.user %}
+                            <span class="font-medium text-gray-800 text-sm">
+                                <i class="ri-user-line text-gray-400"></i>
+                                {{ mute.user.get_full_name|default:mute.user.username }}
+                                <span class="text-gray-400">({{ mute.user.username }})</span>
+                            </span>
+                            {% else %}
+                            <span class="font-medium text-red-700 text-sm">
+                                <i class="ri-group-line"></i> Все клиенты
+                            </span>
+                            {% endif %}
+                            <!-- Канал -->
+                            {% if mute.channel == 'telegram' %}
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"><i class="ri-telegram-line"></i> Telegram</span>
+                            {% elif mute.channel == 'email' %}
+                            <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full"><i class="ri-mail-line"></i> Email</span>
+                            {% else %}
+                            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full"><i class="ri-notification-off-line"></i> Все каналы</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-500 flex items-center gap-3 flex-wrap">
+                            <span><i class="ri-time-line"></i> Отключено: {{ mute.muted_at|date:"d.m.Y H:i" }}</span>
+                            {% if mute.expires_at %}
+                            <span class="text-orange-600"><i class="ri-alarm-line"></i> До: {{ mute.expires_at|date:"d.m.Y H:i" }}</span>
+                            {% else %}
+                            <span class="text-red-600"><i class="ri-lock-line"></i> До ручного включения</span>
+                            {% endif %}
+                            {% if mute.muted_by %}
+                            <span class="text-gray-400"><i class="ri-user-settings-line"></i> {{ mute.muted_by.username }}</span>
+                            {% endif %}
+                            {% if mute.reason %}
+                            <span class="italic text-gray-400">"{{ mute.reason }}"</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <button type="button"
+                            class="deactivate-btn flex-shrink-0 text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition"
+                            data-mute-id="{{ mute.id }}">
+                        <i class="ri-play-circle-line mr-1"></i> Включить обратно
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="px-5 py-8 text-center text-gray-400 text-sm">
+                <i class="ri-checkbox-circle-line text-2xl text-green-400 mb-1"></i>
+                <p>Все уведомления активны — заглушек нет</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- История (последние 50) -->
+        {% if history_mutes %}
+        <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+            <details>
+                <summary class="px-5 py-3 cursor-pointer font-semibold text-gray-600 text-sm hover:bg-gray-50">
+                    <i class="ri-history-line"></i> История отключений (последние {{ history_mutes|length }})
+                </summary>
+                <div class="divide-y divide-gray-100">
+                    {% for mute in history_mutes %}
+                    <div class="px-5 py-2 flex items-center gap-3 flex-wrap text-xs text-gray-500">
+                        <span>
+                            {% if mute.user %}{{ mute.user.username }}{% else %}<em>все</em>{% endif %}
+                        </span>
+                        <span class="{% if mute.channel == 'telegram' %}text-blue-600{% elif mute.channel == 'email' %}text-orange-600{% else %}text-gray-600{% endif %}">
+                            {{ mute.get_channel_display }}
+                        </span>
+                        <span>{{ mute.muted_at|date:"d.m.Y H:i" }}</span>
+                        {% if mute.expires_at %}<span>→ {{ mute.expires_at|date:"d.m.Y H:i" }}</span>{% endif %}
+                        {% if mute.reason %}<span class="italic">"{{ mute.reason }}"</span>{% endif %}
+                        <span class="text-green-600"><i class="ri-check-line"></i> Отключено</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+{% endblock %}
+
+{% include 'includes/footer.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var csrfToken = '{{ csrf_token }}';
+    var searchUrl = '{% url "mute_search_users" %}';
+    var createUrl = '{% url "create_mute" %}';
+
+    // ── Переключение "все / конкретный клиент" ──────────────────────────
+    var scopeRadios = document.querySelectorAll('input[name="scope"]');
+    var userSearchBlock = document.getElementById('userSearchBlock');
+    scopeRadios.forEach(function (r) {
+        r.addEventListener('change', function () {
+            userSearchBlock.classList.toggle('hidden', this.value !== 'user');
+            if (this.value !== 'user') {
+                document.getElementById('selectedUserId').value = '';
+                document.getElementById('userSearchInput').value = '';
+                document.getElementById('selectedUserDisplay').classList.add('hidden');
+            }
+        });
+    });
+
+    // ── Переключение "вручную / на часы" ────────────────────────────────
+    var durationRadios = document.querySelectorAll('input[name="duration_type"]');
+    var hoursBlock = document.getElementById('hoursBlock');
+    durationRadios.forEach(function (r) {
+        r.addEventListener('change', function () {
+            hoursBlock.classList.toggle('hidden', this.value !== 'hours');
+        });
+    });
+
+    // Быстрые кнопки часов
+    document.querySelectorAll('.quick-hours').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('hoursInput').value = this.dataset.hours;
+        });
+    });
+
+    // ── Поиск клиента ────────────────────────────────────────────────────
+    var searchInput = document.getElementById('userSearchInput');
+    var searchResults = document.getElementById('userSearchResults');
+    var selectedUserId = document.getElementById('selectedUserId');
+    var selectedUserDisplay = document.getElementById('selectedUserDisplay');
+    var selectedUserName = document.getElementById('selectedUserName');
+    var clearUserBtn = document.getElementById('clearUserBtn');
+    var searchTimer = null;
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        var q = this.value.trim();
+        if (q.length < 2) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+        searchTimer = setTimeout(function () {
+            fetch(searchUrl + '?q=' + encodeURIComponent(q), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                searchResults.innerHTML = '';
+                if (!data.users || !data.users.length) {
+                    searchResults.innerHTML = '<div class="px-3 py-2 text-sm text-gray-400">Не найдено</div>';
+                    searchResults.classList.remove('hidden');
+                    return;
+                }
+                data.users.forEach(function (u) {
+                    var item = document.createElement('div');
+                    item.className = 'px-3 py-2 text-sm cursor-pointer hover:bg-red-50 flex items-center gap-2';
+                    item.innerHTML = '<i class="ri-user-line text-gray-400"></i>'
+                        + '<span class="font-medium text-gray-800">' + u.username + '</span>'
+                        + (u.full_name ? '<span class="text-gray-500 text-xs">' + u.full_name + '</span>' : '');
+                    item.addEventListener('click', function () {
+                        selectedUserId.value = u.id;
+                        selectedUserName.textContent = u.username + (u.full_name ? ' (' + u.full_name + ')' : '');
+                        selectedUserDisplay.classList.remove('hidden');
+                        searchInput.value = '';
+                        searchResults.classList.add('hidden');
+                    });
+                    searchResults.appendChild(item);
+                });
+                searchResults.classList.remove('hidden');
+            });
+        }, 300);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!searchResults.contains(e.target) && e.target !== searchInput) {
+            searchResults.classList.add('hidden');
+        }
+    });
+
+    clearUserBtn.addEventListener('click', function () {
+        selectedUserId.value = '';
+        selectedUserDisplay.classList.add('hidden');
+    });
+
+    // ── Отправка формы создания ──────────────────────────────────────────
+    var createForm = document.getElementById('createMuteForm');
+    var createStatus = document.getElementById('createMuteStatus');
+
+    createForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var scope = createForm.querySelector('input[name="scope"]:checked').value;
+        var userId = selectedUserId.value;
+
+        if (scope === 'user' && !userId) {
+            createStatus.textContent = 'Выберите клиента из списка.';
+            createStatus.className = 'text-sm text-red-600';
+            createStatus.classList.remove('hidden');
+            return;
+        }
+
+        var durationType = createForm.querySelector('input[name="duration_type"]:checked').value;
+        if (durationType === 'hours' && !document.getElementById('hoursInput').value) {
+            createStatus.textContent = 'Укажите количество часов.';
+            createStatus.className = 'text-sm text-red-600';
+            createStatus.classList.remove('hidden');
+            return;
+        }
+
+        var formData = new FormData(createForm);
+        if (scope === 'all') formData.delete('user_id');
+
+        var submitBtn = createForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Применяется...';
+
+        fetch(createUrl, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.error) {
+                createStatus.textContent = data.error;
+                createStatus.className = 'text-sm text-red-600';
+                createStatus.classList.remove('hidden');
+            } else {
+                createStatus.textContent = 'Уведомления отключены.';
+                createStatus.className = 'text-sm text-green-700';
+                createStatus.classList.remove('hidden');
+                setTimeout(function () { location.reload(); }, 800);
+            }
+        })
+        .catch(function () {
+            createStatus.textContent = 'Ошибка при выполнении запроса.';
+            createStatus.className = 'text-sm text-red-600';
+            createStatus.classList.remove('hidden');
+        })
+        .finally(function () {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="ri-notification-off-line mr-1"></i> Отключить уведомления';
+        });
+    });
+
+    // ── Кнопки "Включить обратно" ────────────────────────────────────────
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.deactivate-btn');
+        if (!btn) return;
+
+        var muteId = btn.dataset.muteId;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i>';
+
+        var fd = new FormData();
+        fd.append('csrfmiddlewaretoken', csrfToken);
+
+        fetch('/profile/notification-mutes/' + muteId + '/deactivate/', {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                var row = document.getElementById('mute-row-' + muteId);
+                if (row) {
+                    row.classList.add('opacity-40', 'line-through');
+                    btn.innerHTML = '<i class="ri-check-line text-green-600"></i> Включено';
+                    setTimeout(function () { location.reload(); }, 600);
+                }
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-play-circle-line mr-1"></i> Включить обратно';
+        });
+    });
+});
+</script>
+</body>
+</html>

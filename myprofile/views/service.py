@@ -419,6 +419,8 @@ def service_test_notification(request):
 
     cfg = TEST_CONFIGS.get(notif_type, TEST_CONFIGS['delivered'])
 
+    from myprofile.views.utils import is_notification_muted
+
     # 1. In-app уведомление (+ browser push автоматически через сигнал)
     from myprofile.models import Notification as _Notification
     _Notification.objects.create(user=user, message=cfg['message'])
@@ -427,7 +429,9 @@ def service_test_notification(request):
     # 2. Telegram
     try:
         from tgbot.models import TelegramNotification, TelegramProfile
-        if TelegramProfile.objects.filter(user=user, is_active=True).exists():
+        if is_notification_muted(user.id, 'telegram'):
+            channels.append('Telegram — заглушено (настройка уведомлений)')
+        elif TelegramProfile.objects.filter(user=user, is_active=True).exists():
             TelegramNotification.objects.create(
                 user=user,
                 title=cfg['title'],
@@ -444,13 +448,17 @@ def service_test_notification(request):
     if user.email:
         try:
             from myprofile.email_utils import send_mail_logged
-            send_mail_logged(
-                subject=f'[Inter Cargo] {cfg["title"]}',
-                body=cfg['message'],
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-            channels.append(f'Email ✓ → {user.email}')
+            if is_notification_muted(user.id, 'email'):
+                channels.append(f'Email — заглушено (настройка уведомлений)')
+            else:
+                send_mail_logged(
+                    subject=f'[Inter Cargo] {cfg["title"]}',
+                    body=cfg['message'],
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                    user_id=user.id,
+                )
+                channels.append(f'Email ✓ → {user.email}')
         except Exception as e:
             channels.append(f'Email — ошибка: {e}')
     else:

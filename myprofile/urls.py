@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -53,6 +53,8 @@ urlpatterns = [
     path('extradition/toggle-payment/', extraditions.toggle_payment, name='extradition_toggle_payment'),
     path('extradition/sessions/', extraditions.get_sessions, name='extradition_sessions'),
     path('extradition/close-session/', extraditions.close_session, name='extradition_close_session'),
+    path('extradition/warehouse-receipts/', extraditions.warehouse_get_receipts, name='warehouse_get_receipts'),
+    path('extradition/warehouse-quick-issue/', extraditions.warehouse_quick_issue_receipt, name='warehouse_quick_issue_receipt'),
     path('extradition-package/', extradition_Package.extradition_package_view, name='extradition_package'),
     path('quick-issue/', extradition_Package.quick_issue, name='quick_issue'),
     path('documents/', documents.print_documents_view, name='print_documents'),
@@ -93,15 +95,33 @@ urlpatterns = [
     path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
     path('delivery/receipts/', delivery.get_pickup_receipts, name='get_pickup_receipts'),
     path('pp-acceptance/', pp_acceptance.pp_acceptance_view, name='pp_acceptance'),
+    path('pp-acceptance/<int:pickup_id>/<str:date_str>/', pp_acceptance.pp_acceptance_detail_view, name='pp_acceptance_detail'),
     path('pp-acceptance/accept/', pp_acceptance.accept_delivery, name='accept_delivery'),
     path('pp-acceptance/receipts/', pp_acceptance.get_acceptance_receipts, name='get_acceptance_receipts'),
     path('pp-acceptance/finish/', pp_acceptance.finish_acceptance_session, name='finish_acceptance_session'),
     path('attention/', pp_acceptance.attention_required_view, name='attention_required'),
     path('attention/resolve/', pp_acceptance.resolve_attention, name='resolve_attention'),
+    path('attention/confirm-return/', warehouse.confirm_return_to_sorting, name='confirm_return_to_sorting'),
     path('pp-extradition-history/', pp_extradition_history.pp_extradition_history_view, name='pp_extradition_history'),
     path('email-logs/resend/<int:log_id>/', email_logs.resend_email, name='resend_email'),
     path('notification-logs/', notification_logs.notification_logs_view, name='notification_logs'),
+    path('notification-mutes/', notification_mutes.notification_mutes_view, name='notification_mutes'),
+    path('notification-mutes/create/', notification_mutes.create_mute, name='create_mute'),
+    path('notification-mutes/<int:mute_id>/deactivate/', notification_mutes.deactivate_mute, name='deactivate_mute'),
+    path('notification-mutes/search-users/', notification_mutes.search_users, name='mute_search_users'),
     path('finance/', finance_summary.finance_summary_view, name='finance_summary'),
+    path('arrival-reschedule/', reschedule_arrival.reschedule_arrival_view, name='reschedule_arrival'),
+    path('arrival-reschedule/date-summary/', reschedule_arrival.reschedule_get_date_summary, name='reschedule_date_summary'),
+    path('arrival-reschedule/search-users/', reschedule_arrival.reschedule_search_users, name='reschedule_search_users'),
+    path('arrival-reschedule/get-tracks/', reschedule_arrival.reschedule_get_tracks, name='reschedule_get_tracks'),
+    path('arrival-reschedule/transfer/', reschedule_arrival.reschedule_transfer, name='reschedule_transfer'),
+    path('arrival-reschedule/no-pickup-transfer/', reschedule_arrival.reschedule_no_pickup_transfer, name='reschedule_no_pickup_transfer'),
+    path('unidentified/', unidentified.unidentified_view, name='unidentified'),
+    path('unidentified/<int:track_id>/assign/', unidentified.unidentified_assign_owner, name='unidentified_assign_owner'),
+    path('unidentified/<int:track_id>/confirm/', unidentified.unidentified_confirm, name='unidentified_confirm'),
+    path('unidentified/<int:track_id>/unassign/', unidentified.unidentified_unassign, name='unidentified_unassign'),
+    path('unidentified/<int:track_id>/delete/', unidentified.unidentified_delete, name='unidentified_delete'),
+    path('unidentified/search-users/', unidentified.unidentified_search_users, name='unidentified_search_users'),
     path('service/', service.service_view, name='service'),
     path('service/generate-packages/', service.service_generate_packages, name='service_generate_packages'),
     path('service/generate-receipts/', service.service_generate_receipts, name='service_generate_receipts'),

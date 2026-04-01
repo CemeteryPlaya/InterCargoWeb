@@ -34,7 +34,7 @@ async def show_my_receipts(message: Message):
             f"📄 <b>Чек №{r['receipt_number']}</b>\n"
             f"Статус: <b>ожидает получение</b>\n\n"
             f"📦 Количество посылок: <b>{r['items_count']}</b>\n"
-            f"⚖️ Общий вес: <b>{r['total_weight']:.1f} кг</b>\n\n"
+            f"⚖️ Общий вес: <b>{r['total_weight']:.3f} кг</b>\n\n"
             f"💰 Сумма к оплате: <b>{r['total_price']} ₸</b>\n\n"
             f"📍 Пункт выдачи: <b>{r['pickup_point'] or 'Не указан'}</b>\n"
         )

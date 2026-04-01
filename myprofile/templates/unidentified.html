@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo — Неопознанные посылки</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script defer src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+        <main class="flex-1 px-4 md:px-8 py-8 space-y-8">
+            <header>
+                <h1 class="text-xl font-bold text-red-500">Неопознанные посылки</h1>
+                <p class="text-sm text-gray-500 mt-1">Посылки без владельца на сортировочном складе</p>
+            </header>
+
+            {% if messages %}
+            <div>
+                {% for message in messages %}
+                <div class="p-4 mb-3 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Форма добавления -->
+            <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-base font-semibold text-gray-800 mb-4">
+                    <i class="ri-add-circle-line text-red-500 mr-1"></i> Добавить неопознанную посылку
+                </h2>
+                <form method="post" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Трек-код *</label>
+                        <input type="text" name="track_code" required
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                            placeholder="Введите трек-код">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Вес (кг)</label>
+                        <input type="text" name="weight"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                            placeholder="0.000">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Место сортировки</label>
+                        <select name="sorting_location"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300">
+                            <option value="">— не указано —</option>
+                            {% for loc in sorting_locations %}
+                            <option value="{{ loc.id }}">{{ loc.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Примечание</label>
+                        <input type="text" name="note"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                            placeholder="Необязательно">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
+                        <button type="submit"
+                            class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition">
+                            <i class="ri-add-line mr-1"></i> Добавить
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Заявлены клиентами -->
+            {% if claimed %}
+            <section class="bg-white rounded-xl shadow-sm border border-orange-200">
+                <div class="p-4 border-b border-orange-100 bg-orange-50 rounded-t-xl flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-orange-800">
+                        <i class="ri-user-received-line mr-1"></i>
+                        Заявлено клиентами: <span class="text-orange-600" id="claimedCount">{{ claimed|length }}</span>
+                    </h2>
+                    <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">Требует подтверждения</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Трек-код</th>
+                                <th class="px-4 py-3 text-left">Клиент</th>
+                                <th class="px-4 py-3 text-left">Вес</th>
+                                <th class="px-4 py-3 text-left">Место сортировки</th>
+                                <th class="px-4 py-3 text-left">Дата</th>
+                                <th class="px-4 py-3 text-center">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="claimedTableBody">
+                            {% for pkg in claimed %}
+                            <tr id="crow-{{ pkg.id }}" class="hover:bg-orange-50 transition">
+                                <td class="px-4 py-3 font-mono font-medium text-gray-800">{{ pkg.track_code }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="font-medium text-gray-800">{{ pkg.owner.username }}</span>
+                                    {% if pkg.owner.get_full_name %}
+                                    <span class="text-gray-500 text-xs block">{{ pkg.owner.get_full_name }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-700">
+                                    {% if pkg.weight %}{{ pkg.weight }} кг{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-700">
+                                    {% if pkg.sorting_location %}{{ pkg.sorting_location.name }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-500">{{ pkg.update_date|date:"d.m.Y" }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button
+                                            class="confirm-btn text-xs bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}"
+                                            data-owner="{{ pkg.owner.username }}">
+                                            <i class="ri-check-line"></i> Подтвердить
+                                        </button>
+                                        <button
+                                            class="unassign-btn text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded hover:bg-yellow-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}">
+                                            <i class="ri-user-unfollow-line"></i> Снять
+                                        </button>
+                                        <button
+                                            class="delete-btn text-xs bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Без владельца -->
+            <section class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-gray-800">
+                        <i class="ri-question-mark text-yellow-500 mr-1"></i>
+                        Без владельца: <span class="text-yellow-600" id="unclaimedCount">{{ unclaimed|length }}</span>
+                    </h2>
+                </div>
+
+                {% if unclaimed %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Трек-код</th>
+                                <th class="px-4 py-3 text-left">Вес</th>
+                                <th class="px-4 py-3 text-left">Место сортировки</th>
+                                <th class="px-4 py-3 text-left">Примечание</th>
+                                <th class="px-4 py-3 text-left">Дата добавления</th>
+                                <th class="px-4 py-3 text-center">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="unclaimedTableBody">
+                            {% for pkg in unclaimed %}
+                            <tr id="row-{{ pkg.id }}" class="hover:bg-gray-50 transition">
+                                <td class="px-4 py-3 font-mono font-medium text-gray-800">{{ pkg.track_code }}</td>
+                                <td class="px-4 py-3 text-gray-700">
+                                    {% if pkg.weight %}{{ pkg.weight }} кг{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-700">
+                                    {% if pkg.sorting_location %}{{ pkg.sorting_location.name }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-600 max-w-xs truncate">
+                                    {% if pkg.description %}{{ pkg.description }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-500">{{ pkg.update_date|date:"d.m.Y" }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button
+                                            class="assign-btn text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}">
+                                            <i class="ri-user-add-line"></i> Назначить клиента
+                                        </button>
+                                        <button
+                                            class="delete-btn text-xs bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}">
+                                            <i class="ri-delete-bin-line"></i> Удалить
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-12 text-center text-gray-400">
+                    <i class="ri-inbox-2-line text-4xl mb-3 block"></i>
+                    <p>Нет неопознанных посылок без владельца</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно: назначить клиента вручную -->
+    <div id="assignModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold text-gray-800">Назначить клиента</h3>
+                <button onclick="closeAssignModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">
+                Трек-код: <span id="assignTrackCode" class="font-mono font-medium text-gray-800"></span>
+            </p>
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Поиск клиента</label>
+                <input type="text" id="userSearchInput" autocomplete="off"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    placeholder="Введите имя или логин...">
+                <div id="userSearchResults" class="mt-1 border border-gray-200 rounded-lg bg-white shadow hidden max-h-48 overflow-y-auto"></div>
+            </div>
+            <div id="selectedUserInfo" class="hidden mb-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                <i class="ri-user-line mr-1"></i>
+                <span id="selectedUserText"></span>
+                <input type="hidden" id="selectedUserId">
+            </div>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeAssignModal()" class="text-sm text-gray-500 hover:text-gray-700 px-4 py-2">Отмена</button>
+                <button id="confirmAssignBtn" onclick="confirmAssign()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition"
+                    disabled>
+                    <i class="ri-check-line mr-1"></i> Назначить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    let currentAssignTrackId = null;
+
+    function ajaxPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest'},
+            body: new URLSearchParams(body),
+        }).then(r => r.json());
+    }
+
+    // ── Назначить клиента (из таблицы "без владельца") ──
+    document.querySelectorAll('.assign-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentAssignTrackId = btn.dataset.trackId;
+            document.getElementById('assignTrackCode').textContent = btn.dataset.trackCode;
+            document.getElementById('userSearchInput').value = '';
+            document.getElementById('userSearchResults').classList.add('hidden');
+            document.getElementById('selectedUserInfo').classList.add('hidden');
+            document.getElementById('selectedUserId').value = '';
+            document.getElementById('confirmAssignBtn').disabled = true;
+            document.getElementById('assignModal').classList.remove('hidden');
+        });
+    });
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').classList.add('hidden');
+        currentAssignTrackId = null;
+    }
+
+    // Поиск пользователей
+    let searchTimeout = null;
+    document.getElementById('userSearchInput').addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        const q = this.value.trim();
+        if (q.length < 2) {
+            document.getElementById('userSearchResults').classList.add('hidden');
+            return;
+        }
+        searchTimeout = setTimeout(() => {
+            fetch(`{% url 'unidentified_search_users' %}?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    const box = document.getElementById('userSearchResults');
+                    if (!data.users.length) {
+                        box.innerHTML = '<p class="px-3 py-2 text-sm text-gray-400">Пользователи не найдены</p>';
+                    } else {
+                        box.innerHTML = data.users.map(u => `
+                            <div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 transition user-option"
+                                data-id="${u.id}" data-username="${u.username}" data-fullname="${u.full_name}">
+                                <span class="font-medium">${u.username}</span>
+                                ${u.full_name ? `<span class="text-gray-500 ml-1">${u.full_name}</span>` : ''}
+                            </div>`).join('');
+                        box.querySelectorAll('.user-option').forEach(el => {
+                            el.addEventListener('click', () => {
+                                const label = el.dataset.fullname
+                                    ? `${el.dataset.username} (${el.dataset.fullname})`
+                                    : el.dataset.username;
+                                document.getElementById('selectedUserId').value = el.dataset.id;
+                                document.getElementById('selectedUserText').textContent = label;
+                                document.getElementById('selectedUserInfo').classList.remove('hidden');
+                                document.getElementById('confirmAssignBtn').disabled = false;
+                                document.getElementById('userSearchInput').value = label;
+                                box.classList.add('hidden');
+                            });
+                        });
+                    }
+                    box.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    function confirmAssign() {
+        const userId = document.getElementById('selectedUserId').value;
+        if (!userId || !currentAssignTrackId) return;
+        const btn = document.getElementById('confirmAssignBtn');
+        btn.disabled = true;
+
+        ajaxPost(`{% url 'unidentified_assign_owner' 0 %}`.replace('/0/', `/${currentAssignTrackId}/`), {user_id: userId})
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`row-${data.track_id}`)?.remove();
+                    updateCount('unclaimedCount', '#unclaimedTableBody');
+                    closeAssignModal();
+                } else {
+                    alert(data.error || 'Ошибка.');
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => { alert('Ошибка сети.'); btn.disabled = false; });
+    }
+
+    // ── Подтвердить заявку клиента ──
+    document.querySelectorAll('.confirm-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const trackCode = btn.dataset.trackCode;
+            const owner = btn.dataset.owner;
+            if (!confirm(`Подтвердить посылку «${trackCode}» для клиента ${owner}?\nСтатус изменится на "Доставлен на сортировочный склад".`)) return;
+            btn.disabled = true;
+
+            ajaxPost(`{% url 'unidentified_confirm' 0 %}`.replace('/0/', `/${btn.dataset.trackId}/`), {})
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`crow-${data.track_id}`)?.remove();
+                        updateCount('claimedCount', '#claimedTableBody');
+                    } else {
+                        alert(data.error || 'Ошибка.');
+                        btn.disabled = false;
+                    }
+                })
+                .catch(() => { alert('Ошибка сети.'); btn.disabled = false; });
+        });
+    });
+
+    // ── Снять владельца (вернуть в "без владельца") ──
+    document.querySelectorAll('.unassign-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!confirm(`Снять владельца с посылки «${btn.dataset.trackCode}»? Она вернётся в список без владельца.`)) return;
+            btn.disabled = true;
+
+            ajaxPost(`{% url 'unidentified_unassign' 0 %}`.replace('/0/', `/${btn.dataset.trackId}/`), {})
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'Ошибка.');
+                        btn.disabled = false;
+                    }
+                })
+                .catch(() => { alert('Ошибка сети.'); btn.disabled = false; });
+        });
+    });
+
+    // ── Удалить ──
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!confirm(`Удалить посылку «${btn.dataset.trackCode}»?\nЭто означает, что посылка больше не на складе или передана другому карго.`)) return;
+            btn.disabled = true;
+
+            ajaxPost(`{% url 'unidentified_delete' 0 %}`.replace('/0/', `/${btn.dataset.trackId}/`), {})
+                .then(data => {
+                    if (data.success) {
+                        const trackId = data.track_id;
+                        document.getElementById(`row-${trackId}`)?.remove();
+                        document.getElementById(`crow-${trackId}`)?.remove();
+                        updateCount('unclaimedCount', '#unclaimedTableBody');
+                        updateCount('claimedCount', '#claimedTableBody');
+                    } else {
+                        alert(data.error || 'Ошибка.');
+                        btn.disabled = false;
+                    }
+                })
+                .catch(() => { alert('Ошибка сети.'); btn.disabled = false; });
+        });
+    });
+
+    function updateCount(countId, tableBodySelector) {
+        const el = document.getElementById(countId);
+        if (el) {
+            const rows = document.querySelectorAll(`${tableBodySelector} tr`).length;
+            el.textContent = rows;
+        }
+    }
+
+    document.getElementById('assignModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAssignModal();
+    });
+    </script>
+</body>
+</html>

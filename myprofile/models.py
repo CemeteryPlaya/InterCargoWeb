@@ -2,11 +2,23 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 import uuid
+import re
 from io import BytesIO
 import base64
 import qrcode
 import inspect
 from django.utils import timezone
+
+# Запрещённые символы в трек-кодах: китайские (CJK) и кириллица
+_INVALID_TRACK_CODE_RE = re.compile(
+    r'['
+    r'\u4E00-\u9FFF'   # CJK Unified Ideographs (включая 订单编号)
+    r'\u3400-\u4DBF'   # CJK Extension A
+    r'\uF900-\uFAFF'   # CJK Compatibility Ideographs
+    r'\u3000-\u303F'   # CJK Symbols and Punctuation
+    r'\u0400-\u04FF'   # Кириллица
+    r']'
+)
 
 
 class SortingLocation(models.Model):
@@ -33,6 +45,7 @@ class TrackCode(models.Model):
         ('user_added', 'Добавлен пользователем'),
         ('warehouse_cn', 'Прибыло на склад (Китай)'),
         ('shipped_cn', 'Отправлено со склада (Китай)'),
+        ('unidentified', 'Неопознанка (сортировочный склад)'),
         ('delivered', 'Доставлен на сортировочный склад'),
         ('shipping_pp', 'В доставке'),
         ('ready', 'Доставлен на ПВЗ'),
@@ -45,10 +58,11 @@ class TrackCode(models.Model):
         'user_added': 0,
         'warehouse_cn': 1,
         'shipped_cn': 2,
-        'delivered': 3,
-        'shipping_pp': 4,
-        'ready': 5,
-        'claimed': 6,
+        'unidentified': 3,
+        'delivered': 4,
+        'shipping_pp': 5,
+        'ready': 6,
+        'claimed': 7,
     }
 
     id = models.AutoField(primary_key=True, verbose_name="№ трек кода")
@@ -98,6 +112,12 @@ class TrackCode(models.Model):
         verbose_name="Кто принял на ПВЗ"
     )
 
+    # Требует переноса: прибыл без ПВЗ у клиента
+    needs_pickup_reschedule = models.BooleanField(
+        default=False,
+        verbose_name="Требует переноса (прибыл без ПВЗ)"
+    )
+
     # Архивация
     is_archived = models.BooleanField(default=False, verbose_name="Архивирован")
     archived_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата архивации")
@@ -111,6 +131,12 @@ class TrackCode(models.Model):
         Запрещаем регресс статуса: нельзя менять на статус с меньшим порядком.
         Но пропускаем проверку, если изменение делается администратором через админ-панель.
         """
+        # Проверяем трек-код на наличие запрещённых символов (китайские, кириллица)
+        if self.track_code and _INVALID_TRACK_CODE_RE.search(self.track_code):
+            raise ValidationError({
+                'track_code': 'Трек-код не может содержать китайские символы или кириллицу.'
+            })
+
         # Проверяем, установлен ли флаг для обхода валидации (для админ-панели)
         if hasattr(self, '_skip_status_validation') and self._skip_status_validation:
             return
@@ -149,6 +175,7 @@ class TrackCode(models.Model):
     STATUS_DATE_FIELD = {
         'user_added': 'date_user_added',
         'shipped_cn': 'date_shipped_cn',
+        'unidentified': 'delivered_date',
         'delivered': 'delivered_date',
         'shipping_pp': 'date_shipping_pp',
         'ready': 'date_ready',
@@ -839,6 +866,71 @@ class EmailLog(models.Model):
 
     def __str__(self):
         return f"[{self.get_status_display()}] {self.subject} → {self.recipient}"
+
+
+class NotificationMute(models.Model):
+    """
+    Заглушка уведомлений: позволяет сотруднику временно или бессрочно
+    отключить отправку Telegram- и/или email-уведомлений для конкретного
+    клиента или для всех клиентов сразу.
+    """
+    CHANNEL_CHOICES = [
+        ('telegram', 'Telegram'),
+        ('email', 'Email'),
+        ('all', 'Все каналы'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='notification_mutes',
+        verbose_name='Клиент (пусто = все клиенты)',
+    )
+    channel = models.CharField(
+        max_length=20, choices=CHANNEL_CHOICES, default='all',
+        verbose_name='Канал',
+    )
+    muted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_notification_mutes',
+        verbose_name='Кто отключил',
+    )
+    muted_at = models.DateTimeField(auto_now_add=True, verbose_name='Время отключения')
+    expires_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name='Истекает (пусто = только вручную)',
+    )
+    is_active = models.BooleanField(default=True, verbose_name='Активна')
+    reason = models.CharField(max_length=255, blank=True, verbose_name='Причина')
+
+    class Meta:
+        verbose_name = 'Заглушка уведомлений'
+        verbose_name_plural = 'Заглушки уведомлений'
+        ordering = ['-muted_at']
+        indexes = [
+            models.Index(fields=['is_active', 'user']),
+        ]
+
+    def __str__(self):
+        target = self.user.username if self.user else 'все клиенты'
+        ch = self.get_channel_display()
+        exp = self.expires_at.strftime('%d.%m %H:%M') if self.expires_at else 'вручную'
+        return f"Заглушка [{ch}] для {target} до {exp}"
+
+    @property
+    def is_expired(self):
+        if self.expires_at:
+            from django.utils import timezone as _tz
+            return _tz.now() > self.expires_at
+        return False
+
+    @property
+    def is_effective(self):
+        """Заглушка реально действует: активна и не просрочена."""
+        return self.is_active and not self.is_expired
 
 
 class ExtraditionSession(models.Model):
