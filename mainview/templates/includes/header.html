@@ -1,7 +1,7 @@
 {% load static %}
 <meta name="vapid-key" content="{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}">
 <script src="{% static 'scripts/coockiesAndPush.js' %}?v={{ APP_VERSION }}" defer></script>
-<header class="bg-white shadow-sm sticky top-0 z-50">
+<header class="bg-white shadow-sm sticky top-0 z-50 ic-header">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center">
             <a href="/" class="text-2xl font-['Pacifico'] text-primary mr-8">

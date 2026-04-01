@@ -469,3 +469,58 @@
         body.theme-dark #tutorial-banner:hover {
             background-color: #1e3a6f !important;
         }
+
+        /* =========================================
+           Мобильный хидер — фиксированное положение
+           ========================================= */
+
+        /* На мобильных устройствах хидер фиксируется к верхней части экрана,
+           чтобы горизонтальное переполнение контента не сдвигало его */
+        @media (max-width: 767px) {
+            .ic-header {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+            }
+
+            /* Компенсируем высоту фиксированного хидера (~82px = py-4 + logo 50px) */
+            body {
+                padding-top: 82px;
+            }
+
+            /* Основной контент не расширяет страницу шире вьюпорта */
+            .flex.min-h-screen {
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+
+            /* main внутри flex-layout — не даёт контенту "ломать" ширину страницы */
+            main {
+                min-width: 0;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            /* Таблицы внутри overflow-x-auto скроллятся, а не тянут страницу */
+            .overflow-x-auto {
+                max-width: 100%;
+            }
+
+            /* Блоки, которые изначально скрыты и появляются (x-show, hidden),
+               не должны расширять страницу при открытии */
+            [x-show],
+            [x-cloak],
+            .hidden-expandable {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+        }
+
+        /* Dark theme: фиксированный хидер */
+        @media (max-width: 767px) {
+            body.theme-dark .ic-header {
+                background-color: #020617 !important;
+            }
+        }
