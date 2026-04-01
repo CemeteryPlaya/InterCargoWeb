@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 import json
@@ -128,7 +129,10 @@ def get_acceptance_receipts(request):
 
     from datetime import datetime as _dt
     filter_date = None
-    if delivered_date_str:
+    filter_none_date = False
+    if delivered_date_str == 'none':
+        filter_none_date = True
+    elif delivered_date_str:
         try:
             filter_date = _dt.strptime(delivered_date_str, '%Y-%m-%d').date()
         except ValueError:
@@ -140,7 +144,9 @@ def get_acceptance_receipts(request):
         status='ready',
         is_accepted_pp=False,
     )
-    if filter_date is not None:
+    if filter_none_date:
+        tracks_qs = tracks_qs.filter(delivered_date__isnull=True)
+    elif filter_date is not None:
         tracks_qs = tracks_qs.filter(delivered_date=filter_date)
 
     tracks = list(tracks_qs.select_related('owner'))
@@ -259,7 +265,8 @@ def accept_delivery(request):
 
     from datetime import datetime as _dt
     filter_date = None
-    if delivered_date_str:
+    filter_none_date = delivered_date_str == 'none'
+    if not filter_none_date and delivered_date_str:
         try:
             filter_date = _dt.strptime(delivered_date_str, '%Y-%m-%d').date()
         except ValueError:
@@ -271,7 +278,9 @@ def accept_delivery(request):
         status='ready',
         is_accepted_pp=False,
     ).select_related('owner', 'owner__userprofile__pickup')
-    if filter_date is not None:
+    if filter_none_date:
+        all_tracks_qs = all_tracks_qs.filter(delivered_date__isnull=True)
+    elif filter_date is not None:
         all_tracks_qs = all_tracks_qs.filter(delivered_date=filter_date)
 
     if scanned_receipts:
@@ -351,7 +360,8 @@ def finish_acceptance_session(request):
 
     from datetime import datetime as _dt
     filter_date = None
-    if delivered_date_str:
+    filter_none_date = delivered_date_str == 'none'
+    if not filter_none_date and delivered_date_str:
         try:
             filter_date = _dt.strptime(delivered_date_str, '%Y-%m-%d').date()
         except ValueError:
@@ -363,39 +373,110 @@ def finish_acceptance_session(request):
         status='ready',
         is_accepted_pp=False,
     )
-    if filter_date is not None:
+    if filter_none_date:
+        unsorted_tracks = unsorted_tracks.filter(delivered_date__isnull=True)
+    elif filter_date is not None:
         unsorted_tracks = unsorted_tracks.filter(delivered_date=filter_date)
 
-    today = timezone.localdate()
+    now = timezone.now()
     count = 0
-    returned_track_ids = []
-    for track in unsorted_tracks:
-        track.status = 'delivered'
-        track.update_date = today
-        track.save(skip_full_clean=True)
-        returned_track_ids.append(track.id)
+    flagged_track_ids = []
+
+    unsorted_tracks_list = list(unsorted_tracks)
+    for track in unsorted_tracks_list:
+        track.is_accepted_pp = True
+        track.accepted_pp_at = now
+        track.accepted_pp_by_id = request.user.id
+        flagged_track_ids.append(track.id)
         count += 1
 
+    if unsorted_tracks_list:
+        TrackCode.objects.bulk_update(
+            unsorted_tracks_list,
+            ['is_accepted_pp', 'accepted_pp_at', 'accepted_pp_by_id'],
+        )
+
     # Помечаем связанные чеки как "Требует внимания"
-    if returned_track_ids:
+    # Треки остаются в статусе 'ready' и отображаются в Складе ПВЗ без ячейки
+    if flagged_track_ids:
         Receipt.objects.filter(
-            items__track_code_id__in=returned_track_ids
+            items__track_code_id__in=flagged_track_ids
         ).distinct().update(
             needs_attention=True,
             attention_reason='Не принято при приёмке на ПВЗ',
             attention_added_by=request.user,
             attention_pickup=str(pickup),
+            attention_at=now,
         )
 
     if count:
         messages.warning(
             request,
-            f"Сессия приёмки завершена. {count} неотсортированных посылок возвращены на сортировочный склад."
+            f"Сессия приёмки завершена. {count} неотсортированных посылок отмечены в «Требует внимания» и отображаются в Складе ПВЗ без ячейки."
         )
     else:
         messages.success(request, "Сессия приёмки завершена. Все посылки отсортированы.")
 
     return redirect('pp_acceptance')
+
+
+@login_required
+def pp_acceptance_detail_view(request, pickup_id, date_str):
+    """
+    Отдельная страница приёмки для конкретного ПВЗ и даты.
+    Показывает только треки за выбранную дату — сканирование и отметки.
+    """
+    if not _can_accept(request.user):
+        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+
+    from datetime import datetime as _dt
+
+    try:
+        pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
+    except PickupPoint.DoesNotExist:
+        messages.error(request, "Пункт выдачи не найден.")
+        return redirect('pp_acceptance')
+
+    # Парсим дату ('none' означает треки без даты прихода)
+    filter_date = None
+    if date_str != 'none':
+        try:
+            filter_date = _dt.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            messages.error(request, "Некорректная дата.")
+            return redirect('pp_acceptance')
+
+    # Проверяем доступ работника
+    is_staff = False
+    try:
+        is_staff = request.user.userprofile.is_staff
+    except UserProfile.DoesNotExist:
+        pass
+
+    worker_pickup = _get_worker_pickup(request.user)
+    if not is_staff and (not worker_pickup or worker_pickup.id != pickup.id):
+        return HttpResponseForbidden("У вас нет доступа к этому пункту выдачи.")
+
+    # Считаем треки для этой даты
+    tracks_qs = TrackCode.objects.filter(
+        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
+        Q(delivery_pickup=pickup),
+        status='ready',
+        is_accepted_pp=False,
+    )
+    if filter_date is not None:
+        tracks_qs = tracks_qs.filter(delivered_date=filter_date)
+    else:
+        tracks_qs = tracks_qs.filter(delivered_date__isnull=True)
+
+    track_count = tracks_qs.count()
+
+    return render(request, 'pp_acceptance_detail.html', {
+        'pickup': pickup,
+        'delivered_date': filter_date,
+        'date_str': date_str,
+        'track_count': track_count,
+    })
 
 
 @login_required
@@ -421,6 +502,7 @@ def attention_required_view(request):
     pickups = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {
         'name': '', 'login': '', 'owner_id': None, 'owner_type': None,
         'added_by': '', 'added_by_set': set(), 'receipts': [], 'track_count': 0, 'total_weight': 0.0,
+        'attention_at': None,
     })))
 
     for receipt in receipts:
@@ -450,6 +532,11 @@ def attention_required_view(request):
             client['added_by_set'].add(added_by)
         client['added_by'] = ', '.join(sorted(client['added_by_set'])) if client['added_by_set'] else ''
         client['receipts'].append(receipt)
+
+        # Запоминаем максимальную дату появления в "Требует внимания"
+        if receipt.attention_at:
+            if not client['attention_at'] or receipt.attention_at > client['attention_at']:
+                client['attention_at'] = receipt.attention_at
 
         for item in receipt.items.all():
             client['track_count'] += 1

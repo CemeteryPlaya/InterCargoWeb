@@ -98,19 +98,20 @@
                     <i class="ri-information-line text-yellow-500 text-3xl"></i>
                     <p class="text-gray-600 mt-2">Выберите пункт выдачи для просмотра склада.</p>
                 </div>
-                {% elif not cells %}
+                {% elif not cells and not no_cell_data %}
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                     <i class="ri-inbox-line text-gray-400 text-4xl"></i>
                     <p class="text-gray-500 mt-2">На складе нет товаров, ожидающих выдачи.</p>
                 </div>
                 {% else %}
+                {% if cells %}
                 <div class="mb-4 text-sm text-gray-500">
                     Ячеек с товарами: <strong>{{ cells|length }}</strong>
                 </div>
 
                 <div class="grid gap-4">
                     {% for item in cells %}
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-sm border {% if item.has_pending_return %}border-orange-300{% else %}border-gray-200{% endif %} overflow-hidden">
                         <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
                              onclick="toggleCell('{{ item.cell.id }}')">
                             <div class="flex items-center gap-4">
@@ -124,6 +125,11 @@
                                     <div class="font-semibold text-gray-900">{{ item.cell.client_name }}</div>
                                     {% if item.cell.client_full_name %}
                                     <div class="text-sm text-gray-500">{{ item.cell.client_full_name }}</div>
+                                    {% endif %}
+                                    {% if item.has_pending_return %}
+                                    <span class="inline-flex items-center gap-1 text-xs text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full mt-1">
+                                        <i class="ri-alarm-warning-line"></i> Заявка на возврат — ожидает подтверждения
+                                    </span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -141,7 +147,7 @@
 
                         <div class="hidden border-t border-gray-100" id="cell-{{ item.cell.id }}">
                             {% for sub in item.sub_cells %}
-                            <div class="{% if not forloop.first %}border-t border-gray-200{% endif %}">
+                            <div class="{% if not forloop.first %}border-t border-gray-200{% endif %}" id="subcell-{{ sub.receipt.id|default:'no' }}-{{ forloop.counter }}">
                                 <div class="flex items-center justify-between px-5 py-2 bg-blue-50">
                                     <div class="flex items-center gap-2">
                                         <span class="inline-flex items-center justify-center w-10 h-7 bg-primary bg-opacity-15 rounded text-primary font-bold text-sm">{{ sub.sub_number }}</span>
@@ -151,8 +157,17 @@
                                         <span class="text-xs text-gray-400">Без чека</span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ sub.track_count }} шт. / {{ sub.total_weight|floatformat:2 }} кг
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-gray-500">{{ sub.track_count }} шт. / {{ sub.total_weight|floatformat:2 }} кг</span>
+                                        {% if sub.receipt and not sub.receipt.is_claimed %}
+                                        <button type="button"
+                                            class="quick-issue-btn text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded hover:bg-emerald-200 transition font-medium"
+                                            data-receipt-id="{{ sub.receipt.id }}"
+                                            data-receipt-number="{{ sub.receipt.receipt_number }}"
+                                            data-client-name="{{ item.cell.client_name }}">
+                                            <i class="ri-flashlight-line"></i> Быстрая выдача
+                                        </button>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="overflow-x-auto">
@@ -191,19 +206,72 @@
                                         <i class="ri-hand-coin-line mr-1"></i> Выдано клиенту
                                     </button>
                                 </form>
+                                {% if item.has_pending_return %}
+                                <span class="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-4 py-2 rounded text-sm font-medium">
+                                    <i class="ri-time-line mr-1"></i> Ожидает подтверждения возврата
+                                </span>
+                                {% else %}
                                 <form method="post" action="{% url 'warehouse_not_arrived' %}" class="inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
                                     <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition text-sm font-medium"
-                                        onclick="return confirm('Вернуть посылки клиента {{ item.cell.client_name }} на сортировочный склад? ({{ item.track_count }} посылок)')">
+                                        onclick="return confirm('Создать заявку на возврат посылок клиента {{ item.cell.client_name }} на сортировочный склад? ({{ item.track_count }} посылок)\n\nВозврат будет выполнен после подтверждения на странице «Требует внимания».')">
                                         <i class="ri-arrow-go-back-line mr-1"></i> Не доехал до склада
                                     </button>
                                 </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
+                {% endif %}{# end if cells #}
+
+                {% if no_cell_data %}
+                <div class="mt-6">
+                    <h2 class="text-base font-semibold text-orange-700 mb-3 flex items-center gap-2">
+                        <i class="ri-inbox-unarchive-line"></i> Без ячейки
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                            {{ no_cell_data|length }} клиентов
+                        </span>
+                    </h2>
+                    <div class="grid gap-3">
+                        {% for item in no_cell_data %}
+                        <div class="bg-white rounded-lg shadow-sm border border-orange-200 overflow-hidden">
+                            <div class="flex items-center justify-between px-5 py-3">
+                                <div class="flex items-center gap-3">
+                                    <i class="ri-user-line text-gray-400"></i>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">{{ item.user.username }}</div>
+                                        {% if item.user.get_full_name %}
+                                        <div class="text-sm text-gray-500">{{ item.user.get_full_name }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6 text-sm text-gray-600">
+                                    <div class="text-center">
+                                        <div class="font-semibold text-gray-900">{{ item.tracks|length }}</div>
+                                        <div class="text-xs text-gray-400">посылок</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="font-semibold text-gray-900">{{ item.total_weight|floatformat:2 }} кг</div>
+                                        <div class="text-xs text-gray-400">вес</div>
+                                    </div>
+                                    <button type="button"
+                                        class="assign-cell-btn bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-xs font-medium"
+                                        data-user-id="{{ item.user.id }}"
+                                        data-pickup-id="{{ pickup_point.id }}"
+                                        data-username="{{ item.user.username }}">
+                                        <i class="ri-add-line"></i> Назначить ячейку
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 {% endif %}
             </div>
         </main>
@@ -214,5 +282,103 @@
     {% endblock %}
 
     {% include 'includes/footer.html' %}
+
+    <script>
+    (function() {
+        function getCsrf() {
+            var el = document.querySelector('[name=csrfmiddlewaretoken]');
+            return el ? el.value : '';
+        }
+
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.quick-issue-btn');
+            if (!btn) return;
+
+            var receiptId = btn.dataset.receiptId;
+            var receiptNumber = btn.dataset.receiptNumber;
+            var clientName = btn.dataset.clientName;
+
+            if (!confirm('Быстрая выдача чека ' + receiptNumber + ' клиенту ' + clientName + '?')) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i>';
+
+            var formData = new FormData();
+            formData.append('receipt_id', receiptId);
+            formData.append('csrfmiddlewaretoken', getCsrf());
+
+            fetch('{% url "warehouse_quick_issue_receipt" %}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    alert(data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ri-flashlight-line"></i> Быстрая выдача';
+                    return;
+                }
+                // Помечаем sub-ячейку как выданную
+                var subCell = btn.closest('[id^="subcell-"]');
+                if (subCell) {
+                    var header = subCell.querySelector('.bg-blue-50');
+                    if (header) {
+                        btn.replaceWith(Object.assign(document.createElement('span'), {
+                            className: 'text-xs text-emerald-700 font-medium',
+                            innerHTML: '<i class="ri-checkbox-circle-fill"></i> Выдано',
+                        }));
+                    }
+                }
+            })
+            .catch(function() {
+                alert('Ошибка при выдаче чека.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-flashlight-line"></i> Быстрая выдача';
+            });
+        });
+
+        // === Назначить ячейку (без ячейки) ===
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.assign-cell-btn');
+            if (!btn) return;
+
+            var userId = btn.dataset.userId;
+            var pickupId = btn.dataset.pickupId;
+            var username = btn.dataset.username;
+
+            if (!confirm('Автоматически назначить ячейку клиенту ' + username + '?')) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i>';
+
+            fetch('{% url "warehouse_assign_cell" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrf(),
+                },
+                body: JSON.stringify({ client_id: userId, pickup_id: pickupId, cell_number: null }),
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    alert(data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ri-add-line"></i> Назначить ячейку';
+                    return;
+                }
+                // Перезагружаем страницу для обновления данных
+                window.location.reload();
+            })
+            .catch(function() {
+                alert('Ошибка при назначении ячейки.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-add-line"></i> Назначить ячейку';
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

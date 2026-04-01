@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo — Перенос прихода</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script defer src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+        <main class="flex-1 px-4 md:px-8 py-8 space-y-8 max-w-4xl">
+            <header>
+                <h1 class="text-xl font-bold text-red-500">Перенос прихода</h1>
+                <p class="text-sm text-gray-500 mt-1">Перенести пропущенные посылки клиента с одной даты прихода на другую</p>
+            </header>
+
+            <!-- Шаг 1: Выбор клиента и даты -->
+            <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
+                <h2 class="text-base font-semibold text-gray-800">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold mr-2">1</span>
+                    Выберите клиента и исходную дату
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Поиск клиента -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Клиент</label>
+                        <div class="relative">
+                            <input type="text" id="userSearchInput" autocomplete="off"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                placeholder="Введите логин или имя...">
+                            <div id="userSearchResults" class="absolute z-10 w-full mt-1 border border-gray-200 rounded-lg bg-white shadow hidden max-h-52 overflow-y-auto"></div>
+                        </div>
+                        <div id="selectedUserInfo" class="hidden mt-2 px-3 py-2 bg-blue-50 rounded-lg text-sm text-blue-800">
+                            <i class="ri-user-line mr-1"></i>
+                            <span id="selectedUserText"></span>
+                            <input type="hidden" id="selectedUserId">
+                        </div>
+                    </div>
+                    <!-- Исходная дата -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Исходная дата прихода</label>
+                        <input type="date" id="originalDateInput"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                            value="{{ today_str }}">
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="loadSummaryBtn" onclick="loadDateSummary()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition">
+                        <i class="ri-bar-chart-2-line mr-1"></i> Показать сводку
+                    </button>
+                    <button id="loadTracksBtn" onclick="loadTracks()"
+                        class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-lg transition">
+                        <i class="ri-search-line mr-1"></i> Найти треки клиента
+                    </button>
+                </div>
+            </section>
+
+            <!-- Сводка по дате -->
+            <section id="dateSummarySection" class="hidden bg-white rounded-xl shadow-sm border border-blue-100 p-6">
+                <h2 class="text-base font-semibold text-gray-800 mb-4">
+                    <i class="ri-bar-chart-2-line text-blue-500 mr-1"></i>
+                    Сводка прихода за <span id="summaryDateLabel" class="text-blue-600"></span>
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5" id="summaryStats"></div>
+                <div id="summaryBreakdown" class="space-y-2"></div>
+                <div id="summaryArrivals" class="mt-4"></div>
+            </section>
+
+            <!-- Шаг 2: Список треков -->
+            <section id="tracksSection" class="hidden bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+                <h2 class="text-base font-semibold text-gray-800">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold mr-2">2</span>
+                    Треки клиента <span id="tracksOwnerLabel" class="text-gray-500 font-normal"></span>
+                    за <span id="tracksDateLabel" class="text-gray-600"></span>
+                </h2>
+
+                <!-- Выбор всех -->
+                <div class="flex items-center gap-3 text-sm">
+                    <label class="flex items-center gap-2 cursor-pointer text-gray-600">
+                        <input type="checkbox" id="selectAll" class="rounded" onchange="toggleAll(this)">
+                        Выбрать все (<span id="totalCount">0</span>)
+                    </label>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-gray-500">Выбрано: <span id="selectedCount" class="font-medium text-gray-700">0</span></span>
+                </div>
+
+                <div class="overflow-x-auto border border-gray-100 rounded-lg">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-3 py-2 text-center w-8"></th>
+                                <th class="px-3 py-2 text-left">Трек-код</th>
+                                <th class="px-3 py-2 text-left">Вес</th>
+                                <th class="px-3 py-2 text-left">Статус</th>
+                                <th class="px-3 py-2 text-left">Дата прихода</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracksTableBody" class="divide-y divide-gray-100">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noTracksMsg" class="hidden py-8 text-center text-gray-400">
+                    <i class="ri-inbox-2-line text-3xl mb-2 block"></i>
+                    Нет треков для переноса за эту дату
+                </div>
+            </section>
+
+            <!-- Шаг 3: Новая дата и подтверждение -->
+            <section id="transferSection" class="hidden bg-white rounded-xl shadow-sm border border-orange-200 p-6 space-y-4">
+                <h2 class="text-base font-semibold text-gray-800">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-bold mr-2">3</span>
+                    Укажите новую дату прихода
+                </h2>
+
+                <div class="max-w-xs">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Новая дата прихода</label>
+                    <input type="date" id="newDateInput"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300">
+                </div>
+
+                <div class="p-4 bg-orange-50 rounded-lg text-sm text-orange-800 border border-orange-200">
+                    <i class="ri-information-line mr-1"></i>
+                    Выбранные треки будут <strong>удалены из исходного прихода</strong> и добавлены в новый приход за указанную дату.
+                    Все связанные сессии и документы будут обновлены.
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button id="transferBtn" onclick="doTransfer()"
+                        class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition disabled:opacity-50"
+                        disabled>
+                        <i class="ri-arrow-right-line mr-1"></i> Перенести треки
+                    </button>
+                    <span id="transferBtnHint" class="text-xs text-gray-400"></span>
+                </div>
+            </section>
+
+            <!-- Результат -->
+            <div id="resultBlock" class="hidden p-5 bg-green-50 border border-green-200 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <i class="ri-checkbox-circle-line text-green-600 text-xl flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold text-green-800" id="resultMsg"></p>
+                        <p class="text-sm text-green-700 mt-1" id="resultDetail"></p>
+                        <button onclick="resetForm()" class="mt-3 text-sm text-green-700 underline hover:text-green-900">
+                            Сделать ещё один перенос
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== Прибыло без ПВЗ ====== -->
+            {% if no_pickup_data %}
+            <section class="bg-white rounded-xl shadow-sm border border-yellow-200 p-6 space-y-5">
+                <h2 class="text-base font-semibold text-gray-800">
+                    <i class="ri-alert-line text-yellow-500 mr-1"></i>
+                    Прибыло без ПВЗ — требует переноса
+                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{{ no_pickup_data|length }} клиентов</span>
+                </h2>
+                <p class="text-sm text-gray-500">Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте дату следующего прихода — они появятся в доставке за эту дату.</p>
+
+                <div class="space-y-4">
+                    {% for item in no_pickup_data %}
+                    <div class="border border-yellow-100 rounded-lg overflow-hidden" id="nopickup-client-{{ item.user.id }}">
+                        <div class="flex items-center justify-between px-4 py-3 bg-yellow-50">
+                            <div>
+                                <span class="font-medium text-gray-800">{{ item.user.username }}</span>
+                                {% if item.user.get_full_name %}
+                                <span class="text-sm text-gray-500 ml-1">({{ item.user.get_full_name }})</span>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-0.5">
+                                    ПВЗ: {{ item.pickup }}
+                                    &nbsp;·&nbsp; {{ item.tracks|length }} посылок
+                                    &nbsp;·&nbsp; {{ item.total_weight|floatformat:2 }} кг
+                                    {% if item.dates %}
+                                    &nbsp;·&nbsp; Даты прихода: {% for d in item.dates %}{{ d|date:"d.m.Y" }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <button type="button"
+                                class="nopickup-toggle-btn text-xs text-gray-500 hover:text-gray-700"
+                                onclick="toggleNopickupDetails({{ item.user.id }})">
+                                <i class="ri-arrow-down-s-line" id="nopickup-arrow-{{ item.user.id }}"></i>
+                            </button>
+                        </div>
+
+                        <!-- Треки (скрыты) -->
+                        <div class="hidden" id="nopickup-details-{{ item.user.id }}">
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead class="bg-gray-50 text-gray-400 uppercase">
+                                    <tr>
+                                        <th class="px-3 py-2 text-center w-8">
+                                            <input type="checkbox" class="nopickup-select-all rounded"
+                                                data-uid="{{ item.user.id }}"
+                                                onchange="toggleNopickupAll(this, {{ item.user.id }})">
+                                        </th>
+                                        <th class="px-3 py-2 text-left">Трек-код</th>
+                                        <th class="px-3 py-2 text-left">Вес</th>
+                                        <th class="px-3 py-2 text-left">Дата прихода</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for track in item.tracks %}
+                                    <tr class="border-t border-gray-100 hover:bg-gray-50">
+                                        <td class="px-3 py-2 text-center">
+                                            <input type="checkbox" class="nopickup-track-cb rounded"
+                                                data-uid="{{ item.user.id }}"
+                                                value="{{ track.id }}">
+                                        </td>
+                                        <td class="px-3 py-2 font-mono text-gray-800">{{ track.track_code }}</td>
+                                        <td class="px-3 py-2 text-gray-600">{{ track.weight|default:"—"|floatformat:3 }} кг</td>
+                                        <td class="px-3 py-2 text-gray-500">{{ track.delivered_date|date:"d.m.Y"|default:"—" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            </div>
+
+                            <!-- Перенос -->
+                            <div class="px-4 py-3 bg-gray-50 border-t border-yellow-100 flex flex-wrap items-end gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Новая дата прихода</label>
+                                    <input type="date" class="nopickup-date-input border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                                        data-uid="{{ item.user.id }}">
+                                </div>
+                                <button type="button"
+                                    class="nopickup-transfer-btn bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium px-4 py-2 rounded transition"
+                                    data-uid="{{ item.user.id }}"
+                                    data-username="{{ item.user.username }}"
+                                    onclick="doNopickupTransfer({{ item.user.id }})">
+                                    <i class="ri-calendar-check-line mr-1"></i> Перенести на выбранную дату
+                                </button>
+                                <span class="nopickup-result-{{ item.user.id }} text-sm text-green-700 font-medium hidden"></span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+        </main>
+    </div>
+
+    <script>
+    const CSRF = '{{ csrf_token }}';
+    let loadedTracks = [];
+
+    // ── Поиск пользователей ──
+    let searchTimeout = null;
+    document.getElementById('userSearchInput').addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        const q = this.value.trim();
+        document.getElementById('selectedUserId').value = '';
+        document.getElementById('selectedUserInfo').classList.add('hidden');
+        if (q.length < 2) {
+            document.getElementById('userSearchResults').classList.add('hidden');
+            return;
+        }
+        searchTimeout = setTimeout(() => {
+            fetch(`{% url 'reschedule_search_users' %}?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    const box = document.getElementById('userSearchResults');
+                    if (!data.users || !data.users.length) {
+                        box.innerHTML = '<p class="px-3 py-2 text-sm text-gray-400">Не найдено</p>';
+                    } else {
+                        box.innerHTML = data.users.map(u => `
+                            <div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 user-opt"
+                                data-id="${u.id}" data-username="${u.username}" data-fullname="${u.full_name || ''}">
+                                <span class="font-medium">${u.username}</span>
+                                ${u.full_name ? `<span class="text-gray-500 ml-1">${u.full_name}</span>` : ''}
+                            </div>`).join('');
+                        box.querySelectorAll('.user-opt').forEach(el => {
+                            el.addEventListener('click', () => {
+                                const label = el.dataset.fullname
+                                    ? `${el.dataset.username} (${el.dataset.fullname})`
+                                    : el.dataset.username;
+                                document.getElementById('selectedUserId').value = el.dataset.id;
+                                document.getElementById('selectedUserText').textContent = label;
+                                document.getElementById('selectedUserInfo').classList.remove('hidden');
+                                document.getElementById('userSearchInput').value = label;
+                                box.classList.add('hidden');
+                            });
+                        });
+                    }
+                    box.classList.remove('hidden');
+                });
+        }, 300);
+    });
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#userSearchInput') && !e.target.closest('#userSearchResults')) {
+            document.getElementById('userSearchResults').classList.add('hidden');
+        }
+    });
+
+    // ── Сводка по дате ──
+    function loadDateSummary() {
+        const date = document.getElementById('originalDateInput').value;
+        if (!date) { alert('Укажите дату прихода.'); return; }
+
+        const btn = document.getElementById('loadSummaryBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Загрузка...';
+
+        fetch(`{% url 'reschedule_date_summary' %}?date=${date}`)
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false; btn.innerHTML = '<i class="ri-bar-chart-2-line mr-1"></i> Показать сводку';
+                if (data.error) { alert(data.error); return; }
+
+                document.getElementById('summaryDateLabel').textContent = data.date;
+
+                // Карточки-цифры
+                const statusColors = {
+                    'delivered':   'bg-blue-50 text-blue-700 border-blue-200',
+                    'shipping_pp': 'bg-orange-50 text-orange-700 border-orange-200',
+                    'ready':       'bg-purple-50 text-purple-700 border-purple-200',
+                    'unidentified':'bg-yellow-50 text-yellow-700 border-yellow-200',
+                };
+                const statsEl = document.getElementById('summaryStats');
+                statsEl.innerHTML = `
+                    <div class="border rounded-lg p-3 bg-gray-50 border-gray-200 text-center">
+                        <div class="text-2xl font-bold text-gray-800">${data.total}</div>
+                        <div class="text-xs text-gray-500 mt-1">Всего треков</div>
+                    </div>
+                    <div class="border rounded-lg p-3 bg-gray-50 border-gray-200 text-center">
+                        <div class="text-2xl font-bold text-gray-800">${data.clients_count}</div>
+                        <div class="text-xs text-gray-500 mt-1">Клиентов</div>
+                    </div>`;
+
+                // Разбивка по статусам
+                const breakdownEl = document.getElementById('summaryBreakdown');
+                breakdownEl.innerHTML = '<p class="text-xs font-medium text-gray-500 uppercase mb-2">Разбивка по статусам</p>';
+                data.status_breakdown.forEach(item => {
+                    const color = statusColors[item.status] || 'bg-gray-50 text-gray-700 border-gray-200';
+                    const pct = data.total > 0 ? Math.round(item.count / data.total * 100) : 0;
+                    breakdownEl.innerHTML += `
+                        <div class="flex items-center gap-3">
+                            <span class="inline-block border rounded px-2 py-0.5 text-xs font-medium ${color} w-52 flex-shrink-0">${item.label}</span>
+                            <div class="flex-1 bg-gray-100 rounded-full h-2">
+                                <div class="h-2 rounded-full bg-blue-400" style="width:${pct}%"></div>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-700 w-8 text-right">${item.count}</span>
+                            <span class="text-xs text-gray-400 w-10">${pct}%</span>
+                        </div>`;
+                });
+
+                // Записи приходов
+                const arrivalsEl = document.getElementById('summaryArrivals');
+                if (data.arrivals.length) {
+                    arrivalsEl.innerHTML = '<p class="text-xs font-medium text-gray-500 uppercase mb-2 mt-3">Записи приходов</p>'
+                        + data.arrivals.map(a =>
+                            `<span class="inline-block text-xs bg-blue-50 border border-blue-200 text-blue-700 rounded px-2 py-1 mr-2 mb-1">
+                                Приход #${a.id} — ${a.total_tracks} треков${a.sorting_location__name ? ' (' + a.sorting_location__name + ')' : ''}
+                            </span>`
+                        ).join('');
+                } else {
+                    arrivalsEl.innerHTML = '<p class="text-xs text-gray-400 mt-2">Записей приходов за эту дату не найдено</p>';
+                }
+
+                document.getElementById('dateSummarySection').classList.remove('hidden');
+                document.getElementById('resultBlock').classList.add('hidden');
+            })
+            .catch(() => {
+                btn.disabled = false; btn.innerHTML = '<i class="ri-bar-chart-2-line mr-1"></i> Показать сводку';
+                alert('Ошибка сети.');
+            });
+    }
+
+    // При смене даты — скрываем сводку (она устарела)
+    document.getElementById('originalDateInput').addEventListener('change', function() {
+        document.getElementById('dateSummarySection').classList.add('hidden');
+    });
+
+    // ── Загрузить треки ──
+    function loadTracks() {
+        const userId = document.getElementById('selectedUserId').value;
+        const date = document.getElementById('originalDateInput').value;
+        if (!userId) { alert('Выберите клиента из списка.'); return; }
+        if (!date) { alert('Укажите исходную дату.'); return; }
+
+        const btn = document.getElementById('loadTracksBtn');
+        btn.disabled = true; btn.textContent = 'Загрузка...';
+
+        fetch(`{% url 'reschedule_get_tracks' %}?user_id=${userId}&date=${date}`)
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false; btn.innerHTML = '<i class="ri-search-line mr-1"></i> Найти треки';
+                if (data.error) { alert(data.error); return; }
+
+                loadedTracks = data.tracks;
+                renderTracks(data.tracks, data.owner_username, date);
+            })
+            .catch(() => { btn.disabled = false; btn.innerHTML = '<i class="ri-search-line mr-1"></i> Найти треки'; alert('Ошибка сети.'); });
+    }
+
+    function renderTracks(tracks, ownerUsername, date) {
+        const section = document.getElementById('tracksSection');
+        const tbody = document.getElementById('tracksTableBody');
+        const noMsg = document.getElementById('noTracksMsg');
+        const transferSection = document.getElementById('transferSection');
+
+        document.getElementById('tracksOwnerLabel').textContent = ownerUsername;
+        const [y, m, d] = date.split('-');
+        document.getElementById('tracksDateLabel').textContent = `${d}.${m}.${y}`;
+        document.getElementById('totalCount').textContent = tracks.length;
+        document.getElementById('selectedCount').textContent = '0';
+        document.getElementById('selectAll').checked = false;
+
+        tbody.innerHTML = '';
+        section.classList.remove('hidden');
+        document.getElementById('resultBlock').classList.add('hidden');
+
+        if (!tracks.length) {
+            noMsg.classList.remove('hidden');
+            tbody.closest('div').classList.add('hidden');
+            transferSection.classList.add('hidden');
+            return;
+        }
+
+        noMsg.classList.add('hidden');
+        tbody.closest('div').classList.remove('hidden');
+
+        tracks.forEach(t => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50';
+            tr.innerHTML = `
+                <td class="px-3 py-2 text-center">
+                    <input type="checkbox" class="track-cb rounded" value="${t.id}" onchange="updateSelectedCount()">
+                </td>
+                <td class="px-3 py-2 font-mono font-medium text-gray-800">${t.track_code}</td>
+                <td class="px-3 py-2 text-gray-600">${t.weight !== null ? t.weight + ' кг' : '—'}</td>
+                <td class="px-3 py-2 text-gray-600">${t.status}</td>
+                <td class="px-3 py-2 text-gray-500">${t.delivered_date ? fmtDate(t.delivered_date) : '—'}</td>`;
+            tbody.appendChild(tr);
+        });
+
+        transferSection.classList.remove('hidden');
+        updateTransferBtn();
+    }
+
+    function fmtDate(iso) {
+        const [y, m, d] = iso.split('-');
+        return `${d}.${m}.${y}`;
+    }
+
+    function toggleAll(cb) {
+        document.querySelectorAll('.track-cb').forEach(el => { el.checked = cb.checked; });
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.track-cb:checked').length;
+        document.getElementById('selectedCount').textContent = count;
+        const all = document.querySelectorAll('.track-cb').length;
+        document.getElementById('selectAll').checked = count === all && all > 0;
+        updateTransferBtn();
+    }
+
+    function updateTransferBtn() {
+        const selected = document.querySelectorAll('.track-cb:checked').length;
+        const newDate = document.getElementById('newDateInput').value;
+        const btn = document.getElementById('transferBtn');
+        const hint = document.getElementById('transferBtnHint');
+        if (!selected) {
+            btn.disabled = true;
+            hint.textContent = 'Выберите хотя бы один трек';
+        } else if (!newDate) {
+            btn.disabled = true;
+            hint.textContent = 'Укажите новую дату';
+        } else {
+            btn.disabled = false;
+            hint.textContent = `${selected} трек(а/ов) будут перенесены`;
+        }
+    }
+
+    document.getElementById('newDateInput').addEventListener('input', updateTransferBtn);
+
+    // ── Выполнить перенос ──
+    function doTransfer() {
+        const userId = document.getElementById('selectedUserId').value;
+        const originalDate = document.getElementById('originalDateInput').value;
+        const newDate = document.getElementById('newDateInput').value;
+        const checkedIds = [...document.querySelectorAll('.track-cb:checked')].map(el => el.value);
+
+        if (!checkedIds.length) { alert('Выберите треки.'); return; }
+        if (!newDate) { alert('Укажите новую дату.'); return; }
+        if (newDate === originalDate) { alert('Исходная и новая даты совпадают.'); return; }
+
+        const totalSelected = checkedIds.length;
+        const totalLoaded = loadedTracks.length;
+        const msg = checkedIds.length < totalLoaded
+            ? `Перенести выбранные ${totalSelected} трек(а/ов) на ${fmtDate(newDate)}?`
+            : `Перенести все ${totalSelected} трек(а/ов) на ${fmtDate(newDate)}?`;
+        if (!confirm(msg)) return;
+
+        const btn = document.getElementById('transferBtn');
+        btn.disabled = true; btn.textContent = 'Перенос...';
+
+        const body = new URLSearchParams({user_id: userId, original_date: originalDate, new_date: newDate});
+        checkedIds.forEach(id => body.append('track_ids', id));
+
+        fetch('{% url "reschedule_transfer" %}', {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF},
+            body,
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false; btn.innerHTML = '<i class="ri-arrow-right-line mr-1"></i> Перенести треки';
+            if (data.error) { alert(data.error); return; }
+
+            document.getElementById('tracksSection').classList.add('hidden');
+            document.getElementById('transferSection').classList.add('hidden');
+            document.getElementById('resultMsg').textContent =
+                `Успешно перенесено ${data.transferred} трек(а/ов)`;
+            document.getElementById('resultDetail').textContent =
+                `Клиент: ${data.owner} · Из прихода ${data.original_date} → в приход ${data.new_date}`;
+            document.getElementById('resultBlock').classList.remove('hidden');
+        })
+        .catch(() => {
+            btn.disabled = false; btn.innerHTML = '<i class="ri-arrow-right-line mr-1"></i> Перенести треки';
+            alert('Ошибка сети.');
+        });
+    }
+
+    // ── Прибыло без ПВЗ ──
+    function toggleNopickupDetails(uid) {
+        const details = document.getElementById('nopickup-details-' + uid);
+        const arrow = document.getElementById('nopickup-arrow-' + uid);
+        if (details.classList.contains('hidden')) {
+            details.classList.remove('hidden');
+            arrow.classList.replace('ri-arrow-down-s-line', 'ri-arrow-up-s-line');
+        } else {
+            details.classList.add('hidden');
+            arrow.classList.replace('ri-arrow-up-s-line', 'ri-arrow-down-s-line');
+        }
+    }
+
+    function toggleNopickupAll(cb, uid) {
+        document.querySelectorAll(`.nopickup-track-cb[data-uid="${uid}"]`).forEach(el => {
+            el.checked = cb.checked;
+        });
+    }
+
+    function doNopickupTransfer(uid) {
+        const dateInput = document.querySelector(`.nopickup-date-input[data-uid="${uid}"]`);
+        const newDate = dateInput ? dateInput.value : '';
+        if (!newDate) { alert('Укажите новую дату прихода.'); return; }
+
+        const checkedBoxes = [...document.querySelectorAll(`.nopickup-track-cb[data-uid="${uid}"]:checked`)];
+        const trackIds = checkedBoxes.map(el => el.value);
+        if (!trackIds.length) { alert('Выберите хотя бы одну посылку.'); return; }
+
+        const btn = document.querySelector(`.nopickup-transfer-btn[data-uid="${uid}"]`);
+        const username = btn ? btn.dataset.username : '';
+        if (!confirm(`Перенести ${trackIds.length} посылок(у) клиента ${username} на ${fmtDate(newDate)}?`)) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Перенос...';
+
+        const body = new URLSearchParams({user_id: uid, new_date: newDate});
+        trackIds.forEach(id => body.append('track_ids', id));
+
+        fetch('{% url "reschedule_no_pickup_transfer" %}', {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF},
+            body,
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-calendar-check-line mr-1"></i> Перенести на выбранную дату';
+            if (data.error) { alert(data.error); return; }
+
+            const resultSpan = document.querySelector('.nopickup-result-' + uid);
+            if (resultSpan) {
+                resultSpan.textContent = `✓ Перенесено ${data.transferred} посылок на ${data.new_date}`;
+                resultSpan.classList.remove('hidden');
+            }
+            // Скрываем карточку клиента через 2 секунды
+            setTimeout(() => {
+                const card = document.getElementById('nopickup-client-' + uid);
+                if (card) card.style.opacity = '0.4';
+            }, 1500);
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-calendar-check-line mr-1"></i> Перенести на выбранную дату';
+            alert('Ошибка сети.');
+        });
+    }
+
+    function resetForm() {
+        document.getElementById('userSearchInput').value = '';
+        document.getElementById('selectedUserId').value = '';
+        document.getElementById('selectedUserInfo').classList.add('hidden');
+        document.getElementById('originalDateInput').value = '';
+        document.getElementById('newDateInput').value = '';
+        document.getElementById('tracksSection').classList.add('hidden');
+        document.getElementById('transferSection').classList.add('hidden');
+        document.getElementById('dateSummarySection').classList.add('hidden');
+        document.getElementById('resultBlock').classList.add('hidden');
+        loadedTracks = [];
+    }
+    </script>
+</body>
+</html>

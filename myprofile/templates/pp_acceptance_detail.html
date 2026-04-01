@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo — Приёмка: {{ pickup.address }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'includes/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'includes/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-6">
+
+            <!-- Шапка -->
+            <div class="flex items-center gap-3 mb-6 flex-wrap">
+                <a href="{% url 'pp_acceptance' %}"
+                   class="text-gray-500 hover:text-gray-700 transition">
+                    <i class="ri-arrow-left-line text-xl"></i>
+                </a>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        <i class="ri-inbox-archive-line text-green-600"></i> Приёмка товара
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-0.5">
+                        <i class="ri-map-pin-line mr-1"></i>{{ pickup.address }}{% if pickup.premise_name %} — {{ pickup.premise_name }}{% endif %}
+                        &nbsp;·&nbsp;
+                        <i class="ri-calendar-line mr-1"></i>
+                        {% if delivered_date %}{{ delivered_date|date:"d.m.Y" }}{% else %}без даты прихода{% endif %}
+                        &nbsp;·&nbsp;
+                        <span class="text-green-700 font-medium">{{ track_count }} посылок</span>
+                    </p>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="p-3 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Панель сканирования -->
+            <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden"
+                 id="acceptance-panel"
+                 data-receipts-url="{% url 'get_acceptance_receipts' %}"
+                 data-accept-url="{% url 'accept_delivery' %}"
+                 data-finish-url="{% url 'finish_acceptance_session' %}"
+                 data-pickup-id="{{ pickup.id }}"
+                 data-delivered-date="{{ date_str }}"
+                 data-csrf="{{ csrf_token }}">
+
+                <!-- Загрузка чеков -->
+                <div id="loading-state" class="px-6 py-12 text-center text-gray-400">
+                    <i class="ri-loader-4-line animate-spin text-3xl mb-2"></i>
+                    <p class="text-sm">Загрузка данных приёмки...</p>
+                </div>
+
+                <!-- Нет чеков -->
+                <div id="empty-state" class="hidden px-6 py-12 text-center text-gray-400">
+                    <i class="ri-inbox-line text-4xl mb-2"></i>
+                    <p>Нет посылок для приёмки за эту дату</p>
+                    <p class="text-xs mt-1 text-gray-400">Все посылки уже отсортированы или чеки не созданы</p>
+                </div>
+
+                <!-- Основной интерфейс -->
+                <div id="scan-state" class="hidden">
+
+                    <!-- Ввод сканером -->
+                    <div class="px-5 pt-5 pb-3 border-b border-gray-100">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">
+                            <i class="ri-barcode-box-line mr-1"></i> Ввод сканером / вручную
+                        </label>
+                        <input type="text" id="qr-scanner-input"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Наведите сканер или введите номер чека" autocomplete="off">
+                    </div>
+
+                    <!-- Камера -->
+                    <div class="px-5 pt-3">
+                        <div id="qr-reader" class="w-full max-w-sm mx-auto rounded-lg overflow-hidden mb-3"></div>
+                    </div>
+
+                    <!-- Прогресс -->
+                    <div class="px-5 pb-3">
+                        <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                            <span>Отсканировано: <strong id="qr-scanned-count">0</strong> / <strong id="qr-total-count">0</strong></span>
+                            <span id="qr-progress-percent" class="font-medium text-green-600">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="qr-progress-bar" class="bg-green-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Последнее сканирование / ошибка -->
+                    <div class="px-5 pb-2">
+                        <div id="qr-last-scan" class="hidden p-2 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm text-center">
+                            <i class="ri-checkbox-circle-fill mr-1"></i> <span id="qr-last-scan-text"></span>
+                        </div>
+                        <div id="qr-error" class="hidden p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm text-center"></div>
+                    </div>
+
+                    <!-- Список клиентов -->
+                    <div class="px-5 pb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-gray-500 font-medium">Чеки к приёмке:</span>
+                            <button id="qr-select-all-btn" type="button"
+                                class="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium">
+                                <i class="ri-checkbox-multiple-line mr-1"></i> Выбрать все
+                            </button>
+                        </div>
+                        <div id="qr-clients-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div class="px-5 py-4 bg-gray-50 border-t border-gray-200 flex flex-col gap-3 sm:flex-row">
+                        <button id="qr-submit-btn" type="button" disabled
+                            class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm">
+                            <i class="ri-checkbox-circle-line mr-1"></i> Отсортировать отмеченные
+                        </button>
+                        <form method="post" id="finish-session-form"
+                              onsubmit="return confirm('Завершить сессию приёмки за эту дату? Неотсортированные посылки будут возвращены на сортировочный склад.')">
+                            {% csrf_token %}
+                            <input type="hidden" name="pickup_id" value="{{ pickup.id }}">
+                            <input type="hidden" name="delivered_date" value="{% if delivered_date %}{{ delivered_date|date:'Y-m-d' }}{% endif %}">
+                            <button type="submit"
+                                class="w-full sm:w-auto px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium text-sm">
+                                <i class="ri-stop-circle-line mr-1"></i> Завершить сессию
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    {% endblock %}
+
+    {% include 'includes/footer.html' %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var panel        = document.getElementById('acceptance-panel');
+        var receiptsUrl  = panel.dataset.receiptsUrl;
+        var acceptUrl    = panel.dataset.acceptUrl;
+        var finishForm   = document.getElementById('finish-session-form');
+        var csrfToken    = panel.dataset.csrf;
+        var pickupId     = panel.dataset.pickupId;
+        var deliveredDate = panel.dataset.deliveredDate; // 'YYYY-MM-DD' или 'none'
+
+        var loadingEl    = document.getElementById('loading-state');
+        var emptyEl      = document.getElementById('empty-state');
+        var scanEl       = document.getElementById('scan-state');
+
+        var scannerInput = document.getElementById('qr-scanner-input');
+        var qrReaderDiv  = document.getElementById('qr-reader');
+        var scannedCountEl   = document.getElementById('qr-scanned-count');
+        var totalCountEl     = document.getElementById('qr-total-count');
+        var progressPercent  = document.getElementById('qr-progress-percent');
+        var progressBar      = document.getElementById('qr-progress-bar');
+        var clientsListEl    = document.getElementById('qr-clients-list');
+        var lastScanEl       = document.getElementById('qr-last-scan');
+        var lastScanText     = document.getElementById('qr-last-scan-text');
+        var errorEl          = document.getElementById('qr-error');
+        var submitBtn        = document.getElementById('qr-submit-btn');
+        var selectAllBtn     = document.getElementById('qr-select-all-btn');
+
+        var allExpectedReceipts = [];
+        var scannedReceipts = [];
+        var receiptToClient = {};
+        var receiptToCell   = {};
+        var html5QrCode     = null;
+        var scannerActive   = false;
+        var scanProcessing  = false;
+
+        // Предупреждаем о незавершённой сортировке
+        window.addEventListener('beforeunload', function (e) {
+            if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
+                e.preventDefault();
+                e.returnValue = 'Сортировка не завершена. Покинуть страницу?';
+                return e.returnValue;
+            }
+        });
+
+        // Keep-alive
+        setInterval(function () {
+            fetch(window.location.href, { method: 'HEAD', credentials: 'same-origin' }).catch(function () {});
+        }, 300000);
+
+        // Загружаем чеки при открытии страницы
+        var url = receiptsUrl + '?pickup_id=' + encodeURIComponent(pickupId);
+        if (deliveredDate && deliveredDate !== 'none') {
+            url += '&delivered_date=' + encodeURIComponent(deliveredDate);
+        } else if (deliveredDate === 'none') {
+            // треки без даты: передаём специальный флаг
+            url += '&delivered_date=none';
+        }
+
+        fetch(url, { credentials: 'same-origin' })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                loadingEl.classList.add('hidden');
+
+                var hasReceipts = data.clients && data.clients.some(function (c) {
+                    return c.receipts.length > 0;
+                });
+
+                if (!data.clients || data.clients.length === 0 || !hasReceipts) {
+                    // Нет чеков — показываем «пусто» и разрешаем только «Завершить сессию»
+                    emptyEl.classList.remove('hidden');
+                    scanEl.classList.remove('hidden');
+                    // Скрываем ненужные элементы сканирования
+                    document.getElementById('qr-scanner-input').closest('div').classList.add('hidden');
+                    qrReaderDiv.classList.add('hidden');
+                    document.getElementById('qr-status') && document.getElementById('qr-status').classList.add('hidden');
+                    clientsListEl.closest('div').classList.add('hidden');
+                    submitBtn.closest('div') && submitBtn.parentElement.classList.add('hidden');
+                    return;
+                }
+
+                initScan(data.clients);
+            })
+            .catch(function (err) {
+                loadingEl.innerHTML = '<div class="text-red-500 py-8 text-center text-sm"><i class="ri-error-warning-line text-2xl mb-1"></i><p>Ошибка загрузки данных</p></div>';
+                console.error('Receipts fetch error:', err);
+            });
+
+        function initScan(clients) {
+            scanEl.classList.remove('hidden');
+
+            allExpectedReceipts = [];
+            receiptToClient = {};
+            receiptToCell   = {};
+
+            clients.forEach(function (client) {
+                client.receipts.forEach(function (r) {
+                    allExpectedReceipts.push(r.receipt_number);
+                    receiptToClient[r.receipt_number] = client.full_name;
+                    receiptToCell[r.receipt_number]   = client.cell_number;
+                });
+            });
+
+            updateProgress();
+            renderClientsList(clients);
+            startCamera();
+            setTimeout(function () { scannerInput.focus(); }, 300);
+        }
+
+        // Сканер ввода
+        scannerInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var code = scannerInput.value.trim();
+                scannerInput.value = '';
+                if (code) onScanSuccess(code);
+                scannerInput.focus();
+            }
+        });
+
+        function renderClientsList(clients) {
+            clientsListEl.innerHTML = '';
+            clients.forEach(function (client) {
+                if (client.receipts.length === 0) return;
+
+                var clientDiv = document.createElement('div');
+                clientDiv.className = 'border border-gray-200 rounded-lg overflow-hidden';
+
+                var header = document.createElement('div');
+                header.className = 'px-3 py-2 bg-gray-50 font-medium text-sm text-gray-800 flex items-center justify-between';
+
+                var left = document.createElement('div');
+                left.className = 'flex items-center gap-2';
+                left.innerHTML = '<i class="ri-user-line text-gray-400"></i>' +
+                    client.full_name +
+                    '<span class="text-xs text-gray-400">(' + client.username + ')</span>';
+                header.appendChild(left);
+
+                if (client.cell_number) {
+                    var cellBadge = document.createElement('span');
+                    cellBadge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800';
+                    cellBadge.innerHTML = '<i class="ri-inbox-archive-line mr-1"></i>Ячейка ' + client.cell_number;
+                    header.appendChild(cellBadge);
+                }
+                clientDiv.appendChild(header);
+
+                client.receipts.forEach(function (r) {
+                    var row = document.createElement('div');
+                    row.className = 'receipt-row flex items-center gap-2 px-3 py-2 border-t border-gray-100 text-sm';
+                    row.dataset.receipt = r.receipt_number;
+
+                    var icon = document.createElement('i');
+                    icon.className = 'ri-checkbox-blank-circle-line text-gray-300 receipt-icon text-base flex-shrink-0';
+                    row.appendChild(icon);
+
+                    var info = document.createElement('div');
+                    info.className = 'flex-1';
+                    info.innerHTML = '<span class="font-mono text-xs">' + r.receipt_number + '</span>' +
+                        '<span class="text-gray-400 ml-2 text-xs">' +
+                        r.track_count + ' шт. / ' + r.total_weight.toFixed(3) + ' кг</span>';
+                    row.appendChild(info);
+
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'manual-check-btn px-2 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 transition';
+                    btn.innerHTML = '<i class="ri-check-line"></i>';
+                    btn.title = 'Отметить вручную';
+                    btn.dataset.receipt = r.receipt_number;
+                    row.appendChild(btn);
+
+                    clientDiv.appendChild(row);
+                });
+
+                clientsListEl.appendChild(clientDiv);
+            });
+        }
+
+        clientsListEl.addEventListener('click', function (e) {
+            var btn = e.target.closest('.manual-check-btn');
+            if (!btn) return;
+            var code = btn.dataset.receipt;
+            if (!code || scannedReceipts.indexOf(code) !== -1) return;
+            scannedReceipts.push(code);
+            markReceiptScanned(code);
+            showCellInfo(code);
+            updateProgress();
+            if (scannedReceipts.length >= allExpectedReceipts.length) onAllScanned();
+        });
+
+        function markReceiptScanned(receiptNumber) {
+            var rows = clientsListEl.querySelectorAll('.receipt-row');
+            rows.forEach(function (row) {
+                if (row.dataset.receipt !== receiptNumber) return;
+                row.classList.add('bg-green-50');
+                var icon = row.querySelector('.receipt-icon');
+                if (icon) icon.className = 'ri-checkbox-circle-fill text-green-500 receipt-icon text-base flex-shrink-0';
+                var btn = row.querySelector('.manual-check-btn');
+                if (btn) btn.classList.add('hidden');
+            });
+        }
+
+        function showCellInfo(receiptNumber) {
+            var clientName = receiptToClient[receiptNumber] || '';
+            var cellNumber = receiptToCell[receiptNumber];
+            var text = receiptNumber;
+            if (clientName) text += ' — ' + clientName;
+            if (cellNumber) text += ' → Ячейка ' + cellNumber;
+            lastScanText.textContent = text;
+            lastScanEl.classList.remove('hidden');
+            setTimeout(function () { lastScanEl.classList.add('hidden'); }, 4000);
+        }
+
+        function startCamera() {
+            if (scannerActive) return;
+            html5QrCode = new Html5Qrcode('qr-reader');
+            html5QrCode.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                onScanSuccess,
+                function () {}
+            ).then(function () {
+                scannerActive = true;
+            }).catch(function (err) {
+                console.error('Camera error:', err);
+                showError('Камера недоступна. Используйте ручной ввод.');
+            });
+        }
+
+        function stopCamera() {
+            if (html5QrCode && scannerActive) {
+                html5QrCode.stop().then(function () {
+                    html5QrCode.clear();
+                    scannerActive = false;
+                }).catch(function () { scannerActive = false; });
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            if (scanProcessing) return;
+            var code = decodedText.trim();
+            if (scannedReceipts.indexOf(code) !== -1) {
+                showError('Уже отсканирован: ' + code);
+                return;
+            }
+            if (allExpectedReceipts.indexOf(code) === -1) {
+                showError('Неизвестный код: ' + code);
+                return;
+            }
+            scanProcessing = true;
+            setTimeout(function () { scanProcessing = false; }, 1500);
+            scannedReceipts.push(code);
+            errorEl.classList.add('hidden');
+            markReceiptScanned(code);
+            showCellInfo(code);
+            updateProgress();
+            if (scannedReceipts.length >= allExpectedReceipts.length) onAllScanned();
+        }
+
+        function onAllScanned() {
+            stopCamera();
+            qrReaderDiv.innerHTML =
+                '<div class="flex flex-col items-center justify-center py-4 text-green-600">' +
+                '<i class="ri-checkbox-circle-fill text-5xl mb-2"></i>' +
+                '<p class="font-semibold">Все QR-коды отсканированы!</p>' +
+                '</div>';
+        }
+
+        function updateProgress() {
+            var total   = allExpectedReceipts.length;
+            var scanned = scannedReceipts.length;
+            var pct     = total > 0 ? Math.round((scanned / total) * 100) : 0;
+            scannedCountEl.textContent  = scanned;
+            totalCountEl.textContent    = total;
+            progressPercent.textContent = pct + '%';
+            progressBar.style.width     = pct + '%';
+            submitBtn.disabled = scanned === 0;
+        }
+
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+            setTimeout(function () { errorEl.classList.add('hidden'); }, 3000);
+        }
+
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function () {
+                var unscanned = allExpectedReceipts.filter(function (r) {
+                    return scannedReceipts.indexOf(r) === -1;
+                });
+                if (!unscanned.length) return;
+                unscanned.forEach(function (code) {
+                    scannedReceipts.push(code);
+                    markReceiptScanned(code);
+                });
+                updateProgress();
+                if (scannedReceipts.length >= allExpectedReceipts.length) onAllScanned();
+            });
+        }
+
+        submitBtn.addEventListener('click', function () {
+            if (scannedReceipts.length === 0) return;
+
+            var remaining = allExpectedReceipts.length - scannedReceipts.length;
+            if (remaining > 0) {
+                if (!confirm('Не все чеки отсканированы (' + remaining + ' осталось). Продолжить только с отмеченными?')) return;
+            }
+
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = acceptUrl;
+            var dd = (deliveredDate && deliveredDate !== 'none') ? deliveredDate : '';
+            form.innerHTML =
+                '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrfToken + '">' +
+                '<input type="hidden" name="pickup_id" value="' + pickupId + '">' +
+                '<input type="hidden" name="delivered_date" value="' + dd + '">' +
+                '<input type="hidden" name="scanned_receipts" value=\'' + JSON.stringify(scannedReceipts) + '\'>';
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+        // Форма завершения сессии уже имеет правильные hidden-поля из шаблона
+    });
+    </script>
+</body>
+</html>

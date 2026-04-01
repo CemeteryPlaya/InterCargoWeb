@@ -98,7 +98,7 @@ def _recalc_receipt_safe(receipt):
     receipt.total_weight = total_weight
     receipt.total_price = total_price
     receipt._allow_content_update = True
-    receipt.save()
+    receipt.save(update_fields=['total_weight', 'total_price'])
 
 
 def _relocate_receipt_item(track, item, old_receipt, weight_changed):

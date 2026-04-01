@@ -9,9 +9,21 @@ MAX_RETRIES = 3
 RETRY_DELAYS = [2, 5, 10]  # секунды между повторами
 
 
-def send_mail_logged(subject, body, recipient_list, from_email=None, fail_silently=False):
-    """Отправка одного письма с логированием и повторными попытками."""
+def send_mail_logged(subject, body, recipient_list, from_email=None, fail_silently=False, user_id=None):
+    """
+    Отправка одного письма с логированием и повторными попытками.
+    user_id — если передан, проверяется заглушка уведомлений для этого пользователя.
+    """
     from myprofile.models import EmailLog
+
+    if user_id is not None:
+        try:
+            from myprofile.views.utils import is_notification_muted
+            if is_notification_muted(user_id, 'email'):
+                logger.info("Email muted for user_id=%s, subject='%s'", user_id, subject)
+                return
+        except Exception as e:
+            logger.warning("Mute check failed for user_id=%s: %s", user_id, e)
 
     if from_email is None:
         from_email = django_settings.DEFAULT_FROM_EMAIL

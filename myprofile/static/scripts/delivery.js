@@ -256,6 +256,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 info.innerHTML = '<span class="font-mono text-xs">' + r.receipt_number + '</span>' +
                     '<span class="text-gray-400 ml-2 text-xs">' + r.track_count + ' шт. / ' +
                     r.total_weight.toFixed(3) + ' кг</span>';
+                if (r.needs_attention) {
+                    var badge = document.createElement('span');
+                    badge.className = 'ml-2 text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium';
+                    badge.innerHTML = '<i class="ri-error-warning-line"></i> Не был принят ранее';
+                    info.appendChild(badge);
+                }
                 row.appendChild(info);
 
                 var manualBtn = document.createElement('button');

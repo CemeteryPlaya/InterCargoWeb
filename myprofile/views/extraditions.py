@@ -10,9 +10,29 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Notification, Receipt, StorageCell, TrackCode
+from myprofile.views.utils import notify_receipt_claimed_telegram
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
+
+
+def _next_fst_pkg_barcode():
+    """Генерирует следующий штрихкод вида FST-PKG-000000001 (автоинкремент, 9 цифр)."""
+    last = (
+        ExtraditionPackage.objects
+        .filter(barcode__startswith='FST-PKG-')
+        .order_by('-barcode')
+        .values_list('barcode', flat=True)
+        .first()
+    )
+    if last:
+        try:
+            num = int(last[8:]) + 1  # 'FST-PKG-' = 8 символов
+        except (ValueError, IndexError):
+            num = 1
+    else:
+        num = 1
+    return f"FST-PKG-{num:09d}"
 
 
 def _can_issue(user):
@@ -65,6 +85,12 @@ def extradition_view(request):
         #     return redirect('extradition')
 
         with transaction.atomic():
+            # Re-fetch with lock to prevent double-submit race condition
+            package = ExtraditionPackage.objects.select_for_update().get(id=package.id)
+            if package.is_issued:
+                messages.warning(request, f"Пакет '{barcode}' уже был выдан.")
+                return redirect('extradition')
+
             extradition = Extradition.objects.create(
                 package=package,
                 user=package.user,
@@ -87,6 +113,8 @@ def extradition_view(request):
             for receipt in all_receipts:
                 for item in receipt.items.all():
                     track = item.track_code
+                    if track is None:
+                        continue
                     track.status = 'claimed'
                     track.set_status_date()
                     track.log_status_change(request.user)
@@ -98,6 +126,11 @@ def extradition_view(request):
                             message=f"📦 Ваш трек {track.track_code} выдан в пункте: {extradition.pickup_point}. "
                                     f"Штрих-код выдачи: {package.barcode}"
                         )
+
+            # Telegram-уведомления по чекам (вместо per-track)
+            for receipt in all_receipts:
+                receipt.refresh_from_db()
+                notify_receipt_claimed_telegram(receipt, pickup_label=extradition.pickup_point)
 
             # Удаляем ячейку хранения клиента (если есть)
             try:
@@ -170,6 +203,8 @@ def search_package(request):
             price_per_kg = receipt.price_per_kg if receipt.price_per_kg else Decimal("0")
             for item in items:
                 track = item.track_code
+                if track is None:
+                    continue
                 weight = track.weight or Decimal("0")
                 track_price = int((weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
                 computed_weight += weight
@@ -313,6 +348,165 @@ def close_session(request):
 @require_POST
 def toggle_payment(request):
     return JsonResponse({'error': 'Оплата временно отключена'}, status=403)
+
+
+@login_required
+def warehouse_get_receipts(request):
+    """
+    AJAX GET: возвращает список невыданных чеков клиента для быстрой выдачи со Склада ПВЗ.
+    """
+    if not _can_issue(request.user):
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'Не указан клиент'}, status=400)
+
+    from django.contrib.auth.models import User
+    from myprofile.models import Receipt
+    try:
+        owner = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Клиент не найден'}, status=404)
+
+    receipts = (
+        Receipt.objects
+        .filter(owner=owner, is_claimed=False)
+        .prefetch_related('items__track_code')
+        .order_by('created_at')
+    )
+
+    receipts_data = []
+    for receipt in receipts:
+        items = receipt.items.all()
+        tracks_data = []
+        computed_weight = Decimal("0")
+        price_per_kg = receipt.price_per_kg or Decimal("0")
+
+        for item in items:
+            track = item.track_code
+            if track is None:
+                continue
+            weight = track.weight or Decimal("0")
+            computed_weight += weight
+            tracks_data.append({
+                'track_code': track.track_code,
+                'weight': float(weight),
+                'status': track.status,
+            })
+
+        computed_price = int(
+            (computed_weight * price_per_kg).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        )
+
+        # Проверяем, входит ли чек в пакет выдачи
+        packages = list(receipt.extradition_packages.filter(is_issued=False).values('id', 'barcode'))
+
+        receipts_data.append({
+            'receipt_id': receipt.id,
+            'receipt_number': receipt.receipt_number,
+            'created_at': receipt.created_at.strftime('%d.%m.%Y') if receipt.created_at else '',
+            'total_weight': float(computed_weight),
+            'total_price': computed_price,
+            'tracks': tracks_data,
+            'in_packages': packages,
+        })
+
+    return JsonResponse({
+        'owner': owner.username,
+        'owner_full_name': owner.get_full_name() or '',
+        'receipts': receipts_data,
+    })
+
+
+@login_required
+@require_POST
+def warehouse_quick_issue_receipt(request):
+    """
+    AJAX POST: быстрая выдача одного чека со Склада ПВЗ.
+    Удаляет чек из пакета выдачи (если он там есть), оформляет выдачу,
+    помечает чек и треки как выданные.
+    """
+    if not _can_issue(request.user):
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    from myprofile.models import Receipt
+    receipt_id = request.POST.get('receipt_id', '').strip()
+    if not receipt_id:
+        return JsonResponse({'error': 'Не указан ID чека'}, status=400)
+
+    try:
+        receipt = Receipt.objects.prefetch_related('items__track_code', 'extradition_packages').get(id=receipt_id)
+    except Receipt.DoesNotExist:
+        return JsonResponse({'error': 'Чек не найден'}, status=404)
+
+    if receipt.is_claimed:
+        return JsonResponse({'error': 'Чек уже выдан'}, status=400)
+
+    PICKUP_LABEL = "Быстрая выдача со Склад ПВЗ"
+
+    with transaction.atomic():
+        # Убираем чек из всех невыданных пакетов
+        for pkg in receipt.extradition_packages.filter(is_issued=False):
+            pkg.receipts.remove(receipt)
+            # Если пакет стал пустым — помечаем как выданный
+            if not pkg.receipts.exists():
+                pkg.is_issued = True
+                pkg.save(update_fields=['is_issued'])
+                ExtraditionSession.objects.filter(package=pkg).delete()
+
+        # Создаём пакет быстрой выдачи с уникальным штрихкодом FST-PKG-XXXXXXXXX
+        fst_barcode = _next_fst_pkg_barcode()
+        temp_pkg = ExtraditionPackage.objects.create(
+            user=receipt.owner,
+            barcode=fst_barcode,
+            comment=PICKUP_LABEL,
+            is_issued=True,
+        )
+        temp_pkg.receipts.add(receipt)
+
+        Extradition.objects.create(
+            package=temp_pkg,
+            user=receipt.owner,
+            issued_by=request.user,
+            pickup_point=PICKUP_LABEL,
+            comment=PICKUP_LABEL,
+            confirmed=True,
+        )
+
+        # Помечаем чек
+        now = timezone.now()
+        receipt.is_paid = True
+        receipt.paid_at = now
+        receipt.is_claimed = True
+        receipt.claimed_at = now
+        receipt.save(update_fields=['is_paid', 'paid_at', 'is_claimed', 'claimed_at'])
+        notify_receipt_claimed_telegram(receipt, pickup_label=PICKUP_LABEL)
+
+        # Меняем статус треков
+        track_codes_issued = []
+        for item in receipt.items.all():
+            track = item.track_code
+            if not track:
+                continue
+            track.status = 'claimed'
+            track.set_status_date()
+            track.log_status_change(request.user)
+            track.save()
+            track_codes_issued.append(track.track_code)
+
+            if track.owner:
+                Notification.objects.create(
+                    user=track.owner,
+                    message=f"📦 Ваш трек {track.track_code} выдан ({PICKUP_LABEL})."
+                )
+
+    return JsonResponse({
+        'success': True,
+        'receipt_id': receipt.id,
+        'receipt_number': receipt.receipt_number,
+        'tracks_issued': track_codes_issued,
+    })
 
 # @login_required
 # @require_POST
