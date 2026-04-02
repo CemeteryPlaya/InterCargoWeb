@@ -200,8 +200,8 @@ def _require_hr(user):
 
 
 def _has_active_sorting_session():
-    """Возвращает True если есть активная или приостановленная сессия сортировки."""
-    return ArrivalSession.objects.filter(status__in=['active', 'paused']).exists()
+    """Возвращает True если есть активная (не на паузе) сессия сортировки."""
+    return ArrivalSession.objects.filter(status='active').exists()
 
 
 @login_required
@@ -229,7 +229,7 @@ def review_pickup_change(request, req_id):
         return forbidden
 
     if _has_active_sorting_session():
-        messages.error(request, "Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её завершения или паузы.")
+        messages.error(request, "Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её завершения или поставьте на паузу.")
         return redirect('pickup_change_requests')
 
     change_req = get_object_or_404(PickupChangeRequest, id=req_id, status='pending')
