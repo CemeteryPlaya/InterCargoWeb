@@ -11,6 +11,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Notification, Receipt, StorageCell, TrackCode
 from myprofile.views.utils import notify_receipt_claimed_telegram
+from myprofile.receipt_lifecycle import issue_to_client as lifecycle_issue, ReceiptLifecycleError
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
@@ -100,14 +101,17 @@ def extradition_view(request):
                 confirmed=True
             )
 
-            # Отмечаем чеки как оплаченные и выданные
-            now = timezone.now()
-            all_receipts.update(
-                is_paid=True,
-                paid_at=now,
-                is_claimed=True,
-                claimed_at=now,
-            )
+            # Lifecycle: accepted_pvz/delivered_pvz → claimed
+            receipt_list = list(all_receipts)
+            try:
+                lifecycle_issue(receipt_list, request.user)
+            except ReceiptLifecycleError as e:
+                logger.warning("extradition lifecycle: %s", e)
+                now = timezone.now()
+                all_receipts.update(
+                    status='claimed', is_paid=True, paid_at=now,
+                    is_claimed=True, claimed_at=now,
+                )
 
             # Меняем статус всех трек-кодов через чеки
             for receipt in all_receipts:
@@ -474,13 +478,19 @@ def warehouse_quick_issue_receipt(request):
             confirmed=True,
         )
 
-        # Помечаем чек
-        now = timezone.now()
-        receipt.is_paid = True
-        receipt.paid_at = now
-        receipt.is_claimed = True
-        receipt.claimed_at = now
-        receipt.save(update_fields=['is_paid', 'paid_at', 'is_claimed', 'claimed_at'])
+        # Lifecycle: → claimed
+        try:
+            lifecycle_issue([receipt], request.user)
+        except ReceiptLifecycleError as e:
+            logger.warning("quick_issue lifecycle: %s", e)
+            now = timezone.now()
+            receipt.status = 'claimed'
+            receipt.is_paid = True
+            receipt.paid_at = now
+            receipt.is_claimed = True
+            receipt.claimed_at = now
+            receipt.save(update_fields=['status', 'is_paid', 'paid_at', 'is_claimed', 'claimed_at'])
+        receipt.refresh_from_db()
         notify_receipt_claimed_telegram(receipt, pickup_label=PICKUP_LABEL)
 
         # Меняем статус треков

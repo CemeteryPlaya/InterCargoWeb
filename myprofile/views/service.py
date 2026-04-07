@@ -284,6 +284,7 @@ def service_mark_claimed(request):
         return redirect('service')
 
     receipts_to_update.update(
+        status='claimed',
         is_claimed=True,
         claimed_at=now,
         is_paid=True,

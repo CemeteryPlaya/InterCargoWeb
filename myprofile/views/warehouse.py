@@ -15,6 +15,13 @@ from myprofile.models import (
 
 from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import notify_receipt_claimed_telegram
+from myprofile.receipt_lifecycle import (
+    issue_to_client as lifecycle_issue, return_to_sorting as lifecycle_return,
+    get_receipts_for_tracks, ReceiptLifecycleError,
+)
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def _is_warehouse_worker(user):
@@ -219,18 +226,25 @@ def warehouse_issue_to_client(request):
 
         # Находим чеки связанные с этими треками
         track_ids = [t.id for t in tracks]
-        receipts = Receipt.objects.filter(
-            items__track_code_id__in=track_ids
-        ).distinct()
-
-        # Отмечаем чеки как оплаченные и выданные
-        now = timezone.now()
-        receipts.update(
-            is_paid=True,
-            paid_at=now,
-            is_claimed=True,
-            claimed_at=now,
+        receipts = list(
+            Receipt.objects.filter(
+                items__track_code_id__in=track_ids
+            ).distinct()
         )
+
+        # Lifecycle: accepted_pvz → claimed
+        try:
+            lifecycle_issue(receipts, request.user)
+        except ReceiptLifecycleError as e:
+            logger.warning("warehouse_issue lifecycle: %s", e)
+            now = timezone.now()
+            Receipt.objects.filter(
+                id__in=[r.id for r in receipts]
+            ).update(
+                status='claimed', is_paid=True, paid_at=now,
+                is_claimed=True, claimed_at=now,
+            )
+
         for receipt in receipts:
             receipt.refresh_from_db()
             notify_receipt_claimed_telegram(receipt, pickup_label=str(pickup_point))
@@ -686,6 +700,27 @@ def confirm_return_to_sorting(request):
         except (UserProfile.DoesNotExist, AttributeError):
             pass
 
+        # Lifecycle: accepted_pvz → pending (возврат на сортировку)
+        return_receipts = list(Receipt.objects.filter(
+            owner=owner,
+            needs_attention=True,
+            attention_reason='Возвращено со склада ПВЗ',
+        ))
+        if return_receipts:
+            try:
+                lifecycle_return(return_receipts, request.user)
+            except ReceiptLifecycleError as e:
+                logger.warning("confirm_return_to_sorting lifecycle: %s", e)
+                # Fallback: сбрасываем напрямую
+                Receipt.objects.filter(
+                    id__in=[r.id for r in return_receipts]
+                ).update(
+                    status='pending', delivery=None,
+                    is_accepted_pp=False, accepted_pp_at=None, accepted_pp_by=None,
+                    needs_attention=False, attention_reason='',
+                    attention_added_by=None, attention_pickup='', attention_at=None,
+                )
+
         # Возвращаем треки на сортировочный склад
         for track in tracks:
             track.status = 'delivered'
@@ -695,19 +730,6 @@ def confirm_return_to_sorting(request):
         # Удаляем ячейку хранения
         if pickup_point:
             StorageCell.objects.filter(pickup_point=pickup_point, user=owner).delete()
-
-        # Снимаем флаг внимания
-        Receipt.objects.filter(
-            owner=owner,
-            needs_attention=True,
-            attention_reason='Возвращено со склада ПВЗ',
-        ).update(
-            needs_attention=False,
-            attention_reason='',
-            attention_added_by=None,
-            attention_pickup='',
-            attention_at=None,
-        )
 
         # Уведомление клиенту
         Notification.objects.create(

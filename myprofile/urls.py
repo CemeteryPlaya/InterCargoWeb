@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -47,6 +47,7 @@ urlpatterns = [
     path('notifications/', notifications.notifications_list, name='notifications'),
     path('notifications/read/<int:notif_id>/', notifications.mark_as_read, name='mark_as_read'),
     path("notifications/mark-as-read/", notifications.mark_notifications_as_read, name="mark_notifications_as_read"),
+    path("notifications/bulk-read/", notifications.mark_notifications_bulk_read, name="mark_notifications_bulk_read"),
     path('save-subscription/', push_subscribe.save_push_subscription, name='save_subscription'),
     path('extradition/', extraditions.extradition_view, name='extradition'),
     path('extradition/search/', extraditions.search_package, name='extradition_search'),
@@ -129,6 +130,12 @@ urlpatterns = [
     path('service/mark-claimed/', service.service_mark_claimed, name='service_mark_claimed'),
     path('service/restore-archived-tracks/', service.service_restore_archived_tracks, name='service_restore_archived_tracks'),
     path('service/test-notification/', service.service_test_notification, name='service_test_notification'),
+    path('mobile-qr/', mobile_qr.mobile_qr_view, name='mobile_qr'),
+    path('mobile-parcels/', mobile_parcels.mobile_parcels_view, name='mobile_parcels'),
+    path('mobile-parcels/archive/', mobile_parcels.mobile_archive_track, name='mobile_archive_track'),
+    path('mobile-parcels/unarchive/', mobile_parcels.mobile_unarchive_track, name='mobile_unarchive_track'),
+    path('mobile-parcels/mass-archive/', mobile_parcels.mobile_mass_archive, name='mobile_mass_archive'),
+    path('mobile-notifications/', mobile_notifications.mobile_notifications_view, name='mobile_notifications'),
 ]
 
 # Подключение медиа-файлов при DEBUG=True

@@ -524,3 +524,130 @@
                 background-color: #020617 !important;
             }
         }
+
+        /* =========================================
+           Мобильная нижняя навигация
+           ========================================= */
+        .mobile-bottom-nav {
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        /* Активная кнопка навигации */
+        .mobile-nav-item.active {
+            color: #e53e3e;
+        }
+
+        .mobile-nav-item.active i {
+            font-weight: bold;
+        }
+
+        /* QR-кнопка: вариант с логотипом (на странице QR) */
+        .mobile-nav-qr.qr-logo-mode {
+            background-color: #ffffff !important;
+            border: 3px solid #e53e3e;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.25);
+        }
+
+        body.theme-dark .mobile-nav-qr.qr-logo-mode {
+            background-color: #0f172a !important;
+            border-color: #e53e3e;
+        }
+
+        /* QR-кнопка: пульсация при наведении */
+        .mobile-nav-qr:active {
+            transform: scale(0.92);
+        }
+
+        /* Компенсация высоты нижней навигации для контента */
+        @media (max-width: 767px) {
+            body.has-bottom-nav {
+                padding-bottom: 64px;
+            }
+
+            /* Скрыть нижнюю навигацию при открытом сайдбаре/меню */
+            body.sidebar-open .mobile-bottom-nav {
+                display: none;
+            }
+        }
+
+        /* Тёмная тема для нижней навигации */
+        body.theme-dark .mobile-bottom-nav {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        body.theme-dark .mobile-nav-item {
+            color: #9ca3af;
+        }
+
+        body.theme-dark .mobile-nav-item:hover,
+        body.theme-dark .mobile-nav-item.active {
+            color: #e53e3e;
+        }
+
+        body.theme-dark .mobile-nav-qr {
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        /* =========================================
+           Мобильная страница QR — табы
+           ========================================= */
+        .mobile-qr-tab {
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        body.theme-dark .mobile-qr-tab.text-gray-500 {
+            color: #6b7280;
+        }
+
+        body.theme-dark .mobile-qr-tab.text-primary {
+            color: #e53e3e;
+        }
+
+        /* =========================================
+           Мобильная страница «Посылки»
+           ========================================= */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.25s ease-out;
+        }
+
+        /* Тёмная тема — модалка добавления */
+        body.theme-dark #add-track-modal > div:last-child {
+            background-color: #0f172a !important;
+        }
+
+        body.theme-dark #add-track-modal input,
+        body.theme-dark #add-track-modal textarea {
+            background-color: #020617 !important;
+            border-color: #374151 !important;
+            color: #e5e7eb !important;
+        }
+
+        /* Тёмная тема — toast */
+        body.theme-dark #mobile-toast .bg-gray-800 {
+            background-color: #1e293b !important;
+        }
+
+        /* Полноэкранные панели категорий */
+        .mobile-cat-panel {
+            will-change: transform;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Тёмная тема — панель категории */
+        body.theme-dark .mobile-cat-panel {
+            background-color: #020617 !important;
+        }
+
+        body.theme-dark .mobile-cat-panel > div:first-child {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+        }

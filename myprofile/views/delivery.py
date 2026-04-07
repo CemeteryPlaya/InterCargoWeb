@@ -18,6 +18,10 @@ from myprofile.models import (
 )
 from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import notify_receipt_claimed_telegram
+from myprofile.receipt_lifecycle import (
+    take_into_delivery, complete_delivery_to_pvz, issue_to_client,
+    get_receipts_for_tracks, ReceiptLifecycleError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -283,6 +287,17 @@ def take_delivery(request):
                 )
                 history.track_codes.set(tracks)
 
+                # Lifecycle: pending → in_delivery, привязка к доставке
+                track_ids = [t.id for t in tracks]
+                delivery_receipts = list(
+                    get_receipts_for_tracks(track_ids).filter(status='pending')
+                )
+                if delivery_receipts:
+                    try:
+                        take_into_delivery(delivery_receipts, history, request.user)
+                    except ReceiptLifecycleError as e:
+                        logger.warning("take_delivery lifecycle: %s", e)
+
     # Доставка на дом
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
     if home_client_ids and home_pp:
@@ -321,6 +336,17 @@ def take_delivery(request):
                     delivered_at=None,
                 )
                 history.track_codes.set(tracks)
+
+                # Lifecycle: pending → in_delivery
+                home_track_ids = [t.id for t in tracks]
+                home_receipts = list(
+                    get_receipts_for_tracks(home_track_ids).filter(status='pending')
+                )
+                if home_receipts:
+                    try:
+                        take_into_delivery(home_receipts, history, request.user)
+                    except ReceiptLifecycleError as e:
+                        logger.warning("take_delivery (home) lifecycle: %s", e)
 
     # Групповые уведомления
     for user, count in notif_counts.items():
@@ -535,6 +561,18 @@ def complete_delivery(request):
                  'date_ready', 'status_history'],
             )
 
+        # Lifecycle: in_delivery → delivered_pvz
+        if all_tracks_to_update:
+            all_track_ids = [t.id for t in all_tracks_to_update]
+            pvz_receipts = list(
+                get_receipts_for_tracks(all_track_ids).filter(status='in_delivery')
+            )
+            if pvz_receipts:
+                try:
+                    complete_delivery_to_pvz(pvz_receipts, request.user)
+                except ReceiptLifecycleError as e:
+                    logger.warning("complete_delivery lifecycle: %s", e)
+
         # In-app уведомления — один bulk_create
         if notif_counts:
             Notification.objects.bulk_create([
@@ -598,17 +636,25 @@ def driver_issue(request):
     with transaction.atomic():
         # Находим все чеки для текущих треков
         track_ids = [t.id for t in tracks]
-        receipts = Receipt.objects.filter(
-            items__track_code_id__in=track_ids
-        ).distinct()
-
-        # Отмечаем чеки как оплаченные и выданные
-        receipts.update(
-            is_paid=True,
-            paid_at=now,
-            is_claimed=True,
-            claimed_at=now,
+        receipts = list(
+            Receipt.objects.filter(
+                items__track_code_id__in=track_ids
+            ).distinct()
         )
+
+        # Lifecycle: in_delivery → claimed (выдача водителем)
+        try:
+            issue_to_client(receipts, request.user)
+        except ReceiptLifecycleError as e:
+            logger.warning("driver_issue lifecycle: %s", e)
+            # Fallback: обновляем напрямую для чеков в неожиданном статусе
+            Receipt.objects.filter(
+                id__in=[r.id for r in receipts]
+            ).update(
+                status='claimed', is_paid=True, paid_at=now,
+                is_claimed=True, claimed_at=now,
+            )
+
         for receipt in receipts:
             receipt.refresh_from_db()
             notify_receipt_claimed_telegram(receipt, pickup_label="Доставка на дом (Курьер)")

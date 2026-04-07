@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Посылки</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/faq.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+{% include 'includes/header.html' %}
+
+<div class="flex min-h-screen">
+    {% include 'includes/sidebar.html' %}
+
+    <main class="flex-1 w-full">
+
+        <!-- ===== Мобильная версия: главный экран ===== -->
+        <div id="parcels-main" class="md:hidden">
+
+            <!-- Баннер «Добавить трек-код» -->
+            <div class="mx-4 mt-4 mb-4">
+                <button type="button" id="add-track-btn"
+                    class="w-full bg-primary rounded-2xl py-5 px-4 flex flex-col items-center justify-center gap-1 shadow-md hover:shadow-lg transition active:scale-[0.98]">
+                    <i class="ri-barcode-line text-3xl text-white"></i>
+                    <span class="text-white font-bold text-base">Добавить трек-код</span>
+                    <span class="text-white/70 text-xs">Отследить новую посылку</span>
+                </button>
+            </div>
+
+            <!-- Список категорий -->
+            <div class="mx-4 mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                {% for cat in categories %}
+                <button type="button"
+                    class="cat-open-btn w-full flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 transition text-left"
+                    style="border-left: 4px solid
+                    {% if cat.key == 'user_added' %}#ef4444
+                    {% elif cat.key == 'warehouse_cn' %}#f97316
+                    {% elif cat.key == 'shipped_cn' %}#eab308
+                    {% elif cat.key == 'in_sorting' %}#a855f7
+                    {% elif cat.key == 'shipping_pp' %}#6b7280
+                    {% elif cat.key == 'ready' %}#22c55e
+                    {% elif cat.key == 'claimed' %}#3b82f6
+                    {% elif cat.key == 'archived' %}#9ca3af
+                    {% endif %}"
+                    data-cat-key="{{ cat.key }}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                            style="
+                            {% if cat.key == 'user_added' %}background:#fee2e2;color:#ef4444
+                            {% elif cat.key == 'warehouse_cn' %}background:#ffedd5;color:#f97316
+                            {% elif cat.key == 'shipped_cn' %}background:#fef9c3;color:#eab308
+                            {% elif cat.key == 'in_sorting' %}background:#f3e8ff;color:#a855f7
+                            {% elif cat.key == 'shipping_pp' %}background:#e5e7eb;color:#6b7280
+                            {% elif cat.key == 'ready' %}background:#dcfce7;color:#22c55e
+                            {% elif cat.key == 'claimed' %}background:#dbeafe;color:#3b82f6
+                            {% elif cat.key == 'archived' %}background:#f3f4f6;color:#9ca3af
+                            {% endif %}">
+                            <i class="{{ cat.icon }} text-lg"></i>
+                        </div>
+                        <span class="font-medium text-sm">{{ cat.label }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center min-w-[24px] h-6 px-2 text-xs font-semibold rounded-full"
+                            style="
+                            {% if cat.key == 'user_added' %}background:#fee2e2;color:#b91c1c
+                            {% elif cat.key == 'warehouse_cn' %}background:#ffedd5;color:#c2410c
+                            {% elif cat.key == 'shipped_cn' %}background:#fef9c3;color:#a16207
+                            {% elif cat.key == 'in_sorting' %}background:#f3e8ff;color:#7e22ce
+                            {% elif cat.key == 'shipping_pp' %}background:#e5e7eb;color:#374151
+                            {% elif cat.key == 'ready' %}background:#dcfce7;color:#15803d
+                            {% elif cat.key == 'claimed' %}background:#dbeafe;color:#1d4ed8
+                            {% elif cat.key == 'archived' %}background:#f3f4f6;color:#4b5563
+                            {% endif %}">{{ cat.count }}</span>
+                        <i class="ri-arrow-right-s-line text-gray-400 text-lg"></i>
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- ===== Полноэкранные панели категорий ===== -->
+        {% for cat in categories %}
+        <div id="panel-{{ cat.key }}" class="mobile-cat-panel md:hidden fixed inset-x-0 bottom-0 z-40 bg-gray-50 hidden" style="top:82px;">
+            <!-- Хидер панели -->
+            <div class="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+                <div class="flex items-center">
+                    <button type="button" class="cat-back-btn mr-3 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+                        <i class="ri-arrow-left-line text-xl text-gray-700"></i>
+                    </button>
+                    <div class="flex-1">
+                        <h2 class="font-bold text-base">{{ cat.label }}</h2>
+                        <p class="text-xs text-gray-400">{{ cat.count }} трек-кодов</p>
+                    </div>
+                </div>
+                {% if cat.key != 'archived' and cat.count > 0 %}
+                <!-- Панель режима выбора -->
+                <div class="mt-2 flex items-center gap-2">
+                    <button type="button"
+                        class="select-mode-toggle text-xs font-medium bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 border border-gray-300 hover:border-red-300 rounded-lg px-3 py-1.5 transition-colors"
+                        data-cat-key="{{ cat.key }}">
+                        <i class="ri-checkbox-multiple-line mr-1"></i> <span class="toggle-label">В архив</span>
+                    </button>
+                    <button type="button"
+                        class="select-all-btn text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300 rounded-lg px-3 py-1.5 transition-colors hidden"
+                        data-cat-key="{{ cat.key }}">
+                        <i class="ri-checkbox-circle-line mr-1"></i> Выбрать все
+                    </button>
+                    <span class="selected-count text-xs text-gray-500 hidden" data-cat-key="{{ cat.key }}">
+                        Выбрано: <strong class="count-num">0</strong>
+                    </span>
+                </div>
+                <!-- Кнопка подтверждения архивации (появляется при выборе) -->
+                <div class="archive-confirm-bar hidden mt-2">
+                    <button type="button"
+                        class="mass-archive-btn w-full text-sm font-semibold bg-red-500 text-white rounded-lg px-4 py-2.5 hover:bg-red-600 transition-colors"
+                        data-cat-key="{{ cat.key }}">
+                        <i class="ri-archive-line mr-1"></i> Архивировать выбранные
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Список карточек -->
+            <div class="overflow-y-auto px-4 pt-4 pb-24" style="height: calc(100% - 60px);">
+                {% if cat.tracks %}
+                <div class="space-y-3">
+                    {% for track in cat.tracks %}
+                    <div class="track-card p-4 rounded-lg shadow border text-gray-800 space-y-1 relative transition-all
+                        {% if track.status == 'ready' %}bg-green-100 border-green-300
+                        {% elif track.status == 'user_added' %}bg-red-100 border-red-300
+                        {% elif track.status == 'warehouse_cn' %}bg-orange-100 border-orange-300
+                        {% elif track.status == 'shipped_cn' %}bg-yellow-100 border-yellow-300
+                        {% elif track.status == 'delivered' or track.status == 'unidentified' %}bg-purple-100 border-purple-300
+                        {% elif track.status == 'shipping_pp' %}bg-gray-200 border-gray-400
+                        {% elif track.status == 'claimed' %}bg-blue-100 border-blue-300
+                        {% else %}bg-white border-gray-300
+                        {% endif %}"
+                        data-track-id="{{ track.id }}" data-is-archived="{{ track.is_archived|yesno:'true,false' }}">
+
+                        <!-- Чекбокс выбора (скрыт по умолчанию) -->
+                        {% if cat.key != 'archived' and not track.is_archived %}
+                        <div class="select-checkbox absolute top-3 left-3 hidden">
+                            <div class="w-6 h-6 rounded border-2 border-gray-400 bg-white flex items-center justify-center transition-colors cursor-pointer">
+                                <i class="ri-check-line text-sm text-white hidden"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if track.is_archived %}
+                        <div class="absolute top-2 right-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-200 text-orange-800">
+                                <i class="ri-archive-line mr-0.5"></i> Архив
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <p class="pr-20 break-all card-content"><strong>Код:</strong> {{ track.track_code }}</p>
+                        <p><strong>Статус:</strong> {{ track.get_status_display }}</p>
+                        <p><strong>Обновлено:</strong> {{ track.update_date|date:"d.m.Y" }}</p>
+                        {% if track.sorting_location %}
+                        <p><strong>Где отсортирован:</strong> {{ track.sorting_location }}</p>
+                        {% endif %}
+                        {% if track.description %}
+                        <p><strong>Описание:</strong> {{ track.description }}</p>
+                        {% endif %}
+                        {% if track.status == 'delivered' or track.status == 'shipping_pp' or track.status == 'claimed' or track.status == 'ready' %}
+                            {% if track.weight %}
+                            <p><strong>Вес:</strong> {{ track.weight }} кг</p>
+                            {% endif %}
+                        {% endif %}
+
+                        <!-- Действия (скрываются в режиме выбора) -->
+                        <div class="card-actions flex items-center gap-2 pt-2">
+                            {% if cat.key == 'archived' %}
+                            <button type="button"
+                                class="unarchive-btn text-xs font-medium bg-white bg-opacity-90 text-blue-700 hover:bg-blue-50 border border-blue-300 rounded px-3 py-1.5 shadow-sm transition-colors"
+                                data-track-id="{{ track.id }}">
+                                <i class="ri-inbox-unarchive-line mr-0.5"></i> Восстановить
+                            </button>
+                            {% else %}
+                            <button type="button"
+                                class="archive-btn text-xs font-medium bg-white bg-opacity-90 text-gray-700 hover:text-red-700 hover:bg-red-50 border border-gray-400 rounded px-3 py-1.5 shadow-sm transition-colors"
+                                data-track-id="{{ track.id }}">
+                                <i class="ri-archive-line mr-0.5"></i> В архив
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-center">
+                    <i class="{{ cat.icon }} text-5xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500 font-medium">Нет трек-кодов</p>
+                    <p class="text-gray-400 text-sm mt-1">В этой категории пока пусто</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- ===== Десктоп: перенаправление на полную страницу ===== -->
+        <div class="hidden md:flex flex-col items-center justify-center py-20 text-center">
+            <i class="ri-box-3-line text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg mb-4">Эта страница оптимизирована для мобильных устройств</p>
+            <a href="{% url 'track_codes' %}" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                <i class="ri-barcode-line mr-1"></i> Трек-коды
+            </a>
+        </div>
+
+    </main>
+</div>
+
+<!-- Модалка добавления трек-кода -->
+<div id="add-track-modal" class="fixed inset-0 z-50 hidden items-center justify-end">
+    <div id="add-track-backdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="relative bg-white rounded-t-2xl shadow-xl w-full mx-0 z-10 animate-slide-up" style="margin-top:auto;">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3">
+            <h3 class="text-lg font-bold">Добавить трек-код</h3>
+            <button id="add-track-close" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+        </div>
+        <form method="post" action="{% url 'track_codes' %}" class="px-5 pb-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <input type="text" name="track_code" required autocomplete="off"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Введите трек-код">
+            </div>
+            <div>
+                <textarea name="description" rows="2"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                    placeholder="Описание посылки (необязательно)"></textarea>
+            </div>
+            <button type="submit"
+                class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-red-600 transition">
+                <i class="ri-add-line mr-1"></i> Добавить
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Toast уведомление -->
+<div id="mobile-toast" class="fixed top-4 left-4 right-4 z-[60] hidden">
+    <div class="bg-gray-800 text-white px-4 py-3 rounded-xl shadow-lg text-sm text-center flex items-center justify-center gap-2">
+        <i id="toast-icon" class="ri-information-line"></i>
+        <span id="toast-text"></span>
+    </div>
+</div>
+
+{% include 'includes/footer.html' %}
+
+<script>
+(function() {
+    var csrf = '{{ csrf_token }}';
+
+    // === Открытие / закрытие панели категории ===
+    var bottomNav = document.getElementById('mobile-bottom-nav');
+    var activePanelKey = null;
+
+    function openPanel(key) {
+        var panel = document.getElementById('panel-' + key);
+        if (!panel) return;
+        activePanelKey = key;
+        panel.style.transform = 'translateX(100%)';
+        panel.classList.remove('hidden');
+        panel.offsetHeight;
+        panel.style.transition = 'transform 0.25s ease-out';
+        panel.style.transform = 'translateX(0)';
+        if (bottomNav) bottomNav.style.display = 'none';
+    }
+
+    function closePanel() {
+        if (!activePanelKey) return;
+        var panel = document.getElementById('panel-' + activePanelKey);
+        if (!panel) return;
+        // Выключаем режим выбора при закрытии
+        exitSelectMode(activePanelKey);
+        panel.style.transition = 'transform 0.2s ease-in';
+        panel.style.transform = 'translateX(100%)';
+        setTimeout(function() {
+            panel.classList.add('hidden');
+            panel.style.transform = '';
+            panel.style.transition = '';
+        }, 200);
+        if (bottomNav) bottomNav.style.display = '';
+        activePanelKey = null;
+    }
+
+    document.querySelectorAll('.cat-open-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openPanel(btn.dataset.catKey);
+        });
+    });
+    document.querySelectorAll('.cat-back-btn').forEach(function(btn) {
+        btn.addEventListener('click', closePanel);
+    });
+
+    window.addEventListener('popstate', function() {
+        if (activePanelKey) closePanel();
+    });
+    var origOpen = openPanel;
+    openPanel = function(key) {
+        history.pushState({ panel: key }, '');
+        origOpen(key);
+    };
+
+    // === Режим выбора для массовой архивации ===
+    var selectModeActive = {};    // catKey → boolean
+    var selectedIds = {};         // catKey → Set
+
+    function enterSelectMode(catKey) {
+        var panel = document.getElementById('panel-' + catKey);
+        if (!panel) return;
+        selectModeActive[catKey] = true;
+        selectedIds[catKey] = new Set();
+
+        // UI кнопок
+        var toggleBtn = panel.querySelector('.select-mode-toggle');
+        var selectAllBtn = panel.querySelector('.select-all-btn');
+        var countEl = panel.querySelector('.selected-count');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
+            toggleBtn.classList.add('bg-red-500', 'text-white', 'border-red-500');
+            toggleBtn.querySelector('.toggle-label').textContent = 'Отмена';
+        }
+        if (selectAllBtn) selectAllBtn.classList.remove('hidden');
+        if (countEl) countEl.classList.remove('hidden');
+
+        // Показать чекбоксы, скрыть кнопки действий
+        panel.querySelectorAll('.select-checkbox').forEach(function(el) { el.classList.remove('hidden'); });
+        panel.querySelectorAll('.track-card[data-is-archived="false"]').forEach(function(card) {
+            card.querySelector('.card-content').classList.add('pl-8');
+        });
+        panel.querySelectorAll('.card-actions').forEach(function(el) { el.classList.add('hidden'); });
+
+        updateSelectUI(catKey);
+    }
+
+    function exitSelectMode(catKey) {
+        var panel = document.getElementById('panel-' + catKey);
+        if (!panel || !selectModeActive[catKey]) return;
+        selectModeActive[catKey] = false;
+        selectedIds[catKey] = new Set();
+
+        var toggleBtn = panel.querySelector('.select-mode-toggle');
+        var selectAllBtn = panel.querySelector('.select-all-btn');
+        var countEl = panel.querySelector('.selected-count');
+        var confirmBar = panel.querySelector('.archive-confirm-bar');
+        if (toggleBtn) {
+            toggleBtn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
+            toggleBtn.classList.remove('bg-red-500', 'text-white', 'border-red-500');
+            toggleBtn.querySelector('.toggle-label').textContent = 'В архив';
+        }
+        if (selectAllBtn) selectAllBtn.classList.add('hidden');
+        if (countEl) countEl.classList.add('hidden');
+        if (confirmBar) confirmBar.classList.add('hidden');
+
+        // Скрыть чекбоксы, вернуть кнопки действий
+        panel.querySelectorAll('.select-checkbox').forEach(function(el) {
+            el.classList.add('hidden');
+            var box = el.querySelector('div');
+            box.classList.remove('bg-red-500', 'border-red-500');
+            box.classList.add('border-gray-400', 'bg-white');
+            box.querySelector('i').classList.add('hidden');
+        });
+        panel.querySelectorAll('.track-card[data-is-archived="false"]').forEach(function(card) {
+            card.querySelector('.card-content').classList.remove('pl-8');
+            card.classList.remove('ring-2', 'ring-red-500', 'opacity-80');
+        });
+        panel.querySelectorAll('.card-actions').forEach(function(el) { el.classList.remove('hidden'); });
+    }
+
+    function toggleCardSelection(catKey, card) {
+        if (!selectModeActive[catKey]) return;
+        if (card.dataset.isArchived === 'true') return;
+        var id = card.dataset.trackId;
+        var checkbox = card.querySelector('.select-checkbox div');
+        var icon = checkbox ? checkbox.querySelector('i') : null;
+
+        if (selectedIds[catKey].has(id)) {
+            selectedIds[catKey].delete(id);
+            card.classList.remove('ring-2', 'ring-red-500', 'opacity-80');
+            if (checkbox) { checkbox.classList.remove('bg-red-500', 'border-red-500'); checkbox.classList.add('border-gray-400', 'bg-white'); }
+            if (icon) icon.classList.add('hidden');
+        } else {
+            selectedIds[catKey].add(id);
+            card.classList.add('ring-2', 'ring-red-500', 'opacity-80');
+            if (checkbox) { checkbox.classList.add('bg-red-500', 'border-red-500'); checkbox.classList.remove('border-gray-400', 'bg-white'); }
+            if (icon) icon.classList.remove('hidden');
+        }
+        updateSelectUI(catKey);
+    }
+
+    function selectAllCards(catKey) {
+        var panel = document.getElementById('panel-' + catKey);
+        if (!panel) return;
+        var cards = panel.querySelectorAll('.track-card[data-is-archived="false"]');
+        var allSelected = selectedIds[catKey] && selectedIds[catKey].size === cards.length;
+
+        cards.forEach(function(card) {
+            var id = card.dataset.trackId;
+            if (allSelected) {
+                // Deselect all
+                selectedIds[catKey].delete(id);
+                card.classList.remove('ring-2', 'ring-red-500', 'opacity-80');
+                var cb = card.querySelector('.select-checkbox div');
+                if (cb) { cb.classList.remove('bg-red-500', 'border-red-500'); cb.classList.add('border-gray-400', 'bg-white'); cb.querySelector('i').classList.add('hidden'); }
+            } else {
+                // Select all
+                selectedIds[catKey].add(id);
+                card.classList.add('ring-2', 'ring-red-500', 'opacity-80');
+                var cb = card.querySelector('.select-checkbox div');
+                if (cb) { cb.classList.add('bg-red-500', 'border-red-500'); cb.classList.remove('border-gray-400', 'bg-white'); cb.querySelector('i').classList.remove('hidden'); }
+            }
+        });
+        updateSelectUI(catKey);
+    }
+
+    function updateSelectUI(catKey) {
+        var panel = document.getElementById('panel-' + catKey);
+        if (!panel) return;
+        var count = selectedIds[catKey] ? selectedIds[catKey].size : 0;
+        var countEl = panel.querySelector('.selected-count .count-num');
+        if (countEl) countEl.textContent = count;
+        var confirmBar = panel.querySelector('.archive-confirm-bar');
+        if (confirmBar) {
+            if (count > 0) {
+                confirmBar.classList.remove('hidden');
+                var btn = confirmBar.querySelector('.mass-archive-btn');
+                if (btn) btn.innerHTML = '<i class="ri-archive-line mr-1"></i> Архивировать выбранные (' + count + ')';
+            } else {
+                confirmBar.classList.add('hidden');
+            }
+        }
+        // Обновляем кнопку «Выбрать все»
+        var cards = panel.querySelectorAll('.track-card[data-is-archived="false"]');
+        var selectAllBtn = panel.querySelector('.select-all-btn');
+        if (selectAllBtn) {
+            if (count === cards.length && count > 0) {
+                selectAllBtn.innerHTML = '<i class="ri-checkbox-circle-fill mr-1"></i> Снять все';
+            } else {
+                selectAllBtn.innerHTML = '<i class="ri-checkbox-circle-line mr-1"></i> Выбрать все';
+            }
+        }
+    }
+
+    // === Модалка добавления трек-кода ===
+    var addBtn = document.getElementById('add-track-btn');
+    var addModal = document.getElementById('add-track-modal');
+    var addClose = document.getElementById('add-track-close');
+    var addBackdrop = document.getElementById('add-track-backdrop');
+
+    function openAddModal() {
+        addModal.classList.remove('hidden');
+        addModal.classList.add('flex');
+        setTimeout(function() {
+            var input = addModal.querySelector('input[name="track_code"]');
+            if (input) input.focus();
+        }, 100);
+    }
+    function closeAddModal() {
+        addModal.classList.add('hidden');
+        addModal.classList.remove('flex');
+    }
+
+    if (addBtn) addBtn.addEventListener('click', openAddModal);
+    if (addClose) addClose.addEventListener('click', closeAddModal);
+    if (addBackdrop) addBackdrop.addEventListener('click', closeAddModal);
+
+    // === Toast ===
+    function showToast(message, type) {
+        var toast = document.getElementById('mobile-toast');
+        var text = document.getElementById('toast-text');
+        var icon = document.getElementById('toast-icon');
+        text.textContent = message;
+        var bg = toast.querySelector('div');
+        bg.className = 'px-4 py-3 rounded-xl shadow-lg text-sm text-center flex items-center justify-center gap-2';
+        if (type === 'warning') {
+            bg.classList.add('bg-orange-500', 'text-white');
+            icon.className = 'ri-error-warning-line';
+        } else if (type === 'error') {
+            bg.classList.add('bg-red-500', 'text-white');
+            icon.className = 'ri-error-warning-line';
+        } else {
+            bg.classList.add('bg-gray-800', 'text-white');
+            icon.className = 'ri-check-line';
+        }
+        toast.classList.remove('hidden');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.add('hidden'); }, 3500);
+    }
+
+    // === Глобальный click handler ===
+    document.addEventListener('click', function(e) {
+
+        // Переключение режима выбора
+        var toggleBtn = e.target.closest('.select-mode-toggle');
+        if (toggleBtn) {
+            var catKey = toggleBtn.dataset.catKey;
+            if (selectModeActive[catKey]) {
+                exitSelectMode(catKey);
+            } else {
+                enterSelectMode(catKey);
+            }
+            return;
+        }
+
+        // Выбрать все
+        var selectAllBtn = e.target.closest('.select-all-btn');
+        if (selectAllBtn) {
+            selectAllCards(selectAllBtn.dataset.catKey);
+            return;
+        }
+
+        // Клик по карточке в режиме выбора
+        var card = e.target.closest('.track-card');
+        if (card && activePanelKey && selectModeActive[activePanelKey]) {
+            // Не перехватываем клики по кнопкам внутри карточки
+            if (!e.target.closest('.archive-btn') && !e.target.closest('.unarchive-btn')) {
+                e.preventDefault();
+                toggleCardSelection(activePanelKey, card);
+                return;
+            }
+        }
+
+        // Одиночная архивация
+        var archiveBtn = e.target.closest('.archive-btn');
+        if (archiveBtn) {
+            e.preventDefault();
+            var trackId = archiveBtn.dataset.trackId;
+            fetch('{% url "mobile_archive_track" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'track_id=' + trackId
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.already_archived) { showToast(data.message, 'warning'); return; }
+                if (data.success) { showToast(data.message, 'success'); setTimeout(function() { window.location.reload(); }, 800); }
+            })
+            .catch(function() { showToast('Ошибка сети', 'error'); });
+            return;
+        }
+
+        // Восстановление из архива
+        var unarchiveBtn = e.target.closest('.unarchive-btn');
+        if (unarchiveBtn) {
+            e.preventDefault();
+            var trackId = unarchiveBtn.dataset.trackId;
+            fetch('{% url "mobile_unarchive_track" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'track_id=' + trackId
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) { showToast(data.message, 'success'); setTimeout(function() { window.location.reload(); }, 800); }
+            })
+            .catch(function() { showToast('Ошибка сети', 'error'); });
+            return;
+        }
+
+        // Массовая архивация выбранных
+        var massBtn = e.target.closest('.mass-archive-btn');
+        if (massBtn) {
+            e.preventDefault();
+            var catKey = massBtn.dataset.catKey;
+            var ids = selectedIds[catKey] ? Array.from(selectedIds[catKey]) : [];
+            if (ids.length === 0) { showToast('Не выбрано ни одного трек-кода', 'warning'); return; }
+
+            massBtn.disabled = true;
+            massBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Архивация...';
+
+            fetch('{% url "mobile_mass_archive" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track_ids: ids })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(function() { window.location.reload(); }, 800);
+                } else {
+                    showToast(data.error || 'Ошибка', 'error');
+                    massBtn.disabled = false;
+                    massBtn.innerHTML = '<i class="ri-archive-line mr-1"></i> Архивировать выбранные';
+                }
+            })
+            .catch(function() {
+                showToast('Ошибка сети', 'error');
+                massBtn.disabled = false;
+                massBtn.innerHTML = '<i class="ri-archive-line mr-1"></i> Архивировать выбранные';
+            });
+            return;
+        }
+    });
+})();
+</script>
+
+</body>
+</html>
