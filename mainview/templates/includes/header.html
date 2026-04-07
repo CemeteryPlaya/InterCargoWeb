@@ -200,3 +200,87 @@
     </script>
     <script src="{% static 'scripts/tutorial.js' %}?v={{ APP_VERSION }}" defer></script>
 </header>
+
+{% if user.is_authenticated %}
+<!-- Мобильная нижняя навигация (только для авторизованных пользователей) -->
+<nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 mobile-bottom-nav">
+    <div class="flex items-center justify-around h-16 px-2">
+        <!-- Главная -->
+        <a href="/" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="home">
+            <i class="ri-home-line text-xl"></i>
+            <span class="text-[10px] font-medium leading-tight">Главная</span>
+        </a>
+
+        <!-- Посылки -->
+        <a href="{% url 'mobile_parcels' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="parcels">
+            <i class="ri-box-3-line text-xl"></i>
+            <span class="text-[10px] font-medium leading-tight">Посылки</span>
+        </a>
+
+        <!-- QR Code (центральная кнопка) -->
+        <a href="{% url 'mobile_qr' %}" class="mobile-nav-qr flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all overflow-hidden" data-nav="qr">
+            <i class="ri-qr-code-line text-2xl nav-qr-icon"></i>
+            <img src="{% static 'images/logo.png' %}" alt="" class="w-8 h-8 object-contain nav-qr-logo hidden">
+        </a>
+
+        <!-- Уведомления -->
+        <a href="{% url 'mobile_notifications' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors relative" data-nav="notifications">
+            <span class="relative">
+                <i class="ri-notification-3-line text-xl"></i>
+                {% if unread > 0 %}
+                <span class="mobile-nav-badge absolute -top-1 -right-2 inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ unread }}</span>
+                {% endif %}
+            </span>
+            <span class="text-[10px] font-medium leading-tight">Уведомления</span>
+        </a>
+
+        <!-- Профиль -->
+        <a href="{% url 'profile' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="profile">
+            <i class="ri-user-line text-xl"></i>
+            <span class="text-[10px] font-medium leading-tight">Профиль</span>
+        </a>
+    </div>
+</nav>
+<script>
+(function() {
+    document.body.classList.add('has-bottom-nav');
+    var path = window.location.pathname;
+    var nav = document.getElementById('mobile-bottom-nav');
+    if (!nav) return;
+
+    // Определяем активную вкладку — проверяем от самых специфичных к общим
+    var activeKey = null;
+    if (path === '/') {
+        activeKey = 'home';
+    } else if (path.startsWith('/profile/mobile-parcels') || path.startsWith('/profile/track-codes') || path.startsWith('/profile/delivered') || path.startsWith('/profile/extradition-package')) {
+        activeKey = 'parcels';
+    } else if (path.startsWith('/profile/mobile-qr')) {
+        activeKey = 'qr';
+    } else if (path.startsWith('/profile/mobile-notifications') || path.startsWith('/profile/notifications')) {
+        activeKey = 'notifications';
+    } else if (path === '/profile/' || path === '/profile') {
+        activeKey = 'profile';
+    }
+
+    if (activeKey) {
+        var item = nav.querySelector('[data-nav="' + activeKey + '"]');
+        if (item) {
+            item.classList.remove('text-gray-500');
+            item.classList.add('active');
+            var icon = item.querySelector('i.ri-home-line, i.ri-box-3-line, i.ri-notification-3-line, i.ri-user-line');
+            if (icon) icon.className = icon.className.replace('-line', '-fill');
+        }
+    }
+
+    // На странице QR — показать логотип вместо иконки QR
+    if (activeKey === 'qr') {
+        var qrBtn = nav.querySelector('.mobile-nav-qr');
+        var qrIcon = nav.querySelector('.nav-qr-icon');
+        var qrLogo = nav.querySelector('.nav-qr-logo');
+        if (qrIcon) qrIcon.classList.add('hidden');
+        if (qrLogo) qrLogo.classList.remove('hidden');
+        if (qrBtn) qrBtn.classList.add('qr-logo-mode');
+    }
+})();
+</script>
+{% endif %}

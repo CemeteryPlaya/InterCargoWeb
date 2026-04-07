@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - Сообщения</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/faq.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+{% include 'includes/header.html' %}
+
+<div class="flex min-h-screen">
+    {% include 'includes/sidebar.html' %}
+
+    <main class="flex-1 w-full">
+
+        <!-- ===== Мобильная версия ===== -->
+        <div id="notif-main" class="md:hidden">
+
+            <div class="px-4 pt-4 pb-2">
+                <h1 class="text-xl font-bold">Сообщения</h1>
+            </div>
+
+            <!-- Баннер Telegram -->
+            {% if not telegram_linked and telegram_link_url %}
+            <div class="mx-4 mb-4">
+                <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#039BE5;">
+                            <i class="ri-telegram-line text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm text-gray-800">Подключить Telegram</p>
+                            <p class="text-xs text-gray-500">Получайте важные сообщения</p>
+                        </div>
+                    </div>
+                    <a href="{{ telegram_link_url }}" target="_blank"
+                        class="px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition">
+                        Подключить
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Список категорий -->
+            <div class="mx-4 mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                {% for cat in categories %}
+                <button type="button"
+                    class="{% if cat.enabled %}notif-open-btn{% else %}notif-disabled-btn{% endif %} w-full flex items-center px-4 py-4 hover:bg-gray-50 transition text-left"
+                    data-cat-key="{{ cat.key }}" data-enabled="{{ cat.enabled|yesno:'true,false' }}">
+                    <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+                        style="background:{{ cat.bg }};color:{{ cat.color }}">
+                        <i class="{{ cat.icon }} text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0 ml-3">
+                        <p class="font-semibold text-sm">{{ cat.label }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ cat.last_message|truncatechars:45 }}</p>
+                    </div>
+                    <div class="flex flex-col items-end ml-2 flex-shrink-0">
+                        {% if cat.last_date %}
+                        <span class="text-[10px] text-gray-400 mb-1">{{ cat.last_date|date:"j M" }}</span>
+                        {% endif %}
+                        {% if cat.unread > 0 %}
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full text-white" style="background:{{ cat.color }}">{{ cat.unread }}</span>
+                        {% endif %}
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- ===== Полноэкранные панели категорий ===== -->
+        {% for cat in categories %}
+        {% if cat.enabled %}
+        <div id="notif-panel-{{ cat.key }}" class="mobile-cat-panel md:hidden fixed inset-x-0 bottom-0 z-40 bg-gray-50 hidden" style="top:82px;"
+            data-unread-ids="{% for n in cat.notifications %}{% if not n.is_read %}{{ n.id }},{% endif %}{% endfor %}">
+            <!-- Хидер -->
+            <div class="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+                <div class="flex items-center">
+                    <button type="button" class="notif-back-btn mr-3 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+                        <i class="ri-arrow-left-line text-xl text-gray-700"></i>
+                    </button>
+                    <div class="flex items-center gap-2 flex-1">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background:{{ cat.bg }};color:{{ cat.color }}">
+                            <i class="{{ cat.icon }} text-base"></i>
+                        </div>
+                        <h2 class="font-bold text-base">{{ cat.label }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Список уведомлений (чат-вид, старые сверху) -->
+            <div id="notif-scroll-{{ cat.key }}" class="overflow-y-auto px-4 pt-3 pb-24" style="height: calc(100% - 56px);">
+                {% if cat.notifications_grouped %}
+                    {% for date_label, notifs in cat.notifications_grouped %}
+                    <!-- Дата-разделитель -->
+                    <div class="flex items-center justify-center my-3">
+                        <span class="px-3 py-1 bg-gray-200 text-gray-500 text-[11px] font-medium rounded-full">{{ date_label }}</span>
+                    </div>
+                    <!-- Сообщения за эту дату -->
+                    {% for notif in notifs %}
+                    <div class="flex mb-2 {% if not notif.is_read %}notif-unread{% endif %}">
+                        <div class="max-w-[85%] rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm relative
+                            {% if not notif.is_read %}bg-white border border-primary/20{% else %}bg-white border border-gray-200{% endif %}">
+                            {% if not notif.is_read %}
+                            <div class="absolute -left-1.5 top-2.5 w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0"></div>
+                            {% endif %}
+                            <p class="text-[13px] text-gray-800 leading-relaxed {% if not notif.is_read %}font-medium{% endif %}">{{ notif.message }}</p>
+                            <div class="flex items-center justify-end gap-2 mt-1">
+                                <span class="text-[10px] text-gray-400">{{ notif.created_at|date:"H:i" }}</span>
+                                {% if not notif.is_read %}
+                                <a href="{% url 'mark_as_read' notif.id %}" class="text-gray-400 hover:text-primary" title="Прочитано">
+                                    <i class="ri-check-line text-xs"></i>
+                                </a>
+                                {% else %}
+                                <i class="ri-check-double-line text-xs text-blue-400"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <div class="flex flex-col items-center justify-center py-16 text-center">
+                        <i class="{{ cat.icon }} text-5xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500 font-medium">Нет сообщений</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <!-- ===== Десктоп: перенаправление ===== -->
+        <div class="hidden md:flex flex-col items-center justify-center py-20 text-center">
+            <i class="ri-notification-3-line text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg mb-4">Эта страница оптимизирована для мобильных устройств</p>
+            <a href="{% url 'notifications' %}" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                <i class="ri-notification-3-line mr-1"></i> Уведомления
+            </a>
+        </div>
+
+    </main>
+</div>
+
+<!-- CSRF + URL для JS -->
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+<input type="hidden" id="bulk-read-url" value="{% url 'mark_notifications_bulk_read' %}">
+
+<!-- Toast -->
+<div id="mobile-toast" class="fixed top-4 left-4 right-4 z-[60] hidden">
+    <div class="bg-gray-800 text-white px-4 py-3 rounded-xl shadow-lg text-sm text-center flex items-center justify-center gap-2">
+        <i id="toast-icon" class="ri-information-line"></i>
+        <span id="toast-text"></span>
+    </div>
+</div>
+
+{% include 'includes/footer.html' %}
+
+<script>
+(function() {
+    var bottomNav = document.getElementById('mobile-bottom-nav');
+    var activePanelKey = null;
+
+    function openPanel(key) {
+        var panel = document.getElementById('notif-panel-' + key);
+        if (!panel) return;
+        activePanelKey = key;
+        panel.style.transform = 'translateX(100%)';
+        panel.classList.remove('hidden');
+        panel.offsetHeight;
+        panel.style.transition = 'transform 0.25s ease-out';
+        panel.style.transform = 'translateX(0)';
+        if (bottomNav) bottomNav.style.display = 'none';
+        // Прокрутить к последним сообщениям
+        setTimeout(function() {
+            var scroll = document.getElementById('notif-scroll-' + key);
+            if (scroll) scroll.scrollTop = scroll.scrollHeight;
+        }, 300);
+        // Автоматически отметить уведомления категории как прочитанные
+        var unreadIdsStr = panel.getAttribute('data-unread-ids') || '';
+        var unreadIds = unreadIdsStr.split(',').filter(function(s) { return s.trim() !== ''; }).map(Number);
+        if (unreadIds.length > 0) {
+            var csrfToken = document.getElementById('csrf-token');
+            var bulkUrl = document.getElementById('bulk-read-url');
+            if (csrfToken && bulkUrl) {
+                fetch(bulkUrl.value, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken.value,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ids: unreadIds }),
+                }).then(function(resp) { return resp.json(); }).then(function(data) {
+                    if (data.status === 'ok') {
+                        // Убрать визуальные индикаторы непрочитанных
+                        panel.querySelectorAll('.notif-unread').forEach(function(item) {
+                            item.classList.remove('notif-unread');
+                            var dot = item.querySelector('.rounded-full.bg-primary');
+                            if (dot && dot.classList.contains('w-2.5')) dot.remove();
+                            // Ищем точку по размеру
+                            item.querySelectorAll('.bg-primary').forEach(function(el) {
+                                if (el.classList.contains('flex-shrink-0')) el.remove();
+                            });
+                            var bubble = item.querySelector('[class*="max-w-"]');
+                            if (bubble) {
+                                bubble.className = bubble.className.replace('border-primary/20', 'border-gray-200');
+                            }
+                            var text = bubble ? bubble.querySelector('p') : null;
+                            if (text) text.classList.remove('font-medium');
+                            var checkLink = item.querySelector('a[href*="mark_as_read"]');
+                            if (checkLink) {
+                                var dblCheck = document.createElement('i');
+                                dblCheck.className = 'ri-check-double-line text-xs text-blue-400';
+                                checkLink.replaceWith(dblCheck);
+                            }
+                        });
+                        // Убрать бейдж непрочитанных в списке категорий
+                        var catBtn = document.querySelector('.notif-open-btn[data-cat-key="' + key + '"]');
+                        if (catBtn) {
+                            var badge = catBtn.querySelector('.rounded-full.text-white');
+                            if (badge) badge.remove();
+                        }
+                        // Обновить бейдж в bottom nav
+                        if (data.remaining_unread === 0) {
+                            var navBadge = document.querySelector('[data-nav="notifications"] .mobile-nav-badge');
+                            if (navBadge) navBadge.style.display = 'none';
+                        } else {
+                            var navBadge = document.querySelector('[data-nav="notifications"] .mobile-nav-badge');
+                            if (navBadge) navBadge.textContent = data.remaining_unread;
+                        }
+                        // Очистить data-атрибут чтобы повторно не отправлять
+                        panel.setAttribute('data-unread-ids', '');
+                    }
+                });
+            }
+        }
+    }
+
+    function closePanel() {
+        if (!activePanelKey) return;
+        var panel = document.getElementById('notif-panel-' + activePanelKey);
+        if (!panel) return;
+        panel.style.transition = 'transform 0.2s ease-in';
+        panel.style.transform = 'translateX(100%)';
+        setTimeout(function() {
+            panel.classList.add('hidden');
+            panel.style.transform = '';
+            panel.style.transition = '';
+        }, 200);
+        if (bottomNav) bottomNav.style.display = '';
+        activePanelKey = null;
+    }
+
+    // Открытие категорий
+    document.querySelectorAll('.notif-open-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            history.pushState({ panel: btn.dataset.catKey }, '');
+            openPanel(btn.dataset.catKey);
+        });
+    });
+
+    // Заглушка для категорий "в разработке"
+    document.querySelectorAll('.notif-disabled-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            showToast('Данный раздел находится в разработке', 'warning');
+        });
+    });
+
+    // Кнопки назад
+    document.querySelectorAll('.notif-back-btn').forEach(function(btn) {
+        btn.addEventListener('click', closePanel);
+    });
+
+    window.addEventListener('popstate', function() {
+        if (activePanelKey) closePanel();
+    });
+
+    // Toast
+    function showToast(message, type) {
+        var toast = document.getElementById('mobile-toast');
+        var text = document.getElementById('toast-text');
+        var icon = document.getElementById('toast-icon');
+        text.textContent = message;
+        var bg = toast.querySelector('div');
+        bg.className = 'px-4 py-3 rounded-xl shadow-lg text-sm text-center flex items-center justify-center gap-2';
+        if (type === 'warning') {
+            bg.classList.add('bg-orange-500', 'text-white');
+            icon.className = 'ri-error-warning-line';
+        } else {
+            bg.classList.add('bg-gray-800', 'text-white');
+            icon.className = 'ri-check-line';
+        }
+        toast.classList.remove('hidden');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.add('hidden'); }, 3500);
+    }
+})();
+</script>
+
+</body>
+</html>

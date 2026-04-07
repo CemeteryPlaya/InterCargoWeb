@@ -250,8 +250,23 @@ class ArchivedTrackCode(models.Model):
 
 
 class Receipt(models.Model):
+    from myprofile.receipt_lifecycle import STATUS_CHOICES as _LIFECYCLE_STATUSES
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Владелец")
     created_at = models.DateField(default=timezone.now, verbose_name="Дата создания")
+
+    # Статус жизненного цикла чека (валидируется receipt_lifecycle.py)
+    status = models.CharField(
+        max_length=20, choices=_LIFECYCLE_STATUSES, default='pending',
+        verbose_name="Статус чека", db_index=True,
+    )
+    # Привязка к доставке: 1 чек → максимум 1 доставка
+    delivery = models.ForeignKey(
+        'DeliveryHistory', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='receipts',
+        verbose_name="Доставка",
+    )
+
     is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
     is_claimed = models.BooleanField(default=False, verbose_name="Выдано клиенту")
@@ -292,6 +307,7 @@ class Receipt(models.Model):
 
     # Поля, которые разрешено менять после финализации чека (операционные флаги).
     _MUTABLE_FIELDS = frozenset({
+        'status', 'delivery', 'delivery_id',
         'is_paid', 'paid_at', 'is_claimed', 'claimed_at',
         'needs_attention', 'attention_reason',
         'attention_added_by', 'attention_added_by_id', 'attention_pickup', 'attention_at',

@@ -6,13 +6,14 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 import json
 import logging
 from myprofile.models import TrackCode, ReceiptItem, StorageCell, Receipt
 from myprofile.views.utils import bulk_get_or_create_storage_cells
+from myprofile.receipt_lifecycle import (
+    accept_at_pvz, get_receipts_for_tracks, ReceiptLifecycleError,
+)
 from register.models import UserProfile, PickupPoint
 
 logger = logging.getLogger(__name__)
@@ -49,20 +50,23 @@ def pp_acceptance_view(request):
     except UserProfile.DoesNotExist:
         pass
 
-    # Находим все неотсортированные ready-треки
+    # Находим все неотсортированные ready-треки с установленным delivery_pickup.
+    # Не используем owner.userprofile.pickup — это текущий ПВЗ пользователя,
+    # который мог измениться после доставки. delivery_pickup фиксируется
+    # при отправке (delivered → shipping_pp) и отражает реальный ПВЗ доставки.
     tracks_qs = TrackCode.objects.filter(
         status='ready', is_accepted_pp=False,
+        delivery_pickup__isnull=False,
     ).select_related(
-        'owner', 'owner__userprofile__pickup',
+        'owner',
         'delivery_pickup',
-    )
+    ).exclude(delivery_pickup__is_home_delivery=True)
 
     # Группируем по (ПВЗ, дата прихода)
     groups = {}  # (pickup_id, delivered_date) -> {pickup, date, track_count, client_ids}
 
-    def _add_track(pickup_obj, track):
-        if not pickup_obj or pickup_obj.is_home_delivery:
-            return
+    for track in tracks_qs:
+        pickup_obj = track.delivery_pickup
         key = (pickup_obj.id, track.delivered_date)
         if key not in groups:
             groups[key] = {
@@ -74,15 +78,6 @@ def pp_acceptance_view(request):
         groups[key]['track_count'] += 1
         if track.owner_id:
             groups[key]['client_ids'].add(f'user_{track.owner_id}')
-
-    for track in tracks_qs:
-        if track.delivery_pickup_id:
-            _add_track(track.delivery_pickup, track)
-        elif track.owner:
-            try:
-                _add_track(track.owner.userprofile.pickup, track)
-            except (UserProfile.DoesNotExist, AttributeError):
-                pass
 
     # Фильтр по ПВЗ работника
     if not is_staff and pickup:
@@ -139,8 +134,7 @@ def get_acceptance_receipts(request):
             pass
 
     tracks_qs = TrackCode.objects.filter(
-        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(delivery_pickup=pickup),
+        delivery_pickup=pickup,
         status='ready',
         is_accepted_pp=False,
     )
@@ -273,11 +267,10 @@ def accept_delivery(request):
             pass
 
     all_tracks_qs = TrackCode.objects.filter(
-        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(delivery_pickup=pickup),
+        delivery_pickup=pickup,
         status='ready',
         is_accepted_pp=False,
-    ).select_related('owner', 'owner__userprofile__pickup')
+    ).select_related('owner')
     if filter_none_date:
         all_tracks_qs = all_tracks_qs.filter(delivered_date__isnull=True)
     elif filter_date is not None:
@@ -310,25 +303,30 @@ def accept_delivery(request):
         ['is_accepted_pp', 'accepted_pp_at', 'accepted_pp_by_id'],
     )
 
-    # Создаём ячейки хранения пакетно — группируем владельцев по ПВЗ
-    from collections import defaultdict
+    # Lifecycle: delivered_pvz → accepted_pvz
+    track_ids = [t.id for t in tracks]
+    pvz_receipts = list(
+        get_receipts_for_tracks(track_ids).filter(status='delivered_pvz')
+    )
+    if pvz_receipts:
+        try:
+            accept_at_pvz(pvz_receipts, request.user)
+        except ReceiptLifecycleError as e:
+            logger.warning("accept_delivery lifecycle: %s", e)
+
+    # Создаём ячейки хранения пакетно — группируем владельцев по ПВЗ доставки
     owners_by_pickup = defaultdict(list)
     seen_user_pickup = set()
     for track in tracks:
-        if not track.owner:
+        if not track.owner or not track.delivery_pickup_id:
             continue
-        try:
-            user_pickup = track.owner.userprofile.pickup
-        except (UserProfile.DoesNotExist, AttributeError):
-            user_pickup = None
-        if user_pickup:
-            key = (user_pickup.id, track.owner_id)
-            if key not in seen_user_pickup:
-                seen_user_pickup.add(key)
-                owners_by_pickup[user_pickup].append(track.owner)
+        key = (track.delivery_pickup_id, track.owner_id)
+        if key not in seen_user_pickup:
+            seen_user_pickup.add(key)
+            owners_by_pickup[track.delivery_pickup].append(track.owner)
 
-    for user_pickup, owners in owners_by_pickup.items():
-        bulk_get_or_create_storage_cells(user_pickup, owners)
+    for delivery_pickup, owners in owners_by_pickup.items():
+        bulk_get_or_create_storage_cells(delivery_pickup, owners)
 
     updated = len(tracks)
     messages.success(request, f"Отсортировано на ПВЗ: {updated} посылок")
@@ -368,8 +366,7 @@ def finish_acceptance_session(request):
             pass
 
     unsorted_tracks = TrackCode.objects.filter(
-        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(delivery_pickup=pickup),
+        delivery_pickup=pickup,
         status='ready',
         is_accepted_pp=False,
     )
@@ -395,6 +392,17 @@ def finish_acceptance_session(request):
             unsorted_tracks_list,
             ['is_accepted_pp', 'accepted_pp_at', 'accepted_pp_by_id'],
         )
+
+    # Lifecycle: delivered_pvz → accepted_pvz (физически на ПВЗ, но не отсортированы)
+    if flagged_track_ids:
+        finish_receipts = list(
+            get_receipts_for_tracks(flagged_track_ids).filter(status='delivered_pvz')
+        )
+        if finish_receipts:
+            try:
+                accept_at_pvz(finish_receipts, request.user)
+            except ReceiptLifecycleError as e:
+                logger.warning("finish_acceptance lifecycle: %s", e)
 
     # Помечаем связанные чеки как "Требует внимания"
     # Треки остаются в статусе 'ready' и отображаются в Складе ПВЗ без ячейки
@@ -459,8 +467,7 @@ def pp_acceptance_detail_view(request, pickup_id, date_str):
 
     # Считаем треки для этой даты
     tracks_qs = TrackCode.objects.filter(
-        Q(owner__userprofile__pickup=pickup, delivery_pickup__isnull=True) |
-        Q(delivery_pickup=pickup),
+        delivery_pickup=pickup,
         status='ready',
         is_accepted_pp=False,
     )

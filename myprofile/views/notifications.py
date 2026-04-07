@@ -44,3 +44,20 @@ def mark_notifications_as_read(request):
     return JsonResponse({"status": "error"}, status=400)
 
 
+@login_required
+def mark_notifications_bulk_read(request):
+    """Отметить конкретные уведомления как прочитанные (по списку ID)."""
+    if request.method == "POST":
+        import json
+        try:
+            data = json.loads(request.body)
+            ids = data.get('ids', [])
+        except (json.JSONDecodeError, AttributeError):
+            ids = []
+        if ids:
+            Notification.objects.filter(user=request.user, id__in=ids, is_read=False).update(is_read=True)
+        remaining = Notification.objects.filter(user=request.user, is_read=False).count()
+        return JsonResponse({"status": "ok", "remaining_unread": remaining})
+    return JsonResponse({"status": "error"}, status=400)
+
+

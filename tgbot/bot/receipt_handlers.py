@@ -13,6 +13,13 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 
+RECEIPT_STATUS_DISPLAY = {
+    'delivered': 'Доставлено на сортировочный склад',
+    'shipping_pp': 'В доставке до ПВЗ',
+    'ready': 'Доставлено на ПВЗ',
+}
+
+
 async def show_my_receipts(message: Message):
     """Показать чеки пользователя."""
     profile = await get_telegram_profile(message.chat.id)
@@ -30,9 +37,10 @@ async def show_my_receipts(message: Message):
     site_url = getattr(django_settings, 'TELEGRAM_SITE_URL', '')
 
     for r in receipts:
+        status_text = RECEIPT_STATUS_DISPLAY.get(r.get('status'), 'ожидает получение')
         msg_text = (
             f"📄 <b>Чек №{r['receipt_number']}</b>\n"
-            f"Статус: <b>ожидает получение</b>\n\n"
+            f"Статус: <b>{status_text}</b>\n\n"
             f"📦 Количество посылок: <b>{r['items_count']}</b>\n"
             f"⚖️ Общий вес: <b>{r['total_weight']:.3f} кг</b>\n\n"
             f"💰 Сумма к оплате: <b>{r['total_price']} ₸</b>\n\n"
@@ -90,9 +98,23 @@ def _get_user_receipts(user_id):
     except Exception:
         pass
 
+    # Порядок статусов для определения минимального
+    STATUS_ORDER = {
+        'delivered': 0,
+        'shipping_pp': 1,
+        'ready': 2,
+    }
+
     result = []
     for receipt in receipts:
         items = list(receipt.items.select_related('track_code').all())
+
+        # Определяем статус чека по минимальному статусу трек-кодов
+        receipt_status = None
+        for item in items:
+            if item.track_code and item.track_code.status in STATUS_ORDER:
+                if receipt_status is None or STATUS_ORDER[item.track_code.status] < STATUS_ORDER.get(receipt_status, 999):
+                    receipt_status = item.track_code.status
 
         # Приоритет: receipt.total_weight > сумма display_weight > 0
         if receipt.total_weight and receipt.total_weight > 0:
@@ -117,6 +139,7 @@ def _get_user_receipts(user_id):
             'pickup_point': receipt.pickup_point,
             'payment_link': receipt.payment_link,
             'working_hours': working_hours,
+            'status': receipt_status,
         })
 
     return result
