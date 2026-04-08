@@ -260,6 +260,10 @@
         tabHistory.addEventListener('click', function() {
             switchTab(tabHistory, tabReady, panelHistory, panelReady);
         });
+        // Авто-переключение по ?tab=history
+        if (new URLSearchParams(window.location.search).get('tab') === 'history') {
+            switchTab(tabHistory, tabReady, panelHistory, panelReady);
+        }
     }
 
     // === Quick Issue ===

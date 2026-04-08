@@ -30,6 +30,289 @@
     {% include 'includes/header.html' %}
     {% block content %}
 
+    <!-- ===== МОБИЛЬНАЯ ГЛАВНАЯ (Kaspi-style) ===== -->
+    <div id="mobile-home" class="md:hidden min-h-screen bg-gray-50 pb-20">
+
+        {% if user.is_authenticated %}
+        <!-- Приветствие -->
+        <div class="px-4 pt-4 pb-2">
+            <p class="text-gray-500 text-sm">Добро пожаловать</p>
+            <h1 class="text-xl font-bold text-gray-900">{{ user.get_full_name|default:user.username }}</h1>
+        </div>
+
+        <!-- Баннер -->
+        <div class="px-4 py-3">
+            <div class="relative rounded-2xl overflow-hidden" style="height: 140px;">
+                <img src="{% static 'images/hero.jpg' %}" alt="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+                <div class="absolute inset-0 flex flex-col justify-center px-5">
+                    <p class="text-white/80 text-xs font-medium mb-1">ТАРИФ</p>
+                    <p class="text-white text-2xl font-bold">{{ price_per_kg }}₸/кг</p>
+                    <p class="text-white/70 text-xs mt-1">Доставка из Китая в Казахстан</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Грид 2x4 быстрых действий -->
+        <div class="px-4 py-3">
+            <div class="grid grid-cols-4 gap-3">
+                <!-- Ряд 1 -->
+                <a href="{% url 'mobile_qr' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#dbeafe;">
+                        <i class="ri-qr-code-line text-xl" style="color:#3b82f6;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">QR код</span>
+                </a>
+                <a href="{% url 'mobile_parcels' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#ffedd5;">
+                        <i class="ri-box-3-line text-xl" style="color:#f97316;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Посылки</span>
+                </a>
+                <a href="{% url 'delivered_posts' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#dcfce7;">
+                        <i class="ri-receipt-line text-xl" style="color:#22c55e;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Чеки</span>
+                </a>
+                <a href="{% url 'mobile_qr' %}?tab=history" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fef3c7;">
+                        <i class="ri-history-line text-xl" style="color:#f59e0b;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">История выдачи</span>
+                </a>
+                <!-- Ряд 2 -->
+                <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e0f2fe;">
+                        <i class="ri-lightbulb-line text-xl" style="color:#0ea5e9;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Интерактивное обучение</span>
+                </button>
+                <a href="{% url 'education' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#f3e8ff;">
+                        <i class="ri-video-line text-xl" style="color:#8b5cf6;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Видеоуроки</span>
+                </a>
+                <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fce7f3;">
+                        <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">О компании</span>
+                </a>
+                <button id="mobile-theme-btn" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#f1f5f9;">
+                        <i id="mobile-theme-icon" class="ri-moon-line text-xl" style="color:#64748b;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Тема</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Карточки статистики -->
+        {% if mobile_stats %}
+        <div class="px-4 py-2">
+            <h2 class="text-base font-bold text-gray-900 mb-3">Мои посылки</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fee2e2;">
+                            <i class="ri-add-circle-line text-lg" style="color:#ef4444;"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.user_added }}</p>
+                            <p class="text-[11px] text-gray-500">Добавлено</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fef3c7;">
+                            <i class="ri-truck-line text-lg" style="color:#f59e0b;"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.in_transit }}</p>
+                            <p class="text-[11px] text-gray-500">В пути</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f3e8ff;">
+                            <i class="ri-route-line text-lg" style="color:#8b5cf6;"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.sorting }}</p>
+                            <p class="text-[11px] text-gray-500">На сортировке</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#dcfce7;">
+                            <i class="ri-check-double-line text-lg" style="color:#22c55e;"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.ready }}</p>
+                            <p class="text-[11px] text-gray-500">Готово</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Калькулятор (компактный) -->
+        <div class="px-4 py-3 mt-1">
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> Калькулятор доставки</h3>
+                <input type="text" inputmode="decimal" id="mobile-weight" data-rate="{{ price_per_kg }}" maxlength="4"
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition"
+                    placeholder="Вес (кг)" autocomplete="off">
+                <div class="flex items-center justify-between mt-2 px-1">
+                    <p class="text-xs text-gray-400">Итого:</p>
+                    <p id="mobile-calc-result" class="text-lg font-bold text-primary">0 ₸</p>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- ===== Неавторизованный пользователь ===== -->
+
+        <!-- Лого + приветствие -->
+        <div class="px-4 pt-6 pb-2 text-center">
+            <img src="{% static 'images/logo.png' %}" alt="Inter Cargo" class="w-16 h-16 mx-auto mb-3">
+            <h1 class="text-xl font-bold text-gray-900">Inter Cargo</h1>
+            <p class="text-sm text-gray-500 mt-1">Доставка из Китая в Казахстан</p>
+        </div>
+
+        <!-- Баннер -->
+        <div class="px-4 py-3">
+            <div class="relative rounded-2xl overflow-hidden" style="height: 140px;">
+                <img src="{% static 'images/hero.jpg' %}" alt="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+                <div class="absolute inset-0 flex flex-col justify-center px-5">
+                    <p class="text-white/80 text-xs font-medium mb-1">ТАРИФ</p>
+                    <p class="text-white text-2xl font-bold">{{ price_per_kg }}₸/кг</p>
+                    <p class="text-white/70 text-xs mt-1">Быстро и надёжно</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Грид 2x2 для неавторизованных -->
+        <div class="px-4 py-3">
+            <div class="grid grid-cols-4 gap-3">
+                <a href="{% url 'login' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fee2e2;">
+                        <i class="ri-login-box-line text-xl" style="color:#e53e3e;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Вход</span>
+                </a>
+                <a href="{% url 'register' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#dcfce7;">
+                        <i class="ri-user-add-line text-xl" style="color:#22c55e;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Регистрация</span>
+                </a>
+                <a href="{% url 'education' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e0f2fe;">
+                        <i class="ri-graduation-cap-line text-xl" style="color:#0ea5e9;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Обучение</span>
+                </a>
+                <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fce7f3;">
+                        <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">О компании</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Калькулятор -->
+        <div class="px-4 py-3">
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> Калькулятор доставки</h3>
+                <input type="text" inputmode="decimal" id="mobile-weight-guest" data-rate="{{ price_per_kg }}" maxlength="4"
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition"
+                    placeholder="Вес (кг)" autocomplete="off">
+                <div class="flex items-center justify-between mt-2 px-1">
+                    <p class="text-xs text-gray-400">Итого:</p>
+                    <p id="mobile-calc-result-guest" class="text-lg font-bold text-primary">0 ₸</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ компактный -->
+        <div class="px-4 py-3">
+            <h2 class="text-base font-bold text-gray-900 mb-3">Частые вопросы</h2>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-100">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq1">
+                    <span class="text-sm font-medium text-gray-800">Как рассчитывается стоимость?</span>
+                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                </button>
+                <div id="m-faq1" class="hidden px-4 pb-3">
+                    <p class="text-xs text-gray-600 leading-relaxed">Стоимость рассчитывается по тарифу {{ price_per_kg }}₸/кг. Используйте калькулятор выше.</p>
+                </div>
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq2">
+                    <span class="text-sm font-medium text-gray-800">Какие сроки доставки?</span>
+                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                </button>
+                <div id="m-faq2" class="hidden px-4 pb-3">
+                    <p class="text-xs text-gray-600 leading-relaxed">Средний срок — 8-12 дней с момента отправки со склада в Китае.</p>
+                </div>
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq3">
+                    <span class="text-sm font-medium text-gray-800">Как зарегистрироваться?</span>
+                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                </button>
+                <div id="m-faq3" class="hidden px-4 pb-3">
+                    <p class="text-xs text-gray-600 leading-relaxed">Нажмите «Регистрация», заполните логин (имя + 4 цифры номера), телефон и выберите ПВЗ.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <!-- ===== /МОБИЛЬНАЯ ГЛАВНАЯ ===== -->
+
+    <!-- Мобильный калькулятор скрипт -->
+    <script>
+    (function() {
+        function setupMobileCalc(inputId, resultId) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            var result = document.getElementById(resultId);
+            var rate = parseFloat(input.dataset.rate) || 0;
+            input.addEventListener('input', function() {
+                // Только цифры, максимум 4 символа
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+                var val = parseInt(this.value, 10) || 0;
+                var total = Math.round(val * rate);
+                result.textContent = total.toLocaleString('ru-RU') + ' ₸';
+            });
+        }
+        setupMobileCalc('mobile-weight', 'mobile-calc-result');
+        setupMobileCalc('mobile-weight-guest', 'mobile-calc-result-guest');
+
+        // FAQ аккордеон
+        document.querySelectorAll('.mobile-faq-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var target = document.getElementById(btn.dataset.target);
+                var icon = btn.querySelector('i');
+                if (target.classList.contains('hidden')) {
+                    target.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    target.classList.add('hidden');
+                    icon.style.transform = '';
+                }
+            });
+        });
+    })();
+    </script>
+
+    <!-- ===== ДЕСКТОП КОНТЕНТ (скрыт на мобильных) ===== -->
+    <div class="hidden md:block">
+
     <!-- Hero секция с калькулятором -->
     <section class="relative py-16 md:py-24 overflow-hidden"
         style="background-image: url('{% static 'images/hero.jpg'%}'); background-size: cover; background-position: center;">
@@ -494,6 +777,8 @@
             </div>
         </div>
     </section>
+    </div>
+    <!-- ===== /ДЕСКТОП КОНТЕНТ ===== -->
     {% endblock %}
 
     {% include 'includes/footer.html' %}
