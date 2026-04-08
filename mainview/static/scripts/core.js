@@ -25,16 +25,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateToggleIcon(theme) {
     const icon = document.getElementById('theme-toggle-icon');
     const button = document.getElementById('theme-toggle');
-    if (!icon || !button) return;
-
-    if (theme === 'dark') {
-      icon.classList.remove('ri-moon-line');
-      icon.classList.add('ri-sun-line');
-      button.setAttribute('aria-label', 'Переключить на светлую тему');
-    } else {
-      icon.classList.remove('ri-sun-line');
-      icon.classList.add('ri-moon-line');
-      button.setAttribute('aria-label', 'Переключить на тёмную тему');
+    if (icon && button) {
+      if (theme === 'dark') {
+        icon.classList.remove('ri-moon-line');
+        icon.classList.add('ri-sun-line');
+        button.setAttribute('aria-label', 'Переключить на светлую тему');
+      } else {
+        icon.classList.remove('ri-sun-line');
+        icon.classList.add('ri-moon-line');
+        button.setAttribute('aria-label', 'Переключить на тёмную тему');
+      }
+    }
+    // Мобильная кнопка темы
+    const mobileIcon = document.getElementById('mobile-theme-icon');
+    if (mobileIcon) {
+      if (theme === 'dark') {
+        mobileIcon.classList.remove('ri-moon-line');
+        mobileIcon.classList.add('ri-sun-line');
+      } else {
+        mobileIcon.classList.remove('ri-sun-line');
+        mobileIcon.classList.add('ri-moon-line');
+      }
     }
   }
 
@@ -42,14 +53,63 @@ document.addEventListener('DOMContentLoaded', () => {
   const initialTheme = getPreferredTheme();
   applyTheme(initialTheme);
 
-  // Обработчик кнопки переключения темы
-  const toggleBtn = document.getElementById('theme-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const current = root.classList.contains('theme-dark') ? 'dark' : 'light';
-      const next = current === 'dark' ? 'light' : 'dark';
+  // === Анимация спирали при смене темы ===
+  function animateThemeTransition(originEl, nextTheme, callback) {
+    // Получаем позицию кнопки-источника
+    var rect = originEl.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+
+    // Максимальный радиус — от кнопки до самого дальнего угла
+    var maxR = Math.ceil(Math.sqrt(
+      Math.max(cx, window.innerWidth - cx) ** 2 +
+      Math.max(cy, window.innerHeight - cy) ** 2
+    ));
+
+    // Создаём оверлей
+    var overlay = document.createElement('div');
+    overlay.style.cssText =
+      'position:fixed;inset:0;z-index:99998;pointer-events:none;' +
+      'background:' + (nextTheme === 'dark' ? '#1a1a2e' : '#ffffff') + ';' +
+      'clip-path:circle(0px at ' + cx + 'px ' + cy + 'px);' +
+      'transition:clip-path 0.6s cubic-bezier(0.4,0,0.2,1);';
+    document.body.appendChild(overlay);
+
+    // Форсируем reflow, затем запускаем анимацию
+    overlay.offsetHeight;
+    overlay.style.clipPath = 'circle(' + maxR + 'px at ' + cx + 'px ' + cy + 'px)';
+
+    overlay.addEventListener('transitionend', function() {
+      callback();
+      // Плавно убираем оверлей
+      overlay.style.transition = 'opacity 0.2s ease';
+      overlay.style.opacity = '0';
+      setTimeout(function() { overlay.remove(); }, 200);
+    }, { once: true });
+  }
+
+  function toggleThemeWithAnimation(originEl) {
+    var current = root.classList.contains('theme-dark') ? 'dark' : 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+    animateThemeTransition(originEl, next, function() {
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
+    });
+  }
+
+  // Обработчик кнопки переключения темы (header)
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+      toggleThemeWithAnimation(toggleBtn);
+    });
+  }
+
+  // Обработчик мобильной кнопки темы
+  const mobileThemeBtn = document.getElementById('mobile-theme-btn');
+  if (mobileThemeBtn) {
+    mobileThemeBtn.addEventListener('click', function() {
+      toggleThemeWithAnimation(mobileThemeBtn);
     });
   }
 
