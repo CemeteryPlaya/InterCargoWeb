@@ -80,3 +80,58 @@ def pay_receipt(request, receipt_id):
     #     receipt.paid_at = parse_paid_at(request)
     #     receipt.save()
     return redirect('delivered_posts')
+
+
+@login_required
+def print_receipt(request, receipt_id):
+    """Печатная форма чека (HTML → PDF через диалог печати браузера).
+    Формат страницы Letter, шрифт x2 для удобства чтения."""
+    receipt = get_object_or_404(Receipt, id=receipt_id, owner=request.user)
+
+    RATE = get_global_price_per_kg()
+    discount_per_kg = get_user_discount(request.user)
+    effective_rate = RATE - discount_per_kg
+
+    # Определяем фактический тариф чека
+    if receipt.price_per_kg > 0:
+        receipt_rate = receipt.price_per_kg
+    elif receipt.total_weight > 0:
+        receipt_rate = receipt.total_price / receipt.total_weight
+    else:
+        receipt_rate = effective_rate
+
+    items = []
+    computed_weight = Decimal("0")
+    for item in receipt.items.select_related('track_code').all():
+        weight = item.display_weight or Decimal("0")
+        price = (weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        items.append({
+            'track_code': item.display_track_code,
+            'weight': weight,
+            'price': price,
+        })
+        computed_weight += weight
+
+    total_price = (computed_weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+
+    # Имя клиента и ПВЗ
+    full_name = request.user.get_full_name()
+    owner_name = f"{request.user.username}" + (f" ({full_name})" if full_name else "")
+
+    pickup_name = receipt.pickup_point or ''
+    if not pickup_name:
+        try:
+            if request.user.userprofile.pickup:
+                pickup_name = str(request.user.userprofile.pickup)
+        except UserProfile.DoesNotExist:
+            pass
+
+    return render(request, 'receipt_print.html', {
+        'receipt': receipt,
+        'items': items,
+        'total_weight': computed_weight,
+        'total_price': total_price,
+        'owner_name': owner_name,
+        'pickup_name': pickup_name,
+        'rate': receipt_rate,
+    })

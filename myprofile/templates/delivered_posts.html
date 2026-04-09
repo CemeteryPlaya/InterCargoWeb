@@ -161,6 +161,14 @@
                 Пункт выдачи: {{ receipt.display_pickup_point }}
               </div>
               {% endif %}
+
+              <!-- Кнопка печати -->
+              <div class="mt-3 flex justify-center">
+                <a href="{% url 'print_receipt' receipt.id %}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition">
+                  <i class="ri-printer-line"></i> Печатная форма (PDF)
+                </a>
+              </div>
             </div>
           </div>
           {% endfor %}

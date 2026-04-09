@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чек {{ receipt.receipt_number }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        @page {
+            size: letter;          /* 215.9 × 279.4 мм */
+            margin: 18mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+        }
+
+        body {
+            padding: 20pt 24pt;
+            max-width: 215.9mm;
+            margin: 0 auto;
+        }
+
+        /* ===== Шапка ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 4px solid #000;
+            padding-bottom: 14pt;
+            margin-bottom: 20pt;
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 36pt;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: 1pt;
+        }
+
+        .logo-sub {
+            font-size: 14pt;
+            color: #555;
+            margin-top: 6pt;
+            font-weight: normal;
+        }
+
+        .receipt-info {
+            text-align: right;
+        }
+
+        .receipt-number {
+            font-weight: 900;
+            font-size: 26pt;
+            line-height: 1;
+        }
+
+        .receipt-date {
+            font-size: 18pt;
+            color: #444;
+            margin-top: 8pt;
+        }
+
+        /* ===== Блок клиента ===== */
+        .client-block {
+            background: #f3f4f6;
+            border: 2pt solid #d1d5db;
+            border-radius: 6pt;
+            padding: 16pt 20pt;
+            margin-bottom: 24pt;
+        }
+
+        .client-row + .client-row {
+            margin-top: 12pt;
+        }
+
+        .client-label {
+            font-size: 14pt;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+            display: block;
+        }
+
+        .client-value {
+            font-size: 22pt;
+            font-weight: bold;
+            margin-top: 2pt;
+            display: block;
+            word-wrap: break-word;
+        }
+
+        /* ===== Таблица позиций ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 22pt;
+        }
+
+        thead th {
+            background: #e5e7eb;
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: left;
+            padding: 12pt 10pt;
+            border-top: 2pt solid #000;
+            border-bottom: 2pt solid #000;
+        }
+
+        tbody td {
+            font-size: 18pt;
+            padding: 10pt;
+            border-bottom: 1pt solid #d1d5db;
+            vertical-align: top;
+            word-break: break-all;
+        }
+
+        th:nth-child(1), td:nth-child(1) { width: 50%; }
+        th:nth-child(2), td:nth-child(2) { width: 22%; text-align: center; }
+        th:nth-child(3), td:nth-child(3) { width: 28%; text-align: right; }
+
+        /* ===== Итоги ===== */
+        .totals {
+            border-top: 4px solid #000;
+            padding-top: 16pt;
+            display: flex;
+            flex-direction: column;
+            gap: 10pt;
+            font-size: 22pt;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .totals-row.grand {
+            font-weight: 900;
+            font-size: 28pt;
+            margin-top: 6pt;
+            padding-top: 12pt;
+            border-top: 1pt dashed #000;
+        }
+
+        .totals-label {
+            color: #444;
+        }
+
+        .totals-row.grand .totals-label {
+            color: #000;
+        }
+
+        .footer-note {
+            margin-top: 30pt;
+            font-size: 14pt;
+            color: #666;
+            text-align: center;
+            border-top: 1pt solid #d1d5db;
+            padding-top: 12pt;
+        }
+
+        /* ===== Панель кнопок (скрыта при печати) ===== */
+        .no-print {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+        }
+
+        .no-print button,
+        .no-print a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: background 0.2s;
+        }
+
+        .btn-back {
+            background: #fff;
+            color: #374151;
+            border: 1px solid #d1d5db !important;
+        }
+
+        .btn-back:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-print {
+            background: #e53e3e;
+            color: #fff;
+        }
+
+        .btn-print:hover {
+            background: #c53030;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; max-width: none; }
+        }
+
+        /* ===== Адаптив для экранов (печать использует pt-размеры выше) ===== */
+        @media screen {
+            body {
+                font-size: 13px;
+                padding: 70px 16px 24px;
+                max-width: 800px;
+            }
+            .header {
+                padding-bottom: 12px;
+                margin-bottom: 16px;
+                border-bottom-width: 2px;
+            }
+            .logo { font-size: 22px; letter-spacing: 0.5px; }
+            .logo-sub { font-size: 11px; margin-top: 4px; }
+            .receipt-number { font-size: 18px; }
+            .receipt-date { font-size: 12px; margin-top: 4px; }
+
+            .client-block {
+                padding: 12px 14px;
+                margin-bottom: 16px;
+                border-width: 1px;
+                border-radius: 6px;
+            }
+            .client-row + .client-row { margin-top: 8px; }
+            .client-label { font-size: 10px; letter-spacing: 0.3px; }
+            .client-value { font-size: 14px; margin-top: 2px; }
+
+            table { margin-bottom: 14px; }
+            thead th {
+                font-size: 12px;
+                padding: 8px 6px;
+                border-top-width: 1px;
+                border-bottom-width: 1px;
+            }
+            tbody td {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .totals {
+                padding-top: 12px;
+                gap: 6px;
+                font-size: 13px;
+                border-top-width: 2px;
+            }
+            .totals-row.grand {
+                font-size: 16px;
+                margin-top: 4px;
+                padding-top: 8px;
+            }
+            .footer-note {
+                margin-top: 18px;
+                font-size: 10px;
+                padding-top: 8px;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            body {
+                font-size: 12px;
+                padding: 64px 12px 20px;
+            }
+            .header {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .receipt-info { text-align: left; }
+            .logo { font-size: 18px; }
+            .logo-sub { font-size: 10px; }
+            .receipt-number { font-size: 15px; }
+            .receipt-date { font-size: 11px; }
+
+            .client-block { padding: 10px 12px; margin-bottom: 12px; }
+            .client-label { font-size: 9px; }
+            .client-value { font-size: 13px; }
+
+            thead th, tbody td {
+                font-size: 10px;
+                padding: 5px 4px;
+            }
+            th:nth-child(1), td:nth-child(1) { width: 56%; }
+            th:nth-child(2), td:nth-child(2) { width: 18%; }
+            th:nth-child(3), td:nth-child(3) { width: 26%; }
+
+            .totals { font-size: 12px; gap: 4px; }
+            .totals-row.grand { font-size: 14px; }
+
+            .no-print {
+                top: 8px;
+                right: 8px;
+                left: 8px;
+                gap: 6px;
+                justify-content: flex-end;
+            }
+            .no-print button,
+            .no-print a {
+                padding: 8px 12px;
+                font-size: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="no-print">
+        <a href="javascript:void(0)" onclick="if (history.length > 1) { history.back(); } else { window.close(); }" class="btn-back">&larr; Назад</a>
+        <button type="button" onclick="window.print()" class="btn-print">Печать / Сохранить PDF</button>
+    </div>
+
+    <div class="header">
+        <div>
+            <div class="logo">INTER CARGO</div>
+            <div class="logo-sub">Доставка из Китая в Казахстан</div>
+        </div>
+        <div class="receipt-info">
+            <div class="receipt-number">{{ receipt.receipt_number }}</div>
+            <div class="receipt-date">{{ receipt.created_at|date:"d.m.Y" }}</div>
+        </div>
+    </div>
+
+    <div class="client-block">
+        <div class="client-row">
+            <span class="client-label">Клиент</span>
+            <span class="client-value">{{ owner_name }}</span>
+        </div>
+        {% if pickup_name %}
+        <div class="client-row">
+            <span class="client-label">Пункт выдачи</span>
+            <span class="client-value">{{ pickup_name }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Трек-код</th>
+                <th>Вес (кг)</th>
+                <th>Цена (₸)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.track_code }}</td>
+                <td>{{ item.weight|floatformat:3 }}</td>
+                <td>{{ item.price|floatformat:0 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="totals-row">
+            <span class="totals-label">Позиций:</span>
+            <span>{{ items|length }}</span>
+        </div>
+        <div class="totals-row">
+            <span class="totals-label">Общий вес:</span>
+            <span>{{ total_weight|floatformat:3 }} кг</span>
+        </div>
+        <div class="totals-row">
+            <span class="totals-label">Тариф:</span>
+            <span>{{ rate|floatformat:0 }} ₸/кг</span>
+        </div>
+        <div class="totals-row grand">
+            <span class="totals-label">Итого к оплате:</span>
+            <span>{{ total_price|floatformat:0 }} ₸</span>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        Inter Cargo · {{ receipt.receipt_number }} · {{ receipt.created_at|date:"d.m.Y" }}
+    </div>
+
+</body>
+
+</html>

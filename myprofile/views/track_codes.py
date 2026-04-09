@@ -4,7 +4,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django import forms
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from myprofile.models import TrackCode, ArchivedTrackCode, ReceiptItem
+
+
+def _safe_next_url(request, fallback='track_codes'):
+    """Возвращает безопасный URL из POST['next'] или fallback-имя маршрута."""
+    next_url = request.POST.get('next', '').strip()
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}
+    ):
+        return next_url
+    return None
 
 class TrackCodeForm(forms.ModelForm):
     class Meta:
@@ -27,6 +38,17 @@ def track_codes_view(request):
     if request.method == 'POST':
         track_code_str = request.POST.get('track_code', '').strip()
         description = request.POST.get('description', '').strip()
+        next_url = _safe_next_url(request)
+
+        def _redirect(track_id=None):
+            """Редирект на next_url с опциональным ?new=<id> для подсветки."""
+            if not next_url:
+                return redirect('track_codes')
+            url = next_url
+            if track_id:
+                sep = '&' if '?' in url else '?'
+                url = f"{url}{sep}new={track_id}"
+            return redirect(url)
 
         if track_code_str:
             try:
@@ -49,7 +71,7 @@ def track_codes_view(request):
                             f"Трек-код добавлен как неопознанная посылка{location_info}. "
                             f"Ожидайте подтверждения оператором — после этого посылка будет обработана."
                         )
-                        return redirect('track_codes')
+                        return _redirect(existing_track.id)
 
                     # Если трек-код существует, но без владельца, присваиваем его текущему пользователю
                     existing_track.owner = request.user
@@ -66,11 +88,13 @@ def track_codes_view(request):
                     existing_track.log_status_change(request.user)
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
+                    return _redirect(existing_track.id)
                 elif existing_track.owner == request.user:
                     messages.warning(request, "Этот трек-код уже добавлен в ваш список.")
+                    return _redirect(existing_track.id)
                 else:
                     messages.error(request, "Этот трек-код уже зарегистрирован другим пользователем.")
-                return redirect('track_codes')
+                    return _redirect()
 
             except TrackCode.DoesNotExist:
                 # Если трек-кода нет, создаём новый через форму для валидации
@@ -83,10 +107,10 @@ def track_codes_view(request):
                     track_code.log_status_change(request.user)
                     track_code.save()
                     messages.success(request, "Трек-код успешно добавлен.")
-                    return redirect('track_codes')
+                    return _redirect(track_code.id)
         else:
             messages.error(request, "Введите трек-код.")
-            return redirect('track_codes')
+            return _redirect()
     else:
         form = TrackCodeForm()
 

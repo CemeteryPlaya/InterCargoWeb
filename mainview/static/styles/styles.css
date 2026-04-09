@@ -651,3 +651,66 @@
             background-color: #0f172a !important;
             border-color: #1e293b !important;
         }
+
+        /* ============================================
+           Анимация смены темы через View Transitions API
+           Контент (иконки, фото, текст) остаётся на месте,
+           новая тема "наезжает" кругом из точки клика
+           ============================================ */
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        /* Старая тема видна снизу, не анимируется */
+        ::view-transition-old(root) {
+            z-index: 1;
+        }
+
+        /* Новая тема — сверху, раскрывается кругом из координат кнопки */
+        ::view-transition-new(root) {
+            z-index: 2;
+            animation: ic-theme-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes ic-theme-reveal {
+            from {
+                clip-path: circle(0px at var(--theme-anim-x, 50%) var(--theme-anim-y, 50%));
+            }
+            to {
+                clip-path: circle(var(--theme-anim-r, 150vmax) at var(--theme-anim-x, 50%) var(--theme-anim-y, 50%));
+            }
+        }
+
+/* ============================================
+   FAQ — плавное раскрытие аккордеона
+   ============================================ */
+.faq-content,
+.mobile-faq-content {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+}
+
+.faq-content.open,
+.mobile-faq-content.open {
+    opacity: 1;
+}
+
+.faq-icon,
+.mobile-faq-icon {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-icon.rotate,
+.mobile-faq-icon.rotate {
+    transform: rotate(180deg);
+}
+
+.faq-toggle:hover .faq-icon,
+.mobile-faq-btn:hover .mobile-faq-icon {
+    color: #e53e3e;
+}

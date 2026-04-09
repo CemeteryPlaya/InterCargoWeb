@@ -1,3 +1,5 @@
+import re
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -8,6 +10,16 @@ from register.models import UserProfile, LoginAttempt
 
 MAX_LOGIN_ATTEMPTS = 10
 LOCKOUT_MINUTES = 30
+
+_MOBILE_UA_RE = re.compile(
+    r'Mobile|Android|iPhone|iPod|BlackBerry|Windows Phone|Opera Mini|IEMobile',
+    re.IGNORECASE,
+)
+
+
+def _is_mobile(request):
+    ua = request.META.get('HTTP_USER_AGENT', '')
+    return bool(_MOBILE_UA_RE.search(ua))
 
 
 def _check_lockout(identifier):
@@ -95,6 +107,9 @@ def login_view(request):
         if user is not None:
             _clear_attempts(identifier)
             login(request, user)
+            # На мобильных — открываем «Главную», на десктопе — «Профиль»
+            if _is_mobile(request):
+                return redirect('home')
             return redirect('profile')
         else:
             _record_failed_attempt(identifier)
