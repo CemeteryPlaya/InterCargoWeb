@@ -91,6 +91,32 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleThemeWithAnimation(originEl) {
     var current = root.classList.contains('theme-dark') ? 'dark' : 'light';
     var next = current === 'dark' ? 'light' : 'dark';
+
+    // Координаты центра кнопки + максимальный радиус до угла экрана
+    var rect = originEl.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var maxR = Math.ceil(Math.sqrt(
+      Math.max(cx, window.innerWidth - cx) ** 2 +
+      Math.max(cy, window.innerHeight - cy) ** 2
+    ));
+
+    // Передаём координаты в CSS — анимация ::view-transition их использует
+    document.documentElement.style.setProperty('--theme-anim-x', cx + 'px');
+    document.documentElement.style.setProperty('--theme-anim-y', cy + 'px');
+    document.documentElement.style.setProperty('--theme-anim-r', maxR + 'px');
+
+    // Современный путь: View Transitions API — снапшотит контент,
+    // иконки и фото остаются на местах, тема "наезжает" сверху кругом
+    if (typeof document.startViewTransition === 'function') {
+      document.startViewTransition(function() {
+        localStorage.setItem(THEME_KEY, next);
+        applyTheme(next);
+      });
+      return;
+    }
+
+    // Фолбэк для старых браузеров — прежний overlay
     animateThemeTransition(originEl, next, function() {
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
