@@ -1,8 +1,8 @@
 {% load static %}
 <meta name="vapid-key" content="{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}">
 <script src="{% static 'scripts/coockiesAndPush.js' %}?v={{ APP_VERSION }}" defer></script>
-<header class="bg-white shadow-sm sticky top-0 z-50 ic-header">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+<header class="md:bg-white md:shadow-sm md:sticky md:top-0 z-50 ic-header">
+    <div class="hidden md:flex container mx-auto px-4 py-4 justify-between items-center">
         <div class="flex items-center">
             <a href="/" class="text-2xl font-['Pacifico'] text-primary mr-8">
                 <img src="{% static 'images/logo.png' %}" style="height: 50px; width: 50px;" alt="Inter Cargo Logo">
@@ -216,7 +216,7 @@
         </a>
         <a href="{% url 'mobile_qr' %}" class="mobile-nav-qr flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all overflow-hidden" data-nav="qr">
             <i class="ri-qr-code-line text-2xl nav-qr-icon"></i>
-            <img src="{% static 'images/logo.png' %}" alt="" class="w-8 h-8 object-contain nav-qr-logo hidden">
+            <img src="{% static 'images/logo1.png' %}" alt="" class="w-8 h-8 object-contain nav-qr-logo hidden">
         </a>
         <a href="{% url 'mobile_notifications' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors relative" data-nav="notifications">
             <span class="relative">

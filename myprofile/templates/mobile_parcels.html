@@ -16,7 +16,7 @@
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
@@ -66,6 +66,11 @@
 
         <!-- ===== Мобильная версия: главный экран ===== -->
         <div id="parcels-main" class="md:hidden">
+
+            <!-- Мобильный хедер -->
+            <div class="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3">
+                <h1 class="text-lg font-bold text-center">Посылки</h1>
+            </div>
 
             <!-- Баннер «Добавить трек-код» -->
             <div class="mx-4 mt-4 mb-4">
@@ -130,7 +135,7 @@
 
         <!-- ===== Полноэкранные панели категорий ===== -->
         {% for cat in categories %}
-        <div id="panel-{{ cat.key }}" class="mobile-cat-panel md:hidden fixed inset-x-0 bottom-0 z-40 bg-gray-50 hidden" style="top:82px;">
+        <div id="panel-{{ cat.key }}" class="mobile-cat-panel md:hidden fixed inset-0 z-40 bg-gray-50 hidden">
             <!-- Хидер панели -->
             <div class="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
                 <div class="flex items-center">
@@ -262,9 +267,9 @@
 </div>
 
 <!-- Модалка добавления трек-кода -->
-<div id="add-track-modal" class="fixed inset-0 z-50 hidden items-center justify-end">
-    <div id="add-track-backdrop" class="absolute inset-0 bg-black/50"></div>
-    <div class="relative bg-white rounded-t-2xl shadow-xl w-full mx-0 z-10 animate-slide-up" style="margin-top:auto;">
+<div id="add-track-modal" class="fixed inset-0 z-50 hidden items-end">
+    <div id="add-track-backdrop" class="absolute inset-0 bg-black/0 transition-colors duration-300"></div>
+    <div id="add-track-sheet" class="relative bg-white rounded-t-2xl shadow-xl w-full z-10 translate-y-full transition-transform duration-300 ease-out">
         <div class="flex items-center justify-between px-5 pt-5 pb-3">
             <h3 class="text-lg font-bold">Добавить трек-код</h3>
             <button id="add-track-close" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
@@ -534,18 +539,38 @@
     var addModal = document.getElementById('add-track-modal');
     var addClose = document.getElementById('add-track-close');
     var addBackdrop = document.getElementById('add-track-backdrop');
+    var addSheet = document.getElementById('add-track-sheet');
 
     function openAddModal() {
         addModal.classList.remove('hidden');
         addModal.classList.add('flex');
+        // Запускаем анимацию в следующем кадре, чтобы transition сработал
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                addSheet.classList.remove('translate-y-full');
+                addSheet.classList.add('translate-y-0');
+                addBackdrop.classList.remove('bg-black/0');
+                addBackdrop.classList.add('bg-black/50');
+            });
+        });
         setTimeout(function() {
             var input = addModal.querySelector('input[name="track_code"]');
             if (input) input.focus();
-        }, 100);
+        }, 300);
     }
     function closeAddModal() {
-        addModal.classList.add('hidden');
-        addModal.classList.remove('flex');
+        addSheet.classList.remove('translate-y-0');
+        addSheet.classList.add('translate-y-full');
+        addBackdrop.classList.remove('bg-black/50');
+        addBackdrop.classList.add('bg-black/0');
+        // Скрываем модалку после завершения анимации
+        var onEnd = function(e) {
+            if (e.propertyName !== 'transform') return;
+            addModal.classList.add('hidden');
+            addModal.classList.remove('flex');
+            addSheet.removeEventListener('transitionend', onEnd);
+        };
+        addSheet.addEventListener('transitionend', onEnd);
     }
 
     if (addBtn) addBtn.addEventListener('click', openAddModal);

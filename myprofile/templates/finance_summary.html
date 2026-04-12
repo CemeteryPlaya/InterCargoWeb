@@ -17,7 +17,7 @@
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
@@ -30,7 +30,11 @@
         {% include 'includes/sidebar.html' %}
 
         <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">
+            <!-- Мобильный хедер -->
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+                <h1 class="text-lg font-bold text-center">Финансовая сводка</h1>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-6 hidden md:block">
                 <i class="ri-money-dollar-circle-line text-primary"></i> Финансовая сводка
             </h1>
 

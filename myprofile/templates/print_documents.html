@@ -18,7 +18,7 @@
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
@@ -33,7 +33,11 @@
         {% include 'includes/sidebar.html' %}
 
         <div class="w-full px-4 py-6 mx-auto max-w-7xl">
-            <h1 class="text-2xl font-bold mb-6 text-gray-800">Печать документов</h1>
+            <!-- Мобильный хедер -->
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
+                <h1 class="text-lg font-bold text-center">Печать документов</h1>
+            </div>
+            <h1 class="text-2xl font-bold mb-6 text-gray-800 hidden md:block">Печать документов</h1>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Форма создания реестра -->

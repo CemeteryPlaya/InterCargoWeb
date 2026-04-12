@@ -1,12 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Auto-uppercase + Latin-only for all login fields
+  // Auto-uppercase + Latin-only + no spaces for all login fields
   document.querySelectorAll('input[name="login"]').forEach(function (input) {
+    // Блокируем пробел на уровне клавиши
+    input.addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+      }
+    });
     input.addEventListener('input', function () {
       var oldLen = this.value.length;
       var start = this.selectionStart;
       var end = this.selectionEnd;
-      // Убираем кириллицу, оставляем только латиницу, цифры и допустимые символы
-      var clean = this.value.replace(/[а-яА-ЯёЁ]/g, '').toUpperCase();
+      // Убираем кириллицу и пробелы, оставляем только латиницу, цифры и допустимые символы
+      var clean = this.value.replace(/[а-яА-ЯёЁ\s]/g, '').toUpperCase();
       this.value = clean;
       // Корректируем позицию курсора если символы были удалены
       var removed = oldLen - clean.length;

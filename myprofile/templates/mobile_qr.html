@@ -16,7 +16,7 @@
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
@@ -31,8 +31,8 @@
     <main class="flex-1 w-full">
 
         <!-- Заголовок страницы (мобильный) -->
-        <div class="md:hidden flex items-center justify-between px-4 py-3 border-b bg-white">
-            <h1 class="text-lg font-bold">Выдача</h1>
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3">
+            <h1 class="text-lg font-bold text-center">Выдача</h1>
         </div>
 
         <!-- ===== QR-секция ===== -->

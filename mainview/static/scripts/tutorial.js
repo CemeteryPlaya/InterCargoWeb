@@ -15,6 +15,37 @@
         return window.innerWidth < 768;
     }
 
+    function getMobileNavHeight() {
+        var nav = document.getElementById('mobile-bottom-nav');
+        if (nav) return nav.offsetHeight || 64;
+        return 64;
+    }
+
+    /**
+     * Calculate the bottom offset for the tutorial tooltip on mobile.
+     * Takes into account the bottom nav bar AND any visible bottom-sheet modals.
+     */
+    function getMobileBottomOffset() {
+        var navH = getMobileNavHeight();
+
+        // Check for open bottom-sheet modals that sit above the nav
+        var sheets = document.querySelectorAll(
+            '#add-track-sheet, .mobile-bottom-sheet'
+        );
+        var maxSheetH = 0;
+        for (var i = 0; i < sheets.length; i++) {
+            var sheet = sheets[i];
+            // Sheet is visible if it has translate-y-0 (open) and its parent modal is not hidden
+            var parent = sheet.closest('.fixed');
+            if (!parent || parent.classList.contains('hidden')) continue;
+            if (sheet.classList.contains('translate-y-full')) continue;
+            var h = sheet.offsetHeight || 0;
+            if (h > maxSheetH) maxSheetH = h;
+        }
+
+        return maxSheetH > 0 ? maxSheetH : navH;
+    }
+
     /* ─── Tutorial Definitions ──────────────────────────────────────────── */
 
     var TUTORIALS = {
@@ -68,6 +99,40 @@
                     position: 'top',
                 },
             ],
+            mobileSteps: [
+                {
+                    page: '/profile/mobile-parcels/',
+                    selector: '[data-nav="parcels"]',
+                    text: 'Нажмите на вкладку "Посылки" в нижней панели навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-parcels/',
+                },
+                {
+                    page: '/profile/mobile-parcels/',
+                    selector: '#add-track-btn',
+                    text: 'Нажмите кнопку "Добавить трек-код" чтобы открыть форму добавления.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/mobile-parcels/',
+                    selector: 'input[name="track_code"]',
+                    text: 'Введите ваш трек-код в это поле. Трек-код вы получаете от продавца после оплаты товара.',
+                    position: 'top',
+                    beforeShow: function () { openMobileAddModal(); },
+                },
+                {
+                    page: '/profile/mobile-parcels/',
+                    selector: 'textarea[name="description"]',
+                    text: 'Добавьте описание посылки (необязательно). Например: "Куртка зимняя" — это поможет вам не путать посылки.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/mobile-parcels/',
+                    selector: '#add-track-modal button[type="submit"]',
+                    text: 'Нажмите "Сохранить" для добавления трек-кода. После этого вы сможете отслеживать статус вашей посылки.',
+                    position: 'top',
+                },
+            ],
         },
 
         view_receipts: {
@@ -104,6 +169,42 @@
                     fallbackSelector: '.bg-white.border-2.border-gray-300',
                     text: 'Нажмите на заголовок чека, чтобы развернуть подробности — список трек-кодов, вес и стоимость каждой посылки.',
                     position: 'bottom',
+                },
+                {
+                    page: '/profile/delivered-posts/',
+                    selector: null,
+                    text: 'В развёрнутом чеке вы увидите таблицу с трек-кодами, весом и ценой каждой посылки, а также итоговую сумму и пункт выдачи.',
+                    position: 'center',
+                },
+            ],
+            mobileSteps: [
+                {
+                    page: null,
+                    selector: '[data-nav="menu"]',
+                    text: 'Чтобы посмотреть чеки, перейдите в раздел "Меню" в нижней навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-menu/',
+                },
+                {
+                    page: '/profile/mobile-menu/',
+                    selector: 'a[href*="delivered-posts"]',
+                    text: 'Нажмите на иконку "Чеки" для перехода к вашим чекам.',
+                    position: 'top',
+                    navigateTo: '/profile/delivered-posts/',
+                },
+                {
+                    page: '/profile/delivered-posts/',
+                    selector: '.bg-white.border-2.border-gray-300',
+                    fallbackSelector: 'h1',
+                    text: 'Здесь отображаются ваши чеки. Каждый чек содержит информацию о дате, весе и стоимости посылок.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/delivered-posts/',
+                    selector: '.cursor-pointer.bg-gray-100',
+                    fallbackSelector: '.bg-white.border-2.border-gray-300',
+                    text: 'Нажмите на заголовок чека, чтобы развернуть подробности — список трек-кодов, вес и стоимость каждой посылки.',
+                    position: 'top',
                 },
                 {
                     page: '/profile/delivered-posts/',
@@ -165,6 +266,44 @@
                 },
                 {
                     page: '/profile/',
+                    selector: null,
+                    text: 'Оплату вы можете произвести на месте в пункте выдачи. Готово — ваши посылки получены!',
+                    position: 'center',
+                    icon: 'ri-bank-card-line',
+                },
+            ],
+            mobileSteps: [
+                {
+                    page: '/profile/mobile-qr/',
+                    selector: '.mobile-nav-qr',
+                    fallbackSelector: '[data-nav="qr"]',
+                    text: 'Нажмите на кнопку "QR" в нижней панели навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-qr/',
+                },
+                {
+                    page: '/profile/mobile-qr/',
+                    selector: '.quickIssueBtn',
+                    fallbackSelector: 'h1',
+                    text: 'Когда посылки доставлены на ПВЗ, появится зелёная кнопка "Получить посылки". Нажмите её, чтобы начать процесс получения.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/mobile-qr/',
+                    selector: null,
+                    text: 'После нажатия вам будет показано количество посылок для подтверждения. Проверьте и нажмите "Окей".',
+                    position: 'center',
+                    icon: 'ri-checkbox-circle-line',
+                },
+                {
+                    page: '/profile/mobile-qr/',
+                    selector: null,
+                    text: 'Далее на экране появится QR-код. Покажите его сотруднику пункта выдачи — он отсканирует код и выдаст ваши посылки.',
+                    position: 'center',
+                    icon: 'ri-qr-code-line',
+                },
+                {
+                    page: '/profile/mobile-qr/',
                     selector: null,
                     text: 'Оплату вы можете произвести на месте в пункте выдачи. Готово — ваши посылки получены!',
                     position: 'center',
@@ -370,6 +509,50 @@
                     icon: 'ri-checkbox-circle-line',
                 },
             ],
+            mobileSteps: [
+                {
+                    page: null,
+                    selector: '[data-nav="menu"]',
+                    text: 'Перейдите в раздел "Меню" в нижней навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-menu/',
+                },
+                {
+                    page: '/profile/mobile-menu/',
+                    selector: 'a[href*="pp-acceptance"]',
+                    text: 'Нажмите на иконку "Приёмка" в секции для сотрудников ПВЗ.',
+                    position: 'top',
+                    navigateTo: '/profile/pp-acceptance/',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: '.border-yellow-400',
+                    fallbackSelector: 'h2',
+                    text: 'Здесь отображаются ожидающие приёмки доставки. Каждая карточка — одна доставка от водителя с количеством чеков.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: null,
+                    text: 'Когда водитель нажимает "Начать выдачу" — на карточке появляется кнопка "Приёмка". Нажмите её, чтобы начать принимать посылки.',
+                    position: 'center',
+                    icon: 'ri-inbox-archive-line',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: null,
+                    text: 'Отсканируйте QR-код каждого чека сканером или камерой. Система автоматически проверит чек и отметит его как принятый.',
+                    position: 'center',
+                    icon: 'ri-qr-code-line',
+                },
+                {
+                    page: '/profile/pp-acceptance/',
+                    selector: null,
+                    text: 'После приёмки всех чеков нажмите "Завершить сессию". Посылки переместятся на склад вашего ПВЗ.',
+                    position: 'center',
+                    icon: 'ri-checkbox-circle-line',
+                },
+            ],
         },
 
         pp_extradition_tutorial: {
@@ -437,6 +620,57 @@
                     icon: 'ri-hand-coin-line',
                 },
             ],
+            mobileSteps: [
+                {
+                    page: null,
+                    selector: '[data-nav="menu"]',
+                    text: 'Перейдите в раздел "Меню" в нижней навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-menu/',
+                },
+                {
+                    page: '/profile/mobile-menu/',
+                    selector: 'a[href*="extradition"]',
+                    text: 'Нажмите на иконку "Выдача" в секции для сотрудников ПВЗ.',
+                    position: 'top',
+                    navigateTo: '/profile/extradition/',
+                },
+                {
+                    page: '/profile/extradition/',
+                    selector: '#barcode',
+                    fallbackSelector: 'h1',
+                    text: 'Когда клиент приходит за посылками, отсканируйте его QR-код выдачи в это поле. Также можно ввести код вручную.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/extradition/',
+                    selector: '#scanBarcodeBtn',
+                    fallbackSelector: '#searchBtn',
+                    text: 'Или нажмите эту кнопку, чтобы открыть камеру и отсканировать QR-код клиента.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/extradition/',
+                    selector: null,
+                    text: 'После сканирования система покажет информацию о клиенте: имя, ПВЗ, ячейку хранения и список чеков с посылками.',
+                    position: 'center',
+                    icon: 'ri-search-line',
+                },
+                {
+                    page: '/profile/extradition/',
+                    selector: null,
+                    text: 'Для быстрой выдачи нажмите "Оформить выдачу". Для проверки — "Проверить и выдать", чтобы отсканировать QR-коды на каждом чеке.',
+                    position: 'center',
+                    icon: 'ri-qr-scan-2-line',
+                },
+                {
+                    page: '/profile/extradition/',
+                    selector: null,
+                    text: 'После оформления: посылки отмечены как выданные, ячейка освободится, клиент получит уведомление.',
+                    position: 'center',
+                    icon: 'ri-hand-coin-line',
+                },
+            ],
         },
 
         pp_warehouse_tutorial: {
@@ -477,6 +711,43 @@
                     text: 'Используйте инвентаризацию для сверки реального содержимого склада с данными в системе.',
                     position: 'center',
                     icon: 'ri-file-list-3-line',
+                },
+            ],
+            mobileSteps: [
+                {
+                    page: null,
+                    selector: '[data-nav="menu"]',
+                    text: 'Перейдите в раздел "Меню" в нижней навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-menu/',
+                },
+                {
+                    page: '/profile/mobile-menu/',
+                    selector: 'a[href*="warehouse"]',
+                    text: 'Нажмите на иконку "Склад ПВЗ" в секции для сотрудников.',
+                    position: 'top',
+                    navigateTo: '/profile/warehouse/',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: '.w-14.h-14',
+                    fallbackSelector: 'h1',
+                    text: 'Здесь отображаются все ячейки с посылками. Номер ячейки — в квадрате. Нажмите, чтобы изменить номер. "Пол" означает ячейку 0.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Каждая ячейка разделена на подячейки по чекам. Это позволяет легко найти конкретные посылки клиента.',
+                    position: 'center',
+                    icon: 'ri-layout-grid-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'a[href*="inventory"]',
+                    fallbackSelector: 'h1',
+                    text: 'Кнопка "Инвентаризация" создаёт печатный документ со списком всех клиентов, ячеек и посылок на складе.',
+                    position: 'top',
                 },
             ],
         },
@@ -535,6 +806,57 @@
                     icon: 'ri-checkbox-circle-line',
                 },
             ],
+            mobileSteps: [
+                {
+                    page: null,
+                    selector: '[data-nav="menu"]',
+                    text: 'Перейдите в раздел "Меню" в нижней навигации.',
+                    position: 'top',
+                    navigateTo: '/profile/mobile-menu/',
+                },
+                {
+                    page: '/profile/mobile-menu/',
+                    selector: 'a[href*="warehouse"]',
+                    text: 'Нажмите на иконку "Склад ПВЗ" в секции для сотрудников.',
+                    position: 'top',
+                    navigateTo: '/profile/warehouse/',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: 'button[type="submit"]',
+                    fallbackSelector: '.animate-pulse',
+                    text: 'Нажмите "Реструктуризация склада". Все номера ячеек будут удалены, а посылки останутся в системе.',
+                    position: 'top',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Откроется страница назначения ячеек. 3 способа: вручную, сканером или камерой.',
+                    position: 'center',
+                    icon: 'ri-refresh-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Сканер: отсканируйте QR-код чека — система найдёт клиента и назначит ячейку автоматически.',
+                    position: 'center',
+                    icon: 'ri-barcode-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Камера: если нет аппаратного сканера, откройте камеру и наведите на QR-код чека.',
+                    position: 'center',
+                    icon: 'ri-camera-line',
+                },
+                {
+                    page: '/profile/warehouse/',
+                    selector: null,
+                    text: 'Когда все ячейки назначены, нажмите "Завершить реструктуризацию".',
+                    position: 'center',
+                    icon: 'ri-checkbox-circle-line',
+                },
+            ],
         },
     };
 
@@ -577,6 +899,34 @@
             el.__x.$data[name] = true;
         } else if (window.Alpine) {
             try { Alpine.evaluate(el, name + ' = true'); } catch (e) { /* ignore */ }
+        }
+    }
+
+    function openMobileAddModal() {
+        var addBtn = document.getElementById('add-track-btn');
+        if (addBtn) {
+            addBtn.click();
+            return;
+        }
+        // Fallback: open modal directly
+        var modal = document.getElementById('add-track-modal');
+        var sheet = document.getElementById('add-track-sheet');
+        var backdrop = modal ? modal.querySelector('[class*="bg-black"]') : null;
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (sheet) {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        sheet.classList.remove('translate-y-full');
+                        sheet.classList.add('translate-y-0');
+                        if (backdrop) {
+                            backdrop.classList.remove('bg-black/0');
+                            backdrop.classList.add('bg-black/50');
+                        }
+                    });
+                });
+            }
         }
     }
 
@@ -642,6 +992,8 @@
     function createOverlay() {
         if (overlay) return;
 
+        var mobile = isMobile();
+
         overlay = document.createElement('div');
         overlay.id = 'tutorial-overlay';
         overlay.style.cssText =
@@ -653,12 +1005,18 @@
         tooltip = document.createElement('div');
         tooltip.id = 'tutorial-tooltip';
         tooltip.style.cssText =
-            'position:fixed;z-index:10001;max-width:380px;width:calc(100vw - 16px);' +
-            'box-sizing:border-box;' +
-            'background:white;border-radius:12px;padding:20px;' +
-            'box-shadow:0 10px 40px rgba(0,0,0,0.3);' +
-            'font-size:14px;line-height:1.6;color:#1f2937;' +
-            'transition:opacity 0.3s ease;';
+            'position:fixed;z-index:10001;box-sizing:border-box;' +
+            'background:white;color:#1f2937;' +
+            'transition:opacity 0.3s ease;' +
+            (mobile
+                ? 'left:0;right:0;width:100%;max-width:100%;' +
+                  'border-radius:24px 24px 0 0;padding:24px 20px;' +
+                  'box-shadow:0 -4px 30px rgba(0,0,0,0.25);' +
+                  'font-size:15px;line-height:1.65;'
+                : 'max-width:380px;width:calc(100vw - 16px);' +
+                  'border-radius:12px;padding:20px;' +
+                  'box-shadow:0 10px 40px rgba(0,0,0,0.3);' +
+                  'font-size:14px;line-height:1.6;');
         document.body.appendChild(tooltip);
 
         overlay.addEventListener('click', function (e) {
@@ -676,6 +1034,10 @@
         closeMobileSidebar();
     }
 
+    var activeNavOrigZIndex = null;
+    var activeContainerEl = null;
+    var activeContainerOrigZIndex = null;
+
     function highlightElement(el) {
         restoreElement();
         if (!el) return;
@@ -689,6 +1051,21 @@
             outline: el.style.outline,
             outlineOffset: el.style.outlineOffset,
         };
+
+        // If element is inside the bottom nav, raise the nav above the overlay
+        var bottomNav = document.getElementById('mobile-bottom-nav');
+        if (bottomNav && bottomNav.contains(el)) {
+            activeNavOrigZIndex = bottomNav.style.zIndex;
+            bottomNav.style.zIndex = '9999';
+        }
+
+        // If element is inside a fixed modal/bottom-sheet, raise it above the overlay
+        var fixedParent = el.closest('.fixed');
+        if (fixedParent && fixedParent !== bottomNav && fixedParent.id !== 'tutorial-overlay') {
+            activeContainerEl = fixedParent;
+            activeContainerOrigZIndex = fixedParent.style.zIndex;
+            fixedParent.style.zIndex = '9999';
+        }
 
         // Raise element above overlay
         var computed = window.getComputedStyle(el);
@@ -711,6 +1088,18 @@
             activeEl.style.outline = activeElOrigStyles.outline;
             activeEl.style.outlineOffset = activeElOrigStyles.outlineOffset;
         }
+        // Restore bottom nav z-index
+        if (activeNavOrigZIndex !== null) {
+            var bottomNav = document.getElementById('mobile-bottom-nav');
+            if (bottomNav) bottomNav.style.zIndex = activeNavOrigZIndex;
+            activeNavOrigZIndex = null;
+        }
+        // Restore modal container z-index
+        if (activeContainerEl) {
+            activeContainerEl.style.zIndex = activeContainerOrigZIndex;
+            activeContainerEl = null;
+            activeContainerOrigZIndex = null;
+        }
         activeEl = null;
         activeElOrigStyles = null;
     }
@@ -721,39 +1110,50 @@
 
     function positionTooltip(el, step, stepIndex, totalSteps) {
         var pos = step.position || 'bottom';
-        if (isMobile() && step.mobilePosition) pos = step.mobilePosition;
+        var mobile = isMobile();
+        if (mobile && step.mobilePosition) pos = step.mobilePosition;
         var icon = step.icon || 'ri-lightbulb-line';
+
+        // Adaptive sizes for mobile vs desktop
+        var btnPad = mobile ? '10px 20px' : '6px 16px';
+        var btnRadius = mobile ? '10px' : '6px';
+        var btnFont = mobile ? '14px' : '13px';
+        var iconSize = mobile ? '28px' : '24px';
+        var counterFont = mobile ? '13px' : '12px';
+        var closeSize = mobile ? '24px' : '20px';
+        var closeTop = mobile ? '16px' : '8px';
+        var closeRight = mobile ? '16px' : '12px';
 
         // Build tooltip HTML
         var html =
             '<div style="display:flex;align-items:flex-start;gap:12px;">' +
-            '<i class="' + icon + '" style="font-size:24px;color:#ef4444;flex-shrink:0;margin-top:2px;"></i>' +
-            '<div style="flex:1;">' +
-            '<p style="margin:0 0 16px 0;">' + step.text + '</p>' +
-            '<div style="display:flex;align-items:center;justify-content:space-between;">' +
-            '<span style="font-size:12px;color:#9ca3af;">' + (stepIndex + 1) + ' / ' + totalSteps + '</span>' +
+            '<i class="' + icon + '" style="font-size:' + iconSize + ';color:#ef4444;flex-shrink:0;margin-top:2px;"></i>' +
+            '<div style="flex:1;min-width:0;">' +
+            '<p style="margin:0 0 16px 0;word-wrap:break-word;">' + step.text + '</p>' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
+            '<span style="font-size:' + counterFont + ';color:#9ca3af;white-space:nowrap;">' + (stepIndex + 1) + ' / ' + totalSteps + '</span>' +
             '<div style="display:flex;gap:8px;">';
 
         if (stepIndex > 0) {
-            html += '<button id="tutorial-prev" style="padding:6px 16px;border-radius:6px;' +
-                'border:1px solid #d1d5db;background:white;color:#374151;font-size:13px;' +
-                'cursor:pointer;font-weight:500;">Назад</button>';
+            html += '<button id="tutorial-prev" style="padding:' + btnPad + ';border-radius:' + btnRadius + ';' +
+                'border:1px solid #d1d5db;background:white;color:#374151;font-size:' + btnFont + ';' +
+                'cursor:pointer;font-weight:500;white-space:nowrap;">Назад</button>';
         }
 
         if (stepIndex < totalSteps - 1) {
             var nextLabel = step.navigateTo ? 'Перейти' : 'Далее';
-            html += '<button id="tutorial-next" style="padding:6px 16px;border-radius:6px;' +
-                'border:none;background:#ef4444;color:white;font-size:13px;' +
-                'cursor:pointer;font-weight:500;">' + nextLabel + '</button>';
+            html += '<button id="tutorial-next" style="padding:' + btnPad + ';border-radius:' + btnRadius + ';' +
+                'border:none;background:#ef4444;color:white;font-size:' + btnFont + ';' +
+                'cursor:pointer;font-weight:500;white-space:nowrap;">' + nextLabel + '</button>';
         } else {
-            html += '<button id="tutorial-finish" style="padding:6px 16px;border-radius:6px;' +
-                'border:none;background:#16a34a;color:white;font-size:13px;' +
-                'cursor:pointer;font-weight:500;">Готово</button>';
+            html += '<button id="tutorial-finish" style="padding:' + btnPad + ';border-radius:' + btnRadius + ';' +
+                'border:none;background:#16a34a;color:white;font-size:' + btnFont + ';' +
+                'cursor:pointer;font-weight:500;white-space:nowrap;">Готово</button>';
         }
 
         html += '</div></div></div></div>';
-        html += '<button id="tutorial-close" style="position:absolute;top:8px;right:12px;' +
-            'background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer;' +
+        html += '<button id="tutorial-close" style="position:absolute;top:' + closeTop + ';right:' + closeRight + ';' +
+            'background:none;border:none;font-size:' + closeSize + ';color:#9ca3af;cursor:pointer;' +
             'line-height:1;" title="Закрыть">&times;</button>';
 
         tooltip.innerHTML = html;
@@ -765,7 +1165,15 @@
         tooltip.style.bottom = '';
         tooltip.style.transform = '';
 
-        // Center mode (no target element)
+        // Mobile: pin above bottom nav or above an open bottom-sheet modal
+        if (mobile) {
+            tooltip.style.bottom = getMobileBottomOffset() + 'px';
+            tooltip.style.left = '0';
+            tooltip.style.right = '0';
+            return;
+        }
+
+        // Center mode (no target element) — desktop only
         if (!el || pos === 'center') {
             tooltip.style.top = '50%';
             tooltip.style.left = '50%';
@@ -891,8 +1299,12 @@
     /* ─── Tutorial Engine ───────────────────────────────────────────────── */
 
     function getEffectiveSteps(tutorial) {
-        // Filter out mobile-only steps when on desktop
         var mobile = isMobile();
+        // Use dedicated mobileSteps if available on mobile
+        if (mobile && tutorial.mobileSteps) {
+            return tutorial.mobileSteps;
+        }
+        // Filter out mobile-only steps when on desktop
         var effective = [];
         for (var i = 0; i < tutorial.steps.length; i++) {
             var step = tutorial.steps[i];
@@ -1016,11 +1428,15 @@
         var existing = document.getElementById('tutorial-menu-modal');
         if (existing) existing.remove();
 
+        var mobile = isMobile();
+
         var modal = document.createElement('div');
         modal.id = 'tutorial-menu-modal';
         modal.style.cssText =
-            'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;' +
-            'justify-content:center;padding:16px;';
+            'position:fixed;inset:0;z-index:9999;display:flex;' +
+            (mobile
+                ? 'align-items:flex-end;'
+                : 'align-items:center;justify-content:center;padding:16px;');
 
         var backdrop = document.createElement('div');
         backdrop.style.cssText =
@@ -1032,19 +1448,28 @@
         var card = document.createElement('div');
         card.className = 'tutorial-menu-card';
         card.style.cssText =
-            'position:relative;background:white;border-radius:12px;padding:24px;' +
-            'max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:1;';
+            'position:relative;background:white;z-index:1;' +
+            (mobile
+                ? 'border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom, 0px));' +
+                  'width:100%;max-height:85vh;overflow-y:auto;' +
+                  'box-shadow:0 -4px 30px rgba(0,0,0,0.25);'
+                : 'border-radius:12px;padding:24px;max-width:420px;width:100%;' +
+                  'box-shadow:0 20px 60px rgba(0,0,0,0.3);');
+
+        var headerSize = mobile ? '17px' : '18px';
+        var descSize = mobile ? '13px' : '13px';
 
         card.innerHTML =
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h3 style="font-size:18px;font-weight:700;margin:0;">' +
+            (mobile ? '<div style="width:40px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 16px;"></div>' : '') +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+            '<h3 style="font-size:' + headerSize + ';font-weight:700;margin:0;">' +
             '<i class="ri-graduation-cap-line" style="color:#ef4444;margin-right:8px;"></i>' +
             'Обучение по сайту</h3>' +
             '<button id="tutorial-menu-close" style="background:none;border:none;font-size:22px;' +
             'color:#9ca3af;cursor:pointer;line-height:1;">&times;</button></div>' +
-            '<p style="color:#6b7280;font-size:13px;margin-bottom:16px;">' +
+            '<p style="color:#6b7280;font-size:' + descSize + ';margin-bottom:16px;">' +
             'Выберите тему для интерактивного обучения:</p>' +
-            '<div id="tutorial-menu-items" style="display:flex;flex-direction:column;gap:10px;"></div>';
+            '<div id="tutorial-menu-items" style="display:flex;flex-direction:column;gap:' + (mobile ? '8px' : '10px') + ';"></div>';
 
         modal.appendChild(card);
         document.body.appendChild(modal);
@@ -1095,15 +1520,20 @@
 
             var btn = document.createElement('button');
             btn.className = 'tutorial-menu-btn';
+            var btnPadding = mobile ? '12px 14px' : '14px 16px';
+            var btnFontSize = mobile ? '14px' : '14px';
+            var iconFontSize = mobile ? '20px' : '22px';
             btn.style.cssText =
-                'display:flex;align-items:center;gap:12px;padding:14px 16px;' +
-                'border:1px solid #e5e7eb;border-radius:10px;background:white;' +
-                'cursor:pointer;text-align:left;transition:all 0.2s;font-size:14px;' +
+                'display:flex;align-items:center;gap:12px;padding:' + btnPadding + ';' +
+                'border:1px solid #e5e7eb;border-radius:' + (mobile ? '16px' : '10px') + ';background:white;' +
+                'cursor:pointer;text-align:left;transition:all 0.2s;font-size:' + btnFontSize + ';' +
                 'color:#374151;width:100%;';
             btn.innerHTML =
-                '<i class="' + t.icon + '" style="font-size:22px;color:' + t.color + ';flex-shrink:0;"></i>' +
-                '<span style="font-weight:500;">' + TUTORIALS[t.id].name + '</span>' +
-                '<i class="ri-arrow-right-s-line" style="margin-left:auto;color:#9ca3af;"></i>';
+                '<div style="width:' + (mobile ? '40px' : 'auto') + ';height:' + (mobile ? '40px' : 'auto') + ';' +
+                (mobile ? 'border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:' + t.color + '14;' : 'flex-shrink:0;') + '">' +
+                '<i class="' + t.icon + '" style="font-size:' + iconFontSize + ';color:' + t.color + ';"></i></div>' +
+                '<span style="font-weight:500;flex:1;min-width:0;word-wrap:break-word;">' + TUTORIALS[t.id].name + '</span>' +
+                '<i class="ri-arrow-right-s-line" style="flex-shrink:0;color:#9ca3af;"></i>';
 
             btn.addEventListener('mouseenter', function () {
                 btn.style.borderColor = '#ef4444';
@@ -1134,9 +1564,41 @@
         document.addEventListener('keydown', escHandler);
     }
 
+    function validateEnvironment(tutorialId) {
+        var tutorial = TUTORIALS[tutorialId];
+        if (!tutorial) return 'Обучение не найдено.';
+        var mobile = isMobile();
+        var steps = getEffectiveSteps(tutorial);
+        if (!steps || steps.length === 0) return 'Нет доступных шагов для этого обучения.';
+
+        // On mobile, check that bottom navigation exists (for authenticated tutorials)
+        if (mobile && !tutorial.guest) {
+            var bottomNav = document.getElementById('mobile-bottom-nav');
+            if (!bottomNav) return 'Мобильная навигация не найдена. Пожалуйста, обновите страницу.';
+        }
+
+        // Check that the first step's page is valid
+        var firstStep = steps[0];
+        if (firstStep.selector && !firstStep.page) {
+            var el = document.querySelector(firstStep.selector);
+            if (!el && !firstStep.fallbackSelector) {
+                return 'Элемент интерфейса для первого шага не найден. Попробуйте обновить страницу.';
+            }
+        }
+
+        return null; // validation passed
+    }
+
     function startTutorial(tutorialId) {
         var tutorial = TUTORIALS[tutorialId];
         if (!tutorial) return;
+
+        // Validate environment before starting
+        var error = validateEnvironment(tutorialId);
+        if (error) {
+            alert(error);
+            return;
+        }
 
         var steps = getEffectiveSteps(tutorial);
         var currentPath = window.location.pathname;
