@@ -20,7 +20,7 @@
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
     <script src="{% static 'scripts/barcode.js' %}?v={{ APP_VERSION }}" defer></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
@@ -50,7 +50,11 @@
         </div>
         {% endif %}
 
-        <h1 class="text-2xl font-bold mb-6"><i class="ri-history-line text-red-500"></i> История выдачи</h1>
+        <!-- Мобильный хедер -->
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+            <h1 class="text-lg font-bold text-center">История выдачи</h1>
+        </div>
+        <h1 class="text-2xl font-bold mb-6 hidden md:block"><i class="ri-history-line text-red-500"></i> История выдачи</h1>
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
     {% if packages %}

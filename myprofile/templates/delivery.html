@@ -18,7 +18,7 @@
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
@@ -30,7 +30,11 @@
     <div class="flex min-h-screen">
         {% include 'includes/sidebar.html' %}
         <div class="flex-1 mx-auto p-4 md:p-6 bg-white rounded-lg shadow mt-10">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Доставка</h2>
+            <!-- Мобильный хедер -->
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+                <h1 class="text-lg font-bold text-center">Доставка</h1>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">Доставка</h2>
 
             {% if messages %}
             <ul class="mb-4">

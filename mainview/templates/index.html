@@ -21,7 +21,7 @@
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
@@ -32,6 +32,12 @@
 
     <!-- ===== МОБИЛЬНАЯ ГЛАВНАЯ (Kaspi-style) ===== -->
     <div id="mobile-home" class="md:hidden min-h-screen bg-gray-50 pb-20">
+
+        <!-- Мобильный хедер с логотипом -->
+        <div class="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-center">
+            <img src="{% static 'images/logo.png' %}" alt="Inter Cargo" class="h-8 w-8 mr-2">
+            <span class="text-base font-bold text-gray-900">Inter Cargo</span>
+        </div>
 
         {% if user.is_authenticated %}
         <!-- Приветствие -->
@@ -58,56 +64,68 @@
             <div class="grid grid-cols-4 gap-3">
                 <!-- Ряд 1 -->
                 <a href="{% url 'mobile_qr' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#dbeafe;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#dbeafe;">
                         <i class="ri-qr-code-line text-xl" style="color:#3b82f6;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">QR код</span>
                 </a>
                 <a href="{% url 'mobile_parcels' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#ffedd5;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#ffedd5;">
                         <i class="ri-box-3-line text-xl" style="color:#f97316;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Посылки</span>
                 </a>
                 <a href="{% url 'delivered_posts' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#dcfce7;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#dcfce7;">
                         <i class="ri-receipt-line text-xl" style="color:#22c55e;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Чеки</span>
                 </a>
                 <a href="{% url 'mobile_qr' %}?tab=history" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fef3c7;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fef3c7;">
                         <i class="ri-history-line text-xl" style="color:#f59e0b;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">История выдачи</span>
                 </a>
                 <!-- Ряд 2 -->
                 <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e0f2fe;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#e0f2fe;">
                         <i class="ri-lightbulb-line text-xl" style="color:#0ea5e9;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Интерактивное обучение</span>
                 </button>
                 <a href="{% url 'education' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#f3e8ff;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#f3e8ff;">
                         <i class="ri-video-line text-xl" style="color:#8b5cf6;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Видеоуроки</span>
                 </a>
                 <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fce7f3;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
                         <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">О компании</span>
                 </a>
                 <button id="mobile-theme-btn" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#f1f5f9;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#f1f5f9;">
                         <i id="mobile-theme-icon" class="ri-moon-line text-xl" style="color:#64748b;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Тема</span>
                 </button>
             </div>
         </div>
+
+        <!-- Кнопка привязки Telegram -->
+        {% if not telegram_linked and telegram_link_url %}
+        <div class="px-4 pb-1">
+            <a href="{{ telegram_link_url }}" target="_blank"
+               class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-white font-semibold text-sm shadow-sm hover:opacity-90 transition"
+               style="background:#039BE5;">
+                <i class="ri-telegram-line text-lg"></i>
+                Привязать Telegram
+            </a>
+        </div>
+        {% endif %}
 
         <!-- Карточки статистики -->
         {% if mobile_stats %}
@@ -209,25 +227,25 @@
         <div class="px-4 py-3">
             <div class="grid grid-cols-4 gap-3">
                 <a href="{% url 'login' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fee2e2;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fee2e2;">
                         <i class="ri-login-box-line text-xl" style="color:#e53e3e;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Вход</span>
                 </a>
                 <a href="{% url 'register' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#dcfce7;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#dcfce7;">
                         <i class="ri-user-add-line text-xl" style="color:#22c55e;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Регистрация</span>
                 </a>
                 <a href="{% url 'education' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e0f2fe;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#e0f2fe;">
                         <i class="ri-graduation-cap-line text-xl" style="color:#0ea5e9;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Обучение</span>
                 </a>
                 <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#fce7f3;">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
                         <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">О компании</span>
@@ -260,82 +278,91 @@
         <!-- FAQ (полный, для всех) -->
         <div class="px-4 py-3">
             <h2 class="text-base font-bold text-gray-900 mb-3">Частые вопросы</h2>
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-100">
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq1">
+            <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-100">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq1">
                     <span class="text-sm font-medium text-gray-800">Как рассчитывается стоимость доставки?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq1" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм груза. Для расчета используйте калькулятор выше.</p>
+                <div id="m-faq1" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <p class="text-xs text-gray-600 leading-relaxed">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм груза. Для расчета используйте калькулятор выше.</p>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq2">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq2">
                     <span class="text-sm font-medium text-gray-800">Какие сроки доставки из Китая?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq2" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">Средний срок доставки составляет 8-12 дней с момента отправки товара с нашего склада в Китае.</p>
+                <div id="m-faq2" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <p class="text-xs text-gray-600 leading-relaxed">Средний срок доставки составляет 8–12 дней с момента отправки товара с нашего склада в Китае.</p>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq3">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq3">
                     <span class="text-sm font-medium text-gray-800">Как зарегистрироваться в системе?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq3" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">Заполните форму на странице «Регистрация», указав логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи.</p>
+                <div id="m-faq3" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <p class="text-xs text-gray-600 leading-relaxed">Заполните форму на странице «Регистрация», указав логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи.</p>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq4">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq4">
                     <span class="text-sm font-medium text-gray-800">Какие товары запрещены к перевозке?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq4" class="hidden px-4 pb-3">
-                    <ul class="text-xs text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                        <li>Взрывоопасные, радиоактивные, горючие, ядовитые вещества</li>
-                        <li>Холодное оружие, макеты, пневматика, арбалеты</li>
-                        <li>Психотропные, наркотические средства, алкоголь, сигареты</li>
-                        <li>Скоропортящиеся и жидкие продукты</li>
-                        <li>Техника, телефоны, ноутбуки (под свою ответственность)</li>
-                        <li>Животные, дроны</li>
-                        <li>Хрупкие, стеклянные товары (просите надёжную упаковку)</li>
-                    </ul>
+                <div id="m-faq4" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <ul class="text-xs text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
+                            <li>Взрывоопасные, радиоактивные, горючие, ядовитые вещества</li>
+                            <li>Холодное оружие, макеты, пневматика, арбалеты</li>
+                            <li>Психотропные, наркотические средства, алкоголь, сигареты</li>
+                            <li>Скоропортящиеся и жидкие продукты</li>
+                            <li>Техника, телефоны, ноутбуки (под свою ответственность)</li>
+                            <li>Животные, дроны</li>
+                            <li>Хрупкие, стеклянные товары (просите надёжную упаковку)</li>
+                        </ul>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq5">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq5">
                     <span class="text-sm font-medium text-gray-800">Как отследить мой заказ?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq5" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">После оформления заказа вам будет предоставлен трек-номер. Используйте его на нашем сайте или свяжитесь с менеджером через WhatsApp.</p>
+                <div id="m-faq5" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <p class="text-xs text-gray-600 leading-relaxed">После оформления заказа вам будет предоставлен трек-номер. Используйте его на нашем сайте или свяжитесь с менеджером через WhatsApp.</p>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq6">
-                    <span class="text-sm font-medium text-gray-800">Как заполнить адрес склада в Китае?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
-                </button>
-                <div id="m-faq6" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">В разделе «Адрес склада в Китае» указан полный адрес. Скопируйте его и вставьте в маркетплейс, затем отправьте скриншот менеджеру для проверки.</p>
-                </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq7">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq7">
                     <span class="text-sm font-medium text-gray-800">Что делать, если заказ повреждён?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq7" class="hidden px-4 pb-3">
-                    <ul class="text-xs text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                        <li>Заранее попросите продавца обеспечить надёжную упаковку</li>
-                        <li>Для хрупких товаров рекомендуется обрешётка груза</li>
-                        <li>Если упаковка не соответствовала — компания не несёт ответственности</li>
-                        <li>Если товар упакован правильно, но повреждён — ответственность несёт Inter Cargo</li>
-                    </ul>
+                <div id="m-faq7" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <ul class="text-xs text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
+                            <li>Заранее попросите продавца обеспечить надёжную упаковку</li>
+                            <li>Для хрупких товаров рекомендуется обрешётка груза</li>
+                            <li>Если упаковка не соответствовала — компания не несёт ответственности</li>
+                            <li>Если товар упакован правильно, но повреждён — ответственность несёт Inter Cargo</li>
+                        </ul>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq8">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq8">
                     <span class="text-sm font-medium text-gray-800">Как связаться с менеджером?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq8" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу главной страницы.</p>
+                <div id="m-faq8" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <p class="text-xs text-gray-600 leading-relaxed">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу главной страницы.</p>
+                    </div>
                 </div>
-                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left" data-target="m-faq9">
+                <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq9">
                     <span class="text-sm font-medium text-gray-800">Ответственность за статус «Добавлено пользователем»?</span>
-                    <i class="ri-arrow-down-s-line text-gray-400 transition-transform"></i>
+                    <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
-                <div id="m-faq9" class="hidden px-4 pb-3">
-                    <p class="text-xs text-gray-600 leading-relaxed">Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo отвечает с момента поступления товара на склад в Китае.</p>
+                <div id="m-faq9" class="mobile-faq-content">
+                    <div class="px-4 pt-2 pb-3.5">
+                        <p class="text-xs text-gray-600 leading-relaxed">Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo отвечает с момента поступления товара на склад в Китае.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -359,7 +386,7 @@
                 var total = Math.round(val * rate);
                 result.textContent = total.toLocaleString('ru-RU') + ' ₸';
                 if (val >= 30 && discountRow) {
-                    var discounted = val * 10;
+                    var discounted = Math.round(val * (rate - 50));
                     discountEl.textContent = discounted.toLocaleString('ru-RU') + ' ₸';
                     discountRow.style.maxHeight = '60px';
                     discountRow.style.opacity = '1';
@@ -372,17 +399,31 @@
         setupMobileCalc('mobile-weight', 'mobile-calc-result', 'mobile-discount-row', 'mobile-calc-discount');
         setupMobileCalc('mobile-weight-guest', 'mobile-calc-result-guest', 'mobile-discount-row-guest', 'mobile-calc-discount-guest');
 
-        // FAQ аккордеон
+        // FAQ аккордеон с плавной анимацией
         document.querySelectorAll('.mobile-faq-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var target = document.getElementById(btn.dataset.target);
                 var icon = btn.querySelector('i');
-                if (target.classList.contains('hidden')) {
-                    target.classList.remove('hidden');
-                    icon.style.transform = 'rotate(180deg)';
+                if (!target) return;
+                var isOpen = target.classList.contains('open');
+                if (isOpen) {
+                    target.style.maxHeight = target.scrollHeight + 'px';
+                    target.offsetHeight;
+                    target.style.maxHeight = '0px';
+                    target.classList.remove('open');
+                    if (icon) icon.classList.remove('rotate');
                 } else {
-                    target.classList.add('hidden');
-                    icon.style.transform = '';
+                    target.classList.add('open');
+                    target.style.maxHeight = target.scrollHeight + 'px';
+                    if (icon) icon.classList.add('rotate');
+                    var onEnd = function(e) {
+                        if (e.propertyName !== 'max-height') return;
+                        if (target.classList.contains('open')) {
+                            target.style.maxHeight = 'none';
+                        }
+                        target.removeEventListener('transitionend', onEnd);
+                    };
+                    target.addEventListener('transitionend', onEnd);
                 }
             });
         });
@@ -487,142 +528,160 @@
     </section>
 
     <!-- FAQ секция -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <div class="text-primary font-medium mb-2">F.A.Q</div>
                 <h2 class="text-3xl font-bold text-gray-900">Часто задаваемые вопросы</h2>
             </div>
             <div class="max-w-3xl mx-auto">
-                <div class="space-y-4">
-                    <div class="border border-gray-200 rounded">
+                <div class="space-y-3">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq1">
                             <span>Как рассчитывается стоимость доставки?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq1" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм
-                                груза. Минимальный вес для расчета - 0 кг, максимальный - 100 кг (Выше 100 кг.
-                                необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.
-                            </p>
+                        <div id="faq1" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм
+                                    груза. Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг
+                                    необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq2">
                             <span>Какие сроки доставки из Китая в Казахстан?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq2" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Средний срок доставки составляет 8-12 дней с момента отправки
-                                товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и
-                                загруженности таможенных служб.</p>
+                        <div id="faq2" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">Средний срок доставки составляет 8–12 дней с момента отправки
+                                    товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и
+                                    загруженности таможенных служб.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq3">
                             <span>Как зарегистрироваться в системе?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq3" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Для регистрации необходимо заполнить форму на странице
-                                "Регистрация", указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона
-                                и выбрав удобный пункт выдачи. После регистрации можете авторизоваться в личном кабинете
-                                нажав на кнопку, либо на инонку профиля в верхней части.</p>
+                        <div id="faq3" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">Для регистрации необходимо заполнить форму на странице
+                                    «Регистрация», указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона
+                                    и выбрав удобный пункт выдачи. После регистрации вы можете авторизоваться в личном кабинете
+                                    нажав на кнопку, либо на иконку профиля в верхней части.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq4">
                             <span>Какие товары запрещены к перевозке?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq4" class="faq-content hidden px-6 pb-4 text-gray-700">
-                            <p>К перевозке запрещены: </p>
-                            <ul class="list-disc pl-5 space-y-2">
-                                <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li>
-                                <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
-                                <li>Психотропные и наркотические средства, алкоголь, сигареты</li>
-                                <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li>
-                                <li>Техника, мобильные телефоны, ноутбуки (под свою ответственность)</li>
-                                <li>Животные (млекопитающию, рептилии, птицы, живые насекомые, молюски и рыбы)</li>
-                                <li>Дроны</li>
-                                <li>Хрупкие, стеклянные товары (либо просите продавца надежную упаковку, пузырчатую пленку, защиту края и т.д.)</li>
-                            </ul>
+                        <div id="faq4" class="faq-content">
+                            <div class="px-6 pt-2 pb-5 text-gray-600 leading-relaxed">
+                                <p class="mb-2">К перевозке запрещены:</p>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li>
+                                    <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
+                                    <li>Психотропные и наркотические средства, алкоголь, сигареты.</li>
+                                    <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li>
+                                    <li>Техника, мобильные телефоны, ноутбуки (под свою ответственность).</li>
+                                    <li>Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы).</li>
+                                    <li>Дроны.</li>
+                                    <li>Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, пузырчатую плёнку, защиту края и т.д.).</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq5">
                             <span>Как отследить мой заказ?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq5" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">После оформления заказа вам будет предоставлен трек-номер для
-                                отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через
-                                WhatsApp для получения актуальной информации о статусе вашего груза.</p>
+                        <div id="faq5" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">После оформления заказа вам будет предоставлен трек-номер для
+                                    отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через
+                                    WhatsApp для получения актуальной информации о статусе вашего груза.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq8">
                             <span>Как заполнить адрес склада в Китае?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq8" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">На главной странице в разделе «Адрес склада в Китае» указан полный
-                                адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте
-                                скриншот менеджеру для проверки.</p>
+                        <div id="faq8" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">На главной странице в разделе «Адрес склада в Китае» указан полный
+                                    адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте
+                                    скриншот менеджеру для проверки.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq9">
-                            <span>Что делать, если заказ пришел сломанным или поврежденным?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <span>Что делать, если заказ пришёл сломанным или повреждённым?</span>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq9" class="faq-content hidden px-6 pb-4">
-                            <ul class="text-gray-700 list-disc pl-5 space-y-2">
-                                <li>Ваша задача — заранее попросить продавца обеспечить надежную упаковку (например, пенопластом).</li>
-                                <li>Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешетку груза (стоимость уточняйте у менеджера).</li>
-                                <li>Если упаковка не соответствовала требованиям, компания не несет ответственности за повреждения.</li>
-                                <li>Если товар был упакован правильно, но поврежден при доставке, ответственность несет Inter Cargo.</li>
-                            </ul>
+                        <div id="faq9" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <ul class="text-gray-600 leading-relaxed list-disc pl-5 space-y-2">
+                                    <li>Ваша задача — заранее попросить продавца обеспечить надёжную упаковку (например, пенопластом).</li>
+                                    <li>Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера).</li>
+                                    <li>Если упаковка не соответствовала требованиям, компания не несёт ответственности за повреждения.</li>
+                                    <li>Если товар был упакован правильно, но повреждён при доставке, ответственность несёт Inter Cargo.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq10">
                             <span>Как связаться с менеджером?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq10" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом
-                                верхнем углу или в левом нижнем углу главной страницы.</p>
+                        <div id="faq10" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом
+                                    верхнем углу или в левом нижнем углу главной страницы.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <button
-                            class="faq-toggle flex justify-between items-center w-full px-6 py-4 text-left font-medium text-gray-900 hover:bg-gray-50 transition"
+                            class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq11">
-                            <span>Кто несет ответственность за заказ в статусе «Добавлено пользователем»?</span>
-                            <i class="ri-arrow-down-s-line text-xl"></i>
+                            <span>Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?</span>
+                            <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
-                        <div id="faq11" class="faq-content hidden px-6 pb-4">
-                            <p class="text-gray-700">Ответственность за заказ, который еще не прибыл на склад (статус
-                                «Добавлено пользователем»), несет продавец с маркетплейса. Inter Cargo начинает нести
-                                ответственность с момента поступления товара на свой склад в Китае. При возникновении
-                                проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции.</p>
+                        <div id="faq11" class="faq-content">
+                            <div class="px-6 pt-2 pb-5">
+                                <p class="text-gray-600 leading-relaxed">Ответственность за заказ, который ещё не прибыл на склад (статус
+                                    «Добавлено пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести
+                                    ответственность с момента поступления товара на свой склад в Китае. При возникновении
+                                    проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -863,6 +922,7 @@
     <div class="hidden md:block">
         {% include 'includes/footer.html' %}
     </div>
+    {% include 'includes/mobile_footer.html' %}
 </body>
 
 </html>

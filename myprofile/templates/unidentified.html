@@ -21,7 +21,11 @@
     <div class="flex min-h-screen">
         {% include 'includes/sidebar.html' %}
         <main class="flex-1 px-4 md:px-8 py-8 space-y-8">
-            <header>
+            <!-- Мобильный хедер -->
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+                <h1 class="text-lg font-bold text-center">Неопознанные посылки</h1>
+            </div>
+            <header class="hidden md:block">
                 <h1 class="text-xl font-bold text-red-500">Неопознанные посылки</h1>
                 <p class="text-sm text-gray-500 mt-1">Посылки без владельца на сортировочном складе</p>
             </header>
