@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
@@ -13,6 +15,8 @@ from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocati
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
+
+logger = logging.getLogger(__name__)
 
 
 def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weight):
@@ -480,6 +484,7 @@ def refresh_arrival(request, arrival_id):
             except (InvalidOperation, ValueError):
                 errors_count += 1
             except Exception:
+                logger.exception("arrival_summary: unexpected error processing row %d", i)
                 errors_count += 1
 
         except TrackCode.DoesNotExist:

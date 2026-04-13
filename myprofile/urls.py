@@ -91,9 +91,6 @@ urlpatterns = [
     path('arrival-summary/assign-temp-pickup/', arrival_summary.assign_temp_pickup, name='assign_temp_pickup'),
     path('arrival-summary/apply-discount/', arrival_summary.apply_discount, name='apply_discount'),
     path('arrival-summary/generate-receipts/', arrival_summary.generate_day_receipts, name='generate_day_receipts'),
-    # Актуализация убрана:
-    # path('arrival-summary/refresh/<int:arrival_id>/', arrival_summary.refresh_arrival, name='refresh_arrival'),
-    # path('arrival-summary/refresh-day/', arrival_summary.refresh_day_arrivals, name='refresh_day_arrivals'),
     path('delivery/issue/', delivery.driver_issue, name='driver_issue'),
     path('delivery/receipts/', delivery.get_pickup_receipts, name='get_pickup_receipts'),
     path('pp-acceptance/', pp_acceptance.pp_acceptance_view, name='pp_acceptance'),

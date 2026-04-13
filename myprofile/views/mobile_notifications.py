@@ -3,10 +3,10 @@ from collections import OrderedDict
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.conf import settings as django_settings
 from django.utils import timezone
 
 from myprofile.models import Notification
+from tgbot.services import is_telegram_linked, get_or_create_link_url
 
 
 # Паттерны для классификации уведомлений
@@ -88,20 +88,9 @@ def mobile_notifications_view(request):
     parcels_grouped = _group_by_date(parcels_notifs)
     registration_grouped = _group_by_date(registration_notifs) if is_hr else []
 
-    # Telegram привязка
-    telegram_linked = False
-    telegram_link_url = None
-    try:
-        from tgbot.models import TelegramProfile, TelegramLinkToken
-        telegram_linked = TelegramProfile.objects.filter(user=user).exists()
-        if not telegram_linked:
-            TelegramLinkToken.objects.filter(user=user, is_used=False).delete()
-            token = TelegramLinkToken.objects.create(user=user)
-            bot_username = getattr(django_settings, 'TELEGRAM_BOT_USERNAME', '')
-            if bot_username:
-                telegram_link_url = f'https://t.me/{bot_username}?start={token.token}'
-    except Exception:
-        pass
+    # Telegram: показываем ссылку только если не привязан
+    telegram_linked = is_telegram_linked(user)
+    telegram_link_url = None if telegram_linked else get_or_create_link_url(user)
 
     categories = [
         {

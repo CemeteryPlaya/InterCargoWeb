@@ -8,6 +8,7 @@ from myprofile.models import (
     Arrival, ArrivalSessionItem, Notification, Receipt, ReceiptItem,
     StorageCell, TrackCode,
 )
+from register.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -295,7 +296,10 @@ def cleanup_storage_cell_on_receipt_delete(sender, instance, **kwargs):
 
     try:
         pickup = user.userprofile.pickup
+    except (UserProfile.DoesNotExist, AttributeError):
+        return
     except Exception:
+        logger.exception("cleanup_storage_cell_on_receipt_delete: failed to resolve pickup for user %s", user.id)
         return
 
     if not pickup:

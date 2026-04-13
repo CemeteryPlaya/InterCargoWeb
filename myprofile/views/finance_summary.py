@@ -10,32 +10,31 @@ from django.db.models.functions import Coalesce, TruncMonth, TruncDate, Concat
 from django.utils import timezone
 from myprofile.models import Receipt, DeliveryHistory
 from register.models import UserProfile, PickupPoint
+from myprofile.permissions import is_accountant, is_driver, is_staff
 
 
 def _has_finance_access(user):
     """Бухгалтер, оператор, водитель или суперпользователь."""
-    try:
-        profile = user.userprofile
-        return profile.is_accountant or profile.is_staff or profile.is_driver
-    except UserProfile.DoesNotExist:
-        return user.is_superuser
+    return (
+        is_accountant(user)
+        or is_staff(user, include_superuser=False)
+        or is_driver(user)
+        or (user.is_authenticated and user.is_superuser)
+    )
 
 
 def _is_driver(user):
     """Возвращает True если пользователь — водитель."""
-    try:
-        return user.userprofile.is_driver
-    except UserProfile.DoesNotExist:
-        return False
+    return is_driver(user)
 
 
 def _is_accountant_or_staff(user):
     """Возвращает True если пользователь — бухгалтер или оператор."""
-    try:
-        profile = user.userprofile
-        return profile.is_accountant or profile.is_staff
-    except UserProfile.DoesNotExist:
-        return user.is_superuser
+    return (
+        is_accountant(user)
+        or is_staff(user, include_superuser=False)
+        or (user.is_authenticated and user.is_superuser)
+    )
 
 
 def _aggregate_receipts(qs):

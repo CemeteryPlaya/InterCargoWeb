@@ -14,7 +14,7 @@ from myprofile.models import (
     Arrival, ArrivalSession, ArrivalSessionItem,
     Receipt, TrackCode,
 )
-from register.models import UserProfile
+from myprofile.permissions import is_staff
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +23,7 @@ _TRANSFERABLE_STATUSES = ('delivered', 'shipping_pp', 'ready', 'unidentified')
 
 
 def _is_staff(user):
-    try:
-        return user.userprofile.is_staff or user.is_superuser
-    except UserProfile.DoesNotExist:
-        return user.is_superuser
+    return is_staff(user, include_superuser=True)
 
 
 @login_required
