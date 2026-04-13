@@ -4,10 +4,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.utils import timezone
-from django.conf import settings as django_settings
 from register.models import UserProfile, PickupPoint
 from myprofile.models import PickupChangeRequest, Notification, ArrivalSession
 from tgbot.models import UserNotificationSettings
+from tgbot.services import get_telegram_context
 
 EDIT_COOLDOWN_DAYS = 30
 PICKUP_CHANGE_COOLDOWN_DAYS = 30
@@ -45,19 +45,8 @@ def settings(request):
     # Настройки уведомлений
     notif_settings, _ = UserNotificationSettings.objects.get_or_create(user=user)
 
-    # Telegram привязка
-    telegram_linked = False
-    telegram_link_url = None
-    try:
-        from tgbot.models import TelegramProfile, TelegramLinkToken
-        telegram_linked = TelegramProfile.objects.filter(user=user).exists()
-        TelegramLinkToken.objects.filter(user=user, is_used=False).delete()
-        token = TelegramLinkToken.objects.create(user=user)
-        bot_username = getattr(django_settings, 'TELEGRAM_BOT_USERNAME', '')
-        if bot_username:
-            telegram_link_url = f'https://t.me/{bot_username}?start={token.token}'
-    except Exception:
-        pass
+    # На settings ссылка генерируется всегда (и для «Перепривязать»)
+    tg_ctx = get_telegram_context(user)
 
     return render(request, "settings.html", {
         'user': user,
@@ -70,8 +59,7 @@ def settings(request):
         'can_change_pickup': can_change_pickup,
         'pickup_days_left': pickup_days_left,
         'notif_settings': notif_settings,
-        'telegram_linked': telegram_linked,
-        'telegram_link_url': telegram_link_url,
+        **tg_ctx,
     })
 
 @login_required

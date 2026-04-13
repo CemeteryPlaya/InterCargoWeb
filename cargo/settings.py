@@ -27,10 +27,9 @@ load_dotenv(dotenv_path)
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# === DEV: раскомментируй для локальной разработки ===
-DEBUG = True
-# === PROD: раскомментируй для продакшена ===
-#DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+# Controlled via DJANGO_DEBUG env var. Default "True" для локалки.
+# На продакшене обязательно выставить DJANGO_DEBUG=False в .env
+DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(',')
 
@@ -116,17 +115,6 @@ DATABASES = {
     }
 }
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': os.getenv("DB_NAME"),
-#        'USER': os.getenv("DB_USER"),
-#        'PASSWORD': os.getenv("DB_PASSWORD"),
-#        'HOST': os.getenv("DB_HOST"),
-#        'PORT': os.getenv("DB_PORT"),
-#    }
-#}
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -177,7 +165,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ArrivalSession может содержать >1000 inline-элементов в админке
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
-SESSION_COOKIE_SECURE = False
+# В продакшене (DEBUG=False) cookies отправляются только по HTTPS
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 SESSION_COOKIE_HTTPONLY = True
 
