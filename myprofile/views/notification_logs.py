@@ -6,16 +6,13 @@ from django.shortcuts import render
 from django.db.models import Q
 
 from myprofile.models import Notification, EmailLog
-from register.models import UserProfile
+from myprofile.permissions import is_staff
 
 logger = logging.getLogger(__name__)
 
 
 def _is_staff(user):
-    try:
-        return user.userprofile.is_staff
-    except UserProfile.DoesNotExist:
-        return False
+    return is_staff(user, include_superuser=False)
 
 
 @login_required

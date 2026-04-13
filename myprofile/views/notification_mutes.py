@@ -11,16 +11,13 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render
 
 from myprofile.models import NotificationMute
-from register.models import UserProfile
+from myprofile.permissions import is_staff
 
 logger = logging.getLogger(__name__)
 
 
 def _is_staff(user):
-    try:
-        return user.userprofile.is_staff or user.is_superuser
-    except UserProfile.DoesNotExist:
-        return user.is_superuser
+    return is_staff(user, include_superuser=True)
 
 
 @login_required

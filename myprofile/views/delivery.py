@@ -6,7 +6,6 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
-from requests import request
 from myprofile.email_utils import send_mail_batch
 from django.contrib.auth.models import User
 from collections import defaultdict, OrderedDict
@@ -26,11 +25,11 @@ from myprofile.receipt_lifecycle import (
 logger = logging.getLogger(__name__)
 
 
+from myprofile.permissions import is_driver as _is_driver_perm
+
+
 def _is_driver(user):
-    try:
-        return user.userprofile.is_driver
-    except UserProfile.DoesNotExist:
-        return False
+    return _is_driver_perm(user)
 
 
 def _get_home_delivery_clients(status):

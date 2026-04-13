@@ -6,16 +6,14 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from myprofile.models import EmailLog
 from myprofile.email_utils import send_mail_logged
-from register.models import UserProfile
+from myprofile.permissions import is_staff
 
 logger = logging.getLogger(__name__)
 
 
 def _is_staff(user):
-    try:
-        return user.userprofile.is_staff
-    except UserProfile.DoesNotExist:
-        return False
+    # email_logs исторически проверял только userprofile.is_staff, без superuser
+    return is_staff(user, include_superuser=False)
 
 
 @login_required
