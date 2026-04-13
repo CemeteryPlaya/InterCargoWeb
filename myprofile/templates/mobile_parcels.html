@@ -20,40 +20,7 @@
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
-    <style>
-        /* Подсветка только что добавленного трек-кода */
-        .track-card-highlight {
-            animation: track-card-pulse 1.4s ease-in-out 3;
-            position: relative;
-            z-index: 1;
-        }
-        @keyframes track-card-pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.55),
-                            0 4px 12px rgba(229, 62, 62, 0.18);
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: 0 0 0 8px rgba(229, 62, 62, 0.0),
-                            0 6px 20px rgba(229, 62, 62, 0.35);
-                transform: scale(1.025);
-            }
-        }
-        .track-card-highlight::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 0.6rem;
-            border: 2.5px solid #e53e3e;
-            pointer-events: none;
-            animation: track-card-border 2.8s ease-out forwards;
-        }
-        @keyframes track-card-border {
-            0%   { opacity: 1; }
-            70%  { opacity: 1; }
-            100% { opacity: 0; }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'styles/mobile_parcels.css' %}?v={{ APP_VERSION }}"/>
 </head>
 
 <body class="bg-gray-50 text-gray-900 min-h-screen">

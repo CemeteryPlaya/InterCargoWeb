@@ -2,9 +2,9 @@ from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.conf import settings as django_settings
 from myprofile.models import TrackCode, Receipt, ReceiptItem
 from register.models import UserProfile, PickupPoint
+from tgbot.services import is_telegram_linked, get_or_create_link_url
 
 @login_required
 def profile(request):
@@ -58,21 +58,9 @@ def profile(request):
         for pp, count in pp_counts.items():
             ready_pickup_groups.append({'pickup_point': pp, 'count': count})
 
-    # Telegram привязка
-    telegram_linked = False
-    telegram_link_url = None
-    try:
-        from tgbot.models import TelegramProfile, TelegramLinkToken
-        telegram_linked = TelegramProfile.objects.filter(user=user).exists()
-        if not telegram_linked:
-            # Создаём/обновляем токен для deep link
-            TelegramLinkToken.objects.filter(user=user, is_used=False).delete()
-            token = TelegramLinkToken.objects.create(user=user)
-            bot_username = getattr(django_settings, 'TELEGRAM_BOT_USERNAME', '')
-            if bot_username:
-                telegram_link_url = f'https://t.me/{bot_username}?start={token.token}'
-    except Exception:
-        pass
+    # Telegram: показываем ссылку только если не привязан
+    telegram_linked = is_telegram_linked(user)
+    telegram_link_url = None if telegram_linked else get_or_create_link_url(user)
 
     return render(request, 'profile.html', {
         'user': user,

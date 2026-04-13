@@ -1,29 +1,22 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
-from .models import TelegramLinkToken, TelegramProfile
+from .models import TelegramProfile
+from .services import get_or_create_link_url, is_telegram_linked
 
 
 @login_required
 @require_POST
 def generate_link(request):
     """Генерирует deep link для привязки Telegram."""
-    # Проверяем, не привязан ли уже
-    if TelegramProfile.objects.filter(user=request.user).exists():
+    if is_telegram_linked(request.user):
         return JsonResponse({'error': 'Telegram уже привязан'}, status=400)
 
-    # Деактивируем старые токены
-    TelegramLinkToken.objects.filter(user=request.user, is_used=False).delete()
-
-    # Создаём новый токен
-    token = TelegramLinkToken.objects.create(user=request.user)
-
-    bot_username = getattr(settings, 'TELEGRAM_BOT_USERNAME', '')
-    deep_link = f'https://t.me/{bot_username}?start={token.token}'
-
-    return JsonResponse({'link': deep_link, 'token': token.token})
+    deep_link = get_or_create_link_url(request.user)
+    if not deep_link:
+        return JsonResponse({'error': 'Bot не настроен'}, status=500)
+    return JsonResponse({'link': deep_link})
 
 
 @login_required
@@ -40,16 +33,9 @@ def unlink_telegram(request):
 @require_POST
 def relink_telegram(request):
     """Перепривязка Telegram — удаляет старую привязку и генерирует новый deep link."""
-    # Удаляем старую привязку
     TelegramProfile.objects.filter(user=request.user).delete()
 
-    # Деактивируем старые токены
-    TelegramLinkToken.objects.filter(user=request.user, is_used=False).delete()
-
-    # Создаём новый токен
-    token = TelegramLinkToken.objects.create(user=request.user)
-
-    bot_username = getattr(settings, 'TELEGRAM_BOT_USERNAME', '')
-    deep_link = f'https://t.me/{bot_username}?start={token.token}'
-
-    return JsonResponse({'link': deep_link, 'token': token.token})
+    deep_link = get_or_create_link_url(request.user)
+    if not deep_link:
+        return JsonResponse({'error': 'Bot не настроен'}, status=500)
+    return JsonResponse({'link': deep_link})
