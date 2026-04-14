@@ -37,7 +37,7 @@ def shipped_cn_view(request):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
 
     if request.method != 'POST':
-        return render(request, "shipped_cn.html")
+        return render(request, "desktop/shipped_cn.html")
 
     update_date_str = request.POST.get('update_date')
     track_codes_raw = request.POST.get('track_codes', '').strip()

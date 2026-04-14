@@ -183,7 +183,7 @@ def print_documents_view(request):
                         'qr_image': _generate_qr_base64(qr_number),
                     })
 
-                return render(request, 'client_check_pdf.html', {
+                return render(request, 'shared/print/client_check_pdf.html', {
                     'checks': checks,
                     'date': check_date,
                 })
@@ -219,7 +219,7 @@ def print_documents_view(request):
 
     registries = ClientRegistry.objects.all().order_by('-created_at')
 
-    return render(request, 'print_documents.html', {
+    return render(request, 'desktop/print_documents.html', {
         'pickup_choices': pickup_choices,
         'registries': registries,
         'today': timezone.localdate()
@@ -298,7 +298,7 @@ def client_registry_pdf(request, registry_id):
     all_weight_total = sum(item['total_weight'] for item in data.values())
     all_sum_total = sum(item['total_sum'] for item in data.values())
 
-    return render(request, 'client_registry_pdf.html', {
+    return render(request, 'shared/print/client_registry_pdf.html', {
         'registry': registry,
         'data': data,
         'today': timezone.localdate(),

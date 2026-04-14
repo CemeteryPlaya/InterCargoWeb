@@ -23,12 +23,12 @@
     <a id="phone"></a>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    {% include 'includes/header.html' %}
+    {% include 'shared/header.html' %}
 
         {% block content %}
         <div class="flex min-h-screen w-full">
             <!-- Sidebar -->
-            {% include 'includes/sidebar.html' %}
+            {% include 'mobile/sidebar.html' %}
 
             <div class="flex-1 p-6 space-y-6">
             <!-- Мобильный хедер -->
@@ -252,6 +252,6 @@
         </div>
         {% endblock %}
 
-    {% include 'includes/footer.html' %}
+    {% include 'shared/footer.html' %}
 </body>
 </html>

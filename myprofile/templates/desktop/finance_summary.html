@@ -23,11 +23,11 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-    {% include 'includes/header.html' %}
+    {% include 'shared/header.html' %}
 
     {% block content %}
     <div class="flex min-h-screen">
-        {% include 'includes/sidebar.html' %}
+        {% include 'mobile/sidebar.html' %}
 
         <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
             <!-- Мобильный хедер -->
@@ -483,6 +483,6 @@
     </div>
     {% endblock %}
 
-    {% include 'includes/footer.html' %}
+    {% include 'shared/footer.html' %}
 </body>
 </html>

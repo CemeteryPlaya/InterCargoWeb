@@ -48,7 +48,7 @@ def notification_mutes_view(request):
         .order_by('-muted_at')[:50]
     )
 
-    return render(request, 'notification_mutes.html', {
+    return render(request, 'desktop/notification_mutes.html', {
         'active_mutes': active_mutes,
         'history_mutes': history_mutes,
         'quick_hours': [1, 2, 4, 8, 12, 24, 48, 72],

@@ -117,7 +117,7 @@ def mobile_qr_view(request):
         for pp, count in pp_counts.items():
             ready_pickup_groups.append({'pickup_point': pp, 'count': count})
 
-    return render(request, "mobile_qr.html", {
+    return render(request, "mobile/mobile_qr.html", {
         'active_package': active_pkg_data,
         'ready_receipts': ready_receipts,
         'ready_count': len(ready_receipts),

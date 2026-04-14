@@ -112,7 +112,7 @@ def password_reset_request(request):
             'masked_email': _mask_email(user.email),
         })
 
-    return render(request, 'password_reset.html')
+    return render(request, 'desktop/password_reset.html')
 
 
 @require_POST

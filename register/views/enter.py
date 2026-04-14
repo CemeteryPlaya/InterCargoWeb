@@ -69,7 +69,7 @@ def login_view(request):
         if is_locked:
             login_method = 'phone' if phone else ('email' if email else 'login')
             messages.error(request, f"Вход заблокирован на {remaining} мин. Слишком много неудачных попыток.")
-            return render(request, 'login.html', {'login_method': login_method})
+            return render(request, 'desktop/login.html', {'login_method': login_method})
 
         if phone:
             # Вход по номеру телефона (ищем с нормализацией)
@@ -91,7 +91,7 @@ def login_view(request):
                 else:
                     _record_failed_attempt(identifier)
                     messages.error(request, "Пользователь с таким номером телефона не найден.")
-                    return render(request, 'login.html', {'login_method': 'phone'})
+                    return render(request, 'desktop/login.html', {'login_method': 'phone'})
         elif email:
             # Вход по email
             try:
@@ -100,7 +100,7 @@ def login_view(request):
             except User.DoesNotExist:
                 _record_failed_attempt(identifier)
                 messages.error(request, "Пользователь с таким email не найден.")
-                return render(request, 'login.html', {'login_method': 'email'})
+                return render(request, 'desktop/login.html', {'login_method': 'email'})
 
         user = authenticate(request, username=username, password=password)
 
@@ -120,10 +120,10 @@ def login_view(request):
             else:
                 login_method = 'login'
             messages.error(request, "Неверный логин или пароль.")
-            return render(request, 'login.html', {'login_method': login_method})
+            return render(request, 'desktop/login.html', {'login_method': login_method})
 
-    return render(request, 'login.html')
+    return render(request, 'desktop/login.html')
 
 
 def success_view(request):
-    return render(request, 'success.html')
+    return render(request, 'desktop/success.html')

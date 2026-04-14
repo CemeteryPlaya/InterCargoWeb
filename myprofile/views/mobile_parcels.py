@@ -109,7 +109,7 @@ def mobile_parcels_view(request):
         },
     ]
 
-    return render(request, 'mobile_parcels.html', {
+    return render(request, 'mobile/mobile_parcels.html', {
         'categories': categories,
     })
 

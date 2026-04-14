@@ -188,6 +188,30 @@ class ReminderSettings(models.Model):
         return f'Напоминания: {"ВКЛ" if self.is_active else "ВЫКЛ"} ({self.intervals} дн.)'
 
 
+class BroadcastLog(models.Model):
+    """Лог рассылок админа — для отчётности."""
+    pvz_name = models.CharField(max_length=255, verbose_name='ПВЗ')
+    text = models.TextField(verbose_name='Текст сообщения')
+    sent_count = models.IntegerField(default=0, verbose_name='Отправлено')
+    error_count = models.IntegerField(default=0, verbose_name='Ошибок')
+    total_count = models.IntegerField(default=0, verbose_name='Всего адресатов')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='broadcast_logs',
+        verbose_name='Отправитель',
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+
+    class Meta:
+        verbose_name = 'Лог рассылки'
+        verbose_name_plural = 'Логи рассылок'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.created_at:%d.%m.%Y %H:%M} — {self.pvz_name} ({self.sent_count}/{self.total_count})'
+
+
 class SentReminder(models.Model):
     """Лог отправленных напоминаний (чтобы не дублировать)."""
     user = models.ForeignKey(

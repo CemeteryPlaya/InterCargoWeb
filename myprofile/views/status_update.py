@@ -14,7 +14,7 @@ from collections import defaultdict
 @login_required
 def update_tracks(request):
     if request.method != 'POST':
-        return render(request, "update_tracks.html", {
+        return render(request, "desktop/update_tracks.html", {
             'status_choices': TrackCode.STATUS_CHOICES
         })
 

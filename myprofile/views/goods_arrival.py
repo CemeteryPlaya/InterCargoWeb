@@ -73,7 +73,7 @@ def goods_arrival_view(request):
     for s in list(active_sessions) + list(paused_sessions) + list(inactive_sessions) + list(completed_sessions):
         s.item_count = s.items.count()
 
-    return render(request, "goods_arrival.html", {
+    return render(request, "desktop/goods_arrival.html", {
         'sorting_locations': sorting_locations,
         'active_sessions': active_sessions,
         'paused_sessions': paused_sessions,
@@ -140,7 +140,7 @@ def session_form(request, session_id):
 
     can_edit = session.status == 'active'
 
-    return render(request, "goods_arrival_session.html", {
+    return render(request, "desktop/goods_arrival_session.html", {
         'session': session,
         'sorting_locations': sorting_locations,
         'items_json': json.dumps(items, default=str),

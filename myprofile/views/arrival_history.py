@@ -38,7 +38,7 @@ def arrival_history_view(request):
         .dates('update_date', 'year', order='DESC')
     )
     year_list = sorted(set(d.year for d in years), reverse=True)
-    return render(request, 'arrival_history.html', {'years': year_list})
+    return render(request, 'desktop/arrival_history.html', {'years': year_list})
 
 
 @_staff_required

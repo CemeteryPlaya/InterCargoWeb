@@ -26,12 +26,12 @@ def index(request):
         context['telegram_linked'] = linked
         context['telegram_link_url'] = None if linked else get_or_create_link_url(user)
 
-    return render(request, "index.html", context)
+    return render(request, "desktop/index.html", context)
 
 
 def education(request):
-    return render(request, "education.html")
+    return render(request, "desktop/education.html")
 
 
 def about(request):
-    return render(request, "about.html")
+    return render(request, "desktop/about.html")

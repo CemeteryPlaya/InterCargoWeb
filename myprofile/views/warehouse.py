@@ -56,7 +56,7 @@ def warehouse_view(request):
     is_pp_worker_only = user_profile.is_pp_worker and not user_profile.is_staff
 
     if not pickup_point:
-        return render(request, "warehouse.html", {
+        return render(request, "desktop/warehouse.html", {
             'pickup_point': None,
             'cells': [],
             'all_pickups': PickupPoint.objects.filter(is_active=True) if user_profile.is_staff else None,
@@ -177,7 +177,7 @@ def warehouse_view(request):
         pickup_point=pickup_point, status='active'
     ).exists()
 
-    return render(request, "warehouse.html", {
+    return render(request, "desktop/warehouse.html", {
         'pickup_point': pickup_point,
         'cells': cells_data,
         'no_cell_data': no_cell_data,
@@ -469,7 +469,7 @@ def warehouse_inventory(request):
             'arrival_count': len(arrival_dates),
         })
 
-    return render(request, "warehouse_inventory.html", {
+    return render(request, "desktop/warehouse_inventory.html", {
         'pickup_point': pickup_point,
         'inventory': inventory,
         'total_tracks': total_tracks_all,
@@ -577,7 +577,7 @@ def warehouse_reassign(request, pickup_id):
         pickup_point=pickup_point, status='active'
     ).first()
 
-    return render(request, "warehouse_reassign.html", {
+    return render(request, "desktop/warehouse_reassign.html", {
         'pickup_point': pickup_point,
         'clients': clients,
         'active_session': active_session,

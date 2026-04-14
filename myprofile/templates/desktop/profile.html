@@ -22,12 +22,12 @@
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
-{% include 'includes/header.html' %}
+{% include 'shared/header.html' %}
 
 {% block content %}
 <div class="flex min-h-screen">
     <!-- Sidebar -->
-    {% include 'includes/sidebar.html' %}
+    {% include 'mobile/sidebar.html' %}
 
     <!-- Main content -->
     <main class="flex-1 px-4 md:px-8 py-8 space-y-10">
@@ -186,7 +186,7 @@
 </div>
 {% endblock %}
 
-{% include 'includes/footer.html' %}
+{% include 'shared/footer.html' %}
 
 <!-- Модалка заполнения недостающих данных -->
 {% if missing_fields %}

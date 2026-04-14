@@ -58,7 +58,7 @@ def extradition_package_view(request):
             # PAYMENT COMMENTED OUT: 'payment_link': payment_link if not all_paid else None,
         })
 
-    return render(request, "extradition_package.html", {
+    return render(request, "desktop/extradition_package.html", {
         "packages": packages_with_barcodes,
     })
 

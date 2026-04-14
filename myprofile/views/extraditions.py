@@ -176,7 +176,7 @@ def extradition_view(request):
     except Exception:
         context['sessions'] = []
 
-    return render(request, "extraditions.html", context)
+    return render(request, "desktop/extraditions.html", context)
 
 
 @login_required

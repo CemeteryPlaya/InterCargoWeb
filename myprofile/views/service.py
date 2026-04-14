@@ -36,7 +36,7 @@ def _can_access_service(user):
 def service_view(request):
     if not _can_access_service(request.user):
         return HttpResponseForbidden("У вас нет доступа к этой странице.")
-    return render(request, 'service.html')
+    return render(request, 'desktop/service.html')
 
 
 @login_required

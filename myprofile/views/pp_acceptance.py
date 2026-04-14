@@ -100,7 +100,7 @@ def pp_acceptance_view(request):
         key=lambda x: (x['pickup'].id, x['delivered_date'] or _min_date),
     )
 
-    return render(request, "pp_acceptance.html", {
+    return render(request, "desktop/pp_acceptance.html", {
         'pending_pickups': pending_pickups,
         'is_staff': is_staff,
     })
@@ -478,7 +478,7 @@ def pp_acceptance_detail_view(request, pickup_id, date_str):
 
     track_count = tracks_qs.count()
 
-    return render(request, 'pp_acceptance_detail.html', {
+    return render(request, 'desktop/pp_acceptance_detail.html', {
         'pickup': pickup,
         'delivered_date': filter_date,
         'date_str': date_str,
@@ -566,7 +566,7 @@ def attention_required_view(request):
             'total_tracks': sum(r['total_tracks'] for r in reasons_list),
         })
 
-    return render(request, "attention_required.html", {
+    return render(request, "desktop/attention_required.html", {
         'attention_data': attention_data,
     })
 

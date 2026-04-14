@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
 </head>
 <body class="bg-gray-50 min-h-screen">
-{% include 'includes/header.html' %}
+{% include 'shared/header.html' %}
 
     {% block content %}
 
@@ -237,6 +237,6 @@
 
     {% endblock %}
 
-{% include 'includes/footer.html' %}
+{% include 'shared/footer.html' %}
 </body>
 </html>

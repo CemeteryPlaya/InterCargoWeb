@@ -208,7 +208,7 @@ def arrival_summary_view(request):
         date=selected_date
     ).select_related('created_by', 'sorting_location').order_by('-created_at')
 
-    return render(request, 'arrival_summary.html', {
+    return render(request, 'desktop/arrival_summary.html', {
         'selected_date': selected_date,
         'pickups': pickups,
         'home_clients': home_clients,

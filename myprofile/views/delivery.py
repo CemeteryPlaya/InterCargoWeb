@@ -186,7 +186,7 @@ def delivery_view(request):
         entry.clients_list = list(clients.values())
         history_by_date[date_key].append(entry)
 
-    return render(request, "delivery.html", {
+    return render(request, "desktop/delivery.html", {
         'pending_pickups': pending_pickups,
         'in_transit_pickups': in_transit_pickups,
         'home_delivery_clients': home_delivery_clients,

@@ -142,7 +142,7 @@ def track_codes_view(request):
         owner=request.user, is_archived=True
     ).order_by('-archived_at')
 
-    return render(request, 'track_codes.html', {
+    return render(request, 'desktop/track_codes.html', {
         'track_codes': track_codes,
         'archived_codes': archived_codes,
         'form': form,
@@ -282,4 +282,4 @@ def delete_duplicate_archived(request):
 
 
 def tracks(request):
-    return render(request, "track_codes.html")
+    return render(request, "desktop/track_codes.html")
