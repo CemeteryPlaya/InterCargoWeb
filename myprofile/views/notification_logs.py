@@ -93,7 +93,7 @@ def notification_logs_view(request):
     email_sent = EmailLog.objects.filter(status='sent').count()
     email_failed = EmailLog.objects.filter(status='failed').count()
 
-    return render(request, 'notification_logs.html', {
+    return render(request, 'desktop/notification_logs.html', {
         'tab': tab,
         'search': search,
         'status_filter': status_filter,

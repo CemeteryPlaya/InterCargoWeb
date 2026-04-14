@@ -48,7 +48,7 @@ def pp_extradition_history_view(request):
     # Если даты не указаны — не загружаем данные
     dates = OrderedDict()
     if not date_from and not date_to:
-        return render(request, 'pp_extradition_history.html', {
+        return render(request, 'desktop/pp_extradition_history.html', {
             'dates': dates,
             'pickup_name': str(pickup) if pickup else 'Все ПВЗ',
             'date_from': date_from_str,
@@ -116,7 +116,7 @@ def pp_extradition_history_view(request):
         })
         dates[date_str]['total_count'] += 1
 
-    return render(request, 'pp_extradition_history.html', {
+    return render(request, 'desktop/pp_extradition_history.html', {
         'dates': dates,
         'pickup_name': str(pickup) if pickup else 'Все ПВЗ',
         'date_from': date_from_str,

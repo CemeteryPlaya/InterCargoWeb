@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 # Controlled via DJANGO_DEBUG env var. Default "True" для локалки.
 # На продакшене обязательно выставить DJANGO_DEBUG=False в .env
-DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
+DEBUG = os.getenv("DJANGO_DEBUG")
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(',')
 
@@ -76,7 +76,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-APP_VERSION = '1.3.7'
+APP_VERSION = '1.3.9'
 
 ROOT_URLCONF = 'cargo.urls'
 
@@ -181,19 +181,19 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Web Push Notifications (VAPID)
 WEBPUSH_SETTINGS = {
-    'VAPID_PUBLIC_KEY': os.getenv('VAPID_PUBLIC_KEY', ''),
-    'VAPID_PRIVATE_KEY': os.getenv('VAPID_PRIVATE_KEY', ''),
+    'VAPID_PUBLIC_KEY': os.getenv('VAPID_PUBLIC_KEY'),
+    'VAPID_PRIVATE_KEY': os.getenv('VAPID_PRIVATE_KEY'),
     'VAPID_ADMIN_EMAIL': os.getenv('VAPID_ADMIN_EMAIL', 'admin@cargointer.kz'),
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_TIMEOUT = 30  # Таймаут SMTP-соединения (сек), чтобы не зависать при проблемах с сетью
-DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER', 'noreply@cargointer.kz')
+EMAIL_TIMEOUT = 30  
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 # Логирование ошибок
 ADMINS = [(os.getenv('EMAIL_HOST_USER', ''), os.getenv('EMAIL_HOST_USER', ''))]
@@ -238,6 +238,6 @@ LOGGING = {
 }
 
 # Telegram Bot
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
-TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME', '')
-TELEGRAM_SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME')
+TELEGRAM_SITE_URL = os.getenv('SITE_URL')

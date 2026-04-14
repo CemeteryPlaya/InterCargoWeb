@@ -9,7 +9,7 @@ from register.models import PickupPoint
 @login_required
 def notifications_list(request):
     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'notifications.html', {'notifications': notifications})
+    return render(request, 'desktop/notifications.html', {'notifications': notifications})
 
 @login_required
 def mark_as_read(request, notif_id):

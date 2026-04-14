@@ -25,11 +25,11 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-    {% include 'includes/header.html' %}
+    {% include 'shared/header.html' %}
 
     {% block content %}
     <div class="flex min-h-screen">
-        {% include 'includes/sidebar.html' %}
+        {% include 'mobile/sidebar.html' %}
 
         <main class="w-full px-6 py-8 mx-auto">
             <!-- Мобильный хедер -->
@@ -182,7 +182,7 @@
         </main>
     </div>
     {% endblock %}
-    {% include 'includes/footer.html' %}
+    {% include 'shared/footer.html' %}
 
     <!-- Модалка сканирования штрихкода камерой -->
     <div id="barcode-scan-modal" class="hidden fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-60 overflow-y-auto py-4">

@@ -17,11 +17,11 @@ def get_telegram_profile(chat_id):
 
 @sync_to_async
 def is_user_admin(profile):
-    """Проверяет, является ли пользователь администратором."""
+    """Доступ к админ-панели бота — только по отдельному флагу is_tg_admin."""
     if not profile or not profile.user:
         return False
     try:
-        return profile.user.userprofile.is_staff
+        return bool(profile.user.userprofile.is_tg_admin)
     except Exception:
         return False
 

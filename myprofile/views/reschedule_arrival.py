@@ -64,7 +64,7 @@ def reschedule_arrival_view(request):
 
     no_pickup_data = sorted(no_pickup_clients.values(), key=lambda x: x['user'].username)
 
-    return render(request, 'reschedule_arrival.html', {
+    return render(request, 'desktop/reschedule_arrival.html', {
         'no_pickup_data': no_pickup_data,
     })
 

@@ -47,7 +47,7 @@ def delivered_trackcodes_by_date(request):
     except UserProfile.DoesNotExist:
         pass
 
-    return render(request, 'delivered_posts.html', {
+    return render(request, 'desktop/delivered_posts.html', {
         'receipts': receipts,
         'payment_link': payment_link,
     })
@@ -126,7 +126,7 @@ def print_receipt(request, receipt_id):
         except UserProfile.DoesNotExist:
             pass
 
-    return render(request, 'receipt_print.html', {
+    return render(request, 'shared/print/receipt_print.html', {
         'receipt': receipt,
         'items': items,
         'total_weight': computed_weight,

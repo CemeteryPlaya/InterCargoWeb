@@ -147,7 +147,7 @@ def _link_by_token(token_str, chat_id, tg_user):
     username = link_token.user.username
     is_admin = False
     try:
-        is_admin = link_token.user.userprofile.is_staff
+        is_admin = bool(link_token.user.userprofile.is_tg_admin)
     except Exception:
         pass
 

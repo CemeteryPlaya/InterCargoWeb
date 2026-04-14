@@ -221,7 +221,7 @@ def finance_summary_view(request):
         except (ValueError, TypeError):
             context['selected_date'] = today
 
-    return render(request, 'finance_summary.html', context)
+    return render(request, 'desktop/finance_summary.html', context)
 
 
 def _get_driver_context(user, view_mode, selected_date, selected_month, today):

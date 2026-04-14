@@ -48,7 +48,7 @@ def settings(request):
     # На settings ссылка генерируется всегда (и для «Перепривязать»)
     tg_ctx = get_telegram_context(user)
 
-    return render(request, "settings.html", {
+    return render(request, "desktop/settings.html", {
         'user': user,
         'profile': profile,
         'pickup': profile.pickup if profile else '',
@@ -219,7 +219,7 @@ def pickup_change_requests_view(request):
     requests_list = PickupChangeRequest.objects.filter(status='pending').select_related(
         'user', 'current_pickup', 'requested_pickup'
     )
-    return render(request, "pickup_change_requests.html", {
+    return render(request, "desktop/pickup_change_requests.html", {
         'requests': requests_list,
         'has_active_session': _has_active_sorting_session(),
     })

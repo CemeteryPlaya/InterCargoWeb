@@ -13,6 +13,6 @@ def mobile_menu_view(request):
     except UserProfile.DoesNotExist:
         pass
 
-    return render(request, 'mobile_menu.html', {
+    return render(request, 'mobile/mobile_menu.html', {
         'profile': profile,
     })

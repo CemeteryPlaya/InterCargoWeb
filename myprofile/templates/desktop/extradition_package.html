@@ -27,12 +27,12 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-{% include 'includes/header.html' %}
+{% include 'shared/header.html' %}
 
 {% block content %}
 
 <div class="flex min-h-screen">
-    {% include 'includes/sidebar.html' %}
+    {% include 'mobile/sidebar.html' %}
 
     <div class="w-full px-4 md:px-6 py-8 mx-auto">
 
@@ -189,6 +189,6 @@
 <script src="{% static 'scripts/extraditionPackageBarcode.js' %}?v={{ APP_VERSION }}"></script>
 
 {% endblock %}
-{% include 'includes/footer.html' %}
+{% include 'shared/footer.html' %}
 </body>
 </html>

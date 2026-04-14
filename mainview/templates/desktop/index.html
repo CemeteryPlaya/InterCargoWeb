@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
+    <meta name="facebook-domain-verification" content="phgy65zj5hdshibpbndj4ku5q0xrpt" />
     <title>Inter Cargo - доставка из Китая в Казахстан</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <link rel="manifest" href="/static/manifest.json">
@@ -27,7 +28,7 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-    {% include 'includes/header.html' %}
+    {% include 'shared/header.html' %}
     {% block content %}
 
     <!-- ===== МОБИЛЬНАЯ ГЛАВНАЯ (Kaspi-style) ===== -->
@@ -920,9 +921,9 @@
     {% endblock %}
 
     <div class="hidden md:block">
-        {% include 'includes/footer.html' %}
+        {% include 'shared/footer.html' %}
     </div>
-    {% include 'includes/mobile_footer.html' %}
+    {% include 'mobile/mobile_footer.html' %}
 </body>
 
 </html>

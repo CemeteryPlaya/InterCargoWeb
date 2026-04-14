@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import (
     TelegramProfile, TelegramLinkToken, TelegramNotification,
     UserNotificationSettings, ReminderSettings, SentReminder,
+    BroadcastLog,
 )
 
 
@@ -55,3 +56,10 @@ class SentReminderAdmin(admin.ModelAdmin):
     list_display = ('user', 'track_code', 'interval_day', 'sent_at')
     list_filter = ('interval_day',)
     readonly_fields = ('sent_at',)
+
+
+@admin.register(BroadcastLog)
+class BroadcastLogAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'pvz_name', 'sent_count', 'error_count', 'total_count', 'created_by')
+    search_fields = ('pvz_name', 'text', 'created_by__username')
+    readonly_fields = ('created_at',)

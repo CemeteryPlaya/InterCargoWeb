@@ -13,7 +13,7 @@ def pre_register(request):
         pickup = request.POST.get('pickup')
 
         if not all([login, phone, pickup]):
-            return render(request, 'index.html', {
+            return render(request, 'desktop/index.html', {
                 'error': 'Пожалуйста, заполните все поля.',
                 'login': login,
                 'phone': phone,
@@ -29,16 +29,16 @@ def pre_register(request):
         }
         return redirect('continue_register')
 
-    return render(request, 'index.html', {'pickup_points': pickup_points})
+    return render(request, 'desktop/index.html', {'pickup_points': pickup_points})
 
 
 def continue_register(request):
     data = request.session.get('registration_data')
     if not data:
-        return render(request, 'index.html')
+        return render(request, 'desktop/index.html')
 
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
-    return render(request, 'registration.html', {
+    return render(request, 'desktop/registration.html', {
         'login': data.get('login', ''),
         'phone': data.get('phone', ''),
         'selected_pickup': data.get('pickup', ''),
@@ -48,7 +48,7 @@ def continue_register(request):
 
 def _render_registration(request, username, phone, pickup_id, first_name, last_name, email=''):
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
-    return render(request, 'registration.html', {
+    return render(request, 'desktop/registration.html', {
         'login': username, 'phone': phone, 'selected_pickup': str(pickup_id),
         'first_name': first_name, 'last_name': last_name, 'email': email,
         'pickup_points': pickup_points,
@@ -160,9 +160,9 @@ def register_view(request):
         return redirect('success')
 
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
-    return render(request, 'registration.html', {'pickup_points': pickup_points})
+    return render(request, 'desktop/registration.html', {'pickup_points': pickup_points})
 
 
 def registration(request):
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
-    return render(request, "registration.html", {'pickup_points': pickup_points})
+    return render(request, "desktop/registration.html", {'pickup_points': pickup_points})

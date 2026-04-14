@@ -152,7 +152,7 @@ def mobile_notifications_view(request):
         },
     ]
 
-    return render(request, 'mobile_notifications.html', {
+    return render(request, 'mobile/mobile_notifications.html', {
         'categories': categories,
         'telegram_linked': telegram_linked,
         'telegram_link_url': telegram_link_url,

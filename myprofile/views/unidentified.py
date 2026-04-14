@@ -115,7 +115,7 @@ def unidentified_view(request):
 
     sorting_locations = SortingLocation.objects.filter(is_active=True)
 
-    return render(request, 'unidentified.html', {
+    return render(request, 'desktop/unidentified.html', {
         'unclaimed': unclaimed,
         'claimed': claimed,
         'sorting_locations': sorting_locations,

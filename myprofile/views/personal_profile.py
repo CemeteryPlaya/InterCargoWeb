@@ -62,7 +62,7 @@ def profile(request):
     telegram_linked = is_telegram_linked(user)
     telegram_link_url = None if telegram_linked else get_or_create_link_url(user)
 
-    return render(request, 'profile.html', {
+    return render(request, 'desktop/profile.html', {
         'user': user,
         'profile': profile,
         'last_two_codes': last_two_codes,
@@ -82,4 +82,4 @@ def profile(request):
 
 @login_required
 def profile_view(request):
-    return render(request, 'profile.html')
+    return render(request, 'desktop/profile.html')

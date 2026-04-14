@@ -12,7 +12,7 @@ def confirm_view(request):
         return redirect('profile')
 
     registrations = PendingRegistration.objects.all().order_by('-created_at')
-    return render(request, 'register_confirmation.html', {"registrations": registrations})
+    return render(request, 'desktop/register_confirmation.html', {"registrations": registrations})
 
 
 def approve_registration(request, reg_id):

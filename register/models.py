@@ -39,6 +39,7 @@ class UserProfile(models.Model):
     is_pp_worker = models.BooleanField(default=False, verbose_name="Работник ПВЗ")
     is_pp_owner = models.BooleanField(default=False, verbose_name="Владелец ПВЗ")
     is_accountant = models.BooleanField(default=False, verbose_name="Бухгалтер")
+    is_tg_admin = models.BooleanField(default=False, verbose_name="Администратор Telegram-бота")
     is_registered = models.BooleanField(default=True, verbose_name="Регистрация подтверждена")
     delivery_rate = models.DecimalField(
         max_digits=8, decimal_places=2, default=0,
