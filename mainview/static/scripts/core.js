@@ -1,14 +1,51 @@
+// Синхронная инициализация темы ДО рендера body — предотвращает "мигание" светлой темой.
+// Выполняется в <head> до парсинга body, что гарантирует отсутствие вспышки белого фона
+// на первом кадре новой страницы (особенно при переходах между вкладками).
+(function () {
+  try {
+    var saved = localStorage.getItem('theme');
+    var isDark = saved === 'dark';
+    var html = document.documentElement;
+    if (isDark) {
+      html.classList.add('theme-dark');
+      // Inline-стили применяются мгновенно, не дожидаясь загрузки styles.css.
+      html.style.backgroundColor = '#020617';
+      html.style.colorScheme = 'dark';
+      // Inject inline <style>, чтобы перекрыть tailwind-утилиты (bg-gray-50, bg-white)
+      // на body ещё до первой отрисовки — иначе tailwind CDN успевает применить белый фон.
+      var s = document.createElement('style');
+      s.id = 'ic-theme-preload';
+      s.textContent =
+        'html.theme-dark,html.theme-dark body{background-color:#020617 !important;color:#e5e7eb;}' +
+        'html.theme-dark body.bg-gray-50,html.theme-dark .bg-gray-50,' +
+        'html.theme-dark .bg-white,html.theme-dark .bg-gray-100{background-color:#020617 !important;}';
+      // document.head доступен сразу, т.к. скрипт исполняется внутри <head>.
+      (document.head || document.documentElement).appendChild(s);
+    } else {
+      html.classList.remove('theme-dark');
+    }
+  } catch (e) { /* localStorage недоступен — игнорируем */ }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[core.js] DOM fully loaded.');
 
   const root = document.body;
   const THEME_KEY = 'theme';
 
+  // Синхронизируем класс с <html> на <body> сразу после появления body,
+  // чтобы существующие CSS-правила body.theme-dark применились без задержки.
+  if (document.documentElement.classList.contains('theme-dark')) {
+    root.classList.add('theme-dark');
+  }
+
   function applyTheme(theme) {
     if (theme === 'dark') {
       root.classList.add('theme-dark');
+      document.documentElement.classList.add('theme-dark');
     } else {
       root.classList.remove('theme-dark');
+      document.documentElement.classList.remove('theme-dark');
     }
     updateToggleIcon(theme);
   }
