@@ -23,6 +23,19 @@
             color-scheme: light;
         }
 
+        /* Ранняя окраска фона до парсинга body — предотвращает "вспышку" светлой темы
+           при переходах между страницами. Класс theme-dark навешивается на <html>
+           синхронно из core.js ещё до рендера body. */
+        html.theme-dark {
+            color-scheme: dark;
+            background-color: #020617;
+        }
+
+        html.theme-dark body {
+            background-color: #020617;
+            color: #e5e7eb;
+        }
+
         /* Класс тёмной темы навешивается на body из JS */
         body.theme-dark {
             color-scheme: dark;
