@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    var _i18n = document.getElementById('js-i18n')?.dataset || {};
+    var _ei18n = document.getElementById('js-i18n-extraditions')?.dataset || {};
     var config = document.getElementById('extradition-config');
     var searchUrl = config.dataset.searchUrl;
     var sessionsUrl = config.dataset.sessionsUrl;
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ).catch(function (err) {
             console.error('Ошибка камеры:', err);
             closeBarcodeScanner();
-            showMessage('Не удалось запустить камеру. Проверьте разрешения.');
+            showMessage(_ei18n.cameraFailed || 'Не удалось запустить камеру. Проверьте разрешения.');
         });
     }
 
@@ -117,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
             function () { /* игнорируем */ }
         ).catch(function (err) {
             console.error('Ошибка камеры QR:', err);
-            showQrFeedback('Камера не доступна — используйте сканер или ввод вручную', 'warning');
+            showQrFeedback(_ei18n.cameraUnavail || 'Камера не доступна — используйте сканер или ввод вручную', 'warning');
         });
     }
 
@@ -147,10 +149,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (currentReceipts[i].receipt_number === code) {
                 found = true;
                 if (scannedReceipts[code]) {
-                    showQrFeedback('Чек ' + code + ' уже отсканирован', 'warning');
+                    showQrFeedback((_ei18n.receiptAlready || 'Чек {code} уже отсканирован').replace('{code}', code), 'warning');
                 } else {
                     scannedReceipts[code] = true;
-                    showQrFeedback('Чек ' + code + ' подтверждён', 'success');
+                    showQrFeedback((_ei18n.receiptConfirmed || 'Чек {code} подтверждён').replace('{code}', code), 'success');
                     renderQrReceiptsList();
                     updateQrProgress();
                     updateQrSubmitButton();
@@ -165,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         if (!found) {
-            showQrFeedback('Чек ' + code + ' не относится к этому пакету', 'error');
+            showQrFeedback((_ei18n.receiptWrongPkg || 'Чек {code} не относится к этому пакету').replace('{code}', code), 'error');
         }
     }
 
@@ -230,12 +232,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 var manualBtn = document.createElement('button');
                 manualBtn.type = 'button';
                 manualBtn.className = 'text-xs text-blue-500 hover:text-blue-700 underline';
-                manualBtn.textContent = 'Вручную';
-                manualBtn.title = 'Отметить без сканирования';
+                manualBtn.textContent = _ei18n.manually || 'Вручную';
+                manualBtn.title = _ei18n.markWithoutScan || 'Отметить без сканирования';
                 (function (rn) {
                     manualBtn.addEventListener('click', function () {
                         scannedReceipts[rn] = true;
-                        showQrFeedback('Чек ' + rn + ' отмечен вручную', 'success');
+                        showQrFeedback((_ei18n.receiptManual || 'Чек {code} отмечен вручную').replace('{code}', rn), 'success');
                         renderQrReceiptsList();
                         updateQrProgress();
                         updateQrSubmitButton();
@@ -300,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (mainBadge) {
                         mainBadge.setAttribute('data-paid', 'true');
                         mainBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                        mainBadge.textContent = 'Оплачено';
+                        mainBadge.textContent = _ei18n.paid || 'Оплачено';
                         mainBadge.style.cursor = '';
                         mainBadge.title = data.paid_at || '';
                     }
@@ -308,13 +310,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     updateSubmitButton();
                     renderQrReceiptsList();
                     updateQrSubmitButton();
-                    showQrFeedback('Оплата чека ' + receipt.receipt_number + ' подтверждена', 'success');
+                    showQrFeedback((_ei18n.paymentConfirmed || 'Оплата чека {num} подтверждена').replace('{num}', receipt.receipt_number), 'success');
                 } else {
-                    showQrFeedback('Ошибка обновления оплаты', 'error');
+                    showQrFeedback(_ei18n.paymentError || 'Ошибка обновления оплаты', 'error');
                 }
             })
             .catch(function () {
-                showQrFeedback('Ошибка связи с сервером', 'error');
+                showQrFeedback(_ei18n.commError || 'Ошибка связи с сервером', 'error');
             });
         };
     }
@@ -367,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var form = document.getElementById('extraditionForm');
         var barcodeVal = document.getElementById('barcode').value.trim();
         if (!barcodeVal) {
-            showMessage('Ошибка: QR-код пакета не указан');
+            showMessage(_ei18n.qrNoCode || 'Ошибка: QR-код пакета не указан');
             return;
         }
         form.submit();
@@ -382,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
             currentReceipts.forEach(function (receipt) {
                 scannedReceipts[receipt.receipt_number] = true;
             });
-            showQrFeedback('Все чеки отмечены', 'success');
+            showQrFeedback(_ei18n.allChecked || 'Все чеки отмечены', 'success');
             renderQrReceiptsList();
             updateQrProgress();
             updateQrSubmitButton();
@@ -512,15 +514,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function performSearch() {
         var barcode = barcodeInput.value.trim();
         if (!barcode) {
-            showMessage('Введите QR-код');
+            showMessage(_ei18n.enterQr || 'Введите QR-код');
             return;
         }
 
         fetch(searchUrl + '?barcode=' + encodeURIComponent(barcode))
             .then(function (response) {
                 if (!response.ok) {
-                    if (response.status === 404) throw new Error('Пакет не найден');
-                    throw new Error('Ошибка сервера');
+                    if (response.status === 404) throw new Error(_ei18n.packageNotFound || 'Пакет не найден');
+                    throw new Error(_ei18n.serverError || 'Ошибка сервера');
                 }
                 return response.json();
             })
@@ -853,13 +855,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     badgeEl.setAttribute('data-paid', data.is_paid ? 'true' : 'false');
                     if (data.is_paid) {
                         badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                        badgeEl.textContent = 'Оплачено';
+                        badgeEl.textContent = _ei18n.paid || 'Оплачено';
                         badgeEl.style.cursor = '';
                         badgeEl.title = data.paid_at || '';
                     } else {
                         badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200';
-                        badgeEl.textContent = 'Не оплачено';
-                        badgeEl.title = 'Нажмите, чтобы отметить как оплачено';
+                        badgeEl.textContent = _ei18n.notPaid || 'Не оплачено';
+                        badgeEl.title = _ei18n.clickToPay || 'Нажмите, чтобы отметить как оплачено';
                     }
                     // Обновляем currentReceipts
                     for (var i = 0; i < currentReceipts.length; i++) {
@@ -871,13 +873,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     updateGlobalPaymentStatus();
                     updateSubmitButton();
-                    showMessage('Статус оплаты обновлен', 'success');
+                    showMessage(_ei18n.statusUpdated || 'Статус оплаты обновлен', 'success');
                 } else {
-                    showMessage('Ошибка: ' + (data.error || 'Не удалось обновить статус'));
+                    showMessage((_ei18n.statusError || 'Ошибка: {msg}').replace('{msg}', data.error || ''));
                 }
             })
             .catch(function () {
-                showMessage('Ошибка связи с сервером');
+                showMessage(_ei18n.commError || 'Ошибка связи с сервером');
             });
     }
 });

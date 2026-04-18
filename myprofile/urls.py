@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -135,6 +135,12 @@ urlpatterns = [
     path('mobile-parcels/mass-archive/', mobile_parcels.mobile_mass_archive, name='mobile_mass_archive'),
     path('mobile-notifications/', mobile_notifications.mobile_notifications_view, name='mobile_notifications'),
     path('mobile-menu/', mobile_menu.mobile_menu_view, name='mobile_menu'),
+
+    # --- Super Admin: fine-grained role management --------------------------
+    path('admin/roles/', role_management.role_list, name='role_management'),
+    path('admin/roles/search/', role_management.role_search_users, name='role_search_users'),
+    path('admin/roles/<int:user_id>/', role_management.role_edit, name='role_edit'),
+    path('admin/roles/<int:user_id>/save/', role_management.role_save, name='role_save'),
 ]
 
 # Подключение медиа-файлов при DEBUG=True

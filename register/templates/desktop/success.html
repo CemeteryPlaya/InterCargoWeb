@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 
@@ -6,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Успешная регистрация</title>
+    <title>{% trans "Inter Cargo - Успешная регистрация" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -40,11 +41,11 @@
             </div>
             {% endif %}
             <div class="text-center mb-12">
-                <div class="text-primary font-medium mb-2">Спасибо за регистрацию!<br> 
-                    Пока ваша заявка проходит модерацию, можете ознакомиться с тем как устроен наш сервис<br>
-                    Срок рассмотрения заявки - <b>24 ЧАСА</b><br>
-                    Вам на почту придет уведомление когда ваша заявка будет рассмотрена модерацией</div>
-                <h2 class="text-3xl font-bold text-gray-900">Как пользоваться нашим сервисом</h2>
+                <div class="text-primary font-medium mb-2">{% trans "Спасибо за регистрацию!" %}<br> 
+                    {% trans "Пока ваша заявка проходит модерацию, можете ознакомиться с тем как устроен наш сервис" %}<br>
+                    {% trans "Срок рассмотрения заявки -" %} <b>{% trans "24 ЧАСА" %}</b><br>
+                    {% trans "Вам на почту придет уведомление когда ваша заявка будет рассмотрена модерацией" %}</div>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Как пользоваться нашим сервисом" %}</h2>
                 <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы
                     узнать, как эффективно использовать наш сервис доставки</p>
 
@@ -54,16 +55,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu1.jpg' %}" alt="Регистрация на сайте"
+                        <img src="{% static 'images/edu1.jpg' %}" alt="{% trans "Регистрация на сайте" %}"
                             class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Регистрация на сайте</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Регистрация на сайте" %}</h3>
                         <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать
                             удобный пункт выдачи для получения ваших посылок.</p>
                         <a href="#"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                                Смотреть видео
+                                {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
                             </button></a>
                     </div>
@@ -71,16 +72,16 @@
 
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu2.jpg' %}" alt="Оформление заказа"
+                        <img src="{% static 'images/edu2.jpg' %}" alt="{% trans "Оформление заказа" %}"
                             class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Оформление заказа в Китае</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Оформление заказа в Китае" %}</h3>
                         <p class="text-gray-700 mb-4">Пошаговая инструкция по оформлению заказа на китайских торговых
                             площадках и указанию нашего адреса доставки.</p>
                         <a href="#"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                                Смотреть видео
+                                {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
                             </button></a>
                     </div>
@@ -88,16 +89,16 @@
 
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu3.jpg' %}" alt="Отслеживание посылки"
+                        <img src="{% static 'images/edu3.jpg' %}" alt="{% trans "Отслеживание посылки" %}"
                             class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Отслеживание посылки</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Отслеживание посылки" %}</h3>
                         <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе
                             доставки из Китая в Казахстан.</p>
                         <a href="#"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                                Смотреть видео
+                                {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
                             </button>
                         </a>
@@ -110,7 +111,7 @@
     <div class="text-center mb-12 bg-white">
         <a href="{% url 'login' %}"><button type="submit" style="width: 400px;"
                 class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap mx-auto">
-                Войти в аккаунт
+                {% trans "Войти в аккаунт" %}
             </button></a>
     </div>
 

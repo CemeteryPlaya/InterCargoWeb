@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 @login_required

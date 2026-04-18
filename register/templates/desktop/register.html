@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}    	
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Регистрация</title>
+    <title>{% trans "Inter Cargo - Регистрация" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -27,10 +28,10 @@
     <section id="registration" class="py-16 bg-gray-50">
   <div class="container mx-auto px-4">
     <div class="text-center mb-12">
-      <div class="text-primary font-medium mb-2">РЕГИСТРАЦИЯ</div>
-      <h2 class="text-3xl font-bold text-gray-900">Регистрация нового клиента</h2>
+      <div class="text-primary font-medium mb-2">{% trans "РЕГИСТРАЦИЯ" %}</div>
+      <h2 class="text-3xl font-bold text-gray-900">{% trans "Регистрация нового клиента" %}</h2>
       <p class="text-gray-600 mt-4 max-w-2xl mx-auto">
-        Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая
+        {% trans "Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая" %}
       </p>
     </div>
 
@@ -53,22 +54,22 @@
         
         <!-- Логин -->
         <div class="mb-6">
-          <label for="login" class="block text-sm font-medium text-gray-700 mb-2">Логин (Имя/Ник + 4 цифры номера)</label>
-          <input type="text" id="login" name="login" required value="{{ login }}" class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="Например: ANDREY1234">
-          <div class="text-xs text-gray-500 mt-1">Введите ваше имя или ник и последние 4 цифры номера телефона</div>
+          <label for="login" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Логин (Имя/Ник + 4 цифры номера)" %}</label>
+          <input type="text" id="login" name="login" required value="{{ login }}" class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="{% trans "Например: ANDREY1234" %}">
+          <div class="text-xs text-gray-500 mt-1">{% trans "Введите ваше имя или ник и последние 4 цифры номера телефона" %}</div>
         </div>
 
         <!-- Телефон -->
         <div class="mb-6">
-          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Номер телефона</label>
+          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Номер телефона" %}</label>
           <input type="tel" id="phone" name="phone" required value="{{ phone }}" class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="+7 (___) ___-__-__" maxlength="18">
         </div>
 
         <!-- Пункт выдачи -->
         <div class="mb-8">
-          <label for="pickup" class="block text-sm font-medium text-gray-700 mb-2">Выбор пункта выдачи</label>
+          <label for="pickup" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Выбор пункта выдачи" %}</label>
           <select id="pickup" name="pickup" required class="w-full px-4 py-3 pr-8 border border-gray-300 rounded appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition">
-            <option value="" disabled selected>Выберите пункт выдачи</option>
+            <option value="" disabled selected>{% trans "Выберите пункт выдачи" %}</option>
             {% for pp in pickup_points %}
             <option value="{{ pp.id }}" {% if selected_pickup == pp.id|stringformat:"d" %}selected{% endif %}>{{ pp }}</option>
             {% endfor %}
@@ -77,11 +78,11 @@
 
         <!-- Пароль -->
         <div class="mb-6">
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пароль" %}</label>
           <div class="relative">
             <input type="password" id="password" name="password" required minlength="6"
               class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-              placeholder="Введите пароль">
+              placeholder="{% trans "Введите пароль" %}">
             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
               <i class="ri-eye-off-line text-xl"></i>
             </button>
@@ -90,11 +91,11 @@
 
         <!-- Подтверждение пароля -->
         <div class="mb-8">
-          <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">Подтверждение пароля</label>
+          <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Подтверждение пароля" %}</label>
           <div class="relative">
             <input type="password" id="confirm_password" name="confirm_password" required minlength="6"
               class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-              placeholder="Повторите пароль">
+              placeholder="{% trans "Повторите пароль" %}">
             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
               <i class="ri-eye-off-line text-xl"></i>
             </button>
@@ -103,7 +104,7 @@
 
         <!-- Кнопка -->
         <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-          Зарегистрироваться
+          {% trans "Зарегистрироваться" %}
         </button>
       </form>
     </div>

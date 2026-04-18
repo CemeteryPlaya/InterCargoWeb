@@ -6,7 +6,8 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from myprofile.email_utils import send_mail_logged
 from django.utils import timezone
-from register.models import UserProfile, PasswordResetCode
+from register.models import PasswordResetCode
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -35,29 +36,11 @@ def _generate_code():
 
 
 def _find_user(identifier):
-    """Ищет пользователя по логину, телефону или email."""
+    """Ищет пользователя по логину."""
     identifier = identifier.strip()
     if not identifier:
         return None
-
-    # По логину (uppercase)
-    user = User.objects.filter(username=identifier.upper()).first()
-    if user:
-        return user
-
-    # По email (lowercase)
-    user = User.objects.filter(email=identifier.lower()).first()
-    if user:
-        return user
-
-    # По телефону
-    try:
-        profile = UserProfile.objects.get(phone=identifier)
-        return profile.user
-    except UserProfile.DoesNotExist:
-        pass
-
-    return None
+    return User.objects.filter(username=identifier.upper()).first()
 
 
 def password_reset_request(request):
@@ -65,14 +48,14 @@ def password_reset_request(request):
     if request.method == 'POST':
         identifier = request.POST.get('identifier', '').strip()
         if not identifier:
-            return JsonResponse({'error': 'Введите логин, телефон или email.'}, status=400)
+            return JsonResponse({'error': _('Введите логин.')}, status=400)
 
         user = _find_user(identifier)
         if not user:
-            return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
+            return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
 
         if not user.email:
-            return JsonResponse({'error': 'К этому аккаунту не привязан email. Обратитесь в поддержку.'}, status=400)
+            return JsonResponse({'error': _('К этому аккаунту не привязан email. Обратитесь в поддержку.')}, status=400)
 
         # Rate limit: 1 минута между отправками
         now = timezone.now()
@@ -99,7 +82,7 @@ def password_reset_request(request):
             )
         except Exception as e:
             logger.error(f"Ошибка отправки кода сброса пароля пользователю {user.username}: {e}")
-            return JsonResponse({'error': 'Не удалось отправить письмо. Попробуйте позже.'}, status=500)
+            return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=500)
 
         # Сохраняем в сессию
         request.session['reset_user_id'] = user.id
@@ -120,11 +103,11 @@ def password_reset_verify(request):
     """AJAX: проверка 6-значного кода."""
     user_id = request.session.get('reset_user_id')
     if not user_id:
-        return JsonResponse({'error': 'Сессия истекла. Начните сброс заново.'}, status=400)
+        return JsonResponse({'error': _('Сессия истекла. Начните сброс заново.')}, status=400)
 
     code = request.POST.get('code', '').strip()
     if not code:
-        return JsonResponse({'error': 'Введите код.'}, status=400)
+        return JsonResponse({'error': _('Введите код.')}, status=400)
 
     now = timezone.now()
     # Ищем последний неиспользованный код для этого пользователя
@@ -133,15 +116,15 @@ def password_reset_verify(request):
     ).order_by('-created_at').first()
 
     if not reset_code:
-        return JsonResponse({'error': 'Код не найден. Запросите новый код.'}, status=400)
+        return JsonResponse({'error': _('Код не найден. Запросите новый код.')}, status=400)
 
     # Проверка срока (10 минут)
     if (now - reset_code.created_at).total_seconds() > 600:
-        return JsonResponse({'error': 'Код истёк. Запросите новый.'}, status=400)
+        return JsonResponse({'error': _('Код истёк. Запросите новый.')}, status=400)
 
     # Проверка попыток
     if reset_code.attempts >= 5:
-        return JsonResponse({'error': 'Слишком много попыток. Запросите новый код.'}, status=429)
+        return JsonResponse({'error': _('Слишком много попыток. Запросите новый код.')}, status=429)
 
     # Проверка кода
     if reset_code.code != code:
@@ -167,21 +150,21 @@ def password_reset_set_password(request):
     verified = request.session.get('reset_verified')
 
     if not user_id or not verified:
-        return JsonResponse({'error': 'Сессия истекла. Начните сброс заново.'}, status=400)
+        return JsonResponse({'error': _('Сессия истекла. Начните сброс заново.')}, status=400)
 
     password = request.POST.get('password', '')
     password_confirm = request.POST.get('password_confirm', '')
 
     if len(password) < 6:
-        return JsonResponse({'error': 'Пароль должен быть не менее 6 символов.'}, status=400)
+        return JsonResponse({'error': _('Пароль должен быть не менее 6 символов.')}, status=400)
 
     if password != password_confirm:
-        return JsonResponse({'error': 'Пароли не совпадают.'}, status=400)
+        return JsonResponse({'error': _('Пароли не совпадают.')}, status=400)
 
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
+        return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
 
     user.set_password(password)
     user.save()

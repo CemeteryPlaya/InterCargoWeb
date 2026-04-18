@@ -22,6 +22,8 @@ from django.views.static import serve as static_serve
 from mainview import views as mainview_views
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+    path('rosetta/', include('rosetta.urls')),
     # Service worker must be served from root scope
     path('sw.js', static_serve, {'document_root': settings.BASE_DIR / 'mainview' / 'static', 'path': 'sw.js'}, name='sw.js'),
     re_path(r"^mainview/", include('mainview.urls')),

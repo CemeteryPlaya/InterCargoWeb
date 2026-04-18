@@ -11,6 +11,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from myprofile.models import Receipt, ReceiptItem, ExtraditionPackage, Notification, TrackCode
 
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 @login_required
@@ -92,7 +93,7 @@ def quick_issue(request):
             ready_receipts.append(receipt)
 
     if not ready_receipts:
-        return JsonResponse({'error': 'Нет чеков с трек-кодами со статусом «Доставлено на ПВЗ».'}, status=400)
+        return JsonResponse({'error': _('Нет чеков с трек-кодами со статусом «Доставлено на ПВЗ».')}, status=400)
 
     try:
         with transaction.atomic():

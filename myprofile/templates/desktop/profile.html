@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Личный кабинет</title>
+    <title>{% trans "Inter Cargo - Личный кабинет" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -33,7 +34,7 @@
     <main class="flex-1 px-4 md:px-8 py-8 space-y-10">
         <!-- Мобильный хедер -->
         <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-            <h1 class="text-lg font-bold text-center">Личный кабинет</h1>
+            <h1 class="text-lg font-bold text-center">{% trans "Личный кабинет" %}</h1>
         </div>
 
         {% if messages %}
@@ -52,17 +53,17 @@
 
         <!-- User Info -->
         <section id="user-info" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6 relative">
-            <a href="{% url 'settings' %}" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition" title="Настройки">
+            <a href="{% url 'settings' %}" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition" title="{% trans "Настройки" %}">
                 <i class="ri-settings-3-line text-xl"></i>
             </a>
-            <h2 class="text-xl font-semibold mb-4 text-gray-800"><i class="ri-user-3-line text-red-500"></i> Информация о пользователе</h2>
-            <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+            <h2 class="text-xl font-semibold mb-4 text-gray-800"><i class="ri-user-3-line text-red-500"></i> {% trans "Информация о пользователе" %}</h2>
+            <p><strong>{% trans "Имя пользователя:" %}</strong> {{ user.username }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
             {% if user.userprofile %}
-                <p><strong>Телефон:</strong> {{ user.userprofile.phone }}</p>
-                <p><strong>Пункт выдачи:</strong> {{ user.userprofile.pickup }}</p>
+                <p><strong>{% trans "Телефон:" %}</strong> {{ user.userprofile.phone }}</p>
+                <p><strong>{% trans "Пункт выдачи:" %}</strong> {{ user.userprofile.pickup }}</p>
                 {% if user.userprofile.pickup.working_hours %}
-                <p><strong>Время работы:</strong> {{ user.userprofile.pickup.working_hours }}</p>
+                <p><strong>{% trans "Время работы:" %}</strong> {{ user.userprofile.pickup.working_hours }}</p>
                 {% endif %}
             {% endif %}
         </section>
@@ -73,18 +74,18 @@
             <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
                 <div class="flex items-center gap-2">
                     <i class="ri-telegram-line text-blue-500 text-xl"></i>
-                    <span class="text-blue-700 text-sm font-medium">Telegram подключён</span>
+                    <span class="text-blue-700 text-sm font-medium">{% trans "Telegram подключён" %}</span>
                 </div>
                 <button type="button" id="telegram-relink-btn"
                     class="text-sm text-blue-600 hover:text-blue-800 underline transition"
                     data-url="{% url 'telegram_relink' %}" data-csrf="{{ csrf_token }}">
-                    Перепривязать
+                    {% trans "Перепривязать" %}
                 </button>
             </div>
             {% elif telegram_link_url %}
             <a href="{{ telegram_link_url }}" target="_blank"
                 class="w-full flex items-center justify-center gap-2 bg-[#2AABEE] text-white px-4 py-3 rounded-lg hover:bg-[#229ED9] transition text-base font-semibold">
-                <i class="ri-telegram-line text-xl"></i> Привязать Telegram
+                <i class="ri-telegram-line text-xl"></i> {% trans "Привязать Telegram" %}
             </a>
             {% endif %}
         </div>
@@ -118,8 +119,8 @@
             <div class="flex items-center gap-3">
                 <i class="ri-graduation-cap-line text-blue-500 text-2xl"></i>
                 <div>
-                    <p class="text-blue-700 text-sm font-semibold">Новичок на сайте?</p>
-                    <p class="text-blue-600 text-xs">Пройдите интерактивное обучение по основным функциям</p>
+                    <p class="text-blue-700 text-sm font-semibold">{% trans "Новичок на сайте?" %}</p>
+                    <p class="text-blue-600 text-xs">{% trans "Пройдите интерактивное обучение по основным функциям" %}</p>
                 </div>
             </div>
             <i class="ri-arrow-right-s-line text-blue-400 text-xl"></i>
@@ -127,7 +128,7 @@
 
         <!-- Track Codes Section -->
         <section id="trackcodes">
-            <h2 class="text-xl font-semibold mb-4"><i class="ri-barcode-line text-red-500"></i> Трек-коды</h2>
+            <h2 class="text-xl font-semibold mb-4"><i class="ri-barcode-line text-red-500"></i> {% trans "Трек-коды" %}</h2>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 bg-white p-4 rounded-lg shadow border border-gray-200">
                 <p><strong>Новые: {{ user_added }}</strong></p>
                 <p><strong>На складе (Китай): {{ warehouse_cn }}</strong></p>
@@ -159,7 +160,7 @@
                 {% if payment_link %}
                 <button type="button" id="pay-btn"
                     class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition text-base font-semibold">
-                    <i class="ri-bank-card-line mr-1"></i> Оплатить
+                    <i class="ri-bank-card-line mr-1"></i> {% trans "Оплатить" %}
                 </button>
                 {% endif %}
             </div>
@@ -168,16 +169,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 {% for code in last_two_codes %}
                     <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
-                        <p><strong>Код:</strong> {{ code.track_code }}</p>
-                        <p><strong>Статус:</strong> {{ code.get_status_display }}</p>
-                        <p><strong>Обновлено:</strong> {{ code.update_date }}</p>
+                        <p><strong>{% trans "Код:" %}</strong> {{ code.track_code }}</p>
+                        <p><strong>{% trans "Статус:" %}</strong> {{ code.get_status_display }}</p>
+                        <p><strong>{% trans "Обновлено:" %}</strong> {{ code.update_date }}</p>
                         {% if code.description %}
-                            <p><strong>Описание:</strong> {{ code.description }}</p>
+                            <p><strong>{% trans "Описание:" %}</strong> {{ code.description }}</p>
                         {% endif %}
                     </div>
                 {% empty %}
                     <div class="grid grid-cols-1 md:grid-cols-1 bg-white p-4 rounded-lg shadow border border-gray-200">
-                        <p class="text-gray-600">Нет новых товаров.</p>
+                        <p class="text-gray-600">{% trans "Нет новых товаров." %}</p>
                     </div>
                 {% endfor %}
             </div>
@@ -194,30 +195,30 @@
     <div class="absolute inset-0 bg-black/50"></div>
     <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 z-10">
         <h3 class="text-lg font-semibold mb-2 text-gray-800">
-            <i class="ri-error-warning-line text-yellow-500"></i> Заполните данные профиля
+            <i class="ri-error-warning-line text-yellow-500"></i> {% trans "Заполните данные профиля" %}
         </h3>
-        <p class="text-sm text-gray-600 mb-4">Для продолжения работы необходимо заполнить следующие поля:</p>
+        <p class="text-sm text-gray-600 mb-4">{% trans "Для продолжения работы необходимо заполнить следующие поля:" %}</p>
         <form method="post" action="{% url 'update_profile' %}" class="space-y-4">
             {% csrf_token %}
             {% if 'last_name' in missing_fields %}
             <div>
-                <label for="modal_last_name" class="block font-medium text-gray-700 mb-1">Фамилия</label>
+                <label for="modal_last_name" class="block font-medium text-gray-700 mb-1">{% trans "Фамилия" %}</label>
                 <input type="text" name="last_name" id="modal_last_name" required
                     class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="Введите фамилию">
+                    placeholder="{% trans "Введите фамилию" %}">
             </div>
             {% endif %}
             {% if 'first_name' in missing_fields %}
             <div>
-                <label for="modal_first_name" class="block font-medium text-gray-700 mb-1">Имя</label>
+                <label for="modal_first_name" class="block font-medium text-gray-700 mb-1">{% trans "Имя" %}</label>
                 <input type="text" name="first_name" id="modal_first_name" required
                     class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="Введите имя">
+                    placeholder="{% trans "Введите имя" %}">
             </div>
             {% endif %}
             {% if 'email' in missing_fields %}
             <div>
-                <label for="modal_email" class="block font-medium text-gray-700 mb-1">Электронная почта</label>
+                <label for="modal_email" class="block font-medium text-gray-700 mb-1">{% trans "Электронная почта" %}</label>
                 <input type="email" name="email" id="modal_email" required
                     class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
                     placeholder="example@mail.com">
@@ -225,10 +226,10 @@
             {% endif %}
             {% if 'pickup' in missing_fields %}
             <div>
-                <label for="modal_pickup" class="block font-medium text-gray-700 mb-1">Пункт выдачи</label>
+                <label for="modal_pickup" class="block font-medium text-gray-700 mb-1">{% trans "Пункт выдачи" %}</label>
                 <select name="pickup" id="modal_pickup" required
                     class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 bg-white">
-                    <option value="" disabled selected>Выберите пункт выдачи</option>
+                    <option value="" disabled selected>{% trans "Выберите пункт выдачи" %}</option>
                     {% for pp in available_pickups %}
                     <option value="{{ pp.id }}">{{ pp.address }} — {{ pp.premise_name }}</option>
                     {% endfor %}
@@ -238,7 +239,7 @@
             <input type="hidden" name="next" value="{% url 'profile' %}">
             <div class="flex justify-end">
                 <button type="submit" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition">
-                    Сохранить
+                    {% trans "Сохранить" %}
                 </button>
             </div>
         </form>
@@ -253,7 +254,7 @@
         <i class="ri-error-warning-line text-yellow-500 text-4xl mb-3"></i>
         <p class="text-gray-800 text-lg font-medium mb-6" id="issue-confirm-text"></p>
         <button id="issue-confirm-ok" class="w-full bg-green-600 text-white text-lg font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition">
-            Окей
+            {% trans "Окей" %}
         </button>
     </div>
 </div>
@@ -263,24 +264,24 @@
     <div id="barcode-backdrop" class="absolute inset-0 bg-black/50"></div>
     <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 z-10">
         <div class="flex items-start justify-between mb-4">
-            <h3 id="barcode-modal-title" class="text-lg font-semibold">QR-код</h3>
+            <h3 id="barcode-modal-title" class="text-lg font-semibold">{% trans "QR-код" %}</h3>
             <button id="barcode-modal-close" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
         </div>
         <div class="flex flex-col items-center">
-            <img id="barcode-modal-img" src="" alt="QR-код" class="max-w-[280px] mb-4">
+            <img id="barcode-modal-img" src="" alt="{% trans "QR-код" %}" class="max-w-[280px] mb-4">
             <div id="barcode-modal-code" class="font-mono text-sm text-gray-700"></div>
             <!-- PAYMENT COMMENTED OUT
             <a id="barcode-payment-link" href="#" target="_blank"
                 class="hidden mt-4 inline-flex items-center gap-2 bg-green-500 text-white font-medium px-6 py-2.5 rounded-button hover:bg-green-600 transition text-sm">
-                <i class="ri-bank-card-line"></i> Оплатить
+                <i class="ri-bank-card-line"></i> {% trans "Оплатить" %}
             </a>
             -->
             <div class="mt-4 flex gap-2">
                 <button id="barcode-copy-btn" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm">
-                    Копировать код
+                    {% trans "Копировать код" %}
                 </button>
                 <a id="barcode-download-link" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm" download>
-                    Скачать PNG
+                    {% trans "Скачать PNG" %}
                 </a>
             </div>
         </div>
@@ -295,22 +296,22 @@
     <div class="absolute inset-0 bg-black/50" id="payment-disclaimer-backdrop"></div>
     <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 z-10">
         <h3 class="text-lg font-semibold mb-3 text-gray-800">
-            <i class="ri-information-line text-blue-500"></i> Обратите внимание
+            <i class="ri-information-line text-blue-500"></i> {% trans "Обратите внимание" %}
         </h3>
         <p class="text-sm text-gray-600 mb-4">
-            Данная функция предназначена только для удобства оплаты при получении посылки, вам всё ещё необходимо будет показать ваш чек об оплате на пункте выдачи.
+            {% trans "Данная функция предназначена только для удобства оплаты при получении посылки, вам всё ещё необходимо будет показать ваш чек об оплате на пункте выдачи." %}
         </p>
         <label class="flex items-center gap-2 mb-4 cursor-pointer">
             <input type="checkbox" id="payment-dont-show" class="w-4 h-4 text-blue-600 border-gray-300 rounded">
-            <span class="text-sm text-gray-600">Больше не показывать</span>
+            <span class="text-sm text-gray-600">{% trans "Больше не показывать" %}</span>
         </label>
         <div class="flex gap-3">
             <button id="payment-disclaimer-cancel" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
-                Отмена
+                {% trans "Отмена" %}
             </button>
             <a id="payment-disclaimer-continue" href="{{ payment_link }}" target="_blank"
                 class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm text-center">
-                Продолжить
+                {% trans "Продолжить" %}
             </a>
         </div>
     </div>

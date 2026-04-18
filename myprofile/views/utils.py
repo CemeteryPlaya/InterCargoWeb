@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib import messages as django_messages
 from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell, Notification, NotificationMute
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 def cleanup_expired_temp_discounts():
     """Удаляет просроченные разовые скидки (созданные до сегодня)."""

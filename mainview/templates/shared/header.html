@@ -1,4 +1,31 @@
-{% load static %}
+{% load i18n %}
+{% load static i18n %}
+<div id="js-i18n" style="display:none"
+     data-copied="{% trans 'Скопировано!' %}"
+     data-copy-code="{% trans 'Копировать код' %}"
+     data-error="{% trans 'Ошибка' %}"
+     data-network-error="{% trans 'Ошибка сети' %}"
+     data-loading="{% trans 'Загрузка...' %}"
+     data-theme-light="{% trans 'Переключить на светлую тему' %}"
+     data-theme-dark="{% trans 'Переключить на тёмную тему' %}"
+     data-enter-number="{% trans 'Введите номер полностью: +7 (XXX) XXX-XX-XX' %}"
+     data-enter-lastname="{% trans 'Введите фамилию.' %}"
+     data-enter-firstname="{% trans 'Введите имя.' %}"
+     data-invalid-phone="{% trans 'Неверный телефон.' %}"
+     data-enter-login="{% trans 'Введите логин.' %}"
+     data-select-pickup="{% trans 'Выберите пункт выдачи.' %}"
+     data-password-short="{% trans 'Пароль слишком короткий.' %}"
+     data-passwords-mismatch="{% trans 'Пароли не совпадают.' %}"
+     data-enter-password="{% trans 'Введите пароль.' %}"
+     data-select-all="{% trans 'Выбрать все' %}"
+     data-deselect-all="{% trans 'Снять все' %}"
+     data-reg-title="{% trans 'РЕГИСТРАЦИЯ' %}"
+     data-reg-heading="{% trans 'Регистрация нового клиента' %}"
+     data-reg-desc="{% trans 'Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая' %}"
+     data-login-title="{% trans 'АВТОРИЗАЦИЯ' %}"
+     data-login-heading="{% trans 'Вход клиента' %}"
+     data-login-desc="{% trans 'Заполните форму ниже, чтобы войти в свой аккаунт в нашей системе и начать пользоваться услугами доставки из Китая' %}"
+></div>
 <meta name="vapid-key" content="{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}">
 <script src="{% static 'scripts/coockiesAndPush.js' %}?v={{ APP_VERSION }}" defer></script>
 <header class="md:bg-white md:shadow-sm md:sticky md:top-0 z-50 ic-header">
@@ -9,9 +36,9 @@
             </a>
             <!-- Навигация для десктопа (скрыта на мобильных) -->
             <nav id="desktop-menu" class="hidden md:flex space-x-8">
-                <a href="/" class="text-gray-900 font-medium hover:text-primary transition">Главная</a>
-                <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition">Обучение</a>
-                <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition">О компании</a>
+                <a href="/" class="text-gray-900 font-medium hover:text-primary transition">{% trans "Главная" %}</a>
+                <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition">{% trans "Обучение" %}</a>
+                <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition">{% trans "О компании" %}</a>
             </nav>
         </div>
         <div class="flex items-center space-x-4">
@@ -19,9 +46,21 @@
             <button id="theme-toggle"
                 type="button"
                 class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-900 hover:bg-gray-300 transition"
-                aria-label="Переключить тему">
+                aria-label="{% trans "Переключить тему" %}">
                 <i id="theme-toggle-icon" class="ri-moon-line text-lg"></i>
             </button>
+            <!-- Переключатель языка -->
+            <form method="post" action="{% url 'set_language' %}" class="hidden md:flex items-center">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                {% get_current_language as LANGUAGE_CODE %}
+                <select name="language" onchange="this.form.submit()"
+                    class="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-400 cursor-pointer">
+                    <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>RU</option>
+                    <option value="kk" {% if LANGUAGE_CODE == 'kk' %}selected{% endif %}>KZ</option>
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                </select>
+            </form>
             <!-- Ссылки на соцсети ... (оставляем как есть) -->
             <a href="https://www.instagram.com/inter_cargo_trz/"
                 class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex"
@@ -42,7 +81,7 @@
             <div class="relative">
                 <button id="notification-button"
                     class="relative w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition"
-                    title="Уведомления">
+                    title="{% trans "Уведомления" %}">
                     <i class="ri-notification-3-fill text-white text-xl"></i>
                     {% if unread > 0 %}
                     <span id="notification-count"
@@ -70,12 +109,12 @@
                         <div id="notification-dropdown"
                             class="fixed sm:absolute sm:right-0 sm:left-auto left-1/2 top-[70px] sm:top-auto -translate-x-1/2 sm:translate-x-0 w-80 max-w-[90vw] bg-white border rounded-xl shadow-lg z-50 hidden overflow-hidden">
                             <div class="p-3 font-semibold border-b flex justify-between items-center">
-                                <span>Уведомления</span>
+                                <span>{% trans "Уведомления" %}</span>
                                 <button id="mark-all-read"
                                     data-url="{% url 'mark_notifications_as_read' %}"
                                     data-csrf="{{ csrf_token }}"
                                     class="text-xs text-primary hover:underline focus:outline-none">
-                                    Прочесть все
+                                    {% trans "Прочесть все" %}
                                 </button>
                             </div>
                             <ul class="max-h-60 overflow-y-auto">
@@ -85,12 +124,11 @@
                                     <div class="text-xs text-gray-500">{{ notif.created_at|date:"d.m.Y H:i" }}</div>
                                 </li>
                                 {% empty %}
-                                <li class="px-4 py-2 text-sm text-gray-500">Нет уведомлений</li>
+                                <li class="px-4 py-2 text-sm text-gray-500">{% trans "Нет уведомлений" %}</li>
                                 {% endfor %}
                             </ul>
                             <div class="p-2 text-center border-t">
-                                <a href="{% url 'notifications' %}" class="text-primary text-sm hover:underline">Все
-                                    уведомления</a>
+                                <a href="{% url 'notifications' %}" class="text-primary text-sm hover:underline">{% trans "Все уведомления" %}</a>
                             </div>
                         </div>
                     </div>
@@ -98,29 +136,29 @@
             </div>
             <a href="{% url 'profile' %}"
                 class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition hidden md:flex"
-                title="Профиль">
+                title="{% trans "Профиль" %}">
                 <i class="ri-user-fill text-white"></i>
             </a>
             <form method="post" action="{% url 'logout' %}" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit"
                     class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition hidden md:flex"
-                    title="Выйти">
+                    title="{% trans "Выйти" %}">
                     <i class="ri-logout-box-line text-white"></i>
                 </button>
             </form>
             {% else %}
             <div class="flex flex-col items-end space-y-1 hidden md:flex">
                 <a href="{% url 'register' %}"
-                    class="text-sm text-gray-700 hover:text-primary transition">Регистрация</a>
+                    class="text-sm text-gray-700 hover:text-primary transition">{% trans "Регистрация" %}</a>
                 <a href="{% url 'login' %}"
-                    class="text-sm text-gray-700 hover:text-primary transition">Войти</a>
+                    class="text-sm text-gray-700 hover:text-primary transition">{% trans "Войти" %}</a>
             </div>
             {% endif %}
             <!-- Кнопка меню для мобильных устройств -->
             <button id="mobile-menu-toggle"
                 class="md:hidden w-10 h-10 flex items-center justify-center text-gray-900 focus:outline-none"
-                aria-label="Открыть меню" data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+                aria-label="{% trans "Открыть меню" %}" data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
                 <i class="ri-menu-line text-xl"></i>
             </button>
         </div>
@@ -133,17 +171,17 @@
                 <a href="/" class="text-2xl font-['Pacifico'] text-primary">
                     <img src="{% static 'images/logo.png' %}" style="height: 40px; width: 40px;" alt="Inter Cargo Logo">
                 </a>
-                <button id="mobile-menu-close" class="text-gray-900 focus:outline-none" aria-label="Закрыть меню">
+                <button id="mobile-menu-close" class="text-gray-900 focus:outline-none" aria-label="{% trans "Закрыть меню" %}">
                     <i class="ri-close-line text-2xl"></i>
                 </button>
             </div>
             <nav class="flex-grow flex flex-col p-4 space-y-4">
-                <a href="/" class="text-gray-900 font-medium hover:text-primary transition py-2">Главная</a>
-                <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition py-2">Обучение</a>
-                <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition py-2">О компании</a>
+                <a href="/" class="text-gray-900 font-medium hover:text-primary transition py-2">{% trans "Главная" %}</a>
+                <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Обучение" %}</a>
+                <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "О компании" %}</a>
                 {% if not user.is_authenticated %}
-                <a href="{% url 'register' %}" class="text-gray-700 hover:text-primary transition py-2">Регистрация</a>
-                <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">Войти</a>
+                <a href="{% url 'register' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Регистрация" %}</a>
+                <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Войти" %}</a>
                 {% endif %}
             </nav>
             <div class="p-4 border-t">
@@ -168,13 +206,13 @@
                 {% if user.is_authenticated %}
                 <div class="mt-4 flex items-center justify-between md:hidden hidden md:flex">
                     <a href="{% url 'profile' %}" class="flex items-center text-gray-900 hover:text-primary transition">
-                        <i class="ri-user-fill mr-2"></i> Профиль
+                        <i class="ri-user-fill mr-2"></i> {% trans "Профиль" %}
                     </a>
                     <form method="post" action="{% url 'logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="text-gray-700 hover:text-primary transition">
                             <a class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-500 hover:bg-black transition"
-                                title="Выйти">
+                                title="{% trans "Выйти" %}">
                                 <i class="ri-logout-box-line text-white"></i>
                             </a>
                         </button>
@@ -208,11 +246,11 @@
         <!-- Авторизованный -->
         <a href="/" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="home">
             <i class="ri-home-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Главная</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Главная" %}</span>
         </a>
         <a href="{% url 'mobile_parcels' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="parcels">
             <i class="ri-box-3-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Посылки</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Посылки" %}</span>
         </a>
         <a href="{% url 'mobile_qr' %}" class="mobile-nav-qr flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all overflow-hidden" data-nav="qr">
             <i class="ri-qr-code-line text-2xl nav-qr-icon"></i>
@@ -225,32 +263,32 @@
                 <span class="mobile-nav-badge absolute -top-1 -right-2 inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ unread }}</span>
                 {% endif %}
             </span>
-            <span class="text-[10px] font-medium leading-tight">Уведомления</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Уведомления" %}</span>
         </a>
         <a href="{% url 'mobile_menu' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="menu">
             <i class="ri-menu-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Меню</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Меню" %}</span>
         </a>
         {% else %}
         <!-- Неавторизованный — все ведут на логин -->
         <a href="/" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="home">
             <i class="ri-home-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Главная</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Главная" %}</span>
         </a>
         <a href="{% url 'login' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="parcels">
             <i class="ri-box-3-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Посылки</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Посылки" %}</span>
         </a>
         <a href="{% url 'login' %}" class="mobile-nav-qr flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all overflow-hidden" data-nav="qr">
             <i class="ri-qr-code-line text-2xl"></i>
         </a>
         <a href="{% url 'login' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="notifications">
             <i class="ri-notification-3-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Уведомления</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Уведомления" %}</span>
         </a>
         <a href="{% url 'login' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="menu">
             <i class="ri-menu-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">Меню</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Меню" %}</span>
         </a>
         {% endif %}
     </div>

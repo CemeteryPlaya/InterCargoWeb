@@ -8,6 +8,7 @@ from collections import defaultdict
 from myprofile.models import TrackCode
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, send_grouped_notifications, add_bulk_result_messages
+from django.utils.translation import gettext as _
 
 
 def _parse_xlsx(file):
@@ -34,7 +35,7 @@ def _parse_xlsx(file):
 @login_required
 def shipped_cn_view(request):
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     if request.method != 'POST':
         return render(request, "desktop/shipped_cn.html")
@@ -44,13 +45,13 @@ def shipped_cn_view(request):
     xlsx_file = request.FILES.get('xlsx_file')
 
     if not update_date_str:
-        messages.error(request, "Укажите дату обновления.")
+        messages.error(request, _("Укажите дату обновления."))
         return redirect('shipped_cn')
 
     try:
         update_date = datetime.strptime(update_date_str, "%Y-%m-%d").date()
     except ValueError:
-        messages.error(request, "Неверный формат даты.")
+        messages.error(request, _("Неверный формат даты."))
         return redirect('shipped_cn')
 
     # Собираем трек-коды из textarea
@@ -77,7 +78,7 @@ def shipped_cn_view(request):
     track_codes = unique_codes
 
     if not track_codes:
-        messages.error(request, "Введите трек-коды или загрузите xlsx файл.")
+        messages.error(request, _("Введите трек-коды или загрузите xlsx файл."))
         return redirect('shipped_cn')
 
     status = 'shipped_cn'

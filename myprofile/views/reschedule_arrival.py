@@ -15,6 +15,7 @@ from myprofile.models import (
     Receipt, TrackCode,
 )
 from myprofile.permissions import is_staff
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ def _is_staff(user):
 def reschedule_arrival_view(request):
     """Страница переноса прихода — переместить треки клиента с одной даты на другую."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     # Клиенты с посылками, прибывшими без ПВЗ (теперь ПВЗ назначен)
     no_pickup_tracks = (
@@ -73,16 +74,16 @@ def reschedule_arrival_view(request):
 def reschedule_get_date_summary(request):
     """AJAX GET: сводка по треккодам за выбранную дату (все статусы, разбивка)."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     date_str = request.GET.get('date', '').strip()
     if not date_str:
-        return JsonResponse({'error': 'Укажите дату.'}, status=400)
+        return JsonResponse({'error': _('Укажите дату.')}, status=400)
 
     try:
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        return JsonResponse({'error': 'Неверный формат даты.'}, status=400)
+        return JsonResponse({'error': _('Неверный формат даты.')}, status=400)
 
     arrival_track_ids = Arrival.objects.filter(date=date).values_list('track_codes', flat=True)
     tracks = TrackCode.all_objects.filter(
@@ -132,7 +133,7 @@ def reschedule_get_date_summary(request):
 def reschedule_search_users(request):
     """AJAX: поиск клиентов."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     q = request.GET.get('q', '').strip()
     if len(q) < 2:
@@ -157,23 +158,23 @@ def reschedule_search_users(request):
 def reschedule_get_tracks(request):
     """AJAX GET: треки клиента за указанную дату прихода."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     user_id = request.GET.get('user_id', '').strip()
     date_str = request.GET.get('date', '').strip()
 
     if not user_id or not date_str:
-        return JsonResponse({'error': 'Укажите клиента и дату.'}, status=400)
+        return JsonResponse({'error': _('Укажите клиента и дату.')}, status=400)
 
     try:
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        return JsonResponse({'error': 'Неверный формат даты.'}, status=400)
+        return JsonResponse({'error': _('Неверный формат даты.')}, status=400)
 
     try:
         owner = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Клиент не найден.'}, status=404)
+        return JsonResponse({'error': _('Клиент не найден.')}, status=404)
 
     # Треки за эту дату (прямо или через Arrival)
     arrival_track_ids = Arrival.objects.filter(date=date).values_list('track_codes', flat=True)
@@ -208,7 +209,7 @@ def reschedule_transfer(request):
     Можно передать конкретные track_ids (список) или перенести все треки клиента за ту дату.
     """
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     user_id = request.POST.get('user_id', '').strip()
     original_date_str = request.POST.get('original_date', '').strip()
@@ -216,21 +217,21 @@ def reschedule_transfer(request):
     track_ids_raw = request.POST.getlist('track_ids')  # опционально — конкретные треки
 
     if not user_id or not original_date_str or not new_date_str:
-        return JsonResponse({'error': 'Необходимо указать клиента, исходную дату и новую дату.'}, status=400)
+        return JsonResponse({'error': _('Необходимо указать клиента, исходную дату и новую дату.')}, status=400)
 
     if original_date_str == new_date_str:
-        return JsonResponse({'error': 'Исходная и новая даты совпадают.'}, status=400)
+        return JsonResponse({'error': _('Исходная и новая даты совпадают.')}, status=400)
 
     try:
         original_date = datetime.strptime(original_date_str, '%Y-%m-%d').date()
         new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
     except ValueError:
-        return JsonResponse({'error': 'Неверный формат даты.'}, status=400)
+        return JsonResponse({'error': _('Неверный формат даты.')}, status=400)
 
     try:
         owner = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Клиент не найден.'}, status=404)
+        return JsonResponse({'error': _('Клиент не найден.')}, status=404)
 
     # Получаем треки для переноса
     arrival_track_ids = Arrival.objects.filter(date=original_date).values_list('track_codes', flat=True)
@@ -245,12 +246,12 @@ def reschedule_transfer(request):
         try:
             ids = [int(x) for x in track_ids_raw]
         except ValueError:
-            return JsonResponse({'error': 'Некорректные ID треков.'}, status=400)
+            return JsonResponse({'error': _('Некорректные ID треков.')}, status=400)
         tracks_qs = tracks_qs.filter(id__in=ids)
 
     tracks = list(tracks_qs)
     if not tracks:
-        return JsonResponse({'error': 'Нет треков для переноса.'}, status=400)
+        return JsonResponse({'error': _('Нет треков для переноса.')}, status=400)
 
     track_ids = [t.id for t in tracks]
 
@@ -354,24 +355,24 @@ def reschedule_no_pickup_transfer(request):
     Очищает флаг needs_pickup_reschedule — посылки появятся в доставке за новую дату.
     """
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     user_id = request.POST.get('user_id', '').strip()
     new_date_str = request.POST.get('new_date', '').strip()
     track_ids_raw = request.POST.getlist('track_ids')
 
     if not user_id or not new_date_str:
-        return JsonResponse({'error': 'Укажите клиента и новую дату.'}, status=400)
+        return JsonResponse({'error': _('Укажите клиента и новую дату.')}, status=400)
 
     try:
         new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
     except ValueError:
-        return JsonResponse({'error': 'Неверный формат даты.'}, status=400)
+        return JsonResponse({'error': _('Неверный формат даты.')}, status=400)
 
     try:
         owner = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Клиент не найден.'}, status=404)
+        return JsonResponse({'error': _('Клиент не найден.')}, status=404)
 
     tracks_qs = TrackCode.objects.filter(
         owner=owner,
@@ -383,12 +384,12 @@ def reschedule_no_pickup_transfer(request):
         try:
             ids = [int(x) for x in track_ids_raw]
         except ValueError:
-            return JsonResponse({'error': 'Некорректные ID треков.'}, status=400)
+            return JsonResponse({'error': _('Некорректные ID треков.')}, status=400)
         tracks_qs = tracks_qs.filter(id__in=ids)
 
     tracks = list(tracks_qs)
     if not tracks:
-        return JsonResponse({'error': 'Нет треков для переноса.'}, status=400)
+        return JsonResponse({'error': _('Нет треков для переноса.')}, status=400)
 
     with transaction.atomic():
         for track in tracks:

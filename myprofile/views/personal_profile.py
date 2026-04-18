@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from myprofile.models import TrackCode, Receipt, ReceiptItem
 from register.models import UserProfile, PickupPoint
+from django.utils.translation import gettext as _
 from tgbot.services import is_telegram_linked, get_or_create_link_url
 
 @login_required

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -10,7 +11,7 @@
 </head>
 
 <body>
-    <button class="no-print" onclick="window.print()">Печать</button>
+    <button class="no-print" onclick="window.print()">{% trans "Печать" %}</button>
 
     {% for check in checks %}
     <div class="check-container">
@@ -27,7 +28,7 @@
             </div>
             <div class="header-center">
                 <div class="date-block">
-                    <span class="date-label">Дата</span>
+                    <span class="date-label">{% trans "Дата" %}</span>
                     <span class="date-value">{{ date|date:"d.m.Y" }}</span>
                 </div>
             </div>
@@ -44,9 +45,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Трек-номер</th>
-                    <th>Вес</th>
-                    <th>Стоимость</th>
+                    <th>{% trans "Трек-номер" %}</th>
+                    <th>{% trans "Вес" %}</th>
+                    <th>{% trans "Стоимость" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,7 +62,7 @@
         </table>
 
         <div class="total-row">
-            <span class="total-label">Итого</span>
+            <span class="total-label">{% trans "Итого" %}</span>
             <span class="total-count">{{ check.total_count }}</span>
             <span class="total-weight">{{ check.total_weight|floatformat:3 }}</span>
             <span class="total-sum">{{ check.total_sum|floatformat:0 }}</span>

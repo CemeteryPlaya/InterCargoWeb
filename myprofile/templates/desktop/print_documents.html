@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Печать документов</title>
+    <title>{% trans "Inter Cargo - Печать документов" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -35,16 +36,16 @@
         <div class="w-full px-4 py-6 mx-auto max-w-7xl">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
-                <h1 class="text-lg font-bold text-center">Печать документов</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Печать документов" %}</h1>
             </div>
-            <h1 class="text-2xl font-bold mb-6 text-gray-800 hidden md:block">Печать документов</h1>
+            <h1 class="text-2xl font-bold mb-6 text-gray-800 hidden md:block">{% trans "Печать документов" %}</h1>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Форма создания реестра -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="bg-red-500 px-6 py-4">
                         <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                            <i class="ri-file-add-line"></i> Создать реестр клиентов
+                            <i class="ri-file-add-line"></i> {% trans "Создать реестр клиентов" %}
                         </h2>
                     </div>
                     <div class="p-6">
@@ -60,14 +61,14 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Пункты выдачи</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пункты выдачи" %}</label>
                                 <div class="border rounded-md p-4 max-h-[300px] overflow-y-auto bg-gray-50">
                                     <div class="flex items-center mb-3 pb-3 border-b border-gray-200">
                                         <input type="checkbox" id="select_all_pickups"
                                             class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                                         <label for="select_all_pickups"
                                             class="ml-2 text-sm font-medium text-gray-900 cursor-pointer">
-                                            Выбрать все
+                                            {% trans "Выбрать все" %}
                                         </label>
                                     </div>
 
@@ -89,7 +90,7 @@
 
                             <button type="submit"
                                 class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-4 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 shadow-sm">
-                                <i class="ri-printer-line"></i> Сформировать реестр
+                                <i class="ri-printer-line"></i> {% trans "Сформировать реестр" %}
                             </button>
                         </form>
                     </div>
@@ -99,7 +100,7 @@
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="bg-blue-500 px-6 py-4">
                         <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                            <i class="ri-receipt-line"></i> Создать чеки
+                            <i class="ri-receipt-line"></i> {% trans "Создать чеки" %}
                         </h2>
                     </div>
                     <div class="p-6">
@@ -116,14 +117,14 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Пункты выдачи</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пункты выдачи" %}</label>
                                 <div class="border rounded-md p-4 max-h-[300px] overflow-y-auto bg-gray-50">
                                     <div class="flex items-center mb-3 pb-3 border-b border-gray-200">
                                         <input type="checkbox" id="select_all_pickups_checks"
                                             class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                         <label for="select_all_pickups_checks"
                                             class="ml-2 text-sm font-medium text-gray-900 cursor-pointer">
-                                            Выбрать все
+                                            {% trans "Выбрать все" %}
                                         </label>
                                     </div>
 
@@ -145,7 +146,7 @@
 
                             <button type="submit"
                                 class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 shadow-sm">
-                                <i class="ri-printer-line"></i> Печать чеков
+                                <i class="ri-printer-line"></i> {% trans "Печать чеков" %}
                             </button>
                         </form>
                     </div>
@@ -155,7 +156,7 @@
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="bg-gray-800 px-6 py-4">
                         <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                            <i class="ri-history-line"></i> История реестров
+                            <i class="ri-history-line"></i> {% trans "История реестров" %}
                         </h2>
                     </div>
                     <div class="p-0">
@@ -188,7 +189,7 @@
                                             <input type="hidden" name="registry_id" value="{{ registry.id }}">
                                             <button type="submit"
                                                 class="text-gray-400 hover:text-red-500 transition-colors p-1"
-                                                title="Удалить">
+                                                title="{% trans "Удалить" %}">
                                                 <i class="ri-delete-bin-line text-lg"></i>
                                             </button>
                                         </form>
@@ -203,7 +204,7 @@
                                 class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4">
                                 <i class="ri-file-list-3-line text-gray-400 text-xl"></i>
                             </div>
-                            <p class="text-gray-500">История реестров пуста</p>
+                            <p class="text-gray-500">{% trans "История реестров пуста" %}</p>
                         </div>
                         {% endif %}
                     </div>

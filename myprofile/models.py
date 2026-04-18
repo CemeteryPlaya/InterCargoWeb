@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 import uuid
 import re
 from io import BytesIO
@@ -22,12 +23,12 @@ _INVALID_TRACK_CODE_RE = re.compile(
 
 
 class SortingLocation(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name="Название")
-    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Название"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Активен"))
 
     class Meta:
-        verbose_name = "Место сортировки"
-        verbose_name_plural = "Места сортировки"
+        verbose_name = _("Место сортировки")
+        verbose_name_plural = _("Места сортировки")
 
     def __str__(self):
         return self.name
@@ -41,15 +42,15 @@ class ActiveTrackCodeManager(models.Manager):
 
 class TrackCode(models.Model):
     STATUS_CHOICES = [
-        ('no_owner', 'Нет владельца товара'),
-        ('user_added', 'Добавлен пользователем'),
-        ('warehouse_cn', 'Прибыло на склад (Китай)'),
-        ('shipped_cn', 'Отправлено со склада (Китай)'),
-        ('unidentified', 'Неопознанка (сортировочный склад)'),
-        ('delivered', 'Доставлен на сортировочный склад'),
-        ('shipping_pp', 'В доставке'),
-        ('ready', 'Доставлен на ПВЗ'),
-        ('claimed', 'Выдано клиенту'),
+        ('no_owner', _('Нет владельца товара')),
+        ('user_added', _('Добавлен пользователем')),
+        ('warehouse_cn', _('Прибыло на склад (Китай)')),
+        ('shipped_cn', _('Отправлено со склада (Китай)')),
+        ('unidentified', _('Неопозка (сортировочный склад)')),
+        ('delivered', _('Доставлен на сортировочный склад')),
+        ('shipping_pp', _('В доставке')),
+        ('ready', _('Доставлен на ПВЗ')),
+        ('claimed', _('Выдано клиенту')),
     ]
 
     # Порядок статусов для проверки отката
@@ -65,98 +66,88 @@ class TrackCode(models.Model):
         'claimed': 7,
     }
 
-    id = models.AutoField(primary_key=True, verbose_name="№ трек кода")
-    track_code = models.CharField(max_length=100, unique=True, verbose_name="Трек код")
-    update_date = models.DateField(default=timezone.now, verbose_name="Дата обновления")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name="Статус трек-кода")
+    id = models.AutoField(primary_key=True, verbose_name=_("№ трек кода"))
+    track_code = models.CharField(max_length=100, unique=True, verbose_name=_("Трек код"))
+    update_date = models.DateField(default=timezone.now, verbose_name=_("Дата обновления"))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name=_("Статус трек-кода"))
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        verbose_name="Имя владельца",
+        verbose_name=_("Имя владельца"),
         null=True,
         blank=True
     )
-    description = models.CharField(max_length=255, blank=True, verbose_name="О посылке")
-    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес посылки (кг)")
+    description = models.CharField(max_length=255, blank=True, verbose_name=_("О посылке"))
+    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name=_("Вес посылки (кг)"))
     delivery_pickup = models.ForeignKey(
         'register.PickupPoint', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='delivery_tracks',
-        verbose_name="Переопределённый ПВЗ доставки"
+        verbose_name=_("Переопределённый ПВЗ доставки")
     )
     sorting_location = models.ForeignKey(
         SortingLocation, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='track_codes',
-        verbose_name="Где отсортирован"
+        verbose_name=_("Где отсортирован")
     )
     # Даты по этапам жизненного цикла
-    date_user_added = models.DateField(null=True, blank=True, verbose_name="Дата добавления пользователем")
-    date_shipped_cn = models.DateField(null=True, blank=True, verbose_name="Дата отправки со склада (Китай)")
-    delivered_date = models.DateField(null=True, blank=True, verbose_name="Дата прихода на сорт. склад")
-    date_shipping_pp = models.DateField(null=True, blank=True, verbose_name="Дата принятия в доставку")
-    date_ready = models.DateField(null=True, blank=True, verbose_name="Дата прибытия на ПВЗ")
-    date_claimed = models.DateField(null=True, blank=True, verbose_name="Дата выдачи клиенту")
+    date_user_added = models.DateField(null=True, blank=True, verbose_name=_("Дата добавления пользователем"))
+    date_shipped_cn = models.DateField(null=True, blank=True, verbose_name=_("Дата отправки со склада (Китай)"))
+    delivered_date = models.DateField(null=True, blank=True, verbose_name=_("Дата прихода на сорт. склад"))
+    date_shipping_pp = models.DateField(null=True, blank=True, verbose_name=_("Дата принятия в доставку"))
+    date_ready = models.DateField(null=True, blank=True, verbose_name=_("Дата прибытия на ПВЗ"))
+    date_claimed = models.DateField(null=True, blank=True, verbose_name=_("Дата выдачи клиенту"))
 
     # Историческая стоимость и история статусов
     historical_price_per_kg = models.DecimalField(
         max_digits=6, decimal_places=2, null=True, blank=True,
-        verbose_name="Тариф на момент доставки (₸/кг)"
+        verbose_name=_("Тариф на момент доставки (₸/кг)")
     )
-    status_history = models.JSONField(default=list, blank=True, verbose_name="История статусов")
+    status_history = models.JSONField(default=list, blank=True, verbose_name=_("История статусов"))
 
     # Принятие на ПВЗ / складе
-    is_accepted_pp = models.BooleanField(default=False, verbose_name="Принят на ПВЗ")
-    accepted_pp_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата принятия на ПВЗ")
+    is_accepted_pp = models.BooleanField(default=False, verbose_name=_("Принят на ПВЗ"))
+    accepted_pp_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата принятия на ПВЗ"))
     accepted_pp_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='accepted_tracks',
-        verbose_name="Кто принял на ПВЗ"
+        verbose_name=_("Кто принял на ПВЗ")
     )
 
     # Требует переноса: прибыл без ПВЗ у клиента
     needs_pickup_reschedule = models.BooleanField(
         default=False,
-        verbose_name="Требует переноса (прибыл без ПВЗ)"
+        verbose_name=_("Требует переноса (прибыл без ПВЗ)")
     )
 
     # Архивация
-    is_archived = models.BooleanField(default=False, verbose_name="Архивирован")
-    archived_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата архивации")
+    is_archived = models.BooleanField(default=False, verbose_name=_("Архивирован"))
+    archived_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата архивации"))
 
     # Менеджеры: objects — только активные, all_objects — все (включая архивные)
     objects = ActiveTrackCodeManager()
     all_objects = models.Manager()
 
     def clean(self):
-        """
-        Запрещаем регресс статуса: нельзя менять на статус с меньшим порядком.
-        Но пропускаем проверку, если изменение делается администратором через админ-панель.
-        """
-        # Проверяем трек-код на наличие запрещённых символов (китайские, кириллица)
         if self.track_code and _INVALID_TRACK_CODE_RE.search(self.track_code):
             raise ValidationError({
-                'track_code': 'Трек-код не может содержать китайские символы или кириллицу.'
+                'track_code': _('Трек-код не может содержать китайские символы или кириллицу.')
             })
 
-        # Проверяем, установлен ли флаг для обхода валидации (для админ-панели)
         if hasattr(self, '_skip_status_validation') and self._skip_status_validation:
             return
-        
-        # Дополнительная проверка: если вызывается из админ-панели Django
-        # Проверяем стек вызовов на наличие django.contrib.admin
+
         frame = inspect.currentframe()
         try:
-            # Проверяем несколько уровней стека вызовов
             for _ in range(10):
                 frame = frame.f_back
                 if frame is None:
                     break
                 filename = frame.f_code.co_filename
                 if 'django/contrib/admin' in filename or 'django\\contrib\\admin' in filename:
-                    # Вызывается из админ-панели - пропускаем валидацию
                     return
         finally:
             del frame
-            
+
         if self.pk:
             try:
                 old = TrackCode.all_objects.get(pk=self.pk)
@@ -183,7 +174,6 @@ class TrackCode(models.Model):
     }
 
     def log_status_change(self, changed_by=None):
-        """Записывает текущий статус в историю."""
         entry = {
             'status': self.status,
             'date': timezone.localdate().isoformat(),
@@ -195,21 +185,19 @@ class TrackCode(models.Model):
         self.status_history.append(entry)
 
     def set_status_date(self):
-        """Устанавливает дату для текущего статуса, если ещё не заполнена."""
         field = self.STATUS_DATE_FIELD.get(self.status)
         if field and not getattr(self, field, None):
             setattr(self, field, timezone.localdate())
 
     def save(self, *args, **kwargs):
-        # Если установлен флаг пропуска валидации (для админ-панели), пропускаем full_clean
         skip_full_clean = kwargs.pop('skip_full_clean', False) or (hasattr(self, '_skip_status_validation') and self._skip_status_validation)
         if not skip_full_clean:
             self.full_clean()
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "Трек-код"
-        verbose_name_plural = "Трек-коды"
+        verbose_name = _("Трек-код")
+        verbose_name_plural = _("Трек-коды")
         default_manager_name = 'all_objects'
 
     def __str__(self):
@@ -218,24 +206,23 @@ class TrackCode(models.Model):
 
 
 class ArchivedTrackCode(models.Model):
-    track_code = models.CharField(max_length=100, verbose_name="Трек код")
-    update_date = models.DateField(verbose_name="Дата обновления")
-    status = models.CharField(max_length=20, choices=TrackCode.STATUS_CHOICES, verbose_name="Статус")
+    track_code = models.CharField(max_length=100, verbose_name=_("Трек код"))
+    update_date = models.DateField(verbose_name=_("Дата обновления"))
+    status = models.CharField(max_length=20, choices=TrackCode.STATUS_CHOICES, verbose_name=_("Статус"))
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name="Владелец", null=True, blank=True
+        verbose_name=_("Владелец"), null=True, blank=True
     )
-    description = models.CharField(max_length=255, blank=True, verbose_name="О посылке")
-    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
-    archived_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата архивации")
+    description = models.CharField(max_length=255, blank=True, verbose_name=_("О посылке"))
+    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name=_("Вес (кг)"))
+    archived_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата архивации"))
 
     class Meta:
-        verbose_name = "Архивный трек-код"
-        verbose_name_plural = "Архивные трек-коды"
+        verbose_name = _("Архивный трек-код")
+        verbose_name_plural = _("Архивные трек-коды")
 
     @classmethod
     def from_track(cls, track):
-        """Создаёт архивный трек-код из активного TrackCode."""
         return cls.objects.create(
             track_code=track.track_code,
             update_date=track.update_date,
@@ -252,60 +239,54 @@ class ArchivedTrackCode(models.Model):
 class Receipt(models.Model):
     from myprofile.receipt_lifecycle import STATUS_CHOICES as _LIFECYCLE_STATUSES
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Владелец")
-    created_at = models.DateField(default=timezone.now, verbose_name="Дата создания")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Владелец"))
+    created_at = models.DateField(default=timezone.now, verbose_name=_("Дата создания"))
 
-    # Статус жизненного цикла чека (валидируется receipt_lifecycle.py)
     status = models.CharField(
         max_length=20, choices=_LIFECYCLE_STATUSES, default='pending',
-        verbose_name="Статус чека", db_index=True,
+        verbose_name=_("Статус чека"), db_index=True,
     )
-    # Привязка к доставке: 1 чек → максимум 1 доставка
     delivery = models.ForeignKey(
         'DeliveryHistory', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='receipts',
-        verbose_name="Доставка",
+        verbose_name=_("Доставка"),
     )
 
-    is_paid = models.BooleanField(default=False, verbose_name="Статус оплаты")
-    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время оплаты")
-    is_claimed = models.BooleanField(default=False, verbose_name="Выдано клиенту")
-    claimed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время выдачи")
-    needs_attention = models.BooleanField(default=False, verbose_name="Требует внимания")
-    attention_reason = models.CharField(max_length=100, blank=True, default='', verbose_name="Причина внимания")
+    is_paid = models.BooleanField(default=False, verbose_name=_("Статус оплаты"))
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата и время оплаты"))
+    is_claimed = models.BooleanField(default=False, verbose_name=_("Выдано клиенту"))
+    claimed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата и время выдачи"))
+    needs_attention = models.BooleanField(default=False, verbose_name=_("Требует внимания"))
+    attention_reason = models.CharField(max_length=100, blank=True, default='', verbose_name=_("Причина внимания"))
     attention_added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='attention_added_receipts',
-        verbose_name="Кто добавил в внимание"
+        verbose_name=_("Кто добавил в внимание")
     )
-    attention_pickup = models.CharField(max_length=255, blank=True, default='', verbose_name="ПВЗ внимания")
-    attention_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата установки «Требует внимания»")
+    attention_pickup = models.CharField(max_length=255, blank=True, default='', verbose_name=_("ПВЗ внимания"))
+    attention_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата установки «Требует внимания»"))
 
     # Принятие на ПВЗ / складе
-    is_accepted_pp = models.BooleanField(default=False, verbose_name="Принят на ПВЗ")
-    accepted_pp_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата принятия на ПВЗ")
+    is_accepted_pp = models.BooleanField(default=False, verbose_name=_("Принят на ПВЗ"))
+    accepted_pp_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата принятия на ПВЗ"))
     accepted_pp_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='accepted_receipts',
-        verbose_name="Кто принял на ПВЗ"
+        verbose_name=_("Кто принял на ПВЗ")
     )
 
-    total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name="Общий вес (кг)")
-    total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Сумма чека")
-    price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Цена за кг (историческая)")
-    receipt_number = models.CharField(max_length=20, unique=True, blank=True, verbose_name="Номер чека")
+    total_weight = models.DecimalField(max_digits=6, decimal_places=3, default=0, verbose_name=_("Общий вес (кг)"))
+    total_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name=_("Сумма чека"))
+    price_per_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name=_("Цена за кг (историческая)"))
+    receipt_number = models.CharField(max_length=20, unique=True, blank=True, verbose_name=_("Номер чека"))
 
-    # Пункт выдачи
-    pickup_point = models.CharField(max_length=255, blank=True, null=True, verbose_name="Пункт выдачи")
-
-    # Ссылка на оплату (генерируется в зависимости от пункта)
-    payment_link = models.URLField(blank=True, null=True, verbose_name="Ссылка на оплату")
+    pickup_point = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Пункт выдачи"))
+    payment_link = models.URLField(blank=True, null=True, verbose_name=_("Ссылка на оплату"))
 
     class Meta:
-        verbose_name = "Чек"
-        verbose_name_plural = "Чеки"
+        verbose_name = _("Чек")
+        verbose_name_plural = _("Чеки")
 
-    # Поля, которые разрешено менять после финализации чека (операционные флаги).
     _MUTABLE_FIELDS = frozenset({
         'status', 'delivery', 'delivery_id',
         'is_paid', 'paid_at', 'is_claimed', 'claimed_at',
@@ -316,25 +297,21 @@ class Receipt(models.Model):
 
     @property
     def is_finalized(self):
-        """Чек финализирован, если у него есть номер и уже посчитан вес."""
         return bool(self.receipt_number and self.total_weight > 0)
 
     def save(self, *args, **kwargs):
         is_new = not self.pk
 
         if is_new and not self.receipt_number:
-            # Первое сохранение: получим pk, затем сгенерируем номер
             self.receipt_number = f"IC-TEMP-{uuid.uuid4().hex[:8].upper()}"
             super().save(*args, **kwargs)
             self.receipt_number = f"IC-{self.pk:06d}"
             super().save(update_fields=['receipt_number'])
             return
 
-        # Защита от изменения содержимого финализированного чека
         if self.pk and not getattr(self, '_allow_content_update', False):
             update_fields = kwargs.get('update_fields')
             if update_fields:
-                # Если указаны конкретные поля — проверяем, что все в списке разрешённых
                 forbidden = set(update_fields) - self._MUTABLE_FIELDS - {'receipt_number'}
                 if forbidden and self.is_finalized:
                     raise ValueError(
@@ -342,7 +319,6 @@ class Receipt(models.Model):
                         f"Изменение полей {forbidden} запрещено."
                     )
             elif self.is_finalized:
-                # Полный save() — проверяем, не менялись ли контентные поля
                 try:
                     old = Receipt.objects.get(pk=self.pk)
                     content_fields = [
@@ -366,14 +342,12 @@ class Receipt(models.Model):
 
     @property
     def client_display_name(self):
-        """Отображаемое имя клиента чека."""
         if self.owner:
             full = self.owner.get_full_name()
             return f"{self.owner.username} ({full})" if full else self.owner.username
         return '—'
 
     def get_qr_base64(self):
-        """Генерирует QR-код из номера чека и возвращает base64-строку."""
         qr = qrcode.make(self.receipt_number, box_size=4, border=1)
         buffer = BytesIO()
         qr.save(buffer, format='PNG')
@@ -386,18 +360,16 @@ class Receipt(models.Model):
 class ReceiptItem(models.Model):
     receipt = models.ForeignKey(Receipt, related_name='items', on_delete=models.CASCADE)
     track_code = models.OneToOneField(TrackCode, on_delete=models.SET_NULL, null=True, blank=True)
-    # Сохранённые данные — остаются после архивации трек-кода
-    track_code_str = models.CharField(max_length=100, blank=True, verbose_name="Трек-код (текст)")
-    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
-    item_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Стоимость позиции (₸)")
-    item_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Тариф за кг (₸/кг)")
+    track_code_str = models.CharField(max_length=100, blank=True, verbose_name=_("Трек-код (текст)"))
+    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name=_("Вес (кг)"))
+    item_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name=_("Стоимость позиции (₸)"))
+    item_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name=_("Тариф за кг (₸/кг)"))
 
     class Meta:
-        verbose_name = "Позиция чека"
-        verbose_name_plural = "Позиции чеков"
+        verbose_name = _("Позиция чека")
+        verbose_name_plural = _("Позиции чеков")
 
     def save(self, *args, **kwargs):
-        # При первом сохранении копируем данные из track_code
         if self.track_code:
             if not self.track_code_str:
                 self.track_code_str = self.track_code.track_code
@@ -407,14 +379,12 @@ class ReceiptItem(models.Model):
 
     @property
     def display_track_code(self):
-        """Возвращает текст трек-кода (из связи или сохранённый)."""
         if self.track_code:
             return self.track_code.track_code
         return self.track_code_str
 
     @property
     def display_weight(self):
-        """Возвращает зафиксированный вес позиции (не из живого трек-кода)."""
         return self.weight
 
     def __str__(self):
@@ -422,40 +392,39 @@ class ReceiptItem(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
-    message = models.CharField(max_length=255, verbose_name="Сообщение")
-    is_read = models.BooleanField(default=False, verbose_name="Прочитано")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата")
+    message = models.CharField(max_length=255, verbose_name=_("Сообщение"))
+    is_read = models.BooleanField(default=False, verbose_name=_("Прочитано"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата"))
 
     class Meta:
-        verbose_name = "Уведомление"
-        verbose_name_plural = "Уведомления"
+        verbose_name = _("Уведомление")
+        verbose_name_plural = _("Уведомления")
 
     def __str__(self):
         return f"Уведомление для {self.user.username}: {self.message}"
 
 class CustomerDiscount(models.Model):
-    """Постоянная или разовая скидка в тенге за 1 кг"""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="discounts",
-        verbose_name="Пользователь",
+        verbose_name=_("Пользователь"),
         null=True,
         blank=True,
     )
     amount_per_kg = models.DecimalField(
         max_digits=6,
         decimal_places=2,
-        verbose_name="Скидка (₸/кг)"
+        verbose_name=_("Скидка (₸/кг)")
     )
-    is_temporary = models.BooleanField(default=False, verbose_name="Разовая скидка")
-    active = models.BooleanField(default=True, verbose_name="Активная скидка")
-    comment = models.CharField(max_length=255, blank=True, verbose_name="Комментарий")
+    is_temporary = models.BooleanField(default=False, verbose_name=_("Разовая скидка"))
+    active = models.BooleanField(default=True, verbose_name=_("Активная скидка"))
+    comment = models.CharField(max_length=255, blank=True, verbose_name=_("Комментарий"))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Скидка клиента"
-        verbose_name_plural = "Скидки клиентов"
+        verbose_name = _("Скидка клиента")
+        verbose_name_plural = _("Скидки клиентов")
 
     def __str__(self):
         type_label = "Разовая" if self.is_temporary else "Постоянная"
@@ -467,49 +436,46 @@ class UserPushSubscription(models.Model):
     subscription_data = models.JSONField(default=dict, blank=True, null=True)
 
     class Meta:
-        verbose_name = "Push-подписка"
-        verbose_name_plural = "Push-подписки"
+        verbose_name = _("Push-подписка")
+        verbose_name_plural = _("Push-подписки")
 
 class Extradition(models.Model):
     package = models.OneToOneField(
-        'ExtraditionPackage',  # строка для безопасной ссылки
+        'ExtraditionPackage',
         on_delete=models.CASCADE,
         related_name='extradition',
-        verbose_name="Пакет выдачи"
+        verbose_name=_("Пакет выдачи")
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="extraditions",
-        verbose_name="Получатель"
+        verbose_name=_("Получатель")
     )
-    pickup_point = models.CharField(max_length=255, verbose_name="Пункт выдачи")
+    pickup_point = models.CharField(max_length=255, verbose_name=_("Пункт выдачи"))
     issued_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="issued_extraditions",
-        verbose_name="Сотрудник, выдавший посылку"
+        verbose_name=_("Сотрудник, выдавший посылку")
     )
-    confirmed = models.BooleanField(default=False, verbose_name="Подтверждено получателем")
-    comment = models.TextField(blank=True, verbose_name="Комментарий")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    confirmed = models.BooleanField(default=False, verbose_name=_("Подтверждено получателем"))
+    comment = models.TextField(blank=True, verbose_name=_("Комментарий"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
 
     class Meta:
-        verbose_name = "Выдача посылки"
-        verbose_name_plural = "Выдачи посылок"
+        verbose_name = _("Выдача посылки")
+        verbose_name_plural = _("Выдачи посылок")
 
     def __str__(self):
         return f"Выдача #{self.id} — {self.user.username}"
 
     def save(self, *args, **kwargs):
-        # Если создаётся новая выдача и пакет задан
         if self.package and not self.pk:
-            # подтягиваем пользователя и пункт выдачи из пакета
             self.user = self.package.user
-            # Получаем пункт выдачи из профиля пользователя через свойство пакета
-            if not self.pickup_point:  # Если пункт выдачи не установлен явно
+            if not self.pickup_point:
                 try:
                     self.pickup_point = self.package.pickup_point_display
                 except Exception:
@@ -517,44 +483,37 @@ class Extradition(models.Model):
         super().save(*args, **kwargs)
 
 class ExtraditionPackage(models.Model):
-    """
-    Пакет выдачи: собирает все трек-коды пользователя,
-    у которых статус 'ready' и есть оплаченная квитанция.
-    Генерация штрихкода происходит на лету, без сохранения PNG.
-    """
-
     barcode = models.CharField(
         max_length=20,
         unique=True,
         blank=True,
-        verbose_name="Штрихкод выдачи"
+        verbose_name=_("Штрихкод выдачи")
     )
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="extradition_packages",
-        verbose_name="Получатель"
+        verbose_name=_("Получатель")
     )
 
     receipts = models.ManyToManyField(
         'Receipt',
         related_name="extradition_packages",
-        verbose_name="Чеки",
+        verbose_name=_("Чеки"),
         blank=True
     )
 
-    comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
-    is_issued = models.BooleanField(default=False, verbose_name="Выдано клиенту")
+    comment = models.TextField(blank=True, null=True, verbose_name=_("Комментарий"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Обновлено"))
+    is_issued = models.BooleanField(default=False, verbose_name=_("Выдано клиенту"))
 
     class Meta:
-        verbose_name = "Пакет выдачи"
-        verbose_name_plural = "Пакеты выдачи"
+        verbose_name = _("Пакет выдачи")
+        verbose_name_plural = _("Пакеты выдачи")
 
     def save(self, *args, **kwargs):
-        """Автоматически генерируем штрихкод, если он пустой."""
         if not self.barcode:
             self.barcode = f"PKG-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
@@ -568,7 +527,6 @@ class ExtraditionPackage(models.Model):
             return "Не указан"
 
     def get_qr_base64(self):
-        """Генерирует QR-код на лету и возвращает base64-строку для отображения в шаблоне."""
         qr = qrcode.make(self.barcode, box_size=6, border=2)
         buffer = BytesIO()
         qr.save(buffer, format='PNG')
@@ -584,25 +542,21 @@ class GlobalSettings(models.Model):
         max_digits=10,
         decimal_places=2,
         default=1859,
-        verbose_name="Цена за кг (₸/кг)"
+        verbose_name=_("Цена за кг (₸/кг)")
     )
     discount_weight_threshold = models.DecimalField(
         max_digits=6,
         decimal_places=2,
         default=30,
-        verbose_name="Порог веса для скидки (кг)"
+        verbose_name=_("Порог веса для скидки (кг)")
     )
 
     class Meta:
-        verbose_name = "Глобальные настройки"
-        verbose_name_plural = "Глобальные настройки"
+        verbose_name = _("Глобальные настройки")
+        verbose_name_plural = _("Глобальные настройки")
 
     def __str__(self):
         return "Глобальные настройки"
-
-
-
-
 
 
 class StorageCell(models.Model):
@@ -610,26 +564,25 @@ class StorageCell(models.Model):
         'register.PickupPoint',
         on_delete=models.PROTECT,
         related_name='storage_cells',
-        verbose_name="Пункт выдачи"
+        verbose_name=_("Пункт выдачи")
     )
-    cell_number = models.CharField(max_length=10, verbose_name="Номер ячейки")
+    cell_number = models.CharField(max_length=10, verbose_name=_("Номер ячейки"))
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='storage_cells',
-        verbose_name="Клиент"
+        verbose_name=_("Клиент")
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = [('pickup_point', 'cell_number')]
-        verbose_name = "Ячейка хранения"
-        verbose_name_plural = "Ячейки хранения"
+        verbose_name = _("Ячейка хранения")
+        verbose_name_plural = _("Ячейки хранения")
 
     @property
     def display_number(self):
-        """Возвращает отображаемый номер ячейки ('0' → 'Пол', '0.1' → 'Пол 1')."""
         if self.cell_number == '0':
             return 'Пол'
         if self.cell_number.startswith('0.'):
@@ -639,14 +592,12 @@ class StorageCell(models.Model):
 
     @property
     def client_name(self):
-        """Возвращает отображаемое имя клиента."""
         if self.user:
             return self.user.username
         return '—'
 
     @property
     def client_full_name(self):
-        """Возвращает полное имя клиента (если есть)."""
         if self.user:
             return self.user.get_full_name() or ''
         return ''
@@ -656,39 +607,38 @@ class StorageCell(models.Model):
 
 
 class DeliveryHistory(models.Model):
-    """Запись истории доставки: какой водитель доставил какой пункт выдачи."""
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="delivery_history",
-        verbose_name="Доставщик"
+        verbose_name=_("Доставщик")
     )
     pickup_point = models.ForeignKey(
         'register.PickupPoint',
         on_delete=models.PROTECT,
         related_name="delivery_history",
-        verbose_name="Пункт выдачи"
+        verbose_name=_("Пункт выдачи")
     )
     track_codes = models.ManyToManyField(
         'TrackCode',
         related_name="delivery_history",
         blank=True,
-        verbose_name="Трек-коды в доставке"
+        verbose_name=_("Трек-коды в доставке")
     )
     total_weight = models.DecimalField(
         max_digits=10, decimal_places=3, default=0,
-        verbose_name="Общий вес (кг)"
+        verbose_name=_("Общий вес (кг)")
     )
-    taken_at = models.DateTimeField(verbose_name="Время принятия в доставку")
+    taken_at = models.DateTimeField(verbose_name=_("Время принятия в доставку"))
     delivered_at = models.DateTimeField(
         null=True, blank=True,
-        verbose_name="Время доставки до пункта"
+        verbose_name=_("Время доставки до пункта")
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
 
     class Meta:
-        verbose_name = "История доставки"
-        verbose_name_plural = "История доставок"
+        verbose_name = _("История доставки")
+        verbose_name_plural = _("История доставок")
         ordering = ['-taken_at']
 
     def __str__(self):
@@ -696,24 +646,23 @@ class DeliveryHistory(models.Model):
 
 
 class PickupChangeRequest(models.Model):
-    """Заявка на смену пункта выдачи."""
     STATUS_CHOICES = [
-        ('pending', 'На рассмотрении'),
-        ('approved', 'Одобрена'),
-        ('rejected', 'Отклонена'),
+        ('pending', _('На рассмотрении')),
+        ('approved', _('Одобрена')),
+        ('rejected', _('Отклонена')),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pickup_change_requests', verbose_name="Пользователь")
-    current_pickup = models.ForeignKey('register.PickupPoint', on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name="Текущий ПВЗ")
-    requested_pickup = models.ForeignKey('register.PickupPoint', on_delete=models.CASCADE, related_name='+', verbose_name="Запрашиваемый ПВЗ")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Статус")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата заявки")
-    reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата рассмотрения")
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name="Рассмотрел")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pickup_change_requests', verbose_name=_("Пользователь"))
+    current_pickup = models.ForeignKey('register.PickupPoint', on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_("Текущий ПВЗ"))
+    requested_pickup = models.ForeignKey('register.PickupPoint', on_delete=models.CASCADE, related_name='+', verbose_name=_("Запрашиваемый ПВЗ"))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name=_("Статус"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата заявки"))
+    reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата рассмотрения"))
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+', verbose_name=_("Рассмотрел"))
 
     class Meta:
-        verbose_name = "Заявка на смену ПВЗ"
-        verbose_name_plural = "Заявки на смену ПВЗ"
+        verbose_name = _("Заявка на смену ПВЗ")
+        verbose_name_plural = _("Заявки на смену ПВЗ")
         ordering = ['-created_at']
 
     def __str__(self):
@@ -721,32 +670,31 @@ class PickupChangeRequest(models.Model):
 
 
 class Arrival(models.Model):
-    """Запись о приходе товаров за определённый день."""
-    date = models.DateField(verbose_name="Дата прихода")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    date = models.DateField(verbose_name=_("Дата прихода"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата создания"))
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Создал"
+        null=True, blank=True, verbose_name=_("Создал")
     )
     sorting_location = models.ForeignKey(
         SortingLocation, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Место сортировки"
+        null=True, blank=True, verbose_name=_("Место сортировки")
     )
     track_codes = models.ManyToManyField(
         TrackCode, related_name='arrivals', blank=True,
-        verbose_name="Трек-коды"
+        verbose_name=_("Трек-коды")
     )
     raw_data = models.JSONField(
         default=dict, blank=True,
-        verbose_name="Исходные данные (трек-коды, владельцы, веса)"
+        verbose_name=_("Исходные данные (трек-коды, владельцы, веса)")
     )
-    total_tracks = models.PositiveIntegerField(default=0, verbose_name="Всего трек-кодов")
-    updated_count = models.PositiveIntegerField(default=0, verbose_name="Обновлено")
-    created_count = models.PositiveIntegerField(default=0, verbose_name="Создано")
+    total_tracks = models.PositiveIntegerField(default=0, verbose_name=_("Всего трек-кодов"))
+    updated_count = models.PositiveIntegerField(default=0, verbose_name=_("Обновлено"))
+    created_count = models.PositiveIntegerField(default=0, verbose_name=_("Создано"))
 
     class Meta:
-        verbose_name = "Приход"
-        verbose_name_plural = "Приходы"
+        verbose_name = _("Приход")
+        verbose_name_plural = _("Приходы")
         ordering = ['-date', '-created_at']
 
     def __str__(self):
@@ -755,37 +703,36 @@ class Arrival(models.Model):
 
 
 class ArrivalSession(models.Model):
-    """Сессия прихода товаров — данные записываются в реальном времени на сервер."""
     STATUS_CHOICES = [
-        ('active', 'Активная'),
-        ('paused', 'На паузе'),
-        ('inactive', 'Неактивная'),
-        ('completed', 'Завершена'),
+        ('active', _('Активная')),
+        ('paused', _('На паузе')),
+        ('inactive', _('Неактивная')),
+        ('completed', _('Завершена')),
     ]
-    ACTIVE_HOURS_LIMIT = 48  # сессия старше этого числа часов автоматически становится неактивной
+    ACTIVE_HOURS_LIMIT = 48
 
-    date = models.DateField(verbose_name="Дата прихода")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Статус")
+    date = models.DateField(verbose_name=_("Дата прихода"))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name=_("Статус"))
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Создал"
+        null=True, blank=True, verbose_name=_("Создал")
     )
     sorting_location = models.ForeignKey(
         SortingLocation, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Место сортировки"
+        null=True, blank=True, verbose_name=_("Место сортировки")
     )
     arrival = models.OneToOneField(
         Arrival, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='session',
-        verbose_name="Приход (после завершения)"
+        verbose_name=_("Приход (после завершения)")
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
-    paused_at = models.DateTimeField(null=True, blank=True, verbose_name="Поставлена на паузу")
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="Завершено")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
+    paused_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Поставлена на паузу"))
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Завершено"))
 
     class Meta:
-        verbose_name = "Сессия прихода"
-        verbose_name_plural = "Сессии прихода"
+        verbose_name = _("Сессия прихода")
+        verbose_name_plural = _("Сессии прихода")
         ordering = ['-created_at']
 
     def __str__(self):
@@ -794,25 +741,24 @@ class ArrivalSession(models.Model):
 
 
 class ArrivalSessionItem(models.Model):
-    """Строка в сессии прихода — трек-код, владелец, вес."""
     session = models.ForeignKey(
         ArrivalSession, on_delete=models.CASCADE,
-        related_name='items', verbose_name="Сессия"
+        related_name='items', verbose_name=_("Сессия")
     )
-    track_code = models.CharField(max_length=100, unique=True, verbose_name="Трек-код")
+    track_code = models.CharField(max_length=100, unique=True, verbose_name=_("Трек-код"))
     track_obj = models.ForeignKey(
         'TrackCode', on_delete=models.CASCADE,
         null=True, blank=True, related_name='session_items',
-        verbose_name="Трек (объект)"
+        verbose_name=_("Трек (объект)")
     )
-    owner_name = models.CharField(max_length=150, blank=True, default='', verbose_name="Владелец (логин)")
-    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name="Вес (кг)")
-    row_number = models.PositiveIntegerField(default=0, verbose_name="Номер строки")
+    owner_name = models.CharField(max_length=150, blank=True, default='', verbose_name=_("Владелец (логин)"))
+    weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name=_("Вес (кг)"))
+    row_number = models.PositiveIntegerField(default=0, verbose_name=_("Номер строки"))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Строка сессии прихода"
-        verbose_name_plural = "Строки сессии прихода"
+        verbose_name = _("Строка сессии прихода")
+        verbose_name_plural = _("Строки сессии прихода")
         ordering = ['row_number']
 
     def __str__(self):
@@ -820,27 +766,26 @@ class ArrivalSessionItem(models.Model):
 
 
 class RestructureSession(models.Model):
-    """Сессия реструктуризации склада ПВЗ."""
     STATUS_CHOICES = [
-        ('active', 'Активная'),
-        ('completed', 'Завершена'),
+        ('active', _('Активная')),
+        ('completed', _('Завершена')),
     ]
     pickup_point = models.ForeignKey(
         'register.PickupPoint', on_delete=models.PROTECT,
-        verbose_name="Пункт выдачи"
+        verbose_name=_("Пункт выдачи")
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Статус")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name=_("Статус"))
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Создал"
+        null=True, blank=True, verbose_name=_("Создал")
     )
-    cells_backup = models.JSONField(default=list, blank=True, verbose_name="Бэкап ячеек")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Начало")
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="Завершено")
+    cells_backup = models.JSONField(default=list, blank=True, verbose_name=_("Бэкап ячеек"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Начало"))
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Завершено"))
 
     class Meta:
-        verbose_name = "Сессия реструктуризации"
-        verbose_name_plural = "Сессии реструктуризации"
+        verbose_name = _("Сессия реструктуризации")
+        verbose_name_plural = _("Сессии реструктуризации")
         ordering = ['-created_at']
 
     def __str__(self):
@@ -848,36 +793,35 @@ class RestructureSession(models.Model):
 
 
 class ClientRegistry(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-    registry_date = models.DateField(verbose_name="Дата реестра")
-    pickup_points = models.JSONField(verbose_name="Пункты выдачи")
-    track_codes = models.ManyToManyField(TrackCode, related_name='registries', verbose_name="Трек-коды")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата создания"))
+    registry_date = models.DateField(verbose_name=_("Дата реестра"))
+    pickup_points = models.JSONField(verbose_name=_("Пункты выдачи"))
+    track_codes = models.ManyToManyField(TrackCode, related_name='registries', verbose_name=_("Трек-коды"))
 
     class Meta:
-        verbose_name = "Реестр клиентов"
-        verbose_name_plural = "Реестры клиентов"
+        verbose_name = _("Реестр клиентов")
+        verbose_name_plural = _("Реестры клиентов")
 
     def __str__(self):
         return f"Реестр от {self.created_at.strftime('%d.%m.%Y %H:%M')} ({self.registry_date})"
 
 
 class EmailLog(models.Model):
-    """Лог отправки email-сообщений."""
     STATUS_CHOICES = [
-        ('sent', 'Отправлено'),
-        ('failed', 'Ошибка'),
+        ('sent', _('Отправлено')),
+        ('failed', _('Ошибка')),
     ]
 
-    recipient = models.EmailField(verbose_name="Получатель")
-    subject = models.CharField(max_length=255, verbose_name="Тема")
-    body = models.TextField(verbose_name="Текст письма")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, verbose_name="Статус")
-    error_message = models.TextField(blank=True, default='', verbose_name="Ошибка")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата отправки")
+    recipient = models.EmailField(verbose_name=_("Получатель"))
+    subject = models.CharField(max_length=255, verbose_name=_("Тема"))
+    body = models.TextField(verbose_name=_("Текст письма"))
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, verbose_name=_("Статус"))
+    error_message = models.TextField(blank=True, default='', verbose_name=_("Ошибка"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата отправки"))
 
     class Meta:
-        verbose_name = "Лог email"
-        verbose_name_plural = "Логи email"
+        verbose_name = _("Лог email")
+        verbose_name_plural = _("Логи email")
         ordering = ['-created_at']
 
     def __str__(self):
@@ -885,15 +829,10 @@ class EmailLog(models.Model):
 
 
 class NotificationMute(models.Model):
-    """
-    Заглушка уведомлений: позволяет сотруднику временно или бессрочно
-    отключить отправку Telegram- и/или email-уведомлений для конкретного
-    клиента или для всех клиентов сразу.
-    """
     CHANNEL_CHOICES = [
-        ('telegram', 'Telegram'),
-        ('email', 'Email'),
-        ('all', 'Все каналы'),
+        ('telegram', _('Telegram')),
+        ('email', _('Email')),
+        ('all', _('Все каналы')),
     ]
 
     user = models.ForeignKey(
@@ -901,30 +840,30 @@ class NotificationMute(models.Model):
         on_delete=models.CASCADE,
         null=True, blank=True,
         related_name='notification_mutes',
-        verbose_name='Клиент (пусто = все клиенты)',
+        verbose_name=_('Клиент (пусто = все клиенты)'),
     )
     channel = models.CharField(
         max_length=20, choices=CHANNEL_CHOICES, default='all',
-        verbose_name='Канал',
+        verbose_name=_('Канал'),
     )
     muted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='created_notification_mutes',
-        verbose_name='Кто отключил',
+        verbose_name=_('Кто отключил'),
     )
-    muted_at = models.DateTimeField(auto_now_add=True, verbose_name='Время отключения')
+    muted_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Время отключения'))
     expires_at = models.DateTimeField(
         null=True, blank=True,
-        verbose_name='Истекает (пусто = только вручную)',
+        verbose_name=_('Истекает (пусто = только вручную)'),
     )
-    is_active = models.BooleanField(default=True, verbose_name='Активна')
-    reason = models.CharField(max_length=255, blank=True, verbose_name='Причина')
+    is_active = models.BooleanField(default=True, verbose_name=_('Активна'))
+    reason = models.CharField(max_length=255, blank=True, verbose_name=_('Причина'))
 
     class Meta:
-        verbose_name = 'Заглушка уведомлений'
-        verbose_name_plural = 'Заглушки уведомлений'
+        verbose_name = _('Заглушка уведомлений')
+        verbose_name_plural = _('Заглушки уведомлений')
         ordering = ['-muted_at']
         indexes = [
             models.Index(fields=['is_active', 'user']),
@@ -945,41 +884,35 @@ class NotificationMute(models.Model):
 
     @property
     def is_effective(self):
-        """Заглушка реально действует: активна и не просрочена."""
         return self.is_active and not self.is_expired
 
 
 class ExtraditionSession(models.Model):
-    """
-    Сессия выдачи посылки: открывается когда сотрудник ПВЗ сканирует штрихкод пакета,
-    закрывается (удаляется) после оформления выдачи.
-    Видна всем сотрудникам одного ПВЗ.
-    """
     package = models.OneToOneField(
         'ExtraditionPackage',
         on_delete=models.CASCADE,
         related_name='extradition_session',
-        verbose_name="Пакет выдачи",
+        verbose_name=_("Пакет выдачи"),
     )
     pickup_point = models.ForeignKey(
         'register.PickupPoint',
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='extradition_sessions',
-        verbose_name="ПВЗ",
+        verbose_name=_("ПВЗ"),
     )
     opened_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='opened_extradition_sessions',
-        verbose_name="Открыл",
+        verbose_name=_("Открыл"),
     )
-    opened_at = models.DateTimeField(auto_now_add=True, verbose_name="Открыта в")
+    opened_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Открыта в"))
 
     class Meta:
-        verbose_name = "Сессия выдачи"
-        verbose_name_plural = "Сессии выдачи"
+        verbose_name = _("Сессия выдачи")
+        verbose_name_plural = _("Сессии выдачи")
         ordering = ['-opened_at']
 
     def __str__(self):

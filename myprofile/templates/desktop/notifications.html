@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}    	
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Уведомления</title>
+    <title>{% trans "Inter Cargo - Уведомления" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -47,16 +48,16 @@
             {% endif %}
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-                <h1 class="text-lg font-bold text-center">Уведомления</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Уведомления" %}</h1>
             </div>
             <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-                <h1 class="text-2xl font-bold hidden md:block">Уведомления</h1>
+                <h1 class="text-2xl font-bold hidden md:block">{% trans "Уведомления" %}</h1>
                 {% if notifications %}
                 <form method="post" action="{% url 'mark_notifications_as_read' %}">
                     {% csrf_token %}
                     <button type="submit"
                         class="inline-flex items-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition text-sm font-medium">
-                        <i class="ri-check-double-line"></i> Прочитать все
+                        <i class="ri-check-double-line"></i> {% trans "Прочитать все" %}
                     </button>
                 </form>
                 {% endif %}
@@ -73,12 +74,12 @@
                 {% if not notif.is_read %}
                 <a href="{% url 'mark_as_read' notif.id %}"
                     class="inline-flex items-center gap-1 self-start sm:flex-shrink-0 bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-100 transition whitespace-nowrap">
-                    <i class="ri-check-line"></i> Прочитано
+                    <i class="ri-check-line"></i> {% trans "Прочитано" %}
                 </a>
                 {% endif %}
             </div>
             {% empty %}
-            <p class="text-gray-500 text-center py-8">Уведомлений нет.</p>
+            <p class="text-gray-500 text-center py-8">{% trans "Уведомлений нет." %}</p>
             {% endfor %}
             </div>
         </div>

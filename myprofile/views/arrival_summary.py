@@ -15,6 +15,7 @@ from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocati
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weigh
 @login_required
 def arrival_summary_view(request):
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     selected_date = request.GET.get('date', '')
     if not selected_date:
@@ -226,14 +227,14 @@ def arrival_summary_view(request):
 @require_POST
 def toggle_home_delivery(request):
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     user_id = request.POST.get('user_id')
     date = request.POST.get('date')
     action = request.POST.get('action')  # 'home', 'warehouse', 'unset'
 
     if not user_id or not date:
-        messages.error(request, "Недостаточно данных.")
+        messages.error(request, _("Недостаточно данных."))
         return redirect('arrival_summary')
 
     tracks = TrackCode.all_objects.filter(
@@ -245,25 +246,25 @@ def toggle_home_delivery(request):
     if action == 'home':
         home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
         if not home_pp:
-            messages.error(request, "Пункт 'Доставка на дом' не найден.")
+            messages.error(request, _("Пункт 'Доставка на дом' не найден."))
             return redirect(f'/profile/arrival-summary/?date={date}')
         tracks.update(delivery_pickup=home_pp)
-        messages.success(request, "Клиент назначен на доставку на дом.")
+        messages.success(request, _("Клиент назначен на доставку на дом."))
     elif action == 'warehouse':
         pickup_id = request.POST.get('pickup_id')
         if not pickup_id:
-            messages.error(request, "Не указан пункт выдачи.")
+            messages.error(request, _("Не указан пункт выдачи."))
             return redirect(f'/profile/arrival-summary/?date={date}')
         try:
             warehouse_pp = PickupPoint.objects.get(id=pickup_id)
         except PickupPoint.DoesNotExist:
-            messages.error(request, "Пункт выдачи не найден.")
+            messages.error(request, _("Пункт выдачи не найден."))
             return redirect(f'/profile/arrival-summary/?date={date}')
         tracks.update(delivery_pickup=warehouse_pp)
         messages.success(request, f"Клиент назначен на пункт: {warehouse_pp}")
     else:
         tracks.update(delivery_pickup=None)
-        messages.success(request, "Клиент возвращён на свой ПВЗ.")
+        messages.success(request, _("Клиент возвращён на свой ПВЗ."))
 
     return redirect(f'/profile/arrival-summary/?date={date}')
 
@@ -273,20 +274,20 @@ def toggle_home_delivery(request):
 def assign_temp_pickup(request):
     """Назначает ПВЗ пользователям без пункта."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     user_ids = request.POST.getlist('user_id')
     pickup_id = request.POST.get('pickup_id')
     date = request.POST.get('date')
 
     if not user_ids or not pickup_id or not date:
-        messages.error(request, "Недостаточно данных.")
+        messages.error(request, _("Недостаточно данных."))
         return redirect('arrival_summary')
 
     try:
         pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
     except PickupPoint.DoesNotExist:
-        messages.error(request, "Пункт выдачи не найден.")
+        messages.error(request, _("Пункт выдачи не найден."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
     count = UserProfile.objects.filter(user_id__in=user_ids).update(pickup=pickup)
@@ -294,7 +295,7 @@ def assign_temp_pickup(request):
     if count:
         messages.success(request, f"Назначен ПВЗ для {count} клиентов: {pickup}")
     else:
-        messages.info(request, "Нет клиентов для назначения.")
+        messages.info(request, _("Нет клиентов для назначения."))
 
     return redirect(f'/profile/arrival-summary/?date={date}')
 
@@ -304,7 +305,7 @@ def assign_temp_pickup(request):
 def apply_discount(request):
     """Применяет разовую скидку клиенту из страницы сводки прихода."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
@@ -314,8 +315,8 @@ def apply_discount(request):
 
     if not amount_raw:
         if is_ajax:
-            return JsonResponse({'error': 'Укажите размер скидки.'}, status=400)
-        messages.error(request, "Укажите размер скидки.")
+            return JsonResponse({'error': _('Укажите размер скидки.')}, status=400)
+        messages.error(request, _("Укажите размер скидки."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
     try:
@@ -324,22 +325,22 @@ def apply_discount(request):
             raise ValueError
     except (ValueError, Exception):
         if is_ajax:
-            return JsonResponse({'error': 'Некорректный размер скидки.'}, status=400)
-        messages.error(request, "Некорректный размер скидки.")
+            return JsonResponse({'error': _('Некорректный размер скидки.')}, status=400)
+        messages.error(request, _("Некорректный размер скидки."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
     if not user_id:
         if is_ajax:
-            return JsonResponse({'error': 'Не указан клиент.'}, status=400)
-        messages.error(request, "Не указан клиент.")
+            return JsonResponse({'error': _('Не указан клиент.')}, status=400)
+        messages.error(request, _("Не указан клиент."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
     try:
         target_user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         if is_ajax:
-            return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
-        messages.error(request, "Пользователь не найден.")
+            return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
+        messages.error(request, _("Пользователь не найден."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
     default_rate = get_global_price_per_kg()
@@ -377,13 +378,13 @@ def apply_discount(request):
 def generate_day_receipts(request):
     """Генерирует чеки по клиентам за выбранный день на основе треков с delivered_date."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     from myprofile.views.utils import create_receipts_for_user
 
     date_str = request.POST.get('date', '')
     if not date_str:
-        messages.error(request, "Не указана дата.")
+        messages.error(request, _("Не указана дата."))
         return redirect('arrival_summary')
 
     statuses = ('delivered', 'shipping_pp', 'ready', 'claimed')
@@ -414,7 +415,7 @@ def generate_day_receipts(request):
     if created_count:
         messages.success(request, f"Создано чеков: {created_count}")
     else:
-        messages.info(request, "Новых чеков не создано — все треки уже учтены в чеках.")
+        messages.info(request, _("Новых чеков не создано — все треки уже учтены в чеках."))
 
     return redirect(f'/profile/arrival-summary/?date={date_str}')
 
@@ -424,7 +425,7 @@ def generate_day_receipts(request):
 def refresh_arrival(request, arrival_id):
     """Актуализирует данные одного прихода: обновляет веса и владельцев, не сбрасывая статусы и скидки."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     from django.shortcuts import get_object_or_404
     from myprofile.views.utils import resolve_owner as _resolve_owner
@@ -434,7 +435,7 @@ def refresh_arrival(request, arrival_id):
     arrival = get_object_or_404(Arrival, id=arrival_id)
     raw = arrival.raw_data
     if not raw or 'track_codes' not in raw:
-        messages.error(request, "Нет исходных данных для актуализации.")
+        messages.error(request, _("Нет исходных данных для актуализации."))
         return redirect(f'/profile/arrival-summary/?date={arrival.date.isoformat()}')
 
     codes = raw['track_codes']
@@ -442,7 +443,7 @@ def refresh_arrival(request, arrival_id):
     weights = raw.get('weights', [])
 
     if len(codes) != len(usernames) or len(codes) != len(weights):
-        messages.error(request, "Некорректные исходные данные прихода.")
+        messages.error(request, _("Некорректные исходные данные прихода."))
         return redirect(f'/profile/arrival-summary/?date={arrival.date.isoformat()}')
 
     update_date = arrival.date
@@ -515,7 +516,7 @@ def refresh_arrival(request, arrival_id):
     if updated_data or new_created:
         messages.success(request, f"Актуализация прихода #{arrival.id}: обновлено {updated_data}, создано новых {new_created}.")
     else:
-        messages.info(request, "Данные прихода актуальны, изменений не требуется.")
+        messages.info(request, _("Данные прихода актуальны, изменений не требуется."))
     if errors_count:
         messages.warning(request, f"Ошибок при актуализации: {errors_count}")
 
@@ -527,7 +528,7 @@ def refresh_arrival(request, arrival_id):
 def refresh_day_arrivals(request):
     """Актуализирует ВСЕ приходы за выбранный день + подбирает новые треки."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     from myprofile.views.utils import resolve_owner as _resolve_owner
     from django.core.exceptions import ValidationError
@@ -535,7 +536,7 @@ def refresh_day_arrivals(request):
 
     date_str = request.POST.get('date', '')
     if not date_str:
-        messages.error(request, "Не указана дата.")
+        messages.error(request, _("Не указана дата."))
         return redirect('arrival_summary')
 
     # 1. Актуализируем каждый существующий приход

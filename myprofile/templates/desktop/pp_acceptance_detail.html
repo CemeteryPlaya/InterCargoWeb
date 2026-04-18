@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -30,7 +31,7 @@
         <main class="flex-1 p-4 md:p-6">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Приёмка</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Приёмка" %}</h1>
             </div>
 
             <!-- Шапка -->
@@ -41,7 +42,7 @@
                 </a>
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-800">
-                        <i class="ri-inbox-archive-line text-green-600"></i> Приёмка товара
+                        <i class="ri-inbox-archive-line text-green-600"></i> {% trans "Приёмка товара" %}
                     </h2>
                     <p class="text-sm text-gray-500 mt-0.5">
                         <i class="ri-map-pin-line mr-1"></i>{{ pickup.address }}{% if pickup.premise_name %} — {{ pickup.premise_name }}{% endif %}
@@ -81,14 +82,14 @@
                 <!-- Загрузка чеков -->
                 <div id="loading-state" class="px-6 py-12 text-center text-gray-400">
                     <i class="ri-loader-4-line animate-spin text-3xl mb-2"></i>
-                    <p class="text-sm">Загрузка данных приёмки...</p>
+                    <p class="text-sm">{% trans "Загрузка данных приёмки..." %}</p>
                 </div>
 
                 <!-- Нет чеков -->
                 <div id="empty-state" class="hidden px-6 py-12 text-center text-gray-400">
                     <i class="ri-inbox-line text-4xl mb-2"></i>
-                    <p>Нет посылок для приёмки за эту дату</p>
-                    <p class="text-xs mt-1 text-gray-400">Все посылки уже отсортированы или чеки не созданы</p>
+                    <p>{% trans "Нет посылок для приёмки за эту дату" %}</p>
+                    <p class="text-xs mt-1 text-gray-400">{% trans "Все посылки уже отсортированы или чеки не созданы" %}</p>
                 </div>
 
                 <!-- Основной интерфейс -->
@@ -97,11 +98,11 @@
                     <!-- Ввод сканером -->
                     <div class="px-5 pt-5 pb-3 border-b border-gray-100">
                         <label class="block text-sm font-medium text-gray-600 mb-1">
-                            <i class="ri-barcode-box-line mr-1"></i> Ввод сканером / вручную
+                            <i class="ri-barcode-box-line mr-1"></i> {% trans "Ввод сканером / вручную" %}
                         </label>
                         <input type="text" id="qr-scanner-input"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Наведите сканер или введите номер чека" autocomplete="off">
+                            placeholder="{% trans "Наведите сканер или введите номер чека" %}" autocomplete="off">
                     </div>
 
                     <!-- Камера -->
@@ -112,7 +113,7 @@
                     <!-- Прогресс -->
                     <div class="px-5 pb-3">
                         <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
-                            <span>Отсканировано: <strong id="qr-scanned-count">0</strong> / <strong id="qr-total-count">0</strong></span>
+                            <span>{% trans "Отсканировано:" %} <strong id="qr-scanned-count">0</strong> / <strong id="qr-total-count">0</strong></span>
                             <span id="qr-progress-percent" class="font-medium text-green-600">0%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
@@ -131,10 +132,10 @@
                     <!-- Список клиентов -->
                     <div class="px-5 pb-3">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs text-gray-500 font-medium">Чеки к приёмке:</span>
+                            <span class="text-xs text-gray-500 font-medium">{% trans "Чеки к приёмке:" %}</span>
                             <button id="qr-select-all-btn" type="button"
                                 class="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium">
-                                <i class="ri-checkbox-multiple-line mr-1"></i> Выбрать все
+                                <i class="ri-checkbox-multiple-line mr-1"></i> {% trans "Выбрать все" %}
                             </button>
                         </div>
                         <div id="qr-clients-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
@@ -144,7 +145,7 @@
                     <div class="px-5 py-4 bg-gray-50 border-t border-gray-200 flex flex-col gap-3 sm:flex-row">
                         <button id="qr-submit-btn" type="button" disabled
                             class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm">
-                            <i class="ri-checkbox-circle-line mr-1"></i> Отсортировать отмеченные
+                            <i class="ri-checkbox-circle-line mr-1"></i> {% trans "Отсортировать отмеченные" %}
                         </button>
                         <form method="post" id="finish-session-form"
                               onsubmit="return confirm('Завершить сессию приёмки за эту дату? Неотсортированные посылки будут возвращены на сортировочный склад.')">
@@ -153,7 +154,7 @@
                             <input type="hidden" name="delivered_date" value="{% if delivered_date %}{{ delivered_date|date:'Y-m-d' }}{% endif %}">
                             <button type="submit"
                                 class="w-full sm:w-auto px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium text-sm">
-                                <i class="ri-stop-circle-line mr-1"></i> Завершить сессию
+                                <i class="ri-stop-circle-line mr-1"></i> {% trans "Завершить сессию" %}
                             </button>
                         </form>
                     </div>
@@ -249,7 +250,7 @@
                 initScan(data.clients);
             })
             .catch(function (err) {
-                loadingEl.innerHTML = '<div class="text-red-500 py-8 text-center text-sm"><i class="ri-error-warning-line text-2xl mb-1"></i><p>Ошибка загрузки данных</p></div>';
+                loadingEl.innerHTML = '<div class="text-red-500 py-8 text-center text-sm"><i class="ri-error-warning-line text-2xl mb-1"></i><p>{% trans "Ошибка загрузки данных" %}</p></div>';
                 console.error('Receipts fetch error:', err);
             });
 
@@ -428,7 +429,7 @@
             qrReaderDiv.innerHTML =
                 '<div class="flex flex-col items-center justify-center py-4 text-green-600">' +
                 '<i class="ri-checkbox-circle-fill text-5xl mb-2"></i>' +
-                '<p class="font-semibold">Все QR-коды отсканированы!</p>' +
+                '<p class="font-semibold">{% trans "Все QR-коды отсканированы!" %}</p>' +
                 '</div>';
         }
 

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -331,14 +332,14 @@
 
 <body>
     <div class="no-print">
-        <a href="javascript:void(0)" onclick="if (history.length > 1) { history.back(); } else { window.close(); }" class="btn-back">&larr; Назад</a>
-        <button type="button" onclick="window.print()" class="btn-print">Печать / Сохранить PDF</button>
+        <a href="javascript:void(0)" onclick="if (history.length > 1) { history.back(); } else { window.close(); }" class="btn-back">{% trans "&larr; Назад" %}</a>
+        <button type="button" onclick="window.print()" class="btn-print">{% trans "Печать / Сохранить PDF" %}</button>
     </div>
 
     <div class="header">
         <div>
             <div class="logo">INTER CARGO</div>
-            <div class="logo-sub">Доставка из Китая в Казахстан</div>
+            <div class="logo-sub">{% trans "Доставка из Китая в Казахстан" %}</div>
         </div>
         <div class="receipt-info">
             <div class="receipt-number">{{ receipt.receipt_number }}</div>
@@ -348,12 +349,12 @@
 
     <div class="client-block">
         <div class="client-row">
-            <span class="client-label">Клиент</span>
+            <span class="client-label">{% trans "Клиент" %}</span>
             <span class="client-value">{{ owner_name }}</span>
         </div>
         {% if pickup_name %}
         <div class="client-row">
-            <span class="client-label">Пункт выдачи</span>
+            <span class="client-label">{% trans "Пункт выдачи" %}</span>
             <span class="client-value">{{ pickup_name }}</span>
         </div>
         {% endif %}
@@ -362,9 +363,9 @@
     <table>
         <thead>
             <tr>
-                <th>Трек-код</th>
-                <th>Вес (кг)</th>
-                <th>Цена (₸)</th>
+                <th>{% trans "Трек-код" %}</th>
+                <th>{% trans "Вес (кг)" %}</th>
+                <th>{% trans "Цена (₸)" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -380,19 +381,19 @@
 
     <div class="totals">
         <div class="totals-row">
-            <span class="totals-label">Позиций:</span>
+            <span class="totals-label">{% trans "Позиций:" %}</span>
             <span>{{ items|length }}</span>
         </div>
         <div class="totals-row">
-            <span class="totals-label">Общий вес:</span>
+            <span class="totals-label">{% trans "Общий вес:" %}</span>
             <span>{{ total_weight|floatformat:3 }} кг</span>
         </div>
         <div class="totals-row">
-            <span class="totals-label">Тариф:</span>
+            <span class="totals-label">{% trans "Тариф:" %}</span>
             <span>{{ rate|floatformat:0 }} ₸/кг</span>
         </div>
         <div class="totals-row grand">
-            <span class="totals-label">Итого к оплате:</span>
+            <span class="totals-label">{% trans "Итого к оплате:" %}</span>
             <span>{{ total_price|floatformat:0 }} ₸</span>
         </div>
     </div>

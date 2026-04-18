@@ -6,6 +6,7 @@ from myprofile.models import Receipt
 from decimal import Decimal, ROUND_HALF_UP
 from myprofile.views.utils import get_user_discount, get_global_price_per_kg
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 @login_required
@@ -57,7 +58,7 @@ def delivered_trackcodes_by_date(request):
 def generate_daily_receipt(request):
     receipt = create_receipts_for_user(request.user, statuses=('delivered', 'shipping_pp', 'ready'))
     if not receipt:
-        messages.info(request, "Нет новых доставленных посылок для формирования чека.")
+        messages.info(request, _("Нет новых доставленных посылок для формирования чека."))
         return redirect('delivered_posts')
 
     messages.success(request, f"Создан чек #{receipt.id} на сумму {receipt.total_price} тг.")

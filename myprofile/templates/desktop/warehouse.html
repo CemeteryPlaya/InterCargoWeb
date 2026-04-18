@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Склад ПВЗ</title>
+    <title>{% trans "Inter Cargo - Склад ПВЗ" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -29,7 +30,7 @@
         <main class="flex-1 p-4 md:p-8">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Склад ПВЗ</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Склад ПВЗ" %}</h1>
             </div>
             <div class="max-w-6xl mx-auto">
                 {% if messages %}
@@ -50,7 +51,7 @@
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">
                             <i class="ri-building-2-line text-primary"></i>
-                            Склад ПВЗ
+                            {% trans "Склад ПВЗ" %}
                         </h1>
                         {% if pickup_point %}
                         <p class="text-gray-500 mt-1">{{ pickup_point }}</p>
@@ -61,7 +62,7 @@
                     <div>
                         <select id="pickup-select" onchange="window.location.href='?pickup='+this.value"
                             class="px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary">
-                            <option value="">-- Выберите ПВЗ --</option>
+                            <option value="">{% trans "-- Выберите ПВЗ --" %}</option>
                             {% for pp in all_pickups %}
                             <option value="{{ pp.id }}" {% if pickup_point and pickup_point.id == pp.id %}selected{% endif %}>
                                 {{ pp }}
@@ -76,7 +77,7 @@
                 <div class="flex flex-wrap gap-3 mb-6">
                     <a href="{% url 'warehouse_inventory' %}?pickup={{ pickup_point.id }}"
                         class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
-                        <i class="ri-file-list-3-line"></i> Инвентаризация склада
+                        <i class="ri-file-list-3-line"></i> {% trans "Инвентаризация склада" %}
                     </a>
                     {% if not active_restructure %}
                     <form method="post" action="{% url 'warehouse_restructure' %}" class="inline">
@@ -85,13 +86,13 @@
                         <button type="submit"
                             class="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition text-sm font-medium"
                             onclick="return confirm('Реструктуризация склада удалит ВСЕ номера ячеек на данном ПВЗ.\n\nВам нужно будет назначить ячейки заново.\n\nПродолжить?')">
-                            <i class="ri-refresh-line"></i> Реструктуризация склада
+                            <i class="ri-refresh-line"></i> {% trans "Реструктуризация склада" %}
                         </button>
                     </form>
                     {% else %}
                     <a href="{% url 'warehouse_reassign' pickup_id=pickup_point.id %}"
                         class="inline-flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition text-sm font-medium animate-pulse">
-                        <i class="ri-refresh-line"></i> Продолжить реструктуризацию
+                        <i class="ri-refresh-line"></i> {% trans "Продолжить реструктуризацию" %}
                     </a>
                     {% endif %}
                 </div>
@@ -100,17 +101,17 @@
                 {% if not pickup_point %}
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
                     <i class="ri-information-line text-yellow-500 text-3xl"></i>
-                    <p class="text-gray-600 mt-2">Выберите пункт выдачи для просмотра склада.</p>
+                    <p class="text-gray-600 mt-2">{% trans "Выберите пункт выдачи для просмотра склада." %}</p>
                 </div>
                 {% elif not cells and not no_cell_data %}
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                     <i class="ri-inbox-line text-gray-400 text-4xl"></i>
-                    <p class="text-gray-500 mt-2">На складе нет товаров, ожидающих выдачи.</p>
+                    <p class="text-gray-500 mt-2">{% trans "На складе нет товаров, ожидающих выдачи." %}</p>
                 </div>
                 {% else %}
                 {% if cells %}
                 <div class="mb-4 text-sm text-gray-500">
-                    Ячеек с товарами: <strong>{{ cells|length }}</strong>
+                    {% trans "Ячеек с товарами:" %} <strong>{{ cells|length }}</strong>
                 </div>
 
                 <div class="grid gap-4">
@@ -121,7 +122,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-14 h-14 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center cursor-pointer group relative"
                                      onclick="event.stopPropagation(); editCellNumber({{ item.cell.id }}, '{{ item.cell.cell_number }}', this)"
-                                     title="Нажмите чтобы изменить номер ячейки">
+                                     title="{% trans "Нажмите чтобы изменить номер ячейки" %}">
                                     <span class="text-primary font-bold text-xl" id="cell-num-{{ item.cell.id }}">{{ item.cell.display_number }}</span>
                                     <i class="ri-pencil-line absolute -top-1 -right-1 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition"></i>
                                 </div>
@@ -132,7 +133,7 @@
                                     {% endif %}
                                     {% if item.has_pending_return %}
                                     <span class="inline-flex items-center gap-1 text-xs text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full mt-1">
-                                        <i class="ri-alarm-warning-line"></i> Заявка на возврат — ожидает подтверждения
+                                        <i class="ri-alarm-warning-line"></i> {% trans "Заявка на возврат — ожидает подтверждения" %}
                                     </span>
                                     {% endif %}
                                 </div>
@@ -140,11 +141,11 @@
                             <div class="flex items-center gap-6 text-sm text-gray-600">
                                 <div class="text-center">
                                     <div class="font-semibold text-gray-900">{{ item.track_count }}</div>
-                                    <div class="text-xs text-gray-400">посылок</div>
+                                    <div class="text-xs text-gray-400">{% trans "посылок" %}</div>
                                 </div>
                                 <div class="text-center">
                                     <div class="font-semibold text-gray-900">{{ item.total_weight|floatformat:2 }} кг</div>
-                                    <div class="text-xs text-gray-400">вес</div>
+                                    <div class="text-xs text-gray-400">{% trans "вес" %}</div>
                                 </div>
                             </div>
                         </div>
@@ -158,7 +159,7 @@
                                         {% if sub.receipt %}
                                         <span class="text-xs text-gray-500">Чек {{ sub.receipt.receipt_number }} от {{ sub.receipt.created_at|date:"d.m.Y" }}</span>
                                         {% else %}
-                                        <span class="text-xs text-gray-400">Без чека</span>
+                                        <span class="text-xs text-gray-400">{% trans "Без чека" %}</span>
                                         {% endif %}
                                     </div>
                                     <div class="flex items-center gap-3">
@@ -169,7 +170,7 @@
                                             data-receipt-id="{{ sub.receipt.id }}"
                                             data-receipt-number="{{ sub.receipt.receipt_number }}"
                                             data-client-name="{{ item.cell.client_name }}">
-                                            <i class="ri-flashlight-line"></i> Быстрая выдача
+                                            <i class="ri-flashlight-line"></i> {% trans "Быстрая выдача" %}
                                         </button>
                                         {% endif %}
                                     </div>
@@ -178,11 +179,11 @@
                                 <table class="w-full text-sm">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="text-left px-5 py-2 text-gray-500 font-medium">Трек-код</th>
+                                            <th class="text-left px-5 py-2 text-gray-500 font-medium">{% trans "Трек-код" %}</th>
                                             {% if not hide_description %}
-                                            <th class="text-left px-5 py-2 text-gray-500 font-medium">Описание</th>
+                                            <th class="text-left px-5 py-2 text-gray-500 font-medium">{% trans "Описание" %}</th>
                                             {% endif %}
-                                            <th class="text-right px-5 py-2 text-gray-500 font-medium">Вес</th>
+                                            <th class="text-right px-5 py-2 text-gray-500 font-medium">{% trans "Вес" %}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -207,12 +208,12 @@
                                     <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
                                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium"
                                         onclick="return confirm('Подтвердить выдачу клиенту {{ item.cell.client_name }}? ({{ item.track_count }} посылок)')">
-                                        <i class="ri-hand-coin-line mr-1"></i> Выдано клиенту
+                                        <i class="ri-hand-coin-line mr-1"></i> {% trans "Выдано клиенту" %}
                                     </button>
                                 </form>
                                 {% if item.has_pending_return %}
                                 <span class="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-4 py-2 rounded text-sm font-medium">
-                                    <i class="ri-time-line mr-1"></i> Ожидает подтверждения возврата
+                                    <i class="ri-time-line mr-1"></i> {% trans "Ожидает подтверждения возврата" %}
                                 </span>
                                 {% else %}
                                 <form method="post" action="{% url 'warehouse_not_arrived' %}" class="inline">
@@ -220,7 +221,7 @@
                                     <input type="hidden" name="cell_id" value="{{ item.cell.id }}">
                                     <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition text-sm font-medium"
                                         onclick="return confirm('Создать заявку на возврат посылок клиента {{ item.cell.client_name }} на сортировочный склад? ({{ item.track_count }} посылок)\n\nВозврат будет выполнен после подтверждения на странице «Требует внимания».')">
-                                        <i class="ri-arrow-go-back-line mr-1"></i> Не доехал до склада
+                                        <i class="ri-arrow-go-back-line mr-1"></i> {% trans "Не доехал до склада" %}
                                     </button>
                                 </form>
                                 {% endif %}
@@ -234,7 +235,7 @@
                 {% if no_cell_data %}
                 <div class="mt-6">
                     <h2 class="text-base font-semibold text-orange-700 mb-3 flex items-center gap-2">
-                        <i class="ri-inbox-unarchive-line"></i> Без ячейки
+                        <i class="ri-inbox-unarchive-line"></i> {% trans "Без ячейки" %}
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                             {{ no_cell_data|length }} клиентов
                         </span>
@@ -255,18 +256,18 @@
                                 <div class="flex items-center gap-6 text-sm text-gray-600">
                                     <div class="text-center">
                                         <div class="font-semibold text-gray-900">{{ item.tracks|length }}</div>
-                                        <div class="text-xs text-gray-400">посылок</div>
+                                        <div class="text-xs text-gray-400">{% trans "посылок" %}</div>
                                     </div>
                                     <div class="text-center">
                                         <div class="font-semibold text-gray-900">{{ item.total_weight|floatformat:2 }} кг</div>
-                                        <div class="text-xs text-gray-400">вес</div>
+                                        <div class="text-xs text-gray-400">{% trans "вес" %}</div>
                                     </div>
                                     <button type="button"
                                         class="assign-cell-btn bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-xs font-medium"
                                         data-user-id="{{ item.user.id }}"
                                         data-pickup-id="{{ pickup_point.id }}"
                                         data-username="{{ item.user.username }}">
-                                        <i class="ri-add-line"></i> Назначить ячейку
+                                        <i class="ri-add-line"></i> {% trans "Назначить ячейку" %}
                                     </button>
                                 </div>
                             </div>

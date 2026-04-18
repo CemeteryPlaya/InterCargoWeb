@@ -8,6 +8,7 @@ from django.utils import timezone
 from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages, get_global_price_per_kg, get_user_discount
+from django.utils.translation import gettext as _
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
@@ -39,7 +40,7 @@ def _expire_stale_sessions():
 def goods_arrival_view(request):
     """Главная страница прихода товаров — список сессий и кнопка создания."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     _expire_stale_sessions()
 
@@ -88,7 +89,7 @@ def goods_arrival_view(request):
 def start_session(request):
     """Создаёт новую сессию прихода и перенаправляет на форму."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     date_str = request.POST.get('date', '')
     sorting_location_id = request.POST.get('sorting_location', '')
@@ -96,7 +97,7 @@ def start_session(request):
     try:
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        messages.error(request, "Неверный формат даты.")
+        messages.error(request, _("Неверный формат даты."))
         return redirect('goods_arrival')
 
     sorting_location = None
@@ -119,13 +120,13 @@ def start_session(request):
 def session_form(request, session_id):
     """Форма сессии прихода — реальная работа с данными."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     _expire_stale_sessions()
     session = get_object_or_404(ArrivalSession, id=session_id)
 
     if session.status == 'completed':
-        messages.info(request, "Эта сессия уже завершена.")
+        messages.info(request, _("Эта сессия уже завершена."))
         return redirect('goods_arrival')
 
     sorting_locations = SortingLocation.objects.filter(is_active=True).order_by('id')
@@ -154,7 +155,7 @@ def session_form(request, session_id):
 def session_save_items(request, session_id):
     """AJAX: Сохраняет все строки сессии (bulk upsert)."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     session = get_object_or_404(ArrivalSession, id=session_id, status='active')
 
@@ -162,7 +163,7 @@ def session_save_items(request, session_id):
         data = json.loads(request.body)
         items = data.get('items', [])
     except (json.JSONDecodeError, AttributeError):
-        return JsonResponse({'error': 'Неверные данные'}, status=400)
+        return JsonResponse({'error': _('Неверные данные')}, status=400)
 
     # Собираем трек-коды из запроса (без пустых, без дублей внутри сессии)
     seen = set()
@@ -239,7 +240,7 @@ def session_save_items(request, session_id):
 def pause_session(request, session_id):
     """Ставит сессию на паузу."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     session = get_object_or_404(ArrivalSession, id=session_id, status='active')
     session.status = 'paused'
@@ -254,11 +255,11 @@ def pause_session(request, session_id):
 def resume_session(request, session_id):
     """Возобновляет приостановленную или неактивную сессию."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     session = get_object_or_404(ArrivalSession, id=session_id)
     if session.status not in ('paused', 'inactive'):
-        messages.error(request, "Эту сессию нельзя возобновить.")
+        messages.error(request, _("Эту сессию нельзя возобновить."))
         return redirect('goods_arrival')
 
     from datetime import timedelta
@@ -278,13 +279,13 @@ def resume_session(request, session_id):
 def complete_session(request, session_id):
     """Завершает сессию: обрабатывает все строки, создаёт/обновляет трек-коды и Arrival."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     session = get_object_or_404(ArrivalSession, id=session_id, status='active')
     items = list(session.items.order_by('row_number'))
 
     if not items:
-        messages.error(request, "Сессия пуста. Добавьте хотя бы одну строку.")
+        messages.error(request, _("Сессия пуста. Добавьте хотя бы одну строку."))
         return redirect('goods_arrival_session', session_id=session.id)
 
     status = 'delivered'

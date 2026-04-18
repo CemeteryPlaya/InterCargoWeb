@@ -1,10 +1,11 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Инвентаризация склада</title>
+    <title>{% trans "Inter Cargo - Инвентаризация склада" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,23 +43,23 @@
 <body>
     <div class="no-print">
         <a href="{% url 'warehouse' %}{% if pickup_point %}?pickup={{ pickup_point.id }}{% endif %}" class="btn-back">
-            &larr; Назад на склад
+            {% trans "&larr; Назад на склад" %}
         </a>
         <button onclick="window.print()" class="btn-print" style="margin-left: 10px;">
-            &#128424; Печать
+            {% trans "&#128424; Печать" %}
         </button>
     </div>
 
     <div class="header">
-        <h1>Инвентаризация склада ПВЗ</h1>
+        <h1>{% trans "Инвентаризация склада ПВЗ" %}</h1>
         <p>{{ pickup_point }}</p>
         <p>Дата: {{ now|date:"d.m.Y H:i" }}</p>
     </div>
 
     <div class="summary">
-        <span>Клиентов: <strong>{{ total_clients }}</strong></span>
-        <span>Посылок: <strong>{{ total_tracks }}</strong></span>
-        <span>Общий вес: <strong>{{ total_weight|floatformat:2 }} кг</strong></span>
+        <span>{% trans "Клиентов:" %} <strong>{{ total_clients }}</strong></span>
+        <span>{% trans "Посылок:" %} <strong>{{ total_tracks }}</strong></span>
+        <span>{% trans "Общий вес:" %} <strong>{{ total_weight|floatformat:2 }} кг</strong></span>
     </div>
 
     {% if inventory %}
@@ -66,12 +67,12 @@
         <thead>
             <tr>
                 <th style="width:5%">№</th>
-                <th style="width:8%">Ячейка</th>
-                <th style="width:20%">Клиент</th>
-                <th style="width:8%">Посылок</th>
-                <th style="width:10%">Вес (кг)</th>
-                <th style="width:10%">Приходов</th>
-                <th>Даты приходов</th>
+                <th style="width:8%">{% trans "Ячейка" %}</th>
+                <th style="width:20%">{% trans "Клиент" %}</th>
+                <th style="width:8%">{% trans "Посылок" %}</th>
+                <th style="width:10%">{% trans "Вес (кг)" %}</th>
+                <th style="width:10%">{% trans "Приходов" %}</th>
+                <th>{% trans "Даты приходов" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -99,11 +100,11 @@
         </tbody>
     </table>
     {% else %}
-    <p style="text-align:center;color:#999;padding:30px;">Склад пуст.</p>
+    <p style="text-align:center;color:#999;padding:30px;">{% trans "Склад пуст." %}</p>
     {% endif %}
 
     <div class="footer">
-        <span>Inter Cargo — Инвентаризация</span>
+        <span>{% trans "Inter Cargo — Инвентаризация" %}</span>
         <span>Оператор: {{ request.user.username }}</span>
         <span>{{ now|date:"d.m.Y H:i" }}</span>
     </div>

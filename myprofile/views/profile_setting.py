@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from register.models import UserProfile, PickupPoint
 from myprofile.models import PickupChangeRequest, Notification, ArrivalSession
+from django.utils.translation import gettext as _
 from tgbot.models import UserNotificationSettings
 from tgbot.services import get_telegram_context
 
@@ -125,7 +126,7 @@ def update_profile(request):
         profile.profile_updated_at = timezone.now()
     profile.save()
 
-    messages.success(request, "Профиль успешно обновлен.")
+    messages.success(request, _("Профиль успешно обновлен."))
     if is_modal:
         return redirect(next_url)
     return redirect('profile')
@@ -138,7 +139,7 @@ def request_pickup_change(request):
     try:
         profile = user.userprofile
     except UserProfile.DoesNotExist:
-        messages.error(request, "Профиль не найден.")
+        messages.error(request, _("Профиль не найден."))
         return redirect('settings')
 
     # Проверяем кулдаун
@@ -152,17 +153,17 @@ def request_pickup_change(request):
 
     pickup_id = request.POST.get('new_pickup')
     if not pickup_id:
-        messages.error(request, "Выберите новый пункт выдачи.")
+        messages.error(request, _("Выберите новый пункт выдачи."))
         return redirect('settings')
 
     try:
         new_pickup = PickupPoint.objects.get(id=pickup_id, is_active=True, is_home_delivery=False)
     except PickupPoint.DoesNotExist:
-        messages.error(request, "Выбранный пункт выдачи не найден.")
+        messages.error(request, _("Выбранный пункт выдачи не найден."))
         return redirect('settings')
 
     if profile.pickup and profile.pickup.id == new_pickup.id:
-        messages.warning(request, "Вы уже привязаны к этому пункту выдачи.")
+        messages.warning(request, _("Вы уже привязаны к этому пункту выдачи."))
         return redirect('settings')
 
     PickupChangeRequest.objects.create(
@@ -170,7 +171,7 @@ def request_pickup_change(request):
         current_pickup=profile.pickup,
         requested_pickup=new_pickup,
     )
-    messages.success(request, "Заявка на смену пункта выдачи отправлена.")
+    messages.success(request, _("Заявка на смену пункта выдачи отправлена."))
     return redirect('settings')
 
 
@@ -190,7 +191,7 @@ def save_notification_settings(request):
     settings_obj.notify_shipping_pp = request.POST.get('notify_shipping_pp') == 'on'
 
     settings_obj.save()
-    messages.success(request, "Настройки уведомлений сохранены.")
+    messages.success(request, _("Настройки уведомлений сохранены."))
     return redirect('settings')
 
 
@@ -198,9 +199,9 @@ def _require_hr(user):
     """Возвращает HttpResponseForbidden если пользователь не HR, иначе None."""
     try:
         if not user.userprofile.is_hr:
-            return HttpResponseForbidden("Нет доступа.")
+            return HttpResponseForbidden(_("Нет доступа."))
     except UserProfile.DoesNotExist:
-        return HttpResponseForbidden("Нет доступа.")
+        return HttpResponseForbidden(_("Нет доступа."))
     return None
 
 
@@ -234,7 +235,7 @@ def review_pickup_change(request, req_id):
         return forbidden
 
     if _has_active_sorting_session():
-        messages.error(request, "Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её завершения или поставьте на паузу.")
+        messages.error(request, _("Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её завершения или поставьте на паузу."))
         return redirect('pickup_change_requests')
 
     change_req = get_object_or_404(PickupChangeRequest, id=req_id, status='pending')

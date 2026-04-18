@@ -1,10 +1,11 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo — Неопознанные посылки</title>
+    <title>{% trans "Inter Cargo — Неопознанные посылки" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -23,11 +24,11 @@
         <main class="flex-1 px-4 md:px-8 py-8 space-y-8">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-                <h1 class="text-lg font-bold text-center">Неопознанные посылки</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Неопознанные посылки" %}</h1>
             </div>
             <header class="hidden md:block">
-                <h1 class="text-xl font-bold text-red-500">Неопознанные посылки</h1>
-                <p class="text-sm text-gray-500 mt-1">Посылки без владельца на сортировочном складе</p>
+                <h1 class="text-xl font-bold text-red-500">{% trans "Неопознанные посылки" %}</h1>
+                <p class="text-sm text-gray-500 mt-1">{% trans "Посылки без владельца на сортировочном складе" %}</p>
             </header>
 
             {% if messages %}
@@ -47,42 +48,42 @@
             <!-- Форма добавления -->
             <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <h2 class="text-base font-semibold text-gray-800 mb-4">
-                    <i class="ri-add-circle-line text-red-500 mr-1"></i> Добавить неопознанную посылку
+                    <i class="ri-add-circle-line text-red-500 mr-1"></i> {% trans "Добавить неопознанную посылку" %}
                 </h2>
                 <form method="post" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     {% csrf_token %}
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Трек-код *</label>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Трек-код *" %}</label>
                         <input type="text" name="track_code" required
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
-                            placeholder="Введите трек-код">
+                            placeholder="{% trans "Введите трек-код" %}">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Вес (кг)</label>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Вес (кг)" %}</label>
                         <input type="text" name="weight"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
                             placeholder="0.000">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Место сортировки</label>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Место сортировки" %}</label>
                         <select name="sorting_location"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300">
-                            <option value="">— не указано —</option>
+                            <option value="">{% trans "— не указано —" %}</option>
                             {% for loc in sorting_locations %}
                             <option value="{{ loc.id }}">{{ loc.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Примечание</label>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Примечание" %}</label>
                         <input type="text" name="note"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
-                            placeholder="Необязательно">
+                            placeholder="{% trans "Необязательно" %}">
                     </div>
                     <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
                         <button type="submit"
                             class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition">
-                            <i class="ri-add-line mr-1"></i> Добавить
+                            <i class="ri-add-line mr-1"></i> {% trans "Добавить" %}
                         </button>
                     </div>
                 </form>
@@ -94,20 +95,20 @@
                 <div class="p-4 border-b border-orange-100 bg-orange-50 rounded-t-xl flex items-center justify-between">
                     <h2 class="text-base font-semibold text-orange-800">
                         <i class="ri-user-received-line mr-1"></i>
-                        Заявлено клиентами: <span class="text-orange-600" id="claimedCount">{{ claimed|length }}</span>
+                        {% trans "Заявлено клиентами:" %} <span class="text-orange-600" id="claimedCount">{{ claimed|length }}</span>
                     </h2>
-                    <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">Требует подтверждения</span>
+                    <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">{% trans "Требует подтверждения" %}</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                             <tr>
-                                <th class="px-4 py-3 text-left">Трек-код</th>
-                                <th class="px-4 py-3 text-left">Клиент</th>
-                                <th class="px-4 py-3 text-left">Вес</th>
-                                <th class="px-4 py-3 text-left">Место сортировки</th>
-                                <th class="px-4 py-3 text-left">Дата</th>
-                                <th class="px-4 py-3 text-center">Действия</th>
+                                <th class="px-4 py-3 text-left">{% trans "Трек-код" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Клиент" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Вес" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Место сортировки" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Дата" %}</th>
+                                <th class="px-4 py-3 text-center">{% trans "Действия" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100" id="claimedTableBody">
@@ -134,13 +135,13 @@
                                             data-track-id="{{ pkg.id }}"
                                             data-track-code="{{ pkg.track_code }}"
                                             data-owner="{{ pkg.owner.username }}">
-                                            <i class="ri-check-line"></i> Подтвердить
+                                            <i class="ri-check-line"></i> {% trans "Подтвердить" %}
                                         </button>
                                         <button
                                             class="unassign-btn text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded hover:bg-yellow-200 transition"
                                             data-track-id="{{ pkg.id }}"
                                             data-track-code="{{ pkg.track_code }}">
-                                            <i class="ri-user-unfollow-line"></i> Снять
+                                            <i class="ri-user-unfollow-line"></i> {% trans "Снять" %}
                                         </button>
                                         <button
                                             class="delete-btn text-xs bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
@@ -163,7 +164,7 @@
                 <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                     <h2 class="text-base font-semibold text-gray-800">
                         <i class="ri-question-mark text-yellow-500 mr-1"></i>
-                        Без владельца: <span class="text-yellow-600" id="unclaimedCount">{{ unclaimed|length }}</span>
+                        {% trans "Без владельца:" %} <span class="text-yellow-600" id="unclaimedCount">{{ unclaimed|length }}</span>
                     </h2>
                 </div>
 
@@ -172,12 +173,12 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                             <tr>
-                                <th class="px-4 py-3 text-left">Трек-код</th>
-                                <th class="px-4 py-3 text-left">Вес</th>
-                                <th class="px-4 py-3 text-left">Место сортировки</th>
-                                <th class="px-4 py-3 text-left">Примечание</th>
-                                <th class="px-4 py-3 text-left">Дата добавления</th>
-                                <th class="px-4 py-3 text-center">Действия</th>
+                                <th class="px-4 py-3 text-left">{% trans "Трек-код" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Вес" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Место сортировки" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Примечание" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Дата добавления" %}</th>
+                                <th class="px-4 py-3 text-center">{% trans "Действия" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100" id="unclaimedTableBody">
@@ -200,13 +201,13 @@
                                             class="assign-btn text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition"
                                             data-track-id="{{ pkg.id }}"
                                             data-track-code="{{ pkg.track_code }}">
-                                            <i class="ri-user-add-line"></i> Назначить клиента
+                                            <i class="ri-user-add-line"></i> {% trans "Назначить клиента" %}
                                         </button>
                                         <button
                                             class="delete-btn text-xs bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
                                             data-track-id="{{ pkg.id }}"
                                             data-track-code="{{ pkg.track_code }}">
-                                            <i class="ri-delete-bin-line"></i> Удалить
+                                            <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
                                         </button>
                                     </div>
                                 </td>
@@ -218,7 +219,7 @@
                 {% else %}
                 <div class="p-12 text-center text-gray-400">
                     <i class="ri-inbox-2-line text-4xl mb-3 block"></i>
-                    <p>Нет неопознанных посылок без владельца</p>
+                    <p>{% trans "Нет неопознанных посылок без владельца" %}</p>
                 </div>
                 {% endif %}
             </section>
@@ -229,19 +230,19 @@
     <div id="assignModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-semibold text-gray-800">Назначить клиента</h3>
+                <h3 class="text-base font-semibold text-gray-800">{% trans "Назначить клиента" %}</h3>
                 <button onclick="closeAssignModal()" class="text-gray-400 hover:text-gray-600">
                     <i class="ri-close-line text-xl"></i>
                 </button>
             </div>
             <p class="text-sm text-gray-500 mb-4">
-                Трек-код: <span id="assignTrackCode" class="font-mono font-medium text-gray-800"></span>
+                {% trans "Трек-код:" %} <span id="assignTrackCode" class="font-mono font-medium text-gray-800"></span>
             </p>
             <div class="mb-4">
-                <label class="block text-xs font-medium text-gray-600 mb-1">Поиск клиента</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Поиск клиента" %}</label>
                 <input type="text" id="userSearchInput" autocomplete="off"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    placeholder="Введите имя или логин...">
+                    placeholder="{% trans "Введите имя или логин..." %}">
                 <div id="userSearchResults" class="mt-1 border border-gray-200 rounded-lg bg-white shadow hidden max-h-48 overflow-y-auto"></div>
             </div>
             <div id="selectedUserInfo" class="hidden mb-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
@@ -250,11 +251,11 @@
                 <input type="hidden" id="selectedUserId">
             </div>
             <div class="flex gap-3 justify-end">
-                <button onclick="closeAssignModal()" class="text-sm text-gray-500 hover:text-gray-700 px-4 py-2">Отмена</button>
+                <button onclick="closeAssignModal()" class="text-sm text-gray-500 hover:text-gray-700 px-4 py-2">{% trans "Отмена" %}</button>
                 <button id="confirmAssignBtn" onclick="confirmAssign()"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition"
                     disabled>
-                    <i class="ri-check-line mr-1"></i> Назначить
+                    <i class="ri-check-line mr-1"></i> {% trans "Назначить" %}
                 </button>
             </div>
         </div>
@@ -306,7 +307,7 @@
                 .then(data => {
                     const box = document.getElementById('userSearchResults');
                     if (!data.users.length) {
-                        box.innerHTML = '<p class="px-3 py-2 text-sm text-gray-400">Пользователи не найдены</p>';
+                        box.innerHTML = '<p class="px-3 py-2 text-sm text-gray-400">{% trans "Пользователи не найдены" %}</p>';
                     } else {
                         box.innerHTML = data.users.map(u => `
                             <div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 transition user-option"

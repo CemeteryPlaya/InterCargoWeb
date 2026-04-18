@@ -6,6 +6,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from myprofile.models import TrackCode, ArchivedTrackCode, ReceiptItem
+from django.utils.translation import gettext as _
 
 
 def _safe_next_url(request, fallback='track_codes'):
@@ -90,10 +91,10 @@ def track_codes_view(request):
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
                     return _redirect(existing_track.id)
                 elif existing_track.owner == request.user:
-                    messages.warning(request, "Этот трек-код уже добавлен в ваш список.")
+                    messages.warning(request, _("Этот трек-код уже добавлен в ваш список."))
                     return _redirect(existing_track.id)
                 else:
-                    messages.error(request, "Этот трек-код уже зарегистрирован другим пользователем.")
+                    messages.error(request, _("Этот трек-код уже зарегистрирован другим пользователем."))
                     return _redirect()
 
             except TrackCode.DoesNotExist:
@@ -106,21 +107,21 @@ def track_codes_view(request):
                     track_code.set_status_date()
                     track_code.log_status_change(request.user)
                     track_code.save()
-                    messages.success(request, "Трек-код успешно добавлен.")
+                    messages.success(request, _("Трек-код успешно добавлен."))
                     return _redirect(track_code.id)
         else:
-            messages.error(request, "Введите трек-код.")
+            messages.error(request, _("Введите трек-код."))
             return _redirect()
     else:
         form = TrackCodeForm()
 
     track_codes_qs = TrackCode.objects.filter(owner=request.user).order_by('-update_date')
 
-    # Filter by status (single select)
-    status_filter = request.GET.get('status', '')
+    # Filter by status — supports single or multiple ?status=a&status=b
+    status_filters = [s for s in request.GET.getlist('status') if s]
 
-    if status_filter:
-        track_codes_qs = track_codes_qs.filter(status=status_filter)
+    if status_filters:
+        track_codes_qs = track_codes_qs.filter(status__in=status_filters)
 
     track_codes = list(track_codes_qs)
 
@@ -146,7 +147,7 @@ def track_codes_view(request):
         'track_codes': track_codes,
         'archived_codes': archived_codes,
         'form': form,
-        'current_filters': [status_filter] if status_filter else [],
+        'current_filters': status_filters,
         'duplicate_archived_codes': set(),
     })
 
@@ -158,9 +159,9 @@ def edit_track_code_description(request, track_id):
         if new_description is not None:
             track.description = new_description
             track.save()
-            messages.success(request, "Описание успешно обновлено.")
+            messages.success(request, _("Описание успешно обновлено."))
         else:
-            messages.error(request, "Некорректные данные.")
+            messages.error(request, _("Некорректные данные."))
     return redirect('track_codes')
 
 @login_required
@@ -189,9 +190,9 @@ def add_track_code_view(request):
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
                 elif existing_track.owner == request.user:
-                    messages.warning(request, "Этот трек-код уже добавлен в ваш список.")
+                    messages.warning(request, _("Этот трек-код уже добавлен в ваш список."))
                 else:
-                    messages.error(request, "Этот трек-код уже зарегистрирован другим пользователем.")
+                    messages.error(request, _("Этот трек-код уже зарегистрирован другим пользователем."))
                 return redirect('track_codes')
 
             except TrackCode.DoesNotExist:
@@ -203,10 +204,10 @@ def add_track_code_view(request):
                     track_code.set_status_date()
                     track_code.log_status_change(request.user)
                     track_code.save()
-                    messages.success(request, "Трек-код успешно добавлен.")
+                    messages.success(request, _("Трек-код успешно добавлен."))
                     return redirect('track_codes')
         else:
-            messages.error(request, "Введите трек-код.")
+            messages.error(request, _("Введите трек-код."))
             return redirect('track_codes')
     else:
         form = TrackCodeForm()
@@ -220,7 +221,7 @@ def archive_track_code(request, track_id):
     track.archived_at = timezone.now()
     track._skip_status_validation = True
     track.save(update_fields=['is_archived', 'archived_at'])
-    messages.success(request, "Трек-код перемещён в архив.")
+    messages.success(request, _("Трек-код перемещён в архив."))
     return redirect('track_codes')
 
 
@@ -232,7 +233,7 @@ def unarchive_track_code(request, track_id):
     track.archived_at = None
     track._skip_status_validation = True
     track.save(update_fields=['is_archived', 'archived_at'])
-    messages.success(request, "Трек-код восстановлен из архива.")
+    messages.success(request, _("Трек-код восстановлен из архива."))
     return redirect('track_codes')
 
 
@@ -242,7 +243,7 @@ def mass_archive_track_codes(request):
     """Массовая архивация трек-кодов."""
     track_ids = request.POST.getlist('track_ids')
     if not track_ids:
-        messages.info(request, "Не выбрано ни одного трек-кода.")
+        messages.info(request, _("Не выбрано ни одного трек-кода."))
         return redirect('track_codes')
 
     tracks = TrackCode.objects.filter(id__in=track_ids, owner=request.user)

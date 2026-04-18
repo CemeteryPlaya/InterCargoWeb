@@ -12,6 +12,7 @@ from django.shortcuts import render
 
 from myprofile.models import NotificationMute
 from myprofile.permissions import is_staff
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def _is_staff(user):
 def notification_mutes_view(request):
     """Страница управления заглушками уведомлений (только для персонала)."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     # Автоматически деактивируем просроченные заглушки
     now = timezone.now()
@@ -60,7 +61,7 @@ def notification_mutes_view(request):
 def create_mute(request):
     """Создать новую заглушку уведомлений."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     user_id = request.POST.get('user_id', '').strip()   # пусто = глобальная
     channel = request.POST.get('channel', 'all')
@@ -76,7 +77,7 @@ def create_mute(request):
         try:
             target_user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
+            return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
 
     expires_at = None
     if duration_type == 'hours' and hours_raw:
@@ -86,7 +87,7 @@ def create_mute(request):
                 raise ValueError
             expires_at = timezone.now() + timedelta(hours=hours)
         except ValueError:
-            return JsonResponse({'error': 'Некорректное количество часов.'}, status=400)
+            return JsonResponse({'error': _('Некорректное количество часов.')}, status=400)
 
     # Если уже есть активная заглушка для этого же user+channel — деактивируем старую
     qs_existing = NotificationMute.objects.filter(
@@ -124,7 +125,7 @@ def create_mute(request):
 def deactivate_mute(request, mute_id):
     """Деактивировать (включить обратно) заглушку уведомлений."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
@@ -132,7 +133,7 @@ def deactivate_mute(request, mute_id):
         mute = NotificationMute.objects.get(id=mute_id)
     except NotificationMute.DoesNotExist:
         if is_ajax:
-            return JsonResponse({'error': 'Заглушка не найдена.'}, status=404)
+            return JsonResponse({'error': _('Заглушка не найдена.')}, status=404)
         return redirect('notification_mutes')
 
     mute.is_active = False
@@ -147,7 +148,7 @@ def deactivate_mute(request, mute_id):
 def search_users(request):
     """AJAX: поиск клиентов для выбора в форме заглушки."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     q = request.GET.get('q', '').strip()
     if len(q) < 2:

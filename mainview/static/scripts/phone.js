@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+  var _i18n = document.getElementById('js-i18n')?.dataset || {};
   var phoneInputs = document.querySelectorAll('input[name="phone"], input[type="tel"]');
 
   phoneInputs.forEach(function (phoneInput) {
@@ -138,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             errorMsg.className = 'phone-error text-xs text-red-600 mt-1';
             phoneInput.parentElement.appendChild(errorMsg);
           }
-          errorMsg.textContent = 'Введите номер полностью: +7 (XXX) XXX-XX-XX';
+          errorMsg.textContent = _i18n.enterNumber || 'Введите номер полностью: +7 (XXX) XXX-XX-XX';
           phoneInput.focus();
         } else {
           phoneInput.classList.remove('border-red-500');

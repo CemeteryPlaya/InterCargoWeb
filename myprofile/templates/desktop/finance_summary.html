@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Финансовая сводка</title>
+    <title>{% trans "Inter Cargo - Финансовая сводка" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -32,10 +33,10 @@
         <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-                <h1 class="text-lg font-bold text-center">Финансовая сводка</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Финансовая сводка" %}</h1>
             </div>
             <h1 class="text-2xl font-bold text-gray-800 mb-6 hidden md:block">
-                <i class="ri-money-dollar-circle-line text-primary"></i> Финансовая сводка
+                <i class="ri-money-dollar-circle-line text-primary"></i> {% trans "Финансовая сводка" %}
             </h1>
 
             <!-- Переключатель режима и фильтры -->
@@ -45,12 +46,12 @@
                         <a href="{% url 'finance_summary' %}?mode=daily&date={{ selected_date|date:'Y-m-d' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                             {% if view_mode == 'daily' %}bg-primary text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
-                            <i class="ri-calendar-line mr-1"></i> По дням
+                            <i class="ri-calendar-line mr-1"></i> {% trans "По дням" %}
                         </a>
                         <a href="{% url 'finance_summary' %}?mode=monthly&month={{ selected_month }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                             {% if view_mode == 'monthly' %}bg-primary text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
-                            <i class="ri-calendar-2-line mr-1"></i> По месяцам
+                            <i class="ri-calendar-2-line mr-1"></i> {% trans "По месяцам" %}
                         </a>
                     </div>
 
@@ -58,13 +59,13 @@
                         <input type="hidden" name="mode" value="{{ view_mode }}">
                         {% if view_mode == 'daily' %}
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Дата</label>
+                            <label class="block text-xs text-gray-500 mb-1">{% trans "Дата" %}</label>
                             <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
                                 class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         </div>
                         {% else %}
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Месяц</label>
+                            <label class="block text-xs text-gray-500 mb-1">{% trans "Месяц" %}</label>
                             <input type="month" name="month" value="{{ selected_month }}"
                                 class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         </div>
@@ -72,9 +73,9 @@
 
                         {% if show_accountant %}
                         <div class="min-w-0 flex-1 md:flex-none">
-                            <label class="block text-xs text-gray-500 mb-1">Пункт выдачи</label>
+                            <label class="block text-xs text-gray-500 mb-1">{% trans "Пункт выдачи" %}</label>
                             <select name="pickup" class="w-full md:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm max-w-xs">
-                                <option value="">Все ПВЗ</option>
+                                <option value="">{% trans "Все ПВЗ" %}</option>
                                 {% for pp in pickups %}
                                 <option value="{{ pp.id }}" {% if selected_pickup == pp.id|stringformat:"d" %}selected{% endif %}>
                                     {{ pp.address }} ({{ pp.premise_name }})
@@ -85,7 +86,7 @@
                         {% endif %}
 
                         <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 text-sm transition">
-                            <i class="ri-filter-line mr-1"></i> Показать
+                            <i class="ri-filter-line mr-1"></i> {% trans "Показать" %}
                         </button>
                     </form>
                 </div>
@@ -94,28 +95,28 @@
             <!-- ==================== СВОДКА ДЛЯ БУХГАЛТЕРА/ОПЕРАТОРА ==================== -->
             {% if show_driver %}
             <h2 class="text-lg font-bold text-gray-800 mb-4 mt-2">
-                <i class="ri-money-dollar-circle-line text-primary"></i> Финансовая сводка по чекам
+                <i class="ri-money-dollar-circle-line text-primary"></i> {% trans "Финансовая сводка по чекам" %}
             </h2>
             {% endif %}
 
             <!-- Итоговые карточки -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white border rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">Всего чеков</div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Всего чеков" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ totals.total_receipts }}</div>
                 </div>
                 <div class="bg-white border rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">Общая сумма</div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Общая сумма" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ totals.total_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">{{ totals.total_weight|floatformat:3 }} кг</div>
                 </div>
                 <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">Оплачено</div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Оплачено" %}</div>
                     <div class="text-2xl font-bold text-green-600">{{ totals.paid_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">{{ totals.paid_count }} чеков</div>
                 </div>
                 <div class="bg-white border border-red-200 rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">Не оплачено</div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Не оплачено" %}</div>
                     <div class="text-2xl font-bold text-red-600">{{ totals.unpaid_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">{{ totals.unpaid_count }} чеков</div>
                 </div>
@@ -135,12 +136,12 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 border-b">
-                                <th class="px-4 py-3 text-left font-medium">ПВЗ</th>
-                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
-                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
-                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "ПВЗ" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Чеков" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Сумма (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Оплачено (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Не оплачено (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -174,11 +175,11 @@
                                         <table class="w-full text-sm">
                                             <thead>
                                                 <tr class="text-gray-500 text-xs border-b border-purple-100">
-                                                    <th class="px-6 py-2 text-left font-medium">Клиент</th>
-                                                    <th class="px-4 py-2 text-right font-medium">Чеков</th>
-                                                    <th class="px-4 py-2 text-right font-medium">Вес (кг)</th>
-                                                    <th class="px-4 py-2 text-right font-medium">Сумма (₸)</th>
-                                                    <th class="px-4 py-2 text-right font-medium">Оплачено (₸)</th>
+                                                    <th class="px-6 py-2 text-left font-medium">{% trans "Клиент" %}</th>
+                                                    <th class="px-4 py-2 text-right font-medium">{% trans "Чеков" %}</th>
+                                                    <th class="px-4 py-2 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                                                    <th class="px-4 py-2 text-right font-medium">{% trans "Сумма (₸)" %}</th>
+                                                    <th class="px-4 py-2 text-right font-medium">{% trans "Оплачено (₸)" %}</th>
                                                     <th class="px-4 py-2"></th>
                                                 </tr>
                                             </thead>
@@ -213,18 +214,18 @@
                 <div class="px-4 py-3 bg-purple-50 border-b border-purple-200">
                     <h2 class="font-semibold text-purple-800">
                         <i class="ri-home-line text-purple-600 mr-1"></i>
-                        Доставка на дом
+                        {% trans "Доставка на дом" %}
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="text-gray-500 text-xs border-b">
-                                <th class="px-4 py-2 text-left font-medium">Клиент</th>
-                                <th class="px-4 py-2 text-right font-medium">Чеков</th>
-                                <th class="px-4 py-2 text-right font-medium">Вес (кг)</th>
-                                <th class="px-4 py-2 text-right font-medium">Сумма (₸)</th>
-                                <th class="px-4 py-2 text-right font-medium">Оплачено (₸)</th>
+                                <th class="px-4 py-2 text-left font-medium">{% trans "Клиент" %}</th>
+                                <th class="px-4 py-2 text-right font-medium">{% trans "Чеков" %}</th>
+                                <th class="px-4 py-2 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                                <th class="px-4 py-2 text-right font-medium">{% trans "Сумма (₸)" %}</th>
+                                <th class="px-4 py-2 text-right font-medium">{% trans "Оплачено (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -248,18 +249,18 @@
             <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
-                        <i class="ri-calendar-line text-primary mr-1"></i> Последние 30 дней
+                        <i class="ri-calendar-line text-primary mr-1"></i> {% trans "Последние 30 дней" %}
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 border-b">
-                                <th class="px-4 py-3 text-left font-medium">Дата</th>
-                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
-                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Дата" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Чеков" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Сумма (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Оплачено (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Не оплачено (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -278,7 +279,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">Нет данных за этот период</td>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">{% trans "Нет данных за этот период" %}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -298,12 +299,12 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 border-b">
-                                <th class="px-4 py-3 text-left font-medium">Дата</th>
-                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
-                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
-                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Дата" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Чеков" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Сумма (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Оплачено (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Не оплачено (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -321,7 +322,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">Нет данных за этот месяц</td>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">{% trans "Нет данных за этот месяц" %}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -334,18 +335,18 @@
             <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
-                        <i class="ri-calendar-2-line text-primary mr-1"></i> Последние 12 месяцев
+                        <i class="ri-calendar-2-line text-primary mr-1"></i> {% trans "Последние 12 месяцев" %}
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 border-b">
-                                <th class="px-4 py-3 text-left font-medium">Месяц</th>
-                                <th class="px-4 py-3 text-right font-medium">Чеков</th>
-                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Оплачено (₸)</th>
-                                <th class="px-4 py-3 text-right font-medium">Не оплачено (₸)</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Месяц" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Чеков" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Сумма (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Оплачено (₸)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Не оплачено (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -373,21 +374,21 @@
             {% if show_driver %}
             <!-- ==================== БЛОК ДОСТАВЩИКА ==================== -->
             <h2 class="text-lg font-bold text-gray-800 mb-4">
-                <i class="ri-truck-line text-primary"></i> Оплата за доставку
+                <i class="ri-truck-line text-primary"></i> {% trans "Оплата за доставку" %}
             </h2>
 
             <!-- Итоговые карточки водителя -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-white border rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">Доставок</div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Доставок" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_deliveries }}</div>
                 </div>
                 <div class="bg-white border rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">Общий вес</div>
-                    <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_weight|floatformat:3 }} <span class="text-sm font-normal text-gray-500">кг</span></div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Общий вес" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_weight|floatformat:3 }} <span class="text-sm font-normal text-gray-500">{% trans "кг" %}</span></div>
                 </div>
                 <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">К выплате</div>
+                    <div class="text-xs text-gray-500 mb-1">{% trans "К выплате" %}</div>
                     <div class="text-2xl font-bold text-green-600">{{ driver_totals.total_earnings|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">Ставка: {{ delivery_rate|floatformat:0 }} ₸/кг</div>
                 </div>
@@ -406,11 +407,11 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 border-b">
-                                <th class="px-4 py-3 text-left font-medium">Дата</th>
-                                <th class="px-4 py-3 text-left font-medium">Пункт выдачи</th>
-                                <th class="px-4 py-3 text-right font-medium">Посылок</th>
-                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
-                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Дата" %}</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Пункт выдачи" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Посылок" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Сумма (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -424,14 +425,14 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">Нет доставок за выбранный период</td>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">{% trans "Нет доставок за выбранный период" %}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                         {% if driver_groups %}
                         <tfoot>
                             <tr class="bg-gray-50 border-t-2 border-gray-300 font-bold">
-                                <td class="px-4 py-3 text-gray-800" colspan="2">Итого</td>
+                                <td class="px-4 py-3 text-gray-800" colspan="2">{% trans "Итого" %}</td>
                                 <td class="px-4 py-3 text-right text-gray-800">{{ driver_totals.total_tracks }}</td>
                                 <td class="px-4 py-3 text-right text-gray-800">{{ driver_totals.total_weight|floatformat:3 }}</td>
                                 <td class="px-4 py-3 text-right text-green-600">{{ driver_totals.total_earnings|floatformat:0 }}</td>
@@ -455,10 +456,10 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 border-b">
-                                <th class="px-4 py-3 text-left font-medium">Дата</th>
-                                <th class="px-4 py-3 text-right font-medium">Доставок</th>
-                                <th class="px-4 py-3 text-right font-medium">Вес (кг)</th>
-                                <th class="px-4 py-3 text-right font-medium">Сумма (₸)</th>
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Дата" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Доставок" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Сумма (₸)" %}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">

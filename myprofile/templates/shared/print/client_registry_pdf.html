@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -10,12 +11,12 @@
 </head>
 
 <body>
-    <button class="no-print" onclick="window.print()">Печать</button>
+    <button class="no-print" onclick="window.print()">{% trans "Печать" %}</button>
 
     <div class="header-section">
         <table style="width: auto; margin-bottom: 10px;">
             <tr>
-                <td style="border: none; font-weight: bold; color: #888; width: 100px;">Дата</td>
+                <td style="border: none; font-weight: bold; color: #888; width: 100px;">{% trans "Дата" %}</td>
                 <td style="border: 1px solid #888; width: 150px; text-align: center;">
                     {{ registry.registry_date|date:"d.m.Y" }}</td>
             </tr>
@@ -25,12 +26,12 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 200px;">Клиент</th>
-                <th style="width: 50px;">Кол-во</th>
-                <th style="width: 80px;">Вес, кг</th>
-                <th style="width: 80px;">Сумма, тг</th>
-                <th style="width: 100px;">Ячейка</th>
-                <th style="width: 100px;">Выдано</th>
+                <th style="width: 200px;">{% trans "Клиент" %}</th>
+                <th style="width: 50px;">{% trans "Кол-во" %}</th>
+                <th style="width: 80px;">{% trans "Вес, кг" %}</th>
+                <th style="width: 80px;">{% trans "Сумма, тг" %}</th>
+                <th style="width: 100px;">{% trans "Ячейка" %}</th>
+                <th style="width: 100px;">{% trans "Выдано" %}</th>
             </tr>
         </thead>
 
@@ -39,7 +40,7 @@
             <!-- Pickup Point Header Row -->
             <tr class="pickup-header-row" style="background-color: #f0f0f0;">
                 <td colspan="6" style="text-align: left; font-weight: bold; border: 1px solid #888; padding: 5px;">
-                    Пункт выдачи:
+                    {% trans "Пункт выдачи:" %}
                 </td>
                 <td></td>
                 <td>
@@ -62,7 +63,7 @@
             </tr>
             {% endfor %}
             <tr class="totals-row">
-                <td class="text-left">ИТОГО:</td>
+                <td class="text-left">{% trans "ИТОГО:" %}</td>
                 <td id="total-count-{{ pickup_code }}">{{ info.total_count }}</td>
                 <td id="total-weight-{{ pickup_code }}">{{ info.total_weight|floatformat:3 }}</td>
                 <td id="total-sum-{{ pickup_code }}">{{ info.total_sum|floatformat:0 }}</td>

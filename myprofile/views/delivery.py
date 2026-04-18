@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 from myprofile.permissions import is_driver as _is_driver_perm
+from django.utils.translation import gettext as _
 
 
 def _is_driver(user):
@@ -136,7 +137,7 @@ def _build_pickup_date_groups(status):
 @login_required
 def delivery_view(request):
     if not _is_driver(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     # Пункты с посылками в статусе 'delivered' (готовы к забору) — группировка по дате
     pending_pickups = _build_pickup_date_groups('delivered')
@@ -199,7 +200,7 @@ def delivery_view(request):
 @require_POST
 def take_delivery(request):
     if not _is_driver(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     pickup_id = request.POST.get('pickup_id')
     home_client_ids = request.POST.getlist('home_client_ids')
@@ -213,7 +214,7 @@ def take_delivery(request):
         scanned_receipts = []
 
     if not pickup_id and not home_client_ids:
-        messages.error(request, "Выберите хотя бы один пункт выдачи или клиента.")
+        messages.error(request, _("Выберите хотя бы один пункт выдачи или клиента."))
         return redirect('delivery')
 
     # Парсим фильтр по дате прихода
@@ -386,7 +387,7 @@ def take_delivery(request):
     if updated:
         messages.success(request, f"Взято в доставку: {updated} посылок")
     else:
-        messages.info(request, "Нет посылок для доставки в выбранных пунктах.")
+        messages.info(request, _("Нет посылок для доставки в выбранных пунктах."))
 
     return redirect('delivery')
 
@@ -475,12 +476,12 @@ def _send_delivery_notifications_bg(email_batch, tg_track_data):
 @require_POST
 def complete_delivery(request):
     if not _is_driver(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     # Формат значений: "pickup_id:YYYY-MM-DD" или "pickup_id:"
     pickup_entries = request.POST.getlist('pickup_ids')
     if not pickup_entries:
-        messages.error(request, "Выберите хотя бы один пункт выдачи.")
+        messages.error(request, _("Выберите хотя бы один пункт выдачи."))
         return redirect('delivery')
 
     from datetime import datetime as _dt
@@ -591,7 +592,7 @@ def complete_delivery(request):
     if updated:
         messages.success(request, f"Доставлено на ПВЗ: {updated} посылок. Уведомления отправляются.")
     else:
-        messages.info(request, "Нет посылок для завершения доставки в выбранных пунктах.")
+        messages.info(request, _("Нет посылок для завершения доставки в выбранных пунктах."))
 
     return redirect('delivery')
 
@@ -601,22 +602,22 @@ def complete_delivery(request):
 def driver_issue(request):
     """Выдача товара водителем при доставке на дом."""
     if not _is_driver(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     user_id_raw = request.POST.get('user_id')
     if not user_id_raw:
-        messages.error(request, "Не указан клиент.")
+        messages.error(request, _("Не указан клиент."))
         return redirect('delivery')
 
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
     if not home_pp:
-        messages.error(request, "Пункт 'Доставка на дом' не настроен.")
+        messages.error(request, _("Пункт 'Доставка на дом' не настроен."))
         return redirect('delivery')
 
     try:
         client_user = User.objects.get(id=user_id_raw)
     except User.DoesNotExist:
-        messages.error(request, "Клиент не найден.")
+        messages.error(request, _("Клиент не найден."))
         return redirect('delivery')
     tracks = list(TrackCode.objects.filter(
         status='shipping_pp',
@@ -626,7 +627,7 @@ def driver_issue(request):
     client_name = client_user.username
 
     if not tracks:
-        messages.info(request, "Нет посылок для выдачи этому клиенту.")
+        messages.info(request, _("Нет посылок для выдачи этому клиенту."))
         return redirect('delivery')
 
     today = timezone.localdate()
@@ -703,7 +704,7 @@ def driver_issue(request):
 def get_pickup_receipts(request):
     """AJAX: возвращает чеки ПВЗ, сгруппированные по клиентам."""
     if not _is_driver(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     pickup_id = request.GET.get('pickup_id')
     filter_date_str = request.GET.get('delivered_date', '')
@@ -795,7 +796,7 @@ def get_pickup_receipts(request):
                 'receipts': {},
             }
         # Помечаем как "без чека"
-        no_receipt_key = '__no_receipt__'
+        no_receipt_key = '__no_receipt__('
         if no_receipt_key not in clients_map[username]['receipts']:
             clients_map[username]['receipts'][no_receipt_key] = {
                 'receipt_number': None,
@@ -815,7 +816,7 @@ def get_pickup_receipts(request):
                 [r for r in client['receipts'].values() if r['receipt_number']],
                 key=lambda r: r['receipt_number'],
             ),
-            'no_receipt_tracks': client['receipts'].get('__no_receipt__', {}).get('track_count', 0),
+            'no_receipt_tracks': client['receipts'].get('__no_receipt__(', {}).get('track_count', 0),
         })
 
     return JsonResponse({'clients': result})

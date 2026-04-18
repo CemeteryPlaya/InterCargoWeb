@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Доставка</title>
+    <title>{% trans "Inter Cargo - Доставка" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -25,6 +26,18 @@
 
 <body class="bg-gray-50 min-h-screen">
     {% include 'shared/header.html' %}
+    <div id="js-i18n-delivery" style="display:none"
+         data-load-error="{% trans 'Ошибка загрузки данных. Попробуйте снова.' %}"
+         data-mark-manual="{% trans 'Отметить вручную' %}"
+         data-camera-denied="{% trans 'Не удалось получить доступ к камере. Разрешите доступ в настройках браузера.' %}"
+         data-qr-already-scanned="{% trans 'Этот QR-код уже отсканирован: {code}' %}"
+         data-qr-unknown="{% trans 'Неизвестный QR-код: {code}' %}"
+         data-scan-incomplete="{% trans 'Сканирование не завершено. Вы уверены, что хотите отменить?' %}"
+         data-leave-confirm="{% trans 'Сканирование не завершено. Вы уверены, что хотите покинуть страницу?' %}"
+         data-no-qr-title="{% trans 'Нет QR-кодов для сканирования' %}"
+         data-no-qr-desc="{% trans 'У клиентов нет чеков — можно сразу взять в доставку' %}"
+         data-all-scanned="{% trans 'Все QR-коды отсканированы!' %}"
+    ></div>
 
     {% block content %}
     <div class="flex min-h-screen">
@@ -32,9 +45,9 @@
         <div class="flex-1 mx-auto p-4 md:p-6 bg-white rounded-lg shadow mt-10">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Доставка</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Доставка" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">Доставка</h2>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Доставка" %}</h2>
 
             {% if messages %}
             <ul class="mb-4">
@@ -48,19 +61,19 @@
             <div class="flex border-b border-gray-200 mb-6 flex-wrap">
                 <button id="tab-take" class="tab-delivery-btn px-6 py-3 font-medium text-sm border-b-2 border-primary text-primary transition-colors"
                     data-tab="take">
-                    <i class="ri-truck-line"></i> Взять в доставку
+                    <i class="ri-truck-line"></i> {% trans "Взять в доставку" %}
                 </button>
                 <button id="tab-complete" class="tab-delivery-btn px-6 py-3 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
                     data-tab="complete">
-                    <i class="ri-checkbox-circle-line"></i> Завершить доставку
+                    <i class="ri-checkbox-circle-line"></i> {% trans "Завершить доставку" %}
                 </button>
                 <button id="tab-issue" class="tab-delivery-btn px-6 py-3 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
                     data-tab="issue">
-                    <i class="ri-hand-coin-line"></i> Выдача товара
+                    <i class="ri-hand-coin-line"></i> {% trans "Выдача товара" %}
                 </button>
                 <button id="tab-history" class="tab-delivery-btn px-6 py-3 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
                     data-tab="history">
-                    <i class="ri-history-line"></i> История доставок
+                    <i class="ri-history-line"></i> {% trans "История доставок" %}
                 </button>
             </div>
 
@@ -72,7 +85,7 @@
                 {% if pending_pickups or home_delivery_clients %}
 
                     {% if pending_pickups %}
-                    <h3 class="text-lg font-medium text-gray-700 mb-3"><i class="ri-map-pin-line text-red-500"></i> Пункты выдачи</h3>
+                    <h3 class="text-lg font-medium text-gray-700 mb-3"><i class="ri-map-pin-line text-red-500"></i> {% trans "Пункты выдачи" %}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         {% for pp in pending_pickups %}
                         <div class="delivery-card block border border-gray-200 rounded-lg p-4 hover:border-primary hover:shadow-md transition-all">
@@ -97,7 +110,7 @@
                                     data-pickup-id="{{ pp.pickup.id }}"
                                     data-pickup-name="{{ pp.pickup.address }} — {{ pp.pickup.premise_name }}"
                                     data-delivered-date="{{ pp.delivered_date|date:'Y-m-d'|default:'' }}">
-                                <i class="ri-qr-scan-2-line mr-1"></i> Сканировать и взять
+                                <i class="ri-qr-scan-2-line mr-1"></i> {% trans "Сканировать и взять" %}
                             </button>
                         </div>
                         {% endfor %}
@@ -110,7 +123,7 @@
                         <details class="mb-6 border border-orange-200 rounded-lg overflow-hidden" open>
                             <summary class="flex items-center justify-between px-4 py-3 bg-orange-50 hover:bg-orange-100 cursor-pointer select-none transition">
                                 <span class="font-semibold text-orange-800">
-                                    <i class="ri-home-4-line mr-1"></i> Доставка на дом (Курьер)
+                                    <i class="ri-home-4-line mr-1"></i> {% trans "Доставка на дом (Курьер)" %}
                                 </span>
                                 <span class="text-sm text-orange-600">{{ home_delivery_clients|length }} клиентов</span>
                             </summary>
@@ -138,10 +151,10 @@
                         </details>
                         <div class="flex gap-3">
                             <button type="button" id="select-all-take" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition text-sm">
-                                Выбрать все
+                                {% trans "Выбрать все" %}
                             </button>
                             <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-red-600 transition">
-                                <i class="ri-truck-line"></i> Взять в доставку
+                                <i class="ri-truck-line"></i> {% trans "Взять в доставку" %}
                             </button>
                         </div>
                     </form>
@@ -150,7 +163,7 @@
                 {% else %}
                 <div class="text-center py-12 text-gray-500">
                     <i class="ri-inbox-line text-4xl mb-2"></i>
-                    <p>Нет посылок для доставки</p>
+                    <p>{% trans "Нет посылок для доставки" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -161,7 +174,7 @@
                 <form method="post" action="{% url 'complete_delivery' %}">
                     {% csrf_token %}
 
-                    <h3 class="text-lg font-medium text-gray-700 mb-3"><i class="ri-map-pin-line text-green-600"></i> Пункты выдачи</h3>
+                    <h3 class="text-lg font-medium text-gray-700 mb-3"><i class="ri-map-pin-line text-green-600"></i> {% trans "Пункты выдачи" %}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         {% for pp in in_transit_pickups %}
                         <label class="delivery-card cursor-pointer block border-2 border-yellow-400 rounded-lg p-4 hover:border-green-500 hover:shadow-md transition-all bg-white">
@@ -189,17 +202,17 @@
 
                     <div class="flex gap-3">
                         <button type="button" id="select-all-complete" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition text-sm">
-                            Выбрать все
+                            {% trans "Выбрать все" %}
                         </button>
                         <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
-                            <i class="ri-checkbox-circle-line"></i> Доставлено на ПВЗ
+                            <i class="ri-checkbox-circle-line"></i> {% trans "Доставлено на ПВЗ" %}
                         </button>
                     </div>
                 </form>
                 {% else %}
                 <div class="text-center py-12 text-gray-600">
                     <i class="ri-truck-line text-4xl mb-2"></i>
-                    <p>Нет посылок в доставке</p>
+                    <p>{% trans "Нет посылок в доставке" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -208,7 +221,7 @@
             <div id="panel-issue" class="tab-delivery-panel hidden">
                 {% if home_in_transit_clients %}
                 <h3 class="text-lg font-medium text-gray-700 mb-3">
-                    <i class="ri-home-4-line text-orange-600"></i> Доставка на дом (Курьер) — Выдача клиентам
+                    <i class="ri-home-4-line text-orange-600"></i> {% trans "Доставка на дом (Курьер) — Выдача клиентам" %}
                 </h3>
                 <div class="space-y-3">
                     {% for client in home_in_transit_clients %}
@@ -231,7 +244,7 @@
                             <input type="hidden" name="user_id" value="{{ client.user_id }}">
                             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm"
                                 onclick="return confirm('Подтвердить выдачу клиенту {{ client.full_name }}?')">
-                                <i class="ri-hand-coin-line"></i> Выдать
+                                <i class="ri-hand-coin-line"></i> {% trans "Выдать" %}
                             </button>
                         </form>
                     </div>
@@ -240,8 +253,8 @@
                 {% else %}
                 <div class="text-center py-12 text-gray-500">
                     <i class="ri-hand-coin-line text-4xl mb-2"></i>
-                    <p>Нет клиентов для выдачи</p>
-                    <p class="text-sm text-gray-400 mt-1">Здесь отображаются клиенты с доставкой на дом, ожидающие выдачу</p>
+                    <p>{% trans "Нет клиентов для выдачи" %}</p>
+                    <p class="text-sm text-gray-400 mt-1">{% trans "Здесь отображаются клиенты с доставкой на дом, ожидающие выдачу" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -290,7 +303,7 @@
                                             </span>
                                             {% else %}
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
-                                                <i class="ri-truck-line mr-1"></i> В пути
+                                                <i class="ri-truck-line mr-1"></i> {% trans "В пути" %}
                                             </span>
                                             {% endif %}
                                         </div>
@@ -302,9 +315,9 @@
                                         <table class="w-full text-sm">
                                             <thead>
                                                 <tr class="text-gray-500 border-b border-gray-200">
-                                                    <th class="py-2 text-left font-medium">Клиент</th>
-                                                    <th class="py-2 text-center font-medium">Посылок</th>
-                                                    <th class="py-2 text-right font-medium">Вес (кг)</th>
+                                                    <th class="py-2 text-left font-medium">{% trans "Клиент" %}</th>
+                                                    <th class="py-2 text-center font-medium">{% trans "Посылок" %}</th>
+                                                    <th class="py-2 text-right font-medium">{% trans "Вес (кг)" %}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -323,7 +336,7 @@
                                         </table>
                                         </div>
                                         {% else %}
-                                        <p class="text-sm text-gray-400 py-2">Нет данных о клиентах</p>
+                                        <p class="text-sm text-gray-400 py-2">{% trans "Нет данных о клиентах" %}</p>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -336,7 +349,7 @@
                 {% else %}
                 <div class="text-center py-12 text-gray-500">
                     <i class="ri-history-line text-4xl mb-2"></i>
-                    <p>История доставок пуста</p>
+                    <p>{% trans "История доставок пуста" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -347,7 +360,7 @@
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                 <div class="flex items-center justify-between px-5 py-4 border-b">
                     <h3 class="text-lg font-semibold text-gray-800">
-                        <i class="ri-qr-scan-2-line mr-1"></i> <span id="qr-modal-title">Сканирование</span>
+                        <i class="ri-qr-scan-2-line mr-1"></i> <span id="qr-modal-title">{% trans "Сканирование" %}</span>
                     </h3>
                     <button id="qr-modal-close" type="button" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
                 </div>
@@ -359,7 +372,7 @@
                     <!-- Progress -->
                     <div id="qr-status" class="mb-4">
                         <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
-                            <span>Отсканировано: <strong id="qr-scanned-count">0</strong> / <strong id="qr-total-count">0</strong></span>
+                            <span>{% trans "Отсканировано:" %} <strong id="qr-scanned-count">0</strong> / <strong id="qr-total-count">0</strong></span>
                             <span id="qr-progress-percent" class="font-medium text-primary">0%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -379,15 +392,15 @@
 
                 <div class="px-5 py-4 border-t bg-gray-50 flex gap-3 flex-wrap">
                     <button id="qr-cancel-btn" type="button" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                        Отмена
+                        {% trans "Отмена" %}
                     </button>
                     <button id="qr-select-all-btn" type="button"
                         class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                        <i class="ri-checkbox-multiple-line mr-1"></i> Выбрать все
+                        <i class="ri-checkbox-multiple-line mr-1"></i> {% trans "Выбрать все" %}
                     </button>
                     <button id="qr-submit-btn" type="button" disabled
                         class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="ri-truck-line mr-1"></i> Взять в доставку
+                        <i class="ri-truck-line mr-1"></i> {% trans "Взять в доставку" %}
                     </button>
                 </div>
             </div>

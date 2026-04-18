@@ -1,11 +1,12 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
-{% load static %}    	
+{% load static i18n %}    	
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Настройки</title>
+    <title>{% trans "Inter Cargo - Настройки" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -33,11 +34,11 @@
             <div class="flex-1 p-6 space-y-6">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-6 -mt-6 mb-4">
-                <h1 class="text-lg font-bold text-center">Настройки</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Настройки" %}</h1>
             </div>
             <section id="account-settings" class="bg-white p-6 rounded-lg shadow border border-gray-200">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">
-                    <i class="ri-settings-3-line text-red-500"></i> Настройки аккаунта
+                    <i class="ri-settings-3-line text-red-500"></i> {% trans "Настройки аккаунта" %}
                 </h2>
                 {% if messages %}
                 <div class="mb-6">
@@ -64,23 +65,23 @@
 
                     <!-- Фамилия -->
                     <div>
-                        <label for="last_name" class="block font-medium text-gray-700 mb-1">Фамилия</label>
+                        <label for="last_name" class="block font-medium text-gray-700 mb-1">{% trans "Фамилия" %}</label>
                         <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}"
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 {% if not can_edit %}bg-gray-100 cursor-not-allowed{% endif %}"
-                            placeholder="Введите фамилию" {% if not can_edit %}disabled{% endif %}>
+                            placeholder="{% trans "Введите фамилию" %}" {% if not can_edit %}disabled{% endif %}>
                     </div>
 
                     <!-- Имя -->
                     <div>
-                        <label for="first_name" class="block font-medium text-gray-700 mb-1">Имя</label>
+                        <label for="first_name" class="block font-medium text-gray-700 mb-1">{% trans "Имя" %}</label>
                         <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}"
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 {% if not can_edit %}bg-gray-100 cursor-not-allowed{% endif %}"
-                            placeholder="Введите имя" {% if not can_edit %}disabled{% endif %}>
+                            placeholder="{% trans "Введите имя" %}" {% if not can_edit %}disabled{% endif %}>
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label for="email" class="block font-medium text-gray-700 mb-1">Электронная почта</label>
+                        <label for="email" class="block font-medium text-gray-700 mb-1">{% trans "Электронная почта" %}</label>
                         <input type="email" name="email" id="email" value="{{ user.email }}"
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 {% if not can_edit %}bg-gray-100 cursor-not-allowed{% endif %}"
                             {% if not can_edit %}disabled{% endif %}>
@@ -88,7 +89,7 @@
 
                     <!-- Phone -->
                     <div>
-                        <label for="phone" class="block font-medium text-gray-700 mb-1">Номер телефона</label>
+                        <label for="phone" class="block font-medium text-gray-700 mb-1">{% trans "Номер телефона" %}</label>
                         <input type="text" name="phone" id="phone" value="{{ profile.phone }}"
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 {% if not can_edit %}bg-gray-100 cursor-not-allowed{% endif %}"
                             required {% if not can_edit %}disabled{% endif %}>
@@ -98,7 +99,7 @@
                     <div class="flex justify-end">
                         <button type="submit" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition {% if not can_edit %}opacity-50 cursor-not-allowed{% endif %}"
                             {% if not can_edit %}disabled{% endif %}>
-                            Сохранить изменения
+                            {% trans "Сохранить изменения" %}
                         </button>
                     </div>
                 </form>
@@ -106,13 +107,13 @@
 
             <section class="bg-white p-6 rounded-lg shadow border border-gray-200">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">
-                    <i class="ri-map-pin-line text-red-500"></i> Смена пункта выдачи
+                    <i class="ri-map-pin-line text-red-500"></i> {% trans "Смена пункта выдачи" %}
                 </h2>
 
                 {% if pickup %}
-                <p class="text-sm text-gray-600 mb-4">Текущий ПВЗ: <strong>{{ pickup }}</strong></p>
+                <p class="text-sm text-gray-600 mb-4">{% trans "Текущий ПВЗ:" %} <strong>{{ pickup }}</strong></p>
                 {% else %}
-                <p class="text-sm text-gray-600 mb-4">Текущий ПВЗ: <strong>не указан</strong></p>
+                <p class="text-sm text-gray-600 mb-4">{% trans "Текущий ПВЗ:" %} <strong>{% trans "не указан" %}</strong></p>
                 {% endif %}
 
                 {% if pending_request %}
@@ -127,10 +128,10 @@
                 <form method="post" action="{% url 'request_pickup_change' %}" class="space-y-4">
                     {% csrf_token %}
                     <div>
-                        <label for="new_pickup" class="block font-medium text-gray-700 mb-1">Новый пункт выдачи</label>
+                        <label for="new_pickup" class="block font-medium text-gray-700 mb-1">{% trans "Новый пункт выдачи" %}</label>
                         <select name="new_pickup" id="new_pickup" required
                             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 bg-white">
-                            <option value="">— Выберите ПВЗ —</option>
+                            <option value="">{% trans "— Выберите ПВЗ —" %}</option>
                             {% for pp in pickup_points %}
                             {% if pp != pickup %}
                             <option value="{{ pp.id }}">{{ pp }}</option>
@@ -141,7 +142,7 @@
                     <div class="flex justify-end">
                         <button type="submit" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition"
                             onclick="return confirm('Вы уверены? Повторную заявку можно подать только через 30 дней.')">
-                            Отправить заявку
+                            {% trans "Отправить заявку" %}
                         </button>
                     </div>
                 </form>
@@ -158,11 +159,11 @@
                         </div>
                         <div class="min-w-0">
                             {% if telegram_linked %}
-                            <p class="font-semibold text-sm text-gray-800">Telegram привязан</p>
-                            <p class="text-xs text-gray-500">Вы получаете уведомления в Telegram</p>
+                            <p class="font-semibold text-sm text-gray-800">{% trans "Telegram привязан" %}</p>
+                            <p class="text-xs text-gray-500">{% trans "Вы получаете уведомления в Telegram" %}</p>
                             {% else %}
-                            <p class="font-semibold text-sm text-gray-800">Telegram не привязан</p>
-                            <p class="text-xs text-gray-500">Привяжите аккаунт, чтобы получать уведомления</p>
+                            <p class="font-semibold text-sm text-gray-800">{% trans "Telegram не привязан" %}</p>
+                            <p class="text-xs text-gray-500">{% trans "Привяжите аккаунт, чтобы получать уведомления" %}</p>
                             {% endif %}
                         </div>
                     </div>
@@ -178,9 +179,42 @@
             </section>
             <section class="bg-white p-6 rounded-lg shadow border border-gray-200">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">
-                    <i class="ri-notification-3-line text-red-500"></i> Настройки уведомлений
+                    <i class="ri-translate-2 text-red-500"></i> {% trans "Язык интерфейса" %}
                 </h2>
-                <p class="text-sm text-gray-500 mb-4">Настройки распространяются на Email и Telegram уведомления.</p>
+                {% get_current_language as LANGUAGE_CODE %}
+                <div class="flex gap-3 flex-wrap">
+                    <form method="post" action="{% url 'set_language' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <input type="hidden" name="language" value="ru">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition {% if LANGUAGE_CODE == 'ru' %}bg-primary text-white shadow{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            {% trans "Русский" %}
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'set_language' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <input type="hidden" name="language" value="kk">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition {% if LANGUAGE_CODE == 'kk' %}bg-primary text-white shadow{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            {% trans "Қазақша" %}
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'set_language' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <input type="hidden" name="language" value="en">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition {% if LANGUAGE_CODE == 'en' %}bg-primary text-white shadow{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            English
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-lg shadow border border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">
+                    <i class="ri-notification-3-line text-red-500"></i> {% trans "Настройки уведомлений" %}
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">{% trans "Настройки распространяются на Email и Telegram уведомления." %}</p>
 
                 <form method="post" action="{% url 'save_notification_settings' %}" class="space-y-4">
                     {% csrf_token %}
@@ -192,8 +226,8 @@
                                 {% if notif_settings.level == 'only_ready' %}checked{% endif %}
                                 class="accent-red-500" onchange="toggleSelective(this)">
                             <div>
-                                <span class="font-medium text-gray-800">Только ПВЗ</span>
-                                <p class="text-sm text-gray-500">Уведомления только о доставке на пункт выдачи</p>
+                                <span class="font-medium text-gray-800">{% trans "Только ПВЗ" %}</span>
+                                <p class="text-sm text-gray-500">{% trans "Уведомления только о доставке на пункт выдачи" %}</p>
                             </div>
                         </label>
 
@@ -203,8 +237,8 @@
                                 {% if notif_settings.level == 'all' %}checked{% endif %}
                                 class="accent-red-500" onchange="toggleSelective(this)">
                             <div>
-                                <span class="font-medium text-gray-800">Все статусы</span>
-                                <p class="text-sm text-gray-500">Уведомления о каждом изменении статуса трек-кода</p>
+                                <span class="font-medium text-gray-800">{% trans "Все статусы" %}</span>
+                                <p class="text-sm text-gray-500">{% trans "Уведомления о каждом изменении статуса трек-кода" %}</p>
                             </div>
                         </label>
 
@@ -214,8 +248,8 @@
                                 {% if notif_settings.level == 'selective' %}checked{% endif %}
                                 class="accent-red-500" onchange="toggleSelective(this)">
                             <div>
-                                <span class="font-medium text-gray-800">Выборочно</span>
-                                <p class="text-sm text-gray-500">Выберите, о каких статусах получать уведомления</p>
+                                <span class="font-medium text-gray-800">{% trans "Выборочно" %}</span>
+                                <p class="text-sm text-gray-500">{% trans "Выберите, о каких статусах получать уведомления" %}</p>
                             </div>
                         </label>
                     </div>
@@ -224,24 +258,24 @@
                         <label class="flex items-center gap-2 text-sm text-gray-700">
                             <input type="checkbox" name="notify_shipped_cn" class="accent-red-500"
                                 {% if notif_settings.notify_shipped_cn %}checked{% endif %}>
-                            Отправлено из Китая
+                            {% trans "Отправлено из Китая" %}
                         </label>
                         <label class="flex items-center gap-2 text-sm text-gray-700">
                             <input type="checkbox" name="notify_delivered_sort" class="accent-red-500"
                                 {% if notif_settings.notify_delivered_sort %}checked{% endif %}>
-                            Сортировочный склад
+                            {% trans "Сортировочный склад" %}
                         </label>
                         <label class="flex items-center gap-2 text-sm text-gray-700">
                             <input type="checkbox" name="notify_shipping_pp" class="accent-red-500"
                                 {% if notif_settings.notify_shipping_pp %}checked{% endif %}>
-                            В доставке до ПВЗ
+                            {% trans "В доставке до ПВЗ" %}
                         </label>
-                        <p class="text-xs text-gray-400 mt-1">Уведомление о доставке на ПВЗ приходит всегда.</p>
+                        <p class="text-xs text-gray-400 mt-1">{% trans "Уведомление о доставке на ПВЗ приходит всегда." %}</p>
                     </div>
 
                     <div class="flex justify-end">
                         <button type="submit" class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition">
-                            Сохранить настройки
+                            {% trans "Сохранить настройки" %}
                         </button>
                     </div>
                 </form>

@@ -24,6 +24,7 @@ from myprofile.views.utils import (
     _recalc_receipt,
 )
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 def _can_access_service(user):
@@ -35,7 +36,7 @@ def _can_access_service(user):
 @login_required
 def service_view(request):
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
     return render(request, 'desktop/service.html')
 
 
@@ -48,7 +49,7 @@ def service_generate_packages(request):
     и нет невыданного ExtraditionPackage — создаёт пакет выдачи.
     """
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     # Находим всех пользователей с ready треками
     ready_tracks = TrackCode.objects.filter(
@@ -118,17 +119,17 @@ def service_generate_receipts(request):
     создаёт чеки для треков, у которых нет ReceiptItem.
     """
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     date_str = request.POST.get('date', '')
     if not date_str:
-        messages.error(request, "Не указана дата.")
+        messages.error(request, _("Не указана дата."))
         return redirect('service')
 
     try:
         target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        messages.error(request, "Некорректный формат даты.")
+        messages.error(request, _("Некорректный формат даты."))
         return redirect('service')
 
     # Треки за выбранную дату в статусах от delivered и выше (по delivered_date или Arrival)
@@ -178,17 +179,17 @@ def service_normalize_receipts(request):
     Если в чеке есть треки за другие даты — выносит их в отдельный чек.
     """
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     date_str = request.POST.get('date', '')
     if not date_str:
-        messages.error(request, "Не указана дата.")
+        messages.error(request, _("Не указана дата."))
         return redirect('service')
 
     try:
         target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
-        messages.error(request, "Некорректный формат даты.")
+        messages.error(request, _("Некорректный формат даты."))
         return redirect('service')
 
     RATE = get_global_price_per_kg()
@@ -258,7 +259,7 @@ def service_mark_claimed(request):
     и отмечает связанные чеки как is_claimed=True и is_paid=True.
     """
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     now = timezone.now()
 
@@ -268,7 +269,7 @@ def service_mark_claimed(request):
     )
 
     if not claimed_track_ids:
-        messages.info(request, "Нет трек-кодов со статусом «Выдано клиенту».")
+        messages.info(request, _("Нет трек-кодов со статусом «Выдано клиенту»."))
         return redirect('service')
 
     # Находим чеки, содержащие эти треки и ещё не отмеченные
@@ -280,7 +281,7 @@ def service_mark_claimed(request):
     count = receipts_to_update.count()
 
     if count == 0:
-        messages.info(request, "Все чеки уже отмечены как «Выдано клиенту».")
+        messages.info(request, _("Все чеки уже отмечены как «Выдано клиенту»."))
         return redirect('service')
 
     receipts_to_update.update(
@@ -387,7 +388,7 @@ def service_test_notification(request):
     (in-app, browser push, Telegram, email).
     """
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     notif_type = request.POST.get('notif_type', 'delivered')
     user = request.user
@@ -477,7 +478,7 @@ def service_restore_archived_tracks(request):
     Если трек-код уже существует в TrackCode — пропускаем.
     """
     if not _can_access_service(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     archived = ArchivedTrackCode.objects.all()
     restored = 0

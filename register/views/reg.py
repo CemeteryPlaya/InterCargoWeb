@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from register.models import PendingRegistration, UserProfile, PickupPoint
 from myprofile.models import Notification
+from django.utils.translation import gettext as _
 
 
 def pre_register(request):
@@ -66,46 +67,46 @@ def register_view(request):
         last_name = request.POST.get('last_name', '').strip()
 
         if not all([username, password, phone, pickup_id, email, first_name, last_name]):
-            messages.error(request, "Заполните все поля.")
+            messages.error(request, _("Заполните все поля."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         # Проверка подтверждения email
         verified_email = request.session.get('email_verified', '')
         if verified_email != email:
-            messages.error(request, "Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией.")
+            messages.error(request, _("Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         # Проверка ПВЗ
         try:
             pickup_point = PickupPoint.objects.get(id=pickup_id, is_active=True)
         except (PickupPoint.DoesNotExist, ValueError):
-            messages.error(request, "Выбранный пункт выдачи не найден.")
+            messages.error(request, _("Выбранный пункт выдачи не найден."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         # Проверяем существующего пользователя
         existing_user = User.objects.filter(username=username).first()
         if existing_user and existing_user.is_active:
-            messages.error(request, "Пользователь с таким логином уже существует.")
+            messages.error(request, _("Пользователь с таким логином уже существует."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if UserProfile.objects.filter(phone=phone).exclude(user=existing_user).exists():
-            messages.error(request, "Пользователь с таким номером телефона уже существует.")
+            messages.error(request, _("Пользователь с таким номером телефона уже существует."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if User.objects.filter(email=email).exclude(username=username).exists():
-            messages.error(request, "Пользователь с таким email уже существует.")
+            messages.error(request, _("Пользователь с таким email уже существует."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if PendingRegistration.objects.filter(login=username).exists():
-            messages.error(request, "Заявка с таким логином уже существует.")
+            messages.error(request, _("Заявка с таким логином уже существует."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if PendingRegistration.objects.filter(phone=phone).exists():
-            messages.error(request, "Заявка с таким номером телефона уже существует.")
+            messages.error(request, _("Заявка с таким номером телефона уже существует."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         if PendingRegistration.objects.filter(email=email).exists():
-            messages.error(request, "Заявка с таким email уже существует.")
+            messages.error(request, _("Заявка с таким email уже существует."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
         # Проверяем: есть ли неактивный User (созданный при приходе товаров) — регистрируем сразу
@@ -133,7 +134,7 @@ def register_view(request):
 
             request.session.pop('registration_data', None)
             request.session.pop('email_verified', None)
-            messages.success(request, "Регистрация прошла успешно! Вы можете войти в систему.")
+            messages.success(request, _("Регистрация прошла успешно! Вы можете войти в систему."))
             return redirect('login')
 
         # Создаём заявку на подтверждение HR

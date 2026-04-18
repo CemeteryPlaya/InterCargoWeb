@@ -14,6 +14,7 @@ from django.db.models import Q
 # RECEIPTS COMMENTED OUT: auto-creation disabled
 # from myprofile.views.utils import create_receipts_for_user
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, round_price as _round_price
+from django.utils.translation import gettext as _
 
 
 def _generate_qr_base64(text):

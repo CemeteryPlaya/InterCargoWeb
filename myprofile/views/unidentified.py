@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from myprofile.models import TrackCode, SortingLocation
 from myprofile.permissions import is_staff
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ def _is_staff(user):
 def unidentified_view(request):
     """Страница управления неопознанными посылками (только для персонала)."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     if request.method == 'POST':
         track_code_str = request.POST.get('track_code', '').strip()
@@ -32,7 +33,7 @@ def unidentified_view(request):
         note = request.POST.get('note', '').strip()
 
         if not track_code_str:
-            messages.error(request, "Введите трек-код.")
+            messages.error(request, _("Введите трек-код."))
             return redirect('unidentified')
 
         from decimal import Decimal, InvalidOperation
@@ -43,7 +44,7 @@ def unidentified_view(request):
                 if weight <= 0:
                     raise ValueError
             except (InvalidOperation, ValueError):
-                messages.error(request, "Некорректный вес.")
+                messages.error(request, _("Некорректный вес."))
                 return redirect('unidentified')
 
         sorting_location = None
@@ -127,21 +128,21 @@ def unidentified_view(request):
 def unidentified_assign_owner(request, track_id):
     """AJAX: назначить владельца неопознанной посылке (только без владельца)."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     try:
         track = TrackCode.all_objects.get(id=track_id, owner__isnull=True, status='unidentified')
     except TrackCode.DoesNotExist:
-        return JsonResponse({'error': 'Посылка не найдена или уже назначена.'}, status=404)
+        return JsonResponse({'error': _('Посылка не найдена или уже назначена.')}, status=404)
 
     user_id = request.POST.get('user_id', '').strip()
     if not user_id:
-        return JsonResponse({'error': 'Не указан пользователь.'}, status=400)
+        return JsonResponse({'error': _('Не указан пользователь.')}, status=400)
 
     try:
         owner = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
+        return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
 
     track.owner = owner
     track.status = 'delivered'
@@ -163,12 +164,12 @@ def unidentified_assign_owner(request, track_id):
 def unidentified_confirm(request, track_id):
     """AJAX: подтвердить заявку клиента — перевести в статус 'delivered'."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     try:
         track = TrackCode.all_objects.get(id=track_id, owner__isnull=False, status='unidentified')
     except TrackCode.DoesNotExist:
-        return JsonResponse({'error': 'Посылка не найдена.'}, status=404)
+        return JsonResponse({'error': _('Посылка не найдена.')}, status=404)
 
     track.status = 'delivered'
     track.delivered_date = track.delivered_date or timezone.localdate()
@@ -188,12 +189,12 @@ def unidentified_confirm(request, track_id):
 def unidentified_unassign(request, track_id):
     """AJAX: снять владельца — вернуть посылку в список без владельца."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     try:
         track = TrackCode.all_objects.get(id=track_id, owner__isnull=False, status='unidentified')
     except TrackCode.DoesNotExist:
-        return JsonResponse({'error': 'Посылка не найдена.'}, status=404)
+        return JsonResponse({'error': _('Посылка не найдена.')}, status=404)
 
     track.owner = None
     track.save(update_fields=['owner'])
@@ -206,12 +207,12 @@ def unidentified_unassign(request, track_id):
 def unidentified_delete(request, track_id):
     """AJAX: удалить неопознанную посылку (не на складе / передана другому карго)."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     try:
         track = TrackCode.all_objects.get(id=track_id, status='unidentified')
     except TrackCode.DoesNotExist:
-        return JsonResponse({'error': 'Посылка не найдена.'}, status=404)
+        return JsonResponse({'error': _('Посылка не найдена.')}, status=404)
 
     track.delete()
     return JsonResponse({'success': True, 'track_id': track_id})
@@ -221,7 +222,7 @@ def unidentified_delete(request, track_id):
 def unidentified_search_users(request):
     """AJAX: поиск пользователей для назначения владельца."""
     if not _is_staff(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     q = request.GET.get('q', '').strip()
     if len(q) < 2:

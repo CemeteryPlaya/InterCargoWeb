@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.conf import settings as django_settings
 from myprofile.models import Notification, GlobalSettings
 from register.models import PickupPoint
+from django.utils.translation import gettext as _
 
 
 @login_required

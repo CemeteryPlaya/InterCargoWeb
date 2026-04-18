@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 from myprofile.models import Extradition
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 def _can_view(user):
@@ -22,7 +23,7 @@ def _can_view(user):
 def pp_extradition_history_view(request):
     """История выдачи посылок на ПВЗ: Дата → Клиент → Чеки."""
     if not _can_view(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     try:
         pickup = request.user.userprofile.pickup

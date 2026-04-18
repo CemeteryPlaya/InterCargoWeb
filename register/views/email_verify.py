@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 from myprofile.email_utils import send_mail_logged
 from django.utils import timezone
 from register.models import EmailVerificationCode
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ def send_email_code(request):
     """AJAX: отправляет 6-значный код подтверждения на email."""
     email = request.POST.get('email', '').strip().lower()
     if not email:
-        return JsonResponse({'error': 'Введите email.'}, status=400)
+        return JsonResponse({'error': _('Введите email.')}, status=400)
 
     # Rate limit: 60 сек между отправками на один email
     now = timezone.now()
@@ -47,7 +48,7 @@ def send_email_code(request):
         )
     except Exception as e:
         logger.error(f"Ошибка отправки кода подтверждения email на {email}: {e}")
-        return JsonResponse({'error': 'Не удалось отправить письмо. Попробуйте позже.'}, status=500)
+        return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=500)
 
     # Сохраняем email в сессию
     request.session['verification_email'] = email
@@ -62,7 +63,7 @@ def verify_email_code(request):
     code = request.POST.get('code', '').strip()
 
     if not email or not code:
-        return JsonResponse({'error': 'Введите email и код.'}, status=400)
+        return JsonResponse({'error': _('Введите email и код.')}, status=400)
 
     now = timezone.now()
     verification = EmailVerificationCode.objects.filter(
@@ -70,15 +71,15 @@ def verify_email_code(request):
     ).order_by('-created_at').first()
 
     if not verification:
-        return JsonResponse({'error': 'Код не найден. Запросите новый код.'}, status=400)
+        return JsonResponse({'error': _('Код не найден. Запросите новый код.')}, status=400)
 
     # Проверка срока (10 минут)
     if (now - verification.created_at).total_seconds() > 600:
-        return JsonResponse({'error': 'Код истёк. Запросите новый.'}, status=400)
+        return JsonResponse({'error': _('Код истёк. Запросите новый.')}, status=400)
 
     # Проверка попыток
     if verification.attempts >= 5:
-        return JsonResponse({'error': 'Слишком много попыток. Запросите новый код.'}, status=429)
+        return JsonResponse({'error': _('Слишком много попыток. Запросите новый код.')}, status=429)
 
     if verification.code != code:
         verification.attempts += 1

@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from myprofile.models import TrackCode
 from register.models import UserProfile
 from myprofile.views.utils import send_grouped_notifications, add_bulk_result_messages
+from django.utils.translation import gettext as _
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
@@ -25,13 +26,13 @@ def update_tracks(request):
     weights_raw = request.POST.get('weights', '').strip()
 
     if not status or not update_date_str or not track_codes_raw:
-        messages.error(request, "Заполните все обязательные поля.")
+        messages.error(request, _("Заполните все обязательные поля."))
         return redirect('update_tracks')
 
     try:
         update_date = datetime.strptime(update_date_str, "%Y-%m-%d").date()
     except ValueError:
-        messages.error(request, "Неверный формат даты. Ожидается YYYY-MM-DD.")
+        messages.error(request, _("Неверный формат даты. Ожидается YYYY-MM-DD."))
         return redirect('update_tracks')
 
     track_codes = [line.strip() for line in track_codes_raw.splitlines() if line.strip()]
@@ -43,7 +44,7 @@ def update_tracks(request):
         usernames = [line.strip() for line in usernames_raw.splitlines() if line.strip()]
         weights = [line.strip() for line in weights_raw.splitlines() if line.strip()]
         if len(track_codes) != len(usernames) or len(track_codes) != len(weights):
-            messages.error(request, "Количество трек-кодов, пользователей и весов должно совпадать.")
+            messages.error(request, _("Количество трек-кодов, пользователей и весов должно совпадать."))
             return redirect('update_tracks')
 
     updated = 0

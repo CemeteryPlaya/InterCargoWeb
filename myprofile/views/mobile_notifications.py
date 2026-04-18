@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from myprofile.models import Notification
+from django.utils.translation import gettext as _
 from tgbot.services import is_telegram_linked, get_or_create_link_url
 
 

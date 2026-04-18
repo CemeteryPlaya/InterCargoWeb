@@ -13,6 +13,7 @@ from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession
 from myprofile.views.utils import notify_receipt_claimed_telegram
 from myprofile.receipt_lifecycle import issue_to_client as lifecycle_issue, ReceiptLifecycleError
 from register.models import UserProfile, PickupPoint
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +55,14 @@ def extradition_view(request):
     Проверяем оплату всех чеков, создаём Extradition и меняем статусы треков.
     """
     if not _can_issue(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     if request.method == 'POST':
         barcode = request.POST.get('barcode', '').strip()
         comment = request.POST.get('comment', '').strip()
 
         if not barcode:
-            messages.error(request, "Введите штрихкод пакета.")
+            messages.error(request, _("Введите штрихкод пакета."))
             return redirect('extradition')
 
         try:
@@ -186,11 +187,11 @@ def search_package(request):
     Возвращает данные о пакете с чеками, сгруппированными по Receipt.
     """
     if not _can_issue(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     barcode = request.GET.get('barcode', '').strip()
     if not barcode:
-        return JsonResponse({'error': 'Введите штрихкод'}, status=400)
+        return JsonResponse({'error': _('Введите штрихкод')}, status=400)
 
     try:
         package = ExtraditionPackage.objects.get(barcode=barcode)
@@ -295,7 +296,7 @@ def search_package(request):
 def get_sessions(request):
     """AJAX: Возвращает список открытых сессий выдачи для ПВЗ сотрудника."""
     if not _can_issue(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     try:
         worker_pickup = request.user.userprofile.pickup if not request.user.is_superuser else None
@@ -334,11 +335,11 @@ def get_sessions(request):
 def close_session(request):
     """AJAX: Закрывает (удаляет) сессию выдачи без оформления выдачи."""
     if not _can_issue(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     session_id = request.POST.get('session_id')
     if not session_id:
-        return JsonResponse({'error': 'Не указан ID сессии'}, status=400)
+        return JsonResponse({'error': _('Не указан ID сессии')}, status=400)
 
     try:
         ExtraditionSession.objects.filter(id=session_id).delete()
@@ -351,7 +352,7 @@ def close_session(request):
 @login_required
 @require_POST
 def toggle_payment(request):
-    return JsonResponse({'error': 'Оплата временно отключена'}, status=403)
+    return JsonResponse({'error': _('Оплата временно отключена')}, status=403)
 
 
 @login_required
@@ -360,18 +361,18 @@ def warehouse_get_receipts(request):
     AJAX GET: возвращает список невыданных чеков клиента для быстрой выдачи со Склада ПВЗ.
     """
     if not _can_issue(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     user_id = request.GET.get('user_id')
     if not user_id:
-        return JsonResponse({'error': 'Не указан клиент'}, status=400)
+        return JsonResponse({'error': _('Не указан клиент')}, status=400)
 
     from django.contrib.auth.models import User
     from myprofile.models import Receipt
     try:
         owner = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Клиент не найден'}, status=404)
+        return JsonResponse({'error': _('Клиент не найден')}, status=404)
 
     receipts = (
         Receipt.objects
@@ -432,20 +433,20 @@ def warehouse_quick_issue_receipt(request):
     помечает чек и треки как выданные.
     """
     if not _can_issue(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     from myprofile.models import Receipt
     receipt_id = request.POST.get('receipt_id', '').strip()
     if not receipt_id:
-        return JsonResponse({'error': 'Не указан ID чека'}, status=400)
+        return JsonResponse({'error': _('Не указан ID чека')}, status=400)
 
     try:
         receipt = Receipt.objects.prefetch_related('items__track_code', 'extradition_packages').get(id=receipt_id)
     except Receipt.DoesNotExist:
-        return JsonResponse({'error': 'Чек не найден'}, status=404)
+        return JsonResponse({'error': _('Чек не найден')}, status=404)
 
     if receipt.is_claimed:
-        return JsonResponse({'error': 'Чек уже выдан'}, status=400)
+        return JsonResponse({'error': _('Чек уже выдан')}, status=400)
 
     PICKUP_LABEL = "Быстрая выдача со Склад ПВЗ"
 
@@ -526,10 +527,10 @@ def warehouse_quick_issue_receipt(request):
 #     Принимает receipt_id, переключает is_paid.
 #     """
 #     if not _can_issue(request.user):
-#         return JsonResponse({'error': 'Нет доступа'}, status=403)
+#         return JsonResponse({'error': _('Нет доступа')}, status=403)
 #     receipt_id = request.POST.get('receipt_id', '').strip()
 #     if not receipt_id:
-#         return JsonResponse({'error': 'Не указан ID чека'}, status=400)
+#         return JsonResponse({'error': _('Не указан ID чека')}, status=400)
 #     try:
 #         receipt = Receipt.objects.get(id=receipt_id)
 #         receipt.is_paid = not receipt.is_paid
@@ -544,6 +545,6 @@ def warehouse_quick_issue_receipt(request):
 #             'paid_at': receipt.paid_at.strftime('%d.%m.%Y %H:%M') if receipt.paid_at else None,
 #         })
 #     except Receipt.DoesNotExist:
-#         return JsonResponse({'error': 'Чек не найден'}, status=404)
+#         return JsonResponse({'error': _('Чек не найден')}, status=404)
 #     except Exception as e:
 #         return JsonResponse({'error': str(e)}, status=500)
