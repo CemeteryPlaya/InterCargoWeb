@@ -80,7 +80,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-APP_VERSION = '1.3.9'
+APP_VERSION = '1.4.1'
 
 ROOT_URLCONF = 'cargo.urls'
 

@@ -236,7 +236,14 @@
             isStaff: {% if user.is_authenticated and user.userprofile.is_staff %}true{% else %}false{% endif %}
         };
     </script>
+    {% get_current_language as LANGUAGE_CODE %}
+    {% if LANGUAGE_CODE == 'en' %}
+    <script src="{% static 'scripts/tutorial.en.js' %}?v={{ APP_VERSION }}" defer></script>
+    {% elif LANGUAGE_CODE == 'kk' %}
+    <script src="{% static 'scripts/tutorial.kk.js' %}?v={{ APP_VERSION }}" defer></script>
+    {% else %}
     <script src="{% static 'scripts/tutorial.js' %}?v={{ APP_VERSION }}" defer></script>
+    {% endif %}
 </header>
 
 <!-- Мобильная нижняя навигация (для всех пользователей) -->
