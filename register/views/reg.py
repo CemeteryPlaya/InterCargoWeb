@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from register.models import PendingRegistration, UserProfile, PickupPoint
-from myprofile.models import Notification
 from django.utils.translation import gettext as _
+from myprofile.views.utils import notify_in_user_language
 
 
 def pre_register(request):
@@ -151,10 +151,8 @@ def register_view(request):
         # Создаем уведомления для HR пользователей
         hr_users = UserProfile.objects.filter(is_hr=True)
         for hr_profile in hr_users:
-            Notification.objects.create(
-                user=hr_profile.user,
-                message=f"Новая заявка на регистрацию клиента: {username}"
-            )
+            notify_in_user_language(hr_profile.user, lambda: _(
+                "Новая заявка на регистрацию клиента: %(username)s") % {'username': username})
 
         request.session.pop('registration_data', None)
         request.session.pop('email_verified', None)

@@ -43,9 +43,9 @@ def _group_by_date(notifications):
     for n in sorted_notifs:
         d = timezone.localdate(n.created_at)
         if d == today:
-            label = 'Сегодня'
+            label = _('Сегодня')
         elif d == yesterday:
-            label = 'Вчера'
+            label = _('Вчера')
         else:
             label = n.created_at.strftime('%d.%m.%Y')
 
@@ -93,17 +93,19 @@ def mobile_notifications_view(request):
     telegram_linked = is_telegram_linked(user)
     telegram_link_url = None if telegram_linked else get_or_create_link_url(user)
 
+    no_messages = _('Нет сообщений')
+
     categories = [
         {
             'key': 'parcels',
-            'label': 'Посылки',
+            'label': _('Посылки'),
             'icon': 'ri-box-3-line',
             'color': '#f97316',
             'bg': '#ffedd5',
             'notifications': parcels_notifs,
             'notifications_grouped': parcels_grouped,
             'unread': parcels_unread,
-            'last_message': parcels_notifs[0].message if parcels_notifs else 'Нет сообщений',
+            'last_message': parcels_notifs[0].message if parcels_notifs else no_messages,
             'last_date': parcels_notifs[0].created_at if parcels_notifs else None,
             'enabled': True,
         },
@@ -112,14 +114,14 @@ def mobile_notifications_view(request):
     if is_hr:
         categories.append({
             'key': 'registration',
-            'label': 'Заявки на регистрацию',
+            'label': _('Заявки на регистрацию'),
             'icon': 'ri-user-add-line',
             'color': '#8b5cf6',
             'bg': '#ede9fe',
             'notifications': registration_notifs,
             'notifications_grouped': registration_grouped,
             'unread': registration_unread,
-            'last_message': registration_notifs[0].message if registration_notifs else 'Нет сообщений',
+            'last_message': registration_notifs[0].message if registration_notifs else no_messages,
             'last_date': registration_notifs[0].created_at if registration_notifs else None,
             'enabled': True,
         })
@@ -127,27 +129,27 @@ def mobile_notifications_view(request):
     categories += [
         {
             'key': 'mailing',
-            'label': 'Рассылка',
+            'label': _('Рассылка'),
             'icon': 'ri-mail-send-line',
             'color': '#ef4444',
             'bg': '#fee2e2',
             'notifications': [],
             'notifications_grouped': [],
             'unread': 0,
-            'last_message': 'Нет сообщений',
+            'last_message': no_messages,
             'last_date': None,
             'enabled': False,
         },
         {
             'key': 'info',
-            'label': 'Информация',
+            'label': _('Информация'),
             'icon': 'ri-information-line',
             'color': '#3b82f6',
             'bg': '#dbeafe',
             'notifications': [],
             'notifications_grouped': [],
             'unread': 0,
-            'last_message': 'Нет сообщений',
+            'last_message': no_messages,
             'last_date': None,
             'enabled': False,
         },

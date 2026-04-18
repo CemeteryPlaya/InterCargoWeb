@@ -42,10 +42,6 @@ def mobile_parcels_view(request):
     for t in all_tracks:
         if t.is_archived:
             archived.append(t)
-            # Архивные в определённых статусах всё ещё видны в своей категории
-            if t.status in VISIBLE_WHEN_ARCHIVED:
-                key = 'in_sorting' if t.status in ('delivered', 'unidentified') else t.status
-                groups[key].append(t)
         else:
             key = 'in_sorting' if t.status in ('delivered', 'unidentified') else t.status
             if key in groups:
@@ -54,56 +50,56 @@ def mobile_parcels_view(request):
     categories = [
         {
             'key': 'user_added',
-            'label': 'В ожидании',
+            'label': _('В ожидании'),
             'icon': 'ri-time-line',
             'tracks': groups['user_added'],
             'count': len(groups['user_added']),
         },
         {
             'key': 'warehouse_cn',
-            'label': 'На складе (Китай)',
+            'label': _('На складе (Китай)'),
             'icon': 'ri-building-2-line',
             'tracks': groups['warehouse_cn'],
             'count': len(groups['warehouse_cn']),
         },
         {
             'key': 'shipped_cn',
-            'label': 'В пути',
+            'label': _('В пути'),
             'icon': 'ri-flight-takeoff-line',
             'tracks': groups['shipped_cn'],
             'count': len(groups['shipped_cn']),
         },
         {
             'key': 'in_sorting',
-            'label': 'Сортировка',
+            'label': _('Сортировка'),
             'icon': 'ri-inbox-archive-line',
             'tracks': groups['in_sorting'],
             'count': len(groups['in_sorting']),
         },
         {
             'key': 'shipping_pp',
-            'label': 'В доставке',
+            'label': _('В доставке'),
             'icon': 'ri-truck-line',
             'tracks': groups['shipping_pp'],
             'count': len(groups['shipping_pp']),
         },
         {
             'key': 'ready',
-            'label': 'Готово к выдаче',
+            'label': _('Готово к выдаче'),
             'icon': 'ri-checkbox-circle-line',
             'tracks': groups['ready'],
             'count': len(groups['ready']),
         },
         {
             'key': 'claimed',
-            'label': 'Выдано',
+            'label': _('Выдано'),
             'icon': 'ri-hand-coin-line',
             'tracks': groups['claimed'],
             'count': len(groups['claimed']),
         },
         {
             'key': 'archived',
-            'label': 'Архивные',
+            'label': _('Архивные'),
             'icon': 'ri-archive-line',
             'tracks': archived,
             'count': len(archived),

@@ -112,7 +112,7 @@
                     </button>
                     <div class="flex-1">
                         <h2 class="font-bold text-base">{{ cat.label }}</h2>
-                        <p class="text-xs text-gray-400">{{ cat.count }} трек-кодов</p>
+                        <p class="text-xs text-gray-400">{{ cat.count }} {% trans "трек-кодов" %}</p>
                     </div>
                 </div>
                 {% if cat.key != 'archived' and cat.count > 0 %}
@@ -379,7 +379,7 @@
         if (toggleBtn) {
             toggleBtn.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
             toggleBtn.classList.add('bg-red-500', 'text-white', 'border-red-500');
-            toggleBtn.querySelector('.toggle-label').textContent = 'Отмена';
+            toggleBtn.querySelector('.toggle-label').textContent = '{% trans "Отмена" %}';
         }
         if (selectAllBtn) selectAllBtn.classList.remove('hidden');
         if (countEl) countEl.classList.remove('hidden');
@@ -407,7 +407,7 @@
         if (toggleBtn) {
             toggleBtn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
             toggleBtn.classList.remove('bg-red-500', 'text-white', 'border-red-500');
-            toggleBtn.querySelector('.toggle-label').textContent = 'В архив';
+            toggleBtn.querySelector('.toggle-label').textContent = '{% trans "В архив" %}';
         }
         if (selectAllBtn) selectAllBtn.classList.add('hidden');
         if (countEl) countEl.classList.add('hidden');
@@ -485,7 +485,7 @@
             if (count > 0) {
                 confirmBar.classList.remove('hidden');
                 var btn = confirmBar.querySelector('.mass-archive-btn');
-                if (btn) btn.innerHTML = '<i class="ri-archive-line mr-1"></i> Архивировать выбранные (' + count + ')';
+                if (btn) btn.innerHTML = '<i class="ri-archive-line mr-1"></i> {% trans "Архивировать выбранные" %} (' + count + ')';
             } else {
                 confirmBar.classList.add('hidden');
             }
@@ -495,9 +495,9 @@
         var selectAllBtn = panel.querySelector('.select-all-btn');
         if (selectAllBtn) {
             if (count === cards.length && count > 0) {
-                selectAllBtn.innerHTML = '<i class="ri-checkbox-circle-fill mr-1"></i> Снять все';
+                selectAllBtn.innerHTML = '<i class="ri-checkbox-circle-fill mr-1"></i> {% trans "Снять все" %}';
             } else {
-                selectAllBtn.innerHTML = '<i class="ri-checkbox-circle-line mr-1"></i> Выбрать все';
+                selectAllBtn.innerHTML = '<i class="ri-checkbox-circle-line mr-1"></i> {% trans "Выбрать все" %}';
             }
         }
     }
@@ -616,7 +616,7 @@
                 if (data.already_archived) { showToast(data.message, 'warning'); return; }
                 if (data.success) { showToast(data.message, 'success'); setTimeout(function() { window.location.reload(); }, 800); }
             })
-            .catch(function() { showToast('Ошибка сети', 'error'); });
+            .catch(function() { showToast('{% trans "Ошибка сети" %}', 'error'); });
             return;
         }
 
@@ -634,7 +634,7 @@
             .then(function(data) {
                 if (data.success) { showToast(data.message, 'success'); setTimeout(function() { window.location.reload(); }, 800); }
             })
-            .catch(function() { showToast('Ошибка сети', 'error'); });
+            .catch(function() { showToast('{% trans "Ошибка сети" %}', 'error'); });
             return;
         }
 
@@ -644,10 +644,10 @@
             e.preventDefault();
             var catKey = massBtn.dataset.catKey;
             var ids = selectedIds[catKey] ? Array.from(selectedIds[catKey]) : [];
-            if (ids.length === 0) { showToast('Не выбрано ни одного трек-кода', 'warning'); return; }
+            if (ids.length === 0) { showToast('{% trans "Не выбрано ни одного трек-кода" %}', 'warning'); return; }
 
             massBtn.disabled = true;
-            massBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Архивация...';
+            massBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> {% trans "Архивация..." %}';
 
             fetch('{% url "mobile_mass_archive" %}', {
                 method: 'POST',
@@ -662,13 +662,13 @@
                 } else {
                     showToast(data.error || 'Ошибка', 'error');
                     massBtn.disabled = false;
-                    massBtn.innerHTML = '<i class="ri-archive-line mr-1"></i> Архивировать выбранные';
+                    massBtn.innerHTML = '<i class="ri-archive-line mr-1"></i> {% trans "Архивировать выбранные" %}';
                 }
             })
             .catch(function() {
-                showToast('Ошибка сети', 'error');
+                showToast('{% trans "Ошибка сети" %}', 'error');
                 massBtn.disabled = false;
-                massBtn.innerHTML = '<i class="ri-archive-line mr-1"></i> Архивировать выбранные';
+                massBtn.innerHTML = '<i class="ri-archive-line mr-1"></i> {% trans "Архивировать выбранные" %}';
             });
             return;
         }

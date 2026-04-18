@@ -6,7 +6,26 @@ from django.utils import timezone
 from django.contrib import messages as django_messages
 from myprofile.models import CustomerDiscount, GlobalSettings, Receipt, ReceiptItem, TrackCode, StorageCell, Notification, NotificationMute
 from register.models import UserProfile
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, get_language, activate
+
+
+def notify_in_user_language(user, message_func):
+    """
+    Создаёт уведомление на языке получателя.
+    message_func — callable, возвращающий переведённую строку.
+    Вызывается после активации языка пользователя.
+    """
+    original_lang = get_language()
+    try:
+        user_lang = user.userprofile.language
+    except Exception:
+        user_lang = 'ru'
+    try:
+        activate(user_lang)
+        msg = message_func()
+    finally:
+        activate(original_lang or 'ru')
+    Notification.objects.create(user=user, message=msg)
 
 def cleanup_expired_temp_discounts():
     """Удаляет просроченные разовые скидки (созданные до сегодня)."""
@@ -233,19 +252,17 @@ def resolve_owner(username):
 
 def send_grouped_notifications(notif_counts, status):
     """Отправляет групповые уведомления после обновления трек-кодов."""
+    # Уведомление «Доставлено на сортировочный склад» полностью отключено
+    if status == 'delivered':
+        return
+
     for user, count in notif_counts.items():
-        if status == 'delivered':
-            if count == 1:
-                msg = "📦 Ваша посылка доставлена на склад сортировки."
-            else:
-                msg = f"📦 Ваши товары ({count} посылок) доставлены на склад сортировки."
-        else:
-            status_display = dict(TrackCode.STATUS_CHOICES).get(status, status)
-            if count == 1:
-                msg = f"📦 Ваш трек-код обновлён: {status_display}"
-            else:
-                msg = f"📦 Обновлено {count} трек-кодов: {status_display}"
-        Notification.objects.create(user=user, message=msg)
+        def _make_msg(c=count, s=status):
+            status_display = dict(TrackCode.STATUS_CHOICES).get(s, s)
+            if c == 1:
+                return _("📦 Ваш трек-код обновлён: %(status)s") % {'status': status_display}
+            return _("📦 Обновлено %(count)s трек-кодов: %(status)s") % {'count': c, 'status': status_display}
+        notify_in_user_language(user, _make_msg)
 
 
 def add_bulk_result_messages(request, updated=0, created=0, partially_updated=0,

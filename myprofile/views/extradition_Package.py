@@ -8,10 +8,11 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 
-from myprofile.models import Receipt, ReceiptItem, ExtraditionPackage, Notification, TrackCode
+from myprofile.models import Receipt, ReceiptItem, ExtraditionPackage, TrackCode
 
 from register.models import UserProfile
 from django.utils.translation import gettext as _
+from myprofile.views.utils import notify_in_user_language
 
 
 @login_required
@@ -137,10 +138,11 @@ def quick_issue(request):
                     packages_created.append(package)
 
                     track_count = sum(r.items.count() for r in pickup_receipts)
-                    Notification.objects.create(
-                        user=user,
-                        message=f"📦 Создан пакет {package.barcode} — ожидает выдачи ({len(pickup_receipts)} чеков, {track_count} треков)."
-                    )
+                    _bc, _rc, _tc = package.barcode, len(pickup_receipts), track_count
+                    notify_in_user_language(user, lambda: _(
+                        "📦 Создан пакет %(barcode)s — ожидает выдачи (%(receipts)s чеков, %(tracks)s треков).") % {
+                        'barcode': _bc, 'receipts': _rc, 'tracks': _tc,
+                    })
 
             # Удаляем старые невыданные пакеты (за прошлые дни)
             ExtraditionPackage.objects.filter(

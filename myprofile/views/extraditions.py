@@ -9,8 +9,8 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Notification, Receipt, StorageCell, TrackCode
-from myprofile.views.utils import notify_receipt_claimed_telegram
+from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Receipt, StorageCell, TrackCode
+from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
 from myprofile.receipt_lifecycle import issue_to_client as lifecycle_issue, ReceiptLifecycleError
 from register.models import UserProfile, PickupPoint
 from django.utils.translation import gettext as _
@@ -126,11 +126,12 @@ def extradition_view(request):
                     track.save()
 
                     if track.owner:
-                        Notification.objects.create(
-                            user=track.owner,
-                            message=f"📦 Ваш трек {track.track_code} выдан в пункте: {extradition.pickup_point}. "
-                                    f"Штрих-код выдачи: {package.barcode}"
-                        )
+                        _tc, _pp, _bc = track.track_code, extradition.pickup_point, package.barcode
+                        notify_in_user_language(track.owner, lambda: _(
+                            "📦 Ваш трек %(track_code)s выдан в пункте: %(pickup_point)s. "
+                            "Штрих-код выдачи: %(barcode)s") % {
+                            'track_code': _tc, 'pickup_point': _pp, 'barcode': _bc,
+                        })
 
             # Telegram-уведомления по чекам (вместо per-track)
             for receipt in all_receipts:
@@ -507,10 +508,11 @@ def warehouse_quick_issue_receipt(request):
             track_codes_issued.append(track.track_code)
 
             if track.owner:
-                Notification.objects.create(
-                    user=track.owner,
-                    message=f"📦 Ваш трек {track.track_code} выдан ({PICKUP_LABEL})."
-                )
+                _tc, _pl = track.track_code, PICKUP_LABEL
+                notify_in_user_language(track.owner, lambda: _(
+                    "📦 Ваш трек %(track_code)s выдан (%(pickup_label)s).") % {
+                    'track_code': _tc, 'pickup_label': _pl,
+                })
 
     return JsonResponse({
         'success': True,

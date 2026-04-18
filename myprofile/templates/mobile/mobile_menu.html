@@ -43,12 +43,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
                         {% get_current_language as LANGUAGE_CODE %}
-                        <select name="language" onchange="this.form.submit()"
-                            class="text-xs border border-gray-300 rounded-lg px-1.5 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-400 cursor-pointer">
-                            <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>Русский</option>
-                            <option value="kk" {% if LANGUAGE_CODE == 'kk' %}selected{% endif %}>Қазақша</option>
-                            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
-                        </select>
+
                     </form>
                 </div>
             </div>
@@ -363,7 +358,7 @@
             <div class="px-4 mb-4">
                 <div class="flex items-center gap-2 mb-3">
                     <div class="h-px flex-1 bg-gray-200"></div>
-                    <span class="text-xs font-semibold text-gray-400 uppercase">{% trans "Язык / Тіл / Lang" %}</span>
+                    <span class="text-xs font-semibold text-gray-400 uppercase">Язык / Тіл / Lang</span>
                     <div class="h-px flex-1 bg-gray-200"></div>
                 </div>
                 {% get_current_language as LANGUAGE_CODE %}

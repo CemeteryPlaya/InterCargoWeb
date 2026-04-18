@@ -259,7 +259,7 @@
     // Заглушка для категорий "в разработке"
     document.querySelectorAll('.notif-disabled-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            showToast('Данный раздел находится в разработке', 'warning');
+            showToast('{% trans "Данный раздел находится в разработке" %}', 'warning');
         });
     });
 

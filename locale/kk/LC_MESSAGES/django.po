@@ -4527,9 +4527,6 @@ msgstr "Супер пайдаланушы"
 msgid "Персонал"
 msgstr "Персонал"
 
-#: .\myprofile\templates\mobile\mobile_menu.html:366
-msgid "Язык / Тіл / Lang"
-msgstr "Тіл / Язык / Lang"
 
 #: .\myprofile\templates\mobile\mobile_menu.html:416
 #: .\myprofile\templates\mobile\mobile_notifications.html:133
@@ -5790,3 +5787,147 @@ msgstr "Жіберілген еске салу"
 #: .\tgbot\models.py:223
 msgid "Отправленные напоминания"
 msgstr "Жіберілген еске салулар"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html
+msgid "Архивация..."
+msgstr "Мұрағаттау..."
+
+#: .\myprofile\templates\mobile\mobile_notifications.html
+msgid "Данный раздел находится в разработке"
+msgstr "Бұл бөлім әзірлеу кезеңінде"
+
+#: .\myprofile\views\mobile_parcels.py
+msgid "В ожидании"
+msgstr "Күтуде"
+
+#: .\myprofile\views\mobile_parcels.py
+msgid "Сортировка"
+msgstr "Сұрыптау"
+
+#: .\myprofile\views\mobile_parcels.py
+msgid "Готово к выдаче"
+msgstr "Алуға дайын"
+
+#: .\myprofile\views\mobile_parcels.py
+msgid "Архивные"
+msgstr "Мұрағатталған"
+
+#: .\myprofile\views\mobile_notifications.py
+msgid "Рассылка"
+msgstr "Тарату"
+
+#: .\myprofile\views\mobile_notifications.py
+msgid "Сегодня"
+msgstr "Бүгін"
+
+#: .\myprofile\views\mobile_notifications.py
+msgid "Вчера"
+msgstr "Кеше"
+
+#: .\myprofile\views\extraditions.py
+msgid "📦 Ваш трек %(track_code)s выдан в пункте: %(pickup_point)s. Штрих-код выдачи: %(barcode)s"
+msgstr "📦 Сіздің трек %(track_code)s берілді: %(pickup_point)s. Штрих-код: %(barcode)s"
+
+#: .\myprofile\views\extraditions.py
+msgid "📦 Ваш трек %(track_code)s выдан (%(pickup_label)s)."
+msgstr "📦 Сіздің трек %(track_code)s берілді (%(pickup_label)s)."
+
+#: .\myprofile\views\delivery.py
+msgid "🚚 Ваш трек-код отправлен на ПВЗ"
+msgstr "🚚 Сіздің трек-код ТБН-ге жіберілді"
+
+#: .\myprofile\views\delivery.py
+msgid "🚚 Отправлено на ПВЗ: %(count)s трек-кодов"
+msgstr "🚚 ТБН-ге жіберілді: %(count)s трек-код"
+
+#: .\myprofile\views\delivery.py
+msgid "📦 Ваш трек-код доставлен на ПВЗ"
+msgstr "📦 Сіздің трек-код ТБН-ге жеткізілді"
+
+#: .\myprofile\views\delivery.py
+msgid "📦 Доставлено на ПВЗ: %(count)s трек-кодов"
+msgstr "📦 ТБН-ге жеткізілді: %(count)s трек-код"
+
+#: .\myprofile\views\delivery.py
+msgid "📦 Ваши посылки (%(count)s шт.) доставлены курьером. Штрихкод: %(barcode)s"
+msgstr "📦 Сіздің сәлемдемелер (%(count)s дана) курьермен жеткізілді. Штрих-код: %(barcode)s"
+
+#: .\myprofile\views\arrival_summary.py
+msgid "🧾 Создан чек №%(receipt_id)s: %(track_count)s трек-кодов, сумма %(total_price)s тг."
+msgstr "🧾 №%(receipt_id)s чек жасалды: %(track_count)s трек-код, сомасы %(total_price)s тг."
+
+#: .\myprofile\views\extradition_Package.py
+msgid "📦 Создан пакет %(barcode)s — ожидает выдачи (%(receipts)s чеков, %(tracks)s треков)."
+msgstr "📦 %(barcode)s бумасы жасалды — беруді күтуде (%(receipts)s чек, %(tracks)s трек)."
+
+#: .\myprofile\views\utils.py
+msgid "📦 Ваша посылка доставлена на склад сортировки."
+msgstr "📦 Сіздің сәлемдемеңіз сұрыптау қоймасына жеткізілді."
+
+#: .\myprofile\views\utils.py
+msgid "📦 Ваши товары (%(count)s посылок) доставлены на склад сортировки."
+msgstr "📦 Сіздің тауарларыңыз (%(count)s сәлемдеме) сұрыптау қоймасына жеткізілді."
+
+#: .\myprofile\views\utils.py
+msgid "📦 Ваш трек-код обновлён: %(status)s"
+msgstr "📦 Сіздің трек-кодыңыз жаңартылды: %(status)s"
+
+#: .\myprofile\views\utils.py
+msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
+msgstr "📦 %(count)s трек-код жаңартылды: %(status)s"
+
+#: .\myprofile\views\profile_setting.py
+msgid "Ваша заявка на смену ПВЗ одобрена. Новый ПВЗ: %(pickup)s"
+msgstr "ТБН ауыстыру өтінішіңіз мақұлданды. Жаңа ТБН: %(pickup)s"
+
+#: .\myprofile\views\profile_setting.py
+msgid "Ваша заявка на смену ПВЗ отклонена."
+msgstr "ТБН ауыстыру өтінішіңіз қабылданбады."
+
+#: .\myprofile\views\warehouse.py
+msgid "Ваши посылки (%(count)s шт.) выданы на ПВЗ."
+msgstr "Сіздің сәлемдемелеріңіз (%(count)s дана) ТБН-де берілді."
+
+#: .\myprofile\views\warehouse.py
+msgid "Создана заявка на возврат ваших посылок (%(count)s шт.) на сортировочный склад."
+msgstr "Сіздің сәлемдемелеріңізді (%(count)s дана) сұрыптау қоймасына қайтару өтінішіңіз жасалды."
+
+#: .\myprofile\views\warehouse.py
+msgid "Ваши посылки (%(count)s шт.) возвращены на сортировочный склад."
+msgstr "Сіздің сәлемдемелеріңіз (%(count)s дана) сұрыптау қоймасына қайтарылды."
+
+#: .\register\views\reg.py
+msgid "Новая заявка на регистрацию клиента: %(username)s"
+msgstr "Жаңа клиент тіркеу өтініші: %(username)s"
+
+#: .\tgbot\signals.py
+msgid "Добавлен пользователем"
+msgstr "Пайдаланушы қосқан"
+
+#: .\tgbot\signals.py
+msgid "На складе в Китае"
+msgstr "Қытайдағы қоймада"
+
+#: .\tgbot\signals.py
+msgid "Отправлен со склада Китая"
+msgstr "Қытай қоймасынан жіберілді"
+
+#: .\tgbot\signals.py
+msgid "Доставлен на сортировочный склад"
+msgstr "Сұрыптау қоймасына жеткізілді"
+
+#: .\tgbot\signals.py
+msgid "В доставке до ПВЗ"
+msgstr "ТБН-ге жеткізу жолында"
+
+#: .\tgbot\signals.py
+msgid "Доставлен на ПВЗ"
+msgstr "ТБН-ге жеткізілді"
+
+#: .\tgbot\signals.py
+msgid "📦 Статус обновлён: %(status)s"
+msgstr "📦 Мәртебе жаңартылды: %(status)s"
+
+#: .\tgbot\signals.py
+msgid "Трек-код %(track_code)s — %(status)s"
+msgstr "Трек-код %(track_code)s — %(status)s"

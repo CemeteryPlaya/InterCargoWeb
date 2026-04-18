@@ -16,7 +16,7 @@ from myprofile.models import (
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
 from register.models import UserProfile, PickupPoint
-from myprofile.views.utils import notify_receipt_claimed_telegram
+from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
 from myprofile.receipt_lifecycle import (
     take_into_delivery, complete_delivery_to_pvz, issue_to_client,
     get_receipts_for_tracks, ReceiptLifecycleError,
@@ -351,15 +351,9 @@ def take_delivery(request):
     # Групповые уведомления
     for user, count in notif_counts.items():
         if count == 1:
-            Notification.objects.create(
-                user=user,
-                message="🚚 Ваш трек-код отправлен на ПВЗ"
-            )
+            notify_in_user_language(user, lambda: _("🚚 Ваш трек-код отправлен на ПВЗ"))
         else:
-            Notification.objects.create(
-                user=user,
-                message=f"🚚 Отправлено на ПВЗ: {count} трек-кодов"
-            )
+            notify_in_user_language(user, lambda c=count: _("🚚 Отправлено на ПВЗ: %(count)s трек-кодов") % {'count': c})
 
     # Помечаем чеки НЕпринятых треков как "Требует внимания"
     if pickup_id and scanned_receipts and pickup:
@@ -575,14 +569,11 @@ def complete_delivery(request):
 
         # In-app уведомления — один bulk_create
         if notif_counts:
-            Notification.objects.bulk_create([
-                Notification(
-                    user=user,
-                    message="📦 Ваш трек-код доставлен на ПВЗ" if count == 1
-                            else f"📦 Доставлено на ПВЗ: {count} трек-кодов",
-                )
-                for user, count in notif_counts.items()
-            ])
+            for user, count in notif_counts.items():
+                if count == 1:
+                    notify_in_user_language(user, lambda: _("📦 Ваш трек-код доставлен на ПВЗ"))
+                else:
+                    notify_in_user_language(user, lambda c=count: _("📦 Доставлено на ПВЗ: %(count)s трек-кодов") % {'count': c})
 
     # --- 3. Email + Telegram в фоновом потоке (не блокируют ответ) ---
     if notif_counts:
@@ -675,10 +666,11 @@ def driver_issue(request):
         package.save()
 
         # Уведомление клиенту
-        Notification.objects.create(
-            user=client_user,
-            message=f"📦 Ваши посылки ({len(tracks)} шт.) доставлены курьером. Штрихкод: {package.barcode}"
-        )
+        _cnt, _bc = len(tracks), package.barcode
+        notify_in_user_language(client_user, lambda: _(
+            "📦 Ваши посылки (%(count)s шт.) доставлены курьером. Штрихкод: %(barcode)s") % {
+            'count': _cnt, 'barcode': _bc,
+        })
 
         # Меняем статус треков на claimed
         for track in tracks:

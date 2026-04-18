@@ -4,17 +4,18 @@ import logging
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
 STATUS_DISPLAY = {
-    'user_added': 'Добавлен пользователем',
-    'warehouse_cn': 'На складе в Китае',
-    'shipped_cn': 'Отправлен со склада Китая',
-    'delivered': 'Доставлен на сортировочный склад',
-    'shipping_pp': 'В доставке до ПВЗ',
-    'ready': 'Доставлен на ПВЗ',
-    'claimed': 'Выдан',
+    'user_added': _('Добавлен пользователем'),
+    'warehouse_cn': _('На складе в Китае'),
+    'shipped_cn': _('Отправлен со склада Китая'),
+    'delivered': _('Доставлен на сортировочный склад'),
+    'shipping_pp': _('В доставке до ПВЗ'),
+    'ready': _('Доставлен на ПВЗ'),
+    'claimed': _('Выдан'),
 }
 
 
@@ -56,14 +57,21 @@ def track_status_changed(sender, instance, **kwargs):
             # Уведомление "В доставке до ПВЗ" полностью отключено
             return
 
+        if instance.status == 'delivered':
+            # Уведомление "Доставлен на сортировочный склад" полностью отключено
+            return
+
         if is_notification_muted(instance.owner_id, 'telegram'):
             logger.debug('Telegram notification muted for user_id=%s, track=%s', instance.owner_id, track_code)
             return
 
         TelegramNotification.objects.create(
             user_id=instance.owner_id,
-            title=f'📦 Статус обновлён: {new_display}',
-            message=f'Трек-код {track_code} — {new_display}',
+            title=str(_('📦 Статус обновлён: %(status)s')) % {'status': new_display},
+            message=str(_('Трек-код %(track_code)s — %(status)s')) % {
+                'track_code': track_code,
+                'status': new_display,
+            },
             notification_type='tracking',
         )
     except Exception as e:

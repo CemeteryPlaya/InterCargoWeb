@@ -14,7 +14,7 @@ from myprofile.models import (
 )
 
 from register.models import UserProfile, PickupPoint
-from myprofile.views.utils import notify_receipt_claimed_telegram
+from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
 from django.utils.translation import gettext as _
 from myprofile.receipt_lifecycle import (
     issue_to_client as lifecycle_issue, return_to_sorting as lifecycle_return,
@@ -273,10 +273,9 @@ def warehouse_issue_to_client(request):
         cell.delete()
 
         # Уведомление клиенту
-        Notification.objects.create(
-            user=client_user,
-            message=f"Ваши посылки ({len(tracks)} шт.) выданы на ПВЗ."
-        )
+        _cnt = len(tracks)
+        notify_in_user_language(client_user, lambda: _(
+            "Ваши посылки (%(count)s шт.) выданы на ПВЗ.") % {'count': _cnt})
 
     messages.success(request, f"Выдано клиенту {client_name}: {len(tracks)} посылок")
     return redirect('warehouse')
@@ -333,10 +332,9 @@ def warehouse_not_arrived(request):
         )
 
         # Уведомление клиенту
-        Notification.objects.create(
-            user=client_user,
-            message=f"Создана заявка на возврат ваших посылок ({len(tracks)} шт.) на сортировочный склад."
-        )
+        _cnt = len(tracks)
+        notify_in_user_language(client_user, lambda: _(
+            "Создана заявка на возврат ваших посылок (%(count)s шт.) на сортировочный склад.") % {'count': _cnt})
 
     messages.success(
         request,
@@ -733,10 +731,9 @@ def confirm_return_to_sorting(request):
             StorageCell.objects.filter(pickup_point=pickup_point, user=owner).delete()
 
         # Уведомление клиенту
-        Notification.objects.create(
-            user=owner,
-            message=f"Ваши посылки ({len(tracks)} шт.) возвращены на сортировочный склад.",
-        )
+        _cnt = len(tracks)
+        notify_in_user_language(owner, lambda: _(
+            "Ваши посылки (%(count)s шт.) возвращены на сортировочный склад.") % {'count': _cnt})
 
     messages.success(request, f"Возврат подтверждён: {len(tracks)} посылок клиента {owner.username}.")
     return redirect('attention_required')

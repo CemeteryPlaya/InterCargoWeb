@@ -5,7 +5,8 @@ from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.utils import timezone
 from register.models import UserProfile, PickupPoint
-from myprofile.models import PickupChangeRequest, Notification, ArrivalSession
+from myprofile.models import PickupChangeRequest, ArrivalSession
+from myprofile.views.utils import notify_in_user_language
 from django.utils.translation import gettext as _
 from tgbot.models import UserNotificationSettings
 from tgbot.services import get_telegram_context
@@ -253,10 +254,9 @@ def review_pickup_change(request, req_id):
         profile.pickup_changed_at = timezone.now()
         profile.save(update_fields=['pickup', 'pickup_changed_at'])
 
-        Notification.objects.create(
-            user=change_req.user,
-            message=f"Ваша заявка на смену ПВЗ одобрена. Новый ПВЗ: {change_req.requested_pickup}"
-        )
+        _pp = str(change_req.requested_pickup)
+        notify_in_user_language(change_req.user, lambda: _(
+            "Ваша заявка на смену ПВЗ одобрена. Новый ПВЗ: %(pickup)s") % {'pickup': _pp})
         messages.success(request, f"Заявка пользователя {change_req.user.username} одобрена.")
 
     elif action == 'reject':
@@ -265,10 +265,7 @@ def review_pickup_change(request, req_id):
         change_req.reviewed_by = request.user
         change_req.save()
 
-        Notification.objects.create(
-            user=change_req.user,
-            message="Ваша заявка на смену ПВЗ отклонена."
-        )
+        notify_in_user_language(change_req.user, lambda: _("Ваша заявка на смену ПВЗ отклонена."))
         messages.info(request, f"Заявка пользователя {change_req.user.username} отклонена.")
 
     return redirect('pickup_change_requests')
