@@ -1,0 +1,5792 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-18 11:41+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: .\cargo\settings.py:161 .\myprofile\templates\desktop\settings.html:191
+msgid "Русский"
+msgstr "Орысша"
+
+#: .\cargo\settings.py:162 .\myprofile\templates\desktop\settings.html:199
+msgid "Қазақша"
+msgstr "Қазақша"
+
+#: .\cargo\settings.py:163
+msgid "English"
+msgstr "Ағылшынша"
+
+#: .\mainview\templates\desktop\about.html:9
+msgid "Inter Cargo - Информация о компании"
+msgstr "Inter Cargo - Компания туралы"
+
+#: .\mainview\templates\desktop\about.html:30
+#: .\mainview\templates\desktop\about.html:41
+#: .\mainview\templates\desktop\education1.html:132
+#: .\mainview\templates\desktop\index.html:109
+#: .\mainview\templates\desktop\index.html:253
+#: .\mainview\templates\shared\footer.html:28
+#: .\mainview\templates\shared\header.html:41
+#: .\mainview\templates\shared\header.html:181
+msgid "О компании"
+msgstr "Компания туралы"
+
+#: .\mainview\templates\desktop\about.html:37
+msgid "О компании INTER CARGO"
+msgstr "INTER CARGO ТУРАЛЫ"
+
+#: .\mainview\templates\desktop\about.html:38
+msgid "История и инфо"
+msgstr "Тарих және ақпарат"
+
+#: .\mainview\templates\desktop\about.html:42
+msgid ""
+"Inter Cargo — это современная логистическая компания, созданная с целью "
+"упростить процесс доставки товаров из Китая для казахстанских клиентов. Мы "
+"начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней"
+" стремились сделать китайский онлайн-шопинг доступным и понятным каждому. "
+"Наши клиенты совершают заказы на популярных китайских маркетплейсах: "
+"Pinduoduo, TaoBao, POIZON и 1688, а мы — берём на себя весь процесс "
+"доставки. Благодаря налаженной системе работы с проверенными посредниками в "
+"Китае, мы гарантируем надёжность, скорость и прозрачность на всех этапах "
+"логистики."
+msgstr ""
+"Inter Cargo — қазақстандық клиенттер үшін Қытайдан тауар жеткізу процесін "
+"жеңілдету мақсатында құрылған заманауи логистикалық компания. Қызметімізді "
+"2023 жылдың желтоқсан айында Тараз қаласында бастадық және алғашқы күндерден"
+" бастап қытайлық онлайн-сауданы әркімге қолжетімді және түсінікті етуге "
+"ұмтылдық. Клиенттеріміз танымал қытай маркетплейстерінде тапсырыс береді: "
+"Pinduoduo, TaoBao, POIZON және 1688, ал біз бүкіл жеткізу процесін өз "
+"мойнымызға аламыз. Қытайдағы сенімді делдалдармен жолға қойылған жұмыс "
+"жүйесінің арқасында логистиканың барлық кезеңдерінде сенімділікке, "
+"жылдамдыққа және ашықтыққа кепілдік береміз."
+
+#: .\mainview\templates\desktop\about.html:45
+msgid "Наш путь"
+msgstr "Біздің жол"
+
+#: .\mainview\templates\desktop\about.html:46
+msgid ""
+"С первых шагов мы открыли 3 пункта выдачи, а уже спустя несколько месяцев "
+"число выросло до 10, что позволило нам обслуживать клиентов более оперативно"
+" и удобно. За это время нам доверились около 1000 клиентов, которые выбрали "
+"Inter Cargo за честность, стабильность и личный подход. Мы не просто "
+"доставляем посылки — мы создаём удобную экосистему для покупок за границей. "
+"Наша команда всегда на связи, а каждое отправление — под контролем до "
+"момента получения."
+msgstr ""
+"Алғашқы қадамдардан бастап 3 алу пунктін аштық, ал бірнеше айдан кейін "
+"олардың саны 10-ға дейін өсті, бұл клиенттерге жылдамырақ және ыңғайлырақ "
+"қызмет көрсетуге мүмкіндік берді. Осы уақыт ішінде Inter Cargo-ны адалдығы, "
+"тұрақтылығы және жеке көзқарасы үшін таңдаған шамамен 1000 клиент бізге "
+"сенім артты. Біз жай ғана посылкаларды жеткізбейміз — шетелде сатып алу үшін"
+" ыңғайлы экожүйе жасаймыз. Командамыз үнемі байланыста, ал әрбір жөнелтілім "
+"алынғанға дейін бақылауда болады."
+
+#: .\mainview\templates\desktop\about.html:49
+msgid "Почему выбирают нас:"
+msgstr "Неге бізді таңдайды:"
+
+#: .\mainview\templates\desktop\about.html:51
+msgid "Прямая доставка из Китая с популярных площадок"
+msgstr "Танымал алаңдардан Қытайдан тікелей жеткізу"
+
+#: .\mainview\templates\desktop\about.html:52
+msgid "Надёжные посредники и партнёры"
+msgstr "Сенімді делдалдар мен серіктестер"
+
+#: .\mainview\templates\desktop\about.html:53
+msgid "Развитая сеть ПВЗ"
+msgstr "Кеңейтілген ПВЗ желісі"
+
+#: .\mainview\templates\desktop\about.html:54
+msgid "Удобное отслеживание заказов"
+msgstr "Тапсырыстарды ыңғайлы қадағалау"
+
+#: .\mainview\templates\desktop\about.html:55
+msgid "Внимание к каждому клиенту"
+msgstr "Әр клиентке назар аудару"
+
+#: .\mainview\templates\desktop\about.html:62
+#: .\mainview\templates\desktop\education1.html:137
+#: .\mainview\templates\mobile\mobile_footer.html:58
+#: .\mainview\templates\shared\footer.html:33 .\myprofile\models.py:798
+#: .\myprofile\templates\desktop\delivery.html:88
+#: .\myprofile\templates\desktop\delivery.html:177
+#: .\myprofile\templates\desktop\print_documents.html:64
+#: .\myprofile\templates\desktop\print_documents.html:120
+#: .\register\models.py:25
+msgid "Пункты выдачи"
+msgstr "Беру нүктелері"
+
+#: .\mainview\templates\desktop\about.html:63
+msgid "Выберите ближайший к вам пункт и заберите посылку в удобное время"
+msgstr "Жақын нүктені таңдап, ыңғайлы уақытта жіберілімді алыңыз"
+
+#: .\mainview\templates\desktop\about.html:67
+msgid "Карта пунктов выдачи Inter Cargo"
+msgstr "Inter Cargo беру нүктелерінің картасы"
+
+#: .\mainview\templates\desktop\about.html:79
+#: .\mainview\templates\desktop\index.html:537
+msgid "Часто задаваемые вопросы"
+msgstr "Жиі қойылатын сұрақтар"
+
+#: .\mainview\templates\desktop\about.html:87
+#: .\mainview\templates\desktop\index.html:285
+#: .\mainview\templates\desktop\index.html:545
+msgid "Как рассчитывается стоимость доставки?"
+msgstr "Жеткізу құны қалай есептеледі?"
+
+#: .\mainview\templates\desktop\about.html:92
+#: .\mainview\templates\desktop\index.html:550
+#, python-format
+msgid ""
+"Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. "
+"Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг "
+"необходимо связаться с менеджером). Для расчета используйте калькулятор на "
+"нашем сайте."
+msgstr ""
+"Жеткізу құны жүктің килограмына %(p)s₸ тарифі бойынша есептеледі. Есептеудің"
+" ең аз салмағы — 0 кг, ең жоғарысы — 100 кг (100 кг-нан жоғары болса "
+"менеджермен байланысу қажет). Есептеу үшін сайтымыздағы калькуляторды "
+"қолданыңыз."
+
+#: .\mainview\templates\desktop\about.html:100
+#: .\mainview\templates\desktop\index.html:559
+msgid "Какие сроки доставки из Китая в Казахстан?"
+msgstr "Қытайдан Қазақстанға жеткізу мерзімі қандай?"
+
+#: .\mainview\templates\desktop\about.html:105
+#: .\mainview\templates\desktop\index.html:564
+msgid ""
+"Средний срок доставки составляет 8–12 дней с момента отправки товара с "
+"нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и "
+"загруженности таможенных служб."
+msgstr ""
+"Орташа жеткізу мерзімі Қытайдағы қоймамыздан тауарды жібергеннен бастап 8–12"
+" күн. Мерзім маусымға және кеден қызметтерінің жүктемесіне байланысты "
+"өзгеруі мүмкін."
+
+#: .\mainview\templates\desktop\about.html:113
+#: .\mainview\templates\desktop\index.html:303
+#: .\mainview\templates\desktop\index.html:572
+msgid "Как зарегистрироваться в системе?"
+msgstr "Жүйеде қалай тіркелуге болады?"
+
+#: .\mainview\templates\desktop\about.html:118
+#: .\mainview\templates\desktop\index.html:577
+msgid ""
+"Для регистрации необходимо заполнить форму на странице «Регистрация», указав"
+" свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав "
+"удобный пункт выдачи. После регистрации вы можете авторизоваться в личном "
+"кабинете нажав на кнопку, либо на иконку профиля в верхней части."
+msgstr ""
+"Тіркелу үшін «Тіркелу» бетіндегі нысанды толтырыңыз: өзіңіздің логиніңізді "
+"(ат/лақап ат + телефонның соңғы 4 цифры), телефон нөмірі мен ыңғайлы беру "
+"нүктесін таңдаңыз. Тіркелгеннен кейін түймені немесе жоғарғы жақтағы "
+"профиль белгішесін басу арқылы жеке кабинетке кіруге болады."
+
+#: .\mainview\templates\desktop\about.html:126
+#: .\mainview\templates\desktop\index.html:312
+#: .\mainview\templates\desktop\index.html:585
+msgid "Какие товары запрещены к перевозке?"
+msgstr "Қандай тауарлар тасымалдауға тыйым салынған?"
+
+#: .\mainview\templates\desktop\about.html:131
+#: .\mainview\templates\desktop\index.html:590
+msgid "К перевозке запрещены:"
+msgstr "Тасымалдауға тыйым салынған:"
+
+#: .\mainview\templates\desktop\about.html:133
+#: .\mainview\templates\desktop\index.html:592
+msgid ""
+"Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества."
+msgstr "Жарылғыш, радиоактивті, тұтанғыш, жұқпалы, улы заттар."
+
+#: .\mainview\templates\desktop\about.html:134
+#: .\mainview\templates\desktop\index.html:593
+msgid "Холодные оружия, включая макеты, пневматику, арбалеты и др."
+msgstr "Суық қару, макеттер, пневматика, арбалеттер және т.б."
+
+#: .\mainview\templates\desktop\about.html:135
+#: .\mainview\templates\desktop\index.html:594
+msgid "Психотропные и наркотические средства, алкоголь, сигареты."
+msgstr "Психотроптық және есірткі заттар, алкоголь, сигарет."
+
+#: .\mainview\templates\desktop\about.html:136
+#: .\mainview\templates\desktop\index.html:595
+msgid ""
+"Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в "
+"вакуумных упаковках)."
+msgstr ""
+"Тез бұзылатын және сұйық өнімдер (құрғақ және вакуумдық орамдағы өнімдерден "
+"басқа)."
+
+#: .\mainview\templates\desktop\about.html:137
+#: .\mainview\templates\desktop\index.html:596
+msgid "Техника, мобильные телефоны, ноутбуки (под свою ответственность)."
+msgstr "Техника, ұялы телефондар, ноутбуктер (өз жауапкершілігімен)."
+
+#: .\mainview\templates\desktop\about.html:138
+#: .\mainview\templates\desktop\index.html:597
+msgid ""
+"Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы)."
+msgstr ""
+"Жануарлар (сүтқоректілер, бауырымен жорғалаушылар, құстар, тірі жәндіктер, "
+"моллюскалар мен балықтар)."
+
+#: .\mainview\templates\desktop\about.html:139
+#: .\mainview\templates\desktop\index.html:598
+msgid "Дроны."
+msgstr "Дрондар."
+
+#: .\mainview\templates\desktop\about.html:140
+#: .\mainview\templates\desktop\index.html:599
+msgid ""
+"Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, "
+"пузырчатую плёнку, защиту края и т.д.)."
+msgstr ""
+"Нәзік, шыны тауарлар (немесе сатушыдан сенімді орам, көпіршікті пленка, жиек"
+" қорғаныс сұраңыз)."
+
+#: .\mainview\templates\desktop\about.html:149
+#: .\mainview\templates\desktop\index.html:329
+#: .\mainview\templates\desktop\index.html:608
+msgid "Как отследить мой заказ?"
+msgstr "Тапсырысымды қалай қадағалауға болады?"
+
+#: .\mainview\templates\desktop\about.html:154
+#: .\mainview\templates\desktop\index.html:613
+msgid ""
+"После оформления заказа вам будет предоставлен трек-номер для отслеживания. "
+"Вы можете использовать его на нашем сайте или связаться с менеджером через "
+"WhatsApp для получения актуальной информации о статусе вашего груза."
+msgstr ""
+"Тапсырысты рәсімдегеннен кейін сізге бақылау үшін трек-нөмір беріледі. Оны "
+"сайтымызда пайдаланыңыз немесе жүгіңіздің күйі туралы өзекті ақпарат алу "
+"үшін WhatsApp арқылы менеджермен байланысыңыз."
+
+#: .\mainview\templates\desktop\about.html:162
+#: .\mainview\templates\desktop\index.html:621
+msgid "Как заполнить адрес склада в Китае?"
+msgstr "Қытайдағы қойма мекенжайын қалай толтыруға болады?"
+
+#: .\mainview\templates\desktop\about.html:167
+#: .\mainview\templates\desktop\index.html:626
+msgid ""
+"На главной странице в разделе «Адрес склада в Китае» указан полный адрес. "
+"Его нужно скопировать и вставить в маркетплейс. После этого обязательно "
+"отправьте скриншот менеджеру для проверки."
+msgstr ""
+"Басты беттегі «Қытайдағы қойма мекенжайы» бөлімінде толық мекенжай "
+"көрсетілген. Оны көшіріп, маркетплейске қою керек. Одан кейін міндетті түрде"
+" менеджерге тексеру үшін скриншот жіберіңіз."
+
+#: .\mainview\templates\desktop\about.html:175
+#: .\mainview\templates\desktop\index.html:634
+msgid "Что делать, если заказ пришёл сломанным или повреждённым?"
+msgstr "Тапсырыс сынған немесе зақымдалған болып келсе не істеу керек?"
+
+#: .\mainview\templates\desktop\about.html:181
+#: .\mainview\templates\desktop\index.html:640
+msgid ""
+"Ваша задача — заранее попросить продавца обеспечить надёжную упаковку "
+"(например, пенопластом)."
+msgstr ""
+"Сіздің міндетіңіз — сатушыдан алдын ала сенімді орамды (мысалы, "
+"пенопластпен) қамтамасыз етуін сұрау."
+
+#: .\mainview\templates\desktop\about.html:182
+#: .\mainview\templates\desktop\index.html:641
+msgid ""
+"Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) "
+"рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера)."
+msgstr ""
+"Нәзік тауарлар үшін (шыны, айналар, ыдыс-аяқ, ірі габаритті тауарлар) жүкті "
+"торлауды жасау ұсынылады (құнын менеджерден анықтаңыз)."
+
+#: .\mainview\templates\desktop\about.html:183
+#: .\mainview\templates\desktop\index.html:642
+msgid ""
+"Если упаковка не соответствовала требованиям, компания не несёт "
+"ответственности за повреждения."
+msgstr "Орам талаптарға сай болмаса, компания зақымдануға жауапты емес."
+
+#: .\mainview\templates\desktop\about.html:184
+#: .\mainview\templates\desktop\index.html:643
+msgid ""
+"Если товар был упакован правильно, но повреждён при доставке, "
+"ответственность несёт Inter Cargo."
+msgstr ""
+"Тауар дұрыс оралса, бірақ жеткізу кезінде зақымданса, Inter Cargo жауапты."
+
+#: .\mainview\templates\desktop\about.html:193
+#: .\mainview\templates\desktop\index.html:352
+#: .\mainview\templates\desktop\index.html:652
+msgid "Как связаться с менеджером?"
+msgstr "Менеджермен қалай байланысуға болады?"
+
+#: .\mainview\templates\desktop\about.html:198
+#: .\mainview\templates\desktop\index.html:657
+msgid ""
+"Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
+"или в левом нижнем углу главной страницы."
+msgstr ""
+"Басты беттің жоғарғы оң бұрышындағы немесе төменгі сол бұрышындағы "
+"мессенджер белгішелеріне (Telegram, WhatsApp) басыңыз."
+
+#: .\mainview\templates\desktop\about.html:206
+#: .\mainview\templates\desktop\index.html:665
+msgid ""
+"Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?"
+msgstr "«Пайдаланушы қосты» мәртебесіндегі тапсырыс үшін кім жауапты?"
+
+#: .\mainview\templates\desktop\about.html:211
+#: .\mainview\templates\desktop\index.html:670
+msgid ""
+"Ответственность за заказ, который ещё не прибыл на склад (статус «Добавлено "
+"пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести "
+"ответственность с момента поступления товара на свой склад в Китае. При "
+"возникновении проблем с таким заказом менеджеры помогут решить вопрос и "
+"предоставят инструкции."
+msgstr ""
+"Қоймаға әлі келмеген тапсырыс үшін («Пайдаланушы қосқан» күйі) "
+"маркетплейстегі сатушы жауап береді. Inter Cargo тауар Қытайдағы өз "
+"қоймасына түскен сәттен бастап жауапкершілікті өз мойнына алады. Мұндай "
+"тапсырыспен мәселе туындаған жағдайда менеджерлер мәселені шешуге "
+"көмектеседі және нұсқаулар береді."
+
+#: .\mainview\templates\desktop\education.html:9
+#: .\mainview\templates\desktop\education1.html:9
+msgid "Inter Cargo - Обучение"
+msgstr "Inter Cargo - Оқыту"
+
+#: .\mainview\templates\desktop\education.html:32
+#: .\mainview\templates\desktop\education1.html:55
+#: .\mainview\templates\desktop\index.html:845
+msgid "ОБУЧЕНИЕ"
+msgstr "ОҚЫТУ"
+
+#: .\mainview\templates\desktop\education.html:33
+#: .\mainview\templates\desktop\education1.html:56
+#: .\mainview\templates\desktop\index.html:846
+#: .\register\templates\desktop\success.html:48
+msgid "Как пользоваться нашим сервисом"
+msgstr "Біздің сервисті қалай пайдалануға болады"
+
+#: .\mainview\templates\desktop\education.html:34
+msgid ""
+"Интерактивные пошаговые инструкции помогут вам разобраться в функциях сайта"
+msgstr ""
+"Интерактивті қадамдық нұсқаулықтар сайт функцияларын түсінуге көмектеседі"
+
+#: .\mainview\templates\desktop\education.html:41
+msgid "Начать интерактивное обучение"
+msgstr "Интерактивті оқытуды бастау"
+
+#: .\mainview\templates\desktop\education.html:43
+msgid "Система проведёт вас по шагам прямо на страницах сайта"
+msgstr "Жүйе сізді сайт беттерінде қадамдар бойынша бастайды"
+
+#: .\mainview\templates\desktop\education.html:48
+msgid "Видеоматериалы"
+msgstr "Бейне материалдар"
+
+#: .\mainview\templates\desktop\education.html:49
+msgid "Обучающие видео по работе с сервисом"
+msgstr "Сервиспен жұмыс бойынша оқыту бейнелері"
+
+#: .\mainview\templates\desktop\education.html:54
+#: .\mainview\templates\desktop\education.html:57
+#: .\mainview\templates\desktop\education1.html:63
+#: .\mainview\templates\desktop\education1.html:66
+#: .\mainview\templates\desktop\index.html:852
+#: .\mainview\templates\desktop\index.html:856
+#: .\register\templates\desktop\success.html:58
+#: .\register\templates\desktop\success.html:62
+msgid "Регистрация на сайте"
+msgstr "Сайтта тіркелу"
+
+#: .\mainview\templates\desktop\education.html:58
+#: .\mainview\templates\desktop\education1.html:67
+#: .\mainview\templates\desktop\index.html:857
+msgid ""
+"Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт "
+"выдачи для получения ваших посылок."
+msgstr ""
+"Тіркелу нысанын дұрыс толтыруды және жіберілімдер алу үшін ыңғайлы беру "
+"нүктесін таңдауды үйреніңіз."
+
+#: .\mainview\templates\desktop\education.html:60
+#: .\mainview\templates\desktop\education.html:73
+#: .\mainview\templates\desktop\education.html:86
+#: .\mainview\templates\desktop\education1.html:69
+#: .\mainview\templates\desktop\education1.html:83
+#: .\mainview\templates\desktop\education1.html:97
+#: .\mainview\templates\desktop\index.html:860
+#: .\mainview\templates\desktop\index.html:876
+#: .\mainview\templates\desktop\index.html:892
+#: .\register\templates\desktop\success.html:67
+#: .\register\templates\desktop\success.html:84
+#: .\register\templates\desktop\success.html:101
+msgid "Смотреть видео"
+msgstr "Бейнені қарау"
+
+#: .\mainview\templates\desktop\education.html:67
+#: .\mainview\templates\desktop\education1.html:77
+#: .\mainview\templates\desktop\index.html:868
+#: .\register\templates\desktop\success.html:75
+msgid "Оформление заказа"
+msgstr "Тапсырыс рәсімдеу"
+
+#: .\mainview\templates\desktop\education.html:70
+#: .\mainview\templates\desktop\education1.html:80
+#: .\mainview\templates\desktop\index.html:872
+#: .\register\templates\desktop\success.html:79
+msgid "Оформление заказа в Китае"
+msgstr "Қытайда тапсырыс рәсімдеу"
+
+#: .\mainview\templates\desktop\education.html:71
+#: .\mainview\templates\desktop\education1.html:81
+#: .\mainview\templates\desktop\index.html:873
+msgid ""
+"Пошаговая инструкция по оформлению заказа на китайских торговых площадках и "
+"указанию нашего адреса доставки."
+msgstr ""
+"Қытай сауда алаңдарында тапсырыс беру және жеткізу мекенжайымызды көрсету "
+"бойынша қадамдық нұсқаулық."
+
+#: .\mainview\templates\desktop\education.html:80
+#: .\mainview\templates\desktop\education.html:83
+#: .\mainview\templates\desktop\education1.html:91
+#: .\mainview\templates\desktop\education1.html:94
+#: .\mainview\templates\desktop\index.html:884
+#: .\mainview\templates\desktop\index.html:888
+#: .\register\templates\desktop\success.html:92
+#: .\register\templates\desktop\success.html:96
+msgid "Отслеживание посылки"
+msgstr "Жіберілімді қадағалау"
+
+#: .\mainview\templates\desktop\education.html:84
+#: .\mainview\templates\desktop\education1.html:95
+#: .\mainview\templates\desktop\index.html:889
+msgid ""
+"Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из "
+"Китая в Казахстан."
+msgstr ""
+"Жіберілімдеріңіздің мәртебесін Қытайдан Қазақстанға жеткізудің әр кезеңінде "
+"қалай бақылауды үйреніңіз."
+
+#: .\mainview\templates\desktop\education1.html:29
+#: .\mainview\templates\desktop\education1.html:129
+#: .\mainview\templates\shared\footer.html:25
+#: .\mainview\templates\shared\header.html:39
+#: .\mainview\templates\shared\header.html:179
+#: .\mainview\templates\shared\header.html:255
+#: .\mainview\templates\shared\header.html:282
+msgid "Главная"
+msgstr "Басты бет"
+
+#: .\mainview\templates\desktop\education1.html:30
+#: .\mainview\templates\desktop\education1.html:130
+#: .\mainview\templates\desktop\index.html:241
+#: .\mainview\templates\desktop\index.html:468
+#: .\mainview\templates\desktop\index.html:701
+#: .\mainview\templates\shared\footer.html:26
+#: .\mainview\templates\shared\header.html:153
+#: .\mainview\templates\shared\header.html:183
+#: .\register\templates\desktop\registration.html:29
+msgid "Регистрация"
+msgstr "Тіркелу"
+
+#: .\mainview\templates\desktop\education1.html:31
+#: .\mainview\templates\desktop\education1.html:131
+#: .\mainview\templates\desktop\index.html:247
+#: .\mainview\templates\shared\footer.html:27
+#: .\mainview\templates\shared\header.html:40
+#: .\mainview\templates\shared\header.html:180
+#: .\myprofile\templates\mobile\mobile_menu.html:106
+msgid "Обучение"
+msgstr "Оқыту"
+
+#: .\mainview\templates\desktop\education1.html:57
+#: .\mainview\templates\desktop\index.html:847
+msgid ""
+"Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно "
+"использовать наш сервис доставки"
+msgstr ""
+"Жеткізу сервисімізді тиімді пайдалану жолын білу үшін оқу материалдарымызбен"
+" танысыңыз"
+
+#: .\mainview\templates\desktop\education1.html:112
+#: .\mainview\templates\shared\footer.html:8
+msgid "Надежная доставка грузов из Китая в Казахстан по выгодным тарифам."
+msgstr "Қытайдан Қазақстанға сенімді жүк жеткізу тиімді тарифтермен."
+
+#: .\mainview\templates\desktop\education1.html:127
+#: .\mainview\templates\shared\footer.html:23
+msgid "Навигация"
+msgstr "Навигация"
+
+#: .\mainview\templates\desktop\education1.html:139
+msgid "Акбулак 21 (Ozon)"
+msgstr "Ақбұлақ 21 (Ozon)"
+
+#: .\mainview\templates\desktop\education1.html:140
+msgid "Пушкина 8 (Ozon)"
+msgstr "Пушкин 8 (Ozon)"
+
+#: .\mainview\templates\desktop\education1.html:141
+msgid "Ташкентская 286 (Ozon)"
+msgstr "Ташкент 286 (Ozon)"
+
+#: .\mainview\templates\desktop\education1.html:142
+msgid "Абая 323 (Beer bochka)"
+msgstr "Абай 323 (Beer bochka)"
+
+#: .\mainview\templates\desktop\education1.html:143
+#: .\mainview\templates\shared\footer.html:43
+msgid "Смотреть все пункты"
+msgstr "Барлық нүктелерді қарау"
+
+#: .\mainview\templates\desktop\education1.html:148
+#: .\mainview\templates\mobile\mobile_footer.html:32
+#: .\mainview\templates\shared\footer.html:48
+msgid "Контакты"
+msgstr "Байланыс"
+
+#: .\mainview\templates\desktop\education1.html:154
+#: .\mainview\templates\shared\footer.html:54
+msgid "Республика Казахстан, Жамбылская обл., г. Тараз, мкр.Акбулак(1), д.21"
+msgstr "Қазақстан Республикасы, Жамбыл облысы, Тараз қ., Ақбұлақ(1) мкр, 21"
+
+#: .\mainview\templates\desktop\education1.html:160
+msgid "Директор: +7 (777) 977-36-96"
+msgstr "Директор: +7 (777) 977-36-96"
+
+#: .\mainview\templates\desktop\education1.html:165
+msgid "Менеджер: +7 (706) 664-06-24"
+msgstr "Менеджер: +7 (706) 664-06-24"
+
+#: .\mainview\templates\desktop\education1.html:178
+msgid "© 2025 Inter Cargo. Все права защищены."
+msgstr "© 2025 Inter Cargo. Барлық құқықтар қорғалған."
+
+#: .\mainview\templates\desktop\education1.html:180
+#: .\mainview\templates\mobile\mobile_footer.html:77
+#: .\mainview\templates\shared\footer.html:81
+msgid "Способы оплаты:"
+msgstr "Төлем тәсілдері:"
+
+#: .\mainview\templates\desktop\index.html:12
+msgid "Inter Cargo - доставка из Китая в Казахстан"
+msgstr "Inter Cargo — Қытайдан Қазақстанға жеткізу"
+
+#: .\mainview\templates\desktop\index.html:47
+msgid "Добро пожаловать"
+msgstr "Қош келдіңіз"
+
+#: .\mainview\templates\desktop\index.html:57
+#: .\mainview\templates\desktop\index.html:221
+msgid "ТАРИФ"
+msgstr "ТАРИФ"
+
+#: .\mainview\templates\desktop\index.html:59
+#: .\mainview\templates\desktop\index.html:212
+#: .\myprofile\templates\shared\print\receipt_print.html:342
+msgid "Доставка из Китая в Казахстан"
+msgstr "Қытайдан Қазақстанға жеткізу"
+
+#: .\mainview\templates\desktop\index.html:72
+msgid "QR код"
+msgstr "QR-код"
+
+#: .\mainview\templates\desktop\index.html:78
+#: .\mainview\templates\shared\header.html:259
+#: .\mainview\templates\shared\header.html:286
+#: .\myprofile\templates\mobile\mobile_parcels.html:40
+msgid "Посылки"
+msgstr "Жіберілімдер"
+
+#: .\mainview\templates\desktop\index.html:84
+#: .\mainview\templates\mobile\m_sidebar.html:98
+#: .\mainview\templates\mobile\sidebar.html:91 .\myprofile\models.py:288
+#: .\myprofile\models.py:503
+#: .\myprofile\templates\desktop\delivered_posts.html:53
+#: .\myprofile\templates\desktop\delivered_posts.html:55
+#: .\myprofile\templates\mobile\mobile_menu.html:88
+msgid "Чеки"
+msgstr "Чектер"
+
+#: .\mainview\templates\desktop\index.html:90
+#: .\mainview\templates\mobile\m_sidebar.html:101
+#: .\mainview\templates\mobile\sidebar.html:94
+#: .\myprofile\templates\desktop\extradition_package.html:56
+#: .\myprofile\templates\desktop\extradition_package.html:58
+#: .\myprofile\templates\desktop\pp_extradition_history.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:94
+#: .\myprofile\templates\mobile\mobile_qr.html:94
+#: .\myprofile\templates\mobile\mobile_qr.html:203
+msgid "История выдачи"
+msgstr "Беру тарихы"
+
+#: .\mainview\templates\desktop\index.html:97
+msgid "Интерактивное обучение"
+msgstr "Интерактивті оқыту"
+
+#: .\mainview\templates\desktop\index.html:103
+msgid "Видеоуроки"
+msgstr "Бейнесабақтар"
+
+#: .\mainview\templates\desktop\index.html:115 .\myprofile\models.py:816
+#: .\myprofile\templates\desktop\notification_logs.html:457
+msgid "Тема"
+msgstr "Тақырып"
+
+#: .\mainview\templates\desktop\index.html:127
+#: .\myprofile\templates\desktop\profile.html:88
+msgid "Привязать Telegram"
+msgstr "Telegram байлау"
+
+#: .\mainview\templates\desktop\index.html:135
+msgid "Мои посылки"
+msgstr "Менің жіберілімдерім"
+
+#: .\mainview\templates\desktop\index.html:144
+msgid "Добавлено"
+msgstr "Қосылды"
+
+#: .\mainview\templates\desktop\index.html:155
+#: .\myprofile\templates\desktop\delivery.html:306
+msgid "В пути"
+msgstr "Жолда"
+
+#: .\mainview\templates\desktop\index.html:166
+#: .\myprofile\templates\desktop\track_codes.html:192
+msgid "На сортировке"
+msgstr "Сұрыпталуда"
+
+#: .\mainview\templates\desktop\index.html:177
+msgid "Готово"
+msgstr "Дайын"
+
+#: .\mainview\templates\desktop\index.html:188
+#: .\mainview\templates\desktop\index.html:261
+msgid "Калькулятор доставки"
+msgstr "Жеткізу калькуляторы"
+
+#: .\mainview\templates\desktop\index.html:191
+#: .\mainview\templates\desktop\index.html:264 .\myprofile\models.py:217
+#: .\myprofile\models.py:364 .\myprofile\models.py:755
+#: .\myprofile\templates\desktop\arrival_history.html:300
+#: .\myprofile\templates\desktop\arrival_summary.html:115
+#: .\myprofile\templates\desktop\arrival_summary.html:199
+#: .\myprofile\templates\desktop\arrival_summary.html:297
+#: .\myprofile\templates\desktop\delivered_posts.html:141
+#: .\myprofile\templates\desktop\delivery.html:320
+#: .\myprofile\templates\desktop\extradition_package.html:109
+#: .\myprofile\templates\desktop\finance_summary.html:141
+#: .\myprofile\templates\desktop\finance_summary.html:180
+#: .\myprofile\templates\desktop\finance_summary.html:226
+#: .\myprofile\templates\desktop\finance_summary.html:304
+#: .\myprofile\templates\desktop\finance_summary.html:413
+#: .\myprofile\templates\desktop\finance_summary.html:461
+#: .\myprofile\templates\desktop\goods_arrival_session.html:159
+#: .\myprofile\templates\desktop\unidentified.html:62
+#: .\myprofile\templates\desktop\update_tracks.html:111
+#: .\myprofile\templates\desktop\warehouse_inventory.html:73
+#: .\myprofile\templates\shared\print\receipt_print.html:367
+msgid "Вес (кг)"
+msgstr "Салмақ (кг)"
+
+#: .\mainview\templates\desktop\index.html:193
+#: .\mainview\templates\desktop\index.html:266
+msgid "Итого:"
+msgstr "Барлығы:"
+
+#: .\mainview\templates\desktop\index.html:198
+#: .\mainview\templates\desktop\index.html:271
+msgid "Итого со скидкой:"
+msgstr "Жеңілдікпен барлығы:"
+
+#: .\mainview\templates\desktop\index.html:223
+msgid "Быстро и надёжно"
+msgstr "Тез және сенімді"
+
+#: .\mainview\templates\desktop\index.html:235
+msgid "Вход"
+msgstr "Кіру"
+
+#: .\mainview\templates\desktop\index.html:282
+msgid "Частые вопросы"
+msgstr "Жиі қойылатын сұрақтар"
+
+#: .\mainview\templates\desktop\index.html:290
+#, python-format
+msgid ""
+"Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. Для "
+"расчета используйте калькулятор выше."
+msgstr ""
+"Жеткізу құны жүктің килограмына %(p)s₸ тарифі бойынша есептеледі. Есептеу "
+"үшін жоғарыдағы калькуляторды қолданыңыз."
+
+#: .\mainview\templates\desktop\index.html:294
+msgid "Какие сроки доставки из Китая?"
+msgstr "Қытайдан жеткізу мерзімі қандай?"
+
+#: .\mainview\templates\desktop\index.html:299
+msgid ""
+"Средний срок доставки составляет 8–12 дней с момента отправки товара с "
+"нашего склада в Китае."
+msgstr ""
+"Орташа жеткізу мерзімі Қытайдағы қоймамыздан тауарды жібергеннен бастап 8–12"
+" күн."
+
+#: .\mainview\templates\desktop\index.html:308
+msgid ""
+"Заполните форму на странице «Регистрация», указав логин (имя/ник + последние"
+" 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи."
+msgstr ""
+"«Тіркелу» бетіндегі нысанды толтырыңыз: логин (ат/лақап ат + телефонның "
+"соңғы 4 цифры), телефон нөмірі және ыңғайлы беру нүктесін таңдаңыз."
+
+#: .\mainview\templates\desktop\index.html:318
+msgid "Взрывоопасные, радиоактивные, горючие, ядовитые вещества"
+msgstr "Жарылғыш, радиоактивті, тұтанғыш, улы заттар"
+
+#: .\mainview\templates\desktop\index.html:319
+msgid "Холодное оружие, макеты, пневматика, арбалеты"
+msgstr "Суық қару, макеттер, пневматика, арбалеттер"
+
+#: .\mainview\templates\desktop\index.html:320
+msgid "Психотропные, наркотические средства, алкоголь, сигареты"
+msgstr "Психотроптық, есірткі заттар, алкоголь, сигарет"
+
+#: .\mainview\templates\desktop\index.html:321
+msgid "Скоропортящиеся и жидкие продукты"
+msgstr "Тез бұзылатын және сұйық өнімдер"
+
+#: .\mainview\templates\desktop\index.html:322
+msgid "Техника, телефоны, ноутбуки (под свою ответственность)"
+msgstr "Техника, телефондар, ноутбуктер (өз жауапкершілігімен)"
+
+#: .\mainview\templates\desktop\index.html:323
+msgid "Животные, дроны"
+msgstr "Жануарлар, дрондар"
+
+#: .\mainview\templates\desktop\index.html:324
+msgid "Хрупкие, стеклянные товары (просите надёжную упаковку)"
+msgstr "Нәзік, шыны тауарлар (сенімді орамды сұраңыз)"
+
+#: .\mainview\templates\desktop\index.html:334
+msgid ""
+"После оформления заказа вам будет предоставлен трек-номер. Используйте его "
+"на нашем сайте или свяжитесь с менеджером через WhatsApp."
+msgstr ""
+"Тапсырысты рәсімдегеннен кейін сізге трек-нөмір беріледі. Оны сайтымызда "
+"пайдаланыңыз немесе WhatsApp арқылы менеджермен байланысыңыз."
+
+#: .\mainview\templates\desktop\index.html:338
+msgid "Что делать, если заказ повреждён?"
+msgstr "Тапсырыс зақымдалса не істеу керек?"
+
+#: .\mainview\templates\desktop\index.html:344
+msgid "Заранее попросите продавца обеспечить надёжную упаковку"
+msgstr "Сатушыдан алдын ала сенімді орам сұраңыз"
+
+#: .\mainview\templates\desktop\index.html:345
+msgid "Для хрупких товаров рекомендуется обрешётка груза"
+msgstr "Нәзік тауарлар үшін жүкті торлау ұсынылады"
+
+#: .\mainview\templates\desktop\index.html:346
+msgid "Если упаковка не соответствовала — компания не несёт ответственности"
+msgstr "Орам сәйкес болмаса — компания жауапкершілік алмайды"
+
+#: .\mainview\templates\desktop\index.html:347
+msgid ""
+"Если товар упакован правильно, но повреждён — ответственность несёт Inter "
+"Cargo"
+msgstr "Тауар дұрыс оралса, бірақ зақымданса — Inter Cargo жауапты"
+
+#: .\mainview\templates\desktop\index.html:357
+msgid ""
+"Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
+"главной страницы."
+msgstr ""
+"Басты беттің жоғарғы оң бұрышындағы мессенджер белгішелеріне (Telegram, "
+"WhatsApp) басыңыз."
+
+#: .\mainview\templates\desktop\index.html:361
+msgid "Ответственность за статус «Добавлено пользователем»?"
+msgstr "«Пайдаланушы қосқан» мәртебесі үшін жауапкершілік?"
+
+#: .\mainview\templates\desktop\index.html:366
+msgid ""
+"Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo "
+"отвечает с момента поступления товара на склад в Китае."
+msgstr ""
+"Тапсырыс қоймаға жеткенге дейін — сатушы жауапты. Inter Cargo Қытайдағы "
+"қоймаға тауар түскен сәттен жауапты."
+
+#: .\mainview\templates\desktop\index.html:446
+#, python-format
+msgid "Добро пожаловать, %(name)s!"
+msgstr "Қош келдіңіз, %(name)s!"
+
+#: .\mainview\templates\desktop\index.html:447
+#: .\mainview\templates\desktop\index.html:464
+#, python-format
+msgid "Тариф: %(p)s₸/кг"
+msgstr "Тариф: %(p)s₸/кг"
+
+#: .\mainview\templates\desktop\index.html:451
+#: .\myprofile\templates\desktop\profile.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:418
+msgid "Личный кабинет"
+msgstr "Жеке кабинет"
+
+#: .\mainview\templates\desktop\index.html:457
+#: .\mainview\templates\desktop\index.html:479
+#: .\mainview\templates\mobile\m_sidebar.html:92
+#: .\mainview\templates\mobile\sidebar.html:85
+msgid "Обучение по сайту"
+msgstr "Сайт бойынша оқыту"
+
+#: .\mainview\templates\desktop\index.html:461
+msgid "КАЛЬКУЛЯТОР"
+msgstr "КАЛЬКУЛЯТОР"
+
+#: .\mainview\templates\desktop\index.html:462
+msgid "Узнайте цену доставки груза из Китая в Казахстан"
+msgstr "Қытайдан Қазақстанға жеткізу бағасын біліңіз"
+
+#: .\mainview\templates\desktop\index.html:473
+#: .\mainview\templates\desktop\index.html:706
+#: .\mainview\templates\desktop\index.html:802
+#: .\mainview\templates\desktop\index.html:828
+#: .\mainview\templates\shared\header.html:155
+#: .\mainview\templates\shared\header.html:184
+#: .\register\templates\desktop\login.html:98
+#: .\register\templates\desktop\login.html:126
+#: .\register\templates\desktop\login.html:154
+#: .\register\templates\desktop\password_reset.html:128
+msgid "Войти"
+msgstr "Кіру"
+
+#: .\mainview\templates\desktop\index.html:486
+msgid "Калькулятор"
+msgstr "Калькулятор"
+
+#: .\mainview\templates\desktop\index.html:488
+msgid "Напишите количество в кг"
+msgstr "Килограммен мөлшерін енгізіңіз"
+
+#: .\mainview\templates\desktop\index.html:504
+msgid "Мин: 0 - Макс: 100"
+msgstr "Мин: 0 - Макс: 100"
+
+#: .\mainview\templates\desktop\index.html:508 .\myprofile\models.py:26
+msgid "Название"
+msgstr "Атауы"
+
+#: .\mainview\templates\desktop\index.html:509
+#: .\myprofile\templates\desktop\delivered_posts.html:156
+#: .\myprofile\templates\desktop\finance_summary.html:435
+#: .\myprofile\templates\shared\print\client_check_pdf.html:65
+msgid "Итого"
+msgstr "Барлығы"
+
+#: .\mainview\templates\desktop\index.html:512
+#: .\myprofile\templates\desktop\reschedule_arrival.html:111
+#: .\myprofile\templates\desktop\reschedule_arrival.html:217
+#: .\myprofile\templates\desktop\unidentified.html:108
+#: .\myprofile\templates\desktop\unidentified.html:177
+#: .\myprofile\templates\desktop\warehouse.html:186
+#: .\myprofile\templates\desktop\warehouse_reassign.html:150
+#: .\myprofile\templates\shared\print\client_check_pdf.html:49
+msgid "Вес"
+msgstr "Салмақ"
+
+#: .\mainview\templates\desktop\index.html:513
+msgid "0 кг"
+msgstr "0 кг"
+
+#: .\mainview\templates\desktop\index.html:516
+msgid "Сумма"
+msgstr "Сомасы"
+
+#: .\mainview\templates\desktop\index.html:522
+msgid "Скидка"
+msgstr "Жеңілдік"
+
+#: .\mainview\templates\desktop\index.html:688
+#: .\mainview\templates\shared\header.html:22
+#: .\register\templates\desktop\register.html:31
+#: .\register\templates\desktop\registration.html:36
+msgid "РЕГИСТРАЦИЯ"
+msgstr "ТІРКЕЛУ"
+
+#: .\mainview\templates\desktop\index.html:689
+#: .\mainview\templates\shared\header.html:23
+#: .\register\templates\desktop\register.html:32
+#: .\register\templates\desktop\registration.html:37
+msgid "Регистрация нового клиента"
+msgstr "Жаңа клиентті тіркеу"
+
+#: .\mainview\templates\desktop\index.html:691
+#: .\mainview\templates\shared\header.html:24
+#: .\register\templates\desktop\register.html:34
+#: .\register\templates\desktop\registration.html:39
+msgid ""
+"Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать "
+"пользоваться услугами доставки из Китая"
+msgstr ""
+"Жүйеде тіркеліп, Қытайдан жеткізу қызметін пайдалану үшін төмендегі форманы "
+"толтырыңыз"
+
+#: .\mainview\templates\desktop\index.html:719
+#: .\mainview\templates\desktop\index.html:784
+#: .\register\templates\desktop\login.html:80
+#: .\register\templates\desktop\register.html:57
+#: .\register\templates\desktop\registration.html:62
+msgid "Логин (Имя/Ник + 4 цифры номера)"
+msgstr "Логин (Аты/Лақап ат + нөмірдің 4 цифры)"
+
+#: .\mainview\templates\desktop\index.html:722
+msgid ""
+"Введите имя или ник (только латинские буквы) и 4 цифры номера, например "
+"ANDREY1234"
+msgstr ""
+"Ат немесе лақап атты (тек латын әріптері) және нөмірдің 4 цифрын енгізіңіз, "
+"мысалы ANDREY1234"
+
+#: .\mainview\templates\desktop\index.html:723
+#: .\mainview\templates\desktop\index.html:787
+#: .\register\templates\desktop\login.html:83
+#: .\register\templates\desktop\register.html:58
+#: .\register\templates\desktop\registration.html:63
+msgid "Например: ANDREY1234"
+msgstr "Мысалы: ANDREY1234"
+
+#: .\mainview\templates\desktop\index.html:726
+#: .\register\templates\desktop\login.html:84
+#: .\register\templates\desktop\register.html:59
+#: .\register\templates\desktop\registration.html:64
+msgid "Введите ваше имя или ник и последние 4 цифры номера телефона"
+msgstr ""
+"Атыңызды немесе лақап атыңызды және телефон нөмірінің соңғы 4 цифрын "
+"енгізіңіз"
+
+#: .\mainview\templates\desktop\index.html:733
+#: .\mainview\templates\desktop\index.html:810
+#: .\myprofile\templates\desktop\settings.html:92
+#: .\register\templates\desktop\login.html:109
+#: .\register\templates\desktop\register.html:64
+#: .\register\templates\desktop\registration.html:81
+msgid "Номер телефона"
+msgstr "Телефон нөмірі"
+
+#: .\mainview\templates\desktop\index.html:743
+#: .\register\templates\desktop\register.html:70
+#: .\register\templates\desktop\registration.html:114
+msgid "Выбор пункта выдачи"
+msgstr "Беру нүктесін таңдау"
+
+#: .\mainview\templates\desktop\index.html:747
+#: .\myprofile\templates\desktop\profile.html:232
+#: .\register\templates\desktop\register.html:72
+#: .\register\templates\desktop\registration.html:116
+msgid "Выберите пункт выдачи"
+msgstr "Беру нүктесін таңдаңыз"
+
+#: .\mainview\templates\desktop\index.html:757
+#: .\register\templates\desktop\register.html:107
+#: .\register\templates\desktop\registration.html:151
+msgid "Зарегистрироваться"
+msgstr "Тіркелу"
+
+#: .\mainview\templates\desktop\index.html:771
+#: .\myprofile\templates\desktop\arrival_summary.html:195
+#: .\register\templates\desktop\login.html:62
+#: .\register\templates\desktop\register_confirmation.html:61
+msgid "Логин"
+msgstr "Логин"
+
+#: .\mainview\templates\desktop\index.html:776
+#: .\myprofile\templates\desktop\arrival_summary.html:113
+#: .\myprofile\templates\desktop\arrival_summary.html:196
+#: .\myprofile\templates\desktop\arrival_summary.html:295
+#: .\register\models.py:33 .\register\templates\desktop\login.html:67
+#: .\register\templates\desktop\register_confirmation.html:63
+msgid "Телефон"
+msgstr "Телефон"
+
+#: .\mainview\templates\desktop\index.html:790
+#: .\mainview\templates\desktop\index.html:816
+#: .\register\templates\desktop\login.html:87
+#: .\register\templates\desktop\login.html:115
+#: .\register\templates\desktop\login.html:143
+#: .\register\templates\desktop\register.html:81
+#: .\register\templates\desktop\registration.html:125
+msgid "Пароль"
+msgstr "Құпия сөз"
+
+#: .\mainview\templates\desktop\index.html:794
+#: .\mainview\templates\desktop\index.html:820
+#: .\register\templates\desktop\login.html:91
+#: .\register\templates\desktop\login.html:119
+#: .\register\templates\desktop\login.html:147
+#: .\register\templates\desktop\register.html:85
+#: .\register\templates\desktop\registration.html:129
+msgid "Введите пароль"
+msgstr "Құпия сөзді енгізіңіз"
+
+#: .\mainview\templates\mobile\m_sidebar.html:12
+#: .\mainview\templates\shared\header.html:174
+msgid "Закрыть меню"
+msgstr "Мәзірді жабу"
+
+#: .\mainview\templates\mobile\m_sidebar.html:22
+#: .\mainview\templates\mobile\sidebar.html:15
+#: .\myprofile\templates\desktop\pp_acceptance.html:32
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:45
+msgid "Приёмка товара"
+msgstr "Тауар қабылдау"
+
+#: .\mainview\templates\mobile\m_sidebar.html:25
+#: .\mainview\templates\mobile\sidebar.html:18
+#: .\myprofile\templates\desktop\extraditions.html:61
+msgid "Выдача посылок"
+msgstr "Жіберілімдерді беру"
+
+#: .\mainview\templates\mobile\m_sidebar.html:28
+#: .\mainview\templates\mobile\sidebar.html:21
+#: .\myprofile\templates\desktop\warehouse.html:33
+#: .\myprofile\templates\desktop\warehouse.html:54
+#: .\myprofile\templates\mobile\mobile_menu.html:141
+#: .\myprofile\templates\mobile\mobile_menu.html:178
+msgid "Склад ПВЗ"
+msgstr "ПВЗ қоймасы"
+
+#: .\mainview\templates\mobile\m_sidebar.html:31
+#: .\mainview\templates\mobile\sidebar.html:24
+#: .\myprofile\templates\desktop\pp_extradition_history.html:34
+msgid "История выдачи ПВЗ"
+msgstr "ПВЗ беру тарихы"
+
+#: .\mainview\templates\mobile\m_sidebar.html:37
+#: .\mainview\templates\mobile\sidebar.html:29 .\myprofile\models.py:259
+#: .\myprofile\templates\desktop\attention_required.html:33
+#: .\myprofile\templates\desktop\attention_required.html:51
+msgid "Требует внимания"
+msgstr "Назар аударуды қажет етеді"
+
+#: .\mainview\templates\mobile\m_sidebar.html:40
+#: .\mainview\templates\mobile\sidebar.html:33
+#: .\myprofile\templates\desktop\settings.html:261 .\tgbot\models.py:160
+msgid "Отправлено из Китая"
+msgstr "Қытайдан жіберілді"
+
+#: .\mainview\templates\mobile\m_sidebar.html:43
+#: .\mainview\templates\mobile\sidebar.html:36
+#: .\myprofile\templates\desktop\goods_arrival.html:35
+#: .\myprofile\templates\desktop\goods_arrival.html:37
+msgid "Приход товаров"
+msgstr "Тауар келуі"
+
+#: .\mainview\templates\mobile\m_sidebar.html:46
+#: .\mainview\templates\mobile\sidebar.html:39
+#: .\myprofile\templates\desktop\unidentified.html:27
+#: .\myprofile\templates\desktop\unidentified.html:30
+msgid "Неопознанные посылки"
+msgstr "Белгісіз жіберілімдер"
+
+#: .\mainview\templates\mobile\m_sidebar.html:49
+#: .\mainview\templates\mobile\sidebar.html:42
+#: .\myprofile\templates\desktop\reschedule_arrival.html:27
+#: .\myprofile\templates\desktop\reschedule_arrival.html:30
+msgid "Перенос прихода"
+msgstr "Келуді ауыстыру"
+
+#: .\mainview\templates\mobile\m_sidebar.html:52
+#: .\mainview\templates\mobile\sidebar.html:45
+#: .\myprofile\templates\desktop\arrival_history.html:47
+#: .\myprofile\templates\desktop\arrival_history.html:51
+#: .\myprofile\templates\mobile\mobile_menu.html:220
+msgid "История приходов"
+msgstr "Келу тарихы"
+
+#: .\mainview\templates\mobile\m_sidebar.html:55
+#: .\mainview\templates\mobile\sidebar.html:48
+#: .\myprofile\templates\desktop\arrival_summary.html:33
+#: .\myprofile\templates\desktop\arrival_summary.html:36
+msgid "Сводка прихода"
+msgstr "Келу қорытындысы"
+
+#: .\mainview\templates\mobile\m_sidebar.html:58
+#: .\mainview\templates\mobile\sidebar.html:51
+msgid "Панель администратора"
+msgstr "Әкімші панелі"
+
+#: .\mainview\templates\mobile\m_sidebar.html:61
+#: .\mainview\templates\mobile\sidebar.html:54
+#: .\myprofile\templates\desktop\print_documents.html:39
+#: .\myprofile\templates\desktop\print_documents.html:41
+msgid "Печать документов"
+msgstr "Құжаттарды басып шығару"
+
+#: .\mainview\templates\mobile\m_sidebar.html:64
+#: .\mainview\templates\mobile\sidebar.html:57
+#: .\myprofile\templates\desktop\notification_logs.html:50
+msgid "Логи Уведомлений"
+msgstr "Хабарлама журналдары"
+
+#: .\mainview\templates\mobile\m_sidebar.html:67
+#: .\mainview\templates\mobile\sidebar.html:60
+msgid "Настройка уведомлений"
+msgstr "Хабарлама баптаулары"
+
+#: .\mainview\templates\mobile\m_sidebar.html:72
+#: .\mainview\templates\mobile\sidebar.html:65
+#: .\myprofile\templates\desktop\finance_summary.html:36
+#: .\myprofile\templates\desktop\finance_summary.html:39
+msgid "Финансовая сводка"
+msgstr "Қаржылық қорытынды"
+
+#: .\mainview\templates\mobile\m_sidebar.html:78
+#: .\mainview\templates\mobile\sidebar.html:71 .\myprofile\models.py:252
+#: .\myprofile\templates\desktop\delivery.html:48
+#: .\myprofile\templates\desktop\delivery.html:50
+#: .\myprofile\templates\mobile\mobile_menu.html:300
+msgid "Доставка"
+msgstr "Жеткізу"
+
+#: .\mainview\templates\mobile\m_sidebar.html:84
+#: .\mainview\templates\mobile\sidebar.html:77
+msgid "Подтверждение пользователей"
+msgstr "Пайдаланушыларды растау"
+
+#: .\mainview\templates\mobile\m_sidebar.html:87
+#: .\mainview\templates\mobile\sidebar.html:80 .\myprofile\models.py:665
+#: .\myprofile\templates\desktop\pickup_change_requests.html:33
+#: .\myprofile\templates\desktop\pickup_change_requests.html:37
+msgid "Заявки на смену ПВЗ"
+msgstr "ПВЗ ауыстыру өтінімдері"
+
+#: .\mainview\templates\mobile\m_sidebar.html:95
+#: .\mainview\templates\mobile\sidebar.html:88 .\myprofile\models.py:200
+#: .\myprofile\models.py:685 .\myprofile\models.py:799
+#: .\myprofile\templates\desktop\profile.html:131
+#: .\myprofile\templates\desktop\track_codes.html:39
+#: .\myprofile\templates\mobile\mobile_menu.html:82
+#: .\myprofile\templates\mobile\mobile_parcels.html:230
+msgid "Трек-коды"
+msgstr "Трек-кодтар"
+
+#: .\mainview\templates\mobile\m_sidebar.html:104
+#: .\mainview\templates\mobile\sidebar.html:97
+#: .\mainview\templates\shared\header.html:84
+#: .\mainview\templates\shared\header.html:112
+#: .\mainview\templates\shared\header.html:272
+#: .\mainview\templates\shared\header.html:293 .\myprofile\models.py:401
+#: .\myprofile\templates\desktop\notifications.html:51
+#: .\myprofile\templates\desktop\notifications.html:54
+#: .\myprofile\templates\mobile\mobile_menu.html:100
+#: .\myprofile\templates\mobile\mobile_notifications.html:38
+#: .\myprofile\templates\mobile\mobile_notifications.html:135
+msgid "Уведомления"
+msgstr "Хабарламалар"
+
+#: .\mainview\templates\mobile\m_sidebar.html:107
+#: .\mainview\templates\mobile\sidebar.html:100
+#: .\myprofile\templates\desktop\profile.html:56
+#: .\myprofile\templates\desktop\settings.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:112
+msgid "Настройки"
+msgstr "Параметрлер"
+
+#: .\mainview\templates\mobile\m_sidebar.html:111
+#: .\mainview\templates\mobile\sidebar.html:104
+msgid "Панель персонала"
+msgstr "Персонал панелі"
+
+#: .\mainview\templates\mobile\m_sidebar.html:116
+#: .\mainview\templates\mobile\sidebar.html:109
+#: .\myprofile\templates\desktop\role_management.html:29
+#: .\myprofile\templates\desktop\role_management.html:32
+msgid "Управление ролями"
+msgstr "Рөлдерді басқару"
+
+#: .\mainview\templates\mobile\m_sidebar.html:121
+#: .\mainview\templates\mobile\sidebar.html:114
+#: .\myprofile\templates\desktop\service.html:33
+#: .\myprofile\templates\desktop\service.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:262
+#: .\myprofile\templates\mobile\mobile_menu.html:356
+msgid "Сервис"
+msgstr "Сервис"
+
+#: .\mainview\templates\mobile\m_sidebar.html:130
+#: .\mainview\templates\shared\header.html:139
+#: .\mainview\templates\shared\header.html:209
+#: .\myprofile\templates\mobile\mobile_qr.html:206
+msgid "Профиль"
+msgstr "Профиль"
+
+#: .\mainview\templates\mobile\m_sidebar.html:136
+#: .\mainview\templates\shared\header.html:146
+#: .\mainview\templates\shared\header.html:215
+#: .\myprofile\templates\mobile\mobile_menu.html:404
+msgid "Выйти"
+msgstr "Шығу"
+
+#: .\mainview\templates\mobile\m_sidebar.html:137
+msgid "Выход"
+msgstr "Шығу"
+
+#: .\mainview\templates\mobile\mobile_footer.html:11
+msgid "Надежная доставка грузов из Китая"
+msgstr "Қытайдан сенімді жүк жеткізу"
+
+#: .\mainview\templates\mobile\mobile_footer.html:11
+msgid "в Казахстан по выгодным тарифам."
+msgstr "Қазақстанға тиімді бағамен."
+
+#: .\mainview\templates\mobile\mobile_footer.html:16
+msgid "Мы в соцсетях"
+msgstr "Бізді әлеуметтік желіде табыңыз"
+
+#: .\mainview\templates\mobile\mobile_footer.html:37
+msgid "Казахстан, г. Тараз,"
+msgstr "Қазақстан, Тараз қ.,"
+
+#: .\mainview\templates\mobile\mobile_footer.html:37
+msgid "мкр. Акбулак(1), д. 21"
+msgstr "Ақбұлақ(1) шағ., 21-үй"
+
+#: .\mainview\templates\mobile\mobile_footer.html:44
+msgid "— директор"
+msgstr "— директор"
+
+#: .\mainview\templates\mobile\mobile_footer.html:45
+msgid "— менеджер"
+msgstr "— менеджер"
+
+#: .\mainview\templates\mobile\mobile_footer.html:80
+msgid "&copy; 2026 Inter Cargo. Все права защищены."
+msgstr "&copy; 2026 Inter Cargo. Барлық құқықтар қорғалған."
+
+#: .\mainview\templates\mobile\sidebar.html:7
+#: .\mainview\templates\shared\header.html:276
+#: .\mainview\templates\shared\header.html:297
+#: .\myprofile\templates\mobile\mobile_menu.html:41
+msgid "Меню"
+msgstr "Мәзір"
+
+#: .\mainview\templates\shared\footer.html:60
+msgid "Директор:"
+msgstr "Директор:"
+
+#: .\mainview\templates\shared\footer.html:66
+msgid "Менеджер:"
+msgstr "Менеджер:"
+
+#: .\mainview\templates\shared\footer.html:79
+msgid "© 2026 Inter Cargo. Все права защищены."
+msgstr "© 2026 Inter Cargo. Барлық құқықтар қорғалған."
+
+#: .\mainview\templates\shared\header.html:4
+msgid "Скопировано!"
+msgstr "Көшірілді!"
+
+#: .\mainview\templates\shared\header.html:5
+#: .\myprofile\templates\desktop\extradition_package.html:182
+#: .\myprofile\templates\desktop\profile.html:281
+#: .\myprofile\templates\mobile\mobile_qr.html:227
+msgid "Копировать код"
+msgstr "Кодты көшіру"
+
+#: .\mainview\templates\shared\header.html:6 .\myprofile\models.py:812
+#: .\myprofile\models.py:819
+#: .\myprofile\templates\desktop\notification_logs.html:275
+#: .\myprofile\templates\desktop\notification_logs.html:296
+#: .\myprofile\templates\desktop\notification_logs.html:353
+#: .\myprofile\templates\desktop\notification_logs.html:459
+#: .\myprofile\templates\desktop\notification_logs.html:474
+#: .\myprofile\templates\desktop\notification_logs.html:531
+msgid "Ошибка"
+msgstr "Қате"
+
+#: .\mainview\templates\shared\header.html:7
+msgid "Ошибка сети"
+msgstr "Желі қатесі"
+
+#: .\mainview\templates\shared\header.html:8
+msgid "Загрузка..."
+msgstr "Жүктелуде..."
+
+#: .\mainview\templates\shared\header.html:9
+msgid "Переключить на светлую тему"
+msgstr "Ашық тақырыпқа ауысу"
+
+#: .\mainview\templates\shared\header.html:10
+msgid "Переключить на тёмную тему"
+msgstr "Қараңғы тақырыпқа ауысу"
+
+#: .\mainview\templates\shared\header.html:11
+msgid "Введите номер полностью: +7 (XXX) XXX-XX-XX"
+msgstr "Нөмірді толық енгізіңіз: +7 (XXX) XXX-XX-XX"
+
+#: .\mainview\templates\shared\header.html:12
+msgid "Введите фамилию."
+msgstr "Тегіңізді енгізіңіз."
+
+#: .\mainview\templates\shared\header.html:13
+msgid "Введите имя."
+msgstr "Атыңызды енгізіңіз."
+
+#: .\mainview\templates\shared\header.html:14
+msgid "Неверный телефон."
+msgstr "Телефон нөмірі қате."
+
+#: .\mainview\templates\shared\header.html:15
+msgid "Введите логин."
+msgstr "Логинді енгізіңіз."
+
+#: .\mainview\templates\shared\header.html:16
+msgid "Выберите пункт выдачи."
+msgstr "Беру нүктесін таңдаңыз."
+
+#: .\mainview\templates\shared\header.html:17
+msgid "Пароль слишком короткий."
+msgstr "Құпия сөз тым қысқа."
+
+#: .\mainview\templates\shared\header.html:18
+#: .\register\views\password_reset.py:180
+msgid "Пароли не совпадают."
+msgstr "Құпия сөздер сәйкес емес."
+
+#: .\mainview\templates\shared\header.html:19
+msgid "Введите пароль."
+msgstr "Құпия сөзді енгізіңіз."
+
+#: .\mainview\templates\shared\header.html:20
+#: .\myprofile\templates\desktop\delivery.html:154
+#: .\myprofile\templates\desktop\delivery.html:205
+#: .\myprofile\templates\desktop\delivery.html:399
+#: .\myprofile\templates\desktop\extraditions.html:278
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:138
+#: .\myprofile\templates\desktop\print_documents.html:71
+#: .\myprofile\templates\desktop\print_documents.html:127
+#: .\myprofile\templates\mobile\mobile_parcels.html:129
+msgid "Выбрать все"
+msgstr "Барлығын таңдау"
+
+#: .\mainview\templates\shared\header.html:21
+msgid "Снять все"
+msgstr "Барлығын алып тастау"
+
+#: .\mainview\templates\shared\header.html:25
+msgid "АВТОРИЗАЦИЯ"
+msgstr "АВТОРИЗАЦИЯ"
+
+#: .\mainview\templates\shared\header.html:26
+#: .\register\templates\desktop\login.html:36
+msgid "Вход клиента"
+msgstr "Клиент кірісі"
+
+#: .\mainview\templates\shared\header.html:27
+msgid ""
+"Заполните форму ниже, чтобы войти в свой аккаунт в нашей системе и начать "
+"пользоваться услугами доставки из Китая"
+msgstr ""
+"Жүйеге кіріп, Қытайдан жеткізу қызметін пайдалану үшін төмендегі форманы "
+"толтырыңыз"
+
+#: .\mainview\templates\shared\header.html:49
+msgid "Переключить тему"
+msgstr "Тақырыпты ауыстыру"
+
+#: .\mainview\templates\shared\header.html:117
+msgid "Прочесть все"
+msgstr "Барлығын оқылды деп белгілеу"
+
+#: .\mainview\templates\shared\header.html:127
+msgid "Нет уведомлений"
+msgstr "Хабарламалар жоқ"
+
+#: .\mainview\templates\shared\header.html:131
+msgid "Все уведомления"
+msgstr "Барлық хабарламалар"
+
+#: .\mainview\templates\shared\header.html:161
+msgid "Открыть меню"
+msgstr "Мәзірді ашу"
+
+#: .\myprofile\admin.py:122
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:15
+msgid "Mass Status Update"
+msgstr "Mass Status Update"
+
+#: .\myprofile\models.py:27 .\register\models.py:11
+msgid "Активен"
+msgstr "Белсенді"
+
+#: .\myprofile\models.py:30 .\myprofile\models.py:681
+#: .\myprofile\models.py:722
+#: .\myprofile\templates\desktop\goods_arrival.html:64
+#: .\myprofile\templates\desktop\unidentified.html:68
+#: .\myprofile\templates\desktop\unidentified.html:109
+#: .\myprofile\templates\desktop\unidentified.html:178
+msgid "Место сортировки"
+msgstr "Сұрыптау орны"
+
+#: .\myprofile\models.py:31
+msgid "Места сортировки"
+msgstr "Сұрыптау орындары"
+
+#: .\myprofile\models.py:45
+msgid "Нет владельца товара"
+msgstr "Тауар иесі жоқ"
+
+#: .\myprofile\models.py:46
+msgid "Добавлен пользователем"
+msgstr "Пайдаланушы қосқан"
+
+#: .\myprofile\models.py:47
+msgid "Прибыло на склад (Китай)"
+msgstr "Қоймаға келді (Қытай)"
+
+#: .\myprofile\models.py:48 .\myprofile\templates\desktop\shipped_cn.html:37
+msgid "Отправлено со склада (Китай)"
+msgstr "Қоймадан жіберілді (Қытай)"
+
+#: .\myprofile\models.py:49
+msgid "Неопозка (сортировочный склад)"
+msgstr "Кешіктірілген (сұрыптау қоймасы)"
+
+#: .\myprofile\models.py:50
+msgid "Доставлен на сортировочный склад"
+msgstr "Сұрыптау қоймасына жеткізілді"
+
+#: .\myprofile\models.py:51 .\myprofile\templates\desktop\track_codes.html:197
+msgid "В доставке"
+msgstr "Жеткізілуде"
+
+#: .\myprofile\models.py:52 .\myprofile\templates\desktop\track_codes.html:172
+msgid "Доставлен на ПВЗ"
+msgstr "ПВЗ-ге жеткізілді"
+
+#: .\myprofile\models.py:53 .\myprofile\models.py:257
+#: .\myprofile\models.py:510 .\myprofile\templates\desktop\warehouse.html:211
+msgid "Выдано клиенту"
+msgstr "Клиентке берілді"
+
+#: .\myprofile\models.py:69
+msgid "№ трек кода"
+msgstr "Трек код №"
+
+#: .\myprofile\models.py:70 .\myprofile\models.py:209
+msgid "Трек код"
+msgstr "Трек-код"
+
+#: .\myprofile\models.py:71 .\myprofile\models.py:210
+#: .\myprofile\templates\desktop\update_tracks.html:63
+msgid "Дата обновления"
+msgstr "Жаңарту күні"
+
+#: .\myprofile\models.py:72
+msgid "Статус трек-кода"
+msgstr "Трек-код мәртебесі"
+
+#: .\myprofile\models.py:76
+msgid "Имя владельца"
+msgstr "Иесінің аты"
+
+#: .\myprofile\models.py:80 .\myprofile\models.py:216
+msgid "О посылке"
+msgstr "Жіберілім туралы"
+
+#: .\myprofile\models.py:81
+msgid "Вес посылки (кг)"
+msgstr "Жіберілім салмағы (кг)"
+
+#: .\myprofile\models.py:85
+msgid "Переопределённый ПВЗ доставки"
+msgstr "Қайта анықталған жеткізу ПВЗ"
+
+#: .\myprofile\models.py:90
+msgid "Где отсортирован"
+msgstr "Қай жерде сұрыпталды"
+
+#: .\myprofile\models.py:93
+msgid "Дата добавления пользователем"
+msgstr "Пайдаланушы қосқан күні"
+
+#: .\myprofile\models.py:94
+msgid "Дата отправки со склада (Китай)"
+msgstr "Қоймадан жіберілген күні (Қытай)"
+
+#: .\myprofile\models.py:95
+msgid "Дата прихода на сорт. склад"
+msgstr "Сұрыптау қоймасына келген күні"
+
+#: .\myprofile\models.py:96
+msgid "Дата принятия в доставку"
+msgstr "Жеткізуге қабылданған күні"
+
+#: .\myprofile\models.py:97
+msgid "Дата прибытия на ПВЗ"
+msgstr "ПВЗ-ге жеткен күні"
+
+#: .\myprofile\models.py:98
+msgid "Дата выдачи клиенту"
+msgstr "Клиентке берілген күні"
+
+#: .\myprofile\models.py:103
+msgid "Тариф на момент доставки (₸/кг)"
+msgstr "Жеткізу кезіндегі тариф (₸/кг)"
+
+#: .\myprofile\models.py:105
+msgid "История статусов"
+msgstr "Мәртебе тарихы"
+
+#: .\myprofile\models.py:108 .\myprofile\models.py:270
+msgid "Принят на ПВЗ"
+msgstr "ПВЗ-де қабылданды"
+
+#: .\myprofile\models.py:109 .\myprofile\models.py:271
+msgid "Дата принятия на ПВЗ"
+msgstr "ПВЗ-де қабылданған күні"
+
+#: .\myprofile\models.py:113 .\myprofile\models.py:275
+msgid "Кто принял на ПВЗ"
+msgstr "ПВЗ-де кім қабылдады"
+
+#: .\myprofile\models.py:119
+msgid "Требует переноса (прибыл без ПВЗ)"
+msgstr "Ауыстыруды қажет етеді (ПВЗ-сіз келді)"
+
+#: .\myprofile\models.py:123
+msgid "Архивирован"
+msgstr "Мұрағатталды"
+
+#: .\myprofile\models.py:124 .\myprofile\models.py:218
+msgid "Дата архивации"
+msgstr "Мұрағатқа алынған күні"
+
+#: .\myprofile\models.py:133
+msgid "Трек-код не может содержать китайские символы или кириллицу."
+msgstr "Трек-код қытай таңбалары немесе кириллицаны қамти алмайды."
+
+#: .\myprofile\models.py:199 .\myprofile\models.py:748
+#: .\myprofile\templates\desktop\arrival_history.html:299
+#: .\myprofile\templates\desktop\delivered_posts.html:140
+#: .\myprofile\templates\desktop\extradition_package.html:108
+#: .\myprofile\templates\desktop\goods_arrival_session.html:157
+#: .\myprofile\templates\desktop\reschedule_arrival.html:110
+#: .\myprofile\templates\desktop\reschedule_arrival.html:216
+#: .\myprofile\templates\desktop\unidentified.html:106
+#: .\myprofile\templates\desktop\unidentified.html:176
+#: .\myprofile\templates\desktop\update_tracks.html:105
+#: .\myprofile\templates\desktop\warehouse.html:182
+#: .\myprofile\templates\shared\print\receipt_print.html:366
+#: .\tgbot\models.py:216
+msgid "Трек-код"
+msgstr "Трек-код"
+
+#: .\myprofile\models.py:211 .\myprofile\models.py:658
+#: .\myprofile\models.py:715 .\myprofile\models.py:777
+#: .\myprofile\models.py:818
+#: .\myprofile\templates\desktop\notification_logs.html:130
+#: .\myprofile\templates\desktop\notification_logs.html:268
+#: .\myprofile\templates\desktop\notification_logs.html:455
+#: .\myprofile\templates\desktop\reschedule_arrival.html:112
+msgid "Статус"
+msgstr "Мәртебе"
+
+#: .\myprofile\models.py:214 .\myprofile\models.py:242
+#: .\myprofile\templates\desktop\goods_arrival_session.html:158
+#: .\myprofile\templates\desktop\update_tracks.html:108
+msgid "Владелец"
+msgstr "Иесі"
+
+#: .\myprofile\models.py:221
+msgid "Архивный трек-код"
+msgstr "Мұрағаттық трек-код"
+
+#: .\myprofile\models.py:222
+msgid "Архивные трек-коды"
+msgstr "Мұрағаттық трек-кодтар"
+
+#: .\myprofile\models.py:243 .\myprofile\models.py:674
+#: .\myprofile\models.py:796
+msgid "Дата создания"
+msgstr "Жасалған күні"
+
+#: .\myprofile\models.py:247
+msgid "Статус чека"
+msgstr "Чек мәртебесі"
+
+#: .\myprofile\models.py:255
+msgid "Статус оплаты"
+msgstr "Төлем мәртебесі"
+
+#: .\myprofile\models.py:256
+msgid "Дата и время оплаты"
+msgstr "Төлем күні мен уақыты"
+
+#: .\myprofile\models.py:258
+msgid "Дата и время выдачи"
+msgstr "Беру күні мен уақыты"
+
+#: .\myprofile\models.py:260
+msgid "Причина внимания"
+msgstr "Назар аудару себебі"
+
+#: .\myprofile\models.py:264
+msgid "Кто добавил в внимание"
+msgstr "Назарға кім қосты"
+
+#: .\myprofile\models.py:266
+msgid "ПВЗ внимания"
+msgstr "Назар ПВЗ"
+
+#: .\myprofile\models.py:267
+msgid "Дата установки «Требует внимания»"
+msgstr "«Назар аударуды қажет етеді» орнатылған күні"
+
+#: .\myprofile\models.py:278 .\myprofile\models.py:630
+msgid "Общий вес (кг)"
+msgstr "Жалпы салмақ (кг)"
+
+#: .\myprofile\models.py:279
+msgid "Сумма чека"
+msgstr "Чек сомасы"
+
+#: .\myprofile\models.py:280
+msgid "Цена за кг (историческая)"
+msgstr "Кг бағасы (тарихи)"
+
+#: .\myprofile\models.py:281
+msgid "Номер чека"
+msgstr "Чек нөмірі"
+
+#: .\myprofile\models.py:283 .\myprofile\models.py:455
+#: .\myprofile\models.py:567 .\myprofile\models.py:620
+#: .\myprofile\models.py:775
+#: .\myprofile\templates\desktop\finance_summary.html:76
+#: .\myprofile\templates\desktop\finance_summary.html:411
+#: .\myprofile\templates\desktop\profile.html:229
+#: .\myprofile\templates\shared\print\receipt_print.html:357
+#: .\register\models.py:24
+msgid "Пункт выдачи"
+msgstr "Беру нүктесі"
+
+#: .\myprofile\models.py:284 .\register\models.py:9
+msgid "Ссылка на оплату"
+msgstr "Төлем сілтемесі"
+
+#: .\myprofile\models.py:287
+msgid "Чек"
+msgstr "Чек"
+
+#: .\myprofile\models.py:363
+msgid "Трек-код (текст)"
+msgstr "Трек-код (мәтін)"
+
+#: .\myprofile\models.py:365
+msgid "Стоимость позиции (₸)"
+msgstr "Позиция құны (₸)"
+
+#: .\myprofile\models.py:366
+msgid "Тариф за кг (₸/кг)"
+msgstr "Кг тарифі (₸/кг)"
+
+#: .\myprofile\models.py:369
+msgid "Позиция чека"
+msgstr "Чек позициясы"
+
+#: .\myprofile\models.py:370
+msgid "Позиции чеков"
+msgstr "Чек позициялары"
+
+#: .\myprofile\models.py:395
+#: .\myprofile\templates\desktop\notification_logs.html:132
+#: .\myprofile\templates\desktop\notification_logs.html:271
+#: .\tgbot\models.py:107
+msgid "Сообщение"
+msgstr "Хабарлама"
+
+#: .\myprofile\models.py:396
+#: .\myprofile\templates\desktop\notification_logs.html:87
+#: .\myprofile\templates\desktop\notification_logs.html:142
+#: .\myprofile\templates\desktop\notification_logs.html:174
+#: .\myprofile\templates\desktop\notifications.html:77
+#: .\myprofile\templates\mobile\mobile_notifications.html:108
+msgid "Прочитано"
+msgstr "Оқылды"
+
+#: .\myprofile\models.py:397
+#: .\myprofile\templates\desktop\finance_summary.html:62
+#: .\myprofile\templates\desktop\finance_summary.html:259
+#: .\myprofile\templates\desktop\finance_summary.html:302
+#: .\myprofile\templates\desktop\finance_summary.html:410
+#: .\myprofile\templates\desktop\finance_summary.html:459
+#: .\myprofile\templates\desktop\notification_logs.html:133
+#: .\myprofile\templates\desktop\notification_logs.html:458
+#: .\myprofile\templates\desktop\unidentified.html:110
+#: .\myprofile\templates\shared\print\client_check_pdf.html:31
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:19
+#: .\register\templates\desktop\register_confirmation.html:66
+msgid "Дата"
+msgstr "Күн"
+
+#: .\myprofile\models.py:400
+msgid "Уведомление"
+msgstr "Хабарлама"
+
+#: .\myprofile\models.py:411 .\myprofile\models.py:655
+#: .\myprofile\templates\desktop\notification_logs.html:131
+#: .\myprofile\templates\desktop\notification_logs.html:269
+#: .\register\models.py:145 .\tgbot\models.py:25 .\tgbot\models.py:62
+#: .\tgbot\models.py:104 .\tgbot\models.py:157 .\tgbot\models.py:211
+msgid "Пользователь"
+msgstr "Пайдаланушы"
+
+#: .\myprofile\models.py:418
+#: .\myprofile\templates\desktop\arrival_summary.html:385
+msgid "Скидка (₸/кг)"
+msgstr "Жеңілдік (₸/кг)"
+
+#: .\myprofile\models.py:420
+msgid "Разовая скидка"
+msgstr "Бір реттік жеңілдік"
+
+#: .\myprofile\models.py:421
+msgid "Активная скидка"
+msgstr "Белсенді жеңілдік"
+
+#: .\myprofile\models.py:422 .\myprofile\models.py:465
+#: .\myprofile\models.py:507
+msgid "Комментарий"
+msgstr "Пікір"
+
+#: .\myprofile\models.py:426
+msgid "Скидка клиента"
+msgstr "Клиент жеңілдігі"
+
+#: .\myprofile\models.py:427
+msgid "Скидки клиентов"
+msgstr "Клиент жеңілдіктері"
+
+#: .\myprofile\models.py:439
+msgid "Push-подписка"
+msgstr "Push-жазылым"
+
+#: .\myprofile\models.py:440
+msgid "Push-подписки"
+msgstr "Push-жазылымдар"
+
+#: .\myprofile\models.py:447 .\myprofile\models.py:513
+#: .\myprofile\models.py:895
+msgid "Пакет выдачи"
+msgstr "Беру пакеті"
+
+#: .\myprofile\models.py:453 .\myprofile\models.py:497
+#: .\myprofile\models.py:815
+#: .\myprofile\templates\desktop\notification_logs.html:456
+msgid "Получатель"
+msgstr "Алушы"
+
+#: .\myprofile\models.py:462
+msgid "Сотрудник, выдавший посылку"
+msgstr "Жіберілімді берген қызметкер"
+
+#: .\myprofile\models.py:464
+msgid "Подтверждено получателем"
+msgstr "Алушы растады"
+
+#: .\myprofile\models.py:466 .\myprofile\models.py:508
+#: .\myprofile\models.py:637 .\myprofile\models.py:693
+#: .\myprofile\models.py:729
+#: .\myprofile\templates\desktop\notification_logs.html:272
+#: .\tgbot\models.py:118 .\tgbot\models.py:196
+msgid "Создано"
+msgstr "Жасалды"
+
+#: .\myprofile\models.py:469
+msgid "Выдача посылки"
+msgstr "Жіберілімді беру"
+
+#: .\myprofile\models.py:470
+msgid "Выдачи посылок"
+msgstr "Жіберілімдерді беру"
+
+#: .\myprofile\models.py:490
+msgid "Штрихкод выдачи"
+msgstr "Беру штрих-коды"
+
+#: .\myprofile\models.py:509 .\myprofile\models.py:692
+#: .\register\models.py:153
+msgid "Обновлено"
+msgstr "Жаңартылды"
+
+#: .\myprofile\models.py:514
+msgid "Пакеты выдачи"
+msgstr "Беру пакеттері"
+
+#: .\myprofile\models.py:545
+msgid "Цена за кг (₸/кг)"
+msgstr "Кг бағасы (₸/кг)"
+
+#: .\myprofile\models.py:551
+msgid "Порог веса для скидки (кг)"
+msgstr "Жеңілдік үшін салмақ шегі (кг)"
+
+#: .\myprofile\models.py:555 .\myprofile\models.py:556
+msgid "Глобальные настройки"
+msgstr "Жаһандық баптаулар"
+
+#: .\myprofile\models.py:569
+msgid "Номер ячейки"
+msgstr "Ұяшық нөмірі"
+
+#: .\myprofile\models.py:575
+#: .\myprofile\templates\desktop\arrival_summary.html:112
+#: .\myprofile\templates\desktop\arrival_summary.html:294
+#: .\myprofile\templates\desktop\delivery.html:318
+#: .\myprofile\templates\desktop\finance_summary.html:178
+#: .\myprofile\templates\desktop\finance_summary.html:224
+#: .\myprofile\templates\desktop\reschedule_arrival.html:43
+#: .\myprofile\templates\desktop\unidentified.html:107
+#: .\myprofile\templates\desktop\warehouse_inventory.html:71
+#: .\myprofile\templates\desktop\warehouse_reassign.html:148
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:29
+#: .\myprofile\templates\shared\print\receipt_print.html:352
+msgid "Клиент"
+msgstr "Клиент"
+
+#: .\myprofile\models.py:581
+msgid "Ячейка хранения"
+msgstr "Сақтау ұяшығы"
+
+#: .\myprofile\models.py:582
+msgid "Ячейки хранения"
+msgstr "Сақтау ұяшықтары"
+
+#: .\myprofile\models.py:614
+msgid "Доставщик"
+msgstr "Жеткізуші"
+
+#: .\myprofile\models.py:626
+msgid "Трек-коды в доставке"
+msgstr "Жеткізудегі трек-кодтар"
+
+#: .\myprofile\models.py:632
+msgid "Время принятия в доставку"
+msgstr "Жеткізуге қабылдау уақыты"
+
+#: .\myprofile\models.py:635
+msgid "Время доставки до пункта"
+msgstr "Нүктеге жеткізу уақыты"
+
+#: .\myprofile\models.py:640
+msgid "История доставки"
+msgstr "Жеткізу тарихы"
+
+#: .\myprofile\models.py:641 .\myprofile\templates\desktop\delivery.html:76
+msgid "История доставок"
+msgstr "Жеткізулер тарихы"
+
+#: .\myprofile\models.py:650
+msgid "На рассмотрении"
+msgstr "Қарауда"
+
+#: .\myprofile\models.py:651
+msgid "Одобрена"
+msgstr "Мақұлданды"
+
+#: .\myprofile\models.py:652
+msgid "Отклонена"
+msgstr "Қабылданбады"
+
+#: .\myprofile\models.py:656
+msgid "Текущий ПВЗ"
+msgstr "Ағымдағы ПВЗ"
+
+#: .\myprofile\models.py:657
+msgid "Запрашиваемый ПВЗ"
+msgstr "Сұралатын ПВЗ"
+
+#: .\myprofile\models.py:659
+msgid "Дата заявки"
+msgstr "Өтінім күні"
+
+#: .\myprofile\models.py:660
+msgid "Дата рассмотрения"
+msgstr "Қарау күні"
+
+#: .\myprofile\models.py:661
+msgid "Рассмотрел"
+msgstr "Қарады"
+
+#: .\myprofile\models.py:664
+msgid "Заявка на смену ПВЗ"
+msgstr "ПВЗ ауыстыру өтінімі"
+
+#: .\myprofile\models.py:673 .\myprofile\models.py:714
+#: .\myprofile\templates\desktop\goods_arrival.html:59
+#: .\myprofile\templates\desktop\reschedule_arrival.html:113
+#: .\myprofile\templates\desktop\reschedule_arrival.html:218
+#: .\myprofile\templates\desktop\service.html:89
+#: .\myprofile\templates\desktop\service.html:114
+msgid "Дата прихода"
+msgstr "Келу күні"
+
+#: .\myprofile\models.py:677 .\myprofile\models.py:718
+#: .\myprofile\models.py:780
+msgid "Создал"
+msgstr "Жасады"
+
+#: .\myprofile\models.py:689
+msgid "Исходные данные (трек-коды, владельцы, веса)"
+msgstr "Бастапқы деректер (трек-кодтар, иелер, салмақтар)"
+
+#: .\myprofile\models.py:691
+msgid "Всего трек-кодов"
+msgstr "Барлық трек-код"
+
+#: .\myprofile\models.py:696 .\myprofile\templates\mobile\mobile_menu.html:202
+msgid "Приход"
+msgstr "Келу"
+
+#: .\myprofile\models.py:697
+msgid "Приходы"
+msgstr "Келулер"
+
+#: .\myprofile\models.py:707 .\myprofile\models.py:770
+#: .\myprofile\templates\desktop\goods_arrival.html:91
+msgid "Активная"
+msgstr "Белсенді"
+
+#: .\myprofile\models.py:708
+#: .\myprofile\templates\desktop\goods_arrival.html:118
+#: .\myprofile\templates\desktop\goods_arrival.html:126
+#: .\myprofile\templates\desktop\goods_arrival_session.html:44
+msgid "На паузе"
+msgstr "Тоқтатылды"
+
+#: .\myprofile\models.py:709
+#: .\myprofile\templates\desktop\goods_arrival.html:165
+#: .\myprofile\templates\desktop\goods_arrival_session.html:48
+msgid "Неактивная"
+msgstr "Белсенді емес"
+
+#: .\myprofile\models.py:710 .\myprofile\models.py:771
+#: .\myprofile\templates\desktop\goods_arrival.html:211
+msgid "Завершена"
+msgstr "Аяқталды"
+
+#: .\myprofile\models.py:727
+msgid "Приход (после завершения)"
+msgstr "Келу (аяқтаудан кейін)"
+
+#: .\myprofile\models.py:730
+msgid "Поставлена на паузу"
+msgstr "Тоқтатылды"
+
+#: .\myprofile\models.py:731 .\myprofile\models.py:784
+msgid "Завершено"
+msgstr "Аяқталды"
+
+#: .\myprofile\models.py:734
+#: .\myprofile\templates\desktop\goods_arrival_session.html:35
+msgid "Сессия прихода"
+msgstr "Келу сеансы"
+
+#: .\myprofile\models.py:735
+msgid "Сессии прихода"
+msgstr "Келу сеанстары"
+
+#: .\myprofile\models.py:746
+msgid "Сессия"
+msgstr "Сеанс"
+
+#: .\myprofile\models.py:752
+msgid "Трек (объект)"
+msgstr "Трек (объект)"
+
+#: .\myprofile\models.py:754
+msgid "Владелец (логин)"
+msgstr "Иесі (логин)"
+
+#: .\myprofile\models.py:756
+msgid "Номер строки"
+msgstr "Жол нөмірі"
+
+#: .\myprofile\models.py:760
+msgid "Строка сессии прихода"
+msgstr "Келу сеансы жолы"
+
+#: .\myprofile\models.py:761
+msgid "Строки сессии прихода"
+msgstr "Келу сеансы жолдары"
+
+#: .\myprofile\models.py:782
+msgid "Бэкап ячеек"
+msgstr "Ұяшықтар сақтық көшірмесі"
+
+#: .\myprofile\models.py:783
+msgid "Начало"
+msgstr "Басталу"
+
+#: .\myprofile\models.py:787
+msgid "Сессия реструктуризации"
+msgstr "Қайта құрылымдау сеансы"
+
+#: .\myprofile\models.py:788
+msgid "Сессии реструктуризации"
+msgstr "Қайта құрылымдау сеанстары"
+
+#: .\myprofile\models.py:797
+msgid "Дата реестра"
+msgstr "Тізім күні"
+
+#: .\myprofile\models.py:802
+msgid "Реестр клиентов"
+msgstr "Клиенттер тізімі"
+
+#: .\myprofile\models.py:803
+msgid "Реестры клиентов"
+msgstr "Клиенттер тізімдері"
+
+#: .\myprofile\models.py:811
+#: .\myprofile\templates\desktop\notification_logs.html:216
+#: .\myprofile\templates\desktop\notification_logs.html:239
+#: .\myprofile\templates\desktop\notification_logs.html:273
+#: .\myprofile\templates\desktop\notification_logs.html:288
+#: .\myprofile\templates\desktop\notification_logs.html:345
+#: .\myprofile\templates\desktop\notification_logs.html:412
+#: .\myprofile\templates\desktop\notification_logs.html:431
+#: .\myprofile\templates\desktop\notification_logs.html:470
+#: .\myprofile\templates\desktop\notification_logs.html:527
+#: .\tgbot\models.py:115 .\tgbot\models.py:187 .\tgbot\models.py:219
+msgid "Отправлено"
+msgstr "Жіберілді"
+
+#: .\myprofile\models.py:817
+msgid "Текст письма"
+msgstr "Хат мәтіні"
+
+#: .\myprofile\models.py:820 .\myprofile\templates\desktop\shipped_cn.html:51
+msgid "Дата отправки"
+msgstr "Жіберілу күні"
+
+#: .\myprofile\models.py:823
+msgid "Лог email"
+msgstr "Email журналы"
+
+#: .\myprofile\models.py:824
+msgid "Логи email"
+msgstr "Email журналдары"
+
+#: .\myprofile\models.py:833
+msgid "Telegram"
+msgstr "Telegram"
+
+#: .\myprofile\models.py:834 .\register\models.py:69 .\register\models.py:106
+msgid "Email"
+msgstr "Email"
+
+#: .\myprofile\models.py:835
+#: .\myprofile\templates\desktop\notification_mutes.html:97
+#: .\myprofile\templates\desktop\notification_mutes.html:193
+msgid "Все каналы"
+msgstr "Барлық арналар"
+
+#: .\myprofile\models.py:843
+msgid "Клиент (пусто = все клиенты)"
+msgstr "Клиент (бос = барлық клиенттер)"
+
+#: .\myprofile\models.py:847
+#: .\myprofile\templates\desktop\notification_mutes.html:93
+msgid "Канал"
+msgstr "Арна"
+
+#: .\myprofile\models.py:854
+msgid "Кто отключил"
+msgstr "Кім өшірді"
+
+#: .\myprofile\models.py:856
+msgid "Время отключения"
+msgstr "Өшіру уақыты"
+
+#: .\myprofile\models.py:859
+msgid "Истекает (пусто = только вручную)"
+msgstr "Мерзімі бітеді (бос = тек қолмен)"
+
+#: .\myprofile\models.py:861
+msgid "Активна"
+msgstr "Белсенді"
+
+#: .\myprofile\models.py:862
+#: .\myprofile\templates\desktop\notification_mutes.html:143
+msgid "Причина"
+msgstr "Себеп"
+
+#: .\myprofile\models.py:865
+msgid "Заглушка уведомлений"
+msgstr "Хабарлама өшіргіші"
+
+#: .\myprofile\models.py:866
+msgid "Заглушки уведомлений"
+msgstr "Хабарлама өшіргіштері"
+
+#: .\myprofile\models.py:902
+#: .\myprofile\templates\desktop\finance_summary.html:139
+#: .\register\models.py:35 .\register\models.py:71
+#: .\register\templates\desktop\register_confirmation.html:65
+#: .\tgbot\models.py:185
+msgid "ПВЗ"
+msgstr "ПВЗ"
+
+#: .\myprofile\models.py:909
+msgid "Открыл"
+msgstr "Ашты"
+
+#: .\myprofile\models.py:911
+msgid "Открыта в"
+msgstr "Ашылды"
+
+#: .\myprofile\models.py:914
+msgid "Сессия выдачи"
+msgstr "Беру сеансы"
+
+#: .\myprofile\models.py:915
+msgid "Сессии выдачи"
+msgstr "Беру сеанстары"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:12
+msgid "Home"
+msgstr "Home"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:22
+#, python-format
+msgid ""
+"Are you sure you want to update the status of the selected\n"
+"            track code?"
+msgid_plural ""
+"Are you sure you want to update the status of the selected %(counter)s track\n"
+"            codes?"
+msgstr[0] ""
+"Таңдалған трек-кодтың мәртебесін жаңартқыңыз келетініне сенімдісіз бе?"
+msgstr[1] ""
+"%(counter)s таңдалған трек-кодтардың мәртебесін жаңартқыңыз келетініне "
+"сенімдісіз бе?"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:26
+msgid "Select New Status"
+msgstr "Жаңа мәртебені таңдаңыз"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:34
+msgid "Selected Track Codes"
+msgstr "Таңдалған трек-кодтар"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:46
+msgid "Update Status"
+msgstr "Мәртебені жаңарту"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:47
+msgid "No, take me back"
+msgstr "Жоқ, артқа қайту"
+
+#: .\myprofile\templates\desktop\arrival_history.html:9
+msgid "Inter Cargo - История приходов"
+msgstr "Inter Cargo - Келу тарихы"
+
+#: .\myprofile\templates\desktop\arrival_history.html:57
+msgid "Нет данных о приходах."
+msgstr "Келу туралы деректер жоқ."
+
+#: .\myprofile\templates\desktop\arrival_history.html:71
+msgid "Загрузка месяцев..."
+msgstr "Айлар жүктелуде..."
+
+#: .\myprofile\templates\desktop\arrival_history.html:125
+msgid "Нет данных за этот год."
+msgstr "Бұл жыл үшін деректер жоқ."
+
+#: .\myprofile\templates\desktop\arrival_history.html:142
+#: .\myprofile\templates\desktop\arrival_history.html:177
+#: .\myprofile\templates\desktop\arrival_history.html:196
+msgid "Ошибка загрузки данных."
+msgstr "Деректерді жүктеу қатесі."
+
+#: .\myprofile\templates\desktop\arrival_history.html:160
+msgid "Нет данных за этот месяц."
+msgstr "Бұл ай үшін деректер жоқ."
+
+#: .\myprofile\templates\desktop\arrival_history.html:241
+msgid "Нет данных за эту дату."
+msgstr "Бұл күн үшін деректер жоқ."
+
+#: .\myprofile\templates\desktop\arrival_history.html:267
+msgid "Трек-коды:"
+msgstr "Трек-кодтар:"
+
+#: .\myprofile\templates\desktop\arrival_history.html:283
+msgid "Оплачен"
+msgstr "Төленді"
+
+#: .\myprofile\templates\desktop\arrival_history.html:284
+msgid "Не оплачен"
+msgstr "Төленбеді"
+
+#: .\myprofile\templates\desktop\arrival_history.html:301
+#: .\myprofile\templates\desktop\extradition_package.html:110
+msgid "Стоимость (тг)"
+msgstr "Құны (тг)"
+
+#: .\myprofile\templates\desktop\arrival_history.html:326
+msgid "Чек ещё не сформирован"
+msgstr "Чек әлі қалыптасырылмаған"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:9
+msgid "Inter Cargo - Сводка прихода"
+msgstr "Inter Cargo - Келу қорытындысы"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:55
+#: .\myprofile\templates\desktop\goods_arrival_session.html:53
+msgid "Дата:"
+msgstr "Күн:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:59
+#: .\myprofile\templates\desktop\finance_summary.html:89
+#: .\myprofile\templates\desktop\goods_arrival.html:200
+msgid "Показать"
+msgstr "Көрсету"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:68
+msgid "Сформировать чеки"
+msgstr "Чектерді қалыптастыру"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:97
+msgid "Нет посылок со статусом \"Доставлен на сортировочный склад\" за эту дату"
+msgstr "Бұл күні «Сұрыптау қоймасына жеткізілді» мәртебелі жіберілімдер жоқ"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:105
+#: .\myprofile\templates\desktop\delivery.html:126
+msgid "Доставка на дом (Курьер)"
+msgstr "Үйге жеткізу (Курьер)"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:114
+#: .\myprofile\templates\desktop\arrival_summary.html:198
+#: .\myprofile\templates\desktop\arrival_summary.html:296
+#: .\myprofile\templates\desktop\delivery.html:319
+#: .\myprofile\templates\desktop\finance_summary.html:412
+#: .\myprofile\templates\desktop\warehouse_inventory.html:72
+#: .\myprofile\templates\desktop\warehouse_reassign.html:149
+msgid "Посылок"
+msgstr "Жіберілім"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:116
+#: .\myprofile\templates\desktop\arrival_summary.html:200
+#: .\myprofile\templates\desktop\arrival_summary.html:298
+msgid "Цена/кг (₸)"
+msgstr "Баға/кг (₸)"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:117
+#: .\myprofile\templates\desktop\arrival_summary.html:201
+#: .\myprofile\templates\desktop\arrival_summary.html:299
+msgid "Стоимость (₸)"
+msgstr "Құны (₸)"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:118
+#: .\myprofile\templates\desktop\arrival_summary.html:300
+msgid "Действие"
+msgstr "Әрекет"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:145
+#: .\myprofile\templates\desktop\arrival_summary.html:329
+msgid "Вернуть на ПВЗ"
+msgstr "ПВЗ-ге қайтару"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:163
+msgid "Без пункта"
+msgstr "Нүктесіз"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:167
+msgid "Копировать логины"
+msgstr "Логиндерді көшіру"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:170
+msgid "Выбрать несколько"
+msgstr "Бірнешеуін таңдау"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:177
+#: .\myprofile\templates\desktop\reschedule_arrival.html:102
+#: .\myprofile\templates\desktop\track_codes.html:105
+#: .\myprofile\templates\mobile\mobile_parcels.html:132
+msgid "Выбрано:"
+msgstr "Таңдалды:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:179
+msgid "Выбрать всех"
+msgstr "Барлығын таңдау"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:182
+#: .\myprofile\templates\desktop\arrival_summary.html:197
+#: .\myprofile\templates\desktop\arrival_summary.html:250
+msgid "Назначить ПВЗ"
+msgstr "ПВЗ тағайындау"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:185
+#: .\myprofile\templates\desktop\arrival_summary.html:264
+#: .\myprofile\templates\desktop\arrival_summary.html:391
+#: .\myprofile\templates\desktop\delivered_posts.html:210
+#: .\myprofile\templates\desktop\delivery.html:395
+#: .\myprofile\templates\desktop\extraditions.html:275
+#: .\myprofile\templates\desktop\profile.html:310
+#: .\myprofile\templates\desktop\role_management_edit.html:144
+#: .\myprofile\templates\desktop\track_codes.html:155
+#: .\myprofile\templates\desktop\track_codes.html:290
+#: .\myprofile\templates\desktop\unidentified.html:254
+#: .\register\templates\desktop\register_confirmation.html:132
+msgid "Отмена"
+msgstr "Болдырмау"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:230
+#: .\myprofile\templates\desktop\arrival_summary.html:267
+#: .\myprofile\templates\desktop\unidentified.html:258
+#: .\myprofile\templates\desktop\warehouse_reassign.html:99
+msgid "Назначить"
+msgstr "Тағайындау"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:252
+msgid "Выбрано клиентов:"
+msgstr "Клиенттер таңдалды:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:337
+msgid "Ввести скидку"
+msgstr "Жеңілдік енгізу"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:346
+msgid "На дом"
+msgstr "Үйге жеткізу"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:357
+msgid "Со склада"
+msgstr "Қоймадан"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:378
+msgid "Ввести разовую скидку"
+msgstr "Бір реттік жеңілдік енгізу"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:380
+msgid "Клиент:"
+msgstr "Клиент:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:388
+msgid "Например: 100"
+msgstr "Мысалы: 100"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:394
+#: .\myprofile\templates\desktop\pp_extradition_history.html:55
+msgid "Применить"
+msgstr "Қолдану"
+
+#: .\myprofile\templates\desktop\attention_required.html:9
+msgid "Inter Cargo - Требует внимания"
+msgstr "Inter Cargo - Назар аударуды қажет етеді"
+
+#: .\myprofile\templates\desktop\attention_required.html:54
+msgid ""
+"Посылки клиентов, которые требуют внимания: возвращены со склада ПВЗ, не "
+"приняты при приёмке или не приняты в доставку водителем."
+msgstr ""
+"Назар аударуды қажет ететін клиент жіберілімдері: ПВЗ қоймасынан қайтарылды,"
+" қабылдауда қабылданбады немесе жүргізушімен жеткізуге алынбады."
+
+#: .\myprofile\templates\desktop\attention_required.html:97
+#: .\myprofile\templates\desktop\warehouse_reassign.html:161
+msgid "(вр.)"
+msgstr "(уақ.)"
+
+#: .\myprofile\templates\desktop\attention_required.html:123
+msgid "Подтвердить возврат"
+msgstr "Қайтаруды растау"
+
+#: .\myprofile\templates\desktop\attention_required.html:135
+msgid "Проблемы устранены"
+msgstr "Мәселелер шешілді"
+
+#: .\myprofile\templates\desktop\attention_required.html:152
+msgid "Все посылки приняты. Нет проблем, требующих внимания."
+msgstr ""
+"Барлық жіберілімдер қабылданды. Назар аударуды қажет ететін мәселе жоқ."
+
+#: .\myprofile\templates\desktop\delivered_posts.html:9
+msgid "Inter Cargo - Чеки"
+msgstr "Inter Cargo - Чектер"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:61
+#: .\myprofile\templates\desktop\profile.html:163
+#: .\myprofile\templates\desktop\profile.html:276
+msgid "Оплатить"
+msgstr "Төлеу"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:67
+msgid "Фильтр:"
+msgstr "Сүзгі:"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:70
+#: .\myprofile\templates\desktop\notification_logs.html:101
+#: .\myprofile\templates\desktop\notification_logs.html:234
+#: .\myprofile\templates\desktop\notification_logs.html:426
+#: .\myprofile\templates\desktop\track_codes.html:167
+msgid "Все"
+msgstr "Барлығы"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:73
+#: .\myprofile\templates\desktop\track_codes.html:202
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:34
+msgid "Выдано"
+msgstr "Берілді"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:76
+msgid "Не выдано"
+msgstr "Берілмеді"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:142
+#: .\myprofile\templates\shared\print\receipt_print.html:368
+msgid "Цена (₸)"
+msgstr "Баға (₸)"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:176
+msgid "Печатная форма (PDF)"
+msgstr "Басып шығару (PDF)"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:184
+msgid "Чеки ещё не сформированы."
+msgstr "Чектер әлі қалыптастырылмаған."
+
+#: .\myprofile\templates\desktop\delivered_posts.html:199
+#: .\myprofile\templates\desktop\profile.html:299
+msgid "Обратите внимание"
+msgstr "Назар аударыңыз"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:202
+#: .\myprofile\templates\desktop\profile.html:302
+msgid ""
+"Данная функция предназначена только для удобства оплаты при получении "
+"посылки, вам всё ещё необходимо будет показать ваш чек об оплате на пункте "
+"выдачи."
+msgstr ""
+"Бұл функция жіберілімді алу кезінде төлем ыңғайлылығы үшін ғана, сізге беру "
+"нүктесінде төлем чегіңізді көрсету қажет болады."
+
+#: .\myprofile\templates\desktop\delivered_posts.html:206
+#: .\myprofile\templates\desktop\profile.html:306
+msgid "Больше не показывать"
+msgstr "Енді көрсетпеу"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:214
+#: .\myprofile\templates\desktop\goods_arrival.html:106
+#: .\myprofile\templates\desktop\goods_arrival.html:144
+#: .\myprofile\templates\desktop\profile.html:314
+msgid "Продолжить"
+msgstr "Жалғастыру"
+
+#: .\myprofile\templates\desktop\delivery.html:9
+msgid "Inter Cargo - Доставка"
+msgstr "Inter Cargo - Жеткізу"
+
+#: .\myprofile\templates\desktop\delivery.html:30
+msgid "Ошибка загрузки данных. Попробуйте снова."
+msgstr "Деректерді жүктеу қатесі. Қайталап көріңіз."
+
+#: .\myprofile\templates\desktop\delivery.html:31
+msgid "Отметить вручную"
+msgstr "Қолмен белгілеу"
+
+#: .\myprofile\templates\desktop\delivery.html:32
+msgid ""
+"Не удалось получить доступ к камере. Разрешите доступ в настройках браузера."
+msgstr ""
+"Камераға қол жеткізу мүмкін болмады. Браузер параметрлерінде рұқсат беріңіз."
+
+#: .\myprofile\templates\desktop\delivery.html:33
+#, python-brace-format
+msgid "Этот QR-код уже отсканирован: {code}"
+msgstr "Бұл QR-код бұрыннан сканерленген: {code}"
+
+#: .\myprofile\templates\desktop\delivery.html:34
+#, python-brace-format
+msgid "Неизвестный QR-код: {code}"
+msgstr "Белгісіз QR-код: {code}"
+
+#: .\myprofile\templates\desktop\delivery.html:35
+msgid "Сканирование не завершено. Вы уверены, что хотите отменить?"
+msgstr "Сканерлеу аяқталмады. Болдырмауға сенімдісіз бе?"
+
+#: .\myprofile\templates\desktop\delivery.html:36
+msgid "Сканирование не завершено. Вы уверены, что хотите покинуть страницу?"
+msgstr "Сканерлеу аяқталмады. Беттен шыққыңыз келетініне сенімдісіз бе?"
+
+#: .\myprofile\templates\desktop\delivery.html:37
+msgid "Нет QR-кодов для сканирования"
+msgstr "Сканерлейтін QR-кодтар жоқ"
+
+#: .\myprofile\templates\desktop\delivery.html:38
+msgid "У клиентов нет чеков — можно сразу взять в доставку"
+msgstr "Клиенттерде чек жоқ — тікелей жеткізуге алуға болады"
+
+#: .\myprofile\templates\desktop\delivery.html:39
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:432
+msgid "Все QR-коды отсканированы!"
+msgstr "Барлық QR-кодтар сканерленді!"
+
+#: .\myprofile\templates\desktop\delivery.html:64
+#: .\myprofile\templates\desktop\delivery.html:157
+#: .\myprofile\templates\desktop\delivery.html:403
+msgid "Взять в доставку"
+msgstr "Жеткізуге алу"
+
+#: .\myprofile\templates\desktop\delivery.html:68
+msgid "Завершить доставку"
+msgstr "Жеткізуді аяқтау"
+
+#: .\myprofile\templates\desktop\delivery.html:72
+msgid "Выдача товара"
+msgstr "Тауарды беру"
+
+#: .\myprofile\templates\desktop\delivery.html:113
+msgid "Сканировать и взять"
+msgstr "Сканерлеп алу"
+
+#: .\myprofile\templates\desktop\delivery.html:166
+msgid "Нет посылок для доставки"
+msgstr "Жеткізетін жіберілімдер жоқ"
+
+#: .\myprofile\templates\desktop\delivery.html:208
+#: .\myprofile\templates\desktop\service.html:193
+msgid "Доставлено на ПВЗ"
+msgstr "ПВЗ-ге жеткізілді"
+
+#: .\myprofile\templates\desktop\delivery.html:215
+msgid "Нет посылок в доставке"
+msgstr "Жеткізудегі жіберілімдер жоқ"
+
+#: .\myprofile\templates\desktop\delivery.html:224
+msgid "Доставка на дом (Курьер) — Выдача клиентам"
+msgstr "Үйге жеткізу (Курьер) — Клиенттерге беру"
+
+#: .\myprofile\templates\desktop\delivery.html:247
+msgid "Выдать"
+msgstr "Беру"
+
+#: .\myprofile\templates\desktop\delivery.html:256
+msgid "Нет клиентов для выдачи"
+msgstr "Беретін клиенттер жоқ"
+
+#: .\myprofile\templates\desktop\delivery.html:257
+msgid "Здесь отображаются клиенты с доставкой на дом, ожидающие выдачу"
+msgstr "Мұнда беруді күтіп тұрған үй жеткізімі бар клиенттер көрсетіледі"
+
+#: .\myprofile\templates\desktop\delivery.html:339
+msgid "Нет данных о клиентах"
+msgstr "Клиенттер туралы деректер жоқ"
+
+#: .\myprofile\templates\desktop\delivery.html:352
+msgid "История доставок пуста"
+msgstr "Жеткізу тарихы бос"
+
+#: .\myprofile\templates\desktop\delivery.html:363
+msgid "Сканирование"
+msgstr "Сканерлеу"
+
+#: .\myprofile\templates\desktop\delivery.html:375
+#: .\myprofile\templates\desktop\extraditions.html:260
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:116
+msgid "Отсканировано:"
+msgstr "Сканерленді:"
+
+#: .\myprofile\templates\desktop\extradition_package.html:9
+msgid "Inter Cargo - История выдачи"
+msgstr "Inter Cargo - Беру тарихы"
+
+#: .\myprofile\templates\desktop\extradition_package.html:76
+#: .\myprofile\templates\mobile\mobile_qr.html:152
+msgid "Выдан"
+msgstr "Берілді"
+
+#: .\myprofile\templates\desktop\extradition_package.html:78
+msgid "Ожидает выдачи"
+msgstr "Берілуін күтуде"
+
+#: .\myprofile\templates\desktop\extradition_package.html:145
+msgid "Показать QR-код"
+msgstr "QR-кодты көрсету"
+
+#: .\myprofile\templates\desktop\extradition_package.html:154
+msgid "Пока нет оформленных пакетов."
+msgstr "Рәсімделген пакеттер жоқ."
+
+#: .\myprofile\templates\desktop\extradition_package.html:166
+#: .\myprofile\templates\desktop\extradition_package.html:171
+#: .\myprofile\templates\desktop\profile.html:267
+#: .\myprofile\templates\desktop\profile.html:271
+#: .\myprofile\templates\mobile\mobile_qr.html:44
+#: .\myprofile\templates\mobile\mobile_qr.html:219
+#: .\myprofile\templates\mobile\mobile_qr.html:223
+msgid "QR-код"
+msgstr "QR-код"
+
+#: .\myprofile\templates\desktop\extradition_package.html:185
+#: .\myprofile\templates\desktop\profile.html:284
+#: .\myprofile\templates\mobile\mobile_qr.html:230
+msgid "Скачать PNG"
+msgstr "PNG жүктеу"
+
+#: .\myprofile\templates\desktop\extraditions.html:9
+msgid "Inter Cargo - Выдача клиентов"
+msgstr "Inter Cargo - Клиенттерге беру"
+
+#: .\myprofile\templates\desktop\extraditions.html:31
+msgid "Камера не доступна — используйте сканер или ввод вручную"
+msgstr "Камера қолжетімсіз — сканер немесе қолмен енгізу қолданыңыз"
+
+#: .\myprofile\templates\desktop\extraditions.html:32
+msgid "Не удалось запустить камеру. Проверьте разрешения."
+msgstr "Камераны іске қосу сәтсіз. Рұқсаттарды тексеріңіз."
+
+#: .\myprofile\templates\desktop\extraditions.html:33
+#, python-brace-format
+msgid "Чек {code} уже отсканирован"
+msgstr "Чек {code} бұрыннан сканерленген"
+
+#: .\myprofile\templates\desktop\extraditions.html:34
+#, python-brace-format
+msgid "Чек {code} подтверждён"
+msgstr "Чек {code} расталды"
+
+#: .\myprofile\templates\desktop\extraditions.html:35
+#, python-brace-format
+msgid "Чек {code} отмечен вручную"
+msgstr "Чек {code} қолмен белгіленді"
+
+#: .\myprofile\templates\desktop\extraditions.html:36
+#, python-brace-format
+msgid "Чек {code} не относится к этому пакету"
+msgstr "Чек {code} бұл пакетке жатпайды"
+
+#: .\myprofile\templates\desktop\extraditions.html:37
+msgid "Все чеки отмечены"
+msgstr "Барлық чектер белгіленді"
+
+#: .\myprofile\templates\desktop\extraditions.html:38
+msgid "Введите QR-код"
+msgstr "QR-кодты енгізіңіз"
+
+#: .\myprofile\templates\desktop\extraditions.html:39
+msgid "Пакет не найден"
+msgstr "Пакет табылмады"
+
+#: .\myprofile\templates\desktop\extraditions.html:40
+msgid "Ошибка сервера"
+msgstr "Сервер қатесі"
+
+#: .\myprofile\templates\desktop\extraditions.html:41
+#: .\myprofile\templates\desktop\finance_summary.html:114
+msgid "Оплачено"
+msgstr "Төленді"
+
+#: .\myprofile\templates\desktop\extraditions.html:42
+#: .\myprofile\templates\desktop\finance_summary.html:119
+msgid "Не оплачено"
+msgstr "Төленбеді"
+
+#: .\myprofile\templates\desktop\extraditions.html:43
+msgid "Отметить без сканирования"
+msgstr "Сканерлеусіз белгілеу"
+
+#: .\myprofile\templates\desktop\extraditions.html:44
+#: .\myprofile\templates\desktop\warehouse_reassign.html:83
+msgid "Вручную"
+msgstr "Қолмен"
+
+#: .\myprofile\templates\desktop\extraditions.html:45
+#, python-brace-format
+msgid "Оплата чека {num} подтверждена"
+msgstr "{num} чегінің төлемі расталды"
+
+#: .\myprofile\templates\desktop\extraditions.html:46
+msgid "Ошибка обновления оплаты"
+msgstr "Төлемді жаңарту қатесі"
+
+#: .\myprofile\templates\desktop\extraditions.html:47
+msgid "Ошибка связи с сервером"
+msgstr "Сервермен байланыс қатесі"
+
+#: .\myprofile\templates\desktop\extraditions.html:48
+msgid "Статус оплаты обновлен"
+msgstr "Төлем мәртебесі жаңартылды"
+
+#: .\myprofile\templates\desktop\extraditions.html:49
+#, python-brace-format
+msgid "Ошибка: {msg}"
+msgstr "Қате: {msg}"
+
+#: .\myprofile\templates\desktop\extraditions.html:50
+msgid "Ошибка: QR-код пакета не указан"
+msgstr "Қате: Пакеттің QR-коды көрсетілмеген"
+
+#: .\myprofile\templates\desktop\extraditions.html:51
+msgid "Нажмите, чтобы отметить как оплачено"
+msgstr "Төленді деп белгілеу үшін басыңыз"
+
+#: .\myprofile\templates\desktop\extraditions.html:80
+msgid "Оформление выдачи посылок"
+msgstr "Жіберілімдерді беруді рәсімдеу"
+
+#: .\myprofile\templates\desktop\extraditions.html:83
+msgid "Оператор:"
+msgstr "Оператор:"
+
+#: .\myprofile\templates\desktop\extraditions.html:85
+msgid "ПВЗ:"
+msgstr "ПВЗ:"
+
+#: .\myprofile\templates\desktop\extraditions.html:93
+msgid "Выберите ПВЗ"
+msgstr "ПВЗ таңдаңыз"
+
+#: .\myprofile\templates\desktop\extraditions.html:97
+msgid "-- Все ПВЗ --"
+msgstr "-- Барлық ПВЗ --"
+
+#: .\myprofile\templates\desktop\extraditions.html:111
+msgid "QR-код пакета"
+msgstr "Пакеттің QR-коды"
+
+#: .\myprofile\templates\desktop\extraditions.html:111
+msgid "(обязательно)"
+msgstr "(міндетті)"
+
+#: .\myprofile\templates\desktop\extraditions.html:116
+msgid "Введите или отсканируйте QR-код пакета"
+msgstr "Пакеттің QR-кодын енгізіңіз немесе сканерлеңіз"
+
+#: .\myprofile\templates\desktop\extraditions.html:126
+msgid "Информация о пакете"
+msgstr "Пакет туралы ақпарат"
+
+#: .\myprofile\templates\desktop\extraditions.html:129
+msgid "Владелец:"
+msgstr "Иесі:"
+
+#: .\myprofile\templates\desktop\extraditions.html:133
+#: .\myprofile\templates\desktop\profile.html:64
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:43
+msgid "Пункт выдачи:"
+msgstr "Беру нүктесі:"
+
+#: .\myprofile\templates\desktop\extraditions.html:137
+msgid "Ячейка на складе:"
+msgstr "Қоймадағы ұяшық:"
+
+#: .\myprofile\templates\desktop\extraditions.html:160
+msgid "Общая сумма выдачи:"
+msgstr "Беру жалпы сомасы:"
+
+#: .\myprofile\templates\desktop\extraditions.html:160
+msgid "тг"
+msgstr "тг"
+
+#: .\myprofile\templates\desktop\extraditions.html:168
+#: .\myprofile\templates\desktop\extraditions.html:282
+msgid "Оформить выдачу"
+msgstr "Беруді рәсімдеу"
+
+#: .\myprofile\templates\desktop\extraditions.html:173
+msgid "Проверить и выдать"
+msgstr "Тексеріп беру"
+
+#: .\myprofile\templates\desktop\extraditions.html:178
+msgid "Очистить"
+msgstr "Тазалау"
+
+#: .\myprofile\templates\desktop\extraditions.html:183
+msgid "Сканировать"
+msgstr "Сканерлеу"
+
+#: .\myprofile\templates\desktop\extraditions.html:194
+msgid "Открытые сессии выдачи"
+msgstr "Ашық беру сеанстары"
+
+#: .\myprofile\templates\desktop\extraditions.html:199
+msgid "Обновить"
+msgstr "Жаңарту"
+
+#: .\myprofile\templates\desktop\extraditions.html:203
+msgid "Нет открытых сессий"
+msgstr "Ашық сеанстар жоқ"
+
+#: .\myprofile\templates\desktop\extraditions.html:217
+msgid "Сканирование QR-кода"
+msgstr "QR-кодты сканерлеу"
+
+#: .\myprofile\templates\desktop\extraditions.html:229
+msgid "Закрыть"
+msgstr "Жабу"
+
+#: .\myprofile\templates\desktop\extraditions.html:240
+msgid "Проверка чеков для выдачи"
+msgstr "Беру үшін чектерді тексеру"
+
+#: .\myprofile\templates\desktop\extraditions.html:249
+msgid "Ввод сканером или вручную"
+msgstr "Сканер немесе қолмен енгізу"
+
+#: .\myprofile\templates\desktop\extraditions.html:253
+msgid "Нажмите сюда и отсканируйте QR-код сканером..."
+msgstr "Мұнда басыңыз және QR-кодты сканерлеңіз..."
+
+#: .\myprofile\templates\desktop\finance_summary.html:9
+msgid "Inter Cargo - Финансовая сводка"
+msgstr "Inter Cargo - Қаржылық қорытынды"
+
+#: .\myprofile\templates\desktop\finance_summary.html:49
+msgid "По дням"
+msgstr "Күндер бойынша"
+
+#: .\myprofile\templates\desktop\finance_summary.html:54
+msgid "По месяцам"
+msgstr "Айлар бойынша"
+
+#: .\myprofile\templates\desktop\finance_summary.html:68
+#: .\myprofile\templates\desktop\finance_summary.html:345
+msgid "Месяц"
+msgstr "Ай"
+
+#: .\myprofile\templates\desktop\finance_summary.html:78
+msgid "Все ПВЗ"
+msgstr "Барлық ПВЗ"
+
+#: .\myprofile\templates\desktop\finance_summary.html:98
+msgid "Финансовая сводка по чекам"
+msgstr "Чектер бойынша қаржылық қорытынды"
+
+#: .\myprofile\templates\desktop\finance_summary.html:105
+msgid "Всего чеков"
+msgstr "Барлық чек"
+
+#: .\myprofile\templates\desktop\finance_summary.html:109
+msgid "Общая сумма"
+msgstr "Жалпы сома"
+
+#: .\myprofile\templates\desktop\finance_summary.html:140
+#: .\myprofile\templates\desktop\finance_summary.html:179
+#: .\myprofile\templates\desktop\finance_summary.html:225
+#: .\myprofile\templates\desktop\finance_summary.html:260
+#: .\myprofile\templates\desktop\finance_summary.html:303
+#: .\myprofile\templates\desktop\finance_summary.html:346
+msgid "Чеков"
+msgstr "Чек"
+
+#: .\myprofile\templates\desktop\finance_summary.html:142
+#: .\myprofile\templates\desktop\finance_summary.html:181
+#: .\myprofile\templates\desktop\finance_summary.html:227
+#: .\myprofile\templates\desktop\finance_summary.html:261
+#: .\myprofile\templates\desktop\finance_summary.html:305
+#: .\myprofile\templates\desktop\finance_summary.html:347
+#: .\myprofile\templates\desktop\finance_summary.html:414
+#: .\myprofile\templates\desktop\finance_summary.html:462
+msgid "Сумма (₸)"
+msgstr "Сомасы (₸)"
+
+#: .\myprofile\templates\desktop\finance_summary.html:143
+#: .\myprofile\templates\desktop\finance_summary.html:182
+#: .\myprofile\templates\desktop\finance_summary.html:228
+#: .\myprofile\templates\desktop\finance_summary.html:262
+#: .\myprofile\templates\desktop\finance_summary.html:306
+#: .\myprofile\templates\desktop\finance_summary.html:348
+msgid "Оплачено (₸)"
+msgstr "Төленді (₸)"
+
+#: .\myprofile\templates\desktop\finance_summary.html:144
+#: .\myprofile\templates\desktop\finance_summary.html:263
+#: .\myprofile\templates\desktop\finance_summary.html:307
+#: .\myprofile\templates\desktop\finance_summary.html:349
+msgid "Не оплачено (₸)"
+msgstr "Төленбеді (₸)"
+
+#: .\myprofile\templates\desktop\finance_summary.html:217
+#: .\register\models.py:13
+msgid "Доставка на дом"
+msgstr "Үйге жеткізу"
+
+#: .\myprofile\templates\desktop\finance_summary.html:252
+msgid "Последние 30 дней"
+msgstr "Соңғы 30 күн"
+
+#: .\myprofile\templates\desktop\finance_summary.html:282
+msgid "Нет данных за этот период"
+msgstr "Бұл кезең үшін деректер жоқ"
+
+#: .\myprofile\templates\desktop\finance_summary.html:325
+msgid "Нет данных за этот месяц"
+msgstr "Бұл ай үшін деректер жоқ"
+
+#: .\myprofile\templates\desktop\finance_summary.html:338
+msgid "Последние 12 месяцев"
+msgstr "Соңғы 12 ай"
+
+#: .\myprofile\templates\desktop\finance_summary.html:377
+msgid "Оплата за доставку"
+msgstr "Жеткізу төлемі"
+
+#: .\myprofile\templates\desktop\finance_summary.html:383
+#: .\myprofile\templates\desktop\finance_summary.html:460
+msgid "Доставок"
+msgstr "Жеткізу"
+
+#: .\myprofile\templates\desktop\finance_summary.html:387
+msgid "Общий вес"
+msgstr "Жалпы салмақ"
+
+#: .\myprofile\templates\desktop\finance_summary.html:388
+msgid "кг"
+msgstr "кг"
+
+#: .\myprofile\templates\desktop\finance_summary.html:391
+msgid "К выплате"
+msgstr "Төленуге тиіс"
+
+#: .\myprofile\templates\desktop\finance_summary.html:428
+msgid "Нет доставок за выбранный период"
+msgstr "Таңдалған кезең үшін жеткізу жоқ"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:9
+msgid "Inter Cargo - Приход товаров"
+msgstr "Inter Cargo - Тауар келуі"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:55
+msgid "Начать новую сессию"
+msgstr "Жаңа сеанс бастау"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:67
+msgid "— Не указано —"
+msgstr "— Көрсетілмеген —"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:74
+msgid "Начать сессию"
+msgstr "Сеанс бастау"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:83
+msgid "Активные сессии"
+msgstr "Белсенді сеанстар"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:157
+msgid "Неактивные сессии"
+msgstr "Белсенді емес сеанстар"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:158
+msgid "(превышен 48-часовой лимит)"
+msgstr "(48 сағаттық лимит асылды)"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:181
+msgid "Возобновить"
+msgstr "Жалғастыру"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:194
+msgid "Завершённые сессии"
+msgstr "Аяқталған сеанстар"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:233
+msgid "Нет завершённых сессий за эту дату."
+msgstr "Бұл күн үшін аяқталған сеанстар жоқ."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:56
+msgid "| Начата:"
+msgstr "| Басталды:"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:64
+msgid "Назад"
+msgstr "Артқа"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:77
+msgid "Сессия на паузе"
+msgstr "Сеанс тоқтатылды"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:78
+msgid ""
+"Редактирование недоступно. Нажмите «Продолжить», чтобы возобновить работу."
+msgstr ""
+"Өңдеу қолжетімсіз. Жұмысты жалғастыру үшін «Жалғастыру» батырмасын басыңыз."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:83
+msgid "Сессия неактивна"
+msgstr "Сеанс белсенді емес"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:84
+msgid ""
+"Превышен 48-часовой лимит активности. Нажмите «Возобновить» для продолжения."
+msgstr ""
+"48 сағаттық белсенділік лимиті асылды. Жалғастыру үшін «Жалғастыру» "
+"батырмасын басыңыз."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:104
+msgid "Потеряна связь с сессией"
+msgstr "Сеанспен байланыс үзілді"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:105
+msgid "Автосохранение не работает. Данные в браузере сохранены."
+msgstr "Автосақтау жұмыс істемейді. Деректер браузерде сақталды."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:112
+msgid "Переподключиться"
+msgstr "Қайта қосылу"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:122
+msgid "Связь восстановлена. Данные сохранены."
+msgstr "Байланыс қалпына келді. Деректер сақталды."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:145
+msgid "Переключить на текстовый вид"
+msgstr "Мәтіндік көрінісіне ауысу"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:168
+#: .\myprofile\templates\desktop\update_tracks.html:123
+msgid "Добавить строку"
+msgstr "Жол қосу"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:175
+#: .\myprofile\templates\desktop\shipped_cn.html:58
+#: .\myprofile\templates\desktop\update_tracks.html:78
+msgid "Трек-коды (по одному в строке)"
+msgstr "Трек-кодтар (жолма-жол)"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:181
+msgid "Владельцы (по одному в строке)"
+msgstr "Иелер (жолма-жол)"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:187
+msgid "Вес (кг, по одному в строке)"
+msgstr "Салмақ (кг, жолма-жол)"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:197
+msgid "Незаполненных ячеек:"
+msgstr "Толтырылмаған ұяшықтар:"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:203
+msgid "Подозрительных ячеек:"
+msgstr "Күдікті ұяшықтар:"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:204
+msgid "Предыдущая"
+msgstr "Алдыңғы"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:204
+msgid "&#8593; Пред."
+msgstr "&#8593; Алд."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:205
+msgid "Следующая"
+msgstr "Келесі"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:205
+msgid "&#8595; След."
+msgstr "&#8595; Кел."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:216
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:157
+msgid "Завершить сессию"
+msgstr "Сеансты аяқтау"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:224
+msgid "Пауза"
+msgstr "Тоқтату"
+
+#: .\myprofile\templates\desktop\notification_logs.html:9
+msgid "Inter Cargo - Логи Уведомлений"
+msgstr "Inter Cargo - Хабарлама журналдары"
+
+#: .\myprofile\templates\desktop\notification_logs.html:33
+msgid "Логи уведомлений"
+msgstr "Хабарлама журналдары"
+
+#: .\myprofile\templates\desktop\notification_logs.html:58
+msgid "Сайт"
+msgstr "Сайт"
+
+#: .\myprofile\templates\desktop\notification_logs.html:83
+#: .\myprofile\templates\desktop\notification_logs.html:212
+msgid "Всего"
+msgstr "Барлығы"
+
+#: .\myprofile\templates\desktop\notification_logs.html:91
+#: .\myprofile\templates\desktop\notification_logs.html:146
+#: .\myprofile\templates\desktop\notification_logs.html:178
+msgid "Не прочитано"
+msgstr "Оқылмады"
+
+#: .\myprofile\templates\desktop\notification_logs.html:106
+msgid "Непрочитанные"
+msgstr "Оқылмағандар"
+
+#: .\myprofile\templates\desktop\notification_logs.html:111
+msgid "Прочитанные"
+msgstr "Оқылғандар"
+
+#: .\myprofile\templates\desktop\notification_logs.html:115
+#: .\myprofile\templates\desktop\notification_logs.html:253
+#: .\myprofile\templates\desktop\notification_logs.html:440
+msgid "Поиск..."
+msgstr "Іздеу..."
+
+#: .\myprofile\templates\desktop\notification_logs.html:119
+#: .\myprofile\templates\desktop\notification_logs.html:257
+#: .\myprofile\templates\desktop\notification_logs.html:444
+#: .\myprofile\templates\desktop\role_management.html:46
+msgid "Найти"
+msgstr "Табу"
+
+#: .\myprofile\templates\desktop\notification_logs.html:158
+#: .\myprofile\templates\desktop\notification_logs.html:191
+msgid "Уведомлений пока нет"
+msgstr "Хабарламалар жоқ"
+
+#: .\myprofile\templates\desktop\notification_logs.html:183
+#: .\myprofile\templates\desktop\notification_logs.html:358
+msgid "Пользователь:"
+msgstr "Пайдаланушы:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:185
+#: .\myprofile\templates\desktop\notification_logs.html:364
+msgid "Сообщение:"
+msgstr "Хабарлама:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:197
+#: .\myprofile\templates\desktop\notification_logs.html:393
+#: .\myprofile\templates\desktop\notification_logs.html:567
+msgid "Показаны последние 200 записей"
+msgstr "Соңғы 200 жазба көрсетілуде"
+
+#: .\myprofile\templates\desktop\notification_logs.html:220
+#: .\myprofile\templates\desktop\notification_logs.html:244
+#: .\myprofile\templates\desktop\notification_logs.html:292
+#: .\myprofile\templates\desktop\notification_logs.html:349
+msgid "В очереди"
+msgstr "Кезекте"
+
+#: .\myprofile\templates\desktop\notification_logs.html:224
+#: .\myprofile\templates\desktop\notification_logs.html:249
+#: .\myprofile\templates\desktop\notification_logs.html:416
+#: .\myprofile\templates\desktop\notification_logs.html:436
+msgid "Ошибки"
+msgstr "Қателер"
+
+#: .\myprofile\templates\desktop\notification_logs.html:270
+#: .\tgbot\models.py:106
+msgid "Заголовок"
+msgstr "Тақырып"
+
+#: .\myprofile\templates\desktop\notification_logs.html:274
+msgid "Попыток"
+msgstr "Әрекет"
+
+#: .\myprofile\templates\desktop\notification_logs.html:325
+#: .\myprofile\templates\desktop\notification_logs.html:387
+msgid "Telegram-уведомлений пока нет"
+msgstr "Telegram хабарламалары жоқ"
+
+#: .\myprofile\templates\desktop\notification_logs.html:361
+msgid "Заголовок:"
+msgstr "Тақырып:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:368
+msgid "Отправлено:"
+msgstr "Жіберілді:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:372
+msgid "Попыток:"
+msgstr "Әрекет:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:377
+#: .\myprofile\templates\desktop\notification_logs.html:541
+msgid "Ошибка:"
+msgstr "Қате:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:408
+msgid "Всего писем"
+msgstr "Барлық хат"
+
+#: .\myprofile\templates\desktop\notification_logs.html:460
+#: .\myprofile\templates\desktop\unidentified.html:111
+#: .\myprofile\templates\desktop\unidentified.html:181
+#: .\myprofile\templates\desktop\warehouse_reassign.html:152
+#: .\register\templates\desktop\register_confirmation.html:67
+msgid "Действия"
+msgstr "Әрекеттер"
+
+#: .\myprofile\templates\desktop\notification_logs.html:498
+#: .\myprofile\templates\desktop\notification_logs.html:553
+msgid "Переотправить"
+msgstr "Қайта жіберу"
+
+#: .\myprofile\templates\desktop\notification_logs.html:510
+#: .\myprofile\templates\desktop\notification_logs.html:561
+msgid "Логов email пока нет"
+msgstr "Email журналдары жоқ"
+
+#: .\myprofile\templates\desktop\notification_logs.html:536
+msgid "Получатель:"
+msgstr "Алушы:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:538
+msgid "Тема:"
+msgstr "Тақырып:"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:8
+msgid "Inter Cargo — Управление уведомлениями"
+msgstr "Inter Cargo — Хабарламаларды басқару"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:31
+#: .\myprofile\templates\desktop\notification_mutes.html:34
+msgid "Управление уведомлениями"
+msgstr "Хабарламаларды басқару"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:53
+#: .\myprofile\templates\desktop\notification_mutes.html:152
+msgid "Отключить уведомления"
+msgstr "Хабарламаларды өшіру"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:61
+msgid "Для кого"
+msgstr "Кім үшін"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:65
+#: .\myprofile\templates\desktop\notification_mutes.html:184
+msgid "Все клиенты"
+msgstr "Барлық клиенттер"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:69
+msgid "Конкретный клиент"
+msgstr "Нақты клиент"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:76
+#: .\myprofile\templates\desktop\reschedule_arrival.html:47
+msgid "Введите логин или имя..."
+msgstr "Логин немесе атты енгізіңіз..."
+
+#: .\myprofile\templates\desktop\notification_mutes.html:101
+msgid "Только Telegram"
+msgstr "Тек Telegram"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:105
+msgid "Только Email"
+msgstr "Тек Email"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:112
+msgid "Длительность"
+msgstr "Ұзақтығы"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:116
+msgid "Вручную (до ручного включения)"
+msgstr "Қолмен (қолмен қосылғанша)"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:120
+msgid "На определённое время"
+msgstr "Белгілі уақытқа"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:127
+msgid "Количество часов"
+msgstr "Сағат саны"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:129
+msgid "часов"
+msgstr "сағат"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:143
+msgid "(необязательно)"
+msgstr "(міндетті емес)"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:145
+msgid "Например: технические работы, просьба клиента..."
+msgstr "Мысалы: техникалық жұмыстар, клиент сұранысы..."
+
+#: .\myprofile\templates\desktop\notification_mutes.html:164
+msgid "Активные заглушки"
+msgstr "Белсенді өшіргіштер"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:201
+msgid "До ручного включения"
+msgstr "Қолмен қосылғанша"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:214
+msgid "Включить обратно"
+msgstr "Қайта қосу"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:222
+msgid "Все уведомления активны — заглушек нет"
+msgstr "Барлық хабарламалар белсенді — өшіргіштер жоқ"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:238
+msgid "все"
+msgstr "барлығы"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:246
+msgid "Отключено"
+msgstr "Өшірілді"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:320
+#: .\myprofile\templates\desktop\reschedule_arrival.html:285
+#: .\myprofile\templates\desktop\role_management.html:173
+msgid "Не найдено"
+msgstr "Табылмады"
+
+#: .\myprofile\templates\desktop\notifications.html:9
+#: .\myprofile\templates\mobile\mobile_notifications.html:9
+msgid "Inter Cargo - Уведомления"
+msgstr "Inter Cargo - Хабарламалар"
+
+#: .\myprofile\templates\desktop\notifications.html:60
+msgid "Прочитать все"
+msgstr "Барлығын оқу"
+
+#: .\myprofile\templates\desktop\notifications.html:82
+msgid "Уведомлений нет."
+msgstr "Хабарламалар жоқ."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:9
+msgid "Inter Cargo - Заявки на смену ПВЗ"
+msgstr "Inter Cargo - ПВЗ ауыстыру өтінімдері"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:76
+msgid "Одобрить"
+msgstr "Мақұлдау"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:83
+#: .\register\templates\desktop\register_confirmation.html:88
+msgid "Отклонить"
+msgstr "Қабылдамау"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:94
+msgid "Нет заявок на рассмотрении."
+msgstr "Қаралатын өтінімдер жоқ."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:109
+msgid "Идёт сессия сортировки"
+msgstr "Сұрыптау сеансы жүріп жатыр"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:111
+msgid ""
+"Сейчас активна сессия прихода товаров. Изменение ПВЗ пользователям "
+"заблокировано на время сортировки."
+msgstr ""
+"Тауар келу сеансы белсенді. Сұрыптау кезінде пайдаланушылар үшін ПВЗ өзгерту"
+" бұғатталды."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:114
+msgid ""
+"Поставьте активную сессию на паузу или дождитесь её завершения, чтобы "
+"рассмотреть заявки."
+msgstr ""
+"Өтінімдерді қарау үшін белсенді сеансты тоқтатыңыз немесе аяқталуын күтіңіз."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:118
+msgid "Перейти к сессиям прихода"
+msgstr "Келу сеанстарына өту"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:9
+msgid "Inter Cargo - Приёмка товара"
+msgstr "Inter Cargo - Тауар қабылдау"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:35
+msgid "Приёмка товара на ПВЗ"
+msgstr "ПВЗ-де тауар қабылдау"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:54
+msgid "Ожидают приёмки"
+msgstr "Қабылдануды күтуде"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:69
+msgid "Без даты прихода"
+msgstr "Келу күнісіз"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:83
+msgid "Сканировать и отсортировать"
+msgstr "Сканерлеп сұрыптау"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:92
+msgid "Нет посылок для приёмки"
+msgstr "Қабылдайтын жіберілімдер жоқ"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:93
+msgid ""
+"Здесь будут отображаться посылки, доставленные водителем для сортировки"
+msgstr "Жүргізуші сұрыптауға жеткізген жіберілімдер осында көрсетіледі"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:34
+#: .\myprofile\templates\mobile\mobile_menu.html:129
+#: .\myprofile\templates\mobile\mobile_menu.html:166
+msgid "Приёмка"
+msgstr "Қабылдау"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:85
+msgid "Загрузка данных приёмки..."
+msgstr "Қабылдау деректері жүктелуде..."
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:91
+msgid "Нет посылок для приёмки за эту дату"
+msgstr "Бұл күні қабылдайтын жіберілімдер жоқ"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:92
+msgid "Все посылки уже отсортированы или чеки не созданы"
+msgstr "Барлық жіберілімдер сұрыпталды немесе чектер жасалмады"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:101
+msgid "Ввод сканером / вручную"
+msgstr "Сканер / қолмен енгізу"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:105
+msgid "Наведите сканер или введите номер чека"
+msgstr "Сканерді бағыттаңыз немесе чек нөмірін енгізіңіз"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:135
+msgid "Чеки к приёмке:"
+msgstr "Қабылдайтын чектер:"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:148
+msgid "Отсортировать отмеченные"
+msgstr "Белгіленгендерді сұрыптау"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:253
+msgid "Ошибка загрузки данных"
+msgstr "Деректерді жүктеу қатесі"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:9
+msgid "Inter Cargo - История выдачи ПВЗ"
+msgstr "Inter Cargo - ПВЗ беру тарихы"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:44
+msgid "Дата от"
+msgstr "Күн бастап"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:49
+msgid "Дата до"
+msgstr "Күн дейін"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:59
+#: .\myprofile\templates\desktop\role_management.html:50
+msgid "Сбросить"
+msgstr "Тазалау"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:67
+msgid "Нет выдач за указанный период"
+msgstr "Көрсетілген кезең үшін берулер жоқ"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:69
+msgid "Выберите дату для отображения истории выдач"
+msgstr "Беру тарихын көрсету үшін күнді таңдаңыз"
+
+#: .\myprofile\templates\desktop\print_documents.html:9
+msgid "Inter Cargo - Печать документов"
+msgstr "Inter Cargo - Құжаттарды басып шығару"
+
+#: .\myprofile\templates\desktop\print_documents.html:48
+msgid "Создать реестр клиентов"
+msgstr "Клиенттер тізімін жасау"
+
+#: .\myprofile\templates\desktop\print_documents.html:93
+msgid "Сформировать реестр"
+msgstr "Тізімді қалыптастыру"
+
+#: .\myprofile\templates\desktop\print_documents.html:103
+msgid "Создать чеки"
+msgstr "Чектер жасау"
+
+#: .\myprofile\templates\desktop\print_documents.html:149
+msgid "Печать чеков"
+msgstr "Чектерді басып шығару"
+
+#: .\myprofile\templates\desktop\print_documents.html:159
+msgid "История реестров"
+msgstr "Тізімдер тарихы"
+
+#: .\myprofile\templates\desktop\print_documents.html:192
+#: .\myprofile\templates\desktop\unidentified.html:210
+msgid "Удалить"
+msgstr "Жою"
+
+#: .\myprofile\templates\desktop\print_documents.html:207
+msgid "История реестров пуста"
+msgstr "Тізімдер тарихы бос"
+
+#: .\myprofile\templates\desktop\profile.html:9
+msgid "Inter Cargo - Личный кабинет"
+msgstr "Inter Cargo - Жеке кабинет"
+
+#: .\myprofile\templates\desktop\profile.html:59
+msgid "Информация о пользователе"
+msgstr "Пайдаланушы туралы ақпарат"
+
+#: .\myprofile\templates\desktop\profile.html:60
+msgid "Имя пользователя:"
+msgstr "Пайдаланушы аты:"
+
+#: .\myprofile\templates\desktop\profile.html:63
+msgid "Телефон:"
+msgstr "Телефон:"
+
+#: .\myprofile\templates\desktop\profile.html:66
+msgid "Время работы:"
+msgstr "Жұмыс уақыты:"
+
+#: .\myprofile\templates\desktop\profile.html:77
+msgid "Telegram подключён"
+msgstr "Telegram қосылды"
+
+#: .\myprofile\templates\desktop\profile.html:82
+msgid "Перепривязать"
+msgstr "Қайта байлау"
+
+#: .\myprofile\templates\desktop\profile.html:122
+msgid "Новичок на сайте?"
+msgstr "Сайтқа жаңа келдіңіз бе?"
+
+#: .\myprofile\templates\desktop\profile.html:123
+msgid "Пройдите интерактивное обучение по основным функциям"
+msgstr "Негізгі функциялар бойынша интерактивті оқытудан өтіңіз"
+
+#: .\myprofile\templates\desktop\profile.html:172
+#: .\myprofile\templates\desktop\track_codes.html:242
+#: .\myprofile\templates\desktop\track_codes.html:310
+#: .\myprofile\templates\mobile\mobile_parcels.html:180
+msgid "Код:"
+msgstr "Код:"
+
+#: .\myprofile\templates\desktop\profile.html:173
+#: .\myprofile\templates\desktop\track_codes.html:243
+#: .\myprofile\templates\desktop\track_codes.html:311
+#: .\myprofile\templates\mobile\mobile_parcels.html:181
+msgid "Статус:"
+msgstr "Мәртебе:"
+
+#: .\myprofile\templates\desktop\profile.html:174
+#: .\myprofile\templates\desktop\track_codes.html:244
+#: .\myprofile\templates\mobile\mobile_parcels.html:182
+msgid "Обновлено:"
+msgstr "Жаңартылды:"
+
+#: .\myprofile\templates\desktop\profile.html:176
+#: .\myprofile\templates\desktop\track_codes.html:142
+#: .\myprofile\templates\desktop\track_codes.html:249
+#: .\myprofile\templates\desktop\track_codes.html:279
+#: .\myprofile\templates\desktop\track_codes.html:312
+#: .\myprofile\templates\mobile\mobile_parcels.html:187
+msgid "Описание:"
+msgstr "Сипаттама:"
+
+#: .\myprofile\templates\desktop\profile.html:181
+msgid "Нет новых товаров."
+msgstr "Жаңа тауарлар жоқ."
+
+#: .\myprofile\templates\desktop\profile.html:198
+msgid "Заполните данные профиля"
+msgstr "Профиль деректерін толтырыңыз"
+
+#: .\myprofile\templates\desktop\profile.html:200
+msgid "Для продолжения работы необходимо заполнить следующие поля:"
+msgstr "Жұмысты жалғастыру үшін келесі өрістерді толтыру қажет:"
+
+#: .\myprofile\templates\desktop\profile.html:205
+#: .\myprofile\templates\desktop\settings.html:68 .\register\models.py:75
+#: .\register\templates\desktop\registration.html:69
+msgid "Фамилия"
+msgstr "Тегі"
+
+#: .\myprofile\templates\desktop\profile.html:208
+#: .\myprofile\templates\desktop\settings.html:71
+#: .\register\templates\desktop\registration.html:70
+msgid "Введите фамилию"
+msgstr "Тегіңізді енгізіңіз"
+
+#: .\myprofile\templates\desktop\profile.html:213
+#: .\myprofile\templates\desktop\settings.html:76 .\register\models.py:74
+#: .\register\templates\desktop\registration.html:75
+msgid "Имя"
+msgstr "Аты"
+
+#: .\myprofile\templates\desktop\profile.html:216
+#: .\myprofile\templates\desktop\settings.html:79
+#: .\register\templates\desktop\registration.html:76
+msgid "Введите имя"
+msgstr "Атыңызды енгізіңіз"
+
+#: .\myprofile\templates\desktop\profile.html:221
+#: .\myprofile\templates\desktop\settings.html:84
+msgid "Электронная почта"
+msgstr "Электрондық пошта"
+
+#: .\myprofile\templates\desktop\profile.html:242
+#: .\myprofile\templates\desktop\role_management_edit.html:141
+#: .\myprofile\templates\desktop\track_codes.html:151
+#: .\myprofile\templates\desktop\track_codes.html:286
+msgid "Сохранить"
+msgstr "Сақтау"
+
+#: .\myprofile\templates\desktop\profile.html:257
+msgid "Окей"
+msgstr "Жарайды"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:8
+msgid "Inter Cargo — Перенос прихода"
+msgstr "Inter Cargo — Келуді ауыстыру"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:31
+msgid "Перенести пропущенные посылки клиента с одной даты прихода на другую"
+msgstr ""
+"Клиенттің жіберілген жіберілімдерін бір келу күнінен екіншісіне ауыстыру"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:38
+msgid "Выберите клиента и исходную дату"
+msgstr "Клиент пен бастапқы күнді таңдаңыз"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:58
+msgid "Исходная дата прихода"
+msgstr "Бастапқы келу күні"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:67
+msgid "Показать сводку"
+msgstr "Қорытындыны көрсету"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:71
+msgid "Найти треки клиента"
+msgstr "Клиент трек-кодтарын табу"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:80
+msgid "Сводка прихода за"
+msgstr "Келу қорытындысы:"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:91
+msgid "Треки клиента"
+msgstr "Клиент трек-кодтары"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:92
+msgid "за"
+msgstr "үшін"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:99
+msgid "Выбрать все ("
+msgstr "Барлығын таңдау ("
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:123
+msgid "Нет треков для переноса за эту дату"
+msgstr "Бұл күні ауыстыратын трек жоқ"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:131
+msgid "Укажите новую дату прихода"
+msgstr "Жаңа келу күнін енгізіңіз"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:135
+#: .\myprofile\templates\desktop\reschedule_arrival.html:241
+msgid "Новая дата прихода"
+msgstr "Жаңа келу күні"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:142
+msgid "Выбранные треки будут"
+msgstr "Таңдалған трек-кодтар"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:142
+msgid "удалены из исходного прихода"
+msgstr "бастапқы келуден жойылады"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:150
+msgid "Перенести треки"
+msgstr "Трек-кодтарды ауыстыру"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:164
+msgid "Сделать ещё один перенос"
+msgstr "Тағы бір ауыстыру жасау"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:175
+msgid "Прибыло без ПВЗ — требует переноса"
+msgstr "ПВЗ-сіз келді — ауыстыруды қажет етеді"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:178
+msgid ""
+"Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте"
+" дату следующего прихода — они появятся в доставке за эту дату."
+msgstr ""
+"ПВЗ тағайындалмаған кезде келген клиент жіберілімдері. Келесі келу күнін "
+"белгілеңіз — олар сол күні жеткізуде пайда болады."
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:250
+msgid "Перенести на выбранную дату"
+msgstr "Таңдалған күнге ауыстыру"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:343
+msgid "Всего треков"
+msgstr "Барлық трек"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:347
+msgid "Клиентов"
+msgstr "Клиент"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:352
+msgid "Разбивка по статусам"
+msgstr "Мәртебелер бойынша бөлу"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:370
+msgid "Записи приходов"
+msgstr "Келу жазбалары"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:377
+msgid "Записей приходов за эту дату не найдено"
+msgstr "Бұл күні келу жазбалары табылмады"
+
+#: .\myprofile\templates\desktop\role_management.html:8
+msgid "Inter Cargo — Управление ролями"
+msgstr "Inter Cargo — Рөлдерді басқару"
+
+#: .\myprofile\templates\desktop\role_management.html:41
+msgid "Поиск по логину, имени или телефону..."
+msgstr "Логин, ат немесе телефон бойынша іздеу..."
+
+#: .\myprofile\templates\desktop\role_management.html:57
+msgid "Назначить роль пользователю, которого нет в списке"
+msgstr "Тізімде жоқ пайдаланушыға рөл тағайындау"
+
+#: .\myprofile\templates\desktop\role_management.html:61
+msgid "Логин или имя (мин. 2 символа)..."
+msgstr "Логин немесе ат (кем. 2 таңба)..."
+
+#: .\myprofile\templates\desktop\role_management.html:76
+msgid "Пользователи с ролями"
+msgstr "Рөлдері бар пайдаланушылар"
+
+#: .\myprofile\templates\desktop\role_management.html:96
+msgid "Есть явно заданные права"
+msgstr "Нақты белгіленген рұқсаттар бар"
+
+#: .\myprofile\templates\desktop\role_management.html:97
+msgid "тонкая настройка"
+msgstr "нақты баптау"
+
+#: .\myprofile\templates\desktop\role_management.html:105
+msgid "Ролей нет, но есть явные права"
+msgstr "Рөл жоқ, бірақ нақты рұқсаттар бар"
+
+#: .\myprofile\templates\desktop\role_management.html:111
+msgid "Редактировать"
+msgstr "Өңдеу"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:42
+msgid "К списку"
+msgstr "Тізімге"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:55
+msgid "Чекбоксы с"
+msgstr "Белгілеу жолақтары"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:56
+msgid "пунктирной рамкой — право"
+msgstr "нүктелі жиекпен — рұқсат"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:56
+msgid "унаследовано"
+msgstr "мұраланған"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:68
+msgid "Флаги ролей"
+msgstr "Рөл жалаулары"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:91
+msgid "Матрица прав (аспект × действие)"
+msgstr "Рұқсаттар матрицасы (аспект × әрекет)"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:95
+msgid "Применить дефолты по флагам"
+msgstr "Жалаулар бойынша әдепкіні қолдану"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:103
+#: .\register\models.py:147
+msgid "Аспект"
+msgstr "Аспект"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:107
+msgid "Всё/Ничего"
+msgstr "Барлығы/Ешнәрсе"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:126
+msgid "Переключить всё"
+msgstr "Барлығын ауыстыру"
+
+#: .\myprofile\templates\desktop\service.html:9
+msgid "Inter Cargo - Сервис"
+msgstr "Inter Cargo - Сервис"
+
+#: .\myprofile\templates\desktop\service.html:59
+#: .\myprofile\templates\desktop\service.html:70
+msgid "Прогрузить все QR-коды"
+msgstr "Барлық QR-кодтарды жүктеу"
+
+#: .\myprofile\templates\desktop\service.html:79
+#: .\myprofile\templates\desktop\service.html:95
+msgid "Подгрузить чеки"
+msgstr "Чектерді жүктеу"
+
+#: .\myprofile\templates\desktop\service.html:104
+#: .\myprofile\templates\desktop\service.html:120
+msgid "Нормализовать чеки"
+msgstr "Чектерді нормализациялау"
+
+#: .\myprofile\templates\desktop\service.html:129
+msgid "Отметить чеки как «Выдано клиенту»"
+msgstr "Чектерді «Клиентке берілді» деп белгілеу"
+
+#: .\myprofile\templates\desktop\service.html:139
+msgid "Отметить выданные чеки"
+msgstr "Берілген чектерді белгілеу"
+
+#: .\myprofile\templates\desktop\service.html:148
+msgid "Перенос архивных трек-кодов"
+msgstr "Мұрағаттық трек-кодтарды ауыстыру"
+
+#: .\myprofile\templates\desktop\service.html:158
+msgid "Перенести архивные треки"
+msgstr "Мұрағаттық трек-кодтарды ауыстыру"
+
+#: .\myprofile\templates\desktop\service.html:167
+msgid "Тест уведомлений"
+msgstr "Хабарламаны сынау"
+
+#: .\myprofile\templates\desktop\service.html:170
+msgid "Отправляет пробное уведомление"
+msgstr "Сынақ хабарламасын жібереді"
+
+#: .\myprofile\templates\desktop\service.html:170
+msgid "вам лично"
+msgstr "сізге жеке"
+
+#: .\myprofile\templates\desktop\service.html:179
+msgid "Доставлено на склад сортировки"
+msgstr "Сұрыптау қоймасына жеткізілді"
+
+#: .\myprofile\templates\desktop\service.html:186
+msgid "Создан чек"
+msgstr "Чек жасалды"
+
+#: .\myprofile\templates\desktop\service.html:200
+msgid "Отправлен из Китая"
+msgstr "Қытайдан жіберілді"
+
+#: .\myprofile\templates\desktop\settings.html:9
+msgid "Inter Cargo - Настройки"
+msgstr "Inter Cargo - Параметрлер"
+
+#: .\myprofile\templates\desktop\settings.html:41
+msgid "Настройки аккаунта"
+msgstr "Аккаунт параметрлері"
+
+#: .\myprofile\templates\desktop\settings.html:102
+msgid "Сохранить изменения"
+msgstr "Өзгерістерді сақтау"
+
+#: .\myprofile\templates\desktop\settings.html:110
+msgid "Смена пункта выдачи"
+msgstr "Беру нүктесін ауыстыру"
+
+#: .\myprofile\templates\desktop\settings.html:114
+#: .\myprofile\templates\desktop\settings.html:116
+msgid "Текущий ПВЗ:"
+msgstr "Ағымдағы ПВЗ:"
+
+#: .\myprofile\templates\desktop\settings.html:116
+msgid "не указан"
+msgstr "көрсетілмеген"
+
+#: .\myprofile\templates\desktop\settings.html:131
+msgid "Новый пункт выдачи"
+msgstr "Жаңа беру нүктесі"
+
+#: .\myprofile\templates\desktop\settings.html:134
+msgid "— Выберите ПВЗ —"
+msgstr "— ПВЗ таңдаңыз —"
+
+#: .\myprofile\templates\desktop\settings.html:145
+msgid "Отправить заявку"
+msgstr "Өтінім жіберу"
+
+#: .\myprofile\templates\desktop\settings.html:162
+msgid "Telegram привязан"
+msgstr "Telegram байланыстырылған"
+
+#: .\myprofile\templates\desktop\settings.html:163
+msgid "Вы получаете уведомления в Telegram"
+msgstr "Telegram арқылы хабарлама аласыз"
+
+#: .\myprofile\templates\desktop\settings.html:165
+msgid "Telegram не привязан"
+msgstr "Telegram байланыстырылмаған"
+
+#: .\myprofile\templates\desktop\settings.html:166
+msgid "Привяжите аккаунт, чтобы получать уведомления"
+msgstr "Хабарлама алу үшін аккаунтты байланыстырыңыз"
+
+#: .\myprofile\templates\desktop\settings.html:182 .\register\models.py:55
+msgid "Язык интерфейса"
+msgstr "Интерфейс тілі"
+
+#: .\myprofile\templates\desktop\settings.html:215
+msgid "Настройки уведомлений"
+msgstr "Хабарлама баптаулары"
+
+#: .\myprofile\templates\desktop\settings.html:217
+msgid "Настройки распространяются на Email и Telegram уведомления."
+msgstr "Баптаулар Email және Telegram хабарламаларына қолданылады."
+
+#: .\myprofile\templates\desktop\settings.html:229 .\tgbot\models.py:149
+msgid "Только ПВЗ"
+msgstr "Тек ПВЗ"
+
+#: .\myprofile\templates\desktop\settings.html:230
+msgid "Уведомления только о доставке на пункт выдачи"
+msgstr "Тек беру нүктесіне жеткізу туралы хабарламалар"
+
+#: .\myprofile\templates\desktop\settings.html:240 .\tgbot\models.py:148
+msgid "Все статусы"
+msgstr "Барлық мәртебелер"
+
+#: .\myprofile\templates\desktop\settings.html:241
+msgid "Уведомления о каждом изменении статуса трек-кода"
+msgstr "Трек-код мәртебесінің әрбір өзгерісі туралы хабарламалар"
+
+#: .\myprofile\templates\desktop\settings.html:251 .\tgbot\models.py:150
+msgid "Выборочно"
+msgstr "Таңдамалы"
+
+#: .\myprofile\templates\desktop\settings.html:252
+msgid "Выберите, о каких статусах получать уведомления"
+msgstr "Қандай мәртебе туралы хабарлама алатыныңызды таңдаңыз"
+
+#: .\myprofile\templates\desktop\settings.html:266 .\tgbot\models.py:161
+msgid "Сортировочный склад"
+msgstr "Сұрыптау қоймасы"
+
+#: .\myprofile\templates\desktop\settings.html:271 .\tgbot\models.py:162
+msgid "В доставке до ПВЗ"
+msgstr "ПВЗ-ге жеткізу кезінде"
+
+#: .\myprofile\templates\desktop\settings.html:273
+msgid "Уведомление о доставке на ПВЗ приходит всегда."
+msgstr "ПВЗ-ге жеткізу туралы хабарлама әрдайым келеді."
+
+#: .\myprofile\templates\desktop\settings.html:278
+msgid "Сохранить настройки"
+msgstr "Параметрлерді сақтау"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:9
+msgid "Inter Cargo - Отправлено из Китая"
+msgstr "Inter Cargo - Қытайдан жіберілді"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:35
+#: .\myprofile\templates\mobile\mobile_menu.html:196
+msgid "Из Китая"
+msgstr "Қытайдан"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:61
+msgid "Введите трек-коды вручную..."
+msgstr "Трек-кодтарды қолмен енгізіңіз..."
+
+#: .\myprofile\templates\desktop\shipped_cn.html:66
+msgid "Или загрузите xlsx файл"
+msgstr "Немесе xlsx файлды жүктеңіз"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:70
+msgid "Перетащите xlsx файл сюда"
+msgstr "xlsx файлды осында сүйреңіз"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:71
+msgid "или"
+msgstr "немесе"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:73
+msgid "Выбрать файл"
+msgstr "Файл таңдау"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:79
+msgid "Парсинг: столбец A, начиная с A3, до пустой ячейки или \"条码数:\""
+msgstr "Талдау: A бағаны, A3-тен бастап, бос ұяшыққа немесе \"条码数:\"-ге дейін"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:85
+msgid "Обновить статусы"
+msgstr "Мәртебелерді жаңарту"
+
+#: .\myprofile\templates\desktop\track_codes.html:9
+msgid "Inter Cargo - Трек-коды"
+msgstr "Inter Cargo - Трек-кодтар"
+
+#: .\myprofile\templates\desktop\track_codes.html:42
+msgid "Ваши трек-коды"
+msgstr "Сіздің трек-кодтарыңыз"
+
+#: .\myprofile\templates\desktop\track_codes.html:61
+msgid "Внимание!"
+msgstr "Назар аударыңыз!"
+
+#: .\myprofile\templates\desktop\track_codes.html:61
+msgid "Следующие трек-коды есть и в архиве, и в основной таблице:"
+msgstr "Келесі трек-кодтар мұрағатта да, негізгі кестеде де бар:"
+
+#: .\myprofile\templates\desktop\track_codes.html:72
+msgid "Удалить из архива"
+msgstr "Мұрағаттан жою"
+
+#: .\myprofile\templates\desktop\track_codes.html:96
+#: .\myprofile\templates\desktop\unidentified.html:86
+#: .\myprofile\templates\mobile\mobile_parcels.html:260
+msgid "Добавить"
+msgstr "Қосу"
+
+#: .\myprofile\templates\desktop\track_codes.html:105
+msgid "трек-кодов"
+msgstr "трек-код"
+
+#: .\myprofile\templates\desktop\track_codes.html:115
+#: .\myprofile\templates\mobile\mobile_parcels.html:140
+msgid "Архивировать выбранные"
+msgstr "Таңдалғандарды мұрағаттау"
+
+#: .\myprofile\templates\desktop\track_codes.html:122
+msgid "Нажмите на трек-коды, чтобы выбрать их для архивации"
+msgstr "Мұрағаттау үшін трек-кодтарды таңдап басыңыз"
+
+#: .\myprofile\templates\desktop\track_codes.html:130
+#: .\myprofile\templates\mobile\mobile_parcels.html:48
+#: .\myprofile\templates\mobile\mobile_parcels.html:242
+msgid "Добавить трек-код"
+msgstr "Трек-код қосу"
+
+#: .\myprofile\templates\desktop\track_codes.html:135
+#: .\myprofile\templates\desktop\unidentified.html:239
+msgid "Трек-код:"
+msgstr "Трек-код:"
+
+#: .\myprofile\templates\desktop\track_codes.html:136
+#: .\myprofile\templates\desktop\unidentified.html:59
+#: .\myprofile\templates\mobile\mobile_parcels.html:251
+msgid "Введите трек-код"
+msgstr "Трек-кодты енгізіңіз"
+
+#: .\myprofile\templates\desktop\track_codes.html:143
+msgid "Описание посылки"
+msgstr "Жіберілім сипаттамасы"
+
+#: .\myprofile\templates\desktop\track_codes.html:177
+msgid "Добавлен"
+msgstr "Қосылды"
+
+#: .\myprofile\templates\desktop\track_codes.html:182
+msgid "На складе (Китай)"
+msgstr "Қоймада (Қытай)"
+
+#: .\myprofile\templates\desktop\track_codes.html:187
+msgid "Отправлен (Китай)"
+msgstr "Жіберілді (Қытай)"
+
+#: .\myprofile\templates\desktop\track_codes.html:238
+#: .\myprofile\templates\mobile\mobile_parcels.html:124
+#: .\myprofile\templates\mobile\mobile_parcels.html:207
+msgid "В архив"
+msgstr "Мұрағатқа"
+
+#: .\myprofile\templates\desktop\track_codes.html:246
+#: .\myprofile\templates\mobile\mobile_parcels.html:184
+msgid "Где отсортирован:"
+msgstr "Қайда сұрыпталды:"
+
+#: .\myprofile\templates\desktop\track_codes.html:260
+#: .\myprofile\templates\desktop\track_codes.html:314
+#: .\myprofile\templates\mobile\mobile_parcels.html:191
+msgid "Вес:"
+msgstr "Салмақ:"
+
+#: .\myprofile\templates\desktop\track_codes.html:265
+msgid "Трек-коды не найдены."
+msgstr "Трек-кодтар табылмады."
+
+#: .\myprofile\templates\desktop\track_codes.html:275
+msgid "Изменить описание"
+msgstr "Сипаттаманы өзгерту"
+
+#: .\myprofile\templates\desktop\track_codes.html:322
+#: .\myprofile\templates\mobile\mobile_parcels.html:201
+msgid "Восстановить"
+msgstr "Қалпына келтіру"
+
+#: .\myprofile\templates\desktop\unidentified.html:8
+msgid "Inter Cargo — Неопознанные посылки"
+msgstr "Inter Cargo — Белгісіз жіберілімдер"
+
+#: .\myprofile\templates\desktop\unidentified.html:31
+msgid "Посылки без владельца на сортировочном складе"
+msgstr "Сұрыптау қоймасындағы иесіз жіберілімдер"
+
+#: .\myprofile\templates\desktop\unidentified.html:51
+msgid "Добавить неопознанную посылку"
+msgstr "Белгісіз жіберілім қосу"
+
+#: .\myprofile\templates\desktop\unidentified.html:56
+msgid "Трек-код *"
+msgstr "Трек-код *"
+
+#: .\myprofile\templates\desktop\unidentified.html:71
+msgid "— не указано —"
+msgstr "— көрсетілмеген —"
+
+#: .\myprofile\templates\desktop\unidentified.html:78
+#: .\myprofile\templates\desktop\unidentified.html:179
+msgid "Примечание"
+msgstr "Ескерту"
+
+#: .\myprofile\templates\desktop\unidentified.html:81
+msgid "Необязательно"
+msgstr "Міндетті емес"
+
+#: .\myprofile\templates\desktop\unidentified.html:98
+msgid "Заявлено клиентами:"
+msgstr "Клиенттер мәлімдеді:"
+
+#: .\myprofile\templates\desktop\unidentified.html:100
+msgid "Требует подтверждения"
+msgstr "Растауды қажет етеді"
+
+#: .\myprofile\templates\desktop\unidentified.html:138
+#: .\register\templates\desktop\registration.html:91
+msgid "Подтвердить"
+msgstr "Растау"
+
+#: .\myprofile\templates\desktop\unidentified.html:144
+msgid "Снять"
+msgstr "Алып тастау"
+
+#: .\myprofile\templates\desktop\unidentified.html:167
+msgid "Без владельца:"
+msgstr "Иесіз:"
+
+#: .\myprofile\templates\desktop\unidentified.html:180
+msgid "Дата добавления"
+msgstr "Қосылған күн"
+
+#: .\myprofile\templates\desktop\unidentified.html:204
+#: .\myprofile\templates\desktop\unidentified.html:233
+msgid "Назначить клиента"
+msgstr "Клиент тағайындау"
+
+#: .\myprofile\templates\desktop\unidentified.html:222
+msgid "Нет неопознанных посылок без владельца"
+msgstr "Иесіз белгісіз жіберілімдер жоқ"
+
+#: .\myprofile\templates\desktop\unidentified.html:242
+msgid "Поиск клиента"
+msgstr "Клиент іздеу"
+
+#: .\myprofile\templates\desktop\unidentified.html:245
+msgid "Введите имя или логин..."
+msgstr "Ат немесе логинді енгізіңіз..."
+
+#: .\myprofile\templates\desktop\unidentified.html:310
+msgid "Пользователи не найдены"
+msgstr "Пайдаланушылар табылмады"
+
+#: .\myprofile\templates\desktop\update_tracks.html:9
+msgid "Inter Cargo - Обновления статусов"
+msgstr "Inter Cargo - Мәртебе жаңартулары"
+
+#: .\myprofile\templates\desktop\update_tracks.html:35
+#: .\myprofile\templates\desktop\update_tracks.html:37
+msgid "Обновление трек-кодов"
+msgstr "Трек-кодтарды жаңарту"
+
+#: .\myprofile\templates\desktop\update_tracks.html:52
+msgid "Новый статус"
+msgstr "Жаңа мәртебе"
+
+#: .\myprofile\templates\desktop\update_tracks.html:71
+msgid "Переключить на табличный вид"
+msgstr "Кесте көрінісіне ауысу"
+
+#: .\myprofile\templates\desktop\update_tracks.html:93
+msgid "Вес (в кг, по одному в строке)"
+msgstr "Салмақ (кг, жолма-жол)"
+
+#: .\myprofile\templates\desktop\warehouse.html:9
+msgid "Inter Cargo - Склад ПВЗ"
+msgstr "Inter Cargo - ПВЗ қоймасы"
+
+#: .\myprofile\templates\desktop\warehouse.html:65
+msgid "-- Выберите ПВЗ --"
+msgstr "-- ПВЗ таңдаңыз --"
+
+#: .\myprofile\templates\desktop\warehouse.html:80
+msgid "Инвентаризация склада"
+msgstr "Қойма инвентаризациясы"
+
+#: .\myprofile\templates\desktop\warehouse.html:89
+#: .\myprofile\templates\desktop\warehouse_reassign.html:55
+msgid "Реструктуризация склада"
+msgstr "Қойманы қайта құрылымдау"
+
+#: .\myprofile\templates\desktop\warehouse.html:95
+msgid "Продолжить реструктуризацию"
+msgstr "Қайта құрылымдауды жалғастыру"
+
+#: .\myprofile\templates\desktop\warehouse.html:104
+msgid "Выберите пункт выдачи для просмотра склада."
+msgstr "Қойманы қарау үшін беру нүктесін таңдаңыз."
+
+#: .\myprofile\templates\desktop\warehouse.html:109
+msgid "На складе нет товаров, ожидающих выдачи."
+msgstr "Қоймада берілуін күтетін тауарлар жоқ."
+
+#: .\myprofile\templates\desktop\warehouse.html:114
+msgid "Ячеек с товарами:"
+msgstr "Тауарлы ұяшықтар:"
+
+#: .\myprofile\templates\desktop\warehouse.html:125
+msgid "Нажмите чтобы изменить номер ячейки"
+msgstr "Ұяшық нөмірін өзгерту үшін басыңыз"
+
+#: .\myprofile\templates\desktop\warehouse.html:136
+msgid "Заявка на возврат — ожидает подтверждения"
+msgstr "Қайтару өтінімі — растауды күтуде"
+
+#: .\myprofile\templates\desktop\warehouse.html:144
+#: .\myprofile\templates\desktop\warehouse.html:259
+msgid "посылок"
+msgstr "жіберілім"
+
+#: .\myprofile\templates\desktop\warehouse.html:148
+#: .\myprofile\templates\desktop\warehouse.html:263
+msgid "вес"
+msgstr "салмақ"
+
+#: .\myprofile\templates\desktop\warehouse.html:162
+msgid "Без чека"
+msgstr "Чексіз"
+
+#: .\myprofile\templates\desktop\warehouse.html:173
+msgid "Быстрая выдача"
+msgstr "Жылдам беру"
+
+#: .\myprofile\templates\desktop\warehouse.html:184
+msgid "Описание"
+msgstr "Сипаттама"
+
+#: .\myprofile\templates\desktop\warehouse.html:216
+msgid "Ожидает подтверждения возврата"
+msgstr "Қайтаруды растауды күтуде"
+
+#: .\myprofile\templates\desktop\warehouse.html:224
+msgid "Не доехал до склада"
+msgstr "Қоймаға жетпеді"
+
+#: .\myprofile\templates\desktop\warehouse.html:238
+msgid "Без ячейки"
+msgstr "Ұяшықсыз"
+
+#: .\myprofile\templates\desktop\warehouse.html:270
+msgid "Назначить ячейку"
+msgstr "Ұяшық тағайындау"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:8
+msgid "Inter Cargo - Инвентаризация склада"
+msgstr "Inter Cargo - Қойма инвентаризациясы"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:46
+msgid "&larr; Назад на склад"
+msgstr "&larr; Қоймаға оралу"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:49
+msgid "&#128424; Печать"
+msgstr "&#128424; Басып шығару"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:54
+msgid "Инвентаризация склада ПВЗ"
+msgstr "ПВЗ қоймасының инвентаризациясы"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:60
+msgid "Клиентов:"
+msgstr "Клиенттер:"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:61
+msgid "Посылок:"
+msgstr "Жіберілімдер:"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:62
+#: .\myprofile\templates\shared\print\receipt_print.html:388
+msgid "Общий вес:"
+msgstr "Жалпы салмақ:"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:70
+#: .\myprofile\templates\desktop\warehouse_reassign.html:151
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:33
+msgid "Ячейка"
+msgstr "Ұяшық"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:74
+msgid "Приходов"
+msgstr "Келулер"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:75
+msgid "Даты приходов"
+msgstr "Келу күндері"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:103
+msgid "Склад пуст."
+msgstr "Қойма бос."
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:107
+msgid "Inter Cargo — Инвентаризация"
+msgstr "Inter Cargo — Инвентаризация"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:9
+msgid "Inter Cargo - Реструктуризация склада"
+msgstr "Inter Cargo - Қойманы қайта құрылымдау"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:34
+msgid "Реструктуризация"
+msgstr "Қайта құрылымдау"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:62
+msgid "Вернуться на склад"
+msgstr "Қоймаға оралу"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:71
+msgid "Завершить реструктуризацию"
+msgstr "Қайта құрылымдауды аяқтау"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:85
+msgid "Выберите клиента из списка и укажите номер ячейки"
+msgstr "Тізімнен клиент таңдап, ұяшық нөмірін енгізіңіз"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:88
+msgid "-- Выберите клиента --"
+msgstr "-- Клиент таңдаңыз --"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:96
+msgid "Номер ячейки (пусто = авто)"
+msgstr "Ұяшық нөмірі (бос = авто)"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:107
+msgid "Сканер"
+msgstr "Сканер"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:109
+msgid "Отсканируйте QR-код чека сканером. Ячейка назначится автоматически."
+msgstr "Чектің QR-кодын сканерлеңіз. Ұяшық автоматты тағайындалады."
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:110
+msgid "Нажмите и сканируйте..."
+msgstr "Басып сканерлеңіз..."
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:118
+msgid "Камера"
+msgstr "Камера"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:120
+msgid ""
+"Отсканируйте QR-код чека камерой телефона. Ячейка назначится автоматически."
+msgstr ""
+"Чектің QR-кодын телефон камерасымен сканерлеңіз. Ұяшық автоматты "
+"тағайындалады."
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:123
+msgid "Открыть камеру"
+msgstr "Камераны ашу"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:127
+msgid "Закрыть камеру"
+msgstr "Камераны жабу"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:138
+msgid "Клиенты на складе"
+msgstr "Қоймадағы клиенттер"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:141
+msgid "Назначено:"
+msgstr "Тағайындалды:"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:179
+msgid "Изменить"
+msgstr "Өзгерту"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:9
+msgid "Inter Cargo - Меню"
+msgstr "Inter Cargo - Мәзір"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:121 .\register\models.py:40
+msgid "Работник ПВЗ"
+msgstr "ПВЗ қызметкері"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:135
+#: .\myprofile\templates\mobile\mobile_menu.html:172
+#: .\myprofile\templates\mobile\mobile_qr.html:36
+msgid "Выдача"
+msgstr "Беру"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:147
+#: .\myprofile\templates\mobile\mobile_menu.html:184
+msgid "История ПВЗ"
+msgstr "ПВЗ тарихы"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:158
+msgid "Оператор"
+msgstr "Оператор"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:190
+msgid "Внимание"
+msgstr "Назар аудару"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:208
+msgid "Неопознанные"
+msgstr "Белгісіздер"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:214
+msgid "Перенос"
+msgstr "Ауыстыру"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:226
+msgid "Сводка"
+msgstr "Қорытынды"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:232
+msgid "Админ"
+msgstr "Әкімші"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:238
+#: .\myprofile\templates\shared\print\client_check_pdf.html:14
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:14
+msgid "Печать"
+msgstr "Басып шығару"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:244
+msgid "Логи увед."
+msgstr "Хабарлама журн."
+
+#: .\myprofile\templates\mobile\mobile_menu.html:250
+msgid "Откл. увед."
+msgstr "Хабарл. өшіру"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:256
+#: .\myprofile\templates\mobile\mobile_menu.html:281
+#: .\myprofile\templates\mobile\mobile_menu.html:306
+msgid "Финансы"
+msgstr "Қаржы"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:273 .\register\models.py:42
+msgid "Бухгалтер"
+msgstr "Бухгалтер"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:292 .\register\models.py:39
+msgid "Водитель"
+msgstr "Жүргізуші"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:325
+msgid "Подтв. польз."
+msgstr "Пайд. растау"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:331
+msgid "Смена ПВЗ"
+msgstr "ПВЗ ауыстыру"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:342
+msgid "Суперпользователь"
+msgstr "Супер пайдаланушы"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:350 .\register\models.py:37
+msgid "Персонал"
+msgstr "Персонал"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:366
+msgid "Язык / Тіл / Lang"
+msgstr "Тіл / Язык / Lang"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:416
+#: .\myprofile\templates\mobile\mobile_notifications.html:133
+#: .\myprofile\templates\mobile\mobile_parcels.html:228
+#: .\myprofile\templates\mobile\mobile_qr.html:200
+msgid "Эта страница оптимизирована для мобильных устройств"
+msgstr "Бұл бет мобильді құрылғылар үшін оңтайландырылған"
+
+#: .\myprofile\templates\mobile\mobile_notifications.html:122
+msgid "Нет сообщений"
+msgstr "Хабарламалар жоқ"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:9
+msgid "Inter Cargo - Посылки"
+msgstr "Inter Cargo - Жіберілімдер"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:49
+msgid "Отследить новую посылку"
+msgstr "Жаңа жіберілімді қадағалау"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:175
+msgid "Архив"
+msgstr "Мұрағат"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:217
+msgid "Нет трек-кодов"
+msgstr "Трек-кодтар жоқ"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:218
+msgid "В этой категории пока пусто"
+msgstr "Бұл санатта әзірше бос"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:256
+msgid "Описание посылки (необязательно)"
+msgstr "Жіберілім сипаттамасы (міндетті емес)"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:331
+msgid "+ подсветка нового трека по &new="
+msgstr "+ жаңа тректі &new= бойынша бөлектеу"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:9
+msgid "Inter Cargo - Выдача"
+msgstr "Inter Cargo - Беру"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:53
+msgid "Нет активного пакета выдачи"
+msgstr "Белсенді беру пакеті жоқ"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:127
+msgid "Нет посылок, готовых к получению"
+msgstr "Алуға дайын жіберілімдер жоқ"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:128
+msgid "Когда посылки прибудут на ПВЗ, они появятся здесь"
+msgstr "Жіберілімдер ПВЗ-ге келгенде, олар осында пайда болады"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:183
+msgid "Показать все"
+msgstr "Барлығын көрсету"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:190
+msgid "Нет истории выдачи"
+msgstr "Беру тарихы жоқ"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:191
+msgid "Выданные посылки будут отображаться здесь"
+msgstr "Берілген жіберілімдер осында көрсетіледі"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:48
+msgid "Трек-номер"
+msgstr "Трек-нөмір"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:50
+msgid "Стоимость"
+msgstr "Құны"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:30
+msgid "Кол-во"
+msgstr "Саны"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:31
+msgid "Вес, кг"
+msgstr "Салмақ, кг"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:32
+msgid "Сумма, тг"
+msgstr "Сомасы, тг"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:66
+msgid "ИТОГО:"
+msgstr "БАРЛЫҒЫ:"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:335
+msgid "&larr; Назад"
+msgstr "&larr; Артқа"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:336
+msgid "Печать / Сохранить PDF"
+msgstr "Басып шығару / PDF сақтау"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:384
+msgid "Позиций:"
+msgstr "Позиция:"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:392
+msgid "Тариф:"
+msgstr "Тариф:"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:396
+msgid "Итого к оплате:"
+msgstr "Төленетін барлығы:"
+
+#: .\myprofile\views\arrival_history.py:26
+#: .\myprofile\views\arrival_summary.py:40 .\myprofile\views\delivery.py:140
+#: .\myprofile\views\extraditions.py:58
+#: .\myprofile\views\finance_summary.py:81
+#: .\myprofile\views\goods_arrival.py:43
+#: .\myprofile\views\notification_logs.py:23
+#: .\myprofile\views\notification_mutes.py:28
+#: .\myprofile\views\pp_acceptance.py:44
+#: .\myprofile\views\pp_acceptance.py:439
+#: .\myprofile\views\pp_acceptance.py:502
+#: .\myprofile\views\pp_extradition_history.py:26
+#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
+#: .\myprofile\views\shipped_cn.py:38 .\myprofile\views\unidentified.py:27
+#: .\myprofile\views\warehouse.py:45
+msgid "У вас нет доступа к этой странице."
+msgstr "Сізде бұл бетке қол жеткізу жоқ."
+
+#: .\myprofile\views\arrival_summary.py:230
+#: .\myprofile\views\arrival_summary.py:277
+#: .\myprofile\views\arrival_summary.py:308
+#: .\myprofile\views\arrival_summary.py:381
+#: .\myprofile\views\arrival_summary.py:428
+#: .\myprofile\views\arrival_summary.py:531 .\myprofile\views\delivery.py:203
+#: .\myprofile\views\delivery.py:479 .\myprofile\views\delivery.py:605
+#: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:92
+#: .\myprofile\views\goods_arrival.py:123
+#: .\myprofile\views\goods_arrival.py:243
+#: .\myprofile\views\goods_arrival.py:258
+#: .\myprofile\views\goods_arrival.py:282
+#: .\myprofile\views\notification_mutes.py:64
+#: .\myprofile\views\notification_mutes.py:128
+#: .\myprofile\views\pp_acceptance.py:241
+#: .\myprofile\views\pp_acceptance.py:345
+#: .\myprofile\views\pp_acceptance.py:585 .\myprofile\views\service.py:52
+#: .\myprofile\views\service.py:122 .\myprofile\views\service.py:182
+#: .\myprofile\views\service.py:262 .\myprofile\views\service.py:391
+#: .\myprofile\views\service.py:481 .\myprofile\views\warehouse.py:196
+#: .\myprofile\views\warehouse.py:290 .\myprofile\views\warehouse.py:400
+#: .\myprofile\views\warehouse.py:488 .\myprofile\views\warehouse.py:543
+#: .\myprofile\views\warehouse.py:666 .\myprofile\views\warehouse.py:778
+msgid "У вас нет доступа."
+msgstr "Сізде қол жеткізу жоқ."
+
+#: .\myprofile\views\arrival_summary.py:237
+#: .\myprofile\views\arrival_summary.py:284
+msgid "Недостаточно данных."
+msgstr "Деректер жеткіліксіз."
+
+#: .\myprofile\views\arrival_summary.py:249
+msgid "Пункт 'Доставка на дом' не найден."
+msgstr "«Үйге жеткізу» нүктесі табылмады."
+
+#: .\myprofile\views\arrival_summary.py:252
+msgid "Клиент назначен на доставку на дом."
+msgstr "Клиент үйге жеткізуге тағайындалды."
+
+#: .\myprofile\views\arrival_summary.py:256
+#: .\myprofile\views\pp_acceptance.py:252
+#: .\myprofile\views\pp_acceptance.py:351
+msgid "Не указан пункт выдачи."
+msgstr "Беру нүктесі көрсетілмеген."
+
+#: .\myprofile\views\arrival_summary.py:261
+#: .\myprofile\views\arrival_summary.py:290
+#: .\myprofile\views\pp_acceptance.py:258
+#: .\myprofile\views\pp_acceptance.py:357
+#: .\myprofile\views\pp_acceptance.py:446 .\myprofile\views\warehouse.py:548
+msgid "Пункт выдачи не найден."
+msgstr "Беру нүктесі табылмады."
+
+#: .\myprofile\views\arrival_summary.py:267
+msgid "Клиент возвращён на свой ПВЗ."
+msgstr "Клиент өз ПВЗ-іне қайтарылды."
+
+#: .\myprofile\views\arrival_summary.py:298
+msgid "Нет клиентов для назначения."
+msgstr "Тағайындайтын клиенттер жоқ."
+
+#: .\myprofile\views\arrival_summary.py:318
+#: .\myprofile\views\arrival_summary.py:319
+msgid "Укажите размер скидки."
+msgstr "Жеңілдік мөлшерін көрсетіңіз."
+
+#: .\myprofile\views\arrival_summary.py:328
+#: .\myprofile\views\arrival_summary.py:329
+msgid "Некорректный размер скидки."
+msgstr "Жеңілдік мөлшері қате."
+
+#: .\myprofile\views\arrival_summary.py:334
+#: .\myprofile\views\arrival_summary.py:335 .\myprofile\views\delivery.py:609
+#: .\myprofile\views\pp_acceptance.py:592 .\myprofile\views\warehouse.py:670
+msgid "Не указан клиент."
+msgstr "Клиент көрсетілмеген."
+
+#: .\myprofile\views\arrival_summary.py:342
+#: .\myprofile\views\arrival_summary.py:343
+#: .\myprofile\views\notification_mutes.py:80
+#: .\myprofile\views\unidentified.py:145 .\myprofile\views\warehouse.py:643
+#: .\register\views\password_reset.py:73
+#: .\register\views\password_reset.py:185
+msgid "Пользователь не найден."
+msgstr "Пайдаланушы табылмады."
+
+#: .\myprofile\views\arrival_summary.py:387
+#: .\myprofile\views\arrival_summary.py:539 .\myprofile\views\service.py:126
+#: .\myprofile\views\service.py:186
+msgid "Не указана дата."
+msgstr "Күн көрсетілмеген."
+
+#: .\myprofile\views\arrival_summary.py:418
+msgid "Новых чеков не создано — все треки уже учтены в чеках."
+msgstr "Жаңа чектер жасалмады — барлық трек-кодтар чектерде есепке алынған."
+
+#: .\myprofile\views\arrival_summary.py:438
+msgid "Нет исходных данных для актуализации."
+msgstr "Жаңарту үшін бастапқы деректер жоқ."
+
+#: .\myprofile\views\arrival_summary.py:446
+msgid "Некорректные исходные данные прихода."
+msgstr "Келудің бастапқы деректері қате."
+
+#: .\myprofile\views\arrival_summary.py:519
+msgid "Данные прихода актуальны, изменений не требуется."
+msgstr "Келу деректері өзекті, өзгерту қажет емес."
+
+#: .\myprofile\views\customer_paycheks.py:61
+msgid "Нет новых доставленных посылок для формирования чека."
+msgstr "Чек қалыптастыру үшін жаңа жеткізілген жіберілімдер жоқ."
+
+#: .\myprofile\views\delivery.py:217
+msgid "Выберите хотя бы один пункт выдачи или клиента."
+msgstr "Кем дегенде бір беру нүктесін немесе клиентті таңдаңыз."
+
+#: .\myprofile\views\delivery.py:390
+msgid "Нет посылок для доставки в выбранных пунктах."
+msgstr "Таңдалған нүктелерде жеткізетін жіберілімдер жоқ."
+
+#: .\myprofile\views\delivery.py:484
+msgid "Выберите хотя бы один пункт выдачи."
+msgstr "Кем дегенде бір беру нүктесін таңдаңыз."
+
+#: .\myprofile\views\delivery.py:595
+msgid "Нет посылок для завершения доставки в выбранных пунктах."
+msgstr "Таңдалған нүктелерде жеткізуді аяқтайтын жіберілімдер жоқ."
+
+#: .\myprofile\views\delivery.py:614
+msgid "Пункт 'Доставка на дом' не настроен."
+msgstr "«Үйге жеткізу» нүктесі бапталмаған."
+
+#: .\myprofile\views\delivery.py:620
+#: .\myprofile\views\reschedule_arrival.py:177
+#: .\myprofile\views\reschedule_arrival.py:234
+#: .\myprofile\views\reschedule_arrival.py:375
+#: .\myprofile\views\warehouse.py:676
+msgid "Клиент не найден."
+msgstr "Клиент табылмады."
+
+#: .\myprofile\views\delivery.py:630
+msgid "Нет посылок для выдачи этому клиенту."
+msgstr "Бұл клиентке беретін жіберілімдер жоқ."
+
+#: .\myprofile\views\delivery.py:707 .\myprofile\views\extraditions.py:190
+#: .\myprofile\views\extraditions.py:299 .\myprofile\views\extraditions.py:338
+#: .\myprofile\views\extraditions.py:364 .\myprofile\views\extraditions.py:436
+#: .\myprofile\views\goods_arrival.py:158
+#: .\myprofile\views\notification_mutes.py:151
+#: .\myprofile\views\pp_acceptance.py:114
+#: .\myprofile\views\role_management.py:159
+#: .\myprofile\views\role_management.py:214
+msgid "Нет доступа"
+msgstr "Қол жеткізу жоқ"
+
+#: .\myprofile\views\extradition_Package.py:96
+msgid "Нет чеков с трек-кодами со статусом «Доставлено на ПВЗ»."
+msgstr "«ПВЗ-ге жеткізілді» мәртебесіндегі трек-кодтары бар чектер жоқ."
+
+#: .\myprofile\views\extraditions.py:65
+msgid "Введите штрихкод пакета."
+msgstr "Пакеттің штрих-кодын енгізіңіз."
+
+#: .\myprofile\views\extraditions.py:194
+msgid "Введите штрихкод"
+msgstr "Штрих-код енгізіңіз"
+
+#: .\myprofile\views\extraditions.py:342
+msgid "Не указан ID сессии"
+msgstr "Сеанс ID көрсетілмеген"
+
+#: .\myprofile\views\extraditions.py:355
+msgid "Оплата временно отключена"
+msgstr "Төлем уақытша өшірілді"
+
+#: .\myprofile\views\extraditions.py:368
+msgid "Не указан клиент"
+msgstr "Клиент көрсетілмеген"
+
+#: .\myprofile\views\extraditions.py:375
+msgid "Клиент не найден"
+msgstr "Клиент табылмады"
+
+#: .\myprofile\views\extraditions.py:441
+msgid "Не указан ID чека"
+msgstr "Чек ID көрсетілмеген"
+
+#: .\myprofile\views\extraditions.py:446
+msgid "Чек не найден"
+msgstr "Чек табылмады"
+
+#: .\myprofile\views\extraditions.py:449
+msgid "Чек уже выдан"
+msgstr "Чек бұрыннан берілген"
+
+#: .\myprofile\views\goods_arrival.py:100
+#: .\myprofile\views\reschedule_arrival.py:86
+#: .\myprofile\views\reschedule_arrival.py:172
+#: .\myprofile\views\reschedule_arrival.py:229
+#: .\myprofile\views\reschedule_arrival.py:370
+#: .\myprofile\views\shipped_cn.py:54
+msgid "Неверный формат даты."
+msgstr "Күн форматы қате."
+
+#: .\myprofile\views\goods_arrival.py:129
+msgid "Эта сессия уже завершена."
+msgstr "Бұл сеанс бұрыннан аяқталды."
+
+#: .\myprofile\views\goods_arrival.py:166
+msgid "Неверные данные"
+msgstr "Деректер қате"
+
+#: .\myprofile\views\goods_arrival.py:262
+msgid "Эту сессию нельзя возобновить."
+msgstr "Бұл сеансты жалғастыру мүмкін емес."
+
+#: .\myprofile\views\goods_arrival.py:288
+msgid "Сессия пуста. Добавьте хотя бы одну строку."
+msgstr "Сеанс бос. Кем дегенде бір жол қосыңыз."
+
+#: .\myprofile\views\mobile_parcels.py:166
+msgid "Некорректные данные"
+msgstr "Деректер қате"
+
+#: .\myprofile\views\mobile_parcels.py:169
+msgid "Не выбрано ни одного трек-кода"
+msgstr "Бірде-бір трек-код таңдалмады"
+
+#: .\myprofile\views\notification_mutes.py:90
+msgid "Некорректное количество часов."
+msgstr "Сағат саны қате."
+
+#: .\myprofile\views\notification_mutes.py:136
+msgid "Заглушка не найдена."
+msgstr "Өшіргіш табылмады."
+
+#: .\myprofile\views\pp_acceptance.py:292
+msgid "Нет посылок для сортировки."
+msgstr "Сұрыптайтын жіберілімдер жоқ."
+
+#: .\myprofile\views\pp_acceptance.py:427
+msgid "Сессия приёмки завершена. Все посылки отсортированы."
+msgstr "Қабылдау сеансы аяқталды. Барлық жіберілімдер сұрыпталды."
+
+#: .\myprofile\views\pp_acceptance.py:455
+msgid "Некорректная дата."
+msgstr "Күн қате."
+
+#: .\myprofile\views\pp_acceptance.py:467
+msgid "У вас нет доступа к этому пункту выдачи."
+msgstr "Сізде бұл беру нүктесіне қол жеткізу жоқ."
+
+#: .\myprofile\views\pp_acceptance.py:602
+msgid "Неверный тип клиента."
+msgstr "Клиент түрі қате."
+
+#: .\myprofile\views\profile_setting.py:129
+msgid "Профиль успешно обновлен."
+msgstr "Профиль сәтті жаңартылды."
+
+#: .\myprofile\views\profile_setting.py:142 .\myprofile\views\warehouse.py:42
+#: .\myprofile\views\warehouse.py:405 .\myprofile\views\warehouse.py:493
+msgid "Профиль не найден."
+msgstr "Профиль табылмады."
+
+#: .\myprofile\views\profile_setting.py:156
+msgid "Выберите новый пункт выдачи."
+msgstr "Жаңа беру нүктесін таңдаңыз."
+
+#: .\myprofile\views\profile_setting.py:162 .\register\views\reg.py:83
+msgid "Выбранный пункт выдачи не найден."
+msgstr "Таңдалған беру нүктесі табылмады."
+
+#: .\myprofile\views\profile_setting.py:166
+msgid "Вы уже привязаны к этому пункту выдачи."
+msgstr "Сіз бұл беру нүктесіне бұрыннан байланысқансыз."
+
+#: .\myprofile\views\profile_setting.py:174
+msgid "Заявка на смену пункта выдачи отправлена."
+msgstr "Беру нүктесін ауыстыру өтінімі жіберілді."
+
+#: .\myprofile\views\profile_setting.py:194
+msgid "Настройки уведомлений сохранены."
+msgstr "Хабарлама баптаулары сақталды."
+
+#: .\myprofile\views\profile_setting.py:202
+#: .\myprofile\views\profile_setting.py:204
+#: .\myprofile\views\reschedule_arrival.py:77
+#: .\myprofile\views\reschedule_arrival.py:136
+#: .\myprofile\views\reschedule_arrival.py:161
+#: .\myprofile\views\reschedule_arrival.py:212
+#: .\myprofile\views\reschedule_arrival.py:358
+#: .\myprofile\views\role_management.py:56
+#: .\myprofile\views\role_management.py:110
+#: .\myprofile\views\unidentified.py:131 .\myprofile\views\unidentified.py:167
+#: .\myprofile\views\unidentified.py:192 .\myprofile\views\unidentified.py:210
+#: .\myprofile\views\unidentified.py:225 .\myprofile\views\warehouse.py:354
+#: .\myprofile\views\warehouse.py:593 .\myprofile\views\warehouse.py:749
+msgid "Нет доступа."
+msgstr "Қол жеткізу жоқ."
+
+#: .\myprofile\views\profile_setting.py:238
+msgid ""
+"Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её "
+"завершения или поставьте на паузу."
+msgstr ""
+"ПВЗ-ді өзгерту мүмкін емес: сұрыптау сеансы белсенді. Аяқталуын күтіңіз "
+"немесе тоқтатыңыз."
+
+#: .\myprofile\views\reschedule_arrival.py:81
+msgid "Укажите дату."
+msgstr "Күнді көрсетіңіз."
+
+#: .\myprofile\views\reschedule_arrival.py:167
+msgid "Укажите клиента и дату."
+msgstr "Клиент пен күнді көрсетіңіз."
+
+#: .\myprofile\views\reschedule_arrival.py:220
+msgid "Необходимо указать клиента, исходную дату и новую дату."
+msgstr "Клиент, бастапқы күн және жаңа күн көрсетілуі қажет."
+
+#: .\myprofile\views\reschedule_arrival.py:223
+msgid "Исходная и новая даты совпадают."
+msgstr "Бастапқы және жаңа күндер сәйкес келеді."
+
+#: .\myprofile\views\reschedule_arrival.py:249
+#: .\myprofile\views\reschedule_arrival.py:387
+msgid "Некорректные ID треков."
+msgstr "Трек ID-лері қате."
+
+#: .\myprofile\views\reschedule_arrival.py:254
+#: .\myprofile\views\reschedule_arrival.py:392
+msgid "Нет треков для переноса."
+msgstr "Ауыстыратын трек жоқ."
+
+#: .\myprofile\views\reschedule_arrival.py:365
+msgid "Укажите клиента и новую дату."
+msgstr "Клиент пен жаңа күнді көрсетіңіз."
+
+#: .\myprofile\views\role_management.py:167
+msgid "Некорректный JSON."
+msgstr "JSON қате."
+
+#: .\myprofile\views\service.py:132 .\myprofile\views\service.py:192
+msgid "Некорректный формат даты."
+msgstr "Күн форматы қате."
+
+#: .\myprofile\views\service.py:272
+msgid "Нет трек-кодов со статусом «Выдано клиенту»."
+msgstr "«Клиентке берілді» мәртебесіндегі трек-кодтар жоқ."
+
+#: .\myprofile\views\service.py:284
+msgid "Все чеки уже отмечены как «Выдано клиенту»."
+msgstr "Барлық чектер «Клиентке берілді» деп бұрыннан белгіленген."
+
+#: .\myprofile\views\shipped_cn.py:48
+msgid "Укажите дату обновления."
+msgstr "Жаңарту күнін көрсетіңіз."
+
+#: .\myprofile\views\shipped_cn.py:81
+msgid "Введите трек-коды или загрузите xlsx файл."
+msgstr "Трек-кодтарды енгізіңіз немесе xlsx файлды жүктеңіз."
+
+#: .\myprofile\views\status_update.py:29
+msgid "Заполните все обязательные поля."
+msgstr "Барлық міндетті өрістерді толтырыңыз."
+
+#: .\myprofile\views\status_update.py:35
+msgid "Неверный формат даты. Ожидается YYYY-MM-DD."
+msgstr "Күн форматы қате. YYYY-MM-DD форматы күтіледі."
+
+#: .\myprofile\views\status_update.py:47
+msgid "Количество трек-кодов, пользователей и весов должно совпадать."
+msgstr "Трек-кодтар, пайдаланушылар мен салмақтар саны сәйкес болуы керек."
+
+#: .\myprofile\views\track_codes.py:94 .\myprofile\views\track_codes.py:193
+msgid "Этот трек-код уже добавлен в ваш список."
+msgstr "Бұл трек-код тізіміңізде бар."
+
+#: .\myprofile\views\track_codes.py:97 .\myprofile\views\track_codes.py:195
+msgid "Этот трек-код уже зарегистрирован другим пользователем."
+msgstr "Бұл трек-код басқа пайдаланушы тіркеген."
+
+#: .\myprofile\views\track_codes.py:110 .\myprofile\views\track_codes.py:207
+msgid "Трек-код успешно добавлен."
+msgstr "Трек-код сәтті қосылды."
+
+#: .\myprofile\views\track_codes.py:113 .\myprofile\views\track_codes.py:210
+#: .\myprofile\views\unidentified.py:36
+msgid "Введите трек-код."
+msgstr "Трек-кодты енгізіңіз."
+
+#: .\myprofile\views\track_codes.py:162
+msgid "Описание успешно обновлено."
+msgstr "Сипаттама сәтті жаңартылды."
+
+#: .\myprofile\views\track_codes.py:164
+msgid "Некорректные данные."
+msgstr "Деректер қате."
+
+#: .\myprofile\views\track_codes.py:224
+msgid "Трек-код перемещён в архив."
+msgstr "Трек-код мұрағатқа жылжытылды."
+
+#: .\myprofile\views\track_codes.py:236
+msgid "Трек-код восстановлен из архива."
+msgstr "Трек-код мұрағаттан қалпына келтірілді."
+
+#: .\myprofile\views\track_codes.py:246
+msgid "Не выбрано ни одного трек-кода."
+msgstr "Бірде-бір трек-код таңдалмады."
+
+#: .\myprofile\views\unidentified.py:47
+msgid "Некорректный вес."
+msgstr "Салмақ қате."
+
+#: .\myprofile\views\unidentified.py:136
+msgid "Посылка не найдена или уже назначена."
+msgstr "Жіберілім табылмады немесе бұрыннан тағайындалған."
+
+#: .\myprofile\views\unidentified.py:140
+msgid "Не указан пользователь."
+msgstr "Пайдаланушы көрсетілмеген."
+
+#: .\myprofile\views\unidentified.py:172 .\myprofile\views\unidentified.py:197
+#: .\myprofile\views\unidentified.py:215
+msgid "Посылка не найдена."
+msgstr "Жіберілім табылмады."
+
+#: .\myprofile\views\warehouse.py:200 .\myprofile\views\warehouse.py:294
+msgid "Не указана ячейка."
+msgstr "Ұяшық көрсетілмеген."
+
+#: .\myprofile\views\warehouse.py:206 .\myprofile\views\warehouse.py:300
+#: .\myprofile\views\warehouse.py:376
+msgid "Ячейка не найдена."
+msgstr "Ұяшық табылмады."
+
+#: .\myprofile\views\warehouse.py:216 .\myprofile\views\warehouse.py:310
+msgid "Ячейка не привязана к клиенту."
+msgstr "Ұяшық клиентке байланыстырылмаған."
+
+#: .\myprofile\views\warehouse.py:225
+msgid "Нет товаров для выдачи в этой ячейке."
+msgstr "Бұл ұяшықта беретін тауарлар жоқ."
+
+#: .\myprofile\views\warehouse.py:319
+msgid "Нет товаров в этой ячейке."
+msgstr "Бұл ұяшықта тауарлар жоқ."
+
+#: .\myprofile\views\warehouse.py:360 .\myprofile\views\warehouse.py:599
+msgid "Неверный формат данных."
+msgstr "Деректер форматы қате."
+
+#: .\myprofile\views\warehouse.py:366 .\myprofile\views\warehouse.py:606
+msgid "Не указаны параметры."
+msgstr "Параметрлер көрсетілмеген."
+
+#: .\myprofile\views\warehouse.py:371
+msgid "Номер ячейки должен быть числом (например: 1, 2.1, 0)."
+msgstr "Ұяшық нөмірі сан болуы керек (мысалы: 1, 2.1, 0)."
+
+#: .\myprofile\views\warehouse.py:417 .\myprofile\views\warehouse.py:505
+msgid "Не выбран пункт выдачи."
+msgstr "Беру нүктесі таңдалмаған."
+
+#: .\myprofile\views\warehouse.py:510
+msgid "Уже есть активная реструктуризация. Завершите её сначала."
+msgstr "Белсенді қайта құрылымдау бар. Алдымен оны аяқтаңыз."
+
+#: .\myprofile\views\warehouse.py:611
+msgid "ПВЗ не найден."
+msgstr "ПВЗ табылмады."
+
+#: .\myprofile\views\warehouse.py:618
+msgid "Номер ячейки должен быть числом."
+msgstr "Ұяшық нөмірі сан болуы керек."
+
+#: .\myprofile\views\warehouse.py:692
+msgid "Нет треков для подтверждения возврата."
+msgstr "Қайтаруды растайтын трек жоқ."
+
+#: .\myprofile\views\warehouse.py:782
+msgid "Не указана сессия."
+msgstr "Сеанс көрсетілмеген."
+
+#: .\myprofile\views\warehouse.py:788
+msgid "Сессия не найдена или уже завершена."
+msgstr "Сеанс табылмады немесе аяқталды."
+
+#: .\myprofile\views\warehouse.py:834
+msgid "Реструктуризация завершена."
+msgstr "Қайта құрылымдау аяқталды."
+
+#: .\register\models.py:7
+msgid "Адрес"
+msgstr "Мекенжай"
+
+#: .\register\models.py:8
+msgid "Название помещения"
+msgstr "Үй-жай атауы"
+
+#: .\register\models.py:10
+msgid "Время работы"
+msgstr "Жұмыс уақыты"
+
+#: .\register\models.py:12
+msgid "Показывать в регистрации/футере"
+msgstr "Тіркелуде/футерде көрсету"
+
+#: .\register\models.py:14
+msgid "Краткая информация"
+msgstr "Қысқаша ақпарат"
+
+#: .\register\models.py:15
+msgid "2GIS виджет-код"
+msgstr "2GIS виджет-коды"
+
+#: .\register\models.py:16
+msgid "Напоминания включены"
+msgstr "Еске салулар қосылды"
+
+#: .\register\models.py:19
+msgid "Интервалы напоминаний (дни)"
+msgstr "Еске салу аралықтары (күн)"
+
+#: .\register\models.py:20
+msgid ""
+"Через запятую, например: 3,5,7. Если пусто — используются глобальные "
+"настройки."
+msgstr ""
+"Үтірмен бөліп, мысалы: 3,5,7. Бос болса — жаһандық баптаулар қолданылады."
+
+#: .\register\models.py:32
+msgid "Имя пользователя"
+msgstr "Пайдаланушы аты"
+
+#: .\register\models.py:38
+msgid "HR"
+msgstr "HR"
+
+#: .\register\models.py:41
+msgid "Владелец ПВЗ"
+msgstr "ПВЗ иесі"
+
+#: .\register\models.py:43
+msgid "Администратор Telegram-бота"
+msgstr "Telegram-бот әкімшісі"
+
+#: .\register\models.py:44
+msgid "Регистрация подтверждена"
+msgstr "Тіркелу расталды"
+
+#: .\register\models.py:47
+msgid "Цена за 1 кг доставки (₸)"
+msgstr "1 кг жеткізу бағасы (₸)"
+
+#: .\register\models.py:49
+msgid "Дата последнего изменения профиля"
+msgstr "Профильдің соңғы өзгерту күні"
+
+#: .\register\models.py:50
+msgid "Дата последней смены ПВЗ"
+msgstr "Соңғы ПВЗ ауыстыру күні"
+
+#: .\register\models.py:59
+msgid "Профиль пользователя"
+msgstr "Пайдаланушы профилі"
+
+#: .\register\models.py:60
+msgid "Профили пользователей"
+msgstr "Пайдаланушы профильдері"
+
+#: .\register\models.py:83
+msgid "Заявка на регистрацию"
+msgstr "Тіркелу өтінімі"
+
+#: .\register\models.py:84
+#: .\register\templates\desktop\register_confirmation.html:52
+msgid "Заявки на регистрацию"
+msgstr "Тіркелу өтінімдері"
+
+#: .\register\models.py:92
+msgid "Код сброса"
+msgstr "Қалпына келтіру коды"
+
+#: .\register\models.py:94 .\register\models.py:109
+msgid "Попытки ввода"
+msgstr "Енгізу әрекеттері"
+
+#: .\register\models.py:95 .\tgbot\models.py:71
+msgid "Использован"
+msgstr "Пайдаланылды"
+
+#: .\register\models.py:98
+msgid "Код сброса пароля"
+msgstr "Құпиясөзді қалпына келтіру коды"
+
+#: .\register\models.py:99
+msgid "Коды сброса пароля"
+msgstr "Құпиясөзді қалпына келтіру кодтары"
+
+#: .\register\models.py:107
+#: .\register\templates\desktop\password_reset.html:68
+msgid "Код подтверждения"
+msgstr "Растау коды"
+
+#: .\register\models.py:110
+msgid "Подтверждён"
+msgstr "Расталды"
+
+#: .\register\models.py:113
+msgid "Код подтверждения email"
+msgstr "Email растау коды"
+
+#: .\register\models.py:114
+msgid "Коды подтверждения email"
+msgstr "Email растау кодтары"
+
+#: .\register\models.py:122
+msgid "Идентификатор"
+msgstr "Идентификатор"
+
+#: .\register\models.py:123
+msgid "Попытки"
+msgstr "Әрекеттер"
+
+#: .\register\models.py:124
+msgid "Заблокирован до"
+msgstr "Бұғатталған"
+
+#: .\register\models.py:125
+msgid "Последняя попытка"
+msgstr "Соңғы әрекет"
+
+#: .\register\models.py:128
+msgid "Попытка входа"
+msgstr "Кіру әрекеті"
+
+#: .\register\models.py:129
+msgid "Попытки входа"
+msgstr "Кіру әрекеттері"
+
+#: .\register\models.py:148
+msgid "Чтение"
+msgstr "Оқу"
+
+#: .\register\models.py:149
+msgid "Создание"
+msgstr "Жасау"
+
+#: .\register\models.py:150
+msgid "Редактирование"
+msgstr "Өңдеу"
+
+#: .\register\models.py:151
+msgid "Удаление"
+msgstr "Жою"
+
+#: .\register\models.py:152
+msgid "Одобрение"
+msgstr "Мақұлдау"
+
+#: .\register\models.py:158
+msgid "Кем обновлено"
+msgstr "Кім жаңартты"
+
+#: .\register\models.py:164
+msgid "Право доступа"
+msgstr "Қол жеткізу рұқсаты"
+
+#: .\register\models.py:165
+msgid "Права доступа"
+msgstr "Қол жеткізу рұқсаттары"
+
+#: .\register\templates\desktop\login.html:9
+msgid "Inter Cargo - Авторизация"
+msgstr "Inter Cargo - Авторизация"
+
+#: .\register\templates\desktop\login.html:29
+#: .\register\templates\desktop\login.html:35
+msgid "Авторизация"
+msgstr "Авторизация"
+
+#: .\register\templates\desktop\login.html:38
+msgid "Заполните форму ниже, чтобы войти в свой аккаунт"
+msgstr "Аккаунтыңызға кіру үшін төмендегі форманы толтырыңыз"
+
+#: .\register\templates\desktop\login.html:101
+#: .\register\templates\desktop\login.html:129
+#: .\register\templates\desktop\login.html:157
+msgid "Забыли пароль?"
+msgstr "Құпия сөзді ұмыттыңыз ба?"
+
+#: .\register\templates\desktop\password_reset.html:8
+msgid "Inter Cargo - Сброс пароля"
+msgstr "Inter Cargo - Құпия сөзді қалпына келтіру"
+
+#: .\register\templates\desktop\password_reset.html:28
+msgid "Восстановление доступа"
+msgstr "Қолжетімділікті қалпына келтіру"
+
+#: .\register\templates\desktop\password_reset.html:29
+msgid "Сброс пароля"
+msgstr "Құпия сөзді қалпына келтіру"
+
+#: .\register\templates\desktop\password_reset.html:41
+msgid ""
+"Введите ваш логин, номер телефона или email. Мы отправим код подтверждения "
+"на привязанную почту."
+msgstr ""
+"Логиніңізді, телефон нөміріңізді немесе email-іңізді енгізіңіз. "
+"Байланыстырылған поштаға растау коды жіберіледі."
+
+#: .\register\templates\desktop\password_reset.html:45
+msgid "Логин, телефон или email"
+msgstr "Логин, телефон немесе email"
+
+#: .\register\templates\desktop\password_reset.html:52
+msgid "Отправить код"
+msgstr "Код жіберу"
+
+#: .\register\templates\desktop\password_reset.html:55
+msgid "Вернуться на страницу входа"
+msgstr "Кіру бетіне оралу"
+
+#: .\register\templates\desktop\password_reset.html:63
+msgid "Код отправлен на"
+msgstr "Код жіберілді:"
+
+#: .\register\templates\desktop\password_reset.html:64
+msgid "Аккаунт:"
+msgstr "Аккаунт:"
+
+#: .\register\templates\desktop\password_reset.html:75
+msgid "Подтвердить код"
+msgstr "Кодты растау"
+
+#: .\register\templates\desktop\password_reset.html:80
+msgid "Отправить повторно ("
+msgstr "Қайта жіберу ("
+
+#: .\register\templates\desktop\password_reset.html:82
+msgid "Вернуться"
+msgstr "Артқа"
+
+#: .\register\templates\desktop\password_reset.html:90
+msgid "Код подтверждён. Установите новый пароль."
+msgstr "Код расталды. Жаңа құпия сөз орнатыңыз."
+
+#: .\register\templates\desktop\password_reset.html:94
+msgid "Новый пароль"
+msgstr "Жаңа құпия сөз"
+
+#: .\register\templates\desktop\password_reset.html:98
+msgid "Минимум 6 символов"
+msgstr "Кемінде 6 таңба"
+
+#: .\register\templates\desktop\password_reset.html:105
+#: .\register\templates\desktop\register.html:94
+#: .\register\templates\desktop\registration.html:138
+msgid "Подтверждение пароля"
+msgstr "Құпия сөзді растау"
+
+#: .\register\templates\desktop\password_reset.html:109
+#: .\register\templates\desktop\register.html:98
+#: .\register\templates\desktop\registration.html:142
+msgid "Повторите пароль"
+msgstr "Құпия сөзді қайталаңыз"
+
+#: .\register\templates\desktop\password_reset.html:117
+msgid "Установить пароль"
+msgstr "Құпия сөзді орнату"
+
+#: .\register\templates\desktop\password_reset.html:124
+msgid "Пароль успешно изменён"
+msgstr "Құпия сөз сәтті өзгертілді"
+
+#: .\register\templates\desktop\password_reset.html:125
+msgid "Теперь вы можете войти с новым паролем."
+msgstr "Енді жаңа құпия сөзбен кіруге болады."
+
+#: .\register\templates\desktop\register.html:9
+#: .\register\templates\desktop\registration.html:9
+msgid "Inter Cargo - Регистрация"
+msgstr "Inter Cargo - Тіркелу"
+
+#: .\register\templates\desktop\register_confirmation.html:9
+msgid "Inter Cargo - Заявки на регистрацию"
+msgstr "Inter Cargo - Тіркелу өтінімдері"
+
+#: .\register\templates\desktop\register_confirmation.html:62
+msgid "Фамилия Имя"
+msgstr "Тегі Аты"
+
+#: .\register\templates\desktop\register_confirmation.html:83
+msgid "Принять"
+msgstr "Қабылдау"
+
+#: .\register\templates\desktop\register_confirmation.html:102
+msgid "Нет заявок на регистрацию."
+msgstr "Тіркелу өтінімдері жоқ."
+
+#: .\register\templates\desktop\register_confirmation.html:114
+msgid "Отклонение заявки"
+msgstr "Өтінімді қабылдамау"
+
+#: .\register\templates\desktop\register_confirmation.html:119
+msgid "Заявка пользователя:"
+msgstr "Пайдаланушы өтінімі:"
+
+#: .\register\templates\desktop\register_confirmation.html:124
+msgid "Причина отклонения"
+msgstr "Қабылдамау себебі"
+
+#: .\register\templates\desktop\register_confirmation.html:127
+msgid "Укажите причину отклонения заявки..."
+msgstr "Өтінімді қабылдамау себебін енгізіңіз..."
+
+#: .\register\templates\desktop\register_confirmation.html:136
+msgid "Отклонить заявку"
+msgstr "Өтінімді қабылдамау"
+
+#: .\register\templates\desktop\registration.html:99
+msgid "Проверить код"
+msgstr "Кодты тексеру"
+
+#: .\register\templates\desktop\registration.html:102
+msgid "Код отправлен на вашу почту"
+msgstr "Код электрондық поштаңызға жіберілді"
+
+#: .\register\templates\desktop\registration.html:103
+msgid "Отправить код повторно"
+msgstr "Кодты қайта жіберу"
+
+#: .\register\templates\desktop\registration.html:107
+msgid "Email подтверждён"
+msgstr "Email расталды"
+
+#: .\register\templates\desktop\registration.html:153
+msgid "Подтвердите email для завершения регистрации"
+msgstr "Тіркелуді аяқтау үшін emailді растаңыз"
+
+#: .\register\templates\desktop\success.html:10
+msgid "Inter Cargo - Успешная регистрация"
+msgstr "Inter Cargo - Тіркелу сәтті"
+
+#: .\register\templates\desktop\success.html:44
+msgid "Спасибо за регистрацию!"
+msgstr "Тіркелгеніңіз үшін рахмет!"
+
+#: .\register\templates\desktop\success.html:45
+msgid ""
+"Пока ваша заявка проходит модерацию, можете ознакомиться с тем как устроен "
+"наш сервис"
+msgstr ""
+"Өтінімдеріңіз модерациядан өтіп жатқанда, сервисіміздің қалай жұмыс "
+"істейтінімен танысуға болады"
+
+#: .\register\templates\desktop\success.html:46
+msgid "Срок рассмотрения заявки -"
+msgstr "Өтінімді қарау мерзімі -"
+
+#: .\register\templates\desktop\success.html:46
+msgid "24 ЧАСА"
+msgstr "24 САҒАТ"
+
+#: .\register\templates\desktop\success.html:47
+msgid ""
+"Вам на почту придет уведомление когда ваша заявка будет рассмотрена "
+"модерацией"
+msgstr ""
+"Өтінімдеріңіз модерация тарапынан қаралғанда поштаңызға хабарлама келеді"
+
+#: .\register\templates\desktop\success.html:114
+msgid "Войти в аккаунт"
+msgstr "Аккаунтқа кіру"
+
+#: .\register\views\email_verify.py:24
+msgid "Введите email."
+msgstr "Email енгізіңіз."
+
+#: .\register\views\email_verify.py:51 .\register\views\password_reset.py:103
+msgid "Не удалось отправить письмо. Попробуйте позже."
+msgstr "Хат жіберілмеді. Кейінірек қайталаңыз."
+
+#: .\register\views\email_verify.py:66
+msgid "Введите email и код."
+msgstr "Email және кодты енгізіңіз."
+
+#: .\register\views\email_verify.py:74 .\register\views\password_reset.py:137
+msgid "Код не найден. Запросите новый код."
+msgstr "Код табылмады. Жаңа код сұраңыз."
+
+#: .\register\views\email_verify.py:78 .\register\views\password_reset.py:141
+msgid "Код истёк. Запросите новый."
+msgstr "Код мерзімі өтті. Жаңасын сұраңыз."
+
+#: .\register\views\email_verify.py:82 .\register\views\password_reset.py:145
+msgid "Слишком много попыток. Запросите новый код."
+msgstr "Тым көп әрекет. Жаңа код сұраңыз."
+
+#: .\register\views\enter.py:94
+msgid "Пользователь с таким номером телефона не найден."
+msgstr "Бұл телефон нөміріндегі пайдаланушы табылмады."
+
+#: .\register\views\enter.py:103
+msgid "Пользователь с таким email не найден."
+msgstr "Бұл emailдегі пайдаланушы табылмады."
+
+#: .\register\views\enter.py:123
+msgid "Неверный логин или пароль."
+msgstr "Логин немесе құпия сөз қате."
+
+#: .\register\views\password_reset.py:69
+msgid "Введите логин, телефон или email."
+msgstr "Логин, телефон немесе email енгізіңіз."
+
+#: .\register\views\password_reset.py:76
+msgid "К этому аккаунту не привязан email. Обратитесь в поддержку."
+msgstr "Бұл аккаунтқа email байланыстырылмаған. Қолдауға хабарласыңыз."
+
+#: .\register\views\password_reset.py:124
+#: .\register\views\password_reset.py:171
+msgid "Сессия истекла. Начните сброс заново."
+msgstr "Сеанс аяқталды. Қалпына келтіруді қайтадан бастаңыз."
+
+#: .\register\views\password_reset.py:128
+msgid "Введите код."
+msgstr "Кодты енгізіңіз."
+
+#: .\register\views\password_reset.py:177
+msgid "Пароль должен быть не менее 6 символов."
+msgstr "Құпия сөз кемінде 6 таңбадан тұруы керек."
+
+#: .\register\views\reg.py:70
+msgid "Заполните все поля."
+msgstr "Барлық өрістерді толтырыңыз."
+
+#: .\register\views\reg.py:76
+msgid ""
+"Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией."
+msgstr "Email расталмаған. Тіркелмес бұрын email-іңізді растаңыз."
+
+#: .\register\views\reg.py:89
+msgid "Пользователь с таким логином уже существует."
+msgstr "Бұл логинмен пайдаланушы бар."
+
+#: .\register\views\reg.py:93
+msgid "Пользователь с таким номером телефона уже существует."
+msgstr "Бұл телефон нөмірімен пайдаланушы бар."
+
+#: .\register\views\reg.py:97
+msgid "Пользователь с таким email уже существует."
+msgstr "Бұл emailмен пайдаланушы бар."
+
+#: .\register\views\reg.py:101
+msgid "Заявка с таким логином уже существует."
+msgstr "Бұл логинмен өтінім бар."
+
+#: .\register\views\reg.py:105
+msgid "Заявка с таким номером телефона уже существует."
+msgstr "Бұл телефон нөмірімен өтінім бар."
+
+#: .\register\views\reg.py:109
+msgid "Заявка с таким email уже существует."
+msgstr "Бұл emailмен өтінім бар."
+
+#: .\register\views\reg.py:137
+msgid "Регистрация прошла успешно! Вы можете войти в систему."
+msgstr "Тіркелу сәтті! Жүйеге кіруге болады."
+
+#: .\register\views\regConfirm.py:84
+msgid "Пользователь успешно подтверждён."
+msgstr "Пайдаланушы сәтті расталды."
+
+#: .\register\views\regConfirm.py:116
+msgid "Заявка отклонена."
+msgstr "Өтінім қабылданбады."
+
+#: .\tgbot\models.py:29
+msgid "Telegram Chat ID"
+msgstr "Telegram Chat ID"
+
+#: .\tgbot\models.py:33
+msgid "Telegram Username"
+msgstr "Telegram пайдаланушы аты"
+
+#: .\tgbot\models.py:37
+msgid "Имя в Telegram"
+msgstr "Telegram атауы"
+
+#: .\tgbot\models.py:41
+msgid "Привязан"
+msgstr "Байланыстырылды"
+
+#: .\tgbot\models.py:45
+msgid "Уведомления активны"
+msgstr "Хабарламалар белсенді"
+
+#: .\tgbot\models.py:49
+msgid "Telegram профиль"
+msgstr "Telegram профилі"
+
+#: .\tgbot\models.py:50
+msgid "Telegram профили"
+msgstr "Telegram профильдері"
+
+#: .\tgbot\models.py:67
+msgid "Токен"
+msgstr "Токен"
+
+#: .\tgbot\models.py:69
+msgid "Создан"
+msgstr "Жасалды"
+
+#: .\tgbot\models.py:70
+msgid "Истекает"
+msgstr "Мерзімі бітеді"
+
+#: .\tgbot\models.py:74
+msgid "Токен привязки Telegram"
+msgstr "Telegram байланыстыру токені"
+
+#: .\tgbot\models.py:75
+msgid "Токены привязки Telegram"
+msgstr "Telegram байланыстыру токендері"
+
+#: .\tgbot\models.py:94
+msgid "Информация"
+msgstr "Ақпарат"
+
+#: .\tgbot\models.py:95
+msgid "Предупреждение"
+msgstr "Ескерту"
+
+#: .\tgbot\models.py:96
+msgid "Срочное"
+msgstr "Шұғыл"
+
+#: .\tgbot\models.py:97
+msgid "Обновление"
+msgstr "Жаңарту"
+
+#: .\tgbot\models.py:98
+msgid "Отслеживание"
+msgstr "Бақылау"
+
+#: .\tgbot\models.py:112
+msgid "Тип уведомления"
+msgstr "Хабарлама түрі"
+
+#: .\tgbot\models.py:114
+msgid "Ссылка"
+msgstr "Сілтеме"
+
+#: .\tgbot\models.py:116
+msgid "Число попыток"
+msgstr "Әрекет саны"
+
+#: .\tgbot\models.py:117
+msgid "Последняя ошибка"
+msgstr "Соңғы қате"
+
+#: .\tgbot\models.py:119
+msgid "Отправлено в"
+msgstr "Жіберілді"
+
+#: .\tgbot\models.py:122
+msgid "Уведомление Telegram"
+msgstr "Telegram хабарламасы"
+
+#: .\tgbot\models.py:123
+msgid "Уведомления Telegram"
+msgstr "Telegram хабарламалары"
+
+#: .\tgbot\models.py:159
+msgid "Уровень"
+msgstr "Деңгей"
+
+#: .\tgbot\models.py:165 .\tgbot\models.py:166
+msgid "Настройки уведомлений Telegram"
+msgstr "Telegram хабарлама баптаулары"
+
+#: .\tgbot\models.py:173
+msgid "Активно"
+msgstr "Белсенді"
+
+#: .\tgbot\models.py:174
+msgid "Интервалы (дни)"
+msgstr "Аралықтар (күн)"
+
+#: .\tgbot\models.py:177 .\tgbot\models.py:178
+msgid "Настройки напоминаний"
+msgstr "Еске салу баптаулары"
+
+#: .\tgbot\models.py:186
+msgid "Текст сообщения"
+msgstr "Хабарлама мәтіні"
+
+#: .\tgbot\models.py:188
+msgid "Ошибок"
+msgstr "Қателер"
+
+#: .\tgbot\models.py:189
+msgid "Всего адресатов"
+msgstr "Барлық алушылар"
+
+#: .\tgbot\models.py:194
+msgid "Отправитель"
+msgstr "Жіберуші"
+
+#: .\tgbot\models.py:199
+msgid "Лог рассылки"
+msgstr "Таратылым журналы"
+
+#: .\tgbot\models.py:200
+msgid "Логи рассылок"
+msgstr "Таратылым журналдары"
+
+#: .\tgbot\models.py:218
+msgid "Интервал (дни)"
+msgstr "Аралық (күн)"
+
+#: .\tgbot\models.py:222
+msgid "Отправленное напоминание"
+msgstr "Жіберілген еске салу"
+
+#: .\tgbot\models.py:223
+msgid "Отправленные напоминания"
+msgstr "Жіберілген еске салулар"

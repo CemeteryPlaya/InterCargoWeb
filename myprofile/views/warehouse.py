@@ -15,6 +15,7 @@ from myprofile.models import (
 
 from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import notify_receipt_claimed_telegram
+from django.utils.translation import gettext as _
 from myprofile.receipt_lifecycle import (
     issue_to_client as lifecycle_issue, return_to_sorting as lifecycle_return,
     get_receipts_for_tracks, ReceiptLifecycleError,
@@ -38,10 +39,10 @@ def warehouse_view(request):
     try:
         user_profile = request.user.userprofile
     except UserProfile.DoesNotExist:
-        return HttpResponseForbidden("Профиль не найден.")
+        return HttpResponseForbidden(_("Профиль не найден."))
 
     if not (user_profile.is_staff or user_profile.is_pp_worker):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     # Для staff — можно выбрать ПВЗ через GET-параметр
     pickup_id = request.GET.get('pickup')
@@ -192,17 +193,17 @@ def warehouse_view(request):
 def warehouse_issue_to_client(request):
     """Выдано клиенту: помечает все треки ячейки как 'claimed', удаляет ячейку."""
     if not _is_warehouse_worker(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     cell_id = request.POST.get('cell_id')
     if not cell_id:
-        messages.error(request, "Не указана ячейка.")
+        messages.error(request, _("Не указана ячейка."))
         return redirect('warehouse')
 
     try:
         cell = StorageCell.objects.select_related('user', 'pickup_point').get(id=cell_id)
     except StorageCell.DoesNotExist:
-        messages.error(request, "Ячейка не найдена.")
+        messages.error(request, _("Ячейка не найдена."))
         return redirect('warehouse')
 
     pickup_point = cell.pickup_point
@@ -212,7 +213,7 @@ def warehouse_issue_to_client(request):
 
     with transaction.atomic():
         if not client_user:
-            messages.error(request, "Ячейка не привязана к клиенту.")
+            messages.error(request, _("Ячейка не привязана к клиенту."))
             return redirect('warehouse')
 
         tracks = list(TrackCode.objects.filter(
@@ -221,7 +222,7 @@ def warehouse_issue_to_client(request):
         ))
 
         if not tracks:
-            messages.info(request, "Нет товаров для выдачи в этой ячейке.")
+            messages.info(request, _("Нет товаров для выдачи в этой ячейке."))
             return redirect('warehouse')
 
         # Находим чеки связанные с этими треками
@@ -286,17 +287,17 @@ def warehouse_issue_to_client(request):
 def warehouse_not_arrived(request):
     """Не доехал до склада: возвращает треки в статус 'delivered', удаляет ячейку."""
     if not _is_warehouse_worker(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     cell_id = request.POST.get('cell_id')
     if not cell_id:
-        messages.error(request, "Не указана ячейка.")
+        messages.error(request, _("Не указана ячейка."))
         return redirect('warehouse')
 
     try:
         cell = StorageCell.objects.select_related('user', 'pickup_point').get(id=cell_id)
     except StorageCell.DoesNotExist:
-        messages.error(request, "Ячейка не найдена.")
+        messages.error(request, _("Ячейка не найдена."))
         return redirect('warehouse')
 
     pickup_point = cell.pickup_point
@@ -306,7 +307,7 @@ def warehouse_not_arrived(request):
 
     with transaction.atomic():
         if not client_user:
-            messages.error(request, "Ячейка не привязана к клиенту.")
+            messages.error(request, _("Ячейка не привязана к клиенту."))
             return redirect('warehouse')
 
         tracks = list(TrackCode.objects.filter(
@@ -315,7 +316,7 @@ def warehouse_not_arrived(request):
         ))
 
         if not tracks:
-            messages.info(request, "Нет товаров в этой ячейке.")
+            messages.info(request, _("Нет товаров в этой ячейке."))
             return redirect('warehouse')
 
         # Создаём заявку на возврат: помечаем чеки как "Требует внимания"
@@ -350,29 +351,29 @@ def warehouse_not_arrived(request):
 def update_cell_number(request):
     """AJAX: изменить номер ячейки хранения."""
     if not _is_warehouse_worker(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     import json
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Неверный формат данных.'}, status=400)
+        return JsonResponse({'error': _('Неверный формат данных.')}, status=400)
 
     cell_id = data.get('cell_id')
     new_number = data.get('cell_number')
 
     if not cell_id or new_number is None:
-        return JsonResponse({'error': 'Не указаны параметры.'}, status=400)
+        return JsonResponse({'error': _('Не указаны параметры.')}, status=400)
 
     import re
     new_number = str(new_number).strip()
     if not re.match(r'^\d+(\.\d+)?$', new_number):
-        return JsonResponse({'error': 'Номер ячейки должен быть числом (например: 1, 2.1, 0).'}, status=400)
+        return JsonResponse({'error': _('Номер ячейки должен быть числом (например: 1, 2.1, 0).')}, status=400)
 
     try:
         cell = StorageCell.objects.select_related('pickup_point').get(id=cell_id)
     except StorageCell.DoesNotExist:
-        return JsonResponse({'error': 'Ячейка не найдена.'}, status=404)
+        return JsonResponse({'error': _('Ячейка не найдена.')}, status=404)
 
     if cell.cell_number == new_number:
         return JsonResponse({'ok': True, 'cell_number': new_number})
@@ -396,12 +397,12 @@ def update_cell_number(request):
 def warehouse_inventory(request):
     """Инвентаризация склада: генерирует печатный документ со списком клиентов и их товаров."""
     if not _is_warehouse_worker(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     try:
         user_profile = request.user.userprofile
     except UserProfile.DoesNotExist:
-        return HttpResponseForbidden("Профиль не найден.")
+        return HttpResponseForbidden(_("Профиль не найден."))
 
     pickup_id = request.GET.get('pickup')
     if user_profile.is_staff and pickup_id:
@@ -413,7 +414,7 @@ def warehouse_inventory(request):
         pickup_point = user_profile.pickup
 
     if not pickup_point:
-        return HttpResponseForbidden("Не выбран пункт выдачи.")
+        return HttpResponseForbidden(_("Не выбран пункт выдачи."))
 
     cells_qs = StorageCell.objects.filter(pickup_point=pickup_point).select_related('user')
 
@@ -484,12 +485,12 @@ def warehouse_inventory(request):
 def warehouse_restructure(request):
     """Реструктуризация склада: создаёт сессию, бэкапит ячейки, удаляет все ячейки."""
     if not _is_warehouse_worker(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     try:
         user_profile = request.user.userprofile
     except UserProfile.DoesNotExist:
-        return HttpResponseForbidden("Профиль не найден.")
+        return HttpResponseForbidden(_("Профиль не найден."))
 
     pickup_id = request.POST.get('pickup_id')
     if user_profile.is_staff and pickup_id:
@@ -501,12 +502,12 @@ def warehouse_restructure(request):
         pickup_point = user_profile.pickup
 
     if not pickup_point:
-        messages.error(request, "Не выбран пункт выдачи.")
+        messages.error(request, _("Не выбран пункт выдачи."))
         return redirect('warehouse')
 
     # Проверяем: нет ли уже активной сессии
     if RestructureSession.objects.filter(pickup_point=pickup_point, status='active').exists():
-        messages.warning(request, "Уже есть активная реструктуризация. Завершите её сначала.")
+        messages.warning(request, _("Уже есть активная реструктуризация. Завершите её сначала."))
         return redirect('warehouse_reassign', pickup_id=pickup_point.id)
 
     with transaction.atomic():
@@ -539,12 +540,12 @@ def warehouse_restructure(request):
 def warehouse_reassign(request, pickup_id):
     """Страница назначения ячеек после реструктуризации."""
     if not _is_warehouse_worker(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     try:
         pickup_point = PickupPoint.objects.get(id=pickup_id, is_active=True)
     except PickupPoint.DoesNotExist:
-        messages.error(request, "Пункт выдачи не найден.")
+        messages.error(request, _("Пункт выдачи не найден."))
         return redirect('warehouse')
 
     # Получаем клиентов с товарами на складе (ready + is_accepted_pp)
@@ -589,32 +590,32 @@ def warehouse_reassign(request, pickup_id):
 def warehouse_assign_cell(request):
     """AJAX: назначить ячейку клиенту при реструктуризации."""
     if not _is_warehouse_worker(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     import json
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'error': 'Неверный формат данных.'}, status=400)
+        return JsonResponse({'error': _('Неверный формат данных.')}, status=400)
 
     client_id = data.get('client_id')
     pickup_id = data.get('pickup_id')
     cell_number = data.get('cell_number')  # None = auto
 
     if not client_id or not pickup_id:
-        return JsonResponse({'error': 'Не указаны параметры.'}, status=400)
+        return JsonResponse({'error': _('Не указаны параметры.')}, status=400)
 
     try:
         pickup_point = PickupPoint.objects.get(id=pickup_id, is_active=True)
     except PickupPoint.DoesNotExist:
-        return JsonResponse({'error': 'ПВЗ не найден.'}, status=404)
+        return JsonResponse({'error': _('ПВЗ не найден.')}, status=404)
 
     # Определяем номер ячейки
     if cell_number is not None:
         import re
         cell_number = str(cell_number).strip()
         if not re.match(r'^\d+(\.\d+)?$', cell_number):
-            return JsonResponse({'error': 'Номер ячейки должен быть числом.'}, status=400)
+            return JsonResponse({'error': _('Номер ячейки должен быть числом.')}, status=400)
     else:
         # Авто: следующий номер с нуля
         existing = set(
@@ -639,7 +640,7 @@ def warehouse_assign_cell(request):
     try:
         user = User.objects.get(id=client_id)
     except User.DoesNotExist:
-        return JsonResponse({'error': 'Пользователь не найден.'}, status=404)
+        return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
     # Удаляем старую ячейку если есть
     StorageCell.objects.filter(pickup_point=pickup_point, user=user).delete()
     cell = StorageCell.objects.create(pickup_point=pickup_point, cell_number=cell_number, user=user)
@@ -662,17 +663,17 @@ def confirm_return_to_sorting(request):
         is_staff_user = request.user.is_superuser
 
     if not is_staff_user:
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     owner_id = request.POST.get('owner_id')
     if not owner_id:
-        messages.error(request, "Не указан клиент.")
+        messages.error(request, _("Не указан клиент."))
         return redirect('attention_required')
 
     try:
         owner = User.objects.get(id=owner_id)
     except User.DoesNotExist:
-        messages.error(request, "Клиент не найден.")
+        messages.error(request, _("Клиент не найден."))
         return redirect('attention_required')
 
     today = timezone.localdate()
@@ -688,7 +689,7 @@ def confirm_return_to_sorting(request):
         track_ids.discard(None)
 
         if not track_ids:
-            messages.error(request, "Нет треков для подтверждения возврата.")
+            messages.error(request, _("Нет треков для подтверждения возврата."))
             return redirect('attention_required')
 
         tracks = list(TrackCode.objects.filter(id__in=track_ids, status='ready'))
@@ -745,7 +746,7 @@ def confirm_return_to_sorting(request):
 def warehouse_find_client_by_receipt(request):
     """AJAX: найти клиента по номеру чека для реструктуризации."""
     if not _is_warehouse_worker(request.user):
-        return JsonResponse({'error': 'Нет доступа.'}, status=403)
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     receipt_number = request.GET.get('receipt', '').strip()
     pickup_id = request.GET.get('pickup', '')
@@ -774,17 +775,17 @@ def warehouse_find_client_by_receipt(request):
 def finish_restructure(request):
     """Завершить сессию реструктуризации."""
     if not _is_warehouse_worker(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     session_id = request.POST.get('session_id')
     if not session_id:
-        messages.error(request, "Не указана сессия.")
+        messages.error(request, _("Не указана сессия."))
         return redirect('warehouse')
 
     try:
         session = RestructureSession.objects.get(id=session_id, status='active')
     except RestructureSession.DoesNotExist:
-        messages.error(request, "Сессия не найдена или уже завершена.")
+        messages.error(request, _("Сессия не найдена или уже завершена."))
         return redirect('warehouse')
 
     pickup_point = session.pickup_point
@@ -830,6 +831,6 @@ def finish_restructure(request):
             StorageCell.objects.bulk_create(auto_cells)
             messages.success(request, f"Реструктуризация завершена. Автоматически назначено ячеек: {len(auto_cells)}.")
         else:
-            messages.success(request, "Реструктуризация завершена.")
+            messages.success(request, _("Реструктуризация завершена."))
 
     return redirect('warehouse')

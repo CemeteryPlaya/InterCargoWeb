@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Заявки на смену ПВЗ</title>
+    <title>{% trans "Inter Cargo - Заявки на смену ПВЗ" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -29,11 +30,11 @@
         <main class="flex-1 p-4 md:p-8">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Заявки на смену ПВЗ</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Заявки на смену ПВЗ" %}</h1>
             </div>
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
-                    <i class="ri-exchange-line text-primary"></i> Заявки на смену ПВЗ
+                    <i class="ri-exchange-line text-primary"></i> {% trans "Заявки на смену ПВЗ" %}
                 </h1>
 
                 {% if messages %}
@@ -72,14 +73,14 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="approve">
                                     <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition text-sm">
-                                        <i class="ri-check-line"></i> Одобрить
+                                        <i class="ri-check-line"></i> {% trans "Одобрить" %}
                                     </button>
                                 </form>
                                 <form method="post" action="{% url 'review_pickup_change' req.id %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="reject">
                                     <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
-                                        <i class="ri-close-line"></i> Отклонить
+                                        <i class="ri-close-line"></i> {% trans "Отклонить" %}
                                     </button>
                                 </form>
                             </div>
@@ -90,7 +91,7 @@
                 {% else %}
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                     <i class="ri-inbox-line text-gray-400 text-4xl"></i>
-                    <p class="text-gray-500 mt-2">Нет заявок на рассмотрении.</p>
+                    <p class="text-gray-500 mt-2">{% trans "Нет заявок на рассмотрении." %}</p>
                 </div>
                 {% endif %}
 
@@ -105,16 +106,16 @@
                                 <i class="ri-loader-4-line text-orange-500 text-4xl animate-spin"></i>
                             </span>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">Идёт сессия сортировки</h2>
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">{% trans "Идёт сессия сортировки" %}</h2>
                         <p class="text-gray-600 mb-6">
-                            Сейчас активна сессия прихода товаров. Изменение ПВЗ пользователям заблокировано на время сортировки.
+                            {% trans "Сейчас активна сессия прихода товаров. Изменение ПВЗ пользователям заблокировано на время сортировки." %}
                         </p>
                         <p class="text-sm text-gray-400 mb-6">
-                            Поставьте активную сессию на паузу или дождитесь её завершения, чтобы рассмотреть заявки.
+                            {% trans "Поставьте активную сессию на паузу или дождитесь её завершения, чтобы рассмотреть заявки." %}
                         </p>
                         <a href="{% url 'goods_arrival' %}"
                             class="inline-block bg-orange-500 text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 transition font-medium text-sm">
-                            <i class="ri-arrow-right-line mr-1"></i> Перейти к сессиям прихода
+                            <i class="ri-arrow-right-line mr-1"></i> {% trans "Перейти к сессиям прихода" %}
                         </a>
                     </div>
                 </div>

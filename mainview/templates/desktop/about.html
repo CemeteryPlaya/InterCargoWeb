@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}    	
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Информация о компании</title>
+    <title>{% trans "Inter Cargo - Информация о компании" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -26,47 +27,44 @@
 
     <!-- Мобильный хедер -->
     <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5">
-        <h1 class="text-lg font-bold text-center">О компании</h1>
+        <h1 class="text-lg font-bold text-center">{% trans "О компании" %}</h1>
     </div>
 
     <!-- Раздел о компании -->
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <div class="text-primary text-3xl font-bold mb-2">О компании INTER CARGO</div>
-                <h2 class="text-2xl font-semibold text-gray-900">История и инфо</h2>
+                <div class="text-primary text-3xl font-bold mb-2">{% trans "О компании INTER CARGO" %}</div>
+                <h2 class="text-2xl font-semibold text-gray-900">{% trans "История и инфо" %}</h2>
             </div>
                 <section id="about-company" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">О компании</h2>
-                    <p>Inter Cargo — это современная логистическая компания, созданная с целью упростить процесс доставки товаров из Китая для казахстанских клиентов. Мы начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней стремились 
-                        сделать китайский онлайн-шопинг доступным и понятным каждому. Наши клиенты совершают заказы на популярных китайских маркетплейсах: Pinduoduo, TaoBao, POIZON и 1688, а мы — берём на себя весь процесс доставки. Благодаря налаженной 
-                        системе работы с проверенными посредниками в Китае, мы гарантируем надёжность, скорость и прозрачность на всех этапах логистики.</p>
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">{% trans "О компании" %}</h2>
+                    <p>{% trans "Inter Cargo — это современная логистическая компания, созданная с целью упростить процесс доставки товаров из Китая для казахстанских клиентов. Мы начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней стремились сделать китайский онлайн-шопинг доступным и понятным каждому. Наши клиенты совершают заказы на популярных китайских маркетплейсах: Pinduoduo, TaoBao, POIZON и 1688, а мы — берём на себя весь процесс доставки. Благодаря налаженной системе работы с проверенными посредниками в Китае, мы гарантируем надёжность, скорость и прозрачность на всех этапах логистики." %}</p>
                 </section>
                 <section id="about-company" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Наш путь</h2>
-                    <p>С первых шагов мы открыли 3 пункта выдачи, а уже спустя несколько месяцев число выросло до 10, что позволило нам обслуживать клиентов более оперативно и удобно. За это время нам доверились около 1000 клиентов, которые выбрали 
-                        Inter Cargo за честность, стабильность и личный подход. Мы не просто доставляем посылки — мы создаём удобную экосистему для покупок за границей. Наша команда всегда на связи, а каждое отправление — под контролем до момента получения.</p>
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">{% trans "Наш путь" %}</h2>
+                    <p>{% trans "С первых шагов мы открыли 3 пункта выдачи, а уже спустя несколько месяцев число выросло до 10, что позволило нам обслуживать клиентов более оперативно и удобно. За это время нам доверились около 1000 клиентов, которые выбрали Inter Cargo за честность, стабильность и личный подход. Мы не просто доставляем посылки — мы создаём удобную экосистему для покупок за границей. Наша команда всегда на связи, а каждое отправление — под контролем до момента получения." %}</p>
                 </section>
                 <section id="about-company" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Почему выбирают нас:</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">{% trans "Почему выбирают нас:" %}</h2>
                     <ul class="list-disc pl-5 space-y-2">
-                    <li>Прямая доставка из Китая с популярных площадок</li>
-                    <li>Надёжные посредники и партнёры</li>
-                    <li>Развитая сеть ПВЗ</li>
-                    <li>Удобное отслеживание заказов</li>
-                    <li>Внимание к каждому клиенту</li>
+                    <li>{% trans "Прямая доставка из Китая с популярных площадок" %}</li>
+                    <li>{% trans "Надёжные посредники и партнёры" %}</li>
+                    <li>{% trans "Развитая сеть ПВЗ" %}</li>
+                    <li>{% trans "Удобное отслеживание заказов" %}</li>
+                    <li>{% trans "Внимание к каждому клиенту" %}</li>
                     </ul>
                 </section>
 
                 <section id="pickup-points" class="py-16 bg-white">
                     <div class="container mx-auto px-4">
                         <div class="text-center mb-12">
-                            <h2 class="text-3xl font-bold text-gray-900">Пункты выдачи</h2>
-                            <p class="text-gray-600 mt-2">Выберите ближайший к вам пункт и заберите посылку в удобное время</p>
+                            <h2 class="text-3xl font-bold text-gray-900">{% trans "Пункты выдачи" %}</h2>
+                            <p class="text-gray-600 mt-2">{% trans "Выберите ближайший к вам пункт и заберите посылку в удобное время" %}</p>
                         </div>
                             <!-- ПВЗ 1 -->
                         <div class="border border-gray-200 p-4 rounded-lg shadow bg-white">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Карта пунктов выдачи Inter Cargo</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">{% trans "Карта пунктов выдачи Inter Cargo" %}</h3>
                             <div class="aspect-w-16 aspect-h-9 rounded overflow-hidden">
                                 <iframe id="map_684376502" frameborder="0" width="100%" height="600px" src="https://makemap.2gis.ru/widget?data=eJztm1tzm8gSgP-LzmNc8XCHVO0DAhuDAQlZNzi1DxLICARCJaEbqfz37R4k2XE2e9bn2KmzLlzlUsIwo5menq97uttfW8U6mq1nkTEr8lm5Tmab1pd_f22Vx9Ws9aV1O5uU2_WsddVarYvVbF3SdmhOygzbiaV721I7EL_rbRVtT-widtKb-P5GEacsv4KO0WwTrpNVmRRL6NA1eqsoaVfRXbYJ-iQJcmUbaUzuj5jV9G4hWoybBaySmbdDyzoeHqastYsMeeONrZU_2m9C9nYbHpkqgP8HaVn647iM2GwRGbHoVOY-vIslP1eOgTE82mNrHhgZE1bFwVm2-Q6rsNAvnxoK18nnq8DoZdO0TKZcXIbsHN6F56kau3dt3tRvWBgrDvMo8R_iva2rG0fbb52-ueqw1txny2WYK8w090STDfKAjmMtgrEpOmPof-fupka2MDU3c0cDLhiZSTcuZJgPC21kNjpk3Qcr8UfuOuBgjSNh0ckPq2k-nIcJA2PfLiajIcgmPjjVcBGMwo1ZtedOOiAwj9Tp-5WbDtP7frn3Rz14V1h20huCc3b6wX6ml-mUPezCtEhhdnmH7a1Crr3xxwsxyA8ZtM9hfstpwqwiY1iG1SoNRgKB-UsBe7uHsVCWfzbnfMoKxB67q1k-EJ3U2s8085Nsfeqv0v0O3z336aaHxWTsxyHXE6bGQDHzYDddeiDrTAz6xcGle1I_i9jhKmDnpJOGe0cvN8G4h3MpYc4g62wbVMUW99BMJW_haiKx73qxoknEBgVM1KPT__67fzrf_i3KZhcat-lk3BM6Cc-7D-anPrfaTc_zf7YOG-QWpfz9S72F_gt4B-dFdeukL9JJn6vJeJWBDCuqj6yymXKmaFa3uZMuKrcqN7BfmT2aZ5NRVER6cbDTAWPC9xDL7s0j7ROxvZj4d94u0XtxZGjElnqxi8-5XnLUT2tPe_PSsE1XO8LvjFiP3rLUIi39qSye6UoG-6ae9uDP9LmXuU86XUaGAjoBstPaFejVKtBU1KvMMczLHp73tT5rqP_KsZO4qZN6B8dwzrKBs5AtJ3ee6KbqHvZzvxRGnqkv4PyqMV9ofVM3Dx1sc-45WBdD7CkoiEZg7fh5xM_dj3v0G8AmLLJiDZj51-MjgR94UpnLaHZofWHI-efbVSuuYXekKKtJ1y2SZUlHACAmy0lJQSgxnzleEnj5imc_y4ogSPLv0D-JWl9kkfl29fdBeX_nbVxNpvp6VElHU4shC7pkWFm4BJaNnQaWDSzfHpZFhFa5QuWTTN3ju5qC3_NJ-w_fh_sCOgDyclcR6JqdxgAoYTwZHRZ-PjyGeZaF1T8VmIZK_GuvpO176HcTD4jiDBc39z-Vz7INOt8DnQvFzvhp_n4OhoSNjlNuuA30Wn9cY8CC3u_CvJeBfpIpp77Uc3hrsPfTH9Z__G79rHN09Zu9X5UnPYrO62cdXU26O-0xC1TQYfX_FZ6czPAChafM8axyhifLsa-ipzX1tnQxHLibhk7snbcrcTG4eK9xNxuCvh9Bs1LjYQLeLgK3s77nADVsb4Puk_5B3U4FCAmuyqbU9iZS0jfjkxWp8HmpoEw4lEFCrDUcRnz_EQ-pQuw1PDc30O-a2HyMhxX8xzbxbZQhT3wg0oOO_8axj_Q57S952we9l1J6w3ckQGb7GtvadAzoU-L79hjJzp_c3mvst0M4-Lix-P2pt9Xq8aE_vrvH_QLLgM_ROqj1GgzdpPPVcU-ZZ-9Qy2DSawaMHRkGgOYfaRk6_aJyND2JLQfv5SK0xft1GKM-lyWuuY9yqtcO-_-0xrMu_vZeloElkiJSyyBJPCNcLIMoiq_yq-EguoaJSkc337dhg3HjQJGO6rGj-411aKzDO_rXQEjipxgFQ_ekF1NarVEpu-CL8e7PL-P_YAvxiERXKUWOOtIXCNtF68AhfXcPbR31bzK63Ubq35qr8ExXvtfDBInok6DvPztLvV0Ic6NnAtYwGXkx1ft-O-no5Qu5Wt_pn1-ZxOm30x_32t87te4MF5oqdFJnb3bu1cURg0sFtOkarhUgw9J1U8sxRgsJn_zTGk8EfSdqijzh-ZqaAkcuwQiOEOVV_rTeS1w04WDSqZkc16ZeHzS0bGj5nqFbNNUpEuNAfbCovsS5HzF8a4PPbMH9QcHQLHmlX902Both3yNy43e-LUEFSZRZSlCR4XjxQlBO4V9H0JqcvgyHdnAwtXl3BoK79-jEG3I25HzzpNfhdKk5uP2bn5LtxelFH0ma1uORWb_YdvRB0l1QE38e4wff5a9IQ_2pS-LoRcyYe574cQ5BagpOFUpTJO0DU5wTP84DzyC1tVJ7IP4YQ3nEpL6jGtO47SkCsIvqSAv41vC5aEj4tiSUOXIKzSo8x1xAKMvyfwvCNGYbEDYg_FUgxOjORwThkUKh1CTiYwi0fwmPbsA9bLL7bwpBReB5qb5QwyDSmYI8q5BXpvcvMezyEhtnGho2NHzv9D5cInWkhUgv1hGN4nxEKjbu4S91D3lO4mowKjKrcBcwiuLr3MPrXqzU-Zk6OQhr1tSCBmySRQPFBopvD8WlYuinnMzZEv-vdU_Uip_H-PEQ_pUrRsFwlvmLaKb73T44I__Y6Ttch8V9HpQT47zmm63bBzB_B0Tj7pQJBziEL9xEmtmuo4tWFw-eTOVwys9sAThzyz-YNIuO-aqnLPkGM-eloUFbhG52XUPVP8G2SzPkdcoAS3G0fQPdt72TK6KgIHUVwsqEP1NXYKTXURdLMjSQAK06pWUMdX4nbvI7DXnfj7w5dcWWJ0KsL0V6nY9YJ2U_nmlJa5s21L2hB0081TKd5HF9ypZzSGJoUze0AhXrjuhYhFL6Uh6OtUh-k_d5a7ISjqXhToVjmEu0UxDEV93zLQpUAXN5Ja1ls58KUSu1gWsD13eMfFKoLrG-jcFS9ri8FKJWzocBrHS6z--oq1knzKXenFar7Gpv5lIwmmIUOMFDucM_QgTIbBPzY4HTuvaWDxxcabTkF979GZ5TTmVGIsdekuQSK7Lffr9q5ZNVt9gkNdu-trJJiRHTz7LMg6MqKSIRZUW6amXYTKuWgL0M4XmFZWQF5lcUOcyOg1GBkUWWjeazWRbQp-V6O_v2B0tyc0Q" sandbox="allow-modals allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation-by-user-activation"></iframe>
                             </div>
@@ -78,7 +76,7 @@
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <div class="text-primary font-medium mb-2">F.A.Q</div>
-                <h2 class="text-3xl font-bold text-gray-900">Часто задаваемые вопросы</h2>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Часто задаваемые вопросы" %}</h2>
             </div>
             <div class="max-w-3xl mx-auto">
                 <div class="space-y-3">
@@ -86,15 +84,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq1">
-                            <span>Как рассчитывается стоимость доставки?</span>
+                            <span>{% trans "Как рассчитывается стоимость доставки?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq1" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм
-                                    груза. Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг
-                                    необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.
-                                </p>
+                                <p class="text-gray-600 leading-relaxed">{% blocktrans with p=price_per_kg %}Стоимость доставки рассчитывается по тарифу {{ p }}₸ за килограмм груза. Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.{% endblocktrans %}</p>
                             </div>
                         </div>
                     </div>
@@ -102,14 +97,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq2">
-                            <span>Какие сроки доставки из Китая в Казахстан?</span>
+                            <span>{% trans "Какие сроки доставки из Китая в Казахстан?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq2" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Средний срок доставки составляет 8–12 дней с момента отправки
-                                    товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и
-                                    загруженности таможенных служб.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Средний срок доставки составляет 8–12 дней с момента отправки товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и загруженности таможенных служб." %}</p>
                             </div>
                         </div>
                     </div>
@@ -117,15 +110,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq3">
-                            <span>Как зарегистрироваться в системе?</span>
+                            <span>{% trans "Как зарегистрироваться в системе?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq3" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Для регистрации необходимо заполнить форму на странице
-                                    «Регистрация», указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона
-                                    и выбрав удобный пункт выдачи. После регистрации вы можете авторизоваться в личном кабинете
-                                    нажав на кнопку, либо на иконку профиля в верхней части.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Для регистрации необходимо заполнить форму на странице «Регистрация», указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи. После регистрации вы можете авторизоваться в личном кабинете нажав на кнопку, либо на иконку профиля в верхней части." %}</p>
                             </div>
                         </div>
                     </div>
@@ -133,21 +123,21 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq4">
-                            <span>Какие товары запрещены к перевозке?</span>
+                            <span>{% trans "Какие товары запрещены к перевозке?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq4" class="faq-content">
                             <div class="px-6 pt-2 pb-5 text-gray-600 leading-relaxed">
-                                <p class="mb-2">К перевозке запрещены:</p>
+                                <p class="mb-2">{% trans "К перевозке запрещены:" %}</p>
                                 <ul class="list-disc pl-5 space-y-2">
-                                    <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li>
-                                    <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
-                                    <li>Психотропные и наркотические средства, алкоголь, сигареты.</li>
-                                    <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li>
-                                    <li>Техника, мобильные телефоны, ноутбуки (под свою ответственность).</li>
-                                    <li>Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы).</li>
-                                    <li>Дроны.</li>
-                                    <li>Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, пузырчатую плёнку, защиту края и т.д.).</li>
+                                    <li>{% trans "Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества." %}</li>
+                                    <li>{% trans "Холодные оружия, включая макеты, пневматику, арбалеты и др." %}</li>
+                                    <li>{% trans "Психотропные и наркотические средства, алкоголь, сигареты." %}</li>
+                                    <li>{% trans "Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках)." %}</li>
+                                    <li>{% trans "Техника, мобильные телефоны, ноутбуки (под свою ответственность)." %}</li>
+                                    <li>{% trans "Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы)." %}</li>
+                                    <li>{% trans "Дроны." %}</li>
+                                    <li>{% trans "Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, пузырчатую плёнку, защиту края и т.д.)." %}</li>
                                 </ul>
                             </div>
                         </div>
@@ -156,14 +146,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq5">
-                            <span>Как отследить мой заказ?</span>
+                            <span>{% trans "Как отследить мой заказ?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq5" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">После оформления заказа вам будет предоставлен трек-номер для
-                                    отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через
-                                    WhatsApp для получения актуальной информации о статусе вашего груза.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "После оформления заказа вам будет предоставлен трек-номер для отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через WhatsApp для получения актуальной информации о статусе вашего груза." %}</p>
                             </div>
                         </div>
                     </div>
@@ -171,14 +159,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq8">
-                            <span>Как заполнить адрес склада в Китае?</span>
+                            <span>{% trans "Как заполнить адрес склада в Китае?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq8" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">На главной странице в разделе «Адрес склада в Китае» указан полный
-                                    адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте
-                                    скриншот менеджеру для проверки.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "На главной странице в разделе «Адрес склада в Китае» указан полный адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте скриншот менеджеру для проверки." %}</p>
                             </div>
                         </div>
                     </div>
@@ -186,16 +172,16 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq9">
-                            <span>Что делать, если заказ пришёл сломанным или повреждённым?</span>
+                            <span>{% trans "Что делать, если заказ пришёл сломанным или повреждённым?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq9" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
                                 <ul class="text-gray-600 leading-relaxed list-disc pl-5 space-y-2">
-                                    <li>Ваша задача — заранее попросить продавца обеспечить надёжную упаковку (например, пенопластом).</li>
-                                    <li>Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера).</li>
-                                    <li>Если упаковка не соответствовала требованиям, компания не несёт ответственности за повреждения.</li>
-                                    <li>Если товар был упакован правильно, но повреждён при доставке, ответственность несёт Inter Cargo.</li>
+                                    <li>{% trans "Ваша задача — заранее попросить продавца обеспечить надёжную упаковку (например, пенопластом)." %}</li>
+                                    <li>{% trans "Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера)." %}</li>
+                                    <li>{% trans "Если упаковка не соответствовала требованиям, компания не несёт ответственности за повреждения." %}</li>
+                                    <li>{% trans "Если товар был упакован правильно, но повреждён при доставке, ответственность несёт Inter Cargo." %}</li>
                                 </ul>
                             </div>
                         </div>
@@ -204,13 +190,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq10">
-                            <span>Как связаться с менеджером?</span>
+                            <span>{% trans "Как связаться с менеджером?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq10" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом
-                                    верхнем углу или в левом нижнем углу главной страницы.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу или в левом нижнем углу главной страницы." %}</p>
                             </div>
                         </div>
                     </div>
@@ -218,15 +203,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq11">
-                            <span>Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?</span>
+                            <span>{% trans "Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq11" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Ответственность за заказ, который ещё не прибыл на склад (статус
-                                    «Добавлено пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести
-                                    ответственность с момента поступления товара на свой склад в Китае. При возникновении
-                                    проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Ответственность за заказ, который ещё не прибыл на склад (статус «Добавлено пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести ответственность с момента поступления товара на свой склад в Китае. При возникновении проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции." %}</p>
                             </div>
                         </div>
                     </div>

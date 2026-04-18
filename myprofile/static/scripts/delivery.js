@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    var _i18n = document.getElementById('js-i18n')?.dataset || {};
+    var _di18n = document.getElementById('js-i18n-delivery')?.dataset || {};
     // ============================================
     // Tab switching
     // ============================================
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var checkboxes = form.querySelectorAll('input[type="checkbox"]');
             var allChecked = Array.from(checkboxes).every(function (cb) { return cb.checked; });
             checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-            this.textContent = allChecked ? 'Выбрать все' : 'Снять все';
+            this.textContent = allChecked ? (_i18n.selectAll || 'Выбрать все') : (_i18n.deselectAll || 'Снять все');
         });
     }
 
@@ -45,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var checkboxes = panel.querySelectorAll('input[type="checkbox"]');
             var allChecked = Array.from(checkboxes).every(function (cb) { return cb.checked; });
             checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-            this.textContent = allChecked ? 'Выбрать все' : 'Снять все';
+            this.textContent = allChecked ? (_i18n.selectAll || 'Выбрать все') : (_i18n.deselectAll || 'Снять все');
         });
     }
 
@@ -108,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('beforeunload', function (e) {
         if (scanningInProgress) {
             e.preventDefault();
-            e.returnValue = 'Сканирование не завершено. Вы уверены, что хотите покинуть страницу?';
+            e.returnValue = _di18n.leaveConfirm || 'Сканирование не завершено. Вы уверены, что хотите покинуть страницу?';
             return e.returnValue;
         }
     });
@@ -151,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(function (err) {
                 console.error('Error fetching receipts:', err);
-                alert('Ошибка загрузки данных. Попробуйте снова.');
+                alert(_di18n.loadError || 'Ошибка загрузки данных. Попробуйте снова.');
             });
     }
 
@@ -268,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 manualBtn.type = 'button';
                 manualBtn.className = 'manual-check-btn px-2 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-700 transition';
                 manualBtn.innerHTML = '<i class="ri-check-line"></i>';
-                manualBtn.title = 'Отметить вручную';
+                manualBtn.title = _di18n.markManual || 'Отметить вручную';
                 manualBtn.dataset.receipt = r.receipt_number;
                 row.appendChild(manualBtn);
 
@@ -343,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
             scannerActive = true;
         }).catch(function (err) {
             console.error('Camera error:', err);
-            showError('Не удалось получить доступ к камере. Разрешите доступ в настройках браузера.');
+            showError(_di18n.cameraDenied || 'Не удалось получить доступ к камере. Разрешите доступ в настройках браузера.');
         });
     }
 
@@ -365,13 +367,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Already scanned?
         if (scannedReceipts.indexOf(code) !== -1) {
-            showError('Этот QR-код уже отсканирован: ' + code);
+            showError((_di18n.qrAlreadyScanned || 'Этот QR-код уже отсканирован: {code}').replace('{code}', code));
             return;
         }
 
         // Is it expected?
         if (allExpectedReceipts.indexOf(code) === -1) {
-            showError('Неизвестный QR-код: ' + code);
+            showError((_di18n.qrUnknown || 'Неизвестный QR-код: {code}').replace('{code}', code));
             return;
         }
 
@@ -459,14 +461,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ============================================
     modalClose.addEventListener('click', function () {
         if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
-            if (!confirm('Сканирование не завершено. Вы уверены, что хотите отменить?')) return;
+            if (!confirm(_di18n.scanIncomplete || 'Сканирование не завершено. Вы уверены, что хотите отменить?')) return;
         }
         closeScanner();
     });
 
     cancelBtn.addEventListener('click', function () {
         if (scannedReceipts.length > 0 && scannedReceipts.length < allExpectedReceipts.length) {
-            if (!confirm('Сканирование не завершено. Вы уверены, что хотите отменить?')) return;
+            if (!confirm(_di18n.scanIncomplete || 'Сканирование не завершено. Вы уверены, что хотите отменить?')) return;
         }
         closeScanner();
     });

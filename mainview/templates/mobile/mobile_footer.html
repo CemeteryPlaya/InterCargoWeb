@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load static %}
 <!-- Мобильный футер (только md:hidden) -->
 <div class="md:hidden px-4 mb-6">
@@ -7,12 +8,12 @@
             <a href="/" class="inline-block mb-3">
                 <img src="{% static 'images/logo.png' %}" class="w-12 h-12 mx-auto" alt="Inter Cargo">
             </a>
-            <p class="text-xs text-gray-500 leading-relaxed">Надежная доставка грузов из Китая<br>в Казахстан по выгодным тарифам.</p>
+            <p class="text-xs text-gray-500 leading-relaxed">{% trans "Надежная доставка грузов из Китая" %}<br>{% trans "в Казахстан по выгодным тарифам." %}</p>
         </div>
 
         <!-- Соцсети -->
         <div class="px-5 py-4 border-b border-gray-100">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase text-center mb-3">Мы в соцсетях</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase text-center mb-3">{% trans "Мы в соцсетях" %}</p>
             <div class="flex items-center justify-center gap-4">
                 <a href="https://www.instagram.com/inter_cargo_trz/" class="w-11 h-11 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
                     <img src="{% static 'images/instagram.svg' %}" class="w-6 h-6" alt="Instagram">
@@ -28,20 +29,20 @@
 
         <!-- Контакты -->
         <div class="px-5 py-4 border-b border-gray-100 space-y-3">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase text-center">Контакты</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase text-center">{% trans "Контакты" %}</p>
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#fee2e2;">
                     <i class="ri-map-pin-line text-sm" style="color:#e53e3e;"></i>
                 </div>
-                <p class="text-xs text-gray-600 leading-relaxed pt-1.5">Казахстан, г. Тараз,<br>мкр. Акбулак(1), д. 21</p>
+                <p class="text-xs text-gray-600 leading-relaxed pt-1.5">{% trans "Казахстан, г. Тараз," %}<br>{% trans "мкр. Акбулак(1), д. 21" %}</p>
             </div>
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#fee2e2;">
                     <i class="ri-phone-line text-sm" style="color:#e53e3e;"></i>
                 </div>
                 <div class="text-xs text-gray-600">
-                    <a href="tel:+77779773696" class="block hover:text-primary transition">+7 (777) 977-36-96 <span class="text-gray-400">— директор</span></a>
-                    <a href="tel:+77066640624" class="block hover:text-primary transition">+7 (706) 664-06-24 <span class="text-gray-400">— менеджер</span></a>
+                    <a href="tel:+77779773696" class="block hover:text-primary transition">+7 (777) 977-36-96 <span class="text-gray-400">{% trans "— директор" %}</span></a>
+                    <a href="tel:+77066640624" class="block hover:text-primary transition">+7 (706) 664-06-24 <span class="text-gray-400">{% trans "— менеджер" %}</span></a>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -54,7 +55,7 @@
 
         <!-- Пункты выдачи -->
         <div class="px-5 py-4 border-b border-gray-100">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase text-center mb-3">Пункты выдачи</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase text-center mb-3">{% trans "Пункты выдачи" %}</p>
             <div class="space-y-2">
                 {% for pp in pickup_points %}
                 <div class="flex items-start gap-2.5">
@@ -73,10 +74,10 @@
         <!-- Копирайт и оплата -->
         <div class="px-5 py-4 text-center">
             <div class="flex items-center justify-center gap-2 mb-2">
-                <span class="text-[11px] text-gray-400">Способы оплаты:</span>
+                <span class="text-[11px] text-gray-400">{% trans "Способы оплаты:" %}</span>
                 <img src="{% static 'images/kaspi.png' %}" class="h-3.5" alt="Kaspi">
             </div>
-            <p class="text-[11px] text-gray-400">&copy; 2026 Inter Cargo. Все права защищены.</p>
+            <p class="text-[11px] text-gray-400">{% trans "&copy; 2026 Inter Cargo. Все права защищены." %}</p>
         </div>
     </div>
 </div>

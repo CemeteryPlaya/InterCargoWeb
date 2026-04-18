@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - История приходов</title>
+    <title>{% trans "Inter Cargo - История приходов" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -43,17 +44,17 @@
         <main class="flex-1 p-4 md:p-8">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">История приходов</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "История приходов" %}</h1>
             </div>
             <div class="max-w-6xl mx-auto">
                 <h1 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
-                    <i class="ri-archive-line text-primary"></i> История приходов
+                    <i class="ri-archive-line text-primary"></i> {% trans "История приходов" %}
                 </h1>
 
                 {% if not years %}
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                     <i class="ri-inbox-line text-gray-400 text-4xl"></i>
-                    <p class="text-gray-500 mt-2">Нет данных о приходах.</p>
+                    <p class="text-gray-500 mt-2">{% trans "Нет данных о приходах." %}</p>
                 </div>
                 {% else %}
 
@@ -67,7 +68,7 @@
                         </summary>
                         <div class="pl-4 pr-2 pb-3 space-y-2 ah-content">
                             <div class="flex items-center gap-2 px-4 py-2 text-sm text-gray-400">
-                                <span class="ah-spinner"></span> Загрузка месяцев...
+                                <span class="ah-spinner"></span> {% trans "Загрузка месяцев..." %}
                             </div>
                         </div>
                     </details>
@@ -121,7 +122,7 @@
                 try {
                     const data = await fetchJSON(`${BASE}/months/${year}/`);
                     if (!data.months.length) {
-                        container.innerHTML = '<p class="px-4 py-2 text-sm text-gray-400">Нет данных за этот год.</p>';
+                        container.innerHTML = '<p class="px-4 py-2 text-sm text-gray-400">{% trans "Нет данных за этот год." %}</p>';
                         return;
                     }
                     container.innerHTML = data.months.map(m => `
@@ -138,7 +139,7 @@
                     `).join('');
                     bindMonths(container);
                 } catch(e) {
-                    container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">Ошибка загрузки данных.</p>';
+                    container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">{% trans "Ошибка загрузки данных." %}</p>';
                 }
             });
         });
@@ -156,7 +157,7 @@
                     try {
                         const data = await fetchJSON(`${BASE}/days/${year}/${month}/`);
                         if (!data.days.length) {
-                            container.innerHTML = '<p class="px-4 py-2 text-sm text-gray-400">Нет данных за этот месяц.</p>';
+                            container.innerHTML = '<p class="px-4 py-2 text-sm text-gray-400">{% trans "Нет данных за этот месяц." %}</p>';
                             return;
                         }
                         container.innerHTML = data.days.map(d => `
@@ -173,7 +174,7 @@
                         `).join('');
                         bindDays(container);
                     } catch(e) {
-                        container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">Ошибка загрузки данных.</p>';
+                        container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">{% trans "Ошибка загрузки данных." %}</p>';
                     }
                 });
             });
@@ -192,7 +193,7 @@
                         const data = await fetchJSON(`${BASE}/day/${year}/${month}/${day}/`);
                         container.innerHTML = renderDayDetail(data);
                     } catch(e) {
-                        container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">Ошибка загрузки данных.</p>';
+                        container.innerHTML = '<p class="px-4 py-2 text-sm text-red-500">{% trans "Ошибка загрузки данных." %}</p>';
                     }
                 });
             });
@@ -237,7 +238,7 @@
             }
 
             if (!html) {
-                html = '<p class="px-4 py-2 text-sm text-gray-400">Нет данных за эту дату.</p>';
+                html = '<p class="px-4 py-2 text-sm text-gray-400">{% trans "Нет данных за эту дату." %}</p>';
             }
             return html;
         }
@@ -263,7 +264,7 @@
                 </summary>
                 <div class="px-4 pb-3 pt-2">
                     <div class="mb-3">
-                        <p class="text-xs font-medium text-gray-500 mb-1">Трек-коды:</p>
+                        <p class="text-xs font-medium text-gray-500 mb-1">{% trans "Трек-коды:" %}</p>
                         <div class="flex flex-wrap gap-1">`;
 
             c.tracks.forEach(t => {
@@ -279,8 +280,8 @@
             if (c.receipts && c.receipts.length) {
                 c.receipts.forEach(rd => {
                     const paidBadge = rd.is_paid
-                        ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Оплачен</span>'
-                        : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>';
+                        ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{% trans "Оплачен" %}</span>'
+                        : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{% trans "Не оплачен" %}</span>';
                     html += `
                     <details class="border border-gray-200 rounded-lg overflow-hidden mb-2">
                         <summary class="cursor-pointer px-3 py-2 bg-gray-100 hover:bg-gray-200 transition flex items-center justify-between text-xs">
@@ -295,9 +296,9 @@
                             <table class="w-full text-xs border-collapse">
                                 <thead><tr class="bg-gray-200 text-gray-700">
                                     <th class="border border-gray-300 px-2 py-1 text-left">#</th>
-                                    <th class="border border-gray-300 px-2 py-1 text-left">Трек-код</th>
-                                    <th class="border border-gray-300 px-2 py-1 text-right">Вес (кг)</th>
-                                    <th class="border border-gray-300 px-2 py-1 text-right">Стоимость (тг)</th>
+                                    <th class="border border-gray-300 px-2 py-1 text-left">{% trans "Трек-код" %}</th>
+                                    <th class="border border-gray-300 px-2 py-1 text-right">{% trans "Вес (кг)" %}</th>
+                                    <th class="border border-gray-300 px-2 py-1 text-right">{% trans "Стоимость (тг)" %}</th>
                                 </tr></thead>
                                 <tbody>`;
                     rd.items.forEach((item, i) => {
@@ -322,7 +323,7 @@
                     </details>`;
                 });
             } else {
-                html += '<p class="text-xs text-gray-400 italic">Чек ещё не сформирован</p>';
+                html += '<p class="text-xs text-gray-400 italic">{% trans "Чек ещё не сформирован" %}</p>';
             }
 
             html += '</div></details>';

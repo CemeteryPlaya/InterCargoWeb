@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 def generate_link_token():
@@ -17,37 +18,36 @@ def default_token_expiry():
 
 
 class TelegramProfile(models.Model):
-    """Связка аккаунта на сайте с Telegram-аккаунтом."""
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='telegram_profile',
-        verbose_name='Пользователь',
+        verbose_name=_('Пользователь'),
     )
     telegram_chat_id = models.BigIntegerField(
         unique=True,
-        verbose_name='Telegram Chat ID',
+        verbose_name=_('Telegram Chat ID'),
     )
     telegram_username = models.CharField(
         max_length=255, blank=True, null=True,
-        verbose_name='Telegram Username',
+        verbose_name=_('Telegram Username'),
     )
     telegram_first_name = models.CharField(
         max_length=255, blank=True, null=True,
-        verbose_name='Имя в Telegram',
+        verbose_name=_('Имя в Telegram'),
     )
     linked_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Привязан',
+        verbose_name=_('Привязан'),
     )
     is_active = models.BooleanField(
         default=True,
-        verbose_name='Уведомления активны',
+        verbose_name=_('Уведомления активны'),
     )
 
     class Meta:
-        verbose_name = 'Telegram профиль'
-        verbose_name_plural = 'Telegram профили'
+        verbose_name = _('Telegram профиль')
+        verbose_name_plural = _('Telegram профили')
 
     def __str__(self):
         tg_name = self.telegram_username or self.telegram_chat_id
@@ -55,28 +55,24 @@ class TelegramProfile(models.Model):
 
 
 class TelegramLinkToken(models.Model):
-    """
-    Токен для привязки аккаунта через deep link.
-    Генерируется на сайте, используется в ссылке: t.me/BOT?start=TOKEN
-    """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='telegram_link_tokens',
-        verbose_name='Пользователь',
+        verbose_name=_('Пользователь'),
     )
     token = models.CharField(
         max_length=32, unique=True,
         default=generate_link_token,
-        verbose_name='Токен',
+        verbose_name=_('Токен'),
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создан')
-    expires_at = models.DateTimeField(default=default_token_expiry, verbose_name='Истекает')
-    is_used = models.BooleanField(default=False, verbose_name='Использован')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Создан'))
+    expires_at = models.DateTimeField(default=default_token_expiry, verbose_name=_('Истекает'))
+    is_used = models.BooleanField(default=False, verbose_name=_('Использован'))
 
     class Meta:
-        verbose_name = 'Токен привязки Telegram'
-        verbose_name_plural = 'Токены привязки Telegram'
+        verbose_name = _('Токен привязки Telegram')
+        verbose_name_plural = _('Токены привязки Telegram')
         ordering = ['-created_at']
 
     def __str__(self):
@@ -93,39 +89,38 @@ class TelegramLinkToken(models.Model):
 
 
 class TelegramNotification(models.Model):
-    """Уведомление для отправки пользователю в Telegram."""
 
     class NotificationType(models.TextChoices):
-        INFO = 'info', 'Информация'
-        WARNING = 'warning', 'Предупреждение'
-        ALERT = 'alert', 'Срочное'
-        UPDATE = 'update', 'Обновление'
-        TRACKING = 'tracking', 'Отслеживание'
+        INFO = 'info', _('Информация')
+        WARNING = 'warning', _('Предупреждение')
+        ALERT = 'alert', _('Срочное')
+        UPDATE = 'update', _('Обновление')
+        TRACKING = 'tracking', _('Отслеживание')
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='telegram_notifications',
-        verbose_name='Пользователь',
+        verbose_name=_('Пользователь'),
     )
-    title = models.CharField(max_length=255, verbose_name='Заголовок')
-    message = models.TextField(verbose_name='Сообщение')
+    title = models.CharField(max_length=255, verbose_name=_('Заголовок'))
+    message = models.TextField(verbose_name=_('Сообщение'))
     notification_type = models.CharField(
         max_length=20,
         choices=NotificationType.choices,
         default=NotificationType.TRACKING,
-        verbose_name='Тип уведомления',
+        verbose_name=_('Тип уведомления'),
     )
-    url = models.URLField(blank=True, null=True, verbose_name='Ссылка')
-    is_sent = models.BooleanField(default=False, verbose_name='Отправлено', db_index=True)
-    retry_count = models.PositiveSmallIntegerField(default=0, verbose_name='Число попыток')
-    last_error = models.TextField(blank=True, default='', verbose_name='Последняя ошибка')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
-    sent_at = models.DateTimeField(blank=True, null=True, verbose_name='Отправлено в')
+    url = models.URLField(blank=True, null=True, verbose_name=_('Ссылка'))
+    is_sent = models.BooleanField(default=False, verbose_name=_('Отправлено'), db_index=True)
+    retry_count = models.PositiveSmallIntegerField(default=0, verbose_name=_('Число попыток'))
+    last_error = models.TextField(blank=True, default='', verbose_name=_('Последняя ошибка'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Создано'))
+    sent_at = models.DateTimeField(blank=True, null=True, verbose_name=_('Отправлено в'))
 
     class Meta:
-        verbose_name = 'Уведомление Telegram'
-        verbose_name_plural = 'Уведомления Telegram'
+        verbose_name = _('Уведомление Telegram')
+        verbose_name_plural = _('Уведомления Telegram')
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['is_sent', 'created_at']),
@@ -149,63 +144,60 @@ class TelegramNotification(models.Model):
 
 
 class UserNotificationSettings(models.Model):
-    """Настройки уведомлений пользователя в Telegram."""
     LEVEL_CHOICES = [
-        ('all', 'Все статусы'),
-        ('only_ready', 'Только ПВЗ'),
-        ('selective', 'Выборочно'),
+        ('all', _('Все статусы')),
+        ('only_ready', _('Только ПВЗ')),
+        ('selective', _('Выборочно')),
     ]
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='tg_notification_settings',
-        verbose_name='Пользователь',
+        verbose_name=_('Пользователь'),
     )
-    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='only_ready', verbose_name='Уровень')
-    notify_shipped_cn = models.BooleanField(default=True, verbose_name='Отправлено из Китая')
-    notify_delivered_sort = models.BooleanField(default=True, verbose_name='Сортировочный склад')
-    notify_shipping_pp = models.BooleanField(default=True, verbose_name='В доставке до ПВЗ')
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='only_ready', verbose_name=_('Уровень'))
+    notify_shipped_cn = models.BooleanField(default=True, verbose_name=_('Отправлено из Китая'))
+    notify_delivered_sort = models.BooleanField(default=True, verbose_name=_('Сортировочный склад'))
+    notify_shipping_pp = models.BooleanField(default=True, verbose_name=_('В доставке до ПВЗ'))
 
     class Meta:
-        verbose_name = 'Настройки уведомлений Telegram'
-        verbose_name_plural = 'Настройки уведомлений Telegram'
+        verbose_name = _('Настройки уведомлений Telegram')
+        verbose_name_plural = _('Настройки уведомлений Telegram')
 
     def __str__(self):
         return f'{self.user.username} — {self.get_level_display()}'
 
 
 class ReminderSettings(models.Model):
-    """Глобальные настройки напоминаний о незабранных посылках."""
-    is_active = models.BooleanField(default=False, verbose_name='Активно')
-    intervals = models.CharField(max_length=100, default='3,5,7', verbose_name='Интервалы (дни)')
+    is_active = models.BooleanField(default=False, verbose_name=_('Активно'))
+    intervals = models.CharField(max_length=100, default='3,5,7', verbose_name=_('Интервалы (дни)'))
 
     class Meta:
-        verbose_name = 'Настройки напоминаний'
-        verbose_name_plural = 'Настройки напоминаний'
+        verbose_name = _('Настройки напоминаний')
+        verbose_name_plural = _('Настройки напоминаний')
 
     def __str__(self):
         return f'Напоминания: {"ВКЛ" if self.is_active else "ВЫКЛ"} ({self.intervals} дн.)'
 
 
 class BroadcastLog(models.Model):
-    """Лог рассылок админа — для отчётности."""
-    pvz_name = models.CharField(max_length=255, verbose_name='ПВЗ')
-    text = models.TextField(verbose_name='Текст сообщения')
-    sent_count = models.IntegerField(default=0, verbose_name='Отправлено')
-    error_count = models.IntegerField(default=0, verbose_name='Ошибок')
-    total_count = models.IntegerField(default=0, verbose_name='Всего адресатов')
+    pvz_name = models.CharField(max_length=255, verbose_name=_('ПВЗ'))
+    text = models.TextField(verbose_name=_('Текст сообщения'))
+    sent_count = models.IntegerField(default=0, verbose_name=_('Отправлено'))
+    error_count = models.IntegerField(default=0, verbose_name=_('Ошибок'))
+    total_count = models.IntegerField(default=0, verbose_name=_('Всего адресатов'))
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL, null=True, blank=True,
         related_name='broadcast_logs',
-        verbose_name='Отправитель',
+        verbose_name=_('Отправитель'),
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Создано'))
 
     class Meta:
-        verbose_name = 'Лог рассылки'
-        verbose_name_plural = 'Логи рассылок'
+        verbose_name = _('Лог рассылки')
+        verbose_name_plural = _('Логи рассылок')
         ordering = ['-created_at']
 
     def __str__(self):
@@ -213,23 +205,22 @@ class BroadcastLog(models.Model):
 
 
 class SentReminder(models.Model):
-    """Лог отправленных напоминаний (чтобы не дублировать)."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь',
+        verbose_name=_('Пользователь'),
     )
     track_code = models.ForeignKey(
         'myprofile.TrackCode',
         on_delete=models.CASCADE,
-        verbose_name='Трек-код',
+        verbose_name=_('Трек-код'),
     )
-    interval_day = models.IntegerField(verbose_name='Интервал (дни)')
-    sent_at = models.DateTimeField(auto_now_add=True, verbose_name='Отправлено')
+    interval_day = models.IntegerField(verbose_name=_('Интервал (дни)'))
+    sent_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Отправлено'))
 
     class Meta:
-        verbose_name = 'Отправленное напоминание'
-        verbose_name_plural = 'Отправленные напоминания'
+        verbose_name = _('Отправленное напоминание')
+        verbose_name_plural = _('Отправленные напоминания')
         unique_together = ['track_code', 'interval_day']
 
     def __str__(self):

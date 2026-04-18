@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Авторизация</title>
+    <title>{% trans "Inter Cargo - Авторизация" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -17,6 +18,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+    <style>
+        /* Sliding indicator for login-method tabs */
+        .login-tabs-wrap { position: relative; }
+        .login-tab-indicator {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 0;
+            width: 0;
+            background: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transform: translateX(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+            pointer-events: none;
+        }
+        body.theme-dark .login-tab-indicator {
+            background: #1f2937; /* slate-800 — contrasts against dark tab bar */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), inset 0 0 0 1px #334155;
+        }
+        .login-tabs-wrap > button { position: relative; z-index: 1; }
+
+        /* Smooth height transition for the forms container */
+        #login-forms-wrap {
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .login-form {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .login-form.login-form-leaving {
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+        }
+        .login-form.login-form-entering {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen" data-login-method="{{ login_method|default:"login" }}">
 {% include 'shared/header.html' %}
@@ -25,16 +69,16 @@
 
     <!-- Мобильный хедер -->
     <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5">
-        <h1 class="text-lg font-bold text-center">Авторизация</h1>
+        <h1 class="text-lg font-bold text-center">{% trans "Авторизация" %}</h1>
     </div>
 
     <section id="login" class="py-16 bg-gray-50">
   <div class="container mx-auto px-4">
     <div class="text-center mb-12">
-      <div class="text-primary font-medium mb-2">Авторизация</div>
-      <h2 class="text-3xl font-bold text-gray-900">Вход клиента</h2>
+      <div class="text-primary font-medium mb-2">{% trans "Авторизация" %}</div>
+      <h2 class="text-3xl font-bold text-gray-900">{% trans "Вход клиента" %}</h2>
       <p class="text-gray-600 mt-4 max-w-2xl mx-auto">
-        Заполните форму ниже, чтобы войти в свой аккаунт
+        {% trans "Заполните форму ниже, чтобы войти в свой аккаунт" %}
       </p>
     </div>
 
@@ -54,83 +98,85 @@
       {% endif %}
 
       <!-- Переключатель: Логин / Телефон / Email -->
-      <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
+      <div class="flex bg-gray-100 rounded-lg p-1 mb-6 login-tabs-wrap">
+        <span id="login-tab-indicator" class="login-tab-indicator"></span>
         <button type="button" id="tab-login-method"
-            class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
+            class="flex-1 py-2 px-4 text-center font-medium rounded-md text-sm transition-colors"
             onclick="switchLoginMethod('login')">
-            Логин
+            {% trans "Логин" %}
         </button>
         <button type="button" id="tab-phone-method"
-            class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
+            class="flex-1 py-2 px-4 text-center font-medium rounded-md text-sm transition-colors"
             onclick="switchLoginMethod('phone')">
-            Телефон
+            {% trans "Телефон" %}
         </button>
         <button type="button" id="tab-email-method"
-            class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
+            class="flex-1 py-2 px-4 text-center font-medium rounded-md text-sm transition-colors"
             onclick="switchLoginMethod('email')">
             Email
         </button>
       </div>
 
+      <div id="login-forms-wrap">
       <!-- Форма входа по логину -->
-      <form id="login-by-login" method="POST" action="{% url 'login' %}">
+      <form id="login-by-login" method="POST" action="{% url 'login' %}" class="login-form">
         {% csrf_token %}
         <div class="mb-6">
-          <label for="login" class="block text-sm font-medium text-gray-700 mb-2">Логин (Имя/Ник + 4 цифры номера)</label>
+          <label for="login" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Логин (Имя/Ник + 4 цифры номера)" %}</label>
           <input type="text" id="login" name="login" required
             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-            placeholder="Например: ANDREY1234">
-          <div class="text-xs text-gray-500 mt-1">Введите ваше имя или ник и последние 4 цифры номера телефона</div>
+            placeholder="{% trans "Например: ANDREY1234" %}">
+          <div class="text-xs text-gray-500 mt-1">{% trans "Введите ваше имя или ник и последние 4 цифры номера телефона" %}</div>
         </div>
         <div class="mb-6">
-          <label for="password-login" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+          <label for="password-login" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пароль" %}</label>
           <div class="relative">
             <input type="password" id="password-login" name="password" required minlength="6"
               class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-              placeholder="Введите пароль">
+              placeholder="{% trans "Введите пароль" %}">
             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
               <i class="ri-eye-off-line text-xl"></i>
             </button>
           </div>
         </div>
         <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-          Войти
+          {% trans "Войти" %}
         </button>
         <div class="mt-3 text-center">
-          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">Забыли пароль?</a>
+          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">{% trans "Забыли пароль?" %}</a>
         </div>
       </form>
 
       <!-- Форма входа по телефону -->
-      <form id="login-by-phone" method="POST" action="{% url 'login' %}" class="hidden">
+      <form id="login-by-phone" method="POST" action="{% url 'login' %}" class="login-form hidden">
         {% csrf_token %}
         <div class="mb-6">
-          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Номер телефона</label>
+          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Номер телефона" %}</label>
           <input type="tel" id="phone" name="phone" required
             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
             placeholder="+7 (___) ___-__-__" maxlength="18">
         </div>
         <div class="mb-6">
-          <label for="password-phone" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+          <label for="password-phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пароль" %}</label>
           <div class="relative">
             <input type="password" id="password-phone" name="password" required minlength="6"
               class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-              placeholder="Введите пароль">
+              placeholder="{% trans "Введите пароль" %}">
             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
               <i class="ri-eye-off-line text-xl"></i>
             </button>
           </div>
         </div>
         <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-          Войти
+          {% trans "Войти" %}
         </button>
         <div class="mt-3 text-center">
-          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">Забыли пароль?</a>
+          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">{% trans "Забыли пароль?" %}</a>
         </div>
       </form>
 
       <!-- Форма входа по email -->
-      <form id="login-by-email" method="POST" action="{% url 'login' %}" class="hidden">
+      <form id="login-by-email" method="POST" action="{% url 'login' %}" class="login-form hidden">
         {% csrf_token %}
         <div class="mb-6">
           <label for="email-login" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -139,23 +185,24 @@
             placeholder="example@mail.com">
         </div>
         <div class="mb-6">
-          <label for="password-email" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+          <label for="password-email" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пароль" %}</label>
           <div class="relative">
             <input type="password" id="password-email" name="password" required minlength="6"
               class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-              placeholder="Введите пароль">
+              placeholder="{% trans "Введите пароль" %}">
             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
               <i class="ri-eye-off-line text-xl"></i>
             </button>
           </div>
         </div>
         <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-          Войти
+          {% trans "Войти" %}
         </button>
         <div class="mt-3 text-center">
-          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">Забыли пароль?</a>
+          <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:underline">{% trans "Забыли пароль?" %}</a>
         </div>
       </form>
+      </div>
     </div>
   </div>
 </section>

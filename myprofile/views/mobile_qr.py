@@ -6,6 +6,7 @@ from django.shortcuts import render
 
 from myprofile.models import Receipt, ExtraditionPackage, Extradition
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 @login_required

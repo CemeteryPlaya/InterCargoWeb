@@ -11,6 +11,7 @@ from django.utils import timezone
 from myprofile.models import Receipt, DeliveryHistory
 from register.models import UserProfile, PickupPoint
 from myprofile.permissions import is_accountant, is_driver, is_staff
+from django.utils.translation import gettext as _
 
 
 def _has_finance_access(user):
@@ -77,7 +78,7 @@ def _home_delivery_clients(home_qs):
 def finance_summary_view(request):
     """Финансовая сводка по чекам: ежедневная и ежемесячная, по ПВЗ."""
     if not _has_finance_access(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     show_accountant = _is_accountant_or_staff(request.user)
     show_driver = _is_driver(request.user)

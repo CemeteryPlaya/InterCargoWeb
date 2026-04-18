@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Отправлено из Китая</title>
+    <title>{% trans "Inter Cargo - Отправлено из Китая" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -31,9 +32,9 @@
         <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-6 -mt-6 mb-4">
-                <h1 class="text-lg font-bold text-center">Из Китая</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Из Китая" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">Отправлено со склада (Китай)</h2>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Отправлено со склада (Китай)" %}</h2>
 
             {% if messages %}
             <ul class="mb-4">
@@ -47,41 +48,41 @@
                 {% csrf_token %}
 
                 <!-- Дата -->
-                <label for="update_date" class="block font-medium mb-1">Дата отправки</label>
+                <label for="update_date" class="block font-medium mb-1">{% trans "Дата отправки" %}</label>
                 <input type="date" name="update_date" id="update_date" required
                     class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Трек-коды вручную -->
                     <div>
-                        <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)</label>
+                        <label for="track_codes" class="block font-medium mb-1">{% trans "Трек-коды (по одному в строке)" %}</label>
                         <textarea name="track_codes" id="track_codes" rows="12"
                             class="w-full border border-gray-300 rounded px-3 py-2"
-                            placeholder="Введите трек-коды вручную..."></textarea>
+                            placeholder="{% trans "Введите трек-коды вручную..." %}"></textarea>
                     </div>
 
                     <!-- Загрузка xlsx -->
                     <div>
-                        <label for="xlsx_file" class="block font-medium mb-1">Или загрузите xlsx файл</label>
+                        <label for="xlsx_file" class="block font-medium mb-1">{% trans "Или загрузите xlsx файл" %}</label>
                         <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors"
                              id="drop_zone">
                             <i class="ri-file-excel-2-line text-4xl text-green-600 mb-2"></i>
-                            <p class="text-gray-600 mb-2">Перетащите xlsx файл сюда</p>
-                            <p class="text-gray-400 text-sm mb-3">или</p>
+                            <p class="text-gray-600 mb-2">{% trans "Перетащите xlsx файл сюда" %}</p>
+                            <p class="text-gray-400 text-sm mb-3">{% trans "или" %}</p>
                             <label for="xlsx_file" class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition inline-block">
-                                <i class="ri-upload-2-line"></i> Выбрать файл
+                                <i class="ri-upload-2-line"></i> {% trans "Выбрать файл" %}
                             </label>
                             <input type="file" name="xlsx_file" id="xlsx_file" accept=".xlsx"
                                 class="hidden">
                             <p id="file_name" class="text-sm text-gray-500 mt-3 hidden"></p>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2">Парсинг: столбец A, начиная с A3, до пустой ячейки или "条码数:"</p>
+                        <p class="text-xs text-gray-400 mt-2">{% trans 'Парсинг: столбец A, начиная с A3, до пустой ячейки или "条码数:"' %}</p>
                     </div>
                 </div>
 
                 <button type="submit"
                     class="bg-primary text-white px-6 py-2 rounded hover:bg-red-600 mt-6 transition">
-                    <i class="ri-refresh-line"></i> Обновить статусы
+                    <i class="ri-refresh-line"></i> {% trans "Обновить статусы" %}
                 </button>
             </form>
         </div>

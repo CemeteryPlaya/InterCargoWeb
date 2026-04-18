@@ -1,10 +1,11 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo — Перенос прихода</title>
+    <title>{% trans "Inter Cargo — Перенос прихода" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -23,27 +24,27 @@
         <main class="flex-1 px-4 md:px-8 py-8 space-y-8 max-w-4xl">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-                <h1 class="text-lg font-bold text-center">Перенос прихода</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Перенос прихода" %}</h1>
             </div>
             <header class="hidden md:block">
-                <h1 class="text-xl font-bold text-red-500">Перенос прихода</h1>
-                <p class="text-sm text-gray-500 mt-1">Перенести пропущенные посылки клиента с одной даты прихода на другую</p>
+                <h1 class="text-xl font-bold text-red-500">{% trans "Перенос прихода" %}</h1>
+                <p class="text-sm text-gray-500 mt-1">{% trans "Перенести пропущенные посылки клиента с одной даты прихода на другую" %}</p>
             </header>
 
             <!-- Шаг 1: Выбор клиента и даты -->
             <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
                 <h2 class="text-base font-semibold text-gray-800">
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold mr-2">1</span>
-                    Выберите клиента и исходную дату
+                    {% trans "Выберите клиента и исходную дату" %}
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Поиск клиента -->
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Клиент</label>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Клиент" %}</label>
                         <div class="relative">
                             <input type="text" id="userSearchInput" autocomplete="off"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
-                                placeholder="Введите логин или имя...">
+                                placeholder="{% trans "Введите логин или имя..." %}">
                             <div id="userSearchResults" class="absolute z-10 w-full mt-1 border border-gray-200 rounded-lg bg-white shadow hidden max-h-52 overflow-y-auto"></div>
                         </div>
                         <div id="selectedUserInfo" class="hidden mt-2 px-3 py-2 bg-blue-50 rounded-lg text-sm text-blue-800">
@@ -54,7 +55,7 @@
                     </div>
                     <!-- Исходная дата -->
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Исходная дата прихода</label>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Исходная дата прихода" %}</label>
                         <input type="date" id="originalDateInput"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
                             value="{{ today_str }}">
@@ -63,11 +64,11 @@
                 <div class="flex items-center gap-3">
                     <button id="loadSummaryBtn" onclick="loadDateSummary()"
                         class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition">
-                        <i class="ri-bar-chart-2-line mr-1"></i> Показать сводку
+                        <i class="ri-bar-chart-2-line mr-1"></i> {% trans "Показать сводку" %}
                     </button>
                     <button id="loadTracksBtn" onclick="loadTracks()"
                         class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium px-5 py-2 rounded-lg transition">
-                        <i class="ri-search-line mr-1"></i> Найти треки клиента
+                        <i class="ri-search-line mr-1"></i> {% trans "Найти треки клиента" %}
                     </button>
                 </div>
             </section>
@@ -76,7 +77,7 @@
             <section id="dateSummarySection" class="hidden bg-white rounded-xl shadow-sm border border-blue-100 p-6">
                 <h2 class="text-base font-semibold text-gray-800 mb-4">
                     <i class="ri-bar-chart-2-line text-blue-500 mr-1"></i>
-                    Сводка прихода за <span id="summaryDateLabel" class="text-blue-600"></span>
+                    {% trans "Сводка прихода за" %} <span id="summaryDateLabel" class="text-blue-600"></span>
                 </h2>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5" id="summaryStats"></div>
                 <div id="summaryBreakdown" class="space-y-2"></div>
@@ -87,18 +88,18 @@
             <section id="tracksSection" class="hidden bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
                 <h2 class="text-base font-semibold text-gray-800">
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold mr-2">2</span>
-                    Треки клиента <span id="tracksOwnerLabel" class="text-gray-500 font-normal"></span>
-                    за <span id="tracksDateLabel" class="text-gray-600"></span>
+                    {% trans "Треки клиента" %} <span id="tracksOwnerLabel" class="text-gray-500 font-normal"></span>
+                    {% trans "за" %} <span id="tracksDateLabel" class="text-gray-600"></span>
                 </h2>
 
                 <!-- Выбор всех -->
                 <div class="flex items-center gap-3 text-sm">
                     <label class="flex items-center gap-2 cursor-pointer text-gray-600">
                         <input type="checkbox" id="selectAll" class="rounded" onchange="toggleAll(this)">
-                        Выбрать все (<span id="totalCount">0</span>)
+                        {% trans "Выбрать все (" %}<span id="totalCount">0</span>)
                     </label>
                     <span class="text-gray-400">|</span>
-                    <span class="text-gray-500">Выбрано: <span id="selectedCount" class="font-medium text-gray-700">0</span></span>
+                    <span class="text-gray-500">{% trans "Выбрано:" %} <span id="selectedCount" class="font-medium text-gray-700">0</span></span>
                 </div>
 
                 <div class="overflow-x-auto border border-gray-100 rounded-lg">
@@ -106,10 +107,10 @@
                         <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                             <tr>
                                 <th class="px-3 py-2 text-center w-8"></th>
-                                <th class="px-3 py-2 text-left">Трек-код</th>
-                                <th class="px-3 py-2 text-left">Вес</th>
-                                <th class="px-3 py-2 text-left">Статус</th>
-                                <th class="px-3 py-2 text-left">Дата прихода</th>
+                                <th class="px-3 py-2 text-left">{% trans "Трек-код" %}</th>
+                                <th class="px-3 py-2 text-left">{% trans "Вес" %}</th>
+                                <th class="px-3 py-2 text-left">{% trans "Статус" %}</th>
+                                <th class="px-3 py-2 text-left">{% trans "Дата прихода" %}</th>
                             </tr>
                         </thead>
                         <tbody id="tracksTableBody" class="divide-y divide-gray-100">
@@ -119,7 +120,7 @@
 
                 <div id="noTracksMsg" class="hidden py-8 text-center text-gray-400">
                     <i class="ri-inbox-2-line text-3xl mb-2 block"></i>
-                    Нет треков для переноса за эту дату
+                    {% trans "Нет треков для переноса за эту дату" %}
                 </div>
             </section>
 
@@ -127,18 +128,18 @@
             <section id="transferSection" class="hidden bg-white rounded-xl shadow-sm border border-orange-200 p-6 space-y-4">
                 <h2 class="text-base font-semibold text-gray-800">
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-bold mr-2">3</span>
-                    Укажите новую дату прихода
+                    {% trans "Укажите новую дату прихода" %}
                 </h2>
 
                 <div class="max-w-xs">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Новая дата прихода</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Новая дата прихода" %}</label>
                     <input type="date" id="newDateInput"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300">
                 </div>
 
                 <div class="p-4 bg-orange-50 rounded-lg text-sm text-orange-800 border border-orange-200">
                     <i class="ri-information-line mr-1"></i>
-                    Выбранные треки будут <strong>удалены из исходного прихода</strong> и добавлены в новый приход за указанную дату.
+                    {% trans "Выбранные треки будут" %} <strong>{% trans "удалены из исходного прихода" %}</strong> и добавлены в новый приход за указанную дату.
                     Все связанные сессии и документы будут обновлены.
                 </div>
 
@@ -146,7 +147,7 @@
                     <button id="transferBtn" onclick="doTransfer()"
                         class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition disabled:opacity-50"
                         disabled>
-                        <i class="ri-arrow-right-line mr-1"></i> Перенести треки
+                        <i class="ri-arrow-right-line mr-1"></i> {% trans "Перенести треки" %}
                     </button>
                     <span id="transferBtnHint" class="text-xs text-gray-400"></span>
                 </div>
@@ -160,7 +161,7 @@
                         <p class="font-semibold text-green-800" id="resultMsg"></p>
                         <p class="text-sm text-green-700 mt-1" id="resultDetail"></p>
                         <button onclick="resetForm()" class="mt-3 text-sm text-green-700 underline hover:text-green-900">
-                            Сделать ещё один перенос
+                            {% trans "Сделать ещё один перенос" %}
                         </button>
                     </div>
                 </div>
@@ -171,10 +172,10 @@
             <section class="bg-white rounded-xl shadow-sm border border-yellow-200 p-6 space-y-5">
                 <h2 class="text-base font-semibold text-gray-800">
                     <i class="ri-alert-line text-yellow-500 mr-1"></i>
-                    Прибыло без ПВЗ — требует переноса
+                    {% trans "Прибыло без ПВЗ — требует переноса" %}
                     <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{{ no_pickup_data|length }} клиентов</span>
                 </h2>
-                <p class="text-sm text-gray-500">Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте дату следующего прихода — они появятся в доставке за эту дату.</p>
+                <p class="text-sm text-gray-500">{% trans "Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте дату следующего прихода — они появятся в доставке за эту дату." %}</p>
 
                 <div class="space-y-4">
                     {% for item in no_pickup_data %}
@@ -212,9 +213,9 @@
                                                 data-uid="{{ item.user.id }}"
                                                 onchange="toggleNopickupAll(this, {{ item.user.id }})">
                                         </th>
-                                        <th class="px-3 py-2 text-left">Трек-код</th>
-                                        <th class="px-3 py-2 text-left">Вес</th>
-                                        <th class="px-3 py-2 text-left">Дата прихода</th>
+                                        <th class="px-3 py-2 text-left">{% trans "Трек-код" %}</th>
+                                        <th class="px-3 py-2 text-left">{% trans "Вес" %}</th>
+                                        <th class="px-3 py-2 text-left">{% trans "Дата прихода" %}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -237,7 +238,7 @@
                             <!-- Перенос -->
                             <div class="px-4 py-3 bg-gray-50 border-t border-yellow-100 flex flex-wrap items-end gap-3">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Новая дата прихода</label>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">{% trans "Новая дата прихода" %}</label>
                                     <input type="date" class="nopickup-date-input border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300"
                                         data-uid="{{ item.user.id }}">
                                 </div>
@@ -246,7 +247,7 @@
                                     data-uid="{{ item.user.id }}"
                                     data-username="{{ item.user.username }}"
                                     onclick="doNopickupTransfer({{ item.user.id }})">
-                                    <i class="ri-calendar-check-line mr-1"></i> Перенести на выбранную дату
+                                    <i class="ri-calendar-check-line mr-1"></i> {% trans "Перенести на выбранную дату" %}
                                 </button>
                                 <span class="nopickup-result-{{ item.user.id }} text-sm text-green-700 font-medium hidden"></span>
                             </div>
@@ -281,7 +282,7 @@
                 .then(data => {
                     const box = document.getElementById('userSearchResults');
                     if (!data.users || !data.users.length) {
-                        box.innerHTML = '<p class="px-3 py-2 text-sm text-gray-400">Не найдено</p>';
+                        box.innerHTML = '<p class="px-3 py-2 text-sm text-gray-400">{% trans "Не найдено" %}</p>';
                     } else {
                         box.innerHTML = data.users.map(u => `
                             <div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 user-opt"
@@ -339,16 +340,16 @@
                 statsEl.innerHTML = `
                     <div class="border rounded-lg p-3 bg-gray-50 border-gray-200 text-center">
                         <div class="text-2xl font-bold text-gray-800">${data.total}</div>
-                        <div class="text-xs text-gray-500 mt-1">Всего треков</div>
+                        <div class="text-xs text-gray-500 mt-1">{% trans "Всего треков" %}</div>
                     </div>
                     <div class="border rounded-lg p-3 bg-gray-50 border-gray-200 text-center">
                         <div class="text-2xl font-bold text-gray-800">${data.clients_count}</div>
-                        <div class="text-xs text-gray-500 mt-1">Клиентов</div>
+                        <div class="text-xs text-gray-500 mt-1">{% trans "Клиентов" %}</div>
                     </div>`;
 
                 // Разбивка по статусам
                 const breakdownEl = document.getElementById('summaryBreakdown');
-                breakdownEl.innerHTML = '<p class="text-xs font-medium text-gray-500 uppercase mb-2">Разбивка по статусам</p>';
+                breakdownEl.innerHTML = '<p class="text-xs font-medium text-gray-500 uppercase mb-2">{% trans "Разбивка по статусам" %}</p>';
                 data.status_breakdown.forEach(item => {
                     const color = statusColors[item.status] || 'bg-gray-50 text-gray-700 border-gray-200';
                     const pct = data.total > 0 ? Math.round(item.count / data.total * 100) : 0;
@@ -366,14 +367,14 @@
                 // Записи приходов
                 const arrivalsEl = document.getElementById('summaryArrivals');
                 if (data.arrivals.length) {
-                    arrivalsEl.innerHTML = '<p class="text-xs font-medium text-gray-500 uppercase mb-2 mt-3">Записи приходов</p>'
+                    arrivalsEl.innerHTML = '<p class="text-xs font-medium text-gray-500 uppercase mb-2 mt-3">{% trans "Записи приходов" %}</p>'
                         + data.arrivals.map(a =>
                             `<span class="inline-block text-xs bg-blue-50 border border-blue-200 text-blue-700 rounded px-2 py-1 mr-2 mb-1">
                                 Приход #${a.id} — ${a.total_tracks} треков${a.sorting_location__name ? ' (' + a.sorting_location__name + ')' : ''}
                             </span>`
                         ).join('');
                 } else {
-                    arrivalsEl.innerHTML = '<p class="text-xs text-gray-400 mt-2">Записей приходов за эту дату не найдено</p>';
+                    arrivalsEl.innerHTML = '<p class="text-xs text-gray-400 mt-2">{% trans "Записей приходов за эту дату не найдено" %}</p>';
                 }
 
                 document.getElementById('dateSummarySection').classList.remove('hidden');

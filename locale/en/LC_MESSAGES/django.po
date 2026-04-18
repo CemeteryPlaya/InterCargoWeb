@@ -1,0 +1,5793 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-18 11:41+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\cargo\settings.py:161 .\myprofile\templates\desktop\settings.html:191
+msgid "Русский"
+msgstr "Russian"
+
+#: .\cargo\settings.py:162 .\myprofile\templates\desktop\settings.html:199
+msgid "Қазақша"
+msgstr "Kazakh"
+
+#: .\cargo\settings.py:163
+msgid "English"
+msgstr "English"
+
+#: .\mainview\templates\desktop\about.html:9
+msgid "Inter Cargo - Информация о компании"
+msgstr "Inter Cargo - About the Company"
+
+#: .\mainview\templates\desktop\about.html:30
+#: .\mainview\templates\desktop\about.html:41
+#: .\mainview\templates\desktop\education1.html:132
+#: .\mainview\templates\desktop\index.html:109
+#: .\mainview\templates\desktop\index.html:253
+#: .\mainview\templates\shared\footer.html:28
+#: .\mainview\templates\shared\header.html:41
+#: .\mainview\templates\shared\header.html:181
+msgid "О компании"
+msgstr "About"
+
+#: .\mainview\templates\desktop\about.html:37
+msgid "О компании INTER CARGO"
+msgstr "ABOUT INTER CARGO"
+
+#: .\mainview\templates\desktop\about.html:38
+msgid "История и инфо"
+msgstr "History & Info"
+
+#: .\mainview\templates\desktop\about.html:42
+msgid ""
+"Inter Cargo — это современная логистическая компания, созданная с целью "
+"упростить процесс доставки товаров из Китая для казахстанских клиентов. Мы "
+"начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней"
+" стремились сделать китайский онлайн-шопинг доступным и понятным каждому. "
+"Наши клиенты совершают заказы на популярных китайских маркетплейсах: "
+"Pinduoduo, TaoBao, POIZON и 1688, а мы — берём на себя весь процесс "
+"доставки. Благодаря налаженной системе работы с проверенными посредниками в "
+"Китае, мы гарантируем надёжность, скорость и прозрачность на всех этапах "
+"логистики."
+msgstr ""
+"Inter Cargo is a modern logistics company created to simplify the delivery "
+"of goods from China for Kazakh customers. We started our operations in "
+"December 2023 in the city of Taraz, and from the very first days we strived "
+"to make Chinese online shopping accessible and understandable to everyone. "
+"Our clients place orders on popular Chinese marketplaces: Pinduoduo, TaoBao,"
+" POIZON and 1688, and we take care of the entire delivery process. Thanks to"
+" an established system of work with trusted intermediaries in China, we "
+"guarantee reliability, speed and transparency at all stages of logistics."
+
+#: .\mainview\templates\desktop\about.html:45
+msgid "Наш путь"
+msgstr "Our Journey"
+
+#: .\mainview\templates\desktop\about.html:46
+msgid ""
+"С первых шагов мы открыли 3 пункта выдачи, а уже спустя несколько месяцев "
+"число выросло до 10, что позволило нам обслуживать клиентов более оперативно"
+" и удобно. За это время нам доверились около 1000 клиентов, которые выбрали "
+"Inter Cargo за честность, стабильность и личный подход. Мы не просто "
+"доставляем посылки — мы создаём удобную экосистему для покупок за границей. "
+"Наша команда всегда на связи, а каждое отправление — под контролем до "
+"момента получения."
+msgstr ""
+"From the very first steps we opened 3 pickup points, and within a few months"
+" the number grew to 10, which allowed us to serve clients more promptly and "
+"conveniently. During this time, about 1000 clients have trusted us, choosing"
+" Inter Cargo for its honesty, stability and personal approach. We do not "
+"just deliver parcels — we create a convenient ecosystem for shopping abroad."
+" Our team is always in touch, and every shipment is under control until the "
+"moment of receipt."
+
+#: .\mainview\templates\desktop\about.html:49
+msgid "Почему выбирают нас:"
+msgstr "Why choose us:"
+
+#: .\mainview\templates\desktop\about.html:51
+msgid "Прямая доставка из Китая с популярных площадок"
+msgstr "Direct delivery from China from popular marketplaces"
+
+#: .\mainview\templates\desktop\about.html:52
+msgid "Надёжные посредники и партнёры"
+msgstr "Reliable intermediaries and partners"
+
+#: .\mainview\templates\desktop\about.html:53
+msgid "Развитая сеть ПВЗ"
+msgstr "Extensive PVZ network"
+
+#: .\mainview\templates\desktop\about.html:54
+msgid "Удобное отслеживание заказов"
+msgstr "Convenient order tracking"
+
+#: .\mainview\templates\desktop\about.html:55
+msgid "Внимание к каждому клиенту"
+msgstr "Attention to every client"
+
+#: .\mainview\templates\desktop\about.html:62
+#: .\mainview\templates\desktop\education1.html:137
+#: .\mainview\templates\mobile\mobile_footer.html:58
+#: .\mainview\templates\shared\footer.html:33 .\myprofile\models.py:798
+#: .\myprofile\templates\desktop\delivery.html:88
+#: .\myprofile\templates\desktop\delivery.html:177
+#: .\myprofile\templates\desktop\print_documents.html:64
+#: .\myprofile\templates\desktop\print_documents.html:120
+#: .\register\models.py:25
+msgid "Пункты выдачи"
+msgstr "Pickup points"
+
+#: .\mainview\templates\desktop\about.html:63
+msgid "Выберите ближайший к вам пункт и заберите посылку в удобное время"
+msgstr "Choose the nearest point and pick up your parcel at a convenient time"
+
+#: .\mainview\templates\desktop\about.html:67
+msgid "Карта пунктов выдачи Inter Cargo"
+msgstr "Inter Cargo pickup points map"
+
+#: .\mainview\templates\desktop\about.html:79
+#: .\mainview\templates\desktop\index.html:537
+msgid "Часто задаваемые вопросы"
+msgstr "Frequently asked questions"
+
+#: .\mainview\templates\desktop\about.html:87
+#: .\mainview\templates\desktop\index.html:285
+#: .\mainview\templates\desktop\index.html:545
+msgid "Как рассчитывается стоимость доставки?"
+msgstr "How is the delivery cost calculated?"
+
+#: .\mainview\templates\desktop\about.html:92
+#: .\mainview\templates\desktop\index.html:550
+#, python-format
+msgid ""
+"Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. "
+"Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг "
+"необходимо связаться с менеджером). Для расчета используйте калькулятор на "
+"нашем сайте."
+msgstr ""
+"The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo."
+" The minimum weight for calculation is 0 kg, the maximum is 100 kg (above "
+"100 kg, please contact the manager). Use the calculator on our website for "
+"the calculation."
+
+#: .\mainview\templates\desktop\about.html:100
+#: .\mainview\templates\desktop\index.html:559
+msgid "Какие сроки доставки из Китая в Казахстан?"
+msgstr "What are the delivery times from China to Kazakhstan?"
+
+#: .\mainview\templates\desktop\about.html:105
+#: .\mainview\templates\desktop\index.html:564
+msgid ""
+"Средний срок доставки составляет 8–12 дней с момента отправки товара с "
+"нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и "
+"загруженности таможенных служб."
+msgstr ""
+"Average delivery time is 8–12 days from the moment the goods are shipped "
+"from our warehouse in China. Times may vary depending on the season and "
+"customs workload."
+
+#: .\mainview\templates\desktop\about.html:113
+#: .\mainview\templates\desktop\index.html:303
+#: .\mainview\templates\desktop\index.html:572
+msgid "Как зарегистрироваться в системе?"
+msgstr "How to register in the system?"
+
+#: .\mainview\templates\desktop\about.html:118
+#: .\mainview\templates\desktop\index.html:577
+msgid ""
+"Для регистрации необходимо заполнить форму на странице «Регистрация», указав"
+" свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав "
+"удобный пункт выдачи. После регистрации вы можете авторизоваться в личном "
+"кабинете нажав на кнопку, либо на иконку профиля в верхней части."
+msgstr ""
+"To register, fill out the form on the 'Registration' page, entering your "
+"login (name/nickname + last 4 digits of phone), phone number and selecting a"
+" convenient pickup point. After registration, you can log in to your "
+"personal account by clicking the button or the profile icon at the top."
+
+#: .\mainview\templates\desktop\about.html:126
+#: .\mainview\templates\desktop\index.html:312
+#: .\mainview\templates\desktop\index.html:585
+msgid "Какие товары запрещены к перевозке?"
+msgstr "What goods are prohibited for shipping?"
+
+#: .\mainview\templates\desktop\about.html:131
+#: .\mainview\templates\desktop\index.html:590
+msgid "К перевозке запрещены:"
+msgstr "Prohibited for shipping:"
+
+#: .\mainview\templates\desktop\about.html:133
+#: .\mainview\templates\desktop\index.html:592
+msgid ""
+"Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества."
+msgstr "Explosive, radioactive, flammable, infectious, toxic substances."
+
+#: .\mainview\templates\desktop\about.html:134
+#: .\mainview\templates\desktop\index.html:593
+msgid "Холодные оружия, включая макеты, пневматику, арбалеты и др."
+msgstr "Cold weapons, including replicas, pneumatics, crossbows, etc."
+
+#: .\mainview\templates\desktop\about.html:135
+#: .\mainview\templates\desktop\index.html:594
+msgid "Психотропные и наркотические средства, алкоголь, сигареты."
+msgstr "Psychotropic and narcotic substances, alcohol, cigarettes."
+
+#: .\mainview\templates\desktop\about.html:136
+#: .\mainview\templates\desktop\index.html:595
+msgid ""
+"Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в "
+"вакуумных упаковках)."
+msgstr ""
+"Perishable and liquid products (except dry goods and vacuum-packed "
+"products)."
+
+#: .\mainview\templates\desktop\about.html:137
+#: .\mainview\templates\desktop\index.html:596
+msgid "Техника, мобильные телефоны, ноутбуки (под свою ответственность)."
+msgstr "Electronics, mobile phones, laptops (at your own risk)."
+
+#: .\mainview\templates\desktop\about.html:138
+#: .\mainview\templates\desktop\index.html:597
+msgid ""
+"Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы)."
+msgstr "Animals (mammals, reptiles, birds, live insects, mollusks and fish)."
+
+#: .\mainview\templates\desktop\about.html:139
+#: .\mainview\templates\desktop\index.html:598
+msgid "Дроны."
+msgstr "Drones."
+
+#: .\mainview\templates\desktop\about.html:140
+#: .\mainview\templates\desktop\index.html:599
+msgid ""
+"Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, "
+"пузырчатую плёнку, защиту края и т.д.)."
+msgstr ""
+"Fragile, glass goods (or ask the seller for reliable packaging, bubble wrap,"
+" edge protection, etc.)."
+
+#: .\mainview\templates\desktop\about.html:149
+#: .\mainview\templates\desktop\index.html:329
+#: .\mainview\templates\desktop\index.html:608
+msgid "Как отследить мой заказ?"
+msgstr "How to track my order?"
+
+#: .\mainview\templates\desktop\about.html:154
+#: .\mainview\templates\desktop\index.html:613
+msgid ""
+"После оформления заказа вам будет предоставлен трек-номер для отслеживания. "
+"Вы можете использовать его на нашем сайте или связаться с менеджером через "
+"WhatsApp для получения актуальной информации о статусе вашего груза."
+msgstr ""
+"After placing an order, you will be given a track number for tracking. You "
+"can use it on our website or contact the manager via WhatsApp to get up-to-"
+"date information about your cargo status."
+
+#: .\mainview\templates\desktop\about.html:162
+#: .\mainview\templates\desktop\index.html:621
+msgid "Как заполнить адрес склада в Китае?"
+msgstr "How to fill in the warehouse address in China?"
+
+#: .\mainview\templates\desktop\about.html:167
+#: .\mainview\templates\desktop\index.html:626
+msgid ""
+"На главной странице в разделе «Адрес склада в Китае» указан полный адрес. "
+"Его нужно скопировать и вставить в маркетплейс. После этого обязательно "
+"отправьте скриншот менеджеру для проверки."
+msgstr ""
+"The full address is listed on the home page in the \"Warehouse address in "
+"China\" section. You need to copy it and paste it into the marketplace. "
+"After that, be sure to send a screenshot to the manager for verification."
+
+#: .\mainview\templates\desktop\about.html:175
+#: .\mainview\templates\desktop\index.html:634
+msgid "Что делать, если заказ пришёл сломанным или повреждённым?"
+msgstr "What to do if the order arrived broken or damaged?"
+
+#: .\mainview\templates\desktop\about.html:181
+#: .\mainview\templates\desktop\index.html:640
+msgid ""
+"Ваша задача — заранее попросить продавца обеспечить надёжную упаковку "
+"(например, пенопластом)."
+msgstr ""
+"Your task is to ask the seller in advance to provide reliable packaging "
+"(e.g., foam)."
+
+#: .\mainview\templates\desktop\about.html:182
+#: .\mainview\templates\desktop\index.html:641
+msgid ""
+"Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) "
+"рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера)."
+msgstr ""
+"For fragile goods (glass, mirrors, dishes, oversized items) it is "
+"recommended to crate the cargo (ask the manager for the cost)."
+
+#: .\mainview\templates\desktop\about.html:183
+#: .\mainview\templates\desktop\index.html:642
+msgid ""
+"Если упаковка не соответствовала требованиям, компания не несёт "
+"ответственности за повреждения."
+msgstr ""
+"If the packaging did not meet requirements, the company is not responsible "
+"for damage."
+
+#: .\mainview\templates\desktop\about.html:184
+#: .\mainview\templates\desktop\index.html:643
+msgid ""
+"Если товар был упакован правильно, но повреждён при доставке, "
+"ответственность несёт Inter Cargo."
+msgstr ""
+"If the item was properly packaged but damaged during delivery, Inter Cargo "
+"is responsible."
+
+#: .\mainview\templates\desktop\about.html:193
+#: .\mainview\templates\desktop\index.html:352
+#: .\mainview\templates\desktop\index.html:652
+msgid "Как связаться с менеджером?"
+msgstr "How to contact the manager?"
+
+#: .\mainview\templates\desktop\about.html:198
+#: .\mainview\templates\desktop\index.html:657
+msgid ""
+"Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
+"или в левом нижнем углу главной страницы."
+msgstr ""
+"Click the messenger icons (Telegram, WhatsApp) in the top right corner or "
+"the bottom left corner of the main page."
+
+#: .\mainview\templates\desktop\about.html:206
+#: .\mainview\templates\desktop\index.html:665
+msgid ""
+"Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?"
+msgstr "Who is responsible for an order with the status 'Added by user'?"
+
+#: .\mainview\templates\desktop\about.html:211
+#: .\mainview\templates\desktop\index.html:670
+msgid ""
+"Ответственность за заказ, который ещё не прибыл на склад (статус «Добавлено "
+"пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести "
+"ответственность с момента поступления товара на свой склад в Китае. При "
+"возникновении проблем с таким заказом менеджеры помогут решить вопрос и "
+"предоставят инструкции."
+msgstr ""
+"The seller from the marketplace is responsible for an order that has not yet"
+" arrived at the warehouse (status \"Added by user\"). Inter Cargo starts "
+"bearing responsibility from the moment the goods arrive at its warehouse in "
+"China. If problems arise with such an order, managers will help resolve the "
+"issue and provide instructions."
+
+#: .\mainview\templates\desktop\education.html:9
+#: .\mainview\templates\desktop\education1.html:9
+msgid "Inter Cargo - Обучение"
+msgstr "Inter Cargo - Education"
+
+#: .\mainview\templates\desktop\education.html:32
+#: .\mainview\templates\desktop\education1.html:55
+#: .\mainview\templates\desktop\index.html:845
+msgid "ОБУЧЕНИЕ"
+msgstr "EDUCATION"
+
+#: .\mainview\templates\desktop\education.html:33
+#: .\mainview\templates\desktop\education1.html:56
+#: .\mainview\templates\desktop\index.html:846
+#: .\register\templates\desktop\success.html:48
+msgid "Как пользоваться нашим сервисом"
+msgstr "How to use our service"
+
+#: .\mainview\templates\desktop\education.html:34
+msgid ""
+"Интерактивные пошаговые инструкции помогут вам разобраться в функциях сайта"
+msgstr ""
+"Interactive step-by-step instructions will help you understand the site's "
+"features"
+
+#: .\mainview\templates\desktop\education.html:41
+msgid "Начать интерактивное обучение"
+msgstr "Start interactive tutorial"
+
+#: .\mainview\templates\desktop\education.html:43
+msgid "Система проведёт вас по шагам прямо на страницах сайта"
+msgstr "The system will guide you step by step right on the site pages"
+
+#: .\mainview\templates\desktop\education.html:48
+msgid "Видеоматериалы"
+msgstr "Video materials"
+
+#: .\mainview\templates\desktop\education.html:49
+msgid "Обучающие видео по работе с сервисом"
+msgstr "Tutorial videos for using the service"
+
+#: .\mainview\templates\desktop\education.html:54
+#: .\mainview\templates\desktop\education.html:57
+#: .\mainview\templates\desktop\education1.html:63
+#: .\mainview\templates\desktop\education1.html:66
+#: .\mainview\templates\desktop\index.html:852
+#: .\mainview\templates\desktop\index.html:856
+#: .\register\templates\desktop\success.html:58
+#: .\register\templates\desktop\success.html:62
+msgid "Регистрация на сайте"
+msgstr "Registration on the site"
+
+#: .\mainview\templates\desktop\education.html:58
+#: .\mainview\templates\desktop\education1.html:67
+#: .\mainview\templates\desktop\index.html:857
+msgid ""
+"Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт "
+"выдачи для получения ваших посылок."
+msgstr ""
+"Learn how to correctly fill out the registration form and choose a "
+"convenient pickup point for receiving your parcels."
+
+#: .\mainview\templates\desktop\education.html:60
+#: .\mainview\templates\desktop\education.html:73
+#: .\mainview\templates\desktop\education.html:86
+#: .\mainview\templates\desktop\education1.html:69
+#: .\mainview\templates\desktop\education1.html:83
+#: .\mainview\templates\desktop\education1.html:97
+#: .\mainview\templates\desktop\index.html:860
+#: .\mainview\templates\desktop\index.html:876
+#: .\mainview\templates\desktop\index.html:892
+#: .\register\templates\desktop\success.html:67
+#: .\register\templates\desktop\success.html:84
+#: .\register\templates\desktop\success.html:101
+msgid "Смотреть видео"
+msgstr "Watch video"
+
+#: .\mainview\templates\desktop\education.html:67
+#: .\mainview\templates\desktop\education1.html:77
+#: .\mainview\templates\desktop\index.html:868
+#: .\register\templates\desktop\success.html:75
+msgid "Оформление заказа"
+msgstr "Placing an order"
+
+#: .\mainview\templates\desktop\education.html:70
+#: .\mainview\templates\desktop\education1.html:80
+#: .\mainview\templates\desktop\index.html:872
+#: .\register\templates\desktop\success.html:79
+msgid "Оформление заказа в Китае"
+msgstr "Placing an order in China"
+
+#: .\mainview\templates\desktop\education.html:71
+#: .\mainview\templates\desktop\education1.html:81
+#: .\mainview\templates\desktop\index.html:873
+msgid ""
+"Пошаговая инструкция по оформлению заказа на китайских торговых площадках и "
+"указанию нашего адреса доставки."
+msgstr ""
+"Step-by-step instructions for placing an order on Chinese marketplaces and "
+"specifying our delivery address."
+
+#: .\mainview\templates\desktop\education.html:80
+#: .\mainview\templates\desktop\education.html:83
+#: .\mainview\templates\desktop\education1.html:91
+#: .\mainview\templates\desktop\education1.html:94
+#: .\mainview\templates\desktop\index.html:884
+#: .\mainview\templates\desktop\index.html:888
+#: .\register\templates\desktop\success.html:92
+#: .\register\templates\desktop\success.html:96
+msgid "Отслеживание посылки"
+msgstr "Parcel tracking"
+
+#: .\mainview\templates\desktop\education.html:84
+#: .\mainview\templates\desktop\education1.html:95
+#: .\mainview\templates\desktop\index.html:889
+msgid ""
+"Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из "
+"Китая в Казахстан."
+msgstr ""
+"Learn how to track the status of your parcel at every stage of delivery from"
+" China to Kazakhstan."
+
+#: .\mainview\templates\desktop\education1.html:29
+#: .\mainview\templates\desktop\education1.html:129
+#: .\mainview\templates\shared\footer.html:25
+#: .\mainview\templates\shared\header.html:39
+#: .\mainview\templates\shared\header.html:179
+#: .\mainview\templates\shared\header.html:255
+#: .\mainview\templates\shared\header.html:282
+msgid "Главная"
+msgstr "Home"
+
+#: .\mainview\templates\desktop\education1.html:30
+#: .\mainview\templates\desktop\education1.html:130
+#: .\mainview\templates\desktop\index.html:241
+#: .\mainview\templates\desktop\index.html:468
+#: .\mainview\templates\desktop\index.html:701
+#: .\mainview\templates\shared\footer.html:26
+#: .\mainview\templates\shared\header.html:153
+#: .\mainview\templates\shared\header.html:183
+#: .\register\templates\desktop\registration.html:29
+msgid "Регистрация"
+msgstr "Registration"
+
+#: .\mainview\templates\desktop\education1.html:31
+#: .\mainview\templates\desktop\education1.html:131
+#: .\mainview\templates\desktop\index.html:247
+#: .\mainview\templates\shared\footer.html:27
+#: .\mainview\templates\shared\header.html:40
+#: .\mainview\templates\shared\header.html:180
+#: .\myprofile\templates\mobile\mobile_menu.html:106
+msgid "Обучение"
+msgstr "Education"
+
+#: .\mainview\templates\desktop\education1.html:57
+#: .\mainview\templates\desktop\index.html:847
+msgid ""
+"Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно "
+"использовать наш сервис доставки"
+msgstr ""
+"Check out our educational materials to learn how to effectively use our "
+"delivery service"
+
+#: .\mainview\templates\desktop\education1.html:112
+#: .\mainview\templates\shared\footer.html:8
+msgid "Надежная доставка грузов из Китая в Казахстан по выгодным тарифам."
+msgstr ""
+"Reliable cargo delivery from China to Kazakhstan at competitive rates."
+
+#: .\mainview\templates\desktop\education1.html:127
+#: .\mainview\templates\shared\footer.html:23
+msgid "Навигация"
+msgstr "Navigation"
+
+#: .\mainview\templates\desktop\education1.html:139
+msgid "Акбулак 21 (Ozon)"
+msgstr "Akbulak 21 (Ozon)"
+
+#: .\mainview\templates\desktop\education1.html:140
+msgid "Пушкина 8 (Ozon)"
+msgstr "Pushkina 8 (Ozon)"
+
+#: .\mainview\templates\desktop\education1.html:141
+msgid "Ташкентская 286 (Ozon)"
+msgstr "Tashkentskaya 286 (Ozon)"
+
+#: .\mainview\templates\desktop\education1.html:142
+msgid "Абая 323 (Beer bochka)"
+msgstr "Abaya 323 (Beer bochka)"
+
+#: .\mainview\templates\desktop\education1.html:143
+#: .\mainview\templates\shared\footer.html:43
+msgid "Смотреть все пункты"
+msgstr "View all points"
+
+#: .\mainview\templates\desktop\education1.html:148
+#: .\mainview\templates\mobile\mobile_footer.html:32
+#: .\mainview\templates\shared\footer.html:48
+msgid "Контакты"
+msgstr "Contacts"
+
+#: .\mainview\templates\desktop\education1.html:154
+#: .\mainview\templates\shared\footer.html:54
+msgid "Республика Казахстан, Жамбылская обл., г. Тараз, мкр.Акбулак(1), д.21"
+msgstr ""
+"Republic of Kazakhstan, Zhambyl region, Taraz, Akbulak(1) microdistrict, 21"
+
+#: .\mainview\templates\desktop\education1.html:160
+msgid "Директор: +7 (777) 977-36-96"
+msgstr "Director: +7 (777) 977-36-96"
+
+#: .\mainview\templates\desktop\education1.html:165
+msgid "Менеджер: +7 (706) 664-06-24"
+msgstr "Manager: +7 (706) 664-06-24"
+
+#: .\mainview\templates\desktop\education1.html:178
+msgid "© 2025 Inter Cargo. Все права защищены."
+msgstr "© 2025 Inter Cargo. All rights reserved."
+
+#: .\mainview\templates\desktop\education1.html:180
+#: .\mainview\templates\mobile\mobile_footer.html:77
+#: .\mainview\templates\shared\footer.html:81
+msgid "Способы оплаты:"
+msgstr "Payment methods:"
+
+#: .\mainview\templates\desktop\index.html:12
+msgid "Inter Cargo - доставка из Китая в Казахстан"
+msgstr "Inter Cargo — delivery from China to Kazakhstan"
+
+#: .\mainview\templates\desktop\index.html:47
+msgid "Добро пожаловать"
+msgstr "Welcome"
+
+#: .\mainview\templates\desktop\index.html:57
+#: .\mainview\templates\desktop\index.html:221
+msgid "ТАРИФ"
+msgstr "RATE"
+
+#: .\mainview\templates\desktop\index.html:59
+#: .\mainview\templates\desktop\index.html:212
+#: .\myprofile\templates\shared\print\receipt_print.html:342
+msgid "Доставка из Китая в Казахстан"
+msgstr "Delivery from China to Kazakhstan"
+
+#: .\mainview\templates\desktop\index.html:72
+msgid "QR код"
+msgstr "QR Code"
+
+#: .\mainview\templates\desktop\index.html:78
+#: .\mainview\templates\shared\header.html:259
+#: .\mainview\templates\shared\header.html:286
+#: .\myprofile\templates\mobile\mobile_parcels.html:40
+msgid "Посылки"
+msgstr "Parcels"
+
+#: .\mainview\templates\desktop\index.html:84
+#: .\mainview\templates\mobile\m_sidebar.html:98
+#: .\mainview\templates\mobile\sidebar.html:91 .\myprofile\models.py:288
+#: .\myprofile\models.py:503
+#: .\myprofile\templates\desktop\delivered_posts.html:53
+#: .\myprofile\templates\desktop\delivered_posts.html:55
+#: .\myprofile\templates\mobile\mobile_menu.html:88
+msgid "Чеки"
+msgstr "Receipts"
+
+#: .\mainview\templates\desktop\index.html:90
+#: .\mainview\templates\mobile\m_sidebar.html:101
+#: .\mainview\templates\mobile\sidebar.html:94
+#: .\myprofile\templates\desktop\extradition_package.html:56
+#: .\myprofile\templates\desktop\extradition_package.html:58
+#: .\myprofile\templates\desktop\pp_extradition_history.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:94
+#: .\myprofile\templates\mobile\mobile_qr.html:94
+#: .\myprofile\templates\mobile\mobile_qr.html:203
+msgid "История выдачи"
+msgstr "Issue history"
+
+#: .\mainview\templates\desktop\index.html:97
+msgid "Интерактивное обучение"
+msgstr "Interactive tutorial"
+
+#: .\mainview\templates\desktop\index.html:103
+msgid "Видеоуроки"
+msgstr "Video lessons"
+
+#: .\mainview\templates\desktop\index.html:115 .\myprofile\models.py:816
+#: .\myprofile\templates\desktop\notification_logs.html:457
+msgid "Тема"
+msgstr "Theme"
+
+#: .\mainview\templates\desktop\index.html:127
+#: .\myprofile\templates\desktop\profile.html:88
+msgid "Привязать Telegram"
+msgstr "Link Telegram"
+
+#: .\mainview\templates\desktop\index.html:135
+msgid "Мои посылки"
+msgstr "My parcels"
+
+#: .\mainview\templates\desktop\index.html:144
+msgid "Добавлено"
+msgstr "Added"
+
+#: .\mainview\templates\desktop\index.html:155
+#: .\myprofile\templates\desktop\delivery.html:306
+msgid "В пути"
+msgstr "In transit"
+
+#: .\mainview\templates\desktop\index.html:166
+#: .\myprofile\templates\desktop\track_codes.html:192
+msgid "На сортировке"
+msgstr "At sorting"
+
+#: .\mainview\templates\desktop\index.html:177
+msgid "Готово"
+msgstr "Ready"
+
+#: .\mainview\templates\desktop\index.html:188
+#: .\mainview\templates\desktop\index.html:261
+msgid "Калькулятор доставки"
+msgstr "Delivery calculator"
+
+#: .\mainview\templates\desktop\index.html:191
+#: .\mainview\templates\desktop\index.html:264 .\myprofile\models.py:217
+#: .\myprofile\models.py:364 .\myprofile\models.py:755
+#: .\myprofile\templates\desktop\arrival_history.html:300
+#: .\myprofile\templates\desktop\arrival_summary.html:115
+#: .\myprofile\templates\desktop\arrival_summary.html:199
+#: .\myprofile\templates\desktop\arrival_summary.html:297
+#: .\myprofile\templates\desktop\delivered_posts.html:141
+#: .\myprofile\templates\desktop\delivery.html:320
+#: .\myprofile\templates\desktop\extradition_package.html:109
+#: .\myprofile\templates\desktop\finance_summary.html:141
+#: .\myprofile\templates\desktop\finance_summary.html:180
+#: .\myprofile\templates\desktop\finance_summary.html:226
+#: .\myprofile\templates\desktop\finance_summary.html:304
+#: .\myprofile\templates\desktop\finance_summary.html:413
+#: .\myprofile\templates\desktop\finance_summary.html:461
+#: .\myprofile\templates\desktop\goods_arrival_session.html:159
+#: .\myprofile\templates\desktop\unidentified.html:62
+#: .\myprofile\templates\desktop\update_tracks.html:111
+#: .\myprofile\templates\desktop\warehouse_inventory.html:73
+#: .\myprofile\templates\shared\print\receipt_print.html:367
+msgid "Вес (кг)"
+msgstr "Weight (kg)"
+
+#: .\mainview\templates\desktop\index.html:193
+#: .\mainview\templates\desktop\index.html:266
+msgid "Итого:"
+msgstr "Total:"
+
+#: .\mainview\templates\desktop\index.html:198
+#: .\mainview\templates\desktop\index.html:271
+msgid "Итого со скидкой:"
+msgstr "Total with discount:"
+
+#: .\mainview\templates\desktop\index.html:223
+msgid "Быстро и надёжно"
+msgstr "Fast and reliable"
+
+#: .\mainview\templates\desktop\index.html:235
+msgid "Вход"
+msgstr "Login"
+
+#: .\mainview\templates\desktop\index.html:282
+msgid "Частые вопросы"
+msgstr "FAQ"
+
+#: .\mainview\templates\desktop\index.html:290
+#, python-format
+msgid ""
+"Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. Для "
+"расчета используйте калькулятор выше."
+msgstr ""
+"The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo."
+" Use the calculator above for the calculation."
+
+#: .\mainview\templates\desktop\index.html:294
+msgid "Какие сроки доставки из Китая?"
+msgstr "What are the delivery times from China?"
+
+#: .\mainview\templates\desktop\index.html:299
+msgid ""
+"Средний срок доставки составляет 8–12 дней с момента отправки товара с "
+"нашего склада в Китае."
+msgstr ""
+"Average delivery time is 8–12 days from the moment the goods are shipped "
+"from our warehouse in China."
+
+#: .\mainview\templates\desktop\index.html:308
+msgid ""
+"Заполните форму на странице «Регистрация», указав логин (имя/ник + последние"
+" 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи."
+msgstr ""
+"Fill out the form on the 'Registration' page, entering a login "
+"(name/nickname + last 4 digits of phone), phone number and selecting a "
+"convenient pickup point."
+
+#: .\mainview\templates\desktop\index.html:318
+msgid "Взрывоопасные, радиоактивные, горючие, ядовитые вещества"
+msgstr "Explosive, radioactive, flammable, toxic substances"
+
+#: .\mainview\templates\desktop\index.html:319
+msgid "Холодное оружие, макеты, пневматика, арбалеты"
+msgstr "Cold weapons, replicas, pneumatics, crossbows"
+
+#: .\mainview\templates\desktop\index.html:320
+msgid "Психотропные, наркотические средства, алкоголь, сигареты"
+msgstr "Psychotropic, narcotic substances, alcohol, cigarettes"
+
+#: .\mainview\templates\desktop\index.html:321
+msgid "Скоропортящиеся и жидкие продукты"
+msgstr "Perishable and liquid products"
+
+#: .\mainview\templates\desktop\index.html:322
+msgid "Техника, телефоны, ноутбуки (под свою ответственность)"
+msgstr "Electronics, phones, laptops (at your own risk)"
+
+#: .\mainview\templates\desktop\index.html:323
+msgid "Животные, дроны"
+msgstr "Animals, drones"
+
+#: .\mainview\templates\desktop\index.html:324
+msgid "Хрупкие, стеклянные товары (просите надёжную упаковку)"
+msgstr "Fragile, glass items (request reliable packaging)"
+
+#: .\mainview\templates\desktop\index.html:334
+msgid ""
+"После оформления заказа вам будет предоставлен трек-номер. Используйте его "
+"на нашем сайте или свяжитесь с менеджером через WhatsApp."
+msgstr ""
+"After placing an order, you will receive a track number. Use it on our "
+"website or contact a manager via WhatsApp."
+
+#: .\mainview\templates\desktop\index.html:338
+msgid "Что делать, если заказ повреждён?"
+msgstr "What to do if the order is damaged?"
+
+#: .\mainview\templates\desktop\index.html:344
+msgid "Заранее попросите продавца обеспечить надёжную упаковку"
+msgstr "Ask the seller in advance to provide reliable packaging"
+
+#: .\mainview\templates\desktop\index.html:345
+msgid "Для хрупких товаров рекомендуется обрешётка груза"
+msgstr "For fragile goods, crating is recommended"
+
+#: .\mainview\templates\desktop\index.html:346
+msgid "Если упаковка не соответствовала — компания не несёт ответственности"
+msgstr "If packaging was inadequate — the company bears no responsibility"
+
+#: .\mainview\templates\desktop\index.html:347
+msgid ""
+"Если товар упакован правильно, но повреждён — ответственность несёт Inter "
+"Cargo"
+msgstr ""
+"If the item is properly packaged but damaged — Inter Cargo is responsible"
+
+#: .\mainview\templates\desktop\index.html:357
+msgid ""
+"Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
+"главной страницы."
+msgstr ""
+"Click on the messenger icons (Telegram, WhatsApp) in the top right corner of"
+" the main page."
+
+#: .\mainview\templates\desktop\index.html:361
+msgid "Ответственность за статус «Добавлено пользователем»?"
+msgstr "Responsibility for 'Added by user' status?"
+
+#: .\mainview\templates\desktop\index.html:366
+msgid ""
+"Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo "
+"отвечает с момента поступления товара на склад в Китае."
+msgstr ""
+"Until the order arrives at the warehouse — the seller is responsible. Inter "
+"Cargo is responsible from the moment the goods arrive at the warehouse in "
+"China."
+
+#: .\mainview\templates\desktop\index.html:446
+#, python-format
+msgid "Добро пожаловать, %(name)s!"
+msgstr "Welcome, %(name)s!"
+
+#: .\mainview\templates\desktop\index.html:447
+#: .\mainview\templates\desktop\index.html:464
+#, python-format
+msgid "Тариф: %(p)s₸/кг"
+msgstr "Rate: %(p)s₸/kg"
+
+#: .\mainview\templates\desktop\index.html:451
+#: .\myprofile\templates\desktop\profile.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:418
+msgid "Личный кабинет"
+msgstr "Personal account"
+
+#: .\mainview\templates\desktop\index.html:457
+#: .\mainview\templates\desktop\index.html:479
+#: .\mainview\templates\mobile\m_sidebar.html:92
+#: .\mainview\templates\mobile\sidebar.html:85
+msgid "Обучение по сайту"
+msgstr "Site tutorial"
+
+#: .\mainview\templates\desktop\index.html:461
+msgid "КАЛЬКУЛЯТОР"
+msgstr "CALCULATOR"
+
+#: .\mainview\templates\desktop\index.html:462
+msgid "Узнайте цену доставки груза из Китая в Казахстан"
+msgstr "Find out the delivery cost from China to Kazakhstan"
+
+#: .\mainview\templates\desktop\index.html:473
+#: .\mainview\templates\desktop\index.html:706
+#: .\mainview\templates\desktop\index.html:802
+#: .\mainview\templates\desktop\index.html:828
+#: .\mainview\templates\shared\header.html:155
+#: .\mainview\templates\shared\header.html:184
+#: .\register\templates\desktop\login.html:98
+#: .\register\templates\desktop\login.html:126
+#: .\register\templates\desktop\login.html:154
+#: .\register\templates\desktop\password_reset.html:128
+msgid "Войти"
+msgstr "Log in"
+
+#: .\mainview\templates\desktop\index.html:486
+msgid "Калькулятор"
+msgstr "Calculator"
+
+#: .\mainview\templates\desktop\index.html:488
+msgid "Напишите количество в кг"
+msgstr "Enter weight in kg"
+
+#: .\mainview\templates\desktop\index.html:504
+msgid "Мин: 0 - Макс: 100"
+msgstr "Min: 0 - Max: 100"
+
+#: .\mainview\templates\desktop\index.html:508 .\myprofile\models.py:26
+msgid "Название"
+msgstr "Name"
+
+#: .\mainview\templates\desktop\index.html:509
+#: .\myprofile\templates\desktop\delivered_posts.html:156
+#: .\myprofile\templates\desktop\finance_summary.html:435
+#: .\myprofile\templates\shared\print\client_check_pdf.html:65
+msgid "Итого"
+msgstr "Total"
+
+#: .\mainview\templates\desktop\index.html:512
+#: .\myprofile\templates\desktop\reschedule_arrival.html:111
+#: .\myprofile\templates\desktop\reschedule_arrival.html:217
+#: .\myprofile\templates\desktop\unidentified.html:108
+#: .\myprofile\templates\desktop\unidentified.html:177
+#: .\myprofile\templates\desktop\warehouse.html:186
+#: .\myprofile\templates\desktop\warehouse_reassign.html:150
+#: .\myprofile\templates\shared\print\client_check_pdf.html:49
+msgid "Вес"
+msgstr "Weight"
+
+#: .\mainview\templates\desktop\index.html:513
+msgid "0 кг"
+msgstr "0 kg"
+
+#: .\mainview\templates\desktop\index.html:516
+msgid "Сумма"
+msgstr "Amount"
+
+#: .\mainview\templates\desktop\index.html:522
+msgid "Скидка"
+msgstr "Discount"
+
+#: .\mainview\templates\desktop\index.html:688
+#: .\mainview\templates\shared\header.html:22
+#: .\register\templates\desktop\register.html:31
+#: .\register\templates\desktop\registration.html:36
+msgid "РЕГИСТРАЦИЯ"
+msgstr "REGISTRATION"
+
+#: .\mainview\templates\desktop\index.html:689
+#: .\mainview\templates\shared\header.html:23
+#: .\register\templates\desktop\register.html:32
+#: .\register\templates\desktop\registration.html:37
+msgid "Регистрация нового клиента"
+msgstr "New client registration"
+
+#: .\mainview\templates\desktop\index.html:691
+#: .\mainview\templates\shared\header.html:24
+#: .\register\templates\desktop\register.html:34
+#: .\register\templates\desktop\registration.html:39
+msgid ""
+"Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать "
+"пользоваться услугами доставки из Китая"
+msgstr ""
+"Fill in the form below to register in our system and start using our "
+"delivery service from China"
+
+#: .\mainview\templates\desktop\index.html:719
+#: .\mainview\templates\desktop\index.html:784
+#: .\register\templates\desktop\login.html:80
+#: .\register\templates\desktop\register.html:57
+#: .\register\templates\desktop\registration.html:62
+msgid "Логин (Имя/Ник + 4 цифры номера)"
+msgstr "Login (Name/Nickname + 4 digits of phone)"
+
+#: .\mainview\templates\desktop\index.html:722
+msgid ""
+"Введите имя или ник (только латинские буквы) и 4 цифры номера, например "
+"ANDREY1234"
+msgstr ""
+"Enter a name or nickname (Latin letters only) and 4 digits of the number, "
+"e.g. ANDREY1234"
+
+#: .\mainview\templates\desktop\index.html:723
+#: .\mainview\templates\desktop\index.html:787
+#: .\register\templates\desktop\login.html:83
+#: .\register\templates\desktop\register.html:58
+#: .\register\templates\desktop\registration.html:63
+msgid "Например: ANDREY1234"
+msgstr "For example: ANDREY1234"
+
+#: .\mainview\templates\desktop\index.html:726
+#: .\register\templates\desktop\login.html:84
+#: .\register\templates\desktop\register.html:59
+#: .\register\templates\desktop\registration.html:64
+msgid "Введите ваше имя или ник и последние 4 цифры номера телефона"
+msgstr ""
+"Enter your name or nickname and the last 4 digits of your phone number"
+
+#: .\mainview\templates\desktop\index.html:733
+#: .\mainview\templates\desktop\index.html:810
+#: .\myprofile\templates\desktop\settings.html:92
+#: .\register\templates\desktop\login.html:109
+#: .\register\templates\desktop\register.html:64
+#: .\register\templates\desktop\registration.html:81
+msgid "Номер телефона"
+msgstr "Phone number"
+
+#: .\mainview\templates\desktop\index.html:743
+#: .\register\templates\desktop\register.html:70
+#: .\register\templates\desktop\registration.html:114
+msgid "Выбор пункта выдачи"
+msgstr "Select pickup point"
+
+#: .\mainview\templates\desktop\index.html:747
+#: .\myprofile\templates\desktop\profile.html:232
+#: .\register\templates\desktop\register.html:72
+#: .\register\templates\desktop\registration.html:116
+msgid "Выберите пункт выдачи"
+msgstr "Select pickup point"
+
+#: .\mainview\templates\desktop\index.html:757
+#: .\register\templates\desktop\register.html:107
+#: .\register\templates\desktop\registration.html:151
+msgid "Зарегистрироваться"
+msgstr "Register"
+
+#: .\mainview\templates\desktop\index.html:771
+#: .\myprofile\templates\desktop\arrival_summary.html:195
+#: .\register\templates\desktop\login.html:62
+#: .\register\templates\desktop\register_confirmation.html:61
+msgid "Логин"
+msgstr "Login"
+
+#: .\mainview\templates\desktop\index.html:776
+#: .\myprofile\templates\desktop\arrival_summary.html:113
+#: .\myprofile\templates\desktop\arrival_summary.html:196
+#: .\myprofile\templates\desktop\arrival_summary.html:295
+#: .\register\models.py:33 .\register\templates\desktop\login.html:67
+#: .\register\templates\desktop\register_confirmation.html:63
+msgid "Телефон"
+msgstr "Phone"
+
+#: .\mainview\templates\desktop\index.html:790
+#: .\mainview\templates\desktop\index.html:816
+#: .\register\templates\desktop\login.html:87
+#: .\register\templates\desktop\login.html:115
+#: .\register\templates\desktop\login.html:143
+#: .\register\templates\desktop\register.html:81
+#: .\register\templates\desktop\registration.html:125
+msgid "Пароль"
+msgstr "Password"
+
+#: .\mainview\templates\desktop\index.html:794
+#: .\mainview\templates\desktop\index.html:820
+#: .\register\templates\desktop\login.html:91
+#: .\register\templates\desktop\login.html:119
+#: .\register\templates\desktop\login.html:147
+#: .\register\templates\desktop\register.html:85
+#: .\register\templates\desktop\registration.html:129
+msgid "Введите пароль"
+msgstr "Enter password"
+
+#: .\mainview\templates\mobile\m_sidebar.html:12
+#: .\mainview\templates\shared\header.html:174
+msgid "Закрыть меню"
+msgstr "Close menu"
+
+#: .\mainview\templates\mobile\m_sidebar.html:22
+#: .\mainview\templates\mobile\sidebar.html:15
+#: .\myprofile\templates\desktop\pp_acceptance.html:32
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:45
+msgid "Приёмка товара"
+msgstr "Goods reception"
+
+#: .\mainview\templates\mobile\m_sidebar.html:25
+#: .\mainview\templates\mobile\sidebar.html:18
+#: .\myprofile\templates\desktop\extraditions.html:61
+msgid "Выдача посылок"
+msgstr "Parcel issue"
+
+#: .\mainview\templates\mobile\m_sidebar.html:28
+#: .\mainview\templates\mobile\sidebar.html:21
+#: .\myprofile\templates\desktop\warehouse.html:33
+#: .\myprofile\templates\desktop\warehouse.html:54
+#: .\myprofile\templates\mobile\mobile_menu.html:141
+#: .\myprofile\templates\mobile\mobile_menu.html:178
+msgid "Склад ПВЗ"
+msgstr "Pickup point warehouse"
+
+#: .\mainview\templates\mobile\m_sidebar.html:31
+#: .\mainview\templates\mobile\sidebar.html:24
+#: .\myprofile\templates\desktop\pp_extradition_history.html:34
+msgid "История выдачи ПВЗ"
+msgstr "PVZ issue history"
+
+#: .\mainview\templates\mobile\m_sidebar.html:37
+#: .\mainview\templates\mobile\sidebar.html:29 .\myprofile\models.py:259
+#: .\myprofile\templates\desktop\attention_required.html:33
+#: .\myprofile\templates\desktop\attention_required.html:51
+msgid "Требует внимания"
+msgstr "Requires attention"
+
+#: .\mainview\templates\mobile\m_sidebar.html:40
+#: .\mainview\templates\mobile\sidebar.html:33
+#: .\myprofile\templates\desktop\settings.html:261 .\tgbot\models.py:160
+msgid "Отправлено из Китая"
+msgstr "Shipped from China"
+
+#: .\mainview\templates\mobile\m_sidebar.html:43
+#: .\mainview\templates\mobile\sidebar.html:36
+#: .\myprofile\templates\desktop\goods_arrival.html:35
+#: .\myprofile\templates\desktop\goods_arrival.html:37
+msgid "Приход товаров"
+msgstr "Goods arrival"
+
+#: .\mainview\templates\mobile\m_sidebar.html:46
+#: .\mainview\templates\mobile\sidebar.html:39
+#: .\myprofile\templates\desktop\unidentified.html:27
+#: .\myprofile\templates\desktop\unidentified.html:30
+msgid "Неопознанные посылки"
+msgstr "Unidentified parcels"
+
+#: .\mainview\templates\mobile\m_sidebar.html:49
+#: .\mainview\templates\mobile\sidebar.html:42
+#: .\myprofile\templates\desktop\reschedule_arrival.html:27
+#: .\myprofile\templates\desktop\reschedule_arrival.html:30
+msgid "Перенос прихода"
+msgstr "Reschedule arrival"
+
+#: .\mainview\templates\mobile\m_sidebar.html:52
+#: .\mainview\templates\mobile\sidebar.html:45
+#: .\myprofile\templates\desktop\arrival_history.html:47
+#: .\myprofile\templates\desktop\arrival_history.html:51
+#: .\myprofile\templates\mobile\mobile_menu.html:220
+msgid "История приходов"
+msgstr "Arrival history"
+
+#: .\mainview\templates\mobile\m_sidebar.html:55
+#: .\mainview\templates\mobile\sidebar.html:48
+#: .\myprofile\templates\desktop\arrival_summary.html:33
+#: .\myprofile\templates\desktop\arrival_summary.html:36
+msgid "Сводка прихода"
+msgstr "Arrival summary"
+
+#: .\mainview\templates\mobile\m_sidebar.html:58
+#: .\mainview\templates\mobile\sidebar.html:51
+msgid "Панель администратора"
+msgstr "Admin panel"
+
+#: .\mainview\templates\mobile\m_sidebar.html:61
+#: .\mainview\templates\mobile\sidebar.html:54
+#: .\myprofile\templates\desktop\print_documents.html:39
+#: .\myprofile\templates\desktop\print_documents.html:41
+msgid "Печать документов"
+msgstr "Print documents"
+
+#: .\mainview\templates\mobile\m_sidebar.html:64
+#: .\mainview\templates\mobile\sidebar.html:57
+#: .\myprofile\templates\desktop\notification_logs.html:50
+msgid "Логи Уведомлений"
+msgstr "Notification logs"
+
+#: .\mainview\templates\mobile\m_sidebar.html:67
+#: .\mainview\templates\mobile\sidebar.html:60
+msgid "Настройка уведомлений"
+msgstr "Notification settings"
+
+#: .\mainview\templates\mobile\m_sidebar.html:72
+#: .\mainview\templates\mobile\sidebar.html:65
+#: .\myprofile\templates\desktop\finance_summary.html:36
+#: .\myprofile\templates\desktop\finance_summary.html:39
+msgid "Финансовая сводка"
+msgstr "Financial summary"
+
+#: .\mainview\templates\mobile\m_sidebar.html:78
+#: .\mainview\templates\mobile\sidebar.html:71 .\myprofile\models.py:252
+#: .\myprofile\templates\desktop\delivery.html:48
+#: .\myprofile\templates\desktop\delivery.html:50
+#: .\myprofile\templates\mobile\mobile_menu.html:300
+msgid "Доставка"
+msgstr "Delivery"
+
+#: .\mainview\templates\mobile\m_sidebar.html:84
+#: .\mainview\templates\mobile\sidebar.html:77
+msgid "Подтверждение пользователей"
+msgstr "User confirmation"
+
+#: .\mainview\templates\mobile\m_sidebar.html:87
+#: .\mainview\templates\mobile\sidebar.html:80 .\myprofile\models.py:665
+#: .\myprofile\templates\desktop\pickup_change_requests.html:33
+#: .\myprofile\templates\desktop\pickup_change_requests.html:37
+msgid "Заявки на смену ПВЗ"
+msgstr "PVZ change requests"
+
+#: .\mainview\templates\mobile\m_sidebar.html:95
+#: .\mainview\templates\mobile\sidebar.html:88 .\myprofile\models.py:200
+#: .\myprofile\models.py:685 .\myprofile\models.py:799
+#: .\myprofile\templates\desktop\profile.html:131
+#: .\myprofile\templates\desktop\track_codes.html:39
+#: .\myprofile\templates\mobile\mobile_menu.html:82
+#: .\myprofile\templates\mobile\mobile_parcels.html:230
+msgid "Трек-коды"
+msgstr "Track codes"
+
+#: .\mainview\templates\mobile\m_sidebar.html:104
+#: .\mainview\templates\mobile\sidebar.html:97
+#: .\mainview\templates\shared\header.html:84
+#: .\mainview\templates\shared\header.html:112
+#: .\mainview\templates\shared\header.html:272
+#: .\mainview\templates\shared\header.html:293 .\myprofile\models.py:401
+#: .\myprofile\templates\desktop\notifications.html:51
+#: .\myprofile\templates\desktop\notifications.html:54
+#: .\myprofile\templates\mobile\mobile_menu.html:100
+#: .\myprofile\templates\mobile\mobile_notifications.html:38
+#: .\myprofile\templates\mobile\mobile_notifications.html:135
+msgid "Уведомления"
+msgstr "Notifications"
+
+#: .\mainview\templates\mobile\m_sidebar.html:107
+#: .\mainview\templates\mobile\sidebar.html:100
+#: .\myprofile\templates\desktop\profile.html:56
+#: .\myprofile\templates\desktop\settings.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:112
+msgid "Настройки"
+msgstr "Settings"
+
+#: .\mainview\templates\mobile\m_sidebar.html:111
+#: .\mainview\templates\mobile\sidebar.html:104
+msgid "Панель персонала"
+msgstr "Staff panel"
+
+#: .\mainview\templates\mobile\m_sidebar.html:116
+#: .\mainview\templates\mobile\sidebar.html:109
+#: .\myprofile\templates\desktop\role_management.html:29
+#: .\myprofile\templates\desktop\role_management.html:32
+msgid "Управление ролями"
+msgstr "Role management"
+
+#: .\mainview\templates\mobile\m_sidebar.html:121
+#: .\mainview\templates\mobile\sidebar.html:114
+#: .\myprofile\templates\desktop\service.html:33
+#: .\myprofile\templates\desktop\service.html:37
+#: .\myprofile\templates\mobile\mobile_menu.html:262
+#: .\myprofile\templates\mobile\mobile_menu.html:356
+msgid "Сервис"
+msgstr "Service"
+
+#: .\mainview\templates\mobile\m_sidebar.html:130
+#: .\mainview\templates\shared\header.html:139
+#: .\mainview\templates\shared\header.html:209
+#: .\myprofile\templates\mobile\mobile_qr.html:206
+msgid "Профиль"
+msgstr "Profile"
+
+#: .\mainview\templates\mobile\m_sidebar.html:136
+#: .\mainview\templates\shared\header.html:146
+#: .\mainview\templates\shared\header.html:215
+#: .\myprofile\templates\mobile\mobile_menu.html:404
+msgid "Выйти"
+msgstr "Log out"
+
+#: .\mainview\templates\mobile\m_sidebar.html:137
+msgid "Выход"
+msgstr "Logout"
+
+#: .\mainview\templates\mobile\mobile_footer.html:11
+msgid "Надежная доставка грузов из Китая"
+msgstr "Reliable cargo delivery from China"
+
+#: .\mainview\templates\mobile\mobile_footer.html:11
+msgid "в Казахстан по выгодным тарифам."
+msgstr "to Kazakhstan at competitive rates."
+
+#: .\mainview\templates\mobile\mobile_footer.html:16
+msgid "Мы в соцсетях"
+msgstr "Follow us"
+
+#: .\mainview\templates\mobile\mobile_footer.html:37
+msgid "Казахстан, г. Тараз,"
+msgstr "Kazakhstan, Taraz,"
+
+#: .\mainview\templates\mobile\mobile_footer.html:37
+msgid "мкр. Акбулак(1), д. 21"
+msgstr "Akbulak(1) district, 21"
+
+#: .\mainview\templates\mobile\mobile_footer.html:44
+msgid "— директор"
+msgstr "— director"
+
+#: .\mainview\templates\mobile\mobile_footer.html:45
+msgid "— менеджер"
+msgstr "— manager"
+
+#: .\mainview\templates\mobile\mobile_footer.html:80
+msgid "&copy; 2026 Inter Cargo. Все права защищены."
+msgstr "&copy; 2026 Inter Cargo. All rights reserved."
+
+#: .\mainview\templates\mobile\sidebar.html:7
+#: .\mainview\templates\shared\header.html:276
+#: .\mainview\templates\shared\header.html:297
+#: .\myprofile\templates\mobile\mobile_menu.html:41
+msgid "Меню"
+msgstr "Menu"
+
+#: .\mainview\templates\shared\footer.html:60
+msgid "Директор:"
+msgstr "Director:"
+
+#: .\mainview\templates\shared\footer.html:66
+msgid "Менеджер:"
+msgstr "Manager:"
+
+#: .\mainview\templates\shared\footer.html:79
+msgid "© 2026 Inter Cargo. Все права защищены."
+msgstr "© 2026 Inter Cargo. All rights reserved."
+
+#: .\mainview\templates\shared\header.html:4
+msgid "Скопировано!"
+msgstr "Copied!"
+
+#: .\mainview\templates\shared\header.html:5
+#: .\myprofile\templates\desktop\extradition_package.html:182
+#: .\myprofile\templates\desktop\profile.html:281
+#: .\myprofile\templates\mobile\mobile_qr.html:227
+msgid "Копировать код"
+msgstr "Copy code"
+
+#: .\mainview\templates\shared\header.html:6 .\myprofile\models.py:812
+#: .\myprofile\models.py:819
+#: .\myprofile\templates\desktop\notification_logs.html:275
+#: .\myprofile\templates\desktop\notification_logs.html:296
+#: .\myprofile\templates\desktop\notification_logs.html:353
+#: .\myprofile\templates\desktop\notification_logs.html:459
+#: .\myprofile\templates\desktop\notification_logs.html:474
+#: .\myprofile\templates\desktop\notification_logs.html:531
+msgid "Ошибка"
+msgstr "Error"
+
+#: .\mainview\templates\shared\header.html:7
+msgid "Ошибка сети"
+msgstr "Network error"
+
+#: .\mainview\templates\shared\header.html:8
+msgid "Загрузка..."
+msgstr "Loading..."
+
+#: .\mainview\templates\shared\header.html:9
+msgid "Переключить на светлую тему"
+msgstr "Switch to light theme"
+
+#: .\mainview\templates\shared\header.html:10
+msgid "Переключить на тёмную тему"
+msgstr "Switch to dark theme"
+
+#: .\mainview\templates\shared\header.html:11
+msgid "Введите номер полностью: +7 (XXX) XXX-XX-XX"
+msgstr "Enter full number: +7 (XXX) XXX-XX-XX"
+
+#: .\mainview\templates\shared\header.html:12
+msgid "Введите фамилию."
+msgstr "Enter last name."
+
+#: .\mainview\templates\shared\header.html:13
+msgid "Введите имя."
+msgstr "Enter first name."
+
+#: .\mainview\templates\shared\header.html:14
+msgid "Неверный телефон."
+msgstr "Invalid phone number."
+
+#: .\mainview\templates\shared\header.html:15
+msgid "Введите логин."
+msgstr "Enter login."
+
+#: .\mainview\templates\shared\header.html:16
+msgid "Выберите пункт выдачи."
+msgstr "Select pickup point."
+
+#: .\mainview\templates\shared\header.html:17
+msgid "Пароль слишком короткий."
+msgstr "Password is too short."
+
+#: .\mainview\templates\shared\header.html:18
+#: .\register\views\password_reset.py:180
+msgid "Пароли не совпадают."
+msgstr "Passwords do not match."
+
+#: .\mainview\templates\shared\header.html:19
+msgid "Введите пароль."
+msgstr "Enter password."
+
+#: .\mainview\templates\shared\header.html:20
+#: .\myprofile\templates\desktop\delivery.html:154
+#: .\myprofile\templates\desktop\delivery.html:205
+#: .\myprofile\templates\desktop\delivery.html:399
+#: .\myprofile\templates\desktop\extraditions.html:278
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:138
+#: .\myprofile\templates\desktop\print_documents.html:71
+#: .\myprofile\templates\desktop\print_documents.html:127
+#: .\myprofile\templates\mobile\mobile_parcels.html:129
+msgid "Выбрать все"
+msgstr "Select all"
+
+#: .\mainview\templates\shared\header.html:21
+msgid "Снять все"
+msgstr "Deselect all"
+
+#: .\mainview\templates\shared\header.html:25
+msgid "АВТОРИЗАЦИЯ"
+msgstr "LOGIN"
+
+#: .\mainview\templates\shared\header.html:26
+#: .\register\templates\desktop\login.html:36
+msgid "Вход клиента"
+msgstr "Client Login"
+
+#: .\mainview\templates\shared\header.html:27
+msgid ""
+"Заполните форму ниже, чтобы войти в свой аккаунт в нашей системе и начать "
+"пользоваться услугами доставки из Китая"
+msgstr ""
+"Fill in the form below to log in to your account and start using our "
+"delivery service from China"
+
+#: .\mainview\templates\shared\header.html:49
+msgid "Переключить тему"
+msgstr "Toggle theme"
+
+#: .\mainview\templates\shared\header.html:117
+msgid "Прочесть все"
+msgstr "Mark all as read"
+
+#: .\mainview\templates\shared\header.html:127
+msgid "Нет уведомлений"
+msgstr "No notifications"
+
+#: .\mainview\templates\shared\header.html:131
+msgid "Все уведомления"
+msgstr "All notifications"
+
+#: .\mainview\templates\shared\header.html:161
+msgid "Открыть меню"
+msgstr "Open menu"
+
+#: .\myprofile\admin.py:122
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:15
+msgid "Mass Status Update"
+msgstr "Mass Status Update"
+
+#: .\myprofile\models.py:27 .\register\models.py:11
+msgid "Активен"
+msgstr "Active"
+
+#: .\myprofile\models.py:30 .\myprofile\models.py:681
+#: .\myprofile\models.py:722
+#: .\myprofile\templates\desktop\goods_arrival.html:64
+#: .\myprofile\templates\desktop\unidentified.html:68
+#: .\myprofile\templates\desktop\unidentified.html:109
+#: .\myprofile\templates\desktop\unidentified.html:178
+msgid "Место сортировки"
+msgstr "Sorting location"
+
+#: .\myprofile\models.py:31
+msgid "Места сортировки"
+msgstr "Sorting locations"
+
+#: .\myprofile\models.py:45
+msgid "Нет владельца товара"
+msgstr "No item owner"
+
+#: .\myprofile\models.py:46
+msgid "Добавлен пользователем"
+msgstr "Added by user"
+
+#: .\myprofile\models.py:47
+msgid "Прибыло на склад (Китай)"
+msgstr "Arrived at warehouse (China)"
+
+#: .\myprofile\models.py:48 .\myprofile\templates\desktop\shipped_cn.html:37
+msgid "Отправлено со склада (Китай)"
+msgstr "Shipped from warehouse (China)"
+
+#: .\myprofile\models.py:49
+msgid "Неопозка (сортировочный склад)"
+msgstr "Late arrival (sorting warehouse)"
+
+#: .\myprofile\models.py:50
+msgid "Доставлен на сортировочный склад"
+msgstr "Delivered to sorting warehouse"
+
+#: .\myprofile\models.py:51 .\myprofile\templates\desktop\track_codes.html:197
+msgid "В доставке"
+msgstr "In delivery"
+
+#: .\myprofile\models.py:52 .\myprofile\templates\desktop\track_codes.html:172
+msgid "Доставлен на ПВЗ"
+msgstr "Delivered to PVZ"
+
+#: .\myprofile\models.py:53 .\myprofile\models.py:257
+#: .\myprofile\models.py:510 .\myprofile\templates\desktop\warehouse.html:211
+msgid "Выдано клиенту"
+msgstr "Issued to client"
+
+#: .\myprofile\models.py:69
+msgid "№ трек кода"
+msgstr "Track code #"
+
+#: .\myprofile\models.py:70 .\myprofile\models.py:209
+msgid "Трек код"
+msgstr "Track code"
+
+#: .\myprofile\models.py:71 .\myprofile\models.py:210
+#: .\myprofile\templates\desktop\update_tracks.html:63
+msgid "Дата обновления"
+msgstr "Update date"
+
+#: .\myprofile\models.py:72
+msgid "Статус трек-кода"
+msgstr "Track code status"
+
+#: .\myprofile\models.py:76
+msgid "Имя владельца"
+msgstr "Owner name"
+
+#: .\myprofile\models.py:80 .\myprofile\models.py:216
+msgid "О посылке"
+msgstr "About parcel"
+
+#: .\myprofile\models.py:81
+msgid "Вес посылки (кг)"
+msgstr "Parcel weight (kg)"
+
+#: .\myprofile\models.py:85
+msgid "Переопределённый ПВЗ доставки"
+msgstr "Overridden delivery PVZ"
+
+#: .\myprofile\models.py:90
+msgid "Где отсортирован"
+msgstr "Sorted at"
+
+#: .\myprofile\models.py:93
+msgid "Дата добавления пользователем"
+msgstr "Date added by user"
+
+#: .\myprofile\models.py:94
+msgid "Дата отправки со склада (Китай)"
+msgstr "Date shipped from warehouse (China)"
+
+#: .\myprofile\models.py:95
+msgid "Дата прихода на сорт. склад"
+msgstr "Date arrived at sorting warehouse"
+
+#: .\myprofile\models.py:96
+msgid "Дата принятия в доставку"
+msgstr "Date accepted for delivery"
+
+#: .\myprofile\models.py:97
+msgid "Дата прибытия на ПВЗ"
+msgstr "Date arrived at PVZ"
+
+#: .\myprofile\models.py:98
+msgid "Дата выдачи клиенту"
+msgstr "Date issued to client"
+
+#: .\myprofile\models.py:103
+msgid "Тариф на момент доставки (₸/кг)"
+msgstr "Rate at time of delivery (₸/kg)"
+
+#: .\myprofile\models.py:105
+msgid "История статусов"
+msgstr "Status history"
+
+#: .\myprofile\models.py:108 .\myprofile\models.py:270
+msgid "Принят на ПВЗ"
+msgstr "Accepted at PVZ"
+
+#: .\myprofile\models.py:109 .\myprofile\models.py:271
+msgid "Дата принятия на ПВЗ"
+msgstr "Date accepted at PVZ"
+
+#: .\myprofile\models.py:113 .\myprofile\models.py:275
+msgid "Кто принял на ПВЗ"
+msgstr "Who accepted at PVZ"
+
+#: .\myprofile\models.py:119
+msgid "Требует переноса (прибыл без ПВЗ)"
+msgstr "Requires transfer (arrived without PVZ)"
+
+#: .\myprofile\models.py:123
+msgid "Архивирован"
+msgstr "Archived"
+
+#: .\myprofile\models.py:124 .\myprofile\models.py:218
+msgid "Дата архивации"
+msgstr "Archival date"
+
+#: .\myprofile\models.py:133
+msgid "Трек-код не может содержать китайские символы или кириллицу."
+msgstr "Track code cannot contain Chinese characters or Cyrillic."
+
+#: .\myprofile\models.py:199 .\myprofile\models.py:748
+#: .\myprofile\templates\desktop\arrival_history.html:299
+#: .\myprofile\templates\desktop\delivered_posts.html:140
+#: .\myprofile\templates\desktop\extradition_package.html:108
+#: .\myprofile\templates\desktop\goods_arrival_session.html:157
+#: .\myprofile\templates\desktop\reschedule_arrival.html:110
+#: .\myprofile\templates\desktop\reschedule_arrival.html:216
+#: .\myprofile\templates\desktop\unidentified.html:106
+#: .\myprofile\templates\desktop\unidentified.html:176
+#: .\myprofile\templates\desktop\update_tracks.html:105
+#: .\myprofile\templates\desktop\warehouse.html:182
+#: .\myprofile\templates\shared\print\receipt_print.html:366
+#: .\tgbot\models.py:216
+msgid "Трек-код"
+msgstr "Track code"
+
+#: .\myprofile\models.py:211 .\myprofile\models.py:658
+#: .\myprofile\models.py:715 .\myprofile\models.py:777
+#: .\myprofile\models.py:818
+#: .\myprofile\templates\desktop\notification_logs.html:130
+#: .\myprofile\templates\desktop\notification_logs.html:268
+#: .\myprofile\templates\desktop\notification_logs.html:455
+#: .\myprofile\templates\desktop\reschedule_arrival.html:112
+msgid "Статус"
+msgstr "Status"
+
+#: .\myprofile\models.py:214 .\myprofile\models.py:242
+#: .\myprofile\templates\desktop\goods_arrival_session.html:158
+#: .\myprofile\templates\desktop\update_tracks.html:108
+msgid "Владелец"
+msgstr "Owner"
+
+#: .\myprofile\models.py:221
+msgid "Архивный трек-код"
+msgstr "Archived track code"
+
+#: .\myprofile\models.py:222
+msgid "Архивные трек-коды"
+msgstr "Archived track codes"
+
+#: .\myprofile\models.py:243 .\myprofile\models.py:674
+#: .\myprofile\models.py:796
+msgid "Дата создания"
+msgstr "Creation date"
+
+#: .\myprofile\models.py:247
+msgid "Статус чека"
+msgstr "Receipt status"
+
+#: .\myprofile\models.py:255
+msgid "Статус оплаты"
+msgstr "Payment status"
+
+#: .\myprofile\models.py:256
+msgid "Дата и время оплаты"
+msgstr "Payment date and time"
+
+#: .\myprofile\models.py:258
+msgid "Дата и время выдачи"
+msgstr "Issue date and time"
+
+#: .\myprofile\models.py:260
+msgid "Причина внимания"
+msgstr "Attention reason"
+
+#: .\myprofile\models.py:264
+msgid "Кто добавил в внимание"
+msgstr "Who added to attention"
+
+#: .\myprofile\models.py:266
+msgid "ПВЗ внимания"
+msgstr "Attention PVZ"
+
+#: .\myprofile\models.py:267
+msgid "Дата установки «Требует внимания»"
+msgstr "Date 'Requires attention' set"
+
+#: .\myprofile\models.py:278 .\myprofile\models.py:630
+msgid "Общий вес (кг)"
+msgstr "Total weight (kg)"
+
+#: .\myprofile\models.py:279
+msgid "Сумма чека"
+msgstr "Receipt amount"
+
+#: .\myprofile\models.py:280
+msgid "Цена за кг (историческая)"
+msgstr "Price per kg (historical)"
+
+#: .\myprofile\models.py:281
+msgid "Номер чека"
+msgstr "Receipt number"
+
+#: .\myprofile\models.py:283 .\myprofile\models.py:455
+#: .\myprofile\models.py:567 .\myprofile\models.py:620
+#: .\myprofile\models.py:775
+#: .\myprofile\templates\desktop\finance_summary.html:76
+#: .\myprofile\templates\desktop\finance_summary.html:411
+#: .\myprofile\templates\desktop\profile.html:229
+#: .\myprofile\templates\shared\print\receipt_print.html:357
+#: .\register\models.py:24
+msgid "Пункт выдачи"
+msgstr "Pickup point"
+
+#: .\myprofile\models.py:284 .\register\models.py:9
+msgid "Ссылка на оплату"
+msgstr "Payment link"
+
+#: .\myprofile\models.py:287
+msgid "Чек"
+msgstr "Receipt"
+
+#: .\myprofile\models.py:363
+msgid "Трек-код (текст)"
+msgstr "Track code (text)"
+
+#: .\myprofile\models.py:365
+msgid "Стоимость позиции (₸)"
+msgstr "Item cost (₸)"
+
+#: .\myprofile\models.py:366
+msgid "Тариф за кг (₸/кг)"
+msgstr "Rate per kg (₸/kg)"
+
+#: .\myprofile\models.py:369
+msgid "Позиция чека"
+msgstr "Receipt item"
+
+#: .\myprofile\models.py:370
+msgid "Позиции чеков"
+msgstr "Receipt items"
+
+#: .\myprofile\models.py:395
+#: .\myprofile\templates\desktop\notification_logs.html:132
+#: .\myprofile\templates\desktop\notification_logs.html:271
+#: .\tgbot\models.py:107
+msgid "Сообщение"
+msgstr "Message"
+
+#: .\myprofile\models.py:396
+#: .\myprofile\templates\desktop\notification_logs.html:87
+#: .\myprofile\templates\desktop\notification_logs.html:142
+#: .\myprofile\templates\desktop\notification_logs.html:174
+#: .\myprofile\templates\desktop\notifications.html:77
+#: .\myprofile\templates\mobile\mobile_notifications.html:108
+msgid "Прочитано"
+msgstr "Read"
+
+#: .\myprofile\models.py:397
+#: .\myprofile\templates\desktop\finance_summary.html:62
+#: .\myprofile\templates\desktop\finance_summary.html:259
+#: .\myprofile\templates\desktop\finance_summary.html:302
+#: .\myprofile\templates\desktop\finance_summary.html:410
+#: .\myprofile\templates\desktop\finance_summary.html:459
+#: .\myprofile\templates\desktop\notification_logs.html:133
+#: .\myprofile\templates\desktop\notification_logs.html:458
+#: .\myprofile\templates\desktop\unidentified.html:110
+#: .\myprofile\templates\shared\print\client_check_pdf.html:31
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:19
+#: .\register\templates\desktop\register_confirmation.html:66
+msgid "Дата"
+msgstr "Date"
+
+#: .\myprofile\models.py:400
+msgid "Уведомление"
+msgstr "Notification"
+
+#: .\myprofile\models.py:411 .\myprofile\models.py:655
+#: .\myprofile\templates\desktop\notification_logs.html:131
+#: .\myprofile\templates\desktop\notification_logs.html:269
+#: .\register\models.py:145 .\tgbot\models.py:25 .\tgbot\models.py:62
+#: .\tgbot\models.py:104 .\tgbot\models.py:157 .\tgbot\models.py:211
+msgid "Пользователь"
+msgstr "User"
+
+#: .\myprofile\models.py:418
+#: .\myprofile\templates\desktop\arrival_summary.html:385
+msgid "Скидка (₸/кг)"
+msgstr "Discount (₸/kg)"
+
+#: .\myprofile\models.py:420
+msgid "Разовая скидка"
+msgstr "One-time discount"
+
+#: .\myprofile\models.py:421
+msgid "Активная скидка"
+msgstr "Active discount"
+
+#: .\myprofile\models.py:422 .\myprofile\models.py:465
+#: .\myprofile\models.py:507
+msgid "Комментарий"
+msgstr "Comment"
+
+#: .\myprofile\models.py:426
+msgid "Скидка клиента"
+msgstr "Client discount"
+
+#: .\myprofile\models.py:427
+msgid "Скидки клиентов"
+msgstr "Client discounts"
+
+#: .\myprofile\models.py:439
+msgid "Push-подписка"
+msgstr "Push subscription"
+
+#: .\myprofile\models.py:440
+msgid "Push-подписки"
+msgstr "Push subscriptions"
+
+#: .\myprofile\models.py:447 .\myprofile\models.py:513
+#: .\myprofile\models.py:895
+msgid "Пакет выдачи"
+msgstr "Issue package"
+
+#: .\myprofile\models.py:453 .\myprofile\models.py:497
+#: .\myprofile\models.py:815
+#: .\myprofile\templates\desktop\notification_logs.html:456
+msgid "Получатель"
+msgstr "Recipient"
+
+#: .\myprofile\models.py:462
+msgid "Сотрудник, выдавший посылку"
+msgstr "Employee who issued the parcel"
+
+#: .\myprofile\models.py:464
+msgid "Подтверждено получателем"
+msgstr "Confirmed by recipient"
+
+#: .\myprofile\models.py:466 .\myprofile\models.py:508
+#: .\myprofile\models.py:637 .\myprofile\models.py:693
+#: .\myprofile\models.py:729
+#: .\myprofile\templates\desktop\notification_logs.html:272
+#: .\tgbot\models.py:118 .\tgbot\models.py:196
+msgid "Создано"
+msgstr "Created"
+
+#: .\myprofile\models.py:469
+msgid "Выдача посылки"
+msgstr "Parcel issue"
+
+#: .\myprofile\models.py:470
+msgid "Выдачи посылок"
+msgstr "Parcel issues"
+
+#: .\myprofile\models.py:490
+msgid "Штрихкод выдачи"
+msgstr "Issue barcode"
+
+#: .\myprofile\models.py:509 .\myprofile\models.py:692
+#: .\register\models.py:153
+msgid "Обновлено"
+msgstr "Updated"
+
+#: .\myprofile\models.py:514
+msgid "Пакеты выдачи"
+msgstr "Issue packages"
+
+#: .\myprofile\models.py:545
+msgid "Цена за кг (₸/кг)"
+msgstr "Price per kg (₸/kg)"
+
+#: .\myprofile\models.py:551
+msgid "Порог веса для скидки (кг)"
+msgstr "Weight threshold for discount (kg)"
+
+#: .\myprofile\models.py:555 .\myprofile\models.py:556
+msgid "Глобальные настройки"
+msgstr "Global settings"
+
+#: .\myprofile\models.py:569
+msgid "Номер ячейки"
+msgstr "Cell number"
+
+#: .\myprofile\models.py:575
+#: .\myprofile\templates\desktop\arrival_summary.html:112
+#: .\myprofile\templates\desktop\arrival_summary.html:294
+#: .\myprofile\templates\desktop\delivery.html:318
+#: .\myprofile\templates\desktop\finance_summary.html:178
+#: .\myprofile\templates\desktop\finance_summary.html:224
+#: .\myprofile\templates\desktop\reschedule_arrival.html:43
+#: .\myprofile\templates\desktop\unidentified.html:107
+#: .\myprofile\templates\desktop\warehouse_inventory.html:71
+#: .\myprofile\templates\desktop\warehouse_reassign.html:148
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:29
+#: .\myprofile\templates\shared\print\receipt_print.html:352
+msgid "Клиент"
+msgstr "Client"
+
+#: .\myprofile\models.py:581
+msgid "Ячейка хранения"
+msgstr "Storage cell"
+
+#: .\myprofile\models.py:582
+msgid "Ячейки хранения"
+msgstr "Storage cells"
+
+#: .\myprofile\models.py:614
+msgid "Доставщик"
+msgstr "Courier"
+
+#: .\myprofile\models.py:626
+msgid "Трек-коды в доставке"
+msgstr "Track codes in delivery"
+
+#: .\myprofile\models.py:632
+msgid "Время принятия в доставку"
+msgstr "Time accepted for delivery"
+
+#: .\myprofile\models.py:635
+msgid "Время доставки до пункта"
+msgstr "Delivery time to point"
+
+#: .\myprofile\models.py:640
+msgid "История доставки"
+msgstr "Delivery history"
+
+#: .\myprofile\models.py:641 .\myprofile\templates\desktop\delivery.html:76
+msgid "История доставок"
+msgstr "Delivery histories"
+
+#: .\myprofile\models.py:650
+msgid "На рассмотрении"
+msgstr "Under review"
+
+#: .\myprofile\models.py:651
+msgid "Одобрена"
+msgstr "Approved"
+
+#: .\myprofile\models.py:652
+msgid "Отклонена"
+msgstr "Rejected"
+
+#: .\myprofile\models.py:656
+msgid "Текущий ПВЗ"
+msgstr "Current PVZ"
+
+#: .\myprofile\models.py:657
+msgid "Запрашиваемый ПВЗ"
+msgstr "Requested PVZ"
+
+#: .\myprofile\models.py:659
+msgid "Дата заявки"
+msgstr "Request date"
+
+#: .\myprofile\models.py:660
+msgid "Дата рассмотрения"
+msgstr "Review date"
+
+#: .\myprofile\models.py:661
+msgid "Рассмотрел"
+msgstr "Reviewed by"
+
+#: .\myprofile\models.py:664
+msgid "Заявка на смену ПВЗ"
+msgstr "PVZ change request"
+
+#: .\myprofile\models.py:673 .\myprofile\models.py:714
+#: .\myprofile\templates\desktop\goods_arrival.html:59
+#: .\myprofile\templates\desktop\reschedule_arrival.html:113
+#: .\myprofile\templates\desktop\reschedule_arrival.html:218
+#: .\myprofile\templates\desktop\service.html:89
+#: .\myprofile\templates\desktop\service.html:114
+msgid "Дата прихода"
+msgstr "Arrival date"
+
+#: .\myprofile\models.py:677 .\myprofile\models.py:718
+#: .\myprofile\models.py:780
+msgid "Создал"
+msgstr "Created by"
+
+#: .\myprofile\models.py:689
+msgid "Исходные данные (трек-коды, владельцы, веса)"
+msgstr "Source data (track codes, owners, weights)"
+
+#: .\myprofile\models.py:691
+msgid "Всего трек-кодов"
+msgstr "Total track codes"
+
+#: .\myprofile\models.py:696 .\myprofile\templates\mobile\mobile_menu.html:202
+msgid "Приход"
+msgstr "Arrival"
+
+#: .\myprofile\models.py:697
+msgid "Приходы"
+msgstr "Arrivals"
+
+#: .\myprofile\models.py:707 .\myprofile\models.py:770
+#: .\myprofile\templates\desktop\goods_arrival.html:91
+msgid "Активная"
+msgstr "Active"
+
+#: .\myprofile\models.py:708
+#: .\myprofile\templates\desktop\goods_arrival.html:118
+#: .\myprofile\templates\desktop\goods_arrival.html:126
+#: .\myprofile\templates\desktop\goods_arrival_session.html:44
+msgid "На паузе"
+msgstr "Paused"
+
+#: .\myprofile\models.py:709
+#: .\myprofile\templates\desktop\goods_arrival.html:165
+#: .\myprofile\templates\desktop\goods_arrival_session.html:48
+msgid "Неактивная"
+msgstr "Inactive"
+
+#: .\myprofile\models.py:710 .\myprofile\models.py:771
+#: .\myprofile\templates\desktop\goods_arrival.html:211
+msgid "Завершена"
+msgstr "Completed"
+
+#: .\myprofile\models.py:727
+msgid "Приход (после завершения)"
+msgstr "Arrival (after completion)"
+
+#: .\myprofile\models.py:730
+msgid "Поставлена на паузу"
+msgstr "Paused"
+
+#: .\myprofile\models.py:731 .\myprofile\models.py:784
+msgid "Завершено"
+msgstr "Completed"
+
+#: .\myprofile\models.py:734
+#: .\myprofile\templates\desktop\goods_arrival_session.html:35
+msgid "Сессия прихода"
+msgstr "Arrival session"
+
+#: .\myprofile\models.py:735
+msgid "Сессии прихода"
+msgstr "Arrival sessions"
+
+#: .\myprofile\models.py:746
+msgid "Сессия"
+msgstr "Session"
+
+#: .\myprofile\models.py:752
+msgid "Трек (объект)"
+msgstr "Track (object)"
+
+#: .\myprofile\models.py:754
+msgid "Владелец (логин)"
+msgstr "Owner (login)"
+
+#: .\myprofile\models.py:756
+msgid "Номер строки"
+msgstr "Row number"
+
+#: .\myprofile\models.py:760
+msgid "Строка сессии прихода"
+msgstr "Arrival session row"
+
+#: .\myprofile\models.py:761
+msgid "Строки сессии прихода"
+msgstr "Arrival session rows"
+
+#: .\myprofile\models.py:782
+msgid "Бэкап ячеек"
+msgstr "Cell backup"
+
+#: .\myprofile\models.py:783
+msgid "Начало"
+msgstr "Start"
+
+#: .\myprofile\models.py:787
+msgid "Сессия реструктуризации"
+msgstr "Restructuring session"
+
+#: .\myprofile\models.py:788
+msgid "Сессии реструктуризации"
+msgstr "Restructuring sessions"
+
+#: .\myprofile\models.py:797
+msgid "Дата реестра"
+msgstr "Registry date"
+
+#: .\myprofile\models.py:802
+msgid "Реестр клиентов"
+msgstr "Client registry"
+
+#: .\myprofile\models.py:803
+msgid "Реестры клиентов"
+msgstr "Client registries"
+
+#: .\myprofile\models.py:811
+#: .\myprofile\templates\desktop\notification_logs.html:216
+#: .\myprofile\templates\desktop\notification_logs.html:239
+#: .\myprofile\templates\desktop\notification_logs.html:273
+#: .\myprofile\templates\desktop\notification_logs.html:288
+#: .\myprofile\templates\desktop\notification_logs.html:345
+#: .\myprofile\templates\desktop\notification_logs.html:412
+#: .\myprofile\templates\desktop\notification_logs.html:431
+#: .\myprofile\templates\desktop\notification_logs.html:470
+#: .\myprofile\templates\desktop\notification_logs.html:527
+#: .\tgbot\models.py:115 .\tgbot\models.py:187 .\tgbot\models.py:219
+msgid "Отправлено"
+msgstr "Sent"
+
+#: .\myprofile\models.py:817
+msgid "Текст письма"
+msgstr "Email body"
+
+#: .\myprofile\models.py:820 .\myprofile\templates\desktop\shipped_cn.html:51
+msgid "Дата отправки"
+msgstr "Send date"
+
+#: .\myprofile\models.py:823
+msgid "Лог email"
+msgstr "Email log"
+
+#: .\myprofile\models.py:824
+msgid "Логи email"
+msgstr "Email logs"
+
+#: .\myprofile\models.py:833
+msgid "Telegram"
+msgstr "Telegram"
+
+#: .\myprofile\models.py:834 .\register\models.py:69 .\register\models.py:106
+msgid "Email"
+msgstr "Email"
+
+#: .\myprofile\models.py:835
+#: .\myprofile\templates\desktop\notification_mutes.html:97
+#: .\myprofile\templates\desktop\notification_mutes.html:193
+msgid "Все каналы"
+msgstr "All channels"
+
+#: .\myprofile\models.py:843
+msgid "Клиент (пусто = все клиенты)"
+msgstr "Client (empty = all clients)"
+
+#: .\myprofile\models.py:847
+#: .\myprofile\templates\desktop\notification_mutes.html:93
+msgid "Канал"
+msgstr "Channel"
+
+#: .\myprofile\models.py:854
+msgid "Кто отключил"
+msgstr "Disabled by"
+
+#: .\myprofile\models.py:856
+msgid "Время отключения"
+msgstr "Disable time"
+
+#: .\myprofile\models.py:859
+msgid "Истекает (пусто = только вручную)"
+msgstr "Expires (empty = manual only)"
+
+#: .\myprofile\models.py:861
+msgid "Активна"
+msgstr "Active"
+
+#: .\myprofile\models.py:862
+#: .\myprofile\templates\desktop\notification_mutes.html:143
+msgid "Причина"
+msgstr "Reason"
+
+#: .\myprofile\models.py:865
+msgid "Заглушка уведомлений"
+msgstr "Notification mute"
+
+#: .\myprofile\models.py:866
+msgid "Заглушки уведомлений"
+msgstr "Notification mutes"
+
+#: .\myprofile\models.py:902
+#: .\myprofile\templates\desktop\finance_summary.html:139
+#: .\register\models.py:35 .\register\models.py:71
+#: .\register\templates\desktop\register_confirmation.html:65
+#: .\tgbot\models.py:185
+msgid "ПВЗ"
+msgstr "PVZ"
+
+#: .\myprofile\models.py:909
+msgid "Открыл"
+msgstr "Opened by"
+
+#: .\myprofile\models.py:911
+msgid "Открыта в"
+msgstr "Opened at"
+
+#: .\myprofile\models.py:914
+msgid "Сессия выдачи"
+msgstr "Issue session"
+
+#: .\myprofile\models.py:915
+msgid "Сессии выдачи"
+msgstr "Issue sessions"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:12
+msgid "Home"
+msgstr "Home"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:22
+#, python-format
+msgid ""
+"Are you sure you want to update the status of the selected\n"
+"            track code?"
+msgid_plural ""
+"Are you sure you want to update the status of the selected %(counter)s track\n"
+"            codes?"
+msgstr[0] ""
+"Are you sure you want to update the status of the selected track code?"
+msgstr[1] ""
+"Are you sure you want to update the status of %(counter)s selected track "
+"codes?"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:26
+msgid "Select New Status"
+msgstr "Select New Status"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:34
+msgid "Selected Track Codes"
+msgstr "Selected Track Codes"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:46
+msgid "Update Status"
+msgstr "Update Status"
+
+#: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:47
+msgid "No, take me back"
+msgstr "No, take me back"
+
+#: .\myprofile\templates\desktop\arrival_history.html:9
+msgid "Inter Cargo - История приходов"
+msgstr "Inter Cargo - Arrival History"
+
+#: .\myprofile\templates\desktop\arrival_history.html:57
+msgid "Нет данных о приходах."
+msgstr "No arrival data."
+
+#: .\myprofile\templates\desktop\arrival_history.html:71
+msgid "Загрузка месяцев..."
+msgstr "Loading months..."
+
+#: .\myprofile\templates\desktop\arrival_history.html:125
+msgid "Нет данных за этот год."
+msgstr "No data for this year."
+
+#: .\myprofile\templates\desktop\arrival_history.html:142
+#: .\myprofile\templates\desktop\arrival_history.html:177
+#: .\myprofile\templates\desktop\arrival_history.html:196
+msgid "Ошибка загрузки данных."
+msgstr "Error loading data."
+
+#: .\myprofile\templates\desktop\arrival_history.html:160
+msgid "Нет данных за этот месяц."
+msgstr "No data for this month."
+
+#: .\myprofile\templates\desktop\arrival_history.html:241
+msgid "Нет данных за эту дату."
+msgstr "No data for this date."
+
+#: .\myprofile\templates\desktop\arrival_history.html:267
+msgid "Трек-коды:"
+msgstr "Track codes:"
+
+#: .\myprofile\templates\desktop\arrival_history.html:283
+msgid "Оплачен"
+msgstr "Paid"
+
+#: .\myprofile\templates\desktop\arrival_history.html:284
+msgid "Не оплачен"
+msgstr "Unpaid"
+
+#: .\myprofile\templates\desktop\arrival_history.html:301
+#: .\myprofile\templates\desktop\extradition_package.html:110
+msgid "Стоимость (тг)"
+msgstr "Cost (KZT)"
+
+#: .\myprofile\templates\desktop\arrival_history.html:326
+msgid "Чек ещё не сформирован"
+msgstr "Receipt not yet created"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:9
+msgid "Inter Cargo - Сводка прихода"
+msgstr "Inter Cargo - Arrival Summary"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:55
+#: .\myprofile\templates\desktop\goods_arrival_session.html:53
+msgid "Дата:"
+msgstr "Date:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:59
+#: .\myprofile\templates\desktop\finance_summary.html:89
+#: .\myprofile\templates\desktop\goods_arrival.html:200
+msgid "Показать"
+msgstr "Show"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:68
+msgid "Сформировать чеки"
+msgstr "Generate receipts"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:97
+msgid "Нет посылок со статусом \"Доставлен на сортировочный склад\" за эту дату"
+msgstr "No parcels with status \"Delivered to sorting warehouse\" for this date"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:105
+#: .\myprofile\templates\desktop\delivery.html:126
+msgid "Доставка на дом (Курьер)"
+msgstr "Home delivery (Courier)"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:114
+#: .\myprofile\templates\desktop\arrival_summary.html:198
+#: .\myprofile\templates\desktop\arrival_summary.html:296
+#: .\myprofile\templates\desktop\delivery.html:319
+#: .\myprofile\templates\desktop\finance_summary.html:412
+#: .\myprofile\templates\desktop\warehouse_inventory.html:72
+#: .\myprofile\templates\desktop\warehouse_reassign.html:149
+msgid "Посылок"
+msgstr "Parcels"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:116
+#: .\myprofile\templates\desktop\arrival_summary.html:200
+#: .\myprofile\templates\desktop\arrival_summary.html:298
+msgid "Цена/кг (₸)"
+msgstr "Price/kg (₸)"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:117
+#: .\myprofile\templates\desktop\arrival_summary.html:201
+#: .\myprofile\templates\desktop\arrival_summary.html:299
+msgid "Стоимость (₸)"
+msgstr "Cost (₸)"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:118
+#: .\myprofile\templates\desktop\arrival_summary.html:300
+msgid "Действие"
+msgstr "Action"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:145
+#: .\myprofile\templates\desktop\arrival_summary.html:329
+msgid "Вернуть на ПВЗ"
+msgstr "Return to PVZ"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:163
+msgid "Без пункта"
+msgstr "No point"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:167
+msgid "Копировать логины"
+msgstr "Copy logins"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:170
+msgid "Выбрать несколько"
+msgstr "Select multiple"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:177
+#: .\myprofile\templates\desktop\reschedule_arrival.html:102
+#: .\myprofile\templates\desktop\track_codes.html:105
+#: .\myprofile\templates\mobile\mobile_parcels.html:132
+msgid "Выбрано:"
+msgstr "Selected:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:179
+msgid "Выбрать всех"
+msgstr "Select all"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:182
+#: .\myprofile\templates\desktop\arrival_summary.html:197
+#: .\myprofile\templates\desktop\arrival_summary.html:250
+msgid "Назначить ПВЗ"
+msgstr "Assign PVZ"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:185
+#: .\myprofile\templates\desktop\arrival_summary.html:264
+#: .\myprofile\templates\desktop\arrival_summary.html:391
+#: .\myprofile\templates\desktop\delivered_posts.html:210
+#: .\myprofile\templates\desktop\delivery.html:395
+#: .\myprofile\templates\desktop\extraditions.html:275
+#: .\myprofile\templates\desktop\profile.html:310
+#: .\myprofile\templates\desktop\role_management_edit.html:144
+#: .\myprofile\templates\desktop\track_codes.html:155
+#: .\myprofile\templates\desktop\track_codes.html:290
+#: .\myprofile\templates\desktop\unidentified.html:254
+#: .\register\templates\desktop\register_confirmation.html:132
+msgid "Отмена"
+msgstr "Cancel"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:230
+#: .\myprofile\templates\desktop\arrival_summary.html:267
+#: .\myprofile\templates\desktop\unidentified.html:258
+#: .\myprofile\templates\desktop\warehouse_reassign.html:99
+msgid "Назначить"
+msgstr "Assign"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:252
+msgid "Выбрано клиентов:"
+msgstr "Clients selected:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:337
+msgid "Ввести скидку"
+msgstr "Enter discount"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:346
+msgid "На дом"
+msgstr "Home delivery"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:357
+msgid "Со склада"
+msgstr "From warehouse"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:378
+msgid "Ввести разовую скидку"
+msgstr "Enter one-time discount"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:380
+msgid "Клиент:"
+msgstr "Client:"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:388
+msgid "Например: 100"
+msgstr "For example: 100"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:394
+#: .\myprofile\templates\desktop\pp_extradition_history.html:55
+msgid "Применить"
+msgstr "Apply"
+
+#: .\myprofile\templates\desktop\attention_required.html:9
+msgid "Inter Cargo - Требует внимания"
+msgstr "Inter Cargo - Requires Attention"
+
+#: .\myprofile\templates\desktop\attention_required.html:54
+msgid ""
+"Посылки клиентов, которые требуют внимания: возвращены со склада ПВЗ, не "
+"приняты при приёмке или не приняты в доставку водителем."
+msgstr ""
+"Client parcels that require attention: returned from PVZ warehouse, not "
+"accepted during acceptance, or not accepted for delivery by the driver."
+
+#: .\myprofile\templates\desktop\attention_required.html:97
+#: .\myprofile\templates\desktop\warehouse_reassign.html:161
+msgid "(вр.)"
+msgstr "(temp.)"
+
+#: .\myprofile\templates\desktop\attention_required.html:123
+msgid "Подтвердить возврат"
+msgstr "Confirm return"
+
+#: .\myprofile\templates\desktop\attention_required.html:135
+msgid "Проблемы устранены"
+msgstr "Issues resolved"
+
+#: .\myprofile\templates\desktop\attention_required.html:152
+msgid "Все посылки приняты. Нет проблем, требующих внимания."
+msgstr "All parcels accepted. No issues requiring attention."
+
+#: .\myprofile\templates\desktop\delivered_posts.html:9
+msgid "Inter Cargo - Чеки"
+msgstr "Inter Cargo - Receipts"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:61
+#: .\myprofile\templates\desktop\profile.html:163
+#: .\myprofile\templates\desktop\profile.html:276
+msgid "Оплатить"
+msgstr "Pay"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:67
+msgid "Фильтр:"
+msgstr "Filter:"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:70
+#: .\myprofile\templates\desktop\notification_logs.html:101
+#: .\myprofile\templates\desktop\notification_logs.html:234
+#: .\myprofile\templates\desktop\notification_logs.html:426
+#: .\myprofile\templates\desktop\track_codes.html:167
+msgid "Все"
+msgstr "All"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:73
+#: .\myprofile\templates\desktop\track_codes.html:202
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:34
+msgid "Выдано"
+msgstr "Issued"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:76
+msgid "Не выдано"
+msgstr "Not issued"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:142
+#: .\myprofile\templates\shared\print\receipt_print.html:368
+msgid "Цена (₸)"
+msgstr "Price (₸)"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:176
+msgid "Печатная форма (PDF)"
+msgstr "Print form (PDF)"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:184
+msgid "Чеки ещё не сформированы."
+msgstr "Receipts not yet generated."
+
+#: .\myprofile\templates\desktop\delivered_posts.html:199
+#: .\myprofile\templates\desktop\profile.html:299
+msgid "Обратите внимание"
+msgstr "Please note"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:202
+#: .\myprofile\templates\desktop\profile.html:302
+msgid ""
+"Данная функция предназначена только для удобства оплаты при получении "
+"посылки, вам всё ещё необходимо будет показать ваш чек об оплате на пункте "
+"выдачи."
+msgstr ""
+"This feature is for payment convenience when receiving a parcel, you will "
+"still need to show your payment receipt at the pickup point."
+
+#: .\myprofile\templates\desktop\delivered_posts.html:206
+#: .\myprofile\templates\desktop\profile.html:306
+msgid "Больше не показывать"
+msgstr "Don't show again"
+
+#: .\myprofile\templates\desktop\delivered_posts.html:214
+#: .\myprofile\templates\desktop\goods_arrival.html:106
+#: .\myprofile\templates\desktop\goods_arrival.html:144
+#: .\myprofile\templates\desktop\profile.html:314
+msgid "Продолжить"
+msgstr "Continue"
+
+#: .\myprofile\templates\desktop\delivery.html:9
+msgid "Inter Cargo - Доставка"
+msgstr "Inter Cargo - Delivery"
+
+#: .\myprofile\templates\desktop\delivery.html:30
+msgid "Ошибка загрузки данных. Попробуйте снова."
+msgstr "Error loading data. Please try again."
+
+#: .\myprofile\templates\desktop\delivery.html:31
+msgid "Отметить вручную"
+msgstr "Mark manually"
+
+#: .\myprofile\templates\desktop\delivery.html:32
+msgid ""
+"Не удалось получить доступ к камере. Разрешите доступ в настройках браузера."
+msgstr "Failed to access camera. Allow access in browser settings."
+
+#: .\myprofile\templates\desktop\delivery.html:33
+#, python-brace-format
+msgid "Этот QR-код уже отсканирован: {code}"
+msgstr "This QR code has already been scanned: {code}"
+
+#: .\myprofile\templates\desktop\delivery.html:34
+#, python-brace-format
+msgid "Неизвестный QR-код: {code}"
+msgstr "Unknown QR code: {code}"
+
+#: .\myprofile\templates\desktop\delivery.html:35
+msgid "Сканирование не завершено. Вы уверены, что хотите отменить?"
+msgstr "Scanning is not complete. Are you sure you want to cancel?"
+
+#: .\myprofile\templates\desktop\delivery.html:36
+msgid "Сканирование не завершено. Вы уверены, что хотите покинуть страницу?"
+msgstr "Scanning is not complete. Are you sure you want to leave the page?"
+
+#: .\myprofile\templates\desktop\delivery.html:37
+msgid "Нет QR-кодов для сканирования"
+msgstr "No QR codes to scan"
+
+#: .\myprofile\templates\desktop\delivery.html:38
+msgid "У клиентов нет чеков — можно сразу взять в доставку"
+msgstr "Clients have no receipts — you can take directly for delivery"
+
+#: .\myprofile\templates\desktop\delivery.html:39
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:432
+msgid "Все QR-коды отсканированы!"
+msgstr "All QR codes scanned!"
+
+#: .\myprofile\templates\desktop\delivery.html:64
+#: .\myprofile\templates\desktop\delivery.html:157
+#: .\myprofile\templates\desktop\delivery.html:403
+msgid "Взять в доставку"
+msgstr "Take for delivery"
+
+#: .\myprofile\templates\desktop\delivery.html:68
+msgid "Завершить доставку"
+msgstr "Complete delivery"
+
+#: .\myprofile\templates\desktop\delivery.html:72
+msgid "Выдача товара"
+msgstr "Issue goods"
+
+#: .\myprofile\templates\desktop\delivery.html:113
+msgid "Сканировать и взять"
+msgstr "Scan and take"
+
+#: .\myprofile\templates\desktop\delivery.html:166
+msgid "Нет посылок для доставки"
+msgstr "No parcels for delivery"
+
+#: .\myprofile\templates\desktop\delivery.html:208
+#: .\myprofile\templates\desktop\service.html:193
+msgid "Доставлено на ПВЗ"
+msgstr "Delivered to PVZ"
+
+#: .\myprofile\templates\desktop\delivery.html:215
+msgid "Нет посылок в доставке"
+msgstr "No parcels in delivery"
+
+#: .\myprofile\templates\desktop\delivery.html:224
+msgid "Доставка на дом (Курьер) — Выдача клиентам"
+msgstr "Home delivery (Courier) — Client issuance"
+
+#: .\myprofile\templates\desktop\delivery.html:247
+msgid "Выдать"
+msgstr "Issue"
+
+#: .\myprofile\templates\desktop\delivery.html:256
+msgid "Нет клиентов для выдачи"
+msgstr "No clients for issuance"
+
+#: .\myprofile\templates\desktop\delivery.html:257
+msgid "Здесь отображаются клиенты с доставкой на дом, ожидающие выдачу"
+msgstr "Clients with home delivery waiting for issuance are shown here"
+
+#: .\myprofile\templates\desktop\delivery.html:339
+msgid "Нет данных о клиентах"
+msgstr "No client data"
+
+#: .\myprofile\templates\desktop\delivery.html:352
+msgid "История доставок пуста"
+msgstr "Delivery history is empty"
+
+#: .\myprofile\templates\desktop\delivery.html:363
+msgid "Сканирование"
+msgstr "Scanning"
+
+#: .\myprofile\templates\desktop\delivery.html:375
+#: .\myprofile\templates\desktop\extraditions.html:260
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:116
+msgid "Отсканировано:"
+msgstr "Scanned:"
+
+#: .\myprofile\templates\desktop\extradition_package.html:9
+msgid "Inter Cargo - История выдачи"
+msgstr "Inter Cargo - Issue History"
+
+#: .\myprofile\templates\desktop\extradition_package.html:76
+#: .\myprofile\templates\mobile\mobile_qr.html:152
+msgid "Выдан"
+msgstr "Issued"
+
+#: .\myprofile\templates\desktop\extradition_package.html:78
+msgid "Ожидает выдачи"
+msgstr "Awaiting issuance"
+
+#: .\myprofile\templates\desktop\extradition_package.html:145
+msgid "Показать QR-код"
+msgstr "Show QR code"
+
+#: .\myprofile\templates\desktop\extradition_package.html:154
+msgid "Пока нет оформленных пакетов."
+msgstr "No packages issued yet."
+
+#: .\myprofile\templates\desktop\extradition_package.html:166
+#: .\myprofile\templates\desktop\extradition_package.html:171
+#: .\myprofile\templates\desktop\profile.html:267
+#: .\myprofile\templates\desktop\profile.html:271
+#: .\myprofile\templates\mobile\mobile_qr.html:44
+#: .\myprofile\templates\mobile\mobile_qr.html:219
+#: .\myprofile\templates\mobile\mobile_qr.html:223
+msgid "QR-код"
+msgstr "QR code"
+
+#: .\myprofile\templates\desktop\extradition_package.html:185
+#: .\myprofile\templates\desktop\profile.html:284
+#: .\myprofile\templates\mobile\mobile_qr.html:230
+msgid "Скачать PNG"
+msgstr "Download PNG"
+
+#: .\myprofile\templates\desktop\extraditions.html:9
+msgid "Inter Cargo - Выдача клиентов"
+msgstr "Inter Cargo - Client Issuance"
+
+#: .\myprofile\templates\desktop\extraditions.html:31
+msgid "Камера не доступна — используйте сканер или ввод вручную"
+msgstr "Camera unavailable — use scanner or manual input"
+
+#: .\myprofile\templates\desktop\extraditions.html:32
+msgid "Не удалось запустить камеру. Проверьте разрешения."
+msgstr "Failed to start camera. Check permissions."
+
+#: .\myprofile\templates\desktop\extraditions.html:33
+#, python-brace-format
+msgid "Чек {code} уже отсканирован"
+msgstr "Receipt {code} already scanned"
+
+#: .\myprofile\templates\desktop\extraditions.html:34
+#, python-brace-format
+msgid "Чек {code} подтверждён"
+msgstr "Receipt {code} confirmed"
+
+#: .\myprofile\templates\desktop\extraditions.html:35
+#, python-brace-format
+msgid "Чек {code} отмечен вручную"
+msgstr "Receipt {code} marked manually"
+
+#: .\myprofile\templates\desktop\extraditions.html:36
+#, python-brace-format
+msgid "Чек {code} не относится к этому пакету"
+msgstr "Receipt {code} does not belong to this package"
+
+#: .\myprofile\templates\desktop\extraditions.html:37
+msgid "Все чеки отмечены"
+msgstr "All receipts marked"
+
+#: .\myprofile\templates\desktop\extraditions.html:38
+msgid "Введите QR-код"
+msgstr "Enter QR code"
+
+#: .\myprofile\templates\desktop\extraditions.html:39
+msgid "Пакет не найден"
+msgstr "Package not found"
+
+#: .\myprofile\templates\desktop\extraditions.html:40
+msgid "Ошибка сервера"
+msgstr "Server error"
+
+#: .\myprofile\templates\desktop\extraditions.html:41
+#: .\myprofile\templates\desktop\finance_summary.html:114
+msgid "Оплачено"
+msgstr "Paid"
+
+#: .\myprofile\templates\desktop\extraditions.html:42
+#: .\myprofile\templates\desktop\finance_summary.html:119
+msgid "Не оплачено"
+msgstr "Unpaid"
+
+#: .\myprofile\templates\desktop\extraditions.html:43
+msgid "Отметить без сканирования"
+msgstr "Mark without scanning"
+
+#: .\myprofile\templates\desktop\extraditions.html:44
+#: .\myprofile\templates\desktop\warehouse_reassign.html:83
+msgid "Вручную"
+msgstr "Manually"
+
+#: .\myprofile\templates\desktop\extraditions.html:45
+#, python-brace-format
+msgid "Оплата чека {num} подтверждена"
+msgstr "Payment of receipt {num} confirmed"
+
+#: .\myprofile\templates\desktop\extraditions.html:46
+msgid "Ошибка обновления оплаты"
+msgstr "Payment update error"
+
+#: .\myprofile\templates\desktop\extraditions.html:47
+msgid "Ошибка связи с сервером"
+msgstr "Server communication error"
+
+#: .\myprofile\templates\desktop\extraditions.html:48
+msgid "Статус оплаты обновлен"
+msgstr "Payment status updated"
+
+#: .\myprofile\templates\desktop\extraditions.html:49
+#, python-brace-format
+msgid "Ошибка: {msg}"
+msgstr "Error: {msg}"
+
+#: .\myprofile\templates\desktop\extraditions.html:50
+msgid "Ошибка: QR-код пакета не указан"
+msgstr "Error: Package QR code not specified"
+
+#: .\myprofile\templates\desktop\extraditions.html:51
+msgid "Нажмите, чтобы отметить как оплачено"
+msgstr "Click to mark as paid"
+
+#: .\myprofile\templates\desktop\extraditions.html:80
+msgid "Оформление выдачи посылок"
+msgstr "Package issuance"
+
+#: .\myprofile\templates\desktop\extraditions.html:83
+msgid "Оператор:"
+msgstr "Operator:"
+
+#: .\myprofile\templates\desktop\extraditions.html:85
+msgid "ПВЗ:"
+msgstr "PVZ:"
+
+#: .\myprofile\templates\desktop\extraditions.html:93
+msgid "Выберите ПВЗ"
+msgstr "Select PVZ"
+
+#: .\myprofile\templates\desktop\extraditions.html:97
+msgid "-- Все ПВЗ --"
+msgstr "-- All PVZ --"
+
+#: .\myprofile\templates\desktop\extraditions.html:111
+msgid "QR-код пакета"
+msgstr "Package QR code"
+
+#: .\myprofile\templates\desktop\extraditions.html:111
+msgid "(обязательно)"
+msgstr "(required)"
+
+#: .\myprofile\templates\desktop\extraditions.html:116
+msgid "Введите или отсканируйте QR-код пакета"
+msgstr "Enter or scan the package QR code"
+
+#: .\myprofile\templates\desktop\extraditions.html:126
+msgid "Информация о пакете"
+msgstr "Package information"
+
+#: .\myprofile\templates\desktop\extraditions.html:129
+msgid "Владелец:"
+msgstr "Owner:"
+
+#: .\myprofile\templates\desktop\extraditions.html:133
+#: .\myprofile\templates\desktop\profile.html:64
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:43
+msgid "Пункт выдачи:"
+msgstr "Pickup point:"
+
+#: .\myprofile\templates\desktop\extraditions.html:137
+msgid "Ячейка на складе:"
+msgstr "Storage cell:"
+
+#: .\myprofile\templates\desktop\extraditions.html:160
+msgid "Общая сумма выдачи:"
+msgstr "Total issuance amount:"
+
+#: .\myprofile\templates\desktop\extraditions.html:160
+msgid "тг"
+msgstr "KZT"
+
+#: .\myprofile\templates\desktop\extraditions.html:168
+#: .\myprofile\templates\desktop\extraditions.html:282
+msgid "Оформить выдачу"
+msgstr "Process issuance"
+
+#: .\myprofile\templates\desktop\extraditions.html:173
+msgid "Проверить и выдать"
+msgstr "Verify and issue"
+
+#: .\myprofile\templates\desktop\extraditions.html:178
+msgid "Очистить"
+msgstr "Clear"
+
+#: .\myprofile\templates\desktop\extraditions.html:183
+msgid "Сканировать"
+msgstr "Scan"
+
+#: .\myprofile\templates\desktop\extraditions.html:194
+msgid "Открытые сессии выдачи"
+msgstr "Open issuance sessions"
+
+#: .\myprofile\templates\desktop\extraditions.html:199
+msgid "Обновить"
+msgstr "Refresh"
+
+#: .\myprofile\templates\desktop\extraditions.html:203
+msgid "Нет открытых сессий"
+msgstr "No open sessions"
+
+#: .\myprofile\templates\desktop\extraditions.html:217
+msgid "Сканирование QR-кода"
+msgstr "QR code scanning"
+
+#: .\myprofile\templates\desktop\extraditions.html:229
+msgid "Закрыть"
+msgstr "Close"
+
+#: .\myprofile\templates\desktop\extraditions.html:240
+msgid "Проверка чеков для выдачи"
+msgstr "Receipt verification for issuance"
+
+#: .\myprofile\templates\desktop\extraditions.html:249
+msgid "Ввод сканером или вручную"
+msgstr "Input by scanner or manually"
+
+#: .\myprofile\templates\desktop\extraditions.html:253
+msgid "Нажмите сюда и отсканируйте QR-код сканером..."
+msgstr "Click here and scan the QR code with scanner..."
+
+#: .\myprofile\templates\desktop\finance_summary.html:9
+msgid "Inter Cargo - Финансовая сводка"
+msgstr "Inter Cargo - Financial Summary"
+
+#: .\myprofile\templates\desktop\finance_summary.html:49
+msgid "По дням"
+msgstr "By days"
+
+#: .\myprofile\templates\desktop\finance_summary.html:54
+msgid "По месяцам"
+msgstr "By months"
+
+#: .\myprofile\templates\desktop\finance_summary.html:68
+#: .\myprofile\templates\desktop\finance_summary.html:345
+msgid "Месяц"
+msgstr "Month"
+
+#: .\myprofile\templates\desktop\finance_summary.html:78
+msgid "Все ПВЗ"
+msgstr "All PVZ"
+
+#: .\myprofile\templates\desktop\finance_summary.html:98
+msgid "Финансовая сводка по чекам"
+msgstr "Financial summary by receipts"
+
+#: .\myprofile\templates\desktop\finance_summary.html:105
+msgid "Всего чеков"
+msgstr "Total receipts"
+
+#: .\myprofile\templates\desktop\finance_summary.html:109
+msgid "Общая сумма"
+msgstr "Total amount"
+
+#: .\myprofile\templates\desktop\finance_summary.html:140
+#: .\myprofile\templates\desktop\finance_summary.html:179
+#: .\myprofile\templates\desktop\finance_summary.html:225
+#: .\myprofile\templates\desktop\finance_summary.html:260
+#: .\myprofile\templates\desktop\finance_summary.html:303
+#: .\myprofile\templates\desktop\finance_summary.html:346
+msgid "Чеков"
+msgstr "Receipts"
+
+#: .\myprofile\templates\desktop\finance_summary.html:142
+#: .\myprofile\templates\desktop\finance_summary.html:181
+#: .\myprofile\templates\desktop\finance_summary.html:227
+#: .\myprofile\templates\desktop\finance_summary.html:261
+#: .\myprofile\templates\desktop\finance_summary.html:305
+#: .\myprofile\templates\desktop\finance_summary.html:347
+#: .\myprofile\templates\desktop\finance_summary.html:414
+#: .\myprofile\templates\desktop\finance_summary.html:462
+msgid "Сумма (₸)"
+msgstr "Amount (₸)"
+
+#: .\myprofile\templates\desktop\finance_summary.html:143
+#: .\myprofile\templates\desktop\finance_summary.html:182
+#: .\myprofile\templates\desktop\finance_summary.html:228
+#: .\myprofile\templates\desktop\finance_summary.html:262
+#: .\myprofile\templates\desktop\finance_summary.html:306
+#: .\myprofile\templates\desktop\finance_summary.html:348
+msgid "Оплачено (₸)"
+msgstr "Paid (₸)"
+
+#: .\myprofile\templates\desktop\finance_summary.html:144
+#: .\myprofile\templates\desktop\finance_summary.html:263
+#: .\myprofile\templates\desktop\finance_summary.html:307
+#: .\myprofile\templates\desktop\finance_summary.html:349
+msgid "Не оплачено (₸)"
+msgstr "Unpaid (₸)"
+
+#: .\myprofile\templates\desktop\finance_summary.html:217
+#: .\register\models.py:13
+msgid "Доставка на дом"
+msgstr "Home delivery"
+
+#: .\myprofile\templates\desktop\finance_summary.html:252
+msgid "Последние 30 дней"
+msgstr "Last 30 days"
+
+#: .\myprofile\templates\desktop\finance_summary.html:282
+msgid "Нет данных за этот период"
+msgstr "No data for this period"
+
+#: .\myprofile\templates\desktop\finance_summary.html:325
+msgid "Нет данных за этот месяц"
+msgstr "No data for this month"
+
+#: .\myprofile\templates\desktop\finance_summary.html:338
+msgid "Последние 12 месяцев"
+msgstr "Last 12 months"
+
+#: .\myprofile\templates\desktop\finance_summary.html:377
+msgid "Оплата за доставку"
+msgstr "Delivery payment"
+
+#: .\myprofile\templates\desktop\finance_summary.html:383
+#: .\myprofile\templates\desktop\finance_summary.html:460
+msgid "Доставок"
+msgstr "Deliveries"
+
+#: .\myprofile\templates\desktop\finance_summary.html:387
+msgid "Общий вес"
+msgstr "Total weight"
+
+#: .\myprofile\templates\desktop\finance_summary.html:388
+msgid "кг"
+msgstr "kg"
+
+#: .\myprofile\templates\desktop\finance_summary.html:391
+msgid "К выплате"
+msgstr "To pay"
+
+#: .\myprofile\templates\desktop\finance_summary.html:428
+msgid "Нет доставок за выбранный период"
+msgstr "No deliveries for the selected period"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:9
+msgid "Inter Cargo - Приход товаров"
+msgstr "Inter Cargo - Goods Arrival"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:55
+msgid "Начать новую сессию"
+msgstr "Start new session"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:67
+msgid "— Не указано —"
+msgstr "— Not specified —"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:74
+msgid "Начать сессию"
+msgstr "Start session"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:83
+msgid "Активные сессии"
+msgstr "Active sessions"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:157
+msgid "Неактивные сессии"
+msgstr "Inactive sessions"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:158
+msgid "(превышен 48-часовой лимит)"
+msgstr "(48-hour limit exceeded)"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:181
+msgid "Возобновить"
+msgstr "Resume"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:194
+msgid "Завершённые сессии"
+msgstr "Completed sessions"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:233
+msgid "Нет завершённых сессий за эту дату."
+msgstr "No completed sessions for this date."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:56
+msgid "| Начата:"
+msgstr "| Started:"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:64
+msgid "Назад"
+msgstr "Back"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:77
+msgid "Сессия на паузе"
+msgstr "Session paused"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:78
+msgid ""
+"Редактирование недоступно. Нажмите «Продолжить», чтобы возобновить работу."
+msgstr "Editing unavailable. Click 'Continue' to resume."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:83
+msgid "Сессия неактивна"
+msgstr "Session inactive"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:84
+msgid ""
+"Превышен 48-часовой лимит активности. Нажмите «Возобновить» для продолжения."
+msgstr "48-hour activity limit exceeded. Click 'Resume' to continue."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:104
+msgid "Потеряна связь с сессией"
+msgstr "Session connection lost"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:105
+msgid "Автосохранение не работает. Данные в браузере сохранены."
+msgstr "Autosave is not working. Data saved in browser."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:112
+msgid "Переподключиться"
+msgstr "Reconnect"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:122
+msgid "Связь восстановлена. Данные сохранены."
+msgstr "Connection restored. Data saved."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:145
+msgid "Переключить на текстовый вид"
+msgstr "Switch to text view"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:168
+#: .\myprofile\templates\desktop\update_tracks.html:123
+msgid "Добавить строку"
+msgstr "Add row"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:175
+#: .\myprofile\templates\desktop\shipped_cn.html:58
+#: .\myprofile\templates\desktop\update_tracks.html:78
+msgid "Трек-коды (по одному в строке)"
+msgstr "Track codes (one per line)"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:181
+msgid "Владельцы (по одному в строке)"
+msgstr "Owners (one per line)"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:187
+msgid "Вес (кг, по одному в строке)"
+msgstr "Weight (kg, one per line)"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:197
+msgid "Незаполненных ячеек:"
+msgstr "Empty cells:"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:203
+msgid "Подозрительных ячеек:"
+msgstr "Suspicious cells:"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:204
+msgid "Предыдущая"
+msgstr "Previous"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:204
+msgid "&#8593; Пред."
+msgstr "&#8593; Prev."
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:205
+msgid "Следующая"
+msgstr "Next"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:205
+msgid "&#8595; След."
+msgstr "&#8595; Next"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:216
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:157
+msgid "Завершить сессию"
+msgstr "Complete session"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:224
+msgid "Пауза"
+msgstr "Pause"
+
+#: .\myprofile\templates\desktop\notification_logs.html:9
+msgid "Inter Cargo - Логи Уведомлений"
+msgstr "Inter Cargo - Notification Logs"
+
+#: .\myprofile\templates\desktop\notification_logs.html:33
+msgid "Логи уведомлений"
+msgstr "Notification logs"
+
+#: .\myprofile\templates\desktop\notification_logs.html:58
+msgid "Сайт"
+msgstr "Site"
+
+#: .\myprofile\templates\desktop\notification_logs.html:83
+#: .\myprofile\templates\desktop\notification_logs.html:212
+msgid "Всего"
+msgstr "Total"
+
+#: .\myprofile\templates\desktop\notification_logs.html:91
+#: .\myprofile\templates\desktop\notification_logs.html:146
+#: .\myprofile\templates\desktop\notification_logs.html:178
+msgid "Не прочитано"
+msgstr "Unread"
+
+#: .\myprofile\templates\desktop\notification_logs.html:106
+msgid "Непрочитанные"
+msgstr "Unread"
+
+#: .\myprofile\templates\desktop\notification_logs.html:111
+msgid "Прочитанные"
+msgstr "Read"
+
+#: .\myprofile\templates\desktop\notification_logs.html:115
+#: .\myprofile\templates\desktop\notification_logs.html:253
+#: .\myprofile\templates\desktop\notification_logs.html:440
+msgid "Поиск..."
+msgstr "Search..."
+
+#: .\myprofile\templates\desktop\notification_logs.html:119
+#: .\myprofile\templates\desktop\notification_logs.html:257
+#: .\myprofile\templates\desktop\notification_logs.html:444
+#: .\myprofile\templates\desktop\role_management.html:46
+msgid "Найти"
+msgstr "Find"
+
+#: .\myprofile\templates\desktop\notification_logs.html:158
+#: .\myprofile\templates\desktop\notification_logs.html:191
+msgid "Уведомлений пока нет"
+msgstr "No notifications yet"
+
+#: .\myprofile\templates\desktop\notification_logs.html:183
+#: .\myprofile\templates\desktop\notification_logs.html:358
+msgid "Пользователь:"
+msgstr "User:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:185
+#: .\myprofile\templates\desktop\notification_logs.html:364
+msgid "Сообщение:"
+msgstr "Message:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:197
+#: .\myprofile\templates\desktop\notification_logs.html:393
+#: .\myprofile\templates\desktop\notification_logs.html:567
+msgid "Показаны последние 200 записей"
+msgstr "Showing last 200 records"
+
+#: .\myprofile\templates\desktop\notification_logs.html:220
+#: .\myprofile\templates\desktop\notification_logs.html:244
+#: .\myprofile\templates\desktop\notification_logs.html:292
+#: .\myprofile\templates\desktop\notification_logs.html:349
+msgid "В очереди"
+msgstr "In queue"
+
+#: .\myprofile\templates\desktop\notification_logs.html:224
+#: .\myprofile\templates\desktop\notification_logs.html:249
+#: .\myprofile\templates\desktop\notification_logs.html:416
+#: .\myprofile\templates\desktop\notification_logs.html:436
+msgid "Ошибки"
+msgstr "Errors"
+
+#: .\myprofile\templates\desktop\notification_logs.html:270
+#: .\tgbot\models.py:106
+msgid "Заголовок"
+msgstr "Title"
+
+#: .\myprofile\templates\desktop\notification_logs.html:274
+msgid "Попыток"
+msgstr "Attempts"
+
+#: .\myprofile\templates\desktop\notification_logs.html:325
+#: .\myprofile\templates\desktop\notification_logs.html:387
+msgid "Telegram-уведомлений пока нет"
+msgstr "No Telegram notifications yet"
+
+#: .\myprofile\templates\desktop\notification_logs.html:361
+msgid "Заголовок:"
+msgstr "Title:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:368
+msgid "Отправлено:"
+msgstr "Sent:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:372
+msgid "Попыток:"
+msgstr "Attempts:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:377
+#: .\myprofile\templates\desktop\notification_logs.html:541
+msgid "Ошибка:"
+msgstr "Error:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:408
+msgid "Всего писем"
+msgstr "Total emails"
+
+#: .\myprofile\templates\desktop\notification_logs.html:460
+#: .\myprofile\templates\desktop\unidentified.html:111
+#: .\myprofile\templates\desktop\unidentified.html:181
+#: .\myprofile\templates\desktop\warehouse_reassign.html:152
+#: .\register\templates\desktop\register_confirmation.html:67
+msgid "Действия"
+msgstr "Actions"
+
+#: .\myprofile\templates\desktop\notification_logs.html:498
+#: .\myprofile\templates\desktop\notification_logs.html:553
+msgid "Переотправить"
+msgstr "Resend"
+
+#: .\myprofile\templates\desktop\notification_logs.html:510
+#: .\myprofile\templates\desktop\notification_logs.html:561
+msgid "Логов email пока нет"
+msgstr "No email logs yet"
+
+#: .\myprofile\templates\desktop\notification_logs.html:536
+msgid "Получатель:"
+msgstr "Recipient:"
+
+#: .\myprofile\templates\desktop\notification_logs.html:538
+msgid "Тема:"
+msgstr "Subject:"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:8
+msgid "Inter Cargo — Управление уведомлениями"
+msgstr "Inter Cargo — Notification Management"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:31
+#: .\myprofile\templates\desktop\notification_mutes.html:34
+msgid "Управление уведомлениями"
+msgstr "Notification management"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:53
+#: .\myprofile\templates\desktop\notification_mutes.html:152
+msgid "Отключить уведомления"
+msgstr "Disable notifications"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:61
+msgid "Для кого"
+msgstr "For whom"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:65
+#: .\myprofile\templates\desktop\notification_mutes.html:184
+msgid "Все клиенты"
+msgstr "All clients"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:69
+msgid "Конкретный клиент"
+msgstr "Specific client"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:76
+#: .\myprofile\templates\desktop\reschedule_arrival.html:47
+msgid "Введите логин или имя..."
+msgstr "Enter login or name..."
+
+#: .\myprofile\templates\desktop\notification_mutes.html:101
+msgid "Только Telegram"
+msgstr "Telegram only"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:105
+msgid "Только Email"
+msgstr "Email only"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:112
+msgid "Длительность"
+msgstr "Duration"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:116
+msgid "Вручную (до ручного включения)"
+msgstr "Manual (until manually enabled)"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:120
+msgid "На определённое время"
+msgstr "For a specific time"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:127
+msgid "Количество часов"
+msgstr "Number of hours"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:129
+msgid "часов"
+msgstr "hours"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:143
+msgid "(необязательно)"
+msgstr "(optional)"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:145
+msgid "Например: технические работы, просьба клиента..."
+msgstr "For example: maintenance, client request..."
+
+#: .\myprofile\templates\desktop\notification_mutes.html:164
+msgid "Активные заглушки"
+msgstr "Active mutes"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:201
+msgid "До ручного включения"
+msgstr "Until manually enabled"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:214
+msgid "Включить обратно"
+msgstr "Re-enable"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:222
+msgid "Все уведомления активны — заглушек нет"
+msgstr "All notifications active — no mutes"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:238
+msgid "все"
+msgstr "all"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:246
+msgid "Отключено"
+msgstr "Disabled"
+
+#: .\myprofile\templates\desktop\notification_mutes.html:320
+#: .\myprofile\templates\desktop\reschedule_arrival.html:285
+#: .\myprofile\templates\desktop\role_management.html:173
+msgid "Не найдено"
+msgstr "Not found"
+
+#: .\myprofile\templates\desktop\notifications.html:9
+#: .\myprofile\templates\mobile\mobile_notifications.html:9
+msgid "Inter Cargo - Уведомления"
+msgstr "Inter Cargo - Notifications"
+
+#: .\myprofile\templates\desktop\notifications.html:60
+msgid "Прочитать все"
+msgstr "Read all"
+
+#: .\myprofile\templates\desktop\notifications.html:82
+msgid "Уведомлений нет."
+msgstr "No notifications."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:9
+msgid "Inter Cargo - Заявки на смену ПВЗ"
+msgstr "Inter Cargo - PVZ Change Requests"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:76
+msgid "Одобрить"
+msgstr "Approve"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:83
+#: .\register\templates\desktop\register_confirmation.html:88
+msgid "Отклонить"
+msgstr "Reject"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:94
+msgid "Нет заявок на рассмотрении."
+msgstr "No requests under review."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:109
+msgid "Идёт сессия сортировки"
+msgstr "Sorting session in progress"
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:111
+msgid ""
+"Сейчас активна сессия прихода товаров. Изменение ПВЗ пользователям "
+"заблокировано на время сортировки."
+msgstr ""
+"A goods arrival session is currently active. Changing PVZ for users is "
+"blocked during sorting."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:114
+msgid ""
+"Поставьте активную сессию на паузу или дождитесь её завершения, чтобы "
+"рассмотреть заявки."
+msgstr ""
+"Pause the active session or wait for it to complete to review requests."
+
+#: .\myprofile\templates\desktop\pickup_change_requests.html:118
+msgid "Перейти к сессиям прихода"
+msgstr "Go to arrival sessions"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:9
+msgid "Inter Cargo - Приёмка товара"
+msgstr "Inter Cargo - Goods Acceptance"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:35
+msgid "Приёмка товара на ПВЗ"
+msgstr "Goods acceptance at PVZ"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:54
+msgid "Ожидают приёмки"
+msgstr "Awaiting acceptance"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:69
+msgid "Без даты прихода"
+msgstr "No arrival date"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:83
+msgid "Сканировать и отсортировать"
+msgstr "Scan and sort"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:92
+msgid "Нет посылок для приёмки"
+msgstr "No parcels for acceptance"
+
+#: .\myprofile\templates\desktop\pp_acceptance.html:93
+msgid ""
+"Здесь будут отображаться посылки, доставленные водителем для сортировки"
+msgstr "Parcels delivered by the driver for sorting will be displayed here"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:34
+#: .\myprofile\templates\mobile\mobile_menu.html:129
+#: .\myprofile\templates\mobile\mobile_menu.html:166
+msgid "Приёмка"
+msgstr "Acceptance"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:85
+msgid "Загрузка данных приёмки..."
+msgstr "Loading acceptance data..."
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:91
+msgid "Нет посылок для приёмки за эту дату"
+msgstr "No parcels for acceptance on this date"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:92
+msgid "Все посылки уже отсортированы или чеки не созданы"
+msgstr "All parcels are already sorted or receipts not created"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:101
+msgid "Ввод сканером / вручную"
+msgstr "Scanner / manual input"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:105
+msgid "Наведите сканер или введите номер чека"
+msgstr "Point scanner or enter receipt number"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:135
+msgid "Чеки к приёмке:"
+msgstr "Receipts for acceptance:"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:148
+msgid "Отсортировать отмеченные"
+msgstr "Sort marked"
+
+#: .\myprofile\templates\desktop\pp_acceptance_detail.html:253
+msgid "Ошибка загрузки данных"
+msgstr "Data loading error"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:9
+msgid "Inter Cargo - История выдачи ПВЗ"
+msgstr "Inter Cargo - PVZ Issue History"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:44
+msgid "Дата от"
+msgstr "Date from"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:49
+msgid "Дата до"
+msgstr "Date to"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:59
+#: .\myprofile\templates\desktop\role_management.html:50
+msgid "Сбросить"
+msgstr "Reset"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:67
+msgid "Нет выдач за указанный период"
+msgstr "No issuances for the specified period"
+
+#: .\myprofile\templates\desktop\pp_extradition_history.html:69
+msgid "Выберите дату для отображения истории выдач"
+msgstr "Select a date to display issue history"
+
+#: .\myprofile\templates\desktop\print_documents.html:9
+msgid "Inter Cargo - Печать документов"
+msgstr "Inter Cargo - Print Documents"
+
+#: .\myprofile\templates\desktop\print_documents.html:48
+msgid "Создать реестр клиентов"
+msgstr "Create client registry"
+
+#: .\myprofile\templates\desktop\print_documents.html:93
+msgid "Сформировать реестр"
+msgstr "Generate registry"
+
+#: .\myprofile\templates\desktop\print_documents.html:103
+msgid "Создать чеки"
+msgstr "Create receipts"
+
+#: .\myprofile\templates\desktop\print_documents.html:149
+msgid "Печать чеков"
+msgstr "Print receipts"
+
+#: .\myprofile\templates\desktop\print_documents.html:159
+msgid "История реестров"
+msgstr "Registry history"
+
+#: .\myprofile\templates\desktop\print_documents.html:192
+#: .\myprofile\templates\desktop\unidentified.html:210
+msgid "Удалить"
+msgstr "Delete"
+
+#: .\myprofile\templates\desktop\print_documents.html:207
+msgid "История реестров пуста"
+msgstr "Registry history is empty"
+
+#: .\myprofile\templates\desktop\profile.html:9
+msgid "Inter Cargo - Личный кабинет"
+msgstr "Inter Cargo - Personal Account"
+
+#: .\myprofile\templates\desktop\profile.html:59
+msgid "Информация о пользователе"
+msgstr "User information"
+
+#: .\myprofile\templates\desktop\profile.html:60
+msgid "Имя пользователя:"
+msgstr "Username:"
+
+#: .\myprofile\templates\desktop\profile.html:63
+msgid "Телефон:"
+msgstr "Phone:"
+
+#: .\myprofile\templates\desktop\profile.html:66
+msgid "Время работы:"
+msgstr "Working hours:"
+
+#: .\myprofile\templates\desktop\profile.html:77
+msgid "Telegram подключён"
+msgstr "Telegram connected"
+
+#: .\myprofile\templates\desktop\profile.html:82
+msgid "Перепривязать"
+msgstr "Re-link"
+
+#: .\myprofile\templates\desktop\profile.html:122
+msgid "Новичок на сайте?"
+msgstr "New to the site?"
+
+#: .\myprofile\templates\desktop\profile.html:123
+msgid "Пройдите интерактивное обучение по основным функциям"
+msgstr "Take the interactive tutorial on the main features"
+
+#: .\myprofile\templates\desktop\profile.html:172
+#: .\myprofile\templates\desktop\track_codes.html:242
+#: .\myprofile\templates\desktop\track_codes.html:310
+#: .\myprofile\templates\mobile\mobile_parcels.html:180
+msgid "Код:"
+msgstr "Code:"
+
+#: .\myprofile\templates\desktop\profile.html:173
+#: .\myprofile\templates\desktop\track_codes.html:243
+#: .\myprofile\templates\desktop\track_codes.html:311
+#: .\myprofile\templates\mobile\mobile_parcels.html:181
+msgid "Статус:"
+msgstr "Status:"
+
+#: .\myprofile\templates\desktop\profile.html:174
+#: .\myprofile\templates\desktop\track_codes.html:244
+#: .\myprofile\templates\mobile\mobile_parcels.html:182
+msgid "Обновлено:"
+msgstr "Updated:"
+
+#: .\myprofile\templates\desktop\profile.html:176
+#: .\myprofile\templates\desktop\track_codes.html:142
+#: .\myprofile\templates\desktop\track_codes.html:249
+#: .\myprofile\templates\desktop\track_codes.html:279
+#: .\myprofile\templates\desktop\track_codes.html:312
+#: .\myprofile\templates\mobile\mobile_parcels.html:187
+msgid "Описание:"
+msgstr "Description:"
+
+#: .\myprofile\templates\desktop\profile.html:181
+msgid "Нет новых товаров."
+msgstr "No new items."
+
+#: .\myprofile\templates\desktop\profile.html:198
+msgid "Заполните данные профиля"
+msgstr "Complete your profile"
+
+#: .\myprofile\templates\desktop\profile.html:200
+msgid "Для продолжения работы необходимо заполнить следующие поля:"
+msgstr "To continue, please fill in the following fields:"
+
+#: .\myprofile\templates\desktop\profile.html:205
+#: .\myprofile\templates\desktop\settings.html:68 .\register\models.py:75
+#: .\register\templates\desktop\registration.html:69
+msgid "Фамилия"
+msgstr "Last name"
+
+#: .\myprofile\templates\desktop\profile.html:208
+#: .\myprofile\templates\desktop\settings.html:71
+#: .\register\templates\desktop\registration.html:70
+msgid "Введите фамилию"
+msgstr "Enter last name"
+
+#: .\myprofile\templates\desktop\profile.html:213
+#: .\myprofile\templates\desktop\settings.html:76 .\register\models.py:74
+#: .\register\templates\desktop\registration.html:75
+msgid "Имя"
+msgstr "First name"
+
+#: .\myprofile\templates\desktop\profile.html:216
+#: .\myprofile\templates\desktop\settings.html:79
+#: .\register\templates\desktop\registration.html:76
+msgid "Введите имя"
+msgstr "Enter first name"
+
+#: .\myprofile\templates\desktop\profile.html:221
+#: .\myprofile\templates\desktop\settings.html:84
+msgid "Электронная почта"
+msgstr "Email"
+
+#: .\myprofile\templates\desktop\profile.html:242
+#: .\myprofile\templates\desktop\role_management_edit.html:141
+#: .\myprofile\templates\desktop\track_codes.html:151
+#: .\myprofile\templates\desktop\track_codes.html:286
+msgid "Сохранить"
+msgstr "Save"
+
+#: .\myprofile\templates\desktop\profile.html:257
+msgid "Окей"
+msgstr "OK"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:8
+msgid "Inter Cargo — Перенос прихода"
+msgstr "Inter Cargo — Reschedule Arrival"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:31
+msgid "Перенести пропущенные посылки клиента с одной даты прихода на другую"
+msgstr "Transfer client's missed parcels from one arrival date to another"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:38
+msgid "Выберите клиента и исходную дату"
+msgstr "Select client and source date"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:58
+msgid "Исходная дата прихода"
+msgstr "Source arrival date"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:67
+msgid "Показать сводку"
+msgstr "Show summary"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:71
+msgid "Найти треки клиента"
+msgstr "Find client tracks"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:80
+msgid "Сводка прихода за"
+msgstr "Arrival summary for"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:91
+msgid "Треки клиента"
+msgstr "Client tracks"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:92
+msgid "за"
+msgstr "for"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:99
+msgid "Выбрать все ("
+msgstr "Select all ("
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:123
+msgid "Нет треков для переноса за эту дату"
+msgstr "No tracks for transfer on this date"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:131
+msgid "Укажите новую дату прихода"
+msgstr "Enter new arrival date"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:135
+#: .\myprofile\templates\desktop\reschedule_arrival.html:241
+msgid "Новая дата прихода"
+msgstr "New arrival date"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:142
+msgid "Выбранные треки будут"
+msgstr "Selected tracks will be"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:142
+msgid "удалены из исходного прихода"
+msgstr "removed from the original arrival"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:150
+msgid "Перенести треки"
+msgstr "Transfer tracks"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:164
+msgid "Сделать ещё один перенос"
+msgstr "Make another transfer"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:175
+msgid "Прибыло без ПВЗ — требует переноса"
+msgstr "Arrived without PVZ — requires transfer"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:178
+msgid ""
+"Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте"
+" дату следующего прихода — они появятся в доставке за эту дату."
+msgstr ""
+"Client parcels that arrived when no PVZ was assigned. Set the next arrival "
+"date — they will appear in delivery for that date."
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:250
+msgid "Перенести на выбранную дату"
+msgstr "Transfer to selected date"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:343
+msgid "Всего треков"
+msgstr "Total tracks"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:347
+msgid "Клиентов"
+msgstr "Clients"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:352
+msgid "Разбивка по статусам"
+msgstr "Breakdown by status"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:370
+msgid "Записи приходов"
+msgstr "Arrival records"
+
+#: .\myprofile\templates\desktop\reschedule_arrival.html:377
+msgid "Записей приходов за эту дату не найдено"
+msgstr "No arrival records found for this date"
+
+#: .\myprofile\templates\desktop\role_management.html:8
+msgid "Inter Cargo — Управление ролями"
+msgstr "Inter Cargo — Role Management"
+
+#: .\myprofile\templates\desktop\role_management.html:41
+msgid "Поиск по логину, имени или телефону..."
+msgstr "Search by login, name or phone..."
+
+#: .\myprofile\templates\desktop\role_management.html:57
+msgid "Назначить роль пользователю, которого нет в списке"
+msgstr "Assign role to user not in the list"
+
+#: .\myprofile\templates\desktop\role_management.html:61
+msgid "Логин или имя (мин. 2 символа)..."
+msgstr "Login or name (min. 2 chars)..."
+
+#: .\myprofile\templates\desktop\role_management.html:76
+msgid "Пользователи с ролями"
+msgstr "Users with roles"
+
+#: .\myprofile\templates\desktop\role_management.html:96
+msgid "Есть явно заданные права"
+msgstr "Has explicitly set permissions"
+
+#: .\myprofile\templates\desktop\role_management.html:97
+msgid "тонкая настройка"
+msgstr "fine-tuning"
+
+#: .\myprofile\templates\desktop\role_management.html:105
+msgid "Ролей нет, но есть явные права"
+msgstr "No roles, but has explicit permissions"
+
+#: .\myprofile\templates\desktop\role_management.html:111
+msgid "Редактировать"
+msgstr "Edit"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:42
+msgid "К списку"
+msgstr "To list"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:55
+msgid "Чекбоксы с"
+msgstr "Checkboxes with"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:56
+msgid "пунктирной рамкой — право"
+msgstr "dotted border — permission"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:56
+msgid "унаследовано"
+msgstr "inherited"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:68
+msgid "Флаги ролей"
+msgstr "Role flags"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:91
+msgid "Матрица прав (аспект × действие)"
+msgstr "Permissions matrix (aspect × action)"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:95
+msgid "Применить дефолты по флагам"
+msgstr "Apply defaults by flags"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:103
+#: .\register\models.py:147
+msgid "Аспект"
+msgstr "Aspect"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:107
+msgid "Всё/Ничего"
+msgstr "All/None"
+
+#: .\myprofile\templates\desktop\role_management_edit.html:126
+msgid "Переключить всё"
+msgstr "Toggle all"
+
+#: .\myprofile\templates\desktop\service.html:9
+msgid "Inter Cargo - Сервис"
+msgstr "Inter Cargo - Service"
+
+#: .\myprofile\templates\desktop\service.html:59
+#: .\myprofile\templates\desktop\service.html:70
+msgid "Прогрузить все QR-коды"
+msgstr "Load all QR codes"
+
+#: .\myprofile\templates\desktop\service.html:79
+#: .\myprofile\templates\desktop\service.html:95
+msgid "Подгрузить чеки"
+msgstr "Load receipts"
+
+#: .\myprofile\templates\desktop\service.html:104
+#: .\myprofile\templates\desktop\service.html:120
+msgid "Нормализовать чеки"
+msgstr "Normalize receipts"
+
+#: .\myprofile\templates\desktop\service.html:129
+msgid "Отметить чеки как «Выдано клиенту»"
+msgstr "Mark receipts as 'Issued to client'"
+
+#: .\myprofile\templates\desktop\service.html:139
+msgid "Отметить выданные чеки"
+msgstr "Mark issued receipts"
+
+#: .\myprofile\templates\desktop\service.html:148
+msgid "Перенос архивных трек-кодов"
+msgstr "Transfer archived track codes"
+
+#: .\myprofile\templates\desktop\service.html:158
+msgid "Перенести архивные треки"
+msgstr "Transfer archived tracks"
+
+#: .\myprofile\templates\desktop\service.html:167
+msgid "Тест уведомлений"
+msgstr "Notification test"
+
+#: .\myprofile\templates\desktop\service.html:170
+msgid "Отправляет пробное уведомление"
+msgstr "Sends a test notification"
+
+#: .\myprofile\templates\desktop\service.html:170
+msgid "вам лично"
+msgstr "to you personally"
+
+#: .\myprofile\templates\desktop\service.html:179
+msgid "Доставлено на склад сортировки"
+msgstr "Delivered to sorting warehouse"
+
+#: .\myprofile\templates\desktop\service.html:186
+msgid "Создан чек"
+msgstr "Receipt created"
+
+#: .\myprofile\templates\desktop\service.html:200
+msgid "Отправлен из Китая"
+msgstr "Shipped from China"
+
+#: .\myprofile\templates\desktop\settings.html:9
+msgid "Inter Cargo - Настройки"
+msgstr "Inter Cargo - Settings"
+
+#: .\myprofile\templates\desktop\settings.html:41
+msgid "Настройки аккаунта"
+msgstr "Account settings"
+
+#: .\myprofile\templates\desktop\settings.html:102
+msgid "Сохранить изменения"
+msgstr "Save changes"
+
+#: .\myprofile\templates\desktop\settings.html:110
+msgid "Смена пункта выдачи"
+msgstr "Change pickup point"
+
+#: .\myprofile\templates\desktop\settings.html:114
+#: .\myprofile\templates\desktop\settings.html:116
+msgid "Текущий ПВЗ:"
+msgstr "Current PVZ:"
+
+#: .\myprofile\templates\desktop\settings.html:116
+msgid "не указан"
+msgstr "not set"
+
+#: .\myprofile\templates\desktop\settings.html:131
+msgid "Новый пункт выдачи"
+msgstr "New pickup point"
+
+#: .\myprofile\templates\desktop\settings.html:134
+msgid "— Выберите ПВЗ —"
+msgstr "— Select PVZ —"
+
+#: .\myprofile\templates\desktop\settings.html:145
+msgid "Отправить заявку"
+msgstr "Submit request"
+
+#: .\myprofile\templates\desktop\settings.html:162
+msgid "Telegram привязан"
+msgstr "Telegram linked"
+
+#: .\myprofile\templates\desktop\settings.html:163
+msgid "Вы получаете уведомления в Telegram"
+msgstr "You receive notifications in Telegram"
+
+#: .\myprofile\templates\desktop\settings.html:165
+msgid "Telegram не привязан"
+msgstr "Telegram not linked"
+
+#: .\myprofile\templates\desktop\settings.html:166
+msgid "Привяжите аккаунт, чтобы получать уведомления"
+msgstr "Link your account to receive notifications"
+
+#: .\myprofile\templates\desktop\settings.html:182 .\register\models.py:55
+msgid "Язык интерфейса"
+msgstr "Interface language"
+
+#: .\myprofile\templates\desktop\settings.html:215
+msgid "Настройки уведомлений"
+msgstr "Notification settings"
+
+#: .\myprofile\templates\desktop\settings.html:217
+msgid "Настройки распространяются на Email и Telegram уведомления."
+msgstr "Settings apply to Email and Telegram notifications."
+
+#: .\myprofile\templates\desktop\settings.html:229 .\tgbot\models.py:149
+msgid "Только ПВЗ"
+msgstr "PVZ only"
+
+#: .\myprofile\templates\desktop\settings.html:230
+msgid "Уведомления только о доставке на пункт выдачи"
+msgstr "Notifications only about delivery to pickup point"
+
+#: .\myprofile\templates\desktop\settings.html:240 .\tgbot\models.py:148
+msgid "Все статусы"
+msgstr "All statuses"
+
+#: .\myprofile\templates\desktop\settings.html:241
+msgid "Уведомления о каждом изменении статуса трек-кода"
+msgstr "Notifications for every track code status change"
+
+#: .\myprofile\templates\desktop\settings.html:251 .\tgbot\models.py:150
+msgid "Выборочно"
+msgstr "Custom"
+
+#: .\myprofile\templates\desktop\settings.html:252
+msgid "Выберите, о каких статусах получать уведомления"
+msgstr "Choose which status updates to receive notifications for"
+
+#: .\myprofile\templates\desktop\settings.html:266 .\tgbot\models.py:161
+msgid "Сортировочный склад"
+msgstr "Sorting warehouse"
+
+#: .\myprofile\templates\desktop\settings.html:271 .\tgbot\models.py:162
+msgid "В доставке до ПВЗ"
+msgstr "In delivery to PVZ"
+
+#: .\myprofile\templates\desktop\settings.html:273
+msgid "Уведомление о доставке на ПВЗ приходит всегда."
+msgstr "Delivery-to-PVZ notification always arrives."
+
+#: .\myprofile\templates\desktop\settings.html:278
+msgid "Сохранить настройки"
+msgstr "Save settings"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:9
+msgid "Inter Cargo - Отправлено из Китая"
+msgstr "Inter Cargo - Shipped from China"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:35
+#: .\myprofile\templates\mobile\mobile_menu.html:196
+msgid "Из Китая"
+msgstr "From China"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:61
+msgid "Введите трек-коды вручную..."
+msgstr "Enter track codes manually..."
+
+#: .\myprofile\templates\desktop\shipped_cn.html:66
+msgid "Или загрузите xlsx файл"
+msgstr "Or upload xlsx file"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:70
+msgid "Перетащите xlsx файл сюда"
+msgstr "Drag xlsx file here"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:71
+msgid "или"
+msgstr "or"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:73
+msgid "Выбрать файл"
+msgstr "Choose file"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:79
+msgid "Парсинг: столбец A, начиная с A3, до пустой ячейки или \"条码数:\""
+msgstr "Parsing: column A, starting from A3, until empty cell or \"条码数:\""
+
+#: .\myprofile\templates\desktop\shipped_cn.html:85
+msgid "Обновить статусы"
+msgstr "Update statuses"
+
+#: .\myprofile\templates\desktop\track_codes.html:9
+msgid "Inter Cargo - Трек-коды"
+msgstr "Inter Cargo - Track Codes"
+
+#: .\myprofile\templates\desktop\track_codes.html:42
+msgid "Ваши трек-коды"
+msgstr "Your track codes"
+
+#: .\myprofile\templates\desktop\track_codes.html:61
+msgid "Внимание!"
+msgstr "Attention!"
+
+#: .\myprofile\templates\desktop\track_codes.html:61
+msgid "Следующие трек-коды есть и в архиве, и в основной таблице:"
+msgstr ""
+"The following track codes exist in both the archive and the main table:"
+
+#: .\myprofile\templates\desktop\track_codes.html:72
+msgid "Удалить из архива"
+msgstr "Delete from archive"
+
+#: .\myprofile\templates\desktop\track_codes.html:96
+#: .\myprofile\templates\desktop\unidentified.html:86
+#: .\myprofile\templates\mobile\mobile_parcels.html:260
+msgid "Добавить"
+msgstr "Add"
+
+#: .\myprofile\templates\desktop\track_codes.html:105
+msgid "трек-кодов"
+msgstr "track codes"
+
+#: .\myprofile\templates\desktop\track_codes.html:115
+#: .\myprofile\templates\mobile\mobile_parcels.html:140
+msgid "Архивировать выбранные"
+msgstr "Archive selected"
+
+#: .\myprofile\templates\desktop\track_codes.html:122
+msgid "Нажмите на трек-коды, чтобы выбрать их для архивации"
+msgstr "Click on track codes to select them for archiving"
+
+#: .\myprofile\templates\desktop\track_codes.html:130
+#: .\myprofile\templates\mobile\mobile_parcels.html:48
+#: .\myprofile\templates\mobile\mobile_parcels.html:242
+msgid "Добавить трек-код"
+msgstr "Add track code"
+
+#: .\myprofile\templates\desktop\track_codes.html:135
+#: .\myprofile\templates\desktop\unidentified.html:239
+msgid "Трек-код:"
+msgstr "Track code:"
+
+#: .\myprofile\templates\desktop\track_codes.html:136
+#: .\myprofile\templates\desktop\unidentified.html:59
+#: .\myprofile\templates\mobile\mobile_parcels.html:251
+msgid "Введите трек-код"
+msgstr "Enter track code"
+
+#: .\myprofile\templates\desktop\track_codes.html:143
+msgid "Описание посылки"
+msgstr "Parcel description"
+
+#: .\myprofile\templates\desktop\track_codes.html:177
+msgid "Добавлен"
+msgstr "Added"
+
+#: .\myprofile\templates\desktop\track_codes.html:182
+msgid "На складе (Китай)"
+msgstr "At warehouse (China)"
+
+#: .\myprofile\templates\desktop\track_codes.html:187
+msgid "Отправлен (Китай)"
+msgstr "Shipped (China)"
+
+#: .\myprofile\templates\desktop\track_codes.html:238
+#: .\myprofile\templates\mobile\mobile_parcels.html:124
+#: .\myprofile\templates\mobile\mobile_parcels.html:207
+msgid "В архив"
+msgstr "To archive"
+
+#: .\myprofile\templates\desktop\track_codes.html:246
+#: .\myprofile\templates\mobile\mobile_parcels.html:184
+msgid "Где отсортирован:"
+msgstr "Sorted at:"
+
+#: .\myprofile\templates\desktop\track_codes.html:260
+#: .\myprofile\templates\desktop\track_codes.html:314
+#: .\myprofile\templates\mobile\mobile_parcels.html:191
+msgid "Вес:"
+msgstr "Weight:"
+
+#: .\myprofile\templates\desktop\track_codes.html:265
+msgid "Трек-коды не найдены."
+msgstr "Track codes not found."
+
+#: .\myprofile\templates\desktop\track_codes.html:275
+msgid "Изменить описание"
+msgstr "Edit description"
+
+#: .\myprofile\templates\desktop\track_codes.html:322
+#: .\myprofile\templates\mobile\mobile_parcels.html:201
+msgid "Восстановить"
+msgstr "Restore"
+
+#: .\myprofile\templates\desktop\unidentified.html:8
+msgid "Inter Cargo — Неопознанные посылки"
+msgstr "Inter Cargo — Unidentified Parcels"
+
+#: .\myprofile\templates\desktop\unidentified.html:31
+msgid "Посылки без владельца на сортировочном складе"
+msgstr "Parcels without owner at sorting warehouse"
+
+#: .\myprofile\templates\desktop\unidentified.html:51
+msgid "Добавить неопознанную посылку"
+msgstr "Add unidentified parcel"
+
+#: .\myprofile\templates\desktop\unidentified.html:56
+msgid "Трек-код *"
+msgstr "Track code *"
+
+#: .\myprofile\templates\desktop\unidentified.html:71
+msgid "— не указано —"
+msgstr "— not specified —"
+
+#: .\myprofile\templates\desktop\unidentified.html:78
+#: .\myprofile\templates\desktop\unidentified.html:179
+msgid "Примечание"
+msgstr "Note"
+
+#: .\myprofile\templates\desktop\unidentified.html:81
+msgid "Необязательно"
+msgstr "Optional"
+
+#: .\myprofile\templates\desktop\unidentified.html:98
+msgid "Заявлено клиентами:"
+msgstr "Claimed by clients:"
+
+#: .\myprofile\templates\desktop\unidentified.html:100
+msgid "Требует подтверждения"
+msgstr "Requires confirmation"
+
+#: .\myprofile\templates\desktop\unidentified.html:138
+#: .\register\templates\desktop\registration.html:91
+msgid "Подтвердить"
+msgstr "Confirm"
+
+#: .\myprofile\templates\desktop\unidentified.html:144
+msgid "Снять"
+msgstr "Remove"
+
+#: .\myprofile\templates\desktop\unidentified.html:167
+msgid "Без владельца:"
+msgstr "Without owner:"
+
+#: .\myprofile\templates\desktop\unidentified.html:180
+msgid "Дата добавления"
+msgstr "Date added"
+
+#: .\myprofile\templates\desktop\unidentified.html:204
+#: .\myprofile\templates\desktop\unidentified.html:233
+msgid "Назначить клиента"
+msgstr "Assign client"
+
+#: .\myprofile\templates\desktop\unidentified.html:222
+msgid "Нет неопознанных посылок без владельца"
+msgstr "No unidentified parcels without owner"
+
+#: .\myprofile\templates\desktop\unidentified.html:242
+msgid "Поиск клиента"
+msgstr "Client search"
+
+#: .\myprofile\templates\desktop\unidentified.html:245
+msgid "Введите имя или логин..."
+msgstr "Enter name or login..."
+
+#: .\myprofile\templates\desktop\unidentified.html:310
+msgid "Пользователи не найдены"
+msgstr "Users not found"
+
+#: .\myprofile\templates\desktop\update_tracks.html:9
+msgid "Inter Cargo - Обновления статусов"
+msgstr "Inter Cargo - Status Updates"
+
+#: .\myprofile\templates\desktop\update_tracks.html:35
+#: .\myprofile\templates\desktop\update_tracks.html:37
+msgid "Обновление трек-кодов"
+msgstr "Track code updates"
+
+#: .\myprofile\templates\desktop\update_tracks.html:52
+msgid "Новый статус"
+msgstr "New status"
+
+#: .\myprofile\templates\desktop\update_tracks.html:71
+msgid "Переключить на табличный вид"
+msgstr "Switch to table view"
+
+#: .\myprofile\templates\desktop\update_tracks.html:93
+msgid "Вес (в кг, по одному в строке)"
+msgstr "Weight (in kg, one per line)"
+
+#: .\myprofile\templates\desktop\warehouse.html:9
+msgid "Inter Cargo - Склад ПВЗ"
+msgstr "Inter Cargo - PVZ Warehouse"
+
+#: .\myprofile\templates\desktop\warehouse.html:65
+msgid "-- Выберите ПВЗ --"
+msgstr "-- Select PVZ --"
+
+#: .\myprofile\templates\desktop\warehouse.html:80
+msgid "Инвентаризация склада"
+msgstr "Warehouse inventory"
+
+#: .\myprofile\templates\desktop\warehouse.html:89
+#: .\myprofile\templates\desktop\warehouse_reassign.html:55
+msgid "Реструктуризация склада"
+msgstr "Warehouse restructuring"
+
+#: .\myprofile\templates\desktop\warehouse.html:95
+msgid "Продолжить реструктуризацию"
+msgstr "Continue restructuring"
+
+#: .\myprofile\templates\desktop\warehouse.html:104
+msgid "Выберите пункт выдачи для просмотра склада."
+msgstr "Select a pickup point to view the warehouse."
+
+#: .\myprofile\templates\desktop\warehouse.html:109
+msgid "На складе нет товаров, ожидающих выдачи."
+msgstr "No goods awaiting issuance in the warehouse."
+
+#: .\myprofile\templates\desktop\warehouse.html:114
+msgid "Ячеек с товарами:"
+msgstr "Cells with goods:"
+
+#: .\myprofile\templates\desktop\warehouse.html:125
+msgid "Нажмите чтобы изменить номер ячейки"
+msgstr "Click to change cell number"
+
+#: .\myprofile\templates\desktop\warehouse.html:136
+msgid "Заявка на возврат — ожидает подтверждения"
+msgstr "Return request — awaiting confirmation"
+
+#: .\myprofile\templates\desktop\warehouse.html:144
+#: .\myprofile\templates\desktop\warehouse.html:259
+msgid "посылок"
+msgstr "parcels"
+
+#: .\myprofile\templates\desktop\warehouse.html:148
+#: .\myprofile\templates\desktop\warehouse.html:263
+msgid "вес"
+msgstr "weight"
+
+#: .\myprofile\templates\desktop\warehouse.html:162
+msgid "Без чека"
+msgstr "No receipt"
+
+#: .\myprofile\templates\desktop\warehouse.html:173
+msgid "Быстрая выдача"
+msgstr "Quick issue"
+
+#: .\myprofile\templates\desktop\warehouse.html:184
+msgid "Описание"
+msgstr "Description"
+
+#: .\myprofile\templates\desktop\warehouse.html:216
+msgid "Ожидает подтверждения возврата"
+msgstr "Awaiting return confirmation"
+
+#: .\myprofile\templates\desktop\warehouse.html:224
+msgid "Не доехал до склада"
+msgstr "Did not reach warehouse"
+
+#: .\myprofile\templates\desktop\warehouse.html:238
+msgid "Без ячейки"
+msgstr "No cell"
+
+#: .\myprofile\templates\desktop\warehouse.html:270
+msgid "Назначить ячейку"
+msgstr "Assign cell"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:8
+msgid "Inter Cargo - Инвентаризация склада"
+msgstr "Inter Cargo - Warehouse Inventory"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:46
+msgid "&larr; Назад на склад"
+msgstr "&larr; Back to warehouse"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:49
+msgid "&#128424; Печать"
+msgstr "&#128424; Print"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:54
+msgid "Инвентаризация склада ПВЗ"
+msgstr "PVZ warehouse inventory"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:60
+msgid "Клиентов:"
+msgstr "Clients:"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:61
+msgid "Посылок:"
+msgstr "Parcels:"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:62
+#: .\myprofile\templates\shared\print\receipt_print.html:388
+msgid "Общий вес:"
+msgstr "Total weight:"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:70
+#: .\myprofile\templates\desktop\warehouse_reassign.html:151
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:33
+msgid "Ячейка"
+msgstr "Cell"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:74
+msgid "Приходов"
+msgstr "Arrivals"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:75
+msgid "Даты приходов"
+msgstr "Arrival dates"
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:103
+msgid "Склад пуст."
+msgstr "Warehouse is empty."
+
+#: .\myprofile\templates\desktop\warehouse_inventory.html:107
+msgid "Inter Cargo — Инвентаризация"
+msgstr "Inter Cargo — Inventory"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:9
+msgid "Inter Cargo - Реструктуризация склада"
+msgstr "Inter Cargo - Warehouse Restructuring"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:34
+msgid "Реструктуризация"
+msgstr "Restructuring"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:62
+msgid "Вернуться на склад"
+msgstr "Back to warehouse"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:71
+msgid "Завершить реструктуризацию"
+msgstr "Complete restructuring"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:85
+msgid "Выберите клиента из списка и укажите номер ячейки"
+msgstr "Select a client from the list and enter the cell number"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:88
+msgid "-- Выберите клиента --"
+msgstr "-- Select client --"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:96
+msgid "Номер ячейки (пусто = авто)"
+msgstr "Cell number (empty = auto)"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:107
+msgid "Сканер"
+msgstr "Scanner"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:109
+msgid "Отсканируйте QR-код чека сканером. Ячейка назначится автоматически."
+msgstr "Scan the receipt QR code. The cell will be assigned automatically."
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:110
+msgid "Нажмите и сканируйте..."
+msgstr "Click and scan..."
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:118
+msgid "Камера"
+msgstr "Camera"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:120
+msgid ""
+"Отсканируйте QR-код чека камерой телефона. Ячейка назначится автоматически."
+msgstr ""
+"Scan the receipt QR code with your phone camera. The cell will be assigned "
+"automatically."
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:123
+msgid "Открыть камеру"
+msgstr "Open camera"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:127
+msgid "Закрыть камеру"
+msgstr "Close camera"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:138
+msgid "Клиенты на складе"
+msgstr "Clients in warehouse"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:141
+msgid "Назначено:"
+msgstr "Assigned:"
+
+#: .\myprofile\templates\desktop\warehouse_reassign.html:179
+msgid "Изменить"
+msgstr "Change"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:9
+msgid "Inter Cargo - Меню"
+msgstr "Inter Cargo - Menu"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:121 .\register\models.py:40
+msgid "Работник ПВЗ"
+msgstr "PVZ worker"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:135
+#: .\myprofile\templates\mobile\mobile_menu.html:172
+#: .\myprofile\templates\mobile\mobile_qr.html:36
+msgid "Выдача"
+msgstr "Issue"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:147
+#: .\myprofile\templates\mobile\mobile_menu.html:184
+msgid "История ПВЗ"
+msgstr "PVZ history"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:158
+msgid "Оператор"
+msgstr "Operator"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:190
+msgid "Внимание"
+msgstr "Attention"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:208
+msgid "Неопознанные"
+msgstr "Unidentified"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:214
+msgid "Перенос"
+msgstr "Transfer"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:226
+msgid "Сводка"
+msgstr "Summary"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:232
+msgid "Админ"
+msgstr "Admin"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:238
+#: .\myprofile\templates\shared\print\client_check_pdf.html:14
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:14
+msgid "Печать"
+msgstr "Print"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:244
+msgid "Логи увед."
+msgstr "Notif. logs"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:250
+msgid "Откл. увед."
+msgstr "Mute notif."
+
+#: .\myprofile\templates\mobile\mobile_menu.html:256
+#: .\myprofile\templates\mobile\mobile_menu.html:281
+#: .\myprofile\templates\mobile\mobile_menu.html:306
+msgid "Финансы"
+msgstr "Finance"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:273 .\register\models.py:42
+msgid "Бухгалтер"
+msgstr "Accountant"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:292 .\register\models.py:39
+msgid "Водитель"
+msgstr "Driver"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:325
+msgid "Подтв. польз."
+msgstr "Confirm users"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:331
+msgid "Смена ПВЗ"
+msgstr "Change PVZ"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:342
+msgid "Суперпользователь"
+msgstr "Superuser"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:350 .\register\models.py:37
+msgid "Персонал"
+msgstr "Staff"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:366
+msgid "Язык / Тіл / Lang"
+msgstr "Language / Тіл / Lang"
+
+#: .\myprofile\templates\mobile\mobile_menu.html:416
+#: .\myprofile\templates\mobile\mobile_notifications.html:133
+#: .\myprofile\templates\mobile\mobile_parcels.html:228
+#: .\myprofile\templates\mobile\mobile_qr.html:200
+msgid "Эта страница оптимизирована для мобильных устройств"
+msgstr "This page is optimized for mobile devices"
+
+#: .\myprofile\templates\mobile\mobile_notifications.html:122
+msgid "Нет сообщений"
+msgstr "No messages"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:9
+msgid "Inter Cargo - Посылки"
+msgstr "Inter Cargo - Parcels"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:49
+msgid "Отследить новую посылку"
+msgstr "Track new parcel"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:175
+msgid "Архив"
+msgstr "Archive"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:217
+msgid "Нет трек-кодов"
+msgstr "No track codes"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:218
+msgid "В этой категории пока пусто"
+msgstr "This category is empty"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:256
+msgid "Описание посылки (необязательно)"
+msgstr "Parcel description (optional)"
+
+#: .\myprofile\templates\mobile\mobile_parcels.html:331
+msgid "+ подсветка нового трека по &new="
+msgstr "+ highlight new track by &new="
+
+#: .\myprofile\templates\mobile\mobile_qr.html:9
+msgid "Inter Cargo - Выдача"
+msgstr "Inter Cargo - Issue"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:53
+msgid "Нет активного пакета выдачи"
+msgstr "No active issue package"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:127
+msgid "Нет посылок, готовых к получению"
+msgstr "No parcels ready for pickup"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:128
+msgid "Когда посылки прибудут на ПВЗ, они появятся здесь"
+msgstr "When parcels arrive at PVZ, they will appear here"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:183
+msgid "Показать все"
+msgstr "Show all"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:190
+msgid "Нет истории выдачи"
+msgstr "No issue history"
+
+#: .\myprofile\templates\mobile\mobile_qr.html:191
+msgid "Выданные посылки будут отображаться здесь"
+msgstr "Issued parcels will be displayed here"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:48
+msgid "Трек-номер"
+msgstr "Track number"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:50
+msgid "Стоимость"
+msgstr "Cost"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:30
+msgid "Кол-во"
+msgstr "Qty"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:31
+msgid "Вес, кг"
+msgstr "Weight, kg"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:32
+msgid "Сумма, тг"
+msgstr "Amount, KZT"
+
+#: .\myprofile\templates\shared\print\client_registry_pdf.html:66
+msgid "ИТОГО:"
+msgstr "TOTAL:"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:335
+msgid "&larr; Назад"
+msgstr "&larr; Back"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:336
+msgid "Печать / Сохранить PDF"
+msgstr "Print / Save PDF"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:384
+msgid "Позиций:"
+msgstr "Items:"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:392
+msgid "Тариф:"
+msgstr "Rate:"
+
+#: .\myprofile\templates\shared\print\receipt_print.html:396
+msgid "Итого к оплате:"
+msgstr "Total to pay:"
+
+#: .\myprofile\views\arrival_history.py:26
+#: .\myprofile\views\arrival_summary.py:40 .\myprofile\views\delivery.py:140
+#: .\myprofile\views\extraditions.py:58
+#: .\myprofile\views\finance_summary.py:81
+#: .\myprofile\views\goods_arrival.py:43
+#: .\myprofile\views\notification_logs.py:23
+#: .\myprofile\views\notification_mutes.py:28
+#: .\myprofile\views\pp_acceptance.py:44
+#: .\myprofile\views\pp_acceptance.py:439
+#: .\myprofile\views\pp_acceptance.py:502
+#: .\myprofile\views\pp_extradition_history.py:26
+#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
+#: .\myprofile\views\shipped_cn.py:38 .\myprofile\views\unidentified.py:27
+#: .\myprofile\views\warehouse.py:45
+msgid "У вас нет доступа к этой странице."
+msgstr "You do not have access to this page."
+
+#: .\myprofile\views\arrival_summary.py:230
+#: .\myprofile\views\arrival_summary.py:277
+#: .\myprofile\views\arrival_summary.py:308
+#: .\myprofile\views\arrival_summary.py:381
+#: .\myprofile\views\arrival_summary.py:428
+#: .\myprofile\views\arrival_summary.py:531 .\myprofile\views\delivery.py:203
+#: .\myprofile\views\delivery.py:479 .\myprofile\views\delivery.py:605
+#: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:92
+#: .\myprofile\views\goods_arrival.py:123
+#: .\myprofile\views\goods_arrival.py:243
+#: .\myprofile\views\goods_arrival.py:258
+#: .\myprofile\views\goods_arrival.py:282
+#: .\myprofile\views\notification_mutes.py:64
+#: .\myprofile\views\notification_mutes.py:128
+#: .\myprofile\views\pp_acceptance.py:241
+#: .\myprofile\views\pp_acceptance.py:345
+#: .\myprofile\views\pp_acceptance.py:585 .\myprofile\views\service.py:52
+#: .\myprofile\views\service.py:122 .\myprofile\views\service.py:182
+#: .\myprofile\views\service.py:262 .\myprofile\views\service.py:391
+#: .\myprofile\views\service.py:481 .\myprofile\views\warehouse.py:196
+#: .\myprofile\views\warehouse.py:290 .\myprofile\views\warehouse.py:400
+#: .\myprofile\views\warehouse.py:488 .\myprofile\views\warehouse.py:543
+#: .\myprofile\views\warehouse.py:666 .\myprofile\views\warehouse.py:778
+msgid "У вас нет доступа."
+msgstr "You do not have access."
+
+#: .\myprofile\views\arrival_summary.py:237
+#: .\myprofile\views\arrival_summary.py:284
+msgid "Недостаточно данных."
+msgstr "Insufficient data."
+
+#: .\myprofile\views\arrival_summary.py:249
+msgid "Пункт 'Доставка на дом' не найден."
+msgstr "Home delivery point not found."
+
+#: .\myprofile\views\arrival_summary.py:252
+msgid "Клиент назначен на доставку на дом."
+msgstr "Client assigned to home delivery."
+
+#: .\myprofile\views\arrival_summary.py:256
+#: .\myprofile\views\pp_acceptance.py:252
+#: .\myprofile\views\pp_acceptance.py:351
+msgid "Не указан пункт выдачи."
+msgstr "Pickup point not specified."
+
+#: .\myprofile\views\arrival_summary.py:261
+#: .\myprofile\views\arrival_summary.py:290
+#: .\myprofile\views\pp_acceptance.py:258
+#: .\myprofile\views\pp_acceptance.py:357
+#: .\myprofile\views\pp_acceptance.py:446 .\myprofile\views\warehouse.py:548
+msgid "Пункт выдачи не найден."
+msgstr "Pickup point not found."
+
+#: .\myprofile\views\arrival_summary.py:267
+msgid "Клиент возвращён на свой ПВЗ."
+msgstr "Client returned to their PVZ."
+
+#: .\myprofile\views\arrival_summary.py:298
+msgid "Нет клиентов для назначения."
+msgstr "No clients to assign."
+
+#: .\myprofile\views\arrival_summary.py:318
+#: .\myprofile\views\arrival_summary.py:319
+msgid "Укажите размер скидки."
+msgstr "Please specify the discount amount."
+
+#: .\myprofile\views\arrival_summary.py:328
+#: .\myprofile\views\arrival_summary.py:329
+msgid "Некорректный размер скидки."
+msgstr "Invalid discount amount."
+
+#: .\myprofile\views\arrival_summary.py:334
+#: .\myprofile\views\arrival_summary.py:335 .\myprofile\views\delivery.py:609
+#: .\myprofile\views\pp_acceptance.py:592 .\myprofile\views\warehouse.py:670
+msgid "Не указан клиент."
+msgstr "Client not specified."
+
+#: .\myprofile\views\arrival_summary.py:342
+#: .\myprofile\views\arrival_summary.py:343
+#: .\myprofile\views\notification_mutes.py:80
+#: .\myprofile\views\unidentified.py:145 .\myprofile\views\warehouse.py:643
+#: .\register\views\password_reset.py:73
+#: .\register\views\password_reset.py:185
+msgid "Пользователь не найден."
+msgstr "User not found."
+
+#: .\myprofile\views\arrival_summary.py:387
+#: .\myprofile\views\arrival_summary.py:539 .\myprofile\views\service.py:126
+#: .\myprofile\views\service.py:186
+msgid "Не указана дата."
+msgstr "Date not specified."
+
+#: .\myprofile\views\arrival_summary.py:418
+msgid "Новых чеков не создано — все треки уже учтены в чеках."
+msgstr ""
+"No new receipts created — all tracks are already included in receipts."
+
+#: .\myprofile\views\arrival_summary.py:438
+msgid "Нет исходных данных для актуализации."
+msgstr "No source data to update."
+
+#: .\myprofile\views\arrival_summary.py:446
+msgid "Некорректные исходные данные прихода."
+msgstr "Invalid arrival source data."
+
+#: .\myprofile\views\arrival_summary.py:519
+msgid "Данные прихода актуальны, изменений не требуется."
+msgstr "Arrival data is up to date, no changes needed."
+
+#: .\myprofile\views\customer_paycheks.py:61
+msgid "Нет новых доставленных посылок для формирования чека."
+msgstr "No new delivered parcels to generate a receipt."
+
+#: .\myprofile\views\delivery.py:217
+msgid "Выберите хотя бы один пункт выдачи или клиента."
+msgstr "Select at least one pickup point or client."
+
+#: .\myprofile\views\delivery.py:390
+msgid "Нет посылок для доставки в выбранных пунктах."
+msgstr "No parcels for delivery in selected points."
+
+#: .\myprofile\views\delivery.py:484
+msgid "Выберите хотя бы один пункт выдачи."
+msgstr "Select at least one pickup point."
+
+#: .\myprofile\views\delivery.py:595
+msgid "Нет посылок для завершения доставки в выбранных пунктах."
+msgstr "No parcels to complete delivery in selected points."
+
+#: .\myprofile\views\delivery.py:614
+msgid "Пункт 'Доставка на дом' не настроен."
+msgstr "Home delivery point is not configured."
+
+#: .\myprofile\views\delivery.py:620
+#: .\myprofile\views\reschedule_arrival.py:177
+#: .\myprofile\views\reschedule_arrival.py:234
+#: .\myprofile\views\reschedule_arrival.py:375
+#: .\myprofile\views\warehouse.py:676
+msgid "Клиент не найден."
+msgstr "Client not found."
+
+#: .\myprofile\views\delivery.py:630
+msgid "Нет посылок для выдачи этому клиенту."
+msgstr "No parcels to issue to this client."
+
+#: .\myprofile\views\delivery.py:707 .\myprofile\views\extraditions.py:190
+#: .\myprofile\views\extraditions.py:299 .\myprofile\views\extraditions.py:338
+#: .\myprofile\views\extraditions.py:364 .\myprofile\views\extraditions.py:436
+#: .\myprofile\views\goods_arrival.py:158
+#: .\myprofile\views\notification_mutes.py:151
+#: .\myprofile\views\pp_acceptance.py:114
+#: .\myprofile\views\role_management.py:159
+#: .\myprofile\views\role_management.py:214
+msgid "Нет доступа"
+msgstr "No access"
+
+#: .\myprofile\views\extradition_Package.py:96
+msgid "Нет чеков с трек-кодами со статусом «Доставлено на ПВЗ»."
+msgstr "No receipts with track codes with status 'Delivered to PVZ'."
+
+#: .\myprofile\views\extraditions.py:65
+msgid "Введите штрихкод пакета."
+msgstr "Enter package barcode."
+
+#: .\myprofile\views\extraditions.py:194
+msgid "Введите штрихкод"
+msgstr "Enter barcode"
+
+#: .\myprofile\views\extraditions.py:342
+msgid "Не указан ID сессии"
+msgstr "Session ID not specified"
+
+#: .\myprofile\views\extraditions.py:355
+msgid "Оплата временно отключена"
+msgstr "Payment temporarily disabled"
+
+#: .\myprofile\views\extraditions.py:368
+msgid "Не указан клиент"
+msgstr "Client not specified"
+
+#: .\myprofile\views\extraditions.py:375
+msgid "Клиент не найден"
+msgstr "Client not found"
+
+#: .\myprofile\views\extraditions.py:441
+msgid "Не указан ID чека"
+msgstr "Receipt ID not specified"
+
+#: .\myprofile\views\extraditions.py:446
+msgid "Чек не найден"
+msgstr "Receipt not found"
+
+#: .\myprofile\views\extraditions.py:449
+msgid "Чек уже выдан"
+msgstr "Receipt already issued"
+
+#: .\myprofile\views\goods_arrival.py:100
+#: .\myprofile\views\reschedule_arrival.py:86
+#: .\myprofile\views\reschedule_arrival.py:172
+#: .\myprofile\views\reschedule_arrival.py:229
+#: .\myprofile\views\reschedule_arrival.py:370
+#: .\myprofile\views\shipped_cn.py:54
+msgid "Неверный формат даты."
+msgstr "Invalid date format."
+
+#: .\myprofile\views\goods_arrival.py:129
+msgid "Эта сессия уже завершена."
+msgstr "This session is already completed."
+
+#: .\myprofile\views\goods_arrival.py:166
+msgid "Неверные данные"
+msgstr "Invalid data"
+
+#: .\myprofile\views\goods_arrival.py:262
+msgid "Эту сессию нельзя возобновить."
+msgstr "This session cannot be resumed."
+
+#: .\myprofile\views\goods_arrival.py:288
+msgid "Сессия пуста. Добавьте хотя бы одну строку."
+msgstr "Session is empty. Add at least one row."
+
+#: .\myprofile\views\mobile_parcels.py:166
+msgid "Некорректные данные"
+msgstr "Invalid data"
+
+#: .\myprofile\views\mobile_parcels.py:169
+msgid "Не выбрано ни одного трек-кода"
+msgstr "No track codes selected"
+
+#: .\myprofile\views\notification_mutes.py:90
+msgid "Некорректное количество часов."
+msgstr "Invalid number of hours."
+
+#: .\myprofile\views\notification_mutes.py:136
+msgid "Заглушка не найдена."
+msgstr "Mute not found."
+
+#: .\myprofile\views\pp_acceptance.py:292
+msgid "Нет посылок для сортировки."
+msgstr "No parcels to sort."
+
+#: .\myprofile\views\pp_acceptance.py:427
+msgid "Сессия приёмки завершена. Все посылки отсортированы."
+msgstr "Acceptance session completed. All parcels sorted."
+
+#: .\myprofile\views\pp_acceptance.py:455
+msgid "Некорректная дата."
+msgstr "Invalid date."
+
+#: .\myprofile\views\pp_acceptance.py:467
+msgid "У вас нет доступа к этому пункту выдачи."
+msgstr "You do not have access to this pickup point."
+
+#: .\myprofile\views\pp_acceptance.py:602
+msgid "Неверный тип клиента."
+msgstr "Invalid client type."
+
+#: .\myprofile\views\profile_setting.py:129
+msgid "Профиль успешно обновлен."
+msgstr "Profile updated successfully."
+
+#: .\myprofile\views\profile_setting.py:142 .\myprofile\views\warehouse.py:42
+#: .\myprofile\views\warehouse.py:405 .\myprofile\views\warehouse.py:493
+msgid "Профиль не найден."
+msgstr "Profile not found."
+
+#: .\myprofile\views\profile_setting.py:156
+msgid "Выберите новый пункт выдачи."
+msgstr "Select a new pickup point."
+
+#: .\myprofile\views\profile_setting.py:162 .\register\views\reg.py:83
+msgid "Выбранный пункт выдачи не найден."
+msgstr "Selected pickup point not found."
+
+#: .\myprofile\views\profile_setting.py:166
+msgid "Вы уже привязаны к этому пункту выдачи."
+msgstr "You are already linked to this pickup point."
+
+#: .\myprofile\views\profile_setting.py:174
+msgid "Заявка на смену пункта выдачи отправлена."
+msgstr "Request to change pickup point has been sent."
+
+#: .\myprofile\views\profile_setting.py:194
+msgid "Настройки уведомлений сохранены."
+msgstr "Notification settings saved."
+
+#: .\myprofile\views\profile_setting.py:202
+#: .\myprofile\views\profile_setting.py:204
+#: .\myprofile\views\reschedule_arrival.py:77
+#: .\myprofile\views\reschedule_arrival.py:136
+#: .\myprofile\views\reschedule_arrival.py:161
+#: .\myprofile\views\reschedule_arrival.py:212
+#: .\myprofile\views\reschedule_arrival.py:358
+#: .\myprofile\views\role_management.py:56
+#: .\myprofile\views\role_management.py:110
+#: .\myprofile\views\unidentified.py:131 .\myprofile\views\unidentified.py:167
+#: .\myprofile\views\unidentified.py:192 .\myprofile\views\unidentified.py:210
+#: .\myprofile\views\unidentified.py:225 .\myprofile\views\warehouse.py:354
+#: .\myprofile\views\warehouse.py:593 .\myprofile\views\warehouse.py:749
+msgid "Нет доступа."
+msgstr "No access."
+
+#: .\myprofile\views\profile_setting.py:238
+msgid ""
+"Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её "
+"завершения или поставьте на паузу."
+msgstr ""
+"Cannot change PVZ: a sorting session is currently active. Wait for it to "
+"complete or pause it."
+
+#: .\myprofile\views\reschedule_arrival.py:81
+msgid "Укажите дату."
+msgstr "Please specify a date."
+
+#: .\myprofile\views\reschedule_arrival.py:167
+msgid "Укажите клиента и дату."
+msgstr "Please specify client and date."
+
+#: .\myprofile\views\reschedule_arrival.py:220
+msgid "Необходимо указать клиента, исходную дату и новую дату."
+msgstr "Client, source date and new date must be specified."
+
+#: .\myprofile\views\reschedule_arrival.py:223
+msgid "Исходная и новая даты совпадают."
+msgstr "Source and new dates are the same."
+
+#: .\myprofile\views\reschedule_arrival.py:249
+#: .\myprofile\views\reschedule_arrival.py:387
+msgid "Некорректные ID треков."
+msgstr "Invalid track IDs."
+
+#: .\myprofile\views\reschedule_arrival.py:254
+#: .\myprofile\views\reschedule_arrival.py:392
+msgid "Нет треков для переноса."
+msgstr "No tracks to transfer."
+
+#: .\myprofile\views\reschedule_arrival.py:365
+msgid "Укажите клиента и новую дату."
+msgstr "Please specify client and new date."
+
+#: .\myprofile\views\role_management.py:167
+msgid "Некорректный JSON."
+msgstr "Invalid JSON."
+
+#: .\myprofile\views\service.py:132 .\myprofile\views\service.py:192
+msgid "Некорректный формат даты."
+msgstr "Invalid date format."
+
+#: .\myprofile\views\service.py:272
+msgid "Нет трек-кодов со статусом «Выдано клиенту»."
+msgstr "No track codes with status 'Issued to client'."
+
+#: .\myprofile\views\service.py:284
+msgid "Все чеки уже отмечены как «Выдано клиенту»."
+msgstr "All receipts are already marked as 'Issued to client'."
+
+#: .\myprofile\views\shipped_cn.py:48
+msgid "Укажите дату обновления."
+msgstr "Please specify the update date."
+
+#: .\myprofile\views\shipped_cn.py:81
+msgid "Введите трек-коды или загрузите xlsx файл."
+msgstr "Enter track codes or upload an xlsx file."
+
+#: .\myprofile\views\status_update.py:29
+msgid "Заполните все обязательные поля."
+msgstr "Fill in all required fields."
+
+#: .\myprofile\views\status_update.py:35
+msgid "Неверный формат даты. Ожидается YYYY-MM-DD."
+msgstr "Invalid date format. Expected YYYY-MM-DD."
+
+#: .\myprofile\views\status_update.py:47
+msgid "Количество трек-кодов, пользователей и весов должно совпадать."
+msgstr "The number of track codes, users and weights must match."
+
+#: .\myprofile\views\track_codes.py:94 .\myprofile\views\track_codes.py:193
+msgid "Этот трек-код уже добавлен в ваш список."
+msgstr "This track code is already in your list."
+
+#: .\myprofile\views\track_codes.py:97 .\myprofile\views\track_codes.py:195
+msgid "Этот трек-код уже зарегистрирован другим пользователем."
+msgstr "This track code is already registered by another user."
+
+#: .\myprofile\views\track_codes.py:110 .\myprofile\views\track_codes.py:207
+msgid "Трек-код успешно добавлен."
+msgstr "Track code added successfully."
+
+#: .\myprofile\views\track_codes.py:113 .\myprofile\views\track_codes.py:210
+#: .\myprofile\views\unidentified.py:36
+msgid "Введите трек-код."
+msgstr "Enter track code."
+
+#: .\myprofile\views\track_codes.py:162
+msgid "Описание успешно обновлено."
+msgstr "Description updated successfully."
+
+#: .\myprofile\views\track_codes.py:164
+msgid "Некорректные данные."
+msgstr "Invalid data."
+
+#: .\myprofile\views\track_codes.py:224
+msgid "Трек-код перемещён в архив."
+msgstr "Track code moved to archive."
+
+#: .\myprofile\views\track_codes.py:236
+msgid "Трек-код восстановлен из архива."
+msgstr "Track code restored from archive."
+
+#: .\myprofile\views\track_codes.py:246
+msgid "Не выбрано ни одного трек-кода."
+msgstr "No track codes selected."
+
+#: .\myprofile\views\unidentified.py:47
+msgid "Некорректный вес."
+msgstr "Invalid weight."
+
+#: .\myprofile\views\unidentified.py:136
+msgid "Посылка не найдена или уже назначена."
+msgstr "Parcel not found or already assigned."
+
+#: .\myprofile\views\unidentified.py:140
+msgid "Не указан пользователь."
+msgstr "User not specified."
+
+#: .\myprofile\views\unidentified.py:172 .\myprofile\views\unidentified.py:197
+#: .\myprofile\views\unidentified.py:215
+msgid "Посылка не найдена."
+msgstr "Parcel not found."
+
+#: .\myprofile\views\warehouse.py:200 .\myprofile\views\warehouse.py:294
+msgid "Не указана ячейка."
+msgstr "Cell not specified."
+
+#: .\myprofile\views\warehouse.py:206 .\myprofile\views\warehouse.py:300
+#: .\myprofile\views\warehouse.py:376
+msgid "Ячейка не найдена."
+msgstr "Cell not found."
+
+#: .\myprofile\views\warehouse.py:216 .\myprofile\views\warehouse.py:310
+msgid "Ячейка не привязана к клиенту."
+msgstr "Cell is not linked to a client."
+
+#: .\myprofile\views\warehouse.py:225
+msgid "Нет товаров для выдачи в этой ячейке."
+msgstr "No goods for issuance in this cell."
+
+#: .\myprofile\views\warehouse.py:319
+msgid "Нет товаров в этой ячейке."
+msgstr "No goods in this cell."
+
+#: .\myprofile\views\warehouse.py:360 .\myprofile\views\warehouse.py:599
+msgid "Неверный формат данных."
+msgstr "Invalid data format."
+
+#: .\myprofile\views\warehouse.py:366 .\myprofile\views\warehouse.py:606
+msgid "Не указаны параметры."
+msgstr "Parameters not specified."
+
+#: .\myprofile\views\warehouse.py:371
+msgid "Номер ячейки должен быть числом (например: 1, 2.1, 0)."
+msgstr "Cell number must be a number (e.g.: 1, 2.1, 0)."
+
+#: .\myprofile\views\warehouse.py:417 .\myprofile\views\warehouse.py:505
+msgid "Не выбран пункт выдачи."
+msgstr "Pickup point not selected."
+
+#: .\myprofile\views\warehouse.py:510
+msgid "Уже есть активная реструктуризация. Завершите её сначала."
+msgstr "An active restructuring already exists. Complete it first."
+
+#: .\myprofile\views\warehouse.py:611
+msgid "ПВЗ не найден."
+msgstr "PVZ not found."
+
+#: .\myprofile\views\warehouse.py:618
+msgid "Номер ячейки должен быть числом."
+msgstr "Cell number must be a number."
+
+#: .\myprofile\views\warehouse.py:692
+msgid "Нет треков для подтверждения возврата."
+msgstr "No tracks for return confirmation."
+
+#: .\myprofile\views\warehouse.py:782
+msgid "Не указана сессия."
+msgstr "Session not specified."
+
+#: .\myprofile\views\warehouse.py:788
+msgid "Сессия не найдена или уже завершена."
+msgstr "Session not found or already completed."
+
+#: .\myprofile\views\warehouse.py:834
+msgid "Реструктуризация завершена."
+msgstr "Restructuring completed."
+
+#: .\register\models.py:7
+msgid "Адрес"
+msgstr "Address"
+
+#: .\register\models.py:8
+msgid "Название помещения"
+msgstr "Premises name"
+
+#: .\register\models.py:10
+msgid "Время работы"
+msgstr "Working hours"
+
+#: .\register\models.py:12
+msgid "Показывать в регистрации/футере"
+msgstr "Show in registration/footer"
+
+#: .\register\models.py:14
+msgid "Краткая информация"
+msgstr "Brief info"
+
+#: .\register\models.py:15
+msgid "2GIS виджет-код"
+msgstr "2GIS widget code"
+
+#: .\register\models.py:16
+msgid "Напоминания включены"
+msgstr "Reminders enabled"
+
+#: .\register\models.py:19
+msgid "Интервалы напоминаний (дни)"
+msgstr "Reminder intervals (days)"
+
+#: .\register\models.py:20
+msgid ""
+"Через запятую, например: 3,5,7. Если пусто — используются глобальные "
+"настройки."
+msgstr "Comma-separated, e.g.: 3,5,7. If empty — global settings are used."
+
+#: .\register\models.py:32
+msgid "Имя пользователя"
+msgstr "Username"
+
+#: .\register\models.py:38
+msgid "HR"
+msgstr "HR"
+
+#: .\register\models.py:41
+msgid "Владелец ПВЗ"
+msgstr "PVZ owner"
+
+#: .\register\models.py:43
+msgid "Администратор Telegram-бота"
+msgstr "Telegram bot administrator"
+
+#: .\register\models.py:44
+msgid "Регистрация подтверждена"
+msgstr "Registration confirmed"
+
+#: .\register\models.py:47
+msgid "Цена за 1 кг доставки (₸)"
+msgstr "Price per 1 kg of delivery (₸)"
+
+#: .\register\models.py:49
+msgid "Дата последнего изменения профиля"
+msgstr "Last profile change date"
+
+#: .\register\models.py:50
+msgid "Дата последней смены ПВЗ"
+msgstr "Last PVZ change date"
+
+#: .\register\models.py:59
+msgid "Профиль пользователя"
+msgstr "User profile"
+
+#: .\register\models.py:60
+msgid "Профили пользователей"
+msgstr "User profiles"
+
+#: .\register\models.py:83
+msgid "Заявка на регистрацию"
+msgstr "Registration request"
+
+#: .\register\models.py:84
+#: .\register\templates\desktop\register_confirmation.html:52
+msgid "Заявки на регистрацию"
+msgstr "Registration requests"
+
+#: .\register\models.py:92
+msgid "Код сброса"
+msgstr "Reset code"
+
+#: .\register\models.py:94 .\register\models.py:109
+msgid "Попытки ввода"
+msgstr "Input attempts"
+
+#: .\register\models.py:95 .\tgbot\models.py:71
+msgid "Использован"
+msgstr "Used"
+
+#: .\register\models.py:98
+msgid "Код сброса пароля"
+msgstr "Password reset code"
+
+#: .\register\models.py:99
+msgid "Коды сброса пароля"
+msgstr "Password reset codes"
+
+#: .\register\models.py:107
+#: .\register\templates\desktop\password_reset.html:68
+msgid "Код подтверждения"
+msgstr "Confirmation code"
+
+#: .\register\models.py:110
+msgid "Подтверждён"
+msgstr "Confirmed"
+
+#: .\register\models.py:113
+msgid "Код подтверждения email"
+msgstr "Email confirmation code"
+
+#: .\register\models.py:114
+msgid "Коды подтверждения email"
+msgstr "Email confirmation codes"
+
+#: .\register\models.py:122
+msgid "Идентификатор"
+msgstr "Identifier"
+
+#: .\register\models.py:123
+msgid "Попытки"
+msgstr "Attempts"
+
+#: .\register\models.py:124
+msgid "Заблокирован до"
+msgstr "Blocked until"
+
+#: .\register\models.py:125
+msgid "Последняя попытка"
+msgstr "Last attempt"
+
+#: .\register\models.py:128
+msgid "Попытка входа"
+msgstr "Login attempt"
+
+#: .\register\models.py:129
+msgid "Попытки входа"
+msgstr "Login attempts"
+
+#: .\register\models.py:148
+msgid "Чтение"
+msgstr "Read"
+
+#: .\register\models.py:149
+msgid "Создание"
+msgstr "Create"
+
+#: .\register\models.py:150
+msgid "Редактирование"
+msgstr "Edit"
+
+#: .\register\models.py:151
+msgid "Удаление"
+msgstr "Delete"
+
+#: .\register\models.py:152
+msgid "Одобрение"
+msgstr "Approve"
+
+#: .\register\models.py:158
+msgid "Кем обновлено"
+msgstr "Updated by"
+
+#: .\register\models.py:164
+msgid "Право доступа"
+msgstr "Access permission"
+
+#: .\register\models.py:165
+msgid "Права доступа"
+msgstr "Access permissions"
+
+#: .\register\templates\desktop\login.html:9
+msgid "Inter Cargo - Авторизация"
+msgstr "Inter Cargo - Login"
+
+#: .\register\templates\desktop\login.html:29
+#: .\register\templates\desktop\login.html:35
+msgid "Авторизация"
+msgstr "Login"
+
+#: .\register\templates\desktop\login.html:38
+msgid "Заполните форму ниже, чтобы войти в свой аккаунт"
+msgstr "Fill in the form below to log in to your account"
+
+#: .\register\templates\desktop\login.html:101
+#: .\register\templates\desktop\login.html:129
+#: .\register\templates\desktop\login.html:157
+msgid "Забыли пароль?"
+msgstr "Forgot password?"
+
+#: .\register\templates\desktop\password_reset.html:8
+msgid "Inter Cargo - Сброс пароля"
+msgstr "Inter Cargo - Password Reset"
+
+#: .\register\templates\desktop\password_reset.html:28
+msgid "Восстановление доступа"
+msgstr "Account recovery"
+
+#: .\register\templates\desktop\password_reset.html:29
+msgid "Сброс пароля"
+msgstr "Password reset"
+
+#: .\register\templates\desktop\password_reset.html:41
+msgid ""
+"Введите ваш логин, номер телефона или email. Мы отправим код подтверждения "
+"на привязанную почту."
+msgstr ""
+"Enter your login, phone number or email. We will send a confirmation code to"
+" the linked email."
+
+#: .\register\templates\desktop\password_reset.html:45
+msgid "Логин, телефон или email"
+msgstr "Login, phone or email"
+
+#: .\register\templates\desktop\password_reset.html:52
+msgid "Отправить код"
+msgstr "Send code"
+
+#: .\register\templates\desktop\password_reset.html:55
+msgid "Вернуться на страницу входа"
+msgstr "Back to login page"
+
+#: .\register\templates\desktop\password_reset.html:63
+msgid "Код отправлен на"
+msgstr "Code sent to"
+
+#: .\register\templates\desktop\password_reset.html:64
+msgid "Аккаунт:"
+msgstr "Account:"
+
+#: .\register\templates\desktop\password_reset.html:75
+msgid "Подтвердить код"
+msgstr "Confirm code"
+
+#: .\register\templates\desktop\password_reset.html:80
+msgid "Отправить повторно ("
+msgstr "Resend ("
+
+#: .\register\templates\desktop\password_reset.html:82
+msgid "Вернуться"
+msgstr "Back"
+
+#: .\register\templates\desktop\password_reset.html:90
+msgid "Код подтверждён. Установите новый пароль."
+msgstr "Code confirmed. Set a new password."
+
+#: .\register\templates\desktop\password_reset.html:94
+msgid "Новый пароль"
+msgstr "New password"
+
+#: .\register\templates\desktop\password_reset.html:98
+msgid "Минимум 6 символов"
+msgstr "Minimum 6 characters"
+
+#: .\register\templates\desktop\password_reset.html:105
+#: .\register\templates\desktop\register.html:94
+#: .\register\templates\desktop\registration.html:138
+msgid "Подтверждение пароля"
+msgstr "Confirm password"
+
+#: .\register\templates\desktop\password_reset.html:109
+#: .\register\templates\desktop\register.html:98
+#: .\register\templates\desktop\registration.html:142
+msgid "Повторите пароль"
+msgstr "Repeat password"
+
+#: .\register\templates\desktop\password_reset.html:117
+msgid "Установить пароль"
+msgstr "Set password"
+
+#: .\register\templates\desktop\password_reset.html:124
+msgid "Пароль успешно изменён"
+msgstr "Password changed successfully"
+
+#: .\register\templates\desktop\password_reset.html:125
+msgid "Теперь вы можете войти с новым паролем."
+msgstr "You can now log in with your new password."
+
+#: .\register\templates\desktop\register.html:9
+#: .\register\templates\desktop\registration.html:9
+msgid "Inter Cargo - Регистрация"
+msgstr "Inter Cargo - Registration"
+
+#: .\register\templates\desktop\register_confirmation.html:9
+msgid "Inter Cargo - Заявки на регистрацию"
+msgstr "Inter Cargo - Registration Requests"
+
+#: .\register\templates\desktop\register_confirmation.html:62
+msgid "Фамилия Имя"
+msgstr "Last name First name"
+
+#: .\register\templates\desktop\register_confirmation.html:83
+msgid "Принять"
+msgstr "Accept"
+
+#: .\register\templates\desktop\register_confirmation.html:102
+msgid "Нет заявок на регистрацию."
+msgstr "No registration requests."
+
+#: .\register\templates\desktop\register_confirmation.html:114
+msgid "Отклонение заявки"
+msgstr "Request rejection"
+
+#: .\register\templates\desktop\register_confirmation.html:119
+msgid "Заявка пользователя:"
+msgstr "User request:"
+
+#: .\register\templates\desktop\register_confirmation.html:124
+msgid "Причина отклонения"
+msgstr "Rejection reason"
+
+#: .\register\templates\desktop\register_confirmation.html:127
+msgid "Укажите причину отклонения заявки..."
+msgstr "Enter the reason for rejection..."
+
+#: .\register\templates\desktop\register_confirmation.html:136
+msgid "Отклонить заявку"
+msgstr "Reject request"
+
+#: .\register\templates\desktop\registration.html:99
+msgid "Проверить код"
+msgstr "Verify code"
+
+#: .\register\templates\desktop\registration.html:102
+msgid "Код отправлен на вашу почту"
+msgstr "Code sent to your email"
+
+#: .\register\templates\desktop\registration.html:103
+msgid "Отправить код повторно"
+msgstr "Resend code"
+
+#: .\register\templates\desktop\registration.html:107
+msgid "Email подтверждён"
+msgstr "Email confirmed"
+
+#: .\register\templates\desktop\registration.html:153
+msgid "Подтвердите email для завершения регистрации"
+msgstr "Confirm your email to complete registration"
+
+#: .\register\templates\desktop\success.html:10
+msgid "Inter Cargo - Успешная регистрация"
+msgstr "Inter Cargo - Registration Successful"
+
+#: .\register\templates\desktop\success.html:44
+msgid "Спасибо за регистрацию!"
+msgstr "Thank you for registering!"
+
+#: .\register\templates\desktop\success.html:45
+msgid ""
+"Пока ваша заявка проходит модерацию, можете ознакомиться с тем как устроен "
+"наш сервис"
+msgstr ""
+"While your application is being moderated, you can learn how our service "
+"works"
+
+#: .\register\templates\desktop\success.html:46
+msgid "Срок рассмотрения заявки -"
+msgstr "Application review period -"
+
+#: .\register\templates\desktop\success.html:46
+msgid "24 ЧАСА"
+msgstr "24 HOURS"
+
+#: .\register\templates\desktop\success.html:47
+msgid ""
+"Вам на почту придет уведомление когда ваша заявка будет рассмотрена "
+"модерацией"
+msgstr ""
+"You will receive an email notification when your application has been "
+"reviewed"
+
+#: .\register\templates\desktop\success.html:114
+msgid "Войти в аккаунт"
+msgstr "Log in to account"
+
+#: .\register\views\email_verify.py:24
+msgid "Введите email."
+msgstr "Enter email."
+
+#: .\register\views\email_verify.py:51 .\register\views\password_reset.py:103
+msgid "Не удалось отправить письмо. Попробуйте позже."
+msgstr "Failed to send email. Please try again later."
+
+#: .\register\views\email_verify.py:66
+msgid "Введите email и код."
+msgstr "Enter email and code."
+
+#: .\register\views\email_verify.py:74 .\register\views\password_reset.py:137
+msgid "Код не найден. Запросите новый код."
+msgstr "Code not found. Request a new code."
+
+#: .\register\views\email_verify.py:78 .\register\views\password_reset.py:141
+msgid "Код истёк. Запросите новый."
+msgstr "Code expired. Request a new one."
+
+#: .\register\views\email_verify.py:82 .\register\views\password_reset.py:145
+msgid "Слишком много попыток. Запросите новый код."
+msgstr "Too many attempts. Request a new code."
+
+#: .\register\views\enter.py:94
+msgid "Пользователь с таким номером телефона не найден."
+msgstr "No user found with this phone number."
+
+#: .\register\views\enter.py:103
+msgid "Пользователь с таким email не найден."
+msgstr "No user found with this email."
+
+#: .\register\views\enter.py:123
+msgid "Неверный логин или пароль."
+msgstr "Invalid login or password."
+
+#: .\register\views\password_reset.py:69
+msgid "Введите логин, телефон или email."
+msgstr "Enter login, phone or email."
+
+#: .\register\views\password_reset.py:76
+msgid "К этому аккаунту не привязан email. Обратитесь в поддержку."
+msgstr "No email is linked to this account. Contact support."
+
+#: .\register\views\password_reset.py:124
+#: .\register\views\password_reset.py:171
+msgid "Сессия истекла. Начните сброс заново."
+msgstr "Session expired. Start the reset again."
+
+#: .\register\views\password_reset.py:128
+msgid "Введите код."
+msgstr "Enter code."
+
+#: .\register\views\password_reset.py:177
+msgid "Пароль должен быть не менее 6 символов."
+msgstr "Password must be at least 6 characters."
+
+#: .\register\views\reg.py:70
+msgid "Заполните все поля."
+msgstr "Fill in all fields."
+
+#: .\register\views\reg.py:76
+msgid ""
+"Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией."
+msgstr "Email not confirmed. Please confirm your email before registering."
+
+#: .\register\views\reg.py:89
+msgid "Пользователь с таким логином уже существует."
+msgstr "A user with this login already exists."
+
+#: .\register\views\reg.py:93
+msgid "Пользователь с таким номером телефона уже существует."
+msgstr "A user with this phone number already exists."
+
+#: .\register\views\reg.py:97
+msgid "Пользователь с таким email уже существует."
+msgstr "A user with this email already exists."
+
+#: .\register\views\reg.py:101
+msgid "Заявка с таким логином уже существует."
+msgstr "A request with this login already exists."
+
+#: .\register\views\reg.py:105
+msgid "Заявка с таким номером телефона уже существует."
+msgstr "A request with this phone number already exists."
+
+#: .\register\views\reg.py:109
+msgid "Заявка с таким email уже существует."
+msgstr "A request with this email already exists."
+
+#: .\register\views\reg.py:137
+msgid "Регистрация прошла успешно! Вы можете войти в систему."
+msgstr "Registration successful! You can now log in."
+
+#: .\register\views\regConfirm.py:84
+msgid "Пользователь успешно подтверждён."
+msgstr "User confirmed successfully."
+
+#: .\register\views\regConfirm.py:116
+msgid "Заявка отклонена."
+msgstr "Request rejected."
+
+#: .\tgbot\models.py:29
+msgid "Telegram Chat ID"
+msgstr "Telegram Chat ID"
+
+#: .\tgbot\models.py:33
+msgid "Telegram Username"
+msgstr "Telegram Username"
+
+#: .\tgbot\models.py:37
+msgid "Имя в Telegram"
+msgstr "Telegram name"
+
+#: .\tgbot\models.py:41
+msgid "Привязан"
+msgstr "Linked"
+
+#: .\tgbot\models.py:45
+msgid "Уведомления активны"
+msgstr "Notifications active"
+
+#: .\tgbot\models.py:49
+msgid "Telegram профиль"
+msgstr "Telegram profile"
+
+#: .\tgbot\models.py:50
+msgid "Telegram профили"
+msgstr "Telegram profiles"
+
+#: .\tgbot\models.py:67
+msgid "Токен"
+msgstr "Token"
+
+#: .\tgbot\models.py:69
+msgid "Создан"
+msgstr "Created"
+
+#: .\tgbot\models.py:70
+msgid "Истекает"
+msgstr "Expires"
+
+#: .\tgbot\models.py:74
+msgid "Токен привязки Telegram"
+msgstr "Telegram link token"
+
+#: .\tgbot\models.py:75
+msgid "Токены привязки Telegram"
+msgstr "Telegram link tokens"
+
+#: .\tgbot\models.py:94
+msgid "Информация"
+msgstr "Information"
+
+#: .\tgbot\models.py:95
+msgid "Предупреждение"
+msgstr "Warning"
+
+#: .\tgbot\models.py:96
+msgid "Срочное"
+msgstr "Urgent"
+
+#: .\tgbot\models.py:97
+msgid "Обновление"
+msgstr "Update"
+
+#: .\tgbot\models.py:98
+msgid "Отслеживание"
+msgstr "Tracking"
+
+#: .\tgbot\models.py:112
+msgid "Тип уведомления"
+msgstr "Notification type"
+
+#: .\tgbot\models.py:114
+msgid "Ссылка"
+msgstr "Link"
+
+#: .\tgbot\models.py:116
+msgid "Число попыток"
+msgstr "Number of attempts"
+
+#: .\tgbot\models.py:117
+msgid "Последняя ошибка"
+msgstr "Last error"
+
+#: .\tgbot\models.py:119
+msgid "Отправлено в"
+msgstr "Sent at"
+
+#: .\tgbot\models.py:122
+msgid "Уведомление Telegram"
+msgstr "Telegram notification"
+
+#: .\tgbot\models.py:123
+msgid "Уведомления Telegram"
+msgstr "Telegram notifications"
+
+#: .\tgbot\models.py:159
+msgid "Уровень"
+msgstr "Level"
+
+#: .\tgbot\models.py:165 .\tgbot\models.py:166
+msgid "Настройки уведомлений Telegram"
+msgstr "Telegram notification settings"
+
+#: .\tgbot\models.py:173
+msgid "Активно"
+msgstr "Active"
+
+#: .\tgbot\models.py:174
+msgid "Интервалы (дни)"
+msgstr "Intervals (days)"
+
+#: .\tgbot\models.py:177 .\tgbot\models.py:178
+msgid "Настройки напоминаний"
+msgstr "Reminder settings"
+
+#: .\tgbot\models.py:186
+msgid "Текст сообщения"
+msgstr "Message text"
+
+#: .\tgbot\models.py:188
+msgid "Ошибок"
+msgstr "Errors"
+
+#: .\tgbot\models.py:189
+msgid "Всего адресатов"
+msgstr "Total recipients"
+
+#: .\tgbot\models.py:194
+msgid "Отправитель"
+msgstr "Sender"
+
+#: .\tgbot\models.py:199
+msgid "Лог рассылки"
+msgstr "Broadcast log"
+
+#: .\tgbot\models.py:200
+msgid "Логи рассылок"
+msgstr "Broadcast logs"
+
+#: .\tgbot\models.py:218
+msgid "Интервал (дни)"
+msgstr "Interval (days)"
+
+#: .\tgbot\models.py:222
+msgid "Отправленное напоминание"
+msgstr "Sent reminder"
+
+#: .\tgbot\models.py:223
+msgid "Отправленные напоминания"
+msgstr "Sent reminders"

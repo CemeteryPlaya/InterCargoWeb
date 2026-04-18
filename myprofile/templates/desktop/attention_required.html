@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Требует внимания</title>
+    <title>{% trans "Inter Cargo - Требует внимания" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -29,7 +30,7 @@
         <main class="flex-1 p-4 md:p-8">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Требует внимания</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Требует внимания" %}</h1>
             </div>
             <div class="max-w-5xl mx-auto">
                 {% if messages %}
@@ -47,10 +48,10 @@
                 {% endif %}
 
                 <h1 class="text-2xl font-bold mb-2">
-                    <i class="ri-alarm-warning-line text-orange-500 mr-2"></i>Требует внимания
+                    <i class="ri-alarm-warning-line text-orange-500 mr-2"></i>{% trans "Требует внимания" %}
                 </h1>
                 <p class="text-sm text-gray-500 mb-6">
-                    Посылки клиентов, которые требуют внимания: возвращены со склада ПВЗ, не приняты при приёмке или не приняты в доставку водителем.
+                    {% trans "Посылки клиентов, которые требуют внимания: возвращены со склада ПВЗ, не приняты при приёмке или не приняты в доставку водителем." %}
                 </p>
 
                 {% if attention_data %}
@@ -93,7 +94,7 @@
                                                     <span class="text-xs text-gray-400">({{ client.name }})</span>
                                                     {% endif %}
                                                     {% if client.owner_type == 'temp' %}
-                                                    <span class="text-xs text-orange-500">(вр.)</span>
+                                                    <span class="text-xs text-orange-500">{% trans "(вр.)" %}</span>
                                                     {% endif %}
                                                 </div>
                                                 {% if client.added_by %}
@@ -119,7 +120,7 @@
                                                 <button type="submit"
                                                     class="inline-flex items-center gap-1 bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition text-xs font-medium whitespace-nowrap"
                                                     onclick="return confirm('Подтвердить возврат посылок клиента {{ client.login }} на сортировочный склад?\nПосылки получат статус «Доставлено на сортировочный склад», ячейка будет удалена.')">
-                                                    <i class="ri-arrow-go-back-line"></i> Подтвердить возврат
+                                                    <i class="ri-arrow-go-back-line"></i> {% trans "Подтвердить возврат" %}
                                                 </button>
                                             </form>
                                             {% else %}
@@ -131,7 +132,7 @@
                                                 <button type="submit"
                                                     class="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 transition text-xs font-medium whitespace-nowrap"
                                                     onclick="return confirm('Отметить проблемы клиента {{ client.login }} как устранённые?')">
-                                                    <i class="ri-check-line"></i> Проблемы устранены
+                                                    <i class="ri-check-line"></i> {% trans "Проблемы устранены" %}
                                                 </button>
                                             </form>
                                             {% endif %}
@@ -148,7 +149,7 @@
                 {% else %}
                 <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
                     <i class="ri-checkbox-circle-line text-green-500 text-4xl"></i>
-                    <p class="text-gray-600 mt-2">Все посылки приняты. Нет проблем, требующих внимания.</p>
+                    <p class="text-gray-600 mt-2">{% trans "Все посылки приняты. Нет проблем, требующих внимания." %}</p>
                 </div>
                 {% endif %}
             </div>

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - История выдачи</title>
+    <title>{% trans "Inter Cargo - История выдачи" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -52,9 +53,9 @@
 
         <!-- Мобильный хедер -->
         <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-            <h1 class="text-lg font-bold text-center">История выдачи</h1>
+            <h1 class="text-lg font-bold text-center">{% trans "История выдачи" %}</h1>
         </div>
-        <h1 class="text-2xl font-bold mb-6 hidden md:block"><i class="ri-history-line text-red-500"></i> История выдачи</h1>
+        <h1 class="text-2xl font-bold mb-6 hidden md:block"><i class="ri-history-line text-red-500"></i> {% trans "История выдачи" %}</h1>
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
     {% if packages %}
@@ -72,9 +73,9 @@
                 <div class="flex items-center gap-4">
                     <p class="text-sm font-semibold text-gray-800">{{ item.package_total }} тг</p>
                     {% if item.package.is_issued %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Выдан</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{% trans "Выдан" %}</span>
                     {% else %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Ожидает выдачи</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{% trans "Ожидает выдачи" %}</span>
                     {% endif %}
                 </div>
             </summary>
@@ -93,7 +94,7 @@
                                 Оплачен{% if receipt.paid_at %} {{ receipt.paid_at|date:"d.m.Y H:i" }}{% endif %}
                             </span>
                         {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Не оплачен</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{% trans "Не оплачен" %}</span>
                         {% endif %}
                         {% endcomment %}
                     </summary>
@@ -103,9 +104,9 @@
                             <thead>
                                 <tr class="bg-gray-200 text-gray-700">
                                     <th class="border border-gray-300 px-3 py-2 text-left">#</th>
-                                    <th class="border border-gray-300 px-3 py-2 text-left">Трек-код</th>
-                                    <th class="border border-gray-300 px-3 py-2 text-right">Вес (кг)</th>
-                                    <th class="border border-gray-300 px-3 py-2 text-right">Стоимость (тг)</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-left">{% trans "Трек-код" %}</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-right">{% trans "Вес (кг)" %}</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-right">{% trans "Стоимость (тг)" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -140,7 +141,7 @@
                         data-barcode="{{ item.package.barcode|escape }}"
                         data-img="{{ item.qr_base64|escape }}"
                         {% if item.payment_link %}data-payment-link="{{ item.payment_link }}"{% endif %}>
-                        <i class="ri-qr-code-line"></i> Показать QR-код
+                        <i class="ri-qr-code-line"></i> {% trans "Показать QR-код" %}
                     </button>
                 </div>
                 {% endif %}
@@ -149,7 +150,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <p class="text-gray-600">Пока нет оформленных пакетов.</p>
+    <p class="text-gray-600">{% trans "Пока нет оформленных пакетов." %}</p>
     {% endif %}
 </div>
 
@@ -161,25 +162,25 @@
     <div id="barcode-backdrop" class="absolute inset-0 bg-black/50"></div>
     <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 z-10">
         <div class="flex items-start justify-between mb-4">
-            <h3 id="barcode-modal-title" class="text-lg font-semibold">QR-код</h3>
+            <h3 id="barcode-modal-title" class="text-lg font-semibold">{% trans "QR-код" %}</h3>
             <button id="barcode-modal-close" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
         </div>
 
         <div class="flex flex-col items-center">
-            <img id="barcode-modal-img" src="" alt="QR-код" class="max-w-[280px] mb-4">
+            <img id="barcode-modal-img" src="" alt="{% trans "QR-код" %}" class="max-w-[280px] mb-4">
             <div id="barcode-modal-code" class="font-mono text-sm text-gray-700"></div>
             {% comment %}PAYMENT COMMENTED OUT
             <a id="barcode-payment-link" href="#" target="_blank"
                 class="hidden mt-4 inline-flex items-center gap-2 bg-green-500 text-white font-medium px-6 py-2.5 rounded-button hover:bg-green-600 transition text-sm">
-                <i class="ri-bank-card-line"></i> Оплатить
+                <i class="ri-bank-card-line"></i> {% trans "Оплатить" %}
             </a>
             {% endcomment %}
             <div class="mt-4 flex gap-2">
                 <button id="barcode-copy-btn" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm">
-                    Копировать код
+                    {% trans "Копировать код" %}
                 </button>
                 <a id="barcode-download-link" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm" download>
-                    Скачать PNG
+                    {% trans "Скачать PNG" %}
                 </a>
             </div>
         </div>

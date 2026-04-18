@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Сервис</title>
+    <title>{% trans "Inter Cargo - Сервис" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -29,11 +30,11 @@
         <main class="flex-1 p-4 md:p-8">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Сервис</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Сервис" %}</h1>
             </div>
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-2xl font-bold mb-6 hidden md:block">
-                    <i class="ri-tools-line mr-2"></i>Сервис
+                    <i class="ri-tools-line mr-2"></i>{% trans "Сервис" %}
                 </h1>
 
                 <!-- Сообщения -->
@@ -55,7 +56,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-qr-code-line mr-1 text-blue-500"></i>
-                        Прогрузить все QR-коды
+                        {% trans "Прогрузить все QR-коды" %}
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
                         Для всех клиентов, у которых есть чеки с трек-кодами в статусе «Доставлено на ПВЗ»,
@@ -66,7 +67,7 @@
                         {% csrf_token %}
                         <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition font-medium"
                             onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
-                            <i class="ri-qr-code-line mr-1"></i> Прогрузить все QR-коды
+                            <i class="ri-qr-code-line mr-1"></i> {% trans "Прогрузить все QR-коды" %}
                         </button>
                     </form>
                 </div>
@@ -75,7 +76,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-file-list-3-line mr-1 text-green-500"></i>
-                        Подгрузить чеки
+                        {% trans "Подгрузить чеки" %}
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
                         За выбранную дату прихода товаров создаёт чеки для клиентов,
@@ -85,13 +86,13 @@
                     <form method="post" action="{% url 'service_generate_receipts' %}" class="flex flex-wrap items-end gap-4">
                         {% csrf_token %}
                         <div>
-                            <label for="receipts-date" class="block text-sm font-medium text-gray-700 mb-1">Дата прихода</label>
+                            <label for="receipts-date" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Дата прихода" %}</label>
                             <input type="date" id="receipts-date" name="date" required
                                 class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-green-300 focus:border-green-500">
                         </div>
                         <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition font-medium"
                             onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
-                            <i class="ri-file-list-3-line mr-1"></i> Подгрузить чеки
+                            <i class="ri-file-list-3-line mr-1"></i> {% trans "Подгрузить чеки" %}
                         </button>
                     </form>
                 </div>
@@ -100,7 +101,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-exchange-line mr-1 text-orange-500"></i>
-                        Нормализовать чеки
+                        {% trans "Нормализовать чеки" %}
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
                         За выбранную дату: трек-коды одного клиента, получившие статус «Доставлено на сортировочный склад» в одну дату,
@@ -110,13 +111,13 @@
                     <form method="post" action="{% url 'service_normalize_receipts' %}" class="flex flex-wrap items-end gap-4">
                         {% csrf_token %}
                         <div>
-                            <label for="normalize-date" class="block text-sm font-medium text-gray-700 mb-1">Дата прихода</label>
+                            <label for="normalize-date" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Дата прихода" %}</label>
                             <input type="date" id="normalize-date" name="date" required
                                 class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-orange-300 focus:border-orange-500">
                         </div>
                         <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition font-medium"
                             onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
-                            <i class="ri-exchange-line mr-1"></i> Нормализовать чеки
+                            <i class="ri-exchange-line mr-1"></i> {% trans "Нормализовать чеки" %}
                         </button>
                     </form>
                 </div>
@@ -125,7 +126,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-checkbox-circle-line mr-1 text-purple-500"></i>
-                        Отметить чеки как «Выдано клиенту»
+                        {% trans "Отметить чеки как «Выдано клиенту»" %}
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
                         Находит все трек-коды со статусом «Выдано клиенту» и отмечает связанные чеки
@@ -135,7 +136,7 @@
                         {% csrf_token %}
                         <button type="submit" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition font-medium"
                             onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
-                            <i class="ri-checkbox-circle-line mr-1"></i> Отметить выданные чеки
+                            <i class="ri-checkbox-circle-line mr-1"></i> {% trans "Отметить выданные чеки" %}
                         </button>
                     </form>
                 </div>
@@ -144,7 +145,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-inbox-unarchive-line mr-1 text-teal-500"></i>
-                        Перенос архивных трек-кодов
+                        {% trans "Перенос архивных трек-кодов" %}
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
                         Переносит трек-коды из таблицы «Архивные трек-коды» обратно в основную таблицу TrackCode
@@ -154,7 +155,7 @@
                         {% csrf_token %}
                         <button type="submit" class="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition font-medium"
                             onclick="this.disabled=true; this.innerHTML='<i class=\'ri-loader-4-line animate-spin mr-1\'></i> Обработка...'; this.form.submit();">
-                            <i class="ri-inbox-unarchive-line mr-1"></i> Перенести архивные треки
+                            <i class="ri-inbox-unarchive-line mr-1"></i> {% trans "Перенести архивные треки" %}
                         </button>
                     </form>
                 </div>
@@ -163,10 +164,10 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-notification-3-line mr-1 text-rose-500"></i>
-                        Тест уведомлений
+                        {% trans "Тест уведомлений" %}
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
-                        Отправляет пробное уведомление <strong>вам лично</strong> по всем каналам:
+                        {% trans "Отправляет пробное уведомление" %} <strong>{% trans "вам лично" %}</strong> по всем каналам:
                         уведомление на сайте, браузерный Push, Telegram-бот и email.
                         Используйте для проверки текстов и корректности доставки уведомлений.
                     </p>
@@ -175,28 +176,28 @@
                             {% csrf_token %}
                             <input type="hidden" name="notif_type" value="delivered">
                             <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
-                                <i class="ri-truck-line mr-1"></i> Доставлено на склад сортировки
+                                <i class="ri-truck-line mr-1"></i> {% trans "Доставлено на склад сортировки" %}
                             </button>
                         </form>
                         <form method="post" action="{% url 'service_test_notification' %}">
                             {% csrf_token %}
                             <input type="hidden" name="notif_type" value="receipt">
                             <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
-                                <i class="ri-file-list-3-line mr-1"></i> Создан чек
+                                <i class="ri-file-list-3-line mr-1"></i> {% trans "Создан чек" %}
                             </button>
                         </form>
                         <form method="post" action="{% url 'service_test_notification' %}">
                             {% csrf_token %}
                             <input type="hidden" name="notif_type" value="ready">
                             <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
-                                <i class="ri-store-2-line mr-1"></i> Доставлено на ПВЗ
+                                <i class="ri-store-2-line mr-1"></i> {% trans "Доставлено на ПВЗ" %}
                             </button>
                         </form>
                         <form method="post" action="{% url 'service_test_notification' %}">
                             {% csrf_token %}
                             <input type="hidden" name="notif_type" value="shipped_cn">
                             <button type="submit" class="bg-rose-500 text-white px-5 py-2.5 rounded-lg hover:bg-rose-600 transition font-medium text-sm">
-                                <i class="ri-flight-takeoff-line mr-1"></i> Отправлен из Китая
+                                <i class="ri-flight-takeoff-line mr-1"></i> {% trans "Отправлен из Китая" %}
                             </button>
                         </form>
                     </div>

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Сводка прихода</title>
+    <title>{% trans "Inter Cargo - Сводка прихода" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -29,10 +30,10 @@
         <main class="flex-1 p-4 md:p-6">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Сводка прихода</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Сводка прихода" %}</h1>
             </div>
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">
-                <i class="ri-file-list-3-line text-red-500"></i> Сводка прихода
+                <i class="ri-file-list-3-line text-red-500"></i> {% trans "Сводка прихода" %}
             </h2>
 
             {% if messages %}
@@ -51,11 +52,11 @@
             <!-- Выбор даты -->
             <div class="flex flex-wrap gap-3 mb-6">
                 <form method="get" class="flex flex-wrap items-center gap-2">
-                    <label for="date" class="font-medium text-gray-700 self-center">Дата:</label>
+                    <label for="date" class="font-medium text-gray-700 self-center">{% trans "Дата:" %}</label>
                     <input type="date" name="date" id="date" value="{{ selected_date }}"
                         class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400">
                     <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm">
-                        Показать
+                        {% trans "Показать" %}
                     </button>
                 </form>
                 <!-- Актуализация убрана -->
@@ -64,7 +65,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="date" value="{{ selected_date }}">
                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">
-                        <i class="ri-receipt-line"></i> Сформировать чеки
+                        <i class="ri-receipt-line"></i> {% trans "Сформировать чеки" %}
                     </button>
                 </form>
             </div>
@@ -93,7 +94,7 @@
             {% if not pickups and not home_clients and not no_pickup_clients %}
             <div class="text-center py-12 text-gray-500">
                 <i class="ri-inbox-line text-4xl mb-2"></i>
-                <p>Нет посылок со статусом "Доставлен на сортировочный склад" за эту дату</p>
+                <p>{% trans 'Нет посылок со статусом "Доставлен на сортировочный склад" за эту дату' %}</p>
             </div>
             {% else %}
 
@@ -101,20 +102,20 @@
             {% if home_clients %}
             <div class="mb-8">
                 <h3 class="text-lg font-semibold text-orange-700 mb-3">
-                    <i class="ri-home-4-line"></i> Доставка на дом (Курьер)
+                    <i class="ri-home-4-line"></i> {% trans "Доставка на дом (Курьер)" %}
                 </h3>
                 <div class="bg-white rounded-lg shadow border border-orange-200 overflow-hidden">
                     <div class="overflow-x-auto">
                     <table class="w-full text-sm sortable-table">
                         <thead>
                             <tr class="bg-orange-50 text-gray-600 border-b border-orange-200">
-                                <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Клиент <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-left font-medium">Телефон</th>
-                                <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Цена/кг (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-center font-medium">Действие</th>
+                                <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">{% trans "Клиент" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-left font-medium">{% trans "Телефон" %}</th>
+                                <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Посылок" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Вес (кг)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Цена/кг (₸)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Стоимость (₸)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-center font-medium">{% trans "Действие" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -141,7 +142,7 @@
                                         <input type="hidden" name="date" value="{{ selected_date }}">
                                         <input type="hidden" name="action" value="unset">
                                         <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
-                                            <i class="ri-arrow-go-back-line"></i> Вернуть на ПВЗ
+                                            <i class="ri-arrow-go-back-line"></i> {% trans "Вернуть на ПВЗ" %}
                                         </button>
                                     </form>
                                 </td>
@@ -159,29 +160,29 @@
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-semibold text-purple-700">
-                        <i class="ri-user-unfollow-line"></i> Без пункта
+                        <i class="ri-user-unfollow-line"></i> {% trans "Без пункта" %}
                     </h3>
                     <div class="flex items-center gap-2">
                         <button type="button" id="copyLoginsBtn" class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition">
-                            <i class="ri-file-copy-line"></i> Копировать логины
+                            <i class="ri-file-copy-line"></i> {% trans "Копировать логины" %}
                         </button>
                         <button type="button" id="bulkSelectBtn" class="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded hover:bg-purple-200 transition">
-                            <i class="ri-checkbox-multiple-line"></i> Выбрать несколько
+                            <i class="ri-checkbox-multiple-line"></i> {% trans "Выбрать несколько" %}
                         </button>
                     </div>
                 </div>
 
                 <!-- Панель массового назначения (скрыта по умолчанию) -->
                 <div id="bulkPanel" class="hidden mb-3 bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-center gap-3 flex-wrap">
-                    <span class="text-sm text-purple-700 font-medium">Выбрано: <span id="bulkCount">0</span></span>
+                    <span class="text-sm text-purple-700 font-medium">{% trans "Выбрано:" %} <span id="bulkCount">0</span></span>
                     <button type="button" id="bulkSelectAll" class="text-xs bg-white text-purple-700 border border-purple-300 px-3 py-1 rounded hover:bg-purple-100 transition">
-                        Выбрать всех
+                        {% trans "Выбрать всех" %}
                     </button>
                     <button type="button" id="bulkAssignBtn" class="text-xs bg-purple-600 text-white px-3 py-1.5 rounded hover:bg-purple-700 transition disabled:opacity-50" disabled>
-                        <i class="ri-map-pin-add-line"></i> Назначить ПВЗ
+                        <i class="ri-map-pin-add-line"></i> {% trans "Назначить ПВЗ" %}
                     </button>
                     <button type="button" id="bulkCancelBtn" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
-                        Отмена
+                        {% trans "Отмена" %}
                     </button>
                 </div>
 
@@ -191,13 +192,13 @@
                         <thead>
                             <tr class="bg-purple-50 text-gray-600 border-b border-purple-200">
                                 <th class="py-3 px-4 text-left font-medium bulk-col hidden w-8"></th>
-                                <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Логин <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-left font-medium">Телефон</th>
-                                <th class="py-3 px-4 text-left font-medium">Назначить ПВЗ</th>
-                                <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Цена/кг (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">{% trans "Логин" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-left font-medium">{% trans "Телефон" %}</th>
+                                <th class="py-3 px-4 text-left font-medium">{% trans "Назначить ПВЗ" %}</th>
+                                <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Посылок" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Вес (кг)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Цена/кг (₸)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Стоимость (₸)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -226,7 +227,7 @@
                                             {% endfor %}
                                         </select>
                                         <button type="submit" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded hover:bg-purple-200 transition">
-                                            <i class="ri-check-line"></i> Назначить
+                                            <i class="ri-check-line"></i> {% trans "Назначить" %}
                                         </button>
                                     </form>
                                 </td>
@@ -246,9 +247,9 @@
             <div id="bulkPickupModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
                 <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="ri-map-pin-add-line text-purple-600"></i> Назначить ПВЗ
+                        <i class="ri-map-pin-add-line text-purple-600"></i> {% trans "Назначить ПВЗ" %}
                     </h3>
-                    <p class="text-sm text-gray-500 mb-4">Выбрано клиентов: <span id="modalBulkCount" class="font-medium text-purple-700">0</span></p>
+                    <p class="text-sm text-gray-500 mb-4">{% trans "Выбрано клиентов:" %} <span id="modalBulkCount" class="font-medium text-purple-700">0</span></p>
                     <form method="post" action="{% url 'assign_temp_pickup' %}" id="bulkAssignForm">
                         {% csrf_token %}
                         <input type="hidden" name="date" value="{{ selected_date }}">
@@ -260,10 +261,10 @@
                         </select>
                         <div class="flex gap-3 justify-end">
                             <button type="button" id="modalCancelBtn" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
-                                Отмена
+                                {% trans "Отмена" %}
                             </button>
                             <button type="submit" class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition">
-                                <i class="ri-check-line"></i> Назначить
+                                <i class="ri-check-line"></i> {% trans "Назначить" %}
                             </button>
                         </div>
                     </form>
@@ -290,13 +291,13 @@
                         <table class="w-full text-sm sortable-table">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-600 border-b border-gray-200">
-                                    <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">Клиент <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                    <th class="py-3 px-4 text-left font-medium">Телефон</th>
-                                    <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Посылок <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Вес (кг) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Цена/кг (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">Стоимость (₸) <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
-                                    <th class="py-3 px-4 text-center font-medium">Действие</th>
+                                    <th class="py-3 px-4 text-left font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="string">{% trans "Клиент" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-left font-medium">{% trans "Телефон" %}</th>
+                                    <th class="py-3 px-4 text-center font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Посылок" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Вес (кг)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Цена/кг (₸)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-right font-medium sortable-th cursor-pointer hover:text-gray-900" data-sort="number">{% trans "Стоимость (₸)" %} <i class="ri-arrow-up-down-line text-xs text-gray-400"></i></th>
+                                    <th class="py-3 px-4 text-center font-medium">{% trans "Действие" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -325,7 +326,7 @@
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="unset">
                                             <button type="submit" class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition">
-                                                <i class="ri-arrow-go-back-line"></i> Вернуть на ПВЗ
+                                                <i class="ri-arrow-go-back-line"></i> {% trans "Вернуть на ПВЗ" %}
                                             </button>
                                         </form>
                                         {% else %}
@@ -333,7 +334,7 @@
                                         <button type="button" class="discount-btn text-xs bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200 transition"
                                             data-user-id="{{ uid }}"
                                             data-client-name="{{ client.full_name }}">
-                                            <i class="ri-percent-line"></i> Ввести скидку
+                                            <i class="ri-percent-line"></i> {% trans "Ввести скидку" %}
                                         </button>
                                         {% endif %}
                                         <form method="post" action="{% url 'toggle_home_delivery' %}" class="inline">
@@ -342,7 +343,7 @@
                                             <input type="hidden" name="date" value="{{ selected_date }}">
                                             <input type="hidden" name="action" value="home">
                                             <button type="submit" class="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded hover:bg-orange-200 transition">
-                                                <i class="ri-home-4-line"></i> На дом
+                                                <i class="ri-home-4-line"></i> {% trans "На дом" %}
                                             </button>
                                         </form>
                                         {% if warehouse_pp_id %}
@@ -353,7 +354,7 @@
                                             <input type="hidden" name="action" value="warehouse">
                                             <input type="hidden" name="pickup_id" value="{{ warehouse_pp_id }}">
                                             <button type="submit" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition">
-                                                <i class="ri-building-line"></i> Со склада
+                                                <i class="ri-building-line"></i> {% trans "Со склада" %}
                                             </button>
                                         </form>
                                         {% endif %}
@@ -374,23 +375,23 @@
             <div id="discountModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
                 <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4">
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">
-                        <i class="ri-percent-line text-green-600"></i> Ввести разовую скидку
+                        <i class="ri-percent-line text-green-600"></i> {% trans "Ввести разовую скидку" %}
                     </h3>
-                    <p class="text-sm text-gray-500 mb-4">Клиент: <span id="discountClientName" class="font-medium text-gray-700"></span></p>
+                    <p class="text-sm text-gray-500 mb-4">{% trans "Клиент:" %} <span id="discountClientName" class="font-medium text-gray-700"></span></p>
                     <form method="post" action="{% url 'apply_discount' %}" id="discountForm" data-ajax>
                         {% csrf_token %}
                         <input type="hidden" name="date" value="{{ selected_date }}">
                         <input type="hidden" name="user_id" id="discountUserId" value="">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Скидка (₸/кг)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Скидка (₸/кг)" %}</label>
                         <input type="number" name="amount_per_kg" step="0.01" min="1" required
                             class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-green-400"
-                            placeholder="Например: 100">
+                            placeholder="{% trans "Например: 100" %}">
                         <div class="flex gap-3 justify-end">
                             <button type="button" id="discountCancelBtn" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
-                                Отмена
+                                {% trans "Отмена" %}
                             </button>
                             <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition">
-                                <i class="ri-check-line"></i> Применить
+                                <i class="ri-check-line"></i> {% trans "Применить" %}
                             </button>
                         </div>
                     </form>

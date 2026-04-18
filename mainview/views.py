@@ -16,9 +16,9 @@ def index(request):
         status_counts = dict(tracks.values_list('status').annotate(c=Count('id')))
         context['mobile_stats'] = {
             'user_added': status_counts.get('user_added', 0),
+            'in_transit': status_counts.get('warehouse_cn', 0) + status_counts.get('shipped_cn', 0),
+            'sorting': status_counts.get('unidentified', 0) + status_counts.get('delivered', 0) + status_counts.get('shipping_pp', 0),
             'ready': status_counts.get('ready', 0),
-            'sorting': status_counts.get('shipping_pp', 0),
-            'in_transit': status_counts.get('shipped_cn', 0) + status_counts.get('delivered', 0) + status_counts.get('unidentified', 0),
         }
 
         # Telegram: показываем ссылку только если не привязан (на главной)

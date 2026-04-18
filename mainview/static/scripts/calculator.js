@@ -69,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (w >= 30) {
       const discountAmount = price - (w * 10);
       document.getElementById('discount-amount').textContent = `${Math.round(discountAmount).toLocaleString()} ₸`;
-      discountEl.style.visibility = 'visible';
+      discountEl.classList.add('is-visible');
     } else {
-      discountEl.style.visibility = 'hidden';
+      discountEl.classList.remove('is-visible');
     }
   };
 

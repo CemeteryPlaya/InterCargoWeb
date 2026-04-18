@@ -4,6 +4,7 @@
  * elements, so this script does not need any server-rendered values.
  */
 (function() {
+    var _i18n = document.getElementById('js-i18n')?.dataset || {};
     // === Табы ===
     var tabReady = document.getElementById('tab-ready');
     var tabHistory = document.getElementById('tab-history');
@@ -60,13 +61,13 @@
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    alert(data.error || 'Ошибка');
+                    alert(data.error || _i18n.error || 'Ошибка');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="ri-hand-coin-line mr-1"></i> ' + btn.dataset.label;
                 }
             })
             .catch(function() {
-                alert('Ошибка сети');
+                alert(_i18n.networkError || 'Ошибка сети');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="ri-hand-coin-line mr-1"></i> ' + btn.dataset.label;
             });
@@ -105,8 +106,8 @@
         copyBtn.addEventListener('click', function() {
             var code = modalCode.textContent;
             navigator.clipboard.writeText(code).then(function() {
-                copyBtn.textContent = 'Скопировано!';
-                setTimeout(function() { copyBtn.textContent = 'Копировать код'; }, 1500);
+                copyBtn.textContent = _i18n.copied || 'Скопировано!';
+                setTimeout(function() { copyBtn.textContent = _i18n.copyCode || 'Копировать код'; }, 1500);
             });
         });
     }

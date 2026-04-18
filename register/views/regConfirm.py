@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from register.models import PendingRegistration, UserProfile
+from django.utils.translation import gettext as _
 
 
 def confirm_view(request):
@@ -80,7 +81,7 @@ def approve_registration(request, reg_id):
             pass
 
     reg.delete()
-    messages.success(request, "Пользователь успешно подтверждён.")
+    messages.success(request, _("Пользователь успешно подтверждён."))
     return redirect('confirm')
 
 
@@ -112,5 +113,5 @@ def reject_registration(request, reg_id):
             pass
 
     reg.delete()
-    messages.success(request, "Заявка отклонена.")
+    messages.success(request, _("Заявка отклонена."))
     return redirect('confirm')

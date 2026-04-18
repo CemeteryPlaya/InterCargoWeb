@@ -66,11 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (theme === 'dark') {
         icon.classList.remove('ri-moon-line');
         icon.classList.add('ri-sun-line');
-        button.setAttribute('aria-label', 'Переключить на светлую тему');
+        button.setAttribute('aria-label', (document.getElementById('js-i18n')?.dataset.themeLight) || 'Переключить на светлую тему');
       } else {
         icon.classList.remove('ri-sun-line');
         icon.classList.add('ri-moon-line');
-        button.setAttribute('aria-label', 'Переключить на тёмную тему');
+        button.setAttribute('aria-label', (document.getElementById('js-i18n')?.dataset.themeDark) || 'Переключить на тёмную тему');
       }
     }
     // Мобильная кнопка темы
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.innerHTML =
       '<div class="ic-loading-spinner">' +
       '<div class="ic-spinner-ring"></div>' +
-      '<span>Загрузка...</span>' +
+      '<span>' + ((document.getElementById('js-i18n')?.dataset.loading) || 'Загрузка...') + '</span>' +
       '</div>';
     document.body.appendChild(overlay);
 

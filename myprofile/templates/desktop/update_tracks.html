@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Обновления статусов</title>
+    <title>{% trans "Inter Cargo - Обновления статусов" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -31,9 +32,9 @@
         <div class="flex-1 mx-auto p-4 md:p-6 bg-white rounded-lg shadow mt-10">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Обновление трек-кодов</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Обновление трек-кодов" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">Обновление трек-кодов</h2>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Обновление трек-кодов" %}</h2>
 
             {% if messages %}
             <ul class="mb-4">
@@ -48,7 +49,7 @@
                 {% csrf_token %}
 
                 <!-- Статус -->
-                <label for="status" class="block font-medium mb-1">Новый статус</label>
+                <label for="status" class="block font-medium mb-1">{% trans "Новый статус" %}</label>
                 <select name="status" id="status" required
                     class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
                     {% for key, value in status_choices %}
@@ -59,7 +60,7 @@
                 </select>
 
                 <!-- Дата -->
-                <label for="update_date" class="block font-medium mb-1">Дата обновления</label>
+                <label for="update_date" class="block font-medium mb-1">{% trans "Дата обновления" %}</label>
                 <input type="date" name="update_date" id="update_date" required
                     class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
 
@@ -67,14 +68,14 @@
                 <div id="form_toggle_container" class="hidden mb-4">
                     <button type="button" id="form_toggle_btn"
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
-                        <i class="ri-table-line"></i> Переключить на табличный вид
+                        <i class="ri-table-line"></i> {% trans "Переключить на табличный вид" %}
                     </button>
                 </div>
 
                 <div id="standard_view" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Трек-коды -->
                     <div>
-                        <label for="track_codes" class="block font-medium mb-1">Трек-коды (по одному в строке)</label>
+                        <label for="track_codes" class="block font-medium mb-1">{% trans "Трек-коды (по одному в строке)" %}</label>
                         <textarea name="track_codes" id="track_codes" rows="10" required
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
@@ -89,7 +90,7 @@
 
                     <!-- Вес -->
                     <div id="weight_block">
-                        <label for="weights" class="block font-medium mb-1">Вес (в кг, по одному в строке)</label>
+                        <label for="weights" class="block font-medium mb-1">{% trans "Вес (в кг, по одному в строке)" %}</label>
                         <textarea name="weights" id="weights" rows="10"
                             class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                     </div>
@@ -101,13 +102,13 @@
                         <thead>
                             <tr>
                                 <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                                    Трек-код </th>
+                                    {% trans "Трек-код" %} </th>
                                 <th
                                     class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                                    Владелец</th>
+                                    {% trans "Владелец" %}</th>
                                 <th
                                     class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                                    Вес (кг)</th>
+                                    {% trans "Вес (кг)" %}</th>
                                 <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-100"></th>
                             </tr>
                         </thead>
@@ -119,7 +120,7 @@
 
                     <button type="button" id="add_row_btn"
                         class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4 transition">
-                        <i class="ri-add-line"></i> Добавить строку
+                        <i class="ri-add-line"></i> {% trans "Добавить строку" %}
                     </button>
                 </div>
 

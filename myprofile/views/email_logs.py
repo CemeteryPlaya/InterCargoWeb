@@ -7,6 +7,7 @@ from django.contrib import messages
 from myprofile.models import EmailLog
 from myprofile.email_utils import send_mail_logged
 from myprofile.permissions import is_staff
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def _is_staff(user):
 def resend_email(request, log_id):
     """Переотправка неудачного email."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     log_entry = get_object_or_404(EmailLog, id=log_id, status='failed')
 

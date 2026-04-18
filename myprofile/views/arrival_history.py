@@ -6,6 +6,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from myprofile.models import TrackCode, Receipt, ReceiptItem, Arrival
 from myprofile.views.utils import get_global_price_per_kg, is_staff as _is_staff
 from register.models import UserProfile
+from django.utils.translation import gettext as _
 
 
 MONTH_NAMES = {
@@ -22,7 +23,7 @@ def _staff_required(view_func):
     @login_required
     def wrapper(request, *args, **kwargs):
         if not _is_staff(request.user):
-            return HttpResponseForbidden("У вас нет доступа к этой странице.")
+            return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
         return view_func(request, *args, **kwargs)
     wrapper.__name__ = view_func.__name__
     wrapper.__doc__ = view_func.__doc__

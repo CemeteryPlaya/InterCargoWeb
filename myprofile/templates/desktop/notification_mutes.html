@@ -1,10 +1,11 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo — Управление уведомлениями</title>
+    <title>{% trans "Inter Cargo — Управление уведомлениями" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -27,10 +28,10 @@
     <main class="flex-1 p-4 md:p-6 max-w-5xl">
         <!-- Мобильный хедер -->
         <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-            <h1 class="text-lg font-bold text-center">Управление уведомлениями</h1>
+            <h1 class="text-lg font-bold text-center">{% trans "Управление уведомлениями" %}</h1>
         </div>
         <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">
-            <i class="ri-notification-off-line text-red-500"></i> Управление уведомлениями
+            <i class="ri-notification-off-line text-red-500"></i> {% trans "Управление уведомлениями" %}
         </h2>
 
         {% if messages %}
@@ -49,7 +50,7 @@
         <!-- Форма создания заглушки -->
         <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                <i class="ri-add-circle-line text-red-500"></i> Отключить уведомления
+                <i class="ri-add-circle-line text-red-500"></i> {% trans "Отключить уведомления" %}
             </h3>
 
             <form id="createMuteForm" class="space-y-4">
@@ -57,22 +58,22 @@
 
                 <!-- Кому -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Для кого</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Для кого" %}</label>
                     <div class="flex gap-3 mb-2">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="scope" value="all" checked class="accent-red-500">
-                            <span class="text-sm text-gray-700">Все клиенты</span>
+                            <span class="text-sm text-gray-700">{% trans "Все клиенты" %}</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="scope" value="user" class="accent-red-500">
-                            <span class="text-sm text-gray-700">Конкретный клиент</span>
+                            <span class="text-sm text-gray-700">{% trans "Конкретный клиент" %}</span>
                         </label>
                     </div>
                     <!-- Поиск клиента -->
                     <div id="userSearchBlock" class="hidden">
                         <div class="relative">
                             <input type="text" id="userSearchInput"
-                                   placeholder="Введите логин или имя..."
+                                   placeholder="{% trans "Введите логин или имя..." %}"
                                    autocomplete="off"
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400">
                             <div id="userSearchResults"
@@ -89,43 +90,43 @@
 
                 <!-- Канал -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Канал</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Канал" %}</label>
                     <div class="flex gap-4 flex-wrap">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="channel" value="all" checked class="accent-red-500">
-                            <span class="text-sm text-gray-700"><i class="ri-notification-off-line"></i> Все каналы</span>
+                            <span class="text-sm text-gray-700"><i class="ri-notification-off-line"></i> {% trans "Все каналы" %}</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="channel" value="telegram" class="accent-blue-500">
-                            <span class="text-sm text-gray-700"><i class="ri-telegram-line text-blue-500"></i> Только Telegram</span>
+                            <span class="text-sm text-gray-700"><i class="ri-telegram-line text-blue-500"></i> {% trans "Только Telegram" %}</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="channel" value="email" class="accent-orange-500">
-                            <span class="text-sm text-gray-700"><i class="ri-mail-line text-orange-500"></i> Только Email</span>
+                            <span class="text-sm text-gray-700"><i class="ri-mail-line text-orange-500"></i> {% trans "Только Email" %}</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Длительность -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Длительность</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Длительность" %}</label>
                     <div class="flex gap-4 flex-wrap mb-2">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="duration_type" value="manual" checked class="accent-red-500">
-                            <span class="text-sm text-gray-700">Вручную (до ручного включения)</span>
+                            <span class="text-sm text-gray-700">{% trans "Вручную (до ручного включения)" %}</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="duration_type" value="hours" class="accent-red-500">
-                            <span class="text-sm text-gray-700">На определённое время</span>
+                            <span class="text-sm text-gray-700">{% trans "На определённое время" %}</span>
                         </label>
                     </div>
                     <div id="hoursBlock" class="hidden">
                         <div class="flex items-center gap-2 flex-wrap">
                             <input type="number" name="hours" id="hoursInput"
                                    min="0.5" max="720" step="0.5"
-                                   placeholder="Количество часов"
+                                   placeholder="{% trans "Количество часов" %}"
                                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-red-400">
-                            <span class="text-sm text-gray-500">часов</span>
+                            <span class="text-sm text-gray-500">{% trans "часов" %}</span>
                         </div>
                         <!-- Быстрые кнопки -->
                         <div class="flex gap-2 mt-2 flex-wrap">
@@ -139,16 +140,16 @@
 
                 <!-- Причина -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Причина <span class="text-gray-400 font-normal">(необязательно)</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Причина" %} <span class="text-gray-400 font-normal">{% trans "(необязательно)" %}</span></label>
                     <input type="text" name="reason" maxlength="255"
-                           placeholder="Например: технические работы, просьба клиента..."
+                           placeholder="{% trans "Например: технические работы, просьба клиента..." %}"
                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400">
                 </div>
 
                 <div class="flex items-center gap-3">
                     <button type="submit"
                             class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition text-sm font-medium">
-                        <i class="ri-notification-off-line mr-1"></i> Отключить уведомления
+                        <i class="ri-notification-off-line mr-1"></i> {% trans "Отключить уведомления" %}
                     </button>
                     <span id="createMuteStatus" class="text-sm hidden"></span>
                 </div>
@@ -160,7 +161,7 @@
             <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="font-semibold text-gray-800">
                     <i class="ri-pause-circle-line text-red-500"></i>
-                    Активные заглушки
+                    {% trans "Активные заглушки" %}
                     <span class="ml-1 text-sm font-normal text-red-600 bg-red-50 rounded-full px-2 py-0.5">{{ active_mutes|length }}</span>
                 </h3>
             </div>
@@ -180,7 +181,7 @@
                             </span>
                             {% else %}
                             <span class="font-medium text-red-700 text-sm">
-                                <i class="ri-group-line"></i> Все клиенты
+                                <i class="ri-group-line"></i> {% trans "Все клиенты" %}
                             </span>
                             {% endif %}
                             <!-- Канал -->
@@ -189,7 +190,7 @@
                             {% elif mute.channel == 'email' %}
                             <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full"><i class="ri-mail-line"></i> Email</span>
                             {% else %}
-                            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full"><i class="ri-notification-off-line"></i> Все каналы</span>
+                            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full"><i class="ri-notification-off-line"></i> {% trans "Все каналы" %}</span>
                             {% endif %}
                         </div>
                         <div class="text-xs text-gray-500 flex items-center gap-3 flex-wrap">
@@ -197,7 +198,7 @@
                             {% if mute.expires_at %}
                             <span class="text-orange-600"><i class="ri-alarm-line"></i> До: {{ mute.expires_at|date:"d.m.Y H:i" }}</span>
                             {% else %}
-                            <span class="text-red-600"><i class="ri-lock-line"></i> До ручного включения</span>
+                            <span class="text-red-600"><i class="ri-lock-line"></i> {% trans "До ручного включения" %}</span>
                             {% endif %}
                             {% if mute.muted_by %}
                             <span class="text-gray-400"><i class="ri-user-settings-line"></i> {{ mute.muted_by.username }}</span>
@@ -210,7 +211,7 @@
                     <button type="button"
                             class="deactivate-btn flex-shrink-0 text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition"
                             data-mute-id="{{ mute.id }}">
-                        <i class="ri-play-circle-line mr-1"></i> Включить обратно
+                        <i class="ri-play-circle-line mr-1"></i> {% trans "Включить обратно" %}
                     </button>
                 </div>
                 {% endfor %}
@@ -218,7 +219,7 @@
             {% else %}
             <div class="px-5 py-8 text-center text-gray-400 text-sm">
                 <i class="ri-checkbox-circle-line text-2xl text-green-400 mb-1"></i>
-                <p>Все уведомления активны — заглушек нет</p>
+                <p>{% trans "Все уведомления активны — заглушек нет" %}</p>
             </div>
             {% endif %}
         </div>
@@ -234,7 +235,7 @@
                     {% for mute in history_mutes %}
                     <div class="px-5 py-2 flex items-center gap-3 flex-wrap text-xs text-gray-500">
                         <span>
-                            {% if mute.user %}{{ mute.user.username }}{% else %}<em>все</em>{% endif %}
+                            {% if mute.user %}{{ mute.user.username }}{% else %}<em>{% trans "все" %}</em>{% endif %}
                         </span>
                         <span class="{% if mute.channel == 'telegram' %}text-blue-600{% elif mute.channel == 'email' %}text-orange-600{% else %}text-gray-600{% endif %}">
                             {{ mute.get_channel_display }}
@@ -242,7 +243,7 @@
                         <span>{{ mute.muted_at|date:"d.m.Y H:i" }}</span>
                         {% if mute.expires_at %}<span>→ {{ mute.expires_at|date:"d.m.Y H:i" }}</span>{% endif %}
                         {% if mute.reason %}<span class="italic">"{{ mute.reason }}"</span>{% endif %}
-                        <span class="text-green-600"><i class="ri-check-line"></i> Отключено</span>
+                        <span class="text-green-600"><i class="ri-check-line"></i> {% trans "Отключено" %}</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -316,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (data) {
                 searchResults.innerHTML = '';
                 if (!data.users || !data.users.length) {
-                    searchResults.innerHTML = '<div class="px-3 py-2 text-sm text-gray-400">Не найдено</div>';
+                    searchResults.innerHTML = '<div class="px-3 py-2 text-sm text-gray-400">{% trans "Не найдено" %}</div>';
                     searchResults.classList.remove('hidden');
                     return;
                 }

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const _i18n = document.getElementById('js-i18n')?.dataset || {};
     const modal = document.getElementById('barcode-modal');
     const backdrop = document.getElementById('barcode-backdrop');
     const img = document.getElementById('barcode-modal-img');
@@ -58,11 +59,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!text) return;
         try {
             await navigator.clipboard.writeText(text);
-            copyBtn.textContent = 'Скопировано!';
-            setTimeout(() => copyBtn.textContent = 'Копировать код', 1200);
+            copyBtn.textContent = _i18n.copied || 'Скопировано!';
+            setTimeout(() => copyBtn.textContent = _i18n.copyCode || 'Копировать код', 1200);
         } catch (err) {
-            copyBtn.textContent = 'Ошибка';
-            setTimeout(() => copyBtn.textContent = 'Копировать код', 1200);
+            copyBtn.textContent = _i18n.error || 'Ошибка';
+            setTimeout(() => copyBtn.textContent = _i18n.copyCode || 'Копировать код', 1200);
         }
     });
 });

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  var _i18n = document.getElementById('js-i18n')?.dataset || {};
   // Auto-uppercase + Latin-only + no spaces for all login fields
   document.querySelectorAll('input[name="login"]').forEach(function (input) {
     // Блокируем пробел на уровне клавиши
@@ -57,13 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
     registrationForm.addEventListener('submit', e => {
       const raw = phone?.value.replace(/\D/g, '') || '';
       let msg = '';
-      if (!lastName || !lastName.value.trim()) msg += 'Введите фамилию.\n';
-      if (!firstName || !firstName.value.trim()) msg += 'Введите имя.\n';
-      if (raw.length !== 11 || !raw.startsWith('7')) msg += 'Неверный телефон.\n';
-      if (!login.value.trim()) msg += 'Введите логин.\n';
-      if (!pickup.value) msg += 'Выберите пункт выдачи.\n';
-      if (!password.value || password.value.length < 6) msg += 'Пароль слишком короткий.\n';
-      if (password.value !== confirm.value) msg += 'Пароли не совпадают.\n';
+      if (!lastName || !lastName.value.trim()) msg += (_i18n.enterLastname || 'Введите фамилию.') + '\n';
+      if (!firstName || !firstName.value.trim()) msg += (_i18n.enterFirstname || 'Введите имя.') + '\n';
+      if (raw.length !== 11 || !raw.startsWith('7')) msg += (_i18n.invalidPhone || 'Неверный телефон.') + '\n';
+      if (!login.value.trim()) msg += (_i18n.enterLogin || 'Введите логин.') + '\n';
+      if (!pickup.value) msg += (_i18n.selectPickup || 'Выберите пункт выдачи.') + '\n';
+      if (!password.value || password.value.length < 6) msg += (_i18n.passwordShort || 'Пароль слишком короткий.') + '\n';
+      if (password.value !== confirm.value) msg += (_i18n.passwordsMismatch || 'Пароли не совпадают.') + '\n';
       if (msg) { e.preventDefault(); alert(msg); }
     });
   }
@@ -74,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pass = document.getElementById('password');
     loginForm.addEventListener('submit', e => {
       let msg = '';
-      if (!login.value.trim()) msg += 'Введите логин.\n';
-      if (!pass.value) msg += 'Введите пароль.\n';
+      if (!login.value.trim()) msg += (_i18n.enterLogin || 'Введите логин.') + '\n';
+      if (!pass.value) msg += (_i18n.enterPassword || 'Введите пароль.') + '\n';
       if (msg) { e.preventDefault(); alert(msg); }
     });
   }

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, PickupPoint
+from .models import UserProfile, PickupPoint, RolePermission
 
 @admin.register(PickupPoint)
 class PickupPointAdmin(admin.ModelAdmin):
@@ -15,3 +15,13 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_editable = ('delivery_rate',)
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'phone')
     list_filter = ('pickup', 'is_driver', 'is_pp_worker', 'is_pp_owner', 'is_tg_admin', 'is_registered')
+
+
+@admin.register(RolePermission)
+class RolePermissionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'aspect', 'can_view', 'can_create', 'can_edit', 'can_delete', 'can_approve', 'updated_at', 'updated_by')
+    list_filter = ('aspect',)
+    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'aspect')
+    list_editable = ('can_view', 'can_create', 'can_edit', 'can_delete', 'can_approve')
+    list_display_links = ('user',)
+    autocomplete_fields = ('user', 'updated_by')

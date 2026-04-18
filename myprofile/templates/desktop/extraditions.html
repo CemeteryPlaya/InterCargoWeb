@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Выдача клиентов</title>
+    <title>{% trans "Inter Cargo - Выдача клиентов" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -26,6 +27,29 @@
 
 <body class="bg-gray-50 min-h-screen">
     {% include 'shared/header.html' %}
+    <div id="js-i18n-extraditions" style="display:none"
+         data-camera-unavail="{% trans 'Камера не доступна — используйте сканер или ввод вручную' %}"
+         data-camera-failed="{% trans 'Не удалось запустить камеру. Проверьте разрешения.' %}"
+         data-receipt-already="{% trans 'Чек {code} уже отсканирован' %}"
+         data-receipt-confirmed="{% trans 'Чек {code} подтверждён' %}"
+         data-receipt-manual="{% trans 'Чек {code} отмечен вручную' %}"
+         data-receipt-wrong-pkg="{% trans 'Чек {code} не относится к этому пакету' %}"
+         data-all-checked="{% trans 'Все чеки отмечены' %}"
+         data-enter-qr="{% trans 'Введите QR-код' %}"
+         data-package-not-found="{% trans 'Пакет не найден' %}"
+         data-server-error="{% trans 'Ошибка сервера' %}"
+         data-paid="{% trans 'Оплачено' %}"
+         data-not-paid="{% trans 'Не оплачено' %}"
+         data-mark-without-scan="{% trans 'Отметить без сканирования' %}"
+         data-manually="{% trans 'Вручную' %}"
+         data-payment-confirmed="{% trans 'Оплата чека {num} подтверждена' %}"
+         data-payment-error="{% trans 'Ошибка обновления оплаты' %}"
+         data-comm-error="{% trans 'Ошибка связи с сервером' %}"
+         data-status-updated="{% trans 'Статус оплаты обновлен' %}"
+         data-status-error="{% trans 'Ошибка: {msg}' %}"
+         data-qr-no-code="{% trans 'Ошибка: QR-код пакета не указан' %}"
+         data-click-to-pay="{% trans 'Нажмите, чтобы отметить как оплачено' %}"
+    ></div>
 
     {% block content %}
     <div class="flex min-h-screen">
@@ -34,7 +58,7 @@
         <main class="w-full px-6 py-8 mx-auto">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-6 -mt-8 mb-4">
-                <h1 class="text-lg font-bold text-center">Выдача посылок</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Выдача посылок" %}</h1>
             </div>
             <div class="max-w-3xl mx-auto">
                 <div id="ajax-messages">
@@ -53,12 +77,12 @@
                 <div class="flex items-center justify-between mb-6">
                     <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
                         <i class="ri-barcode-box-line text-primary text-2xl"></i>
-                        Оформление выдачи посылок
+                        {% trans "Оформление выдачи посылок" %}
                     </h1>
                     <div class="text-sm text-gray-500 text-right">
-                        <p>Оператор: <strong>{{ request.user.username }}</strong></p>
+                        <p>{% trans "Оператор:" %} <strong>{{ request.user.username }}</strong></p>
                         {% if request.user.userprofile.pickup %}
-                        <p>ПВЗ: <strong>{{ request.user.userprofile.pickup }}</strong></p>
+                        <p>{% trans "ПВЗ:" %} <strong>{{ request.user.userprofile.pickup }}</strong></p>
                         {% endif %}
                     </div>
                 </div>
@@ -66,11 +90,11 @@
                 {% if all_pickups %}
                 <div class="mb-4">
                     <label for="pickup-select" class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="ri-map-pin-line text-primary mr-1"></i> Выберите ПВЗ
+                        <i class="ri-map-pin-line text-primary mr-1"></i> {% trans "Выберите ПВЗ" %}
                     </label>
                     <select id="pickup-select" name="pickup_id"
                         class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                        <option value="">-- Все ПВЗ --</option>
+                        <option value="">{% trans "-- Все ПВЗ --" %}</option>
                         {% for pp in all_pickups %}
                         <option value="{{ pp.id }}">{{ pp.address }} — {{ pp.premise_name }}</option>
                         {% endfor %}
@@ -84,12 +108,12 @@
 
                         <div>
                             <label for="barcode" class="block font-medium mb-2">
-                                QR-код пакета <span class="text-sm text-gray-400">(обязательно)</span>
+                                {% trans "QR-код пакета" %} <span class="text-sm text-gray-400">{% trans "(обязательно)" %}</span>
                             </label>
                             <div class="flex gap-2">
                                 <input type="text" name="barcode" id="barcode" required
                                     class="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-primary"
-                                    placeholder="Введите или отсканируйте QR-код пакета" autocomplete="off">
+                                    placeholder="{% trans "Введите или отсканируйте QR-код пакета" %}" autocomplete="off">
                                 <button type="button" id="searchBtn"
                                     class="bg-secondary text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition">
                                     <i class="ri-search-line"></i>
@@ -99,23 +123,23 @@
 
                         <!-- Блок информации о пакете -->
                         <div id="packageInfo" class="hidden border border-gray-200 rounded-lg p-4 bg-gray-50">
-                            <h3 class="font-bold text-lg mb-3 text-gray-800">Информация о пакете</h3>
+                            <h3 class="font-bold text-lg mb-3 text-gray-800">{% trans "Информация о пакете" %}</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                                 <div>
-                                    <p class="text-gray-500">Владелец:</p>
+                                    <p class="text-gray-500">{% trans "Владелец:" %}</p>
                                     <p class="font-medium text-gray-900" id="infoOwner">-</p>
                                 </div>
                                 <div>
-                                    <p class="text-gray-500">Пункт выдачи:</p>
+                                    <p class="text-gray-500">{% trans "Пункт выдачи:" %}</p>
                                     <p class="font-medium text-gray-900" id="infoPickup">-</p>
                                 </div>
                                 <div id="cellNumberBlock" class="hidden">
-                                    <p class="text-gray-500">Ячейка на складе:</p>
+                                    <p class="text-gray-500">{% trans "Ячейка на складе:" %}</p>
                                     <p class="font-medium text-gray-900" id="infoCellNumber">-</p>
                                 </div>
                                 {% comment %}PAYMENT COMMENTED OUT
                                 <div>
-                                    <p class="text-gray-500">Статус оплаты:</p>
+                                    <p class="text-gray-500">{% trans "Статус оплаты:" %}</p>
                                     <div id="paymentStatusContainer">
                                         <span id="infoPaymentStatus"
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors">
@@ -132,7 +156,7 @@
                             <!-- Общая сумма пакета -->
                             <div id="packageTotalBlock" class="hidden mt-3 pt-3 border-t border-gray-300">
                                 <p class="text-right font-bold text-gray-800">
-                                    Общая сумма выдачи: <span id="packageTotal">0</span> тг
+                                    {% trans "Общая сумма выдачи:" %} <span id="packageTotal">0</span> {% trans "тг" %}
                                 </p>
                             </div>
                         </div>
@@ -140,22 +164,22 @@
                         <div class="flex items-center gap-3 flex-wrap">
                             <button type="submit" id="submitBtn" disabled
                                 class="hidden inline-flex items-center gap-2 bg-gray-400 text-white px-5 py-2 rounded-button transition cursor-not-allowed">
-                                <i class="ri-check-line"></i> Оформить выдачу
+                                <i class="ri-check-line"></i> {% trans "Оформить выдачу" %}
                             </button>
 
                             <button type="button" id="verifyBtn" disabled
                                 class="hidden inline-flex items-center gap-2 bg-green-500 text-white px-5 py-2 rounded-lg transition opacity-50 cursor-not-allowed">
-                                <i class="ri-qr-scan-2-line"></i> Проверить и выдать
+                                <i class="ri-qr-scan-2-line"></i> {% trans "Проверить и выдать" %}
                             </button>
 
                             <button type="button" id="clearBtn"
                                 class="inline-flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50">
-                                <i class="ri-delete-bin-line"></i> Очистить
+                                <i class="ri-delete-bin-line"></i> {% trans "Очистить" %}
                             </button>
 
                             <button type="button" id="scanBarcodeBtn"
                                 class="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-                                <i class="ri-camera-line"></i> Сканировать
+                                <i class="ri-camera-line"></i> {% trans "Сканировать" %}
                             </button>
                         </div>
                     </form>
@@ -166,16 +190,16 @@
                     <div class="flex items-center justify-between mb-3">
                         <h2 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
                             <i class="ri-time-line text-primary"></i>
-                            Открытые сессии выдачи
+                            {% trans "Открытые сессии выдачи" %}
                             <span id="sessions-count-badge" class="hidden ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-xs font-bold"></span>
                         </h2>
                         <button type="button" id="refreshSessionsBtn"
                             class="text-sm text-gray-500 hover:text-primary flex items-center gap-1 transition">
-                            <i class="ri-refresh-line"></i> Обновить
+                            <i class="ri-refresh-line"></i> {% trans "Обновить" %}
                         </button>
                     </div>
                     <div id="sessions-list" class="space-y-3">
-                        <p id="sessions-empty" class="text-gray-400 text-sm text-center py-4">Нет открытых сессий</p>
+                        <p id="sessions-empty" class="text-gray-400 text-sm text-center py-4">{% trans "Нет открытых сессий" %}</p>
                     </div>
                 </div>
             </div>
@@ -189,7 +213,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b">
                 <h3 class="text-lg font-semibold text-gray-800">
-                    <i class="ri-camera-line mr-1"></i> Сканирование QR-кода
+                    <i class="ri-camera-line mr-1"></i> {% trans "Сканирование QR-кода" %}
                 </h3>
                 <button id="barcode-modal-close" type="button" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
@@ -201,7 +225,7 @@
             </div>
             <div class="px-5 py-4 border-t bg-gray-50 flex gap-3">
                 <button id="barcode-cancel-btn" type="button" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                    Закрыть
+                    {% trans "Закрыть" %}
                 </button>
             </div>
         </div>
@@ -212,7 +236,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b">
                 <h3 class="text-lg font-semibold text-gray-800">
-                    <i class="ri-qr-scan-2-line mr-1"></i> Проверка чеков для выдачи
+                    <i class="ri-qr-scan-2-line mr-1"></i> {% trans "Проверка чеков для выдачи" %}
                 </h3>
                 <button id="qr-verify-close" type="button" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
@@ -221,18 +245,18 @@
                 <!-- Поле ввода для аппаратного сканера -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="ri-barcode-line mr-1"></i> Ввод сканером или вручную
+                        <i class="ri-barcode-line mr-1"></i> {% trans "Ввод сканером или вручную" %}
                     </label>
                     <input type="text" id="qr-verify-scanner-input"
                         class="w-full border border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary"
-                        placeholder="Нажмите сюда и отсканируйте QR-код сканером..." autocomplete="off">
+                        placeholder="{% trans "Нажмите сюда и отсканируйте QR-код сканером..." %}" autocomplete="off">
                 </div>
 
                 <div id="qr-verify-reader" class="w-full rounded-lg overflow-hidden mb-4"></div>
 
                 <div id="qr-verify-status" class="mb-4">
                     <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
-                        <span>Отсканировано: <strong id="qr-verify-scanned">0</strong> / <strong id="qr-verify-total">0</strong></span>
+                        <span>{% trans "Отсканировано:" %} <strong id="qr-verify-scanned">0</strong> / <strong id="qr-verify-total">0</strong></span>
                         <span id="qr-verify-percent" class="font-medium text-primary">0%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -247,14 +271,14 @@
 
             <div class="px-5 py-4 border-t bg-gray-50 flex gap-3">
                 <button id="qr-verify-cancel" type="button" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                    Отмена
+                    {% trans "Отмена" %}
                 </button>
                 <button id="qr-select-all-btn" type="button" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                    <i class="ri-checkbox-multiple-line mr-1"></i> Выбрать все
+                    <i class="ri-checkbox-multiple-line mr-1"></i> {% trans "Выбрать все" %}
                 </button>
                 <button id="qr-verify-submit" type="button" disabled
                     class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="ri-check-line mr-1"></i> Оформить выдачу
+                    <i class="ri-check-line mr-1"></i> {% trans "Оформить выдачу" %}
                 </button>
             </div>
         </div>

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Приход товаров</title>
+    <title>{% trans "Inter Cargo - Приход товаров" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -31,9 +32,9 @@
         <div class="flex-1 mx-auto p-4 md:p-6">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
-                <h1 class="text-lg font-bold text-center">Приход товаров</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Приход товаров" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">Приход товаров</h2>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Приход товаров" %}</h2>
 
             {% if messages %}
             <div class="mb-4">
@@ -51,26 +52,26 @@
 
             <!-- Новая сессия -->
             <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="ri-add-circle-line text-green-500"></i> Начать новую сессию</h3>
+                <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="ri-add-circle-line text-green-500"></i> {% trans "Начать новую сессию" %}</h3>
                 <form method="post" action="{% url 'goods_arrival_start' %}" class="flex items-end gap-4 flex-wrap">
                     {% csrf_token %}
                     <div>
-                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Дата прихода</label>
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Дата прихода" %}</label>
                         <input type="date" name="date" id="date" value="{{ selected_date }}" required
                             class="border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-red-400">
                     </div>
                     <div>
-                        <label for="sorting_location" class="block text-sm font-medium text-gray-700 mb-1">Место сортировки</label>
+                        <label for="sorting_location" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Место сортировки" %}</label>
                         <select name="sorting_location" id="sorting_location"
                             class="border border-gray-300 rounded px-3 py-2 bg-white">
-                            <option value="">— Не указано —</option>
+                            <option value="">{% trans "— Не указано —" %}</option>
                             {% for loc in sorting_locations %}
                             <option value="{{ loc.id }}">{{ loc.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition font-medium">
-                        <i class="ri-play-line"></i> Начать сессию
+                        <i class="ri-play-line"></i> {% trans "Начать сессию" %}
                     </button>
                 </form>
             </div>
@@ -79,7 +80,7 @@
             {% if active_sessions %}
             <div class="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">
-                    <i class="ri-loader-4-line text-orange-500"></i> Активные сессии
+                    <i class="ri-loader-4-line text-orange-500"></i> {% trans "Активные сессии" %}
                     <span class="text-sm font-normal text-gray-500">({{ active_sessions|length }})</span>
                 </h3>
                 <div class="space-y-2">
@@ -87,7 +88,7 @@
                     <div class="flex flex-wrap items-center justify-between border border-orange-200 bg-orange-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                Активная
+                                {% trans "Активная" %}
                             </span>
                             <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
@@ -102,7 +103,7 @@
                         </div>
                         <a href="{% url 'goods_arrival_session' s.id %}"
                             class="bg-orange-500 text-white px-4 py-1.5 rounded hover:bg-orange-600 transition text-sm font-medium flex-shrink-0">
-                            <i class="ri-edit-line"></i> Продолжить
+                            <i class="ri-edit-line"></i> {% trans "Продолжить" %}
                         </a>
                     </div>
                     {% endfor %}
@@ -114,7 +115,7 @@
             {% if paused_sessions %}
             <div class="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">
-                    <i class="ri-pause-circle-line text-yellow-500"></i> На паузе
+                    <i class="ri-pause-circle-line text-yellow-500"></i> {% trans "На паузе" %}
                     <span class="text-sm font-normal text-gray-500">({{ paused_sessions|length }})</span>
                 </h3>
                 <div class="space-y-2">
@@ -122,7 +123,7 @@
                     <div class="flex flex-wrap items-center justify-between border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                На паузе
+                                {% trans "На паузе" %}
                             </span>
                             <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
@@ -140,7 +141,7 @@
                         <form method="post" action="{% url 'goods_arrival_resume' s.id %}" class="flex-shrink-0">
                             {% csrf_token %}
                             <button type="submit" class="bg-yellow-500 text-white px-4 py-1.5 rounded hover:bg-yellow-600 transition text-sm font-medium">
-                                <i class="ri-play-line"></i> Продолжить
+                                <i class="ri-play-line"></i> {% trans "Продолжить" %}
                             </button>
                         </form>
                     </div>
@@ -153,15 +154,15 @@
             {% if inactive_sessions %}
             <div class="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">
-                    <i class="ri-timer-flash-line text-gray-400"></i> Неактивные сессии
-                    <span class="text-sm font-normal text-gray-500">(превышен 48-часовой лимит)</span>
+                    <i class="ri-timer-flash-line text-gray-400"></i> {% trans "Неактивные сессии" %}
+                    <span class="text-sm font-normal text-gray-500">{% trans "(превышен 48-часовой лимит)" %}</span>
                 </h3>
                 <div class="space-y-2">
                     {% for s in inactive_sessions %}
                     <div class="flex flex-wrap items-center justify-between border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4 flex-wrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
-                                Неактивная
+                                {% trans "Неактивная" %}
                             </span>
                             <span class="font-medium text-gray-700">Сессия #{{ s.id }}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
@@ -177,7 +178,7 @@
                         <form method="post" action="{% url 'goods_arrival_resume' s.id %}" class="flex-shrink-0">
                             {% csrf_token %}
                             <button type="submit" class="bg-gray-500 text-white px-4 py-1.5 rounded hover:bg-gray-600 transition text-sm font-medium">
-                                <i class="ri-refresh-line"></i> Возобновить
+                                <i class="ri-refresh-line"></i> {% trans "Возобновить" %}
                             </button>
                         </form>
                     </div>
@@ -190,13 +191,13 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex flex-wrap items-center gap-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700">
-                        <i class="ri-check-double-line text-green-500"></i> Завершённые сессии
+                        <i class="ri-check-double-line text-green-500"></i> {% trans "Завершённые сессии" %}
                     </h3>
                     <form method="get" class="flex items-center gap-2">
                         <input type="date" name="date" value="{{ selected_date }}"
                             class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-red-400">
                         <button type="submit" class="bg-primary text-white px-3 py-1.5 rounded hover:bg-red-600 transition text-sm">
-                            Показать
+                            {% trans "Показать" %}
                         </button>
                     </form>
                 </div>
@@ -207,7 +208,7 @@
                     <div class="flex flex-wrap items-center justify-between border border-green-200 bg-green-50 rounded-lg px-4 py-3 gap-2">
                         <div class="flex items-center gap-4">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Завершена
+                                {% trans "Завершена" %}
                             </span>
                             <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
@@ -229,7 +230,7 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-gray-500 text-sm">Нет завершённых сессий за эту дату.</p>
+                <p class="text-gray-500 text-sm">{% trans "Нет завершённых сессий за эту дату." %}</p>
                 {% endif %}
             </div>
         </div>

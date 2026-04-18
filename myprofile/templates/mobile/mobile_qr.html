@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Выдача</title>
+    <title>{% trans "Inter Cargo - Выдача" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -32,7 +33,7 @@
 
         <!-- Заголовок страницы (мобильный) -->
         <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3">
-            <h1 class="text-lg font-bold text-center">Выдача</h1>
+            <h1 class="text-lg font-bold text-center">{% trans "Выдача" %}</h1>
         </div>
 
         <!-- ===== QR-секция ===== -->
@@ -40,7 +41,7 @@
             {% if active_package %}
                 <!-- Есть активный пакет — показываем QR -->
                 <div class="w-48 h-48 rounded-2xl border-4 border-green-400 overflow-hidden flex items-center justify-center bg-white shadow-lg">
-                    <img src="{{ active_package.qr_base64 }}" alt="QR-код" class="w-full h-full object-contain p-2">
+                    <img src="{{ active_package.qr_base64 }}" alt="{% trans "QR-код" %}" class="w-full h-full object-contain p-2">
                 </div>
                 <p class="mt-3 font-mono text-sm text-gray-500">{{ active_package.package.barcode }}</p>
 
@@ -49,7 +50,7 @@
                 <div class="w-48 h-48 rounded-2xl border-4 border-gray-300 border-dashed flex items-center justify-center bg-gray-100">
                     <i class="ri-qr-code-line text-6xl text-gray-300"></i>
                 </div>
-                <p class="mt-3 text-sm text-gray-400">Нет активного пакета выдачи</p>
+                <p class="mt-3 text-sm text-gray-400">{% trans "Нет активного пакета выдачи" %}</p>
 
                 {% if ready_count > 0 %}
                     {% if ready_pickup_groups|length > 1 %}
@@ -90,7 +91,7 @@
                 </button>
                 <button id="tab-history" type="button"
                     class="mobile-qr-tab flex-1 py-3 text-center text-sm font-semibold transition-colors border-b-2 border-transparent text-gray-500">
-                    История выдачи
+                    {% trans "История выдачи" %}
                 </button>
             </div>
 
@@ -123,8 +124,8 @@
                     <div class="flex flex-col items-center py-12 text-center">
                         <img src="{% static 'images/box.png' %}" alt="" class="w-16 h-16 mb-4 opacity-60" onerror="this.style.display='none'">
                         <i class="ri-inbox-line text-5xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500 font-semibold">Нет посылок, готовых к получению</p>
-                        <p class="text-gray-400 text-sm mt-1">Когда посылки прибудут на ПВЗ, они появятся здесь</p>
+                        <p class="text-gray-500 font-semibold">{% trans "Нет посылок, готовых к получению" %}</p>
+                        <p class="text-gray-400 text-sm mt-1">{% trans "Когда посылки прибудут на ПВЗ, они появятся здесь" %}</p>
                     </div>
                 {% endif %}
             </div>
@@ -148,7 +149,7 @@
                             <div class="text-right">
                                 <p class="font-bold text-sm">{{ item.package_total }} тг</p>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">
-                                    <i class="ri-check-line mr-0.5"></i> Выдан
+                                    <i class="ri-check-line mr-0.5"></i> {% trans "Выдан" %}
                                 </span>
                             </div>
                         </div>
@@ -179,15 +180,15 @@
                     <div class="pt-2 pb-4">
                         <a href="{% url 'extradition_package' %}"
                             class="block w-full text-center py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-primary hover:bg-gray-50 transition shadow-sm">
-                            Показать все <i class="ri-arrow-right-s-line align-middle"></i>
+                            {% trans "Показать все" %} <i class="ri-arrow-right-s-line align-middle"></i>
                         </a>
                     </div>
                     {% endif %}
                 {% else %}
                     <div class="flex flex-col items-center py-12 text-center">
                         <i class="ri-history-line text-5xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500 font-semibold">Нет истории выдачи</p>
-                        <p class="text-gray-400 text-sm mt-1">Выданные посылки будут отображаться здесь</p>
+                        <p class="text-gray-500 font-semibold">{% trans "Нет истории выдачи" %}</p>
+                        <p class="text-gray-400 text-sm mt-1">{% trans "Выданные посылки будут отображаться здесь" %}</p>
                     </div>
                 {% endif %}
             </div>
@@ -196,13 +197,13 @@
         <!-- Десктоп: перенаправление на полную страницу -->
         <div class="hidden md:flex flex-col items-center justify-center py-20 text-center">
             <i class="ri-qr-code-line text-6xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 text-lg mb-4">Эта страница оптимизирована для мобильных устройств</p>
+            <p class="text-gray-500 text-lg mb-4">{% trans "Эта страница оптимизирована для мобильных устройств" %}</p>
             <div class="flex gap-3">
                 <a href="{% url 'extradition_package' %}" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-red-600 transition text-sm font-medium">
-                    <i class="ri-history-line mr-1"></i> История выдачи
+                    <i class="ri-history-line mr-1"></i> {% trans "История выдачи" %}
                 </a>
                 <a href="{% url 'profile' %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium">
-                    <i class="ri-user-line mr-1"></i> Профиль
+                    <i class="ri-user-line mr-1"></i> {% trans "Профиль" %}
                 </a>
             </div>
         </div>
@@ -215,18 +216,18 @@
     <div id="barcode-backdrop" class="absolute inset-0 bg-black/50"></div>
     <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 z-10">
         <div class="flex items-start justify-between mb-4">
-            <h3 id="barcode-modal-title" class="text-lg font-semibold">QR-код</h3>
+            <h3 id="barcode-modal-title" class="text-lg font-semibold">{% trans "QR-код" %}</h3>
             <button id="barcode-modal-close" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
         </div>
         <div class="flex flex-col items-center">
-            <img id="barcode-modal-img" src="" alt="QR-код" class="max-w-[280px] mb-4">
+            <img id="barcode-modal-img" src="" alt="{% trans "QR-код" %}" class="max-w-[280px] mb-4">
             <div id="barcode-modal-code" class="font-mono text-sm text-gray-700"></div>
             <div class="mt-4 flex gap-2">
                 <button id="barcode-copy-btn" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm">
-                    Копировать код
+                    {% trans "Копировать код" %}
                 </button>
                 <a id="barcode-download-link" class="px-4 py-2 rounded-button border border-gray-200 hover:bg-gray-50 text-sm" download>
-                    Скачать PNG
+                    {% trans "Скачать PNG" %}
                 </a>
             </div>
         </div>

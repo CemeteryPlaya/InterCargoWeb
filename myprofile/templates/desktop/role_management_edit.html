@@ -1,0 +1,261 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo — Роли: {{ target.username }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+    <style>
+        /* Inherited cells: dashed outline + half-opacity check mark */
+        .perm-cell[data-source="inherited"] input[type="checkbox"] {
+            outline: 2px dashed rgb(59 130 246 / 0.45);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+{% include 'shared/header.html' %}
+
+<div class="flex min-h-screen">
+    {% include 'mobile/sidebar.html' %}
+
+    <main class="flex-1 p-4 md:p-6 max-w-6xl">
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+            <h1 class="text-lg font-bold text-center truncate">Роли: {{ target.username }}</h1>
+        </div>
+
+        <div class="flex items-center gap-3 mb-4 flex-wrap">
+            <a href="{% url 'role_management' %}"
+               class="text-sm text-gray-500 hover:text-red-500">
+                <i class="ri-arrow-left-line"></i> {% trans "К списку" %}
+            </a>
+            <h2 class="text-2xl font-semibold text-gray-800 hidden md:block">
+                <i class="ri-shield-user-line text-red-500"></i>
+                {{ target.get_full_name|default:target.username }}
+                <span class="text-gray-400 text-lg">({{ target.username }})</span>
+            </h2>
+        </div>
+
+        <!-- Легенда -->
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-lg p-3 mb-5 flex items-start gap-2">
+            <i class="ri-information-line text-lg"></i>
+            <div>
+                {% trans "Чекбоксы с" %} <span class="inline-block align-middle w-3 h-3 border-2 border-dashed border-blue-400 rounded-sm"></span>
+                {% trans "пунктирной рамкой — право" %} <b>{% trans "унаследовано" %}</b> от флага роли (напр. «Персонал»).
+                Явно заданные права переопределяют флаги. Если снять все галочки в строке — право
+                снова будет определяться флагами по умолчанию.
+            </div>
+        </div>
+
+        <form id="roleForm">
+            {% csrf_token %}
+
+            <!-- Флаги ролей -->
+            <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                    <i class="ri-user-settings-line text-red-500"></i> {% trans "Флаги ролей" %}
+                </h3>
+                <p class="text-xs text-gray-500 mb-3">
+                    Устанавливают «тип» пользователя и дают ему дефолтный набор прав, если ничего не
+                    настроено тонко. Используются старой системой проверок в 15+ страницах.
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {% for flag in flags %}
+                    <label class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 transition">
+                        <input type="checkbox"
+                               class="role-flag accent-red-500"
+                               data-flag="{{ flag.key }}"
+                               {% if flag.value %}checked{% endif %}>
+                        <span class="text-sm text-gray-700">{{ flag.label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Матрица прав -->
+            <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden mb-6">
+                <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="font-semibold text-gray-800">
+                        <i class="ri-grid-line text-red-500"></i> {% trans "Матрица прав (аспект × действие)" %}
+                    </h3>
+                    <button type="button" id="applyDefaultsBtn"
+                            class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">
+                        <i class="ri-refresh-line mr-1"></i> {% trans "Применить дефолты по флагам" %}
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-semibold">{% trans "Аспект" %}</th>
+                                {% for key, label in actions %}
+                                <th class="px-3 py-2 text-center font-semibold">{{ label }}</th>
+                                {% endfor %}
+                                <th class="px-3 py-2 text-center font-semibold w-20">{% trans "Всё/Ничего" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in rows %}
+                            <tr data-aspect="{{ row.key }}">
+                                <td class="px-4 py-2 text-gray-800">{{ row.label }}</td>
+                                {% for cell in row.cells %}
+                                <td class="px-3 py-2 text-center perm-cell" data-source="{{ cell.source }}">
+                                    <input type="checkbox"
+                                           class="perm-checkbox accent-red-500 w-4 h-4"
+                                           data-aspect="{{ row.key }}"
+                                           data-action="{{ cell.action }}"
+                                           data-inherited="{% if cell.source == 'inherited' %}1{% else %}0{% endif %}"
+                                           {% if cell.value %}checked{% endif %}>
+                                </td>
+                                {% endfor %}
+                                <td class="px-3 py-2 text-center">
+                                    <button type="button" class="row-toggle text-xs text-gray-400 hover:text-red-500"
+                                            data-aspect="{{ row.key }}" title="{% trans "Переключить всё" %}">
+                                        <i class="ri-checkbox-multiple-line"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Действия -->
+            <div class="flex items-center gap-3 flex-wrap mb-10">
+                <button type="submit"
+                        class="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                    <i class="ri-save-line mr-1"></i> {% trans "Сохранить" %}
+                </button>
+                <a href="{% url 'role_management' %}"
+                   class="text-sm text-gray-500 hover:text-red-500">{% trans "Отмена" %}</a>
+                <span id="saveStatus" class="text-sm hidden"></span>
+            </div>
+        </form>
+    </main>
+</div>
+
+{% include 'shared/footer.html' %}
+
+<script>
+(function () {
+    var csrfToken = '{{ csrf_token }}';
+    var saveUrl = '{% url "role_save" target.id %}';
+    var defaultsMap = {{ defaults_json|safe }};
+
+    var form = document.getElementById('roleForm');
+    var status = document.getElementById('saveStatus');
+
+    // Clicking an inherited checkbox makes it explicit — strip the dashed outline.
+    document.querySelectorAll('.perm-checkbox').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            var td = cb.closest('.perm-cell');
+            if (td) td.setAttribute('data-source', 'explicit');
+        });
+    });
+
+    // Row toggle: select all / clear all in one aspect row.
+    document.querySelectorAll('.row-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var aspect = btn.dataset.aspect;
+            var boxes = document.querySelectorAll('.perm-checkbox[data-aspect="' + aspect + '"]');
+            var anyUnchecked = Array.prototype.some.call(boxes, function (b) { return !b.checked; });
+            boxes.forEach(function (b) {
+                b.checked = anyUnchecked;
+                var td = b.closest('.perm-cell');
+                if (td) td.setAttribute('data-source', 'explicit');
+            });
+        });
+    });
+
+    // "Apply defaults from flags": compute the union of defaults from currently
+    // checked flags and overwrite the matrix with it (client-side only — user still
+    // has to press Save to persist).
+    document.getElementById('applyDefaultsBtn').addEventListener('click', function () {
+        var union = {};
+        document.querySelectorAll('.role-flag:checked').forEach(function (f) {
+            var perFlag = defaultsMap[f.dataset.flag] || {};
+            Object.keys(perFlag).forEach(function (aspect) {
+                if (!union[aspect]) union[aspect] = {};
+                perFlag[aspect].forEach(function (act) { union[aspect][act] = true; });
+            });
+        });
+        document.querySelectorAll('.perm-checkbox').forEach(function (cb) {
+            var a = cb.dataset.aspect;
+            var act = cb.dataset.action;
+            cb.checked = !!(union[a] && union[a][act]);
+            var td = cb.closest('.perm-cell');
+            if (td) td.setAttribute('data-source', 'explicit');
+        });
+    });
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var flags = {};
+        document.querySelectorAll('.role-flag').forEach(function (f) {
+            flags[f.dataset.flag] = f.checked;
+        });
+
+        var matrix = {};
+        document.querySelectorAll('.perm-checkbox').forEach(function (cb) {
+            var a = cb.dataset.aspect;
+            var act = cb.dataset.action;
+            if (!matrix[a]) matrix[a] = {};
+            matrix[a][act] = cb.checked;
+        });
+
+        var submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Сохранение...';
+        status.classList.add('hidden');
+
+        fetch(saveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ flags: flags, matrix: matrix }),
+        })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+        .then(function (res) {
+            if (res.ok && res.body.ok) {
+                status.textContent = 'Сохранено. Явных прав: ' + res.body.explicit_rows + '.';
+                status.className = 'text-sm text-green-700';
+                status.classList.remove('hidden');
+                setTimeout(function () { location.reload(); }, 800);
+            } else {
+                status.textContent = (res.body && res.body.error) || 'Ошибка сохранения.';
+                status.className = 'text-sm text-red-600';
+                status.classList.remove('hidden');
+            }
+        })
+        .catch(function () {
+            status.textContent = 'Ошибка при отправке запроса.';
+            status.className = 'text-sm text-red-600';
+            status.classList.remove('hidden');
+        })
+        .finally(function () {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="ri-save-line mr-1"></i> Сохранить';
+        });
+    });
+})();
+</script>
+</body>
+</html>

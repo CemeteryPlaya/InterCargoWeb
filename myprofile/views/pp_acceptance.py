@@ -15,6 +15,7 @@ from myprofile.receipt_lifecycle import (
     accept_at_pvz, get_receipts_for_tracks, ReceiptLifecycleError,
 )
 from register.models import UserProfile, PickupPoint
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ def _get_worker_pickup(user):
 def pp_acceptance_view(request):
     """Страница приёмки товара на ПВЗ — показывает доставленные (ready) неотсортированные посылки."""
     if not _can_accept(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     pickup = _get_worker_pickup(request.user)
 
@@ -110,7 +111,7 @@ def pp_acceptance_view(request):
 def get_acceptance_receipts(request):
     """AJAX: возвращает чеки ПВЗ для приёмки (треки ready, не отсортированы)."""
     if not _can_accept(request.user):
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     pickup_id = request.GET.get('pickup_id')
     delivered_date_str = request.GET.get('delivered_date', '')
@@ -206,7 +207,7 @@ def get_acceptance_receipts(request):
                 'cell_number': cell_number,
                 'receipts': {},
             }
-        no_receipt_key = '__no_receipt__'
+        no_receipt_key = '__no_receipt__('
         if no_receipt_key not in clients_map[username]['receipts']:
             clients_map[username]['receipts'][no_receipt_key] = {
                 'receipt_number': None,
@@ -226,7 +227,7 @@ def get_acceptance_receipts(request):
                 [r for r in client['receipts'].values() if r['receipt_number']],
                 key=lambda r: r['receipt_number'],
             ),
-            'no_receipt_tracks': client['receipts'].get('__no_receipt__', {}).get('track_count', 0),
+            'no_receipt_tracks': client['receipts'].get('__no_receipt__(', {}).get('track_count', 0),
         })
 
     return JsonResponse({'clients': result})
@@ -237,7 +238,7 @@ def get_acceptance_receipts(request):
 def accept_delivery(request):
     """Приёмка товара на ПВЗ — помечает треки как отсортированные, назначает ячейки хранения."""
     if not _can_accept(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     pickup_id = request.POST.get('pickup_id')
     delivered_date_str = request.POST.get('delivered_date', '')
@@ -248,13 +249,13 @@ def accept_delivery(request):
         scanned_receipts = []
 
     if not pickup_id:
-        messages.error(request, "Не указан пункт выдачи.")
+        messages.error(request, _("Не указан пункт выдачи."))
         return redirect('pp_acceptance')
 
     try:
         pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
     except PickupPoint.DoesNotExist:
-        messages.error(request, "Пункт выдачи не найден.")
+        messages.error(request, _("Пункт выдачи не найден."))
         return redirect('pp_acceptance')
 
     from datetime import datetime as _dt
@@ -288,7 +289,7 @@ def accept_delivery(request):
         tracks = list(all_tracks_qs)
 
     if not tracks:
-        messages.info(request, "Нет посылок для сортировки.")
+        messages.info(request, _("Нет посылок для сортировки."))
         return redirect('pp_acceptance')
 
     # Устанавливаем поля принятия в памяти, затем один bulk_update
@@ -341,19 +342,19 @@ def finish_acceptance_session(request):
     возвращаются в статус 'delivered' (Доставлено на сортировочный склад).
     """
     if not _can_accept(request.user):
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     pickup_id = request.POST.get('pickup_id')
     delivered_date_str = request.POST.get('delivered_date', '')
 
     if not pickup_id:
-        messages.error(request, "Не указан пункт выдачи.")
+        messages.error(request, _("Не указан пункт выдачи."))
         return redirect('pp_acceptance')
 
     try:
         pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
     except PickupPoint.DoesNotExist:
-        messages.error(request, "Пункт выдачи не найден.")
+        messages.error(request, _("Пункт выдачи не найден."))
         return redirect('pp_acceptance')
 
     from datetime import datetime as _dt
@@ -423,7 +424,7 @@ def finish_acceptance_session(request):
             f"Сессия приёмки завершена. {count} неотсортированных посылок отмечены в «Требует внимания» и отображаются в Складе ПВЗ без ячейки."
         )
     else:
-        messages.success(request, "Сессия приёмки завершена. Все посылки отсортированы.")
+        messages.success(request, _("Сессия приёмки завершена. Все посылки отсортированы."))
 
     return redirect('pp_acceptance')
 
@@ -435,14 +436,14 @@ def pp_acceptance_detail_view(request, pickup_id, date_str):
     Показывает только треки за выбранную дату — сканирование и отметки.
     """
     if not _can_accept(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     from datetime import datetime as _dt
 
     try:
         pickup = PickupPoint.objects.get(id=pickup_id, is_active=True)
     except PickupPoint.DoesNotExist:
-        messages.error(request, "Пункт выдачи не найден.")
+        messages.error(request, _("Пункт выдачи не найден."))
         return redirect('pp_acceptance')
 
     # Парсим дату ('none' означает треки без даты прихода)
@@ -451,7 +452,7 @@ def pp_acceptance_detail_view(request, pickup_id, date_str):
         try:
             filter_date = _dt.strptime(date_str, '%Y-%m-%d').date()
         except ValueError:
-            messages.error(request, "Некорректная дата.")
+            messages.error(request, _("Некорректная дата."))
             return redirect('pp_acceptance')
 
     # Проверяем доступ работника
@@ -463,7 +464,7 @@ def pp_acceptance_detail_view(request, pickup_id, date_str):
 
     worker_pickup = _get_worker_pickup(request.user)
     if not is_staff and (not worker_pickup or worker_pickup.id != pickup.id):
-        return HttpResponseForbidden("У вас нет доступа к этому пункту выдачи.")
+        return HttpResponseForbidden(_("У вас нет доступа к этому пункту выдачи."))
 
     # Считаем треки для этой даты
     tracks_qs = TrackCode.objects.filter(
@@ -498,7 +499,7 @@ def attention_required_view(request):
         is_staff_user = request.user.is_superuser
 
     if not is_staff_user:
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     # Чеки, требующие внимания
     receipts = Receipt.objects.filter(
@@ -581,14 +582,14 @@ def resolve_attention(request):
         is_staff_user = request.user.is_superuser
 
     if not is_staff_user:
-        return HttpResponseForbidden("У вас нет доступа.")
+        return HttpResponseForbidden(_("У вас нет доступа."))
 
     owner_type = request.POST.get('owner_type')
     owner_id = request.POST.get('owner_id')
     reason = request.POST.get('reason', '')
 
     if not owner_type or not owner_id:
-        messages.error(request, "Не указан клиент.")
+        messages.error(request, _("Не указан клиент."))
         return redirect('attention_required')
 
     qs = Receipt.objects.filter(needs_attention=True)
@@ -598,7 +599,7 @@ def resolve_attention(request):
     if owner_type == 'user':
         qs = qs.filter(owner_id=owner_id)
     else:
-        messages.error(request, "Неверный тип клиента.")
+        messages.error(request, _("Неверный тип клиента."))
         return redirect('attention_required')
 
     count = qs.update(needs_attention=False, attention_reason='', attention_added_by=None, attention_pickup='')

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 
@@ -8,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
     <meta name="facebook-domain-verification" content="phgy65zj5hdshibpbndj4ku5q0xrpt" />
-    <title>Inter Cargo - доставка из Китая в Казахстан</title>
+    <title>{% trans "Inter Cargo - доставка из Китая в Казахстан" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <link rel="manifest" href="/static/manifest.json">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
@@ -25,6 +26,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
     <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+    <style>
+        /* Desktop hero keeps constant size; only the calculator card resizes */
+        #desktop-hero-row { min-height: 520px; }
+
+        /* Smooth reveal for desktop calculator discount row */
+        #discount {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-bottom: 0 solid rgb(229, 231, 235);
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.25s ease 0.05s,
+                        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-bottom-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #discount.is-visible {
+            max-height: 60px;
+            opacity: 1;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom-width: 1px;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -43,7 +69,7 @@
         {% if user.is_authenticated %}
         <!-- Приветствие -->
         <div class="px-4 pt-4 pb-2">
-            <p class="text-gray-500 text-sm">Добро пожаловать</p>
+            <p class="text-gray-500 text-sm">{% trans "Добро пожаловать" %}</p>
             <h1 class="text-xl font-bold text-gray-900">{{ user.get_full_name|default:user.username }}</h1>
         </div>
 
@@ -53,9 +79,9 @@
                 <img src="{% static 'images/hero.jpg' %}" alt="" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 <div class="absolute inset-0 flex flex-col justify-center px-5">
-                    <p class="text-white/80 text-xs font-medium mb-1">ТАРИФ</p>
+                    <p class="text-white/80 text-xs font-medium mb-1">{% trans "ТАРИФ" %}</p>
                     <p class="text-white text-2xl font-bold">{{ price_per_kg }}₸/кг</p>
-                    <p class="text-white/70 text-xs mt-1">Доставка из Китая в Казахстан</p>
+                    <p class="text-white/70 text-xs mt-1">{% trans "Доставка из Китая в Казахстан" %}</p>
                 </div>
             </div>
         </div>
@@ -68,50 +94,50 @@
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#dbeafe;">
                         <i class="ri-qr-code-line text-xl" style="color:#3b82f6;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">QR код</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "QR код" %}</span>
                 </a>
                 <a href="{% url 'mobile_parcels' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#ffedd5;">
                         <i class="ri-box-3-line text-xl" style="color:#f97316;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Посылки</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Посылки" %}</span>
                 </a>
                 <a href="{% url 'delivered_posts' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#dcfce7;">
                         <i class="ri-receipt-line text-xl" style="color:#22c55e;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Чеки</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Чеки" %}</span>
                 </a>
                 <a href="{% url 'mobile_qr' %}?tab=history" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fef3c7;">
                         <i class="ri-history-line text-xl" style="color:#f59e0b;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">История выдачи</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "История выдачи" %}</span>
                 </a>
                 <!-- Ряд 2 -->
                 <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#e0f2fe;">
                         <i class="ri-lightbulb-line text-xl" style="color:#0ea5e9;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Интерактивное обучение</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Интерактивное обучение" %}</span>
                 </button>
                 <a href="{% url 'education' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#f3e8ff;">
                         <i class="ri-video-line text-xl" style="color:#8b5cf6;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Видеоуроки</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Видеоуроки" %}</span>
                 </a>
                 <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
                         <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">О компании</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "О компании" %}</span>
                 </a>
                 <button id="mobile-theme-btn" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#f1f5f9;">
                         <i id="mobile-theme-icon" class="ri-moon-line text-xl" style="color:#64748b;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Тема</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Тема" %}</span>
                 </button>
             </div>
         </div>
@@ -123,7 +149,7 @@
                class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-white font-semibold text-sm shadow-sm hover:opacity-90 transition"
                style="background:#039BE5;">
                 <i class="ri-telegram-line text-lg"></i>
-                Привязать Telegram
+                {% trans "Привязать Telegram" %}
             </a>
         </div>
         {% endif %}
@@ -131,52 +157,56 @@
         <!-- Карточки статистики -->
         {% if mobile_stats %}
         <div class="px-4 py-2">
-            <h2 class="text-base font-bold text-gray-900 mb-3">Мои посылки</h2>
+            <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Мои посылки" %}</h2>
             <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <a href="{% url 'track_codes' %}?status=user_added"
+                   class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fee2e2;">
                             <i class="ri-add-circle-line text-lg" style="color:#ef4444;"></i>
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.user_added }}</p>
-                            <p class="text-[11px] text-gray-500">Добавлено</p>
+                            <p class="text-[11px] text-gray-500">{% trans "Добавлено" %}</p>
                         </div>
                     </div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                </a>
+                <a href="{% url 'track_codes' %}?status=warehouse_cn&status=shipped_cn"
+                   class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fef3c7;">
                             <i class="ri-truck-line text-lg" style="color:#f59e0b;"></i>
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.in_transit }}</p>
-                            <p class="text-[11px] text-gray-500">В пути</p>
+                            <p class="text-[11px] text-gray-500">{% trans "В пути" %}</p>
                         </div>
                     </div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                </a>
+                <a href="{% url 'track_codes' %}?status=unidentified&status=delivered&status=shipping_pp"
+                   class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f3e8ff;">
                             <i class="ri-route-line text-lg" style="color:#8b5cf6;"></i>
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.sorting }}</p>
-                            <p class="text-[11px] text-gray-500">На сортировке</p>
+                            <p class="text-[11px] text-gray-500">{% trans "На сортировке" %}</p>
                         </div>
                     </div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                </a>
+                <a href="{% url 'track_codes' %}?status=ready"
+                   class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#dcfce7;">
                             <i class="ri-check-double-line text-lg" style="color:#22c55e;"></i>
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900">{{ mobile_stats.ready }}</p>
-                            <p class="text-[11px] text-gray-500">Готово</p>
+                            <p class="text-[11px] text-gray-500">{% trans "Готово" %}</p>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
         {% endif %}
@@ -184,17 +214,17 @@
         <!-- Калькулятор (компактный) -->
         <div class="px-4 py-3 mt-1">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> Калькулятор доставки</h3>
+                <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> {% trans "Калькулятор доставки" %}</h3>
                 <input type="text" inputmode="decimal" id="mobile-weight" data-rate="{{ price_per_kg }}" maxlength="4"
                     class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition"
-                    placeholder="Вес (кг)" autocomplete="off">
+                    placeholder="{% trans "Вес (кг)" %}" autocomplete="off">
                 <div class="flex items-center justify-between mt-2 px-1">
-                    <p class="text-xs text-gray-400">Итого:</p>
+                    <p class="text-xs text-gray-400">{% trans "Итого:" %}</p>
                     <p id="mobile-calc-result" class="text-lg font-bold text-primary">0 ₸</p>
                 </div>
                 <div id="mobile-discount-row" style="max-height:0;overflow:hidden;transition:max-height 0.35s ease,opacity 0.3s ease;opacity:0;">
                     <div class="flex items-center justify-between mt-1 px-1 pt-1 border-t border-dashed border-gray-200">
-                        <p class="text-xs text-green-600 font-medium">Итого со скидкой:</p>
+                        <p class="text-xs text-green-600 font-medium">{% trans "Итого со скидкой:" %}</p>
                         <p id="mobile-calc-discount" class="text-lg font-bold text-green-600">0 ₸</p>
                     </div>
                 </div>
@@ -208,7 +238,7 @@
         <div class="px-4 pt-6 pb-2 text-center">
             <img src="{% static 'images/logo.png' %}" alt="Inter Cargo" class="w-16 h-16 mx-auto mb-3">
             <h1 class="text-xl font-bold text-gray-900">Inter Cargo</h1>
-            <p class="text-sm text-gray-500 mt-1">Доставка из Китая в Казахстан</p>
+            <p class="text-sm text-gray-500 mt-1">{% trans "Доставка из Китая в Казахстан" %}</p>
         </div>
 
         <!-- Баннер -->
@@ -217,9 +247,9 @@
                 <img src="{% static 'images/hero.jpg' %}" alt="" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 <div class="absolute inset-0 flex flex-col justify-center px-5">
-                    <p class="text-white/80 text-xs font-medium mb-1">ТАРИФ</p>
+                    <p class="text-white/80 text-xs font-medium mb-1">{% trans "ТАРИФ" %}</p>
                     <p class="text-white text-2xl font-bold">{{ price_per_kg }}₸/кг</p>
-                    <p class="text-white/70 text-xs mt-1">Быстро и надёжно</p>
+                    <p class="text-white/70 text-xs mt-1">{% trans "Быстро и надёжно" %}</p>
                 </div>
             </div>
         </div>
@@ -231,25 +261,25 @@
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fee2e2;">
                         <i class="ri-login-box-line text-xl" style="color:#e53e3e;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Вход</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Вход" %}</span>
                 </a>
                 <a href="{% url 'register' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#dcfce7;">
                         <i class="ri-user-add-line text-xl" style="color:#22c55e;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Регистрация</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Регистрация" %}</span>
                 </a>
                 <a href="{% url 'education' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#e0f2fe;">
                         <i class="ri-graduation-cap-line text-xl" style="color:#0ea5e9;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">Обучение</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Обучение" %}</span>
                 </a>
                 <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
                         <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">О компании</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "О компании" %}</span>
                 </a>
             </div>
         </div>
@@ -257,17 +287,17 @@
         <!-- Калькулятор -->
         <div class="px-4 py-3">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> Калькулятор доставки</h3>
+                <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> {% trans "Калькулятор доставки" %}</h3>
                 <input type="text" inputmode="decimal" id="mobile-weight-guest" data-rate="{{ price_per_kg }}" maxlength="4"
                     class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition"
-                    placeholder="Вес (кг)" autocomplete="off">
+                    placeholder="{% trans "Вес (кг)" %}" autocomplete="off">
                 <div class="flex items-center justify-between mt-2 px-1">
-                    <p class="text-xs text-gray-400">Итого:</p>
+                    <p class="text-xs text-gray-400">{% trans "Итого:" %}</p>
                     <p id="mobile-calc-result-guest" class="text-lg font-bold text-primary">0 ₸</p>
                 </div>
                 <div id="mobile-discount-row-guest" style="max-height:0;overflow:hidden;transition:max-height 0.35s ease,opacity 0.3s ease;opacity:0;">
                     <div class="flex items-center justify-between mt-1 px-1 pt-1 border-t border-dashed border-gray-200">
-                        <p class="text-xs text-green-600 font-medium">Итого со скидкой:</p>
+                        <p class="text-xs text-green-600 font-medium">{% trans "Итого со скидкой:" %}</p>
                         <p id="mobile-calc-discount-guest" class="text-lg font-bold text-green-600">0 ₸</p>
                     </div>
                 </div>
@@ -278,91 +308,91 @@
 
         <!-- FAQ (полный, для всех) -->
         <div class="px-4 py-3">
-            <h2 class="text-base font-bold text-gray-900 mb-3">Частые вопросы</h2>
+            <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Частые вопросы" %}</h2>
             <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-100">
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq1">
-                    <span class="text-sm font-medium text-gray-800">Как рассчитывается стоимость доставки?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Как рассчитывается стоимость доставки?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq1" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
-                        <p class="text-xs text-gray-600 leading-relaxed">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм груза. Для расчета используйте калькулятор выше.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">{% blocktrans with p=price_per_kg %}Стоимость доставки рассчитывается по тарифу {{ p }}₸ за килограмм груза. Для расчета используйте калькулятор выше.{% endblocktrans %}</p>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq2">
-                    <span class="text-sm font-medium text-gray-800">Какие сроки доставки из Китая?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Какие сроки доставки из Китая?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq2" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
-                        <p class="text-xs text-gray-600 leading-relaxed">Средний срок доставки составляет 8–12 дней с момента отправки товара с нашего склада в Китае.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">{% trans "Средний срок доставки составляет 8–12 дней с момента отправки товара с нашего склада в Китае." %}</p>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq3">
-                    <span class="text-sm font-medium text-gray-800">Как зарегистрироваться в системе?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Как зарегистрироваться в системе?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq3" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
-                        <p class="text-xs text-gray-600 leading-relaxed">Заполните форму на странице «Регистрация», указав логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">{% trans "Заполните форму на странице «Регистрация», указав логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи." %}</p>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq4">
-                    <span class="text-sm font-medium text-gray-800">Какие товары запрещены к перевозке?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Какие товары запрещены к перевозке?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq4" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
                         <ul class="text-xs text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                            <li>Взрывоопасные, радиоактивные, горючие, ядовитые вещества</li>
-                            <li>Холодное оружие, макеты, пневматика, арбалеты</li>
-                            <li>Психотропные, наркотические средства, алкоголь, сигареты</li>
-                            <li>Скоропортящиеся и жидкие продукты</li>
-                            <li>Техника, телефоны, ноутбуки (под свою ответственность)</li>
-                            <li>Животные, дроны</li>
-                            <li>Хрупкие, стеклянные товары (просите надёжную упаковку)</li>
+                            <li>{% trans "Взрывоопасные, радиоактивные, горючие, ядовитые вещества" %}</li>
+                            <li>{% trans "Холодное оружие, макеты, пневматика, арбалеты" %}</li>
+                            <li>{% trans "Психотропные, наркотические средства, алкоголь, сигареты" %}</li>
+                            <li>{% trans "Скоропортящиеся и жидкие продукты" %}</li>
+                            <li>{% trans "Техника, телефоны, ноутбуки (под свою ответственность)" %}</li>
+                            <li>{% trans "Животные, дроны" %}</li>
+                            <li>{% trans "Хрупкие, стеклянные товары (просите надёжную упаковку)" %}</li>
                         </ul>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq5">
-                    <span class="text-sm font-medium text-gray-800">Как отследить мой заказ?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Как отследить мой заказ?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq5" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
-                        <p class="text-xs text-gray-600 leading-relaxed">После оформления заказа вам будет предоставлен трек-номер. Используйте его на нашем сайте или свяжитесь с менеджером через WhatsApp.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">{% trans "После оформления заказа вам будет предоставлен трек-номер. Используйте его на нашем сайте или свяжитесь с менеджером через WhatsApp." %}</p>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq7">
-                    <span class="text-sm font-medium text-gray-800">Что делать, если заказ повреждён?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Что делать, если заказ повреждён?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq7" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
                         <ul class="text-xs text-gray-600 leading-relaxed list-disc pl-4 space-y-1">
-                            <li>Заранее попросите продавца обеспечить надёжную упаковку</li>
-                            <li>Для хрупких товаров рекомендуется обрешётка груза</li>
-                            <li>Если упаковка не соответствовала — компания не несёт ответственности</li>
-                            <li>Если товар упакован правильно, но повреждён — ответственность несёт Inter Cargo</li>
+                            <li>{% trans "Заранее попросите продавца обеспечить надёжную упаковку" %}</li>
+                            <li>{% trans "Для хрупких товаров рекомендуется обрешётка груза" %}</li>
+                            <li>{% trans "Если упаковка не соответствовала — компания не несёт ответственности" %}</li>
+                            <li>{% trans "Если товар упакован правильно, но повреждён — ответственность несёт Inter Cargo" %}</li>
                         </ul>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq8">
-                    <span class="text-sm font-medium text-gray-800">Как связаться с менеджером?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Как связаться с менеджером?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq8" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
-                        <p class="text-xs text-gray-600 leading-relaxed">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу главной страницы.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">{% trans "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу главной страницы." %}</p>
                     </div>
                 </div>
                 <button class="mobile-faq-btn w-full flex items-center justify-between px-4 py-3.5 text-left bg-gray-50" data-target="m-faq9">
-                    <span class="text-sm font-medium text-gray-800">Ответственность за статус «Добавлено пользователем»?</span>
+                    <span class="text-sm font-medium text-gray-800">{% trans "Ответственность за статус «Добавлено пользователем»?" %}</span>
                     <i class="ri-arrow-down-s-line text-gray-400 mobile-faq-icon flex-shrink-0"></i>
                 </button>
                 <div id="m-faq9" class="mobile-faq-content">
                     <div class="px-4 pt-2 pb-3.5">
-                        <p class="text-xs text-gray-600 leading-relaxed">Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo отвечает с момента поступления товара на склад в Китае.</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">{% trans "Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo отвечает с момента поступления товара на склад в Китае." %}</p>
                     </div>
                 </div>
             </div>
@@ -439,52 +469,52 @@
         style="background-image: url('{% static 'images/hero.jpg'%}'); background-size: cover; background-position: center;">
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
         <div class="container mx-auto px-4 relative z-10">
-            <div class="flex flex-col md:flex-row items-center justify-between">
+            <div id="desktop-hero-row" class="flex flex-col md:flex-row items-center justify-between">
                 <div class="md:w-1/2 mb-12 md:mb-0 text-white">
                     {% if user.is_authenticated %}
-                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Добро пожаловать, {{ user.get_full_name|default:user.username }}!</h1>
-                    <p class="text-xl mb-8">Тариф: {{ price_per_kg }}₸/кг</p>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">{% blocktrans with name=user.get_full_name|default:user.username %}Добро пожаловать, {{ name }}!{% endblocktrans %}</h1>
+                    <p class="text-xl mb-8">{% blocktrans with p=price_per_kg %}Тариф: {{ p }}₸/кг{% endblocktrans %}</p>
                     <div class="flex flex-col sm:flex-row gap-3">
                         <a href="{% url 'profile' %}"
                             class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
-                            Личный кабинет
+                            {% trans "Личный кабинет" %}
                             <i class="ri-arrow-right-line ml-2"></i>
                         </a>
                         <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()"
                             class="inline-flex items-center bg-white/20 backdrop-blur text-white px-6 py-3 !rounded-button font-medium hover:bg-white/30 transition w-fit border border-white/30">
                             <i class="ri-graduation-cap-line mr-2"></i>
-                            Обучение по сайту
+                            {% trans "Обучение по сайту" %}
                         </button>
                     </div>
                     {% else %}
-                    <div class="text-primary font-medium mb-2">КАЛЬКУЛЯТОР</div>
-                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Узнайте цену доставки груза из Китая в Казахстан
+                    <div class="text-primary font-medium mb-2">{% trans "КАЛЬКУЛЯТОР" %}</div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">{% trans "Узнайте цену доставки груза из Китая в Казахстан" %}
                     </h1>
-                    <p class="text-xl mb-8">Тариф: {{ price_per_kg }}₸/кг</p>
+                    <p class="text-xl mb-8">{% blocktrans with p=price_per_kg %}Тариф: {{ p }}₸/кг{% endblocktrans %}</p>
                     <div class="flex flex-col space-y-3">
                         <a href="{% url 'register' %}"
                             class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
-                            Регистрация
+                            {% trans "Регистрация" %}
                             <i class="ri-arrow-right-line ml-2"></i>
                         </a>
                         <a href="{% url 'login' %}"
                             class="inline-flex items-center bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition w-fit">
-                            Войти
+                            {% trans "Войти" %}
                             <i class="ri-arrow-right-line ml-2"></i>
                         </a>
                         <button onclick="if(window.InterCargoTutorial)InterCargoTutorial.showMenu()"
                             class="inline-flex items-center bg-white/20 backdrop-blur text-white px-6 py-3 !rounded-button font-medium hover:bg-white/30 transition w-fit border border-white/30">
                             <i class="ri-graduation-cap-line mr-2"></i>
-                            Обучение по сайту
+                            {% trans "Обучение по сайту" %}
                         </button>
                     </div>
                     {% endif %}
                 </div>
                 <div class="md:w-5/12">
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-bold text-gray-900 mb-6">Калькулятор</h2>
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">{% trans "Калькулятор" %}</h2>
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Напишите количество в кг</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Напишите количество в кг" %}</label>
                             <div class="relative">
                                 <input type="text" inputmode="decimal" id="weight" data-rate="{{ price_per_kg }}"
                                     class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
@@ -500,25 +530,24 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="text-xs text-gray-500 mt-1">Мин: 0 - Макс: 100</div>
+                            <div class="text-xs text-gray-500 mt-1">{% trans "Мин: 0 - Макс: 100" %}</div>
                         </div>
                         <div class="bg-gray-50 rounded p-4 mb-4">
                             <div class="flex justify-between py-2 border-b border-gray-200">
-                                <span class="text-gray-600">Название</span>
-                                <span class="text-gray-600">Итого</span>
+                                <span class="text-gray-600">{% trans "Название" %}</span>
+                                <span class="text-gray-600">{% trans "Итого" %}</span>
                             </div>
                             <div class="flex justify-between py-2 border-b border-gray-200">
-                                <span class="text-gray-800">Вес</span>
-                                <span id="total-weight" class="text-gray-800">0 кг</span>
+                                <span class="text-gray-800">{% trans "Вес" %}</span>
+                                <span id="total-weight" class="text-gray-800">{% trans "0 кг" %}</span>
                             </div>
                             <div class="flex justify-between py-2 border-b border-gray-200">
-                                <span class="text-gray-900">Сумма</span>
+                                <span class="text-gray-900">{% trans "Сумма" %}</span>
                                 <span id="total-price" class="text-gray-900">0 ₸</span>
                             </div>
                             <div id="discount"
-                                class="flex justify-between text-green-600 font-semibold py-2 border-b border-gray-200"
-                                style="visibility: hidden;">
-                                <span>Скидка</span>
+                                class="flex justify-between text-green-600 font-semibold">
+                                <span>{% trans "Скидка" %}</span>
                                 <span id="discount-amount">0 ₸</span>
                             </div>
                         </div>
@@ -533,7 +562,7 @@
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <div class="text-primary font-medium mb-2">F.A.Q</div>
-                <h2 class="text-3xl font-bold text-gray-900">Часто задаваемые вопросы</h2>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Часто задаваемые вопросы" %}</h2>
             </div>
             <div class="max-w-3xl mx-auto">
                 <div class="space-y-3">
@@ -541,14 +570,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq1">
-                            <span>Как рассчитывается стоимость доставки?</span>
+                            <span>{% trans "Как рассчитывается стоимость доставки?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq1" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Стоимость доставки рассчитывается по тарифу {{ price_per_kg }}₸ за килограмм
-                                    груза. Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг
-                                    необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.
+                                <p class="text-gray-600 leading-relaxed">{% blocktrans with p=price_per_kg %}Стоимость доставки рассчитывается по тарифу {{ p }}₸ за килограмм груза. Минимальный вес для расчета — 0 кг, максимальный — 100 кг (выше 100 кг необходимо связаться с менеджером). Для расчета используйте калькулятор на нашем сайте.{% endblocktrans %}
                                 </p>
                             </div>
                         </div>
@@ -557,14 +584,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq2">
-                            <span>Какие сроки доставки из Китая в Казахстан?</span>
+                            <span>{% trans "Какие сроки доставки из Китая в Казахстан?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq2" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Средний срок доставки составляет 8–12 дней с момента отправки
-                                    товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и
-                                    загруженности таможенных служб.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Средний срок доставки составляет 8–12 дней с момента отправки товара с нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и загруженности таможенных служб." %}</p>
                             </div>
                         </div>
                     </div>
@@ -572,15 +597,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq3">
-                            <span>Как зарегистрироваться в системе?</span>
+                            <span>{% trans "Как зарегистрироваться в системе?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq3" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Для регистрации необходимо заполнить форму на странице
-                                    «Регистрация», указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона
-                                    и выбрав удобный пункт выдачи. После регистрации вы можете авторизоваться в личном кабинете
-                                    нажав на кнопку, либо на иконку профиля в верхней части.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Для регистрации необходимо заполнить форму на странице «Регистрация», указав свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи. После регистрации вы можете авторизоваться в личном кабинете нажав на кнопку, либо на иконку профиля в верхней части." %}</p>
                             </div>
                         </div>
                     </div>
@@ -588,21 +610,21 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq4">
-                            <span>Какие товары запрещены к перевозке?</span>
+                            <span>{% trans "Какие товары запрещены к перевозке?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq4" class="faq-content">
                             <div class="px-6 pt-2 pb-5 text-gray-600 leading-relaxed">
-                                <p class="mb-2">К перевозке запрещены:</p>
+                                <p class="mb-2">{% trans "К перевозке запрещены:" %}</p>
                                 <ul class="list-disc pl-5 space-y-2">
-                                    <li>Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества.</li>
-                                    <li>Холодные оружия, включая макеты, пневматику, арбалеты и др.</li>
-                                    <li>Психотропные и наркотические средства, алкоголь, сигареты.</li>
-                                    <li>Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках).</li>
-                                    <li>Техника, мобильные телефоны, ноутбуки (под свою ответственность).</li>
-                                    <li>Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы).</li>
-                                    <li>Дроны.</li>
-                                    <li>Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, пузырчатую плёнку, защиту края и т.д.).</li>
+                                    <li>{% trans "Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества." %}</li>
+                                    <li>{% trans "Холодные оружия, включая макеты, пневматику, арбалеты и др." %}</li>
+                                    <li>{% trans "Психотропные и наркотические средства, алкоголь, сигареты." %}</li>
+                                    <li>{% trans "Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в вакуумных упаковках)." %}</li>
+                                    <li>{% trans "Техника, мобильные телефоны, ноутбуки (под свою ответственность)." %}</li>
+                                    <li>{% trans "Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы)." %}</li>
+                                    <li>{% trans "Дроны." %}</li>
+                                    <li>{% trans "Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, пузырчатую плёнку, защиту края и т.д.)." %}</li>
                                 </ul>
                             </div>
                         </div>
@@ -611,14 +633,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq5">
-                            <span>Как отследить мой заказ?</span>
+                            <span>{% trans "Как отследить мой заказ?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq5" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">После оформления заказа вам будет предоставлен трек-номер для
-                                    отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через
-                                    WhatsApp для получения актуальной информации о статусе вашего груза.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "После оформления заказа вам будет предоставлен трек-номер для отслеживания. Вы можете использовать его на нашем сайте или связаться с менеджером через WhatsApp для получения актуальной информации о статусе вашего груза." %}</p>
                             </div>
                         </div>
                     </div>
@@ -626,14 +646,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq8">
-                            <span>Как заполнить адрес склада в Китае?</span>
+                            <span>{% trans "Как заполнить адрес склада в Китае?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq8" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">На главной странице в разделе «Адрес склада в Китае» указан полный
-                                    адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте
-                                    скриншот менеджеру для проверки.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "На главной странице в разделе «Адрес склада в Китае» указан полный адрес. Его нужно скопировать и вставить в маркетплейс. После этого обязательно отправьте скриншот менеджеру для проверки." %}</p>
                             </div>
                         </div>
                     </div>
@@ -641,16 +659,16 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq9">
-                            <span>Что делать, если заказ пришёл сломанным или повреждённым?</span>
+                            <span>{% trans "Что делать, если заказ пришёл сломанным или повреждённым?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq9" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
                                 <ul class="text-gray-600 leading-relaxed list-disc pl-5 space-y-2">
-                                    <li>Ваша задача — заранее попросить продавца обеспечить надёжную упаковку (например, пенопластом).</li>
-                                    <li>Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера).</li>
-                                    <li>Если упаковка не соответствовала требованиям, компания не несёт ответственности за повреждения.</li>
-                                    <li>Если товар был упакован правильно, но повреждён при доставке, ответственность несёт Inter Cargo.</li>
+                                    <li>{% trans "Ваша задача — заранее попросить продавца обеспечить надёжную упаковку (например, пенопластом)." %}</li>
+                                    <li>{% trans "Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера)." %}</li>
+                                    <li>{% trans "Если упаковка не соответствовала требованиям, компания не несёт ответственности за повреждения." %}</li>
+                                    <li>{% trans "Если товар был упакован правильно, но повреждён при доставке, ответственность несёт Inter Cargo." %}</li>
                                 </ul>
                             </div>
                         </div>
@@ -659,13 +677,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq10">
-                            <span>Как связаться с менеджером?</span>
+                            <span>{% trans "Как связаться с менеджером?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq10" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом
-                                    верхнем углу или в левом нижнем углу главной страницы.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу или в левом нижнем углу главной страницы." %}</p>
                             </div>
                         </div>
                     </div>
@@ -673,15 +690,12 @@
                         <button
                             class="faq-toggle flex justify-between items-center w-full px-6 py-5 text-left font-medium text-gray-900 hover:bg-gray-50 transition gap-4"
                             data-target="faq11">
-                            <span>Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?</span>
+                            <span>{% trans "Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?" %}</span>
                             <i class="ri-arrow-down-s-line text-xl text-gray-400 faq-icon flex-shrink-0"></i>
                         </button>
                         <div id="faq11" class="faq-content">
                             <div class="px-6 pt-2 pb-5">
-                                <p class="text-gray-600 leading-relaxed">Ответственность за заказ, который ещё не прибыл на склад (статус
-                                    «Добавлено пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести
-                                    ответственность с момента поступления товара на свой склад в Китае. При возникновении
-                                    проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции.</p>
+                                <p class="text-gray-600 leading-relaxed">{% trans "Ответственность за заказ, который ещё не прибыл на склад (статус «Добавлено пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести ответственность с момента поступления товара на свой склад в Китае. При возникновении проблем с таким заказом менеджеры помогут решить вопрос и предоставят инструкции." %}</p>
                             </div>
                         </div>
                     </div>
@@ -699,11 +713,10 @@
 
             <!-- Заголовок формы -->
             <div class="text-center mb-12">
-                <div class="text-primary font-medium mb-2" id="section-title">РЕГИСТРАЦИЯ</div>
-                <h2 class="text-3xl font-bold text-gray-900" id="section-heading">Регистрация нового клиента</h2>
+                <div class="text-primary font-medium mb-2" id="section-title">{% trans "РЕГИСТРАЦИЯ" %}</div>
+                <h2 class="text-3xl font-bold text-gray-900" id="section-heading">{% trans "Регистрация нового клиента" %}</h2>
                 <p class="text-gray-600 mt-4 max-w-2xl mx-auto" id="section-description">
-                    Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами
-                    доставки из Китая
+                    {% trans "Заполните форму ниже, чтобы зарегистрироваться в нашей системе и начать пользоваться услугами доставки из Китая" %}
                 </p>
             </div>
 
@@ -713,12 +726,12 @@
                     <button id="tab-register"
                         class="flex-1 py-3 px-4 text-center font-medium rounded-md transition-all tab-button active"
                         onclick="switchTab('register')">
-                        Регистрация
+                        {% trans "Регистрация" %}
                     </button>
                     <button id="tab-login"
                         class="flex-1 py-3 px-4 text-center font-medium rounded-md transition-all tab-button"
                         onclick="switchTab('login')">
-                        Войти
+                        {% trans "Войти" %}
                     </button>
                 </div>
             </div>
@@ -731,21 +744,21 @@
                     <!-- Логин -->
                     <div class="mb-6">
                         <label for="reg-login" class="block text-sm font-medium text-gray-700 mb-2">
-                            Логин (Имя/Ник + 4 цифры номера)
+                            {% trans "Логин (Имя/Ник + 4 цифры номера)" %}
                         </label>
                         <input type="text" id="reg-login" name="login" required pattern="^[A-Za-z]+[0-9]{4}$"
-                            title="Введите имя или ник (только латинские буквы) и 4 цифры номера, например ANDREY1234"
-                            placeholder="Например: ANDREY1234"
+                            title="{% trans "Введите имя или ник (только латинские буквы) и 4 цифры номера, например ANDREY1234" %}"
+                            placeholder="{% trans "Например: ANDREY1234" %}"
                             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition">
                         <div class="text-xs text-gray-500 mt-1">
-                            Введите ваше имя или ник и последние 4 цифры номера телефона
+                            {% trans "Введите ваше имя или ник и последние 4 цифры номера телефона" %}
                         </div>
                     </div>
 
                     <!-- Телефон -->
                     <div class="mb-6">
                         <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-                            Номер телефона
+                            {% trans "Номер телефона" %}
                         </label>
                         <input type="tel" id="phone" name="phone" required placeholder="+7 (___) ___-__-__"
                             maxlength="18"
@@ -755,11 +768,11 @@
                     <!-- Пункт выдачи -->
                     <div class="mb-8">
                         <label for="pickup" class="block text-sm font-medium text-gray-700 mb-2">
-                            Выбор пункта выдачи
+                            {% trans "Выбор пункта выдачи" %}
                         </label>
                         <select id="pickup" name="pickup" required
                             class="w-full px-4 py-3 pr-8 border border-gray-300 rounded appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition">
-                            <option value="" disabled selected>Выберите пункт выдачи</option>
+                            <option value="" disabled selected>{% trans "Выберите пункт выдачи" %}</option>
                             {% for pp in pickup_points %}
                             <option value="{{ pp.id }}">{{ pp }}</option>
                             {% endfor %}
@@ -769,7 +782,7 @@
                     <!-- Кнопка отправки -->
                     <button type="submit"
                         class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-                        Зарегистрироваться
+                        {% trans "Зарегистрироваться" %}
                     </button>
 
                 </form>
@@ -783,12 +796,12 @@
                     <button type="button" id="idx-tab-login"
                         class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
                         onclick="switchIndexLoginMethod('login')">
-                        Логин
+                        {% trans "Логин" %}
                     </button>
                     <button type="button" id="idx-tab-phone"
                         class="flex-1 py-2 px-4 text-center font-medium rounded-md transition-all text-sm"
                         onclick="switchIndexLoginMethod('phone')">
-                        Телефон
+                        {% trans "Телефон" %}
                     </button>
                 </div>
 
@@ -796,17 +809,17 @@
                 <form id="idx-login-by-login" method="POST" action="{% url 'login' %}">
                     {% csrf_token %}
                     <div class="mb-6">
-                        <label for="auth-login" class="block text-sm font-medium text-gray-700 mb-2">Логин (Имя/Ник + 4 цифры номера)</label>
+                        <label for="auth-login" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Логин (Имя/Ник + 4 цифры номера)" %}</label>
                         <input type="text" id="auth-login" name="login" required
                             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-                            placeholder="Например: ANDREY1234">
+                            placeholder="{% trans "Например: ANDREY1234" %}">
                     </div>
                     <div class="mb-6">
-                        <label for="idx-pass-login" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+                        <label for="idx-pass-login" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пароль" %}</label>
                         <div class="relative">
                             <input type="password" id="idx-pass-login" name="password" required minlength="6"
                                 class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-                                placeholder="Введите пароль">
+                                placeholder="{% trans "Введите пароль" %}">
                             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                                 <i class="ri-eye-off-line text-xl"></i>
                             </button>
@@ -814,7 +827,7 @@
                     </div>
                     <button type="submit"
                         class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-                        Войти
+                        {% trans "Войти" %}
                     </button>
                 </form>
 
@@ -822,17 +835,17 @@
                 <form id="idx-login-by-phone" method="POST" action="{% url 'login' %}" class="hidden">
                     {% csrf_token %}
                     <div class="mb-6">
-                        <label for="auth-phone" class="block text-sm font-medium text-gray-700 mb-2">Номер телефона</label>
+                        <label for="auth-phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Номер телефона" %}</label>
                         <input type="tel" id="auth-phone" name="phone" required
                             class="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
                             placeholder="+7 (___) ___-__-__" maxlength="18">
                     </div>
                     <div class="mb-6">
-                        <label for="idx-pass-phone" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+                        <label for="idx-pass-phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Пароль" %}</label>
                         <div class="relative">
                             <input type="password" id="idx-pass-phone" name="password" required minlength="6"
                                 class="w-full px-4 py-3 pr-12 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition"
-                                placeholder="Введите пароль">
+                                placeholder="{% trans "Введите пароль" %}">
                             <button type="button" class="password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                                 <i class="ri-eye-off-line text-xl"></i>
                             </button>
@@ -840,7 +853,7 @@
                     </div>
                     <button type="submit"
                         class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
-                        Войти
+                        {% trans "Войти" %}
                     </button>
                 </form>
             </div>
@@ -857,24 +870,22 @@
     <section id="education" class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <div class="text-primary font-medium mb-2">ОБУЧЕНИЕ</div>
-                <h2 class="text-3xl font-bold text-gray-900">Как пользоваться нашим сервисом</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Ознакомьтесь с нашими обучающими материалами, чтобы
-                    узнать, как эффективно использовать наш сервис доставки</p>
+                <div class="text-primary font-medium mb-2">{% trans "ОБУЧЕНИЕ" %}</div>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Как пользоваться нашим сервисом" %}</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">{% trans "Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно использовать наш сервис доставки" %}</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu1.jpg' %}" alt="Регистрация на сайте"
+                        <img src="{% static 'images/edu1.jpg' %}" alt="{% trans "Регистрация на сайте" %}"
                             class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Регистрация на сайте</h3>
-                        <p class="text-gray-700 mb-4">Узнайте, как правильно заполнить форму регистрации и выбрать
-                            удобный пункт выдачи для получения ваших посылок.</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Регистрация на сайте" %}</h3>
+                        <p class="text-gray-700 mb-4">{% trans "Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт выдачи для получения ваших посылок." %}</p>
                         <a href="https://t.me/c/3896488034/3"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                                Смотреть видео
+                                {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
                             </button></a>
                     </div>
@@ -882,16 +893,15 @@
 
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu2.jpg' %}" alt="Оформление заказа"
+                        <img src="{% static 'images/edu2.jpg' %}" alt="{% trans "Оформление заказа" %}"
                             class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Оформление заказа в Китае</h3>
-                        <p class="text-gray-700 mb-4">Пошаговая инструкция по оформлению заказа на китайских торговых
-                            площадках и указанию нашего адреса доставки.</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Оформление заказа в Китае" %}</h3>
+                        <p class="text-gray-700 mb-4">{% trans "Пошаговая инструкция по оформлению заказа на китайских торговых площадках и указанию нашего адреса доставки." %}</p>
                         <a href="#"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                                Смотреть видео
+                                {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
                             </button></a>
                     </div>
@@ -899,16 +909,15 @@
 
                 <div class="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
                     <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                        <img src="{% static 'images/edu3.jpg' %}" alt="Отслеживание посылки"
+                        <img src="{% static 'images/edu3.jpg' %}" alt="{% trans "Отслеживание посылки" %}"
                             class="object-cover w-full h-full">
                     </div>
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Отслеживание посылки</h3>
-                        <p class="text-gray-700 mb-4">Узнайте, как отслеживать статус вашей посылки на каждом этапе
-                            доставки из Китая в Казахстан.</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Отслеживание посылки" %}</h3>
+                        <p class="text-gray-700 mb-4">{% trans "Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из Китая в Казахстан." %}</p>
                         <a href="https://t.me/c/3896488034/4"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
-                                Смотреть видео
+                                {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
                             </button></a>
                     </div>

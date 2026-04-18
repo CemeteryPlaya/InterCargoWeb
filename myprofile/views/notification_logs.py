@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from myprofile.models import Notification, EmailLog
 from myprofile.permissions import is_staff
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ def _is_staff(user):
 def notification_logs_view(request):
     """Сводная страница логов уведомлений: сайт, Telegram, Email."""
     if not _is_staff(request.user):
-        return HttpResponseForbidden("У вас нет доступа к этой странице.")
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     tab = request.GET.get('tab', 'site')  # site | telegram | email
     search = request.GET.get('q', '').strip()

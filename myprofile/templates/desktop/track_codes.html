@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inter Cargo - Трек-коды</title>
+    <title>{% trans "Inter Cargo - Трек-коды" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -35,10 +36,10 @@
         <main class="flex-1 px-4 md:px-8 py-8 space-y-10">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
-                <h1 class="text-lg font-bold text-center">Трек-коды</h1>
+                <h1 class="text-lg font-bold text-center">{% trans "Трек-коды" %}</h1>
             </div>
             <header class="mb-6 hidden md:block">
-                <h1 class="text-xl font-bold text-red-500">Ваши трек-коды</h1>
+                <h1 class="text-xl font-bold text-red-500">{% trans "Ваши трек-коды" %}</h1>
             </header>
             {% if messages %}
             <div class="mb-6">
@@ -57,7 +58,7 @@
             {% if duplicate_archived_codes %}
             <div class="p-4 mb-4 rounded-lg bg-yellow-100 border border-yellow-300 text-yellow-800 text-sm">
                 <i class="ri-alert-line text-lg mr-1"></i>
-                <strong>Внимание!</strong> Следующие трек-коды есть и в архиве, и в основной таблице:
+                <strong>{% trans "Внимание!" %}</strong> {% trans "Следующие трек-коды есть и в архиве, и в основной таблице:" %}
                 <span class="font-mono font-medium">
                     {% for code in duplicate_archived_codes %}{{ code }}{% if not forloop.last %}, {% endif %}{% endfor %}
                 </span>.
@@ -68,7 +69,7 @@
                     {% endfor %}
                     <button type="submit" class="text-yellow-900 underline hover:text-red-700 font-medium"
                         onclick="return confirm('Удалить дубликаты из архива?')">
-                        Удалить из архива
+                        {% trans "Удалить из архива" %}
                     </button>
                 </form>
             </div>
@@ -92,7 +93,7 @@
                         </button>
                         <button @click="addModal = true" x-show="!archiveMode"
                             class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                            Добавить
+                            {% trans "Добавить" %}
                         </button>
                     </div>
                 </div>
@@ -101,7 +102,7 @@
                 <div x-show="archiveMode && selectedIds.length > 0" x-transition
                     class="mt-3 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
                     <p class="text-red-800 font-medium">
-                        Выбрано: <span x-text="selectedIds.length"></span> трек-кодов
+                        {% trans "Выбрано:" %} <span x-text="selectedIds.length"></span> {% trans "трек-кодов" %}
                     </p>
                     <form method="post" action="{% url 'mass_archive_track_codes' %}" id="mass-archive-form">
                         {% csrf_token %}
@@ -111,14 +112,14 @@
                         <button type="submit"
                             class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                             onclick="return confirm('Переместить выбранные трек-коды в архив?')">
-                            <i class="ri-archive-line"></i> Архивировать выбранные
+                            <i class="ri-archive-line"></i> {% trans "Архивировать выбранные" %}
                         </button>
                     </form>
                 </div>
 
                 <div x-show="archiveMode && selectedIds.length === 0" x-transition
                     class="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center text-sm text-yellow-700">
-                    Нажмите на трек-коды, чтобы выбрать их для архивации
+                    {% trans "Нажмите на трек-коды, чтобы выбрать их для архивации" %}
                 </div>
 
                 <!-- Модалка "Добавить трек-код" -->
@@ -126,20 +127,20 @@
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div @click.away="addModal = false"
                         class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md space-y-4">
-                        <h2 class="text-xl font-bold text-gray-800">Добавить трек-код</h2>
+                        <h2 class="text-xl font-bold text-gray-800">{% trans "Добавить трек-код" %}</h2>
                         <form method="post" class="space-y-4">
                             {% csrf_token %}
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Трек-код:</label>
-                                <input type="text" name="track_code" id="track-code-input" placeholder="Введите трек-код"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Трек-код:" %}</label>
+                                <input type="text" name="track_code" id="track-code-input" placeholder="{% trans "Введите трек-код" %}"
                                     class="w-full border border-gray-300 rounded px-3 py-2" />
                                 <p id="track-code-error" class="text-sm text-red-600">{{ form.track_code.errors.0 }}</p>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Описание:</label>
-                                <input type="text" name="description" placeholder="Описание посылки"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Описание:" %}</label>
+                                <input type="text" name="description" placeholder="{% trans "Описание посылки" %}"
                                     class="w-full border border-gray-300 rounded px-3 py-2" />
                                 <p class="text-sm text-red-600">{{ form.description.errors.0 }}</p>
                             </div>
@@ -147,11 +148,11 @@
                             <div class="flex justify-end mt-4 space-x-2">
                                 <button type="submit"
                                     class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                                    Сохранить
+                                    {% trans "Сохранить" %}
                                 </button>
                                 <button type="button" @click="addModal = false"
                                     class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
-                                    Отмена
+                                    {% trans "Отмена" %}
                                 </button>
                             </div>
                         </form>
@@ -163,42 +164,42 @@
                 <button onclick="toggleFilter('')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if not current_filters %}bg-gray-800 text-white{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-300{% endif %}">
-                    Все
+                    {% trans "Все" %}
                 </button>
                 <button onclick="toggleFilter('ready')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'ready' in current_filters %}bg-green-600 text-white{% else %}bg-white text-gray-700 hover:bg-green-50 border border-green-200{% endif %}">
-                    Доставлен на ПВЗ
+                    {% trans "Доставлен на ПВЗ" %}
                 </button>
                 <button onclick="toggleFilter('user_added')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'user_added' in current_filters %}bg-red-600 text-white{% else %}bg-white text-gray-700 hover:bg-red-50 border border-red-200{% endif %}">
-                    Добавлен
+                    {% trans "Добавлен" %}
                 </button>
                 <button onclick="toggleFilter('warehouse_cn')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'warehouse_cn' in current_filters %}bg-orange-500 text-white{% else %}bg-white text-gray-700 hover:bg-orange-50 border border-orange-200{% endif %}">
-                    На складе (Китай)
+                    {% trans "На складе (Китай)" %}
                 </button>
                 <button onclick="toggleFilter('shipped_cn')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'shipped_cn' in current_filters %}bg-yellow-500 text-white{% else %}bg-white text-gray-700 hover:bg-yellow-50 border border-yellow-200{% endif %}">
-                    Отправлен (Китай)
+                    {% trans "Отправлен (Китай)" %}
                 </button>
                 <button onclick="toggleFilter('delivered')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'delivered' in current_filters %}bg-purple-600 text-white{% else %}bg-white text-gray-700 hover:bg-purple-50 border border-purple-200{% endif %}">
-                    На сортировке
+                    {% trans "На сортировке" %}
                 </button>
                 <button onclick="toggleFilter('shipping_pp')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'shipping_pp' in current_filters %}bg-gray-600 text-white{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-300{% endif %}">
-                    В доставке
+                    {% trans "В доставке" %}
                 </button>
                 <button onclick="toggleFilter('claimed')"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if 'claimed' in current_filters %}bg-blue-600 text-white{% else %}bg-white text-gray-700 hover:bg-blue-50 border border-blue-200{% endif %}">
-                    Выдано
+                    {% trans "Выдано" %}
                 </button>
             </div>
 
@@ -234,18 +235,18 @@
                         <button type="submit"
                             class="text-xs font-medium bg-white bg-opacity-90 text-gray-700 hover:text-red-700 hover:bg-red-50 border border-gray-400 rounded px-2 py-1 shadow-sm transition-colors"
                             onclick="return confirm('Вы уверены, что хотите переместить трек-код в архив?')">
-                            <i class="ri-archive-line"></i> В архив
+                            <i class="ri-archive-line"></i> {% trans "В архив" %}
                         </button>
                     </form>
                     {% endif %}
-                    <p class="pr-24 break-all" :class="archiveMode ? 'pl-8' : ''"><strong>Код:</strong> {{ code.track_code }}</p>
-                    <p><strong>Статус:</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
-                    <p><strong>Обновлено:</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-500 dark:text-gray-500">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
+                    <p class="pr-24 break-all" :class="archiveMode ? 'pl-8' : ''"><strong>{% trans "Код:" %}</strong> {{ code.track_code }}</p>
+                    <p><strong>{% trans "Статус:" %}</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
+                    <p><strong>{% trans "Обновлено:" %}</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-500 dark:text-gray-500">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
                     {% if code.sorting_location %}
-                    <p><strong>Где отсортирован:</strong> {{ code.sorting_location }}</p>
+                    <p><strong>{% trans "Где отсортирован:" %}</strong> {{ code.sorting_location }}</p>
                     {% endif %}
                     <div class="relative">
-                        <p class="{% if code.status != 'shipping_pp' %}pr-12{% endif %}"><strong>Описание:</strong> <span x-text="'{{ code.description }}'">{{
+                        <p class="{% if code.status != 'shipping_pp' %}pr-12{% endif %}"><strong>{% trans "Описание:" %}</strong> <span x-text="'{{ code.description }}'">{{
                                 code.description }}</span></p>
                         {% if code.status != 'shipping_pp' %}
                         <button
@@ -256,12 +257,12 @@
                         {% endif %}
                     </div>
                     {% if code.status == 'delivered' or code.status == 'shipping_pp' or code.status == 'claimed' or code.status == 'ready' %}
-                    <p><strong>Вес:</strong> {{ code.weight }} кг</p>
+                    <p><strong>{% trans "Вес:" %}</strong> {{ code.weight }} кг</p>
                     {% endif %}
                 </div>
                 {% empty %}
                 <div class="col-span-full text-center py-8 text-gray-500">
-                    Трек-коды не найдены.
+                    {% trans "Трек-коды не найдены." %}
                 </div>
                 {% endfor %}
 
@@ -271,22 +272,22 @@
                     style="display: none;" x-transition.opacity>
                     <div @click.away="editModal = false"
                         class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md space-y-4">
-                        <h2 class="text-xl font-bold text-gray-800">Изменить описание</h2>
+                        <h2 class="text-xl font-bold text-gray-800">{% trans "Изменить описание" %}</h2>
                         <form method="post" :action="'/profile/track-codes/edit/' + editTrackId + '/'">
                             {% csrf_token %}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Описание:</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Описание:" %}</label>
                                 <input type="text" name="description" x-model="editDescription"
                                     class="w-full border border-gray-300 rounded px-3 py-2" />
                             </div>
                             <div class="flex justify-end mt-4 space-x-2">
                                 <button type="submit"
                                     class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                    Сохранить
+                                    {% trans "Сохранить" %}
                                 </button>
                                 <button type="button" @click="editModal = false"
                                     class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
-                                    Отмена
+                                    {% trans "Отмена" %}
                                 </button>
                             </div>
                         </form>
@@ -306,11 +307,11 @@
                 <div x-show="showArchive" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% for code in archived_codes %}
                     <div class="p-4 rounded-lg shadow border bg-gray-100 border-gray-300 space-y-1">
-                        <p><strong>Код:</strong> {{ code.track_code }}</p>
-                        <p><strong>Статус:</strong> {{ code.get_status_display }}</p>
-                        <p><strong>Описание:</strong> {{ code.description }}</p>
+                        <p><strong>{% trans "Код:" %}</strong> {{ code.track_code }}</p>
+                        <p><strong>{% trans "Статус:" %}</strong> {{ code.get_status_display }}</p>
+                        <p><strong>{% trans "Описание:" %}</strong> {{ code.description }}</p>
                         {% if code.weight %}
-                        <p><strong>Вес:</strong> {{ code.weight }} кг</p>
+                        <p><strong>{% trans "Вес:" %}</strong> {{ code.weight }} кг</p>
                         {% endif %}
                         <p class="text-xs text-gray-500">Архивирован: {{ code.archived_at|date:"d.m.Y H:i" }}</p>
                         <div class="flex justify-end mt-2">
@@ -318,7 +319,7 @@
                                 {% csrf_token %}
                                 <button type="submit"
                                     class="text-xs text-blue-600 hover:text-blue-800 border border-blue-300 rounded px-2 py-1 hover:bg-blue-50 transition-colors">
-                                    <i class="ri-inbox-unarchive-line"></i> Восстановить
+                                    <i class="ri-inbox-unarchive-line"></i> {% trans "Восстановить" %}
                                 </button>
                             </form>
                         </div>

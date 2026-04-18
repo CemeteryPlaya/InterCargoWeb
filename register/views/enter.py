@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from register.models import UserProfile, LoginAttempt
+from django.utils.translation import gettext as _
 
 MAX_LOGIN_ATTEMPTS = 10
 LOCKOUT_MINUTES = 30
@@ -90,7 +91,7 @@ def login_view(request):
                     username = profile.user.username
                 else:
                     _record_failed_attempt(identifier)
-                    messages.error(request, "Пользователь с таким номером телефона не найден.")
+                    messages.error(request, _("Пользователь с таким номером телефона не найден."))
                     return render(request, 'desktop/login.html', {'login_method': 'phone'})
         elif email:
             # Вход по email
@@ -99,7 +100,7 @@ def login_view(request):
                 username = user_obj.username
             except User.DoesNotExist:
                 _record_failed_attempt(identifier)
-                messages.error(request, "Пользователь с таким email не найден.")
+                messages.error(request, _("Пользователь с таким email не найден."))
                 return render(request, 'desktop/login.html', {'login_method': 'email'})
 
         user = authenticate(request, username=username, password=password)
@@ -119,7 +120,7 @@ def login_view(request):
                 login_method = 'email'
             else:
                 login_method = 'login'
-            messages.error(request, "Неверный логин или пароль.")
+            messages.error(request, _("Неверный логин или пароль."))
             return render(request, 'desktop/login.html', {'login_method': login_method})
 
     return render(request, 'desktop/login.html')

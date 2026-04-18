@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
 from myprofile.models import TrackCode
+from django.utils.translation import gettext as _
 
 
 # Статусы, при которых архивированный трек всё ещё показывается в своей категории
@@ -162,10 +163,10 @@ def mobile_mass_archive(request):
         data = json.loads(request.body)
         track_ids = data.get('track_ids', [])
     except (json.JSONDecodeError, AttributeError):
-        return JsonResponse({'error': 'Некорректные данные'}, status=400)
+        return JsonResponse({'error': _('Некорректные данные')}, status=400)
 
     if not track_ids:
-        return JsonResponse({'error': 'Не выбрано ни одного трек-кода'}, status=400)
+        return JsonResponse({'error': _('Не выбрано ни одного трек-кода')}, status=400)
 
     now = timezone.now()
     tracks = TrackCode.all_objects.filter(id__in=track_ids, owner=request.user, is_archived=False)

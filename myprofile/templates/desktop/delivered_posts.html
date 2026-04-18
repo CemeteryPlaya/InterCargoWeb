@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
@@ -5,7 +6,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inter Cargo - Чеки</title>
+  <title>{% trans "Inter Cargo - Чеки" %}</title>
   <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
   <script src="https://cdn.tailwindcss.com/3.4.16"></script>
   <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -49,35 +50,35 @@
       {% endif %}
       <!-- Мобильный хедер -->
       <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
-          <h1 class="text-lg font-bold text-center">Чеки</h1>
+          <h1 class="text-lg font-bold text-center">{% trans "Чеки" %}</h1>
       </div>
-      <h1 class="text-2xl font-bold mb-6 ml-2 hidden md:block">Чеки</h1>
+      <h1 class="text-2xl font-bold mb-6 ml-2 hidden md:block">{% trans "Чеки" %}</h1>
 
       {% if payment_link %}
       <div class="mb-4 ml-2">
           <button type="button" id="pay-btn"
               class="inline-flex items-center gap-2 bg-green-600 text-white font-medium px-6 py-2.5 rounded-lg hover:bg-green-700 transition text-sm">
-              <i class="ri-bank-card-line"></i> Оплатить
+              <i class="ri-bank-card-line"></i> {% trans "Оплатить" %}
           </button>
       </div>
       {% endif %}
 
       <div x-data="{ filter: 'all', activeReceipt: null }" class="mb-4 ml-2">
-        <label class="mr-2 font-medium">Фильтр:</label>
+        <label class="mr-2 font-medium">{% trans "Фильтр:" %}</label>
         <button @click="filter = 'all'"
           :class="filter === 'all' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">Все</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Все" %}</button>
         <button @click="filter = 'claimed'"
           :class="filter === 'claimed' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">Выдано</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Выдано" %}</button>
         <button @click="filter = 'unclaimed'"
           :class="filter === 'unclaimed' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">Не выдано</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Не выдано" %}</button>
         {% comment %}PAYMENT COMMENTED OUT
         <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }"
-          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">Оплаченные</button>
+          class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">{% trans "Оплаченные" %}</button>
         <button @click="filter = 'unpaid'" :class="{ 'bg-red-500 text-white': filter === 'unpaid' }"
-          class="px-3 py-1 border rounded text-sm hover:bg-red-100">Неоплаченные</button>
+          class="px-3 py-1 border rounded text-sm hover:bg-red-100">{% trans "Неоплаченные" %}</button>
         {% endcomment %}
 
         {% if receipts %}
@@ -122,7 +123,7 @@
                 {% if receipt.payment_link %}
                 <a href="{{ receipt.payment_link }}" target="_blank"
                   class="inline-block bg-red-500 text-white font-medium px-4 py-2 rounded-button hover:bg-red-600 transition text-sm">
-                  💳 Оплатить сейчас
+                  {% trans "💳 Оплатить сейчас" %}
                 </a>
                 {% endif %}
               </div>
@@ -134,9 +135,9 @@
               <table class="w-full text-xs border-collapse border border-gray-300 mb-3">
                 <thead>
                   <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-1 py-1 text-left">Трек-код</th>
-                    <th class="border border-gray-300 px-1 py-1 text-center">Вес (кг)</th>
-                    <th class="border border-gray-300 px-1 py-1 text-center">Цена (₸)</th>
+                    <th class="border border-gray-300 px-1 py-1 text-left">{% trans "Трек-код" %}</th>
+                    <th class="border border-gray-300 px-1 py-1 text-center">{% trans "Вес (кг)" %}</th>
+                    <th class="border border-gray-300 px-1 py-1 text-center">{% trans "Цена (₸)" %}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -150,7 +151,7 @@
                 </tbody>
                 <tfoot>
                   <tr class="bg-gray-50 font-semibold">
-                    <td class="border border-gray-300 px-1 py-1">Итого</td>
+                    <td class="border border-gray-300 px-1 py-1">{% trans "Итого" %}</td>
                     <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.computed_weight }}</td>
                     <td class="border border-gray-300 px-1 py-1 text-center">{{ receipt.computed_price|floatformat:0 }}
                     </td>
@@ -170,7 +171,7 @@
               <div class="mt-3 flex justify-center">
                 <a href="{% url 'print_receipt' receipt.id %}"
                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition">
-                  <i class="ri-printer-line"></i> Печатная форма (PDF)
+                  <i class="ri-printer-line"></i> {% trans "Печатная форма (PDF)" %}
                 </a>
               </div>
             </div>
@@ -178,7 +179,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-gray-500 ml-2 mt-4">Чеки ещё не сформированы.</p>
+        <p class="text-gray-500 ml-2 mt-4">{% trans "Чеки ещё не сформированы." %}</p>
         {% endif %}
       </div>
     </div>
@@ -193,22 +194,22 @@
     <div class="absolute inset-0 bg-black/50" id="payment-disclaimer-backdrop"></div>
     <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 z-10">
         <h3 class="text-lg font-semibold mb-3 text-gray-800">
-            <i class="ri-information-line text-blue-500"></i> Обратите внимание
+            <i class="ri-information-line text-blue-500"></i> {% trans "Обратите внимание" %}
         </h3>
         <p class="text-sm text-gray-600 mb-4">
-            Данная функция предназначена только для удобства оплаты при получении посылки, вам всё ещё необходимо будет показать ваш чек об оплате на пункте выдачи.
+            {% trans "Данная функция предназначена только для удобства оплаты при получении посылки, вам всё ещё необходимо будет показать ваш чек об оплате на пункте выдачи." %}
         </p>
         <label class="flex items-center gap-2 mb-4 cursor-pointer">
             <input type="checkbox" id="payment-dont-show" class="w-4 h-4 text-blue-600 border-gray-300 rounded">
-            <span class="text-sm text-gray-600">Больше не показывать</span>
+            <span class="text-sm text-gray-600">{% trans "Больше не показывать" %}</span>
         </label>
         <div class="flex gap-3">
             <button id="payment-disclaimer-cancel" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
-                Отмена
+                {% trans "Отмена" %}
             </button>
             <a id="payment-disclaimer-continue" href="{{ payment_link }}" target="_blank"
                 class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm text-center">
-                Продолжить
+                {% trans "Продолжить" %}
             </a>
         </div>
     </div>
