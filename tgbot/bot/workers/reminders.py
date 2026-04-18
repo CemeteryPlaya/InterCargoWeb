@@ -59,14 +59,12 @@ async def check_and_send_reminders(bot: Bot):
 
             for user_id, data in by_user.items():
                 try:
-                    text_msg = (
-                        f"📦 <b>Напоминание</b>\n\n"
-                        f"У вас {data['track_count']} посылок на пункте выдачи.\n"
-                        f"Пожалуйста, заберите их.\n\n"
-                        f"📍 Пункт выдачи: <b>{data['pvz_name']}</b>\n"
+                    text_msg = await _format_reminder(
+                        user_id,
+                        data['track_count'],
+                        data['pvz_name'],
+                        data.get('working_hours', ''),
                     )
-                    if data.get('working_hours'):
-                        text_msg += f"🕒 Время работы: <b>{data['working_hours']}</b>\n"
 
                     await bot.send_message(chat_id=data['chat_id'], text=text_msg, parse_mode='HTML')
 
@@ -91,6 +89,25 @@ async def check_and_send_reminders(bot: Bot):
 
                 except Exception as e:
                     logger.error(f"Error sending reminder to {data['chat_id']}: {e}")
+
+
+@sync_to_async
+def _format_reminder(user_id, track_count, pvz_name, working_hours):
+    """Формирует текст напоминания на языке пользователя."""
+    from django.utils.translation import gettext as _
+    from tgbot.bot.i18n import with_lang, get_lang_by_user_id_sync
+
+    lang = get_lang_by_user_id_sync(user_id)
+    with with_lang(lang):
+        text = (
+            _("📦 <b>Напоминание</b>") + "\n\n"
+            + _("У вас {n} посылок на пункте выдачи.").format(n=track_count) + "\n"
+            + _("Пожалуйста, заберите их.") + "\n\n"
+            + _("📍 Пункт выдачи: <b>{name}</b>").format(name=pvz_name) + "\n"
+        )
+        if working_hours:
+            text += _("🕒 Время работы: <b>{hours}</b>").format(hours=working_hours) + "\n"
+    return text
 
 
 @sync_to_async

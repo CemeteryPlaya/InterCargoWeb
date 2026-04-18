@@ -58,12 +58,20 @@ def _get_home_delivery_clients(status):
                 'phone': phone,
                 'track_count': 0,
                 'total_weight': 0,
+                '_delivered_dates_set': set(),
             }
 
         clients[key]['track_count'] += 1
         clients[key]['total_weight'] += float(track.weight or 0)
+        if track.delivered_date:
+            clients[key]['_delivered_dates_set'].add(track.delivered_date)
 
-    return list(clients.values())
+    result = []
+    for c in clients.values():
+        dates = sorted(c.pop('_delivered_dates_set'))
+        c['delivered_dates'] = dates
+        result.append(c)
+    return result
 
 
 def _build_pickup_date_groups(status):

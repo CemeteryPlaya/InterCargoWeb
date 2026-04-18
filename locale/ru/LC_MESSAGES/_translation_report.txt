@@ -1,0 +1,1 @@
+D:\cargo\InterCargoWeb\locale\ru\LC_MESSAGES\django.po: updated=1, skipped=109, not_found=0

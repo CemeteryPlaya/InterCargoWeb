@@ -4,7 +4,7 @@ import logging
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import activate, get_language, gettext, gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,16 @@ STATUS_DISPLAY = {
     'ready': _('Доставлен на ПВЗ'),
     'claimed': _('Выдан'),
 }
+
+
+def _get_user_language(user_id):
+    """Возвращает язык пользователя из UserProfile. Fallback → 'ru'."""
+    try:
+        from register.models import UserProfile
+        up = UserProfile.objects.filter(user_id=user_id).only('language').first()
+        return (up.language if up else None) or 'ru'
+    except Exception:
+        return 'ru'
 
 
 @receiver(pre_save, sender='myprofile.TrackCode')
@@ -65,13 +75,25 @@ def track_status_changed(sender, instance, **kwargs):
             logger.debug('Telegram notification muted for user_id=%s, track=%s', instance.owner_id, track_code)
             return
 
+        # Рендерим title/message под язык получателя, чтобы уведомление
+        # пришло уже на его языке (они сохраняются в БД как готовый текст).
+        user_lang = _get_user_language(instance.owner_id)
+        original_lang = get_language()
+        try:
+            activate(user_lang)
+            translated_status = gettext(STATUS_DISPLAY.get(instance.status, instance.status))
+            title = gettext('📦 Статус обновлён: %(status)s') % {'status': translated_status}
+            message = gettext('Трек-код %(track_code)s — %(status)s') % {
+                'track_code': track_code,
+                'status': translated_status,
+            }
+        finally:
+            activate(original_lang or 'ru')
+
         TelegramNotification.objects.create(
             user_id=instance.owner_id,
-            title=str(_('📦 Статус обновлён: %(status)s')) % {'status': new_display},
-            message=str(_('Трек-код %(track_code)s — %(status)s')) % {
-                'track_code': track_code,
-                'status': new_display,
-            },
+            title=title,
+            message=message,
             notification_type='tracking',
         )
     except Exception as e:

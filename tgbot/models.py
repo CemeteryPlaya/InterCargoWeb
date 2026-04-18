@@ -44,6 +44,11 @@ class TelegramProfile(models.Model):
         default=True,
         verbose_name=_('Уведомления активны'),
     )
+    linked_bot_username = models.CharField(
+        max_length=255, blank=True, default='',
+        verbose_name=_('Username бота при привязке'),
+        help_text=_('Нужен для разделения профилей между разными ботами (prod/test).'),
+    )
 
     class Meta:
         verbose_name = _('Telegram профиль')

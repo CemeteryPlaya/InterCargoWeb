@@ -161,6 +161,13 @@ def _get_and_group_pending():
             settings_cache[user_id] = s
         return settings_cache[user_id]
 
+    # Заголовки уведомлений сохранены на языке получателя — для соп-ия
+    # по статусу используем переводы ключевых фраз на всех языках.
+    from tgbot.bot.i18n import tr_all
+    shipped_cn_variants = [s.lower() for s in tr_all('Отправлен со склада Китая')]
+    delivered_sort_variants = [s.lower() for s in tr_all('Доставлен на сортировочный склад')]
+    shipping_pp_variants = [s.lower() for s in tr_all('В доставке до ПВЗ')]
+
     def should_send_status(user_id, title):
         """Проверяет, нужно ли отправлять уведомление по настройкам пользователя."""
         s = get_user_settings(user_id)
@@ -173,13 +180,12 @@ def _get_and_group_pending():
         elif s.level == 'only_ready':
             return False
         elif s.level == 'selective':
-            # Проверяем конкретный статус из title
             title_lower = title.lower() if title else ''
-            if 'отправлен' in title_lower and 'китай' in title_lower:
+            if any(v in title_lower for v in shipped_cn_variants):
                 return s.notify_shipped_cn
-            elif 'сортировочн' in title_lower:
+            if any(v in title_lower for v in delivered_sort_variants):
                 return s.notify_delivered_sort
-            elif 'доставке до пвз' in title_lower or 'shipping_pp' in title_lower:
+            if any(v in title_lower for v in shipping_pp_variants) or 'shipping_pp' in title_lower:
                 return s.notify_shipping_pp
             return True
         return False
@@ -238,14 +244,16 @@ def _format_delivery_notification(user_id, tracks):
     """
     Форматирует уведомление о доставке посылок на ПВЗ.
     Учитывает персональную скидку пользователя при расчёте стоимости.
+    Сообщение локализуется под язык пользователя (UserProfile.language).
     """
     from myprofile.views.utils import get_global_price_per_kg, get_user_discount
     from django.contrib.auth import get_user_model
+    from django.utils.translation import gettext as _
+    from tgbot.bot.i18n import with_lang, get_lang_by_user_id_sync
     User = get_user_model()
 
     price_per_kg = get_global_price_per_kg()
 
-    # Учитываем скидку пользователя
     try:
         user = User.objects.get(id=user_id)
         discount = get_user_discount(user)
@@ -253,62 +261,68 @@ def _format_delivery_notification(user_id, tracks):
         discount = Decimal('0')
 
     effective_rate = price_per_kg - discount
+    lang = get_lang_by_user_id_sync(user_id)
 
-    lines = [
-        "<b>📦 Ваши посылки доставлены на ПВЗ!</b>",
-        "",
-    ]
+    with with_lang(lang):
+        lines = [
+            _("<b>📦 Ваши посылки доставлены на ПВЗ!</b>"),
+            "",
+        ]
 
-    total_weight = Decimal('0')
-    total_price = Decimal('0')
+        total_weight = Decimal('0')
+        total_price = Decimal('0')
 
-    for t in tracks:
-        w = Decimal(str(t['weight']))
-        cost = (w * effective_rate).quantize(Decimal('1'))
-        total_weight += w
-        total_price += cost
-        lines.append(f"• <code>{t['track_code']}</code> — {w:.3f} кг — {cost} ₸")
-
-    lines.append("")
-    lines.append(f"📊 <b>Итого: {len(tracks)} посылок</b>")
-    lines.append(f"⚖️ Общий вес: <b>{total_weight:.3f} кг</b>")
-    lines.append(f"💰 Общая стоимость: <b>{total_price} ₸</b>")
-
-    # ПВЗ пользователя
-    try:
-        from register.models import UserProfile
-        up = UserProfile.objects.select_related('pickup').get(user_id=user_id)
-        if up.pickup:
-            lines.append("")
+        for t in tracks:
+            w = Decimal(str(t['weight']))
+            cost = (w * effective_rate).quantize(Decimal('1'))
+            total_weight += w
+            total_price += cost
             lines.append(
-                f"📍 Пункт выдачи: <b>{up.pickup.address} ({up.pickup.premise_name})</b>"
+                _("• <code>{code}</code> — {weight:.3f} кг — {cost} ₸").format(
+                    code=t['track_code'], weight=w, cost=cost,
+                )
             )
-            if up.pickup.working_hours:
-                lines.append(f"🕒 Время работы: <b>{up.pickup.working_hours}</b>")
-    except Exception:
-        pass
 
-    # Кнопка оплаты
-    inline_kb = None
-    try:
-        from myprofile.models import Receipt
-        receipt = (
-            Receipt.objects
-            .filter(owner_id=user_id)
-            .order_by('-created_at')
-            .first()
-        )
-        if receipt:
-            pay_link = receipt.payment_link
-            if not pay_link:
-                site_url = getattr(django_settings, 'TELEGRAM_SITE_URL', '')
-                pay_link = f"{site_url}/profile/pay-receipt/{receipt.id}/"
-            if pay_link:
-                inline_kb = InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="Оплатить", url=pay_link)]
-                ])
-    except Exception:
-        pass
+        lines.append("")
+        lines.append(_("📊 <b>Итого: {n} посылок</b>").format(n=len(tracks)))
+        lines.append(_("⚖️ Общий вес: <b>{weight:.3f} кг</b>").format(weight=total_weight))
+        lines.append(_("💰 Общая стоимость: <b>{price} ₸</b>").format(price=total_price))
+
+        try:
+            from register.models import UserProfile
+            up = UserProfile.objects.select_related('pickup').get(user_id=user_id)
+            if up.pickup:
+                lines.append("")
+                lines.append(
+                    _("📍 Пункт выдачи: <b>{address} ({name})</b>").format(
+                        address=up.pickup.address, name=up.pickup.premise_name,
+                    )
+                )
+                if up.pickup.working_hours:
+                    lines.append(_("🕒 Время работы: <b>{hours}</b>").format(hours=up.pickup.working_hours))
+        except Exception:
+            pass
+
+        inline_kb = None
+        try:
+            from myprofile.models import Receipt
+            receipt = (
+                Receipt.objects
+                .filter(owner_id=user_id)
+                .order_by('-created_at')
+                .first()
+            )
+            if receipt:
+                pay_link = receipt.payment_link
+                if not pay_link:
+                    site_url = getattr(django_settings, 'TELEGRAM_SITE_URL', '')
+                    pay_link = f"{site_url}/profile/pay-receipt/{receipt.id}/"
+                if pay_link:
+                    inline_kb = InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(text=_("Оплатить"), url=pay_link)]
+                    ])
+        except Exception:
+            pass
 
     return '\n'.join(lines), inline_kb
 

@@ -327,8 +327,22 @@
             background-color: #334155 !important; /* slate-700 */
         }
 
+        body.theme-dark .hover\:bg-gray-300:hover {
+            background-color: #475569 !important; /* slate-600 */
+        }
+
         body.theme-dark .hover\:bg-white:hover {
             background-color: #1e293b !important; /* slate-800 instead of white */
+        }
+
+        /* Сброс "залипшего" hover на тач-устройствах для серых кнопок:
+           на touch-only устройствах hover не должен оставаться после тапа */
+        @media (hover: none) {
+            body.theme-dark .hover\:bg-gray-100:hover,
+            body.theme-dark .hover\:bg-gray-200:hover,
+            body.theme-dark .hover\:bg-gray-300:hover {
+                background-color: inherit !important;
+            }
         }
         
         /* Specific fix if FAQ/Lists use other classes */

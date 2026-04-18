@@ -135,7 +135,7 @@
                                     <div class="flex-1">
                                         <span class="font-medium text-gray-800">{{ client.full_name }}</span>
                                         <span class="text-xs text-gray-400 ml-1">({{ client.username }})</span>
-                                        <div class="flex items-center gap-3 mt-1 text-sm">
+                                        <div class="flex items-center gap-2 mt-1 text-sm flex-wrap">
                                             {% if client.phone %}
                                             <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline" onclick="event.stopPropagation();">
                                                 <i class="ri-phone-line"></i> {{ client.phone }}
@@ -143,6 +143,11 @@
                                             {% endif %}
                                             <span class="text-gray-500"><i class="ri-archive-line"></i> {{ client.track_count }} шт.</span>
                                             <span class="text-gray-500"><i class="ri-scales-3-line"></i> {{ client.total_weight|floatformat:3 }} кг</span>
+                                            {% for d in client.delivered_dates %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                <i class="ri-calendar-line mr-1"></i> {% trans "Приход:" %} {{ d|date:"d.m.Y" }}
+                                            </span>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </label>
@@ -229,7 +234,7 @@
                         <div class="flex-1">
                             <span class="font-medium text-gray-800">{{ client.full_name }}</span>
                             <span class="text-xs text-gray-400 ml-1">({{ client.username }})</span>
-                            <div class="flex items-center gap-3 mt-1 text-sm">
+                            <div class="flex items-center gap-2 mt-1 text-sm flex-wrap">
                                 {% if client.phone %}
                                 <a href="tel:{{ client.phone }}" class="text-blue-600 hover:underline">
                                     <i class="ri-phone-line"></i> {{ client.phone }}
@@ -237,6 +242,11 @@
                                 {% endif %}
                                 <span class="text-gray-500"><i class="ri-archive-line"></i> {{ client.track_count }} шт.</span>
                                 <span class="text-gray-500"><i class="ri-scales-3-line"></i> {{ client.total_weight|floatformat:3 }} кг</span>
+                                {% for d in client.delivered_dates %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <i class="ri-calendar-line mr-1"></i> {% trans "Приход:" %} {{ d|date:"d.m.Y" }}
+                                </span>
+                                {% endfor %}
                             </div>
                         </div>
                         <form method="post" action="{% url 'driver_issue' %}">

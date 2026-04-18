@@ -16,6 +16,13 @@ class SyncLanguageToProfileMiddleware:
                 if profile.language != lang:
                     profile.language = lang
                     profile.save(update_fields=['language'])
+                    # Сразу перерисуем клавиатуру в Telegram, если аккаунт привязан,
+                    # чтобы кнопки бота соответствовали новому языку сайта.
+                    try:
+                        from tgbot.services import refresh_main_keyboard_sync
+                        refresh_main_keyboard_sync(request.user, lang)
+                    except Exception:
+                        pass
             except Exception:
                 pass
         return response

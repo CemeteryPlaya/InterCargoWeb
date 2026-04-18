@@ -6,57 +6,49 @@ from aiogram import Router, F
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from asgiref.sync import sync_to_async
 from django.conf import settings as django_settings
+from django.utils.translation import gettext as _
 
 from tgbot.bot.utils import get_telegram_profile
+from tgbot.bot.i18n import with_lang, get_lang_by_chat, render_sync
 
 router = Router()
 logger = logging.getLogger(__name__)
 
 
-RECEIPT_STATUS_DISPLAY = {
-    'delivered': 'Доставлено на сортировочный склад',
-    'shipping_pp': 'В доставке до ПВЗ',
-    'ready': 'Доставлено на ПВЗ',
-}
+def _receipt_status_display(status):
+    """Локализованное название статуса чека. Вызывать под активированным языком."""
+    mapping = {
+        'delivered': _('Доставлено на сортировочный склад'),
+        'shipping_pp': _('В доставке до ПВЗ'),
+        'ready': _('Доставлено на ПВЗ'),
+    }
+    return mapping.get(status, _('ожидает получение'))
 
 
 async def show_my_receipts(message: Message):
     """Показать чеки пользователя."""
     profile = await get_telegram_profile(message.chat.id)
+    lang = await get_lang_by_chat(message.chat.id)
 
     if not profile:
-        await message.answer("❌ Ваш аккаунт не привязан. Используйте «🔗 Привязать».")
+        text = await sync_to_async(render_sync)(
+            lang, lambda: _("❌ Ваш аккаунт не привязан. Используйте «🔗 Привязать»."),
+        )
+        await message.answer(text)
         return
 
     receipts = await _get_user_receipts(profile.user_id)
 
     if not receipts:
-        await message.answer("✅ У вас нет невыданных чеков.")
+        text = await sync_to_async(render_sync)(lang, lambda: _("✅ У вас нет невыданных чеков."))
+        await message.answer(text)
         return
 
     site_url = getattr(django_settings, 'TELEGRAM_SITE_URL', '')
 
     for r in receipts:
-        status_text = RECEIPT_STATUS_DISPLAY.get(r.get('status'), 'ожидает получение')
-        msg_text = (
-            f"📄 <b>Чек №{r['receipt_number']}</b>\n"
-            f"Статус: <b>{status_text}</b>\n\n"
-            f"📦 Количество посылок: <b>{r['items_count']}</b>\n"
-            f"⚖️ Общий вес: <b>{r['total_weight']:.3f} кг</b>\n\n"
-            f"💰 Сумма к оплате: <b>{r['total_price']} ₸</b>\n\n"
-            f"📍 Пункт выдачи: <b>{r['pickup_point'] or 'Не указан'}</b>\n"
-        )
-
-        if r.get('working_hours'):
-            msg_text += f"🕒 Время работы: <b>{r['working_hours']}</b>\n"
-
         pay_link = r.get('payment_link') or f"{site_url}/profile/pay-receipt/{r['id']}/"
-
-        kb = None
-        if pay_link:
-            kb = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="Нажмите для оплаты", url=pay_link)]
-            ])
+        msg_text, kb = await sync_to_async(_build_receipt_message)(lang, r, pay_link)
 
         try:
             from aiogram.exceptions import TelegramBadRequest
@@ -64,15 +56,43 @@ async def show_my_receipts(message: Message):
                 await message.answer(msg_text, reply_markup=kb, disable_web_page_preview=True)
             except TelegramBadRequest as e:
                 if "button url" in str(e).lower() or "wrong http url" in str(e).lower():
-                    await message.answer(
-                        msg_text + "\n\n⚠️ <i>Кнопка оплаты не добавлена из-за некорректной ссылки.</i>",
-                        disable_web_page_preview=True,
+                    fallback = await sync_to_async(render_sync)(
+                        lang,
+                        lambda: msg_text + "\n\n" + _("⚠️ <i>Кнопка оплаты не добавлена из-за некорректной ссылки.</i>"),
                     )
+                    await message.answer(fallback, disable_web_page_preview=True)
                 else:
                     raise
         except Exception as e:
             logger.error(f"Error sending receipt: {e}")
             continue
+
+
+def _build_receipt_message(lang, r, pay_link):
+    with with_lang(lang):
+        status_text = _receipt_status_display(r.get('status'))
+        pickup_label = r['pickup_point'] or _('Не указан')
+
+        lines = [
+            _("📄 <b>Чек №{num}</b>").format(num=r['receipt_number']),
+            _("Статус: <b>{status}</b>").format(status=status_text),
+            "",
+            _("📦 Количество посылок: <b>{count}</b>").format(count=r['items_count']),
+            _("⚖️ Общий вес: <b>{weight:.3f} кг</b>").format(weight=r['total_weight']),
+            "",
+            _("💰 Сумма к оплате: <b>{price} ₸</b>").format(price=r['total_price']),
+            "",
+            _("📍 Пункт выдачи: <b>{pickup}</b>").format(pickup=pickup_label),
+        ]
+        if r.get('working_hours'):
+            lines.append(_("🕒 Время работы: <b>{hours}</b>").format(hours=r['working_hours']))
+
+        kb = None
+        if pay_link:
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=_("Нажмите для оплаты"), url=pay_link)]
+            ])
+    return "\n".join(lines), kb
 
 
 @sync_to_async
@@ -88,7 +108,6 @@ def _get_user_receipts(user_id):
         .order_by('-created_at')[:10]
     )
 
-    # Получаем working_hours один раз
     working_hours = ''
     try:
         from register.models import UserProfile
@@ -98,7 +117,6 @@ def _get_user_receipts(user_id):
     except Exception:
         pass
 
-    # Порядок статусов для определения минимального
     STATUS_ORDER = {
         'delivered': 0,
         'shipping_pp': 1,
@@ -109,14 +127,12 @@ def _get_user_receipts(user_id):
     for receipt in receipts:
         items = list(receipt.items.select_related('track_code').all())
 
-        # Определяем статус чека по минимальному статусу трек-кодов
         receipt_status = None
         for item in items:
             if item.track_code and item.track_code.status in STATUS_ORDER:
                 if receipt_status is None or STATUS_ORDER[item.track_code.status] < STATUS_ORDER.get(receipt_status, 999):
                     receipt_status = item.track_code.status
 
-        # Приоритет: receipt.total_weight > сумма display_weight > 0
         if receipt.total_weight and receipt.total_weight > 0:
             total_weight = receipt.total_weight
         else:
