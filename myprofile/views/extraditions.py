@@ -3,7 +3,7 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db import transaction
+from django.db import connection, transaction
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -18,8 +18,18 @@ from django.utils.translation import gettext as _
 logger = logging.getLogger(__name__)
 
 
+# Уникальный ключ для pg_advisory_xact_lock, сериализующий генерацию FST-PKG-*.
+_FST_PKG_BARCODE_LOCK_KEY = 0x46535450  # 'FSTP'
+
+
 def _next_fst_pkg_barcode():
-    """Генерирует следующий штрихкод вида FST-PKG-000000001 (автоинкремент, 9 цифр)."""
+    """Генерирует следующий штрихкод вида FST-PKG-000000001 (автоинкремент, 9 цифр).
+
+    Защищено pg_advisory_xact_lock: вызывать ТОЛЬКО внутри transaction.atomic(),
+    чтобы параллельные запросы не получили один и тот же номер.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_xact_lock(%s)", [_FST_PKG_BARCODE_LOCK_KEY])
     last = (
         ExtraditionPackage.objects
         .filter(barcode__startswith='FST-PKG-')

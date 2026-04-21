@@ -45,7 +45,7 @@ def settings(request):
             pickup_days_left = PICKUP_CHANGE_COOLDOWN_DAYS - delta.days
 
     # Настройки уведомлений
-    notif_settings, _ = UserNotificationSettings.objects.get_or_create(user=user)
+    notif_settings, _created = UserNotificationSettings.objects.get_or_create(user=user)
 
     # На settings ссылка генерируется всегда (и для «Перепривязать»)
     tg_ctx = get_telegram_context(user)
@@ -180,7 +180,7 @@ def request_pickup_change(request):
 @require_POST
 def save_notification_settings(request):
     """Сохраняет настройки уведомлений пользователя (email + Telegram)."""
-    settings_obj, _ = UserNotificationSettings.objects.get_or_create(user=request.user)
+    settings_obj, _created = UserNotificationSettings.objects.get_or_create(user=request.user)
 
     level = request.POST.get('notif_level', 'only_ready')
     if level not in ('all', 'only_ready', 'selective'):

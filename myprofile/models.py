@@ -138,7 +138,7 @@ class TrackCode(models.Model):
 
         frame = inspect.currentframe()
         try:
-            for _ in range(10):
+            for _i in range(10):
                 frame = frame.f_back
                 if frame is None:
                     break

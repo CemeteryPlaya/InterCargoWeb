@@ -110,7 +110,7 @@ def role_edit(request, user_id):
         return HttpResponseForbidden(_("Нет доступа."))
 
     target = get_object_or_404(User.objects.select_related('userprofile'), id=user_id)
-    profile, _ = UserProfile.objects.get_or_create(user=target)
+    profile, _created = UserProfile.objects.get_or_create(user=target)
 
     matrix = get_effective_permissions(target)
     # Flatten matrix for simpler template iteration.
@@ -159,7 +159,7 @@ def role_save(request, user_id):
         return JsonResponse({'error': _('Нет доступа')}, status=403)
 
     target = get_object_or_404(User, id=user_id)
-    profile, _ = UserProfile.objects.get_or_create(user=target)
+    profile, _created = UserProfile.objects.get_or_create(user=target)
 
     try:
         payload = json.loads(request.body.decode('utf-8') or '{}')

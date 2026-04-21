@@ -9,7 +9,8 @@ class SyncLanguageToProfileMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if request.user.is_authenticated:
+        user = getattr(request, 'user', None)
+        if user is not None and user.is_authenticated:
             lang = translation.get_language() or 'ru'
             try:
                 profile = request.user.userprofile
