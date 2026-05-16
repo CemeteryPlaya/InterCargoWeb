@@ -9,54 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!weightInput) return;
 
+  // Вся очистка ввода идёт через событие input — оно надёжно
+  // срабатывает и на десктопе, и на мобильных виртуальных клавиатурах
+  // (в отличие от keydown, где e.key === "Unidentified" на Android/GBoard
+  // и точку/запятую невозможно отловить).
   weightInput.addEventListener('input', () => {
-    // Заменяем запятую на точку
-    var val = weightInput.value.replace(',', '.');
-    // Убираем всё кроме цифр и первой точки
+    // Заменяем запятую на точку и убираем всё, кроме цифр и точек
+    var val = weightInput.value.replace(',', '.').replace(/[^0-9.]/g, '');
+    // Оставляем только первую точку
+    var firstDot = val.indexOf('.');
+    if (firstDot !== -1) {
+      val = val.slice(0, firstDot + 1) + val.slice(firstDot + 1).replace(/\./g, '');
+    }
     var parts = val.split('.');
-    var integer = parts[0].replace(/[^0-9]/g, '');
-    if (integer.length > 3) integer = integer.slice(0, 3);
+    var integer = parts[0].slice(0, 3);
     if (parts.length > 1) {
-      var decimal = parts.slice(1).join('').replace(/[^0-9]/g, '');
-      if (decimal.length > 3) decimal = decimal.slice(0, 3);
+      // Сохраняем «висящую» точку: "0." остаётся "0.",
+      // чтобы можно было продолжить ввод дробной части
+      var decimal = parts[1].slice(0, 3);
       val = integer + '.' + decimal;
     } else {
       val = integer;
     }
     weightInput.value = val;
     update();
-  });
-
-  weightInput.addEventListener('keydown', (e) => {
-    var allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
-    if (allowedKeys.indexOf(e.key) !== -1) return;
-    // Разрешаем точку и запятую (один раз)
-    if (e.key === '.' || e.key === ',') {
-      if (weightInput.value.indexOf('.') !== -1) {
-        e.preventDefault();
-      }
-      return;
-    }
-    // Блокируем нецифровые символы
-    if (!/^\d$/.test(e.key)) {
-      e.preventDefault();
-      return;
-    }
-    // Проверяем лимит цифр после точки (3) и до точки (3)
-    var val = weightInput.value;
-    var dotIdx = val.indexOf('.');
-    var selStart = weightInput.selectionStart;
-    if (dotIdx !== -1) {
-      if (selStart > dotIdx) {
-        var decPart = val.slice(dotIdx + 1);
-        if (decPart.length >= 3) e.preventDefault();
-      } else {
-        var intPart = val.slice(0, dotIdx);
-        if (intPart.length >= 3) e.preventDefault();
-      }
-    } else {
-      if (val.replace(/[^0-9]/g, '').length >= 3) e.preventDefault();
-    }
   });
 
   const update = () => {
