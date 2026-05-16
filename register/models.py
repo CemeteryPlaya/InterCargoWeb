@@ -9,7 +9,11 @@ class PickupPoint(models.Model):
     payment_link = models.URLField(blank=True, null=True, verbose_name=_("Ссылка на оплату"))
     working_hours = models.CharField(max_length=100, blank=True, default='', verbose_name=_("Время работы"))
     is_active = models.BooleanField(default=True, verbose_name=_("Активен"))
-    show_in_registration = models.BooleanField(default=True, verbose_name=_("Показывать в регистрации/футере"))
+    show_in_registration = models.BooleanField(default=True, verbose_name=_("Показывать в регистрации"))
+    show_in_footer = models.BooleanField(default=True, verbose_name=_("Показывать в футере"))
+    show_in_pickup_transfer = models.BooleanField(
+        default=True, verbose_name=_("Показывать в заявках для перевода в другой ПВЗ")
+    )
     is_home_delivery = models.BooleanField(default=False, verbose_name=_("Доставка на дом"))
     short_info = models.TextField(blank=True, default='', verbose_name=_("Краткая информация"))
     map_widget_code = models.TextField(blank=True, default='', verbose_name=_("2GIS виджет-код"))

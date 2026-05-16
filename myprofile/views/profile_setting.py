@@ -32,7 +32,9 @@ def settings(request):
             days_left = EDIT_COOLDOWN_DAYS - delta.days
 
     # Проверяем возможность смены ПВЗ
-    pickup_points = PickupPoint.objects.filter(is_active=True, is_home_delivery=False)
+    pickup_points = PickupPoint.objects.filter(
+        is_active=True, is_home_delivery=False, show_in_pickup_transfer=True
+    )
     pending_request = PickupChangeRequest.objects.filter(user=user, status='pending').first()
     can_change_pickup = True
     pickup_days_left = 0
@@ -158,7 +160,9 @@ def request_pickup_change(request):
         return redirect('settings')
 
     try:
-        new_pickup = PickupPoint.objects.get(id=pickup_id, is_active=True, is_home_delivery=False)
+        new_pickup = PickupPoint.objects.get(
+            id=pickup_id, is_active=True, is_home_delivery=False, show_in_pickup_transfer=True
+        )
     except PickupPoint.DoesNotExist:
         messages.error(request, _("Выбранный пункт выдачи не найден."))
         return redirect('settings')

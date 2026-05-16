@@ -729,6 +729,10 @@ class ArrivalSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
     paused_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Поставлена на паузу"))
     completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Завершено"))
+    # Резервный сырой снимок последнего автосохранения (на случай потери связи).
+    # Хранит входящий список строк как есть — восстановимая копия, доступная с любого устройства.
+    draft_data = models.JSONField(default=dict, blank=True, verbose_name=_("Черновик (резерв)"))
+    draft_saved_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Черновик сохранён"))
 
     class Meta:
         verbose_name = _("Сессия прихода")

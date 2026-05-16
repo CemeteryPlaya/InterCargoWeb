@@ -156,7 +156,7 @@
         <div class="px-4 py-2">
             <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Мои посылки" %}</h2>
             <div class="grid grid-cols-2 gap-3">
-                <a href="{% url 'track_codes' %}?status=user_added"
+                <a href="{% url 'mobile_parcels' %}?cat=user_added"
                    class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fee2e2;">
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="{% url 'track_codes' %}?status=warehouse_cn&status=shipped_cn"
+                <a href="{% url 'mobile_parcels' %}?cat=shipped_cn"
                    class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fef3c7;">
@@ -180,7 +180,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="{% url 'track_codes' %}?status=unidentified&status=delivered&status=shipping_pp"
+                <a href="{% url 'mobile_parcels' %}?cat=in_sorting"
                    class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f3e8ff;">
@@ -192,7 +192,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="{% url 'track_codes' %}?status=ready"
+                <a href="{% url 'mobile_parcels' %}?cat=ready"
                    class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#dcfce7;">
@@ -212,7 +212,7 @@
         <div class="px-4 py-3 mt-1">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                 <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> {% trans "Калькулятор доставки" %}</h3>
-                <input type="text" inputmode="decimal" id="mobile-weight" data-rate="{{ price_per_kg }}" maxlength="4"
+                <input type="text" inputmode="decimal" id="mobile-weight" data-rate="{{ price_per_kg }}" maxlength="7"
                     class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition"
                     placeholder="{% trans "Вес (кг)" %}" autocomplete="off">
                 <div class="flex items-center justify-between mt-2 px-1">
@@ -285,7 +285,7 @@
         <div class="px-4 py-3">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                 <h3 class="font-bold text-sm text-gray-900 mb-3"><i class="ri-calculator-line mr-1 text-primary"></i> {% trans "Калькулятор доставки" %}</h3>
-                <input type="text" inputmode="decimal" id="mobile-weight-guest" data-rate="{{ price_per_kg }}" maxlength="4"
+                <input type="text" inputmode="decimal" id="mobile-weight-guest" data-rate="{{ price_per_kg }}" maxlength="7"
                     class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition"
                     placeholder="{% trans "Вес (кг)" %}" autocomplete="off">
                 <div class="flex items-center justify-between mt-2 px-1">
@@ -445,12 +445,27 @@
             var discountEl = document.getElementById(discountId);
             var rate = parseFloat(input.dataset.rate) || 0;
             input.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
-                var val = parseInt(this.value, 10) || 0;
-                var total = Math.round(val * rate);
+                // Запятую → точку, оставляем только цифры и точку
+                var val = this.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                // Оставляем только первую точку
+                var firstDot = val.indexOf('.');
+                if (firstDot !== -1) {
+                    val = val.slice(0, firstDot + 1) + val.slice(firstDot + 1).replace(/\./g, '');
+                }
+                // Целая часть — до 3 цифр, дробная — до 3 цифр
+                var parts = val.split('.');
+                var integer = parts[0].slice(0, 3);
+                if (parts.length > 1) {
+                    val = integer + '.' + parts[1].slice(0, 3);
+                } else {
+                    val = integer;
+                }
+                this.value = val;
+                var num = parseFloat(val) || 0;
+                var total = Math.round(num * rate);
                 result.textContent = total.toLocaleString('ru-RU') + ' ₸';
-                if (val >= 30 && discountRow) {
-                    var discounted = Math.round(val * (rate - 50));
+                if (num >= 30 && discountRow) {
+                    var discounted = Math.round(num * (rate - 50));
                     discountEl.textContent = discounted.toLocaleString('ru-RU') + ' ₸';
                     discountRow.style.maxHeight = '60px';
                     discountRow.style.opacity = '1';

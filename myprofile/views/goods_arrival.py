@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
+from django.db import transaction
 from django.utils import timezone
 from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
@@ -141,11 +142,18 @@ def session_form(request, session_id):
 
     can_edit = session.status == 'active'
 
+    # Серверный резервный черновик — клиент сравнит его с локальной копией (localStorage)
+    draft = {
+        'items': (session.draft_data or {}).get('items', []),
+        'savedAt': session.draft_saved_at.timestamp() * 1000 if session.draft_saved_at else None,
+    }
+
     return render(request, "desktop/goods_arrival_session.html", {
         'session': session,
         'sorting_locations': sorting_locations,
         'items_json': json.dumps(items, default=str),
         'known_tracks_json': json.dumps(known_tracks),
+        'draft_json': json.dumps(draft, default=str),
         'can_edit': can_edit,
     })
 
@@ -159,11 +167,26 @@ def session_save_items(request, session_id):
 
     session = get_object_or_404(ArrivalSession, id=session_id, status='active')
 
+    # Поддерживаем два формата запроса:
+    #   - JSON-body (обычный fetch с заголовком X-CSRFToken);
+    #   - form-encoded (navigator.sendBeacon и реплей из Service Worker —
+    #     там нельзя задать заголовки, CSRF идёт полем csrfmiddlewaretoken).
     try:
-        data = json.loads(request.body)
-        items = data.get('items', [])
-    except (json.JSONDecodeError, AttributeError):
+        if request.content_type and request.content_type.startswith('application/json'):
+            data = json.loads(request.body)
+            items = data.get('items', [])
+        else:
+            items = json.loads(request.POST.get('items', '[]'))
+    except (json.JSONDecodeError, AttributeError, TypeError):
         return JsonResponse({'error': _('Неверные данные')}, status=400)
+    if not isinstance(items, list):
+        return JsonResponse({'error': _('Неверные данные')}, status=400)
+
+    # Резервный сырой снимок — пишем сразу, до нормализации и валидации,
+    # чтобы восстановимая копия пережила любые ошибки обработки ниже.
+    session.draft_data = {'items': items}
+    session.draft_saved_at = timezone.now()
+    session.save(update_fields=['draft_data', 'draft_saved_at'])
 
     # Собираем трек-коды из запроса (без пустых, без дублей внутри сессии)
     seen = set()
@@ -208,9 +231,6 @@ def session_save_items(request, session_id):
         for tc in TrackCode.objects.filter(track_code__in=incoming_codes)
     }
 
-    # Удаляем старые строки только текущей сессии
-    session.items.all().delete()
-
     new_items = []
     for p in parsed:
         if p['track_code'] in occupied:
@@ -224,8 +244,12 @@ def session_save_items(request, session_id):
             row_number=p['row_number'],
         ))
 
-    if new_items:
-        ArrivalSessionItem.objects.bulk_create(new_items)
+    # Замена строк сессии — атомарно: при обрыве посередине БД не остаётся
+    # с удалёнными, но не пересозданными строками.
+    with transaction.atomic():
+        session.items.all().delete()
+        if new_items:
+            ArrivalSessionItem.objects.bulk_create(new_items)
 
     return JsonResponse({
         'success': True,

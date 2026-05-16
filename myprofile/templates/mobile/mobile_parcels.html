@@ -16,6 +16,7 @@
     <script src="{% static 'scripts/faq.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/trackCodeValidation.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
@@ -246,9 +247,10 @@
             {% csrf_token %}
             <input type="hidden" name="next" value="{% url 'mobile_parcels' %}?cat=user_added">
             <div>
-                <input type="text" name="track_code" required autocomplete="off"
+                <input type="text" name="track_code" id="track-code-input" required autocomplete="off"
                     class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="{% trans "Введите трек-код" %}">
+                <p id="track-code-error" class="text-sm text-red-600 mt-1"></p>
             </div>
             <div>
                 <textarea name="description" rows="2"
