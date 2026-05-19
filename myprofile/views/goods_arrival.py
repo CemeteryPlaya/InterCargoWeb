@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from django.db import transaction
+from django.db.models import Max
 from django.utils import timezone
 from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
@@ -35,6 +36,56 @@ def _expire_stale_sessions():
         status__in=['active', 'paused'],
         created_at__lt=cutoff,
     ).update(status='inactive')
+
+
+def _drain_awaiting_unidentified(session):
+    """Добавляет подтверждённые неопознанные посылки в конец сессии прихода.
+
+    Подтверждённые "Неопозки" (TrackCode с awaiting_arrival=True) переносятся
+    строками в указанную сессию: трек-код, владелец и вес (если задан).
+    Флаг awaiting_arrival снимается — посылка считается переданной в приход.
+    Возвращает количество добавленных строк.
+    """
+    awaiting = list(
+        TrackCode.all_objects
+        .filter(awaiting_arrival=True, is_archived=False)
+        .select_related('owner')
+        .order_by('update_date', 'id')
+    )
+    if not awaiting:
+        return 0
+
+    # Трек-коды, уже занятые строками любой сессии (track_code у ArrivalSessionItem unique).
+    occupied = set(
+        ArrivalSessionItem.objects.values_list('track_code', flat=True)
+    )
+    last_row = session.items.aggregate(m=Max('row_number'))['m'] or 0
+
+    new_items = []
+    drained_ids = []
+    for track in awaiting:
+        drained_ids.append(track.id)
+        if track.track_code in occupied:
+            # Уже есть строкой в какой-то сессии — повторно не добавляем,
+            # но флаг снимаем, чтобы посылка не "висела" вечно.
+            continue
+        last_row += 1
+        new_items.append(ArrivalSessionItem(
+            session=session,
+            track_code=track.track_code,
+            track_obj=track,
+            owner_name=track.owner.username if track.owner else '',
+            weight=track.weight,
+            row_number=last_row,
+        ))
+        occupied.add(track.track_code)
+
+    with transaction.atomic():
+        if new_items:
+            ArrivalSessionItem.objects.bulk_create(new_items)
+        TrackCode.all_objects.filter(id__in=drained_ids).update(awaiting_arrival=False)
+
+    return len(new_items)
 
 
 @login_required
@@ -114,6 +165,11 @@ def start_session(request):
         sorting_location=sorting_location,
     )
 
+    # Подтверждённые неопознанные посылки автоматически добавляем в новую сессию.
+    drained = _drain_awaiting_unidentified(session)
+    if drained:
+        messages.info(request, f"Добавлено подтверждённых неопознанных посылок: {drained}.")
+
     return redirect('goods_arrival_session', session_id=session.id)
 
 
@@ -129,6 +185,11 @@ def session_form(request, session_id):
     if session.status == 'completed':
         messages.info(request, _("Эта сессия уже завершена."))
         return redirect('goods_arrival')
+
+    # Если сессия активна — подтягиваем подтверждённые неопознанные посылки,
+    # которые подтвердили уже после открытия сессии (вставятся в конец).
+    if session.status == 'active':
+        _drain_awaiting_unidentified(session)
 
     sorting_locations = SortingLocation.objects.filter(is_active=True).order_by('id')
     items = list(session.items.order_by('row_number').values('id', 'track_code', 'owner_name', 'weight', 'row_number'))
@@ -306,6 +367,11 @@ def complete_session(request, session_id):
         return HttpResponseForbidden(_("У вас нет доступа."))
 
     session = get_object_or_404(ArrivalSession, id=session_id, status='active')
+
+    # Финальная подстраховка: добавляем подтверждённые неопознанные посылки,
+    # которые подтвердили во время сессии и ещё не попали в неё.
+    _drain_awaiting_unidentified(session)
+
     items = list(session.items.order_by('row_number'))
 
     if not items:
@@ -359,8 +425,12 @@ def complete_session(request, session_id):
 
             track.status = status
             track.update_date = update_date
-            if not track.delivered_date:
+            # Дата прихода = дата сессии. У подтверждённой "Неопозки"
+            # delivered_date уже проставлен датой её добавления — перезаписываем
+            # его датой сессии прихода, иначе приход встанет старой датой.
+            if not track.delivered_date or old_status == 'unidentified':
                 track.delivered_date = update_date
+            track.awaiting_arrival = False
             if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                 track.weight = weight_val
             if owner_name:

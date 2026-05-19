@@ -538,6 +538,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'user_added':   { border: '#60a5fa', bg: '#eff6ff' },  // голубой
         'warehouse_cn': { border: '#34d399', bg: '#f0fdf4' },  // зелёный
         'shipped_cn':   { border: '#34d399', bg: '#f0fdf4' },
+        'unidentified': { border: '#f87171', bg: '#fef2f2' },  // красный (неопозка)
         'delivered':    { border: '#a78bfa', bg: '#f5f3ff' },  // фиолетовый
         'shipping_pp':  { border: '#f97316', bg: '#fff7ed' },  // оранжевый
         'ready':        { border: '#22c55e', bg: '#f0fdf4' },  // зелёный

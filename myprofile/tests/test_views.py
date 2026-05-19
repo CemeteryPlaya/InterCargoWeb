@@ -180,3 +180,198 @@ class NotificationsContextTest(TestCase):
         Notification.objects.create(user=self.user, message='Read', is_read=True)
         response = self.client.get(reverse('notifications'))
         self.assertEqual(response.context['unread'], 2)
+
+
+class UnidentifiedArrivalFlowTest(PickupPointMixin, TestCase):
+    """Подтверждённые «Неопозки» автоматически попадают в сессию прихода."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.staff = User.objects.create_user(username='staffu', password='pass123')
+        UserProfile.objects.create(user=self.staff, phone='7002222222',
+                                   pickup=self.pickup_point, is_staff=True)
+        self.client.login(username='staffu', password='pass123')
+
+        self.owner = User.objects.create_user(username='CLIENT0001', password='pass123')
+        UserProfile.objects.create(user=self.owner, phone='7003333333',
+                                   pickup=self.pickup_point)
+
+    def _make_neopozka(self, code='NEOPOZKA01', weight=None, owner=None):
+        """Создаёт неопознанную посылку со старой датой добавления."""
+        from django.utils import timezone
+        from datetime import timedelta
+        old_date = timezone.localdate() - timedelta(days=10)
+        return TrackCode.objects.create(
+            track_code=code, status='unidentified', owner=owner,
+            weight=weight, update_date=old_date, delivered_date=old_date,
+        )
+
+    def test_confirm_marks_awaiting_not_delivered(self):
+        """Подтверждение не переводит сразу в приход — ставит флаг ожидания."""
+        track = self._make_neopozka(owner=self.owner)
+        resp = self.client.post(reverse('unidentified_confirm', args=[track.id]))
+        self.assertEqual(resp.status_code, 200)
+        track.refresh_from_db()
+        self.assertTrue(track.awaiting_arrival)
+        self.assertEqual(track.status, 'unidentified')
+
+    def test_confirmed_excluded_from_claimed_list(self):
+        """Подтверждённая неопозка уходит из «Заявлено» в «Ожидают прихода»."""
+        track = self._make_neopozka(owner=self.owner)
+        track.awaiting_arrival = True
+        track.save(skip_full_clean=True)
+        resp = self.client.get(reverse('unidentified'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn(track, list(resp.context['claimed']))
+        self.assertIn(track, list(resp.context['awaiting']))
+
+    def test_new_session_drains_awaiting(self):
+        """При создании новой сессии прихода ожидающие посылки встают в неё."""
+        from myprofile.models import ArrivalSession, ArrivalSessionItem
+        from django.utils import timezone
+        track = self._make_neopozka(weight=Decimal('2.500'), owner=self.owner)
+        track.awaiting_arrival = True
+        track.save(skip_full_clean=True)
+
+        resp = self.client.post(reverse('goods_arrival_start'), {
+            'date': timezone.localdate().strftime('%Y-%m-%d'),
+        })
+        self.assertEqual(resp.status_code, 302)
+
+        session = ArrivalSession.objects.latest('id')
+        item = ArrivalSessionItem.objects.get(session=session, track_code='NEOPOZKA01')
+        self.assertEqual(item.weight, Decimal('2.500'))
+        self.assertEqual(item.owner_name, 'CLIENT0001')
+        track.refresh_from_db()
+        self.assertFalse(track.awaiting_arrival)
+
+    def test_complete_session_sets_session_date(self):
+        """Завершение сессии: неопозка становится приходом с датой сессии."""
+        from myprofile.models import ArrivalSession
+        from django.utils import timezone
+        track = self._make_neopozka(weight=Decimal('1.200'), owner=self.owner)
+        track.awaiting_arrival = True
+        track.save(skip_full_clean=True)
+        old_date = track.delivered_date
+
+        session_date = timezone.localdate()
+        self.client.post(reverse('goods_arrival_start'), {
+            'date': session_date.strftime('%Y-%m-%d'),
+        })
+        session = ArrivalSession.objects.latest('id')
+        resp = self.client.post(reverse('goods_arrival_complete', args=[session.id]))
+        self.assertEqual(resp.status_code, 302)
+
+        track.refresh_from_db()
+        self.assertEqual(track.status, 'delivered')
+        self.assertEqual(track.delivered_date, session_date)
+        self.assertNotEqual(track.delivered_date, old_date)
+        self.assertFalse(track.awaiting_arrival)
+
+    def test_set_weight_endpoint(self):
+        """Эндпоинт ввода веса принимает запятую и сохраняет вес."""
+        track = self._make_neopozka(owner=self.owner)
+        resp = self.client.post(reverse('unidentified_set_weight', args=[track.id]),
+                                {'weight': '3,250'})
+        self.assertEqual(resp.status_code, 200)
+        track.refresh_from_db()
+        self.assertEqual(track.weight, Decimal('3.250'))
+
+    def test_set_weight_rejects_invalid(self):
+        """Некорректный вес отклоняется с ошибкой 400."""
+        track = self._make_neopozka(owner=self.owner)
+        resp = self.client.post(reverse('unidentified_set_weight', args=[track.id]),
+                                {'weight': 'abc'})
+        self.assertEqual(resp.status_code, 400)
+
+
+class UnidentifiedArrivalFlowTest(PickupPointMixin, TestCase):
+    """Подтверждённые «Неопозки» автоматически попадают в «Сессию прихода»."""
+
+    def setUp(self):
+        super().setUp()
+        from django.utils import timezone
+        from datetime import timedelta
+        self._timezone = timezone
+        self._timedelta = timedelta
+
+        self.client = Client()
+        self.staff = User.objects.create_user(username='staffu', password='pass123')
+        UserProfile.objects.create(user=self.staff, phone='7002222222',
+                                   pickup=self.pickup_point, is_staff=True)
+        self.client.login(username='staffu', password='pass123')
+
+        self.owner = User.objects.create_user(username='CLIENT0001', password='pass123')
+        UserProfile.objects.create(user=self.owner, phone='7003333333',
+                                   pickup=self.pickup_point)
+
+    def _make_claimed_neopozka(self, code='NEOPOZKA01', weight=None):
+        """Создаёт неопознанную посылку, заявленную клиентом, с устаревшей датой."""
+        old_date = self._timezone.localdate() - self._timedelta(days=10)
+        return TrackCode.objects.create(
+            track_code=code, status='unidentified', owner=self.owner,
+            weight=weight, update_date=old_date, delivered_date=old_date,
+        )
+
+    def test_confirm_marks_awaiting_not_delivered(self):
+        track = self._make_claimed_neopozka()
+        resp = self.client.post(reverse('unidentified_confirm', args=[track.id]))
+        self.assertEqual(resp.status_code, 200)
+        track.refresh_from_db()
+        self.assertTrue(track.awaiting_arrival)
+        self.assertEqual(track.status, 'unidentified')  # не уходит сразу в приход
+
+    def test_new_session_drains_awaiting_with_weight(self):
+        track = self._make_claimed_neopozka(weight=Decimal('2.500'))
+        track.awaiting_arrival = True
+        track.save()
+
+        resp = self.client.post(reverse('goods_arrival_start'), {
+            'date': self._timezone.localdate().strftime('%Y-%m-%d'),
+        })
+        self.assertEqual(resp.status_code, 302)
+
+        from myprofile.models import ArrivalSession, ArrivalSessionItem
+        session = ArrivalSession.objects.latest('id')
+        item = ArrivalSessionItem.objects.get(session=session, track_code='NEOPOZKA01')
+        self.assertEqual(item.weight, Decimal('2.500'))     # вес подставился
+        self.assertEqual(item.owner_name, 'CLIENT0001')
+        track.refresh_from_db()
+        self.assertFalse(track.awaiting_arrival)            # флаг снят
+
+    def test_complete_session_uses_session_date(self):
+        track = self._make_claimed_neopozka()
+        track.awaiting_arrival = True
+        track.save()
+        session_date = self._timezone.localdate()
+
+        self.client.post(reverse('goods_arrival_start'), {
+            'date': session_date.strftime('%Y-%m-%d'),
+        })
+        from myprofile.models import ArrivalSession
+        session = ArrivalSession.objects.latest('id')
+        resp = self.client.post(reverse('goods_arrival_complete', args=[session.id]))
+        self.assertEqual(resp.status_code, 302)
+
+        track.refresh_from_db()
+        self.assertEqual(track.status, 'delivered')
+        self.assertEqual(track.delivered_date, session_date)  # дата сессии, не старая
+        self.assertFalse(track.awaiting_arrival)
+
+    def test_set_weight_endpoint(self):
+        track = self._make_claimed_neopozka()
+        resp = self.client.post(reverse('unidentified_set_weight', args=[track.id]),
+                                {'weight': '3,250'})
+        self.assertEqual(resp.status_code, 200)
+        track.refresh_from_db()
+        self.assertEqual(track.weight, Decimal('3.250'))
+
+    def test_awaiting_excluded_from_claimed_list(self):
+        track = self._make_claimed_neopozka()
+        track.awaiting_arrival = True
+        track.save()
+        resp = self.client.get(reverse('unidentified'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn(track, list(resp.context['claimed']))
+        self.assertIn(track, list(resp.context['awaiting']))

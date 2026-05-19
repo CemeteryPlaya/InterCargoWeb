@@ -119,6 +119,14 @@ class TrackCode(models.Model):
         verbose_name=_("Требует переноса (прибыл без ПВЗ)")
     )
 
+    # Подтверждённая неопознанная посылка, ожидающая добавления в сессию прихода.
+    # Пока флаг установлен — посылка остаётся в статусе 'unidentified' и будет
+    # автоматически добавлена в конец активной/новой "Сессии прихода".
+    awaiting_arrival = models.BooleanField(
+        default=False,
+        verbose_name=_("Ожидает добавления в приход")
+    )
+
     # Архивация
     is_archived = models.BooleanField(default=False, verbose_name=_("Архивирован"))
     archived_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата архивации"))

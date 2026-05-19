@@ -1,0 +1,224 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Inter Cargo - Управление блокировками" %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'shared/header.html' %}
+
+    {% block content %}
+    <div class="flex min-h-screen">
+        {% include 'mobile/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-8">
+            <!-- Мобильный хедер -->
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+                <h1 class="text-lg font-bold text-center">{% trans "Блокировки" %}</h1>
+            </div>
+            <div class="max-w-5xl mx-auto">
+                <h1 class="text-2xl font-bold mb-6 hidden md:block">
+                    <i class="ri-lock-unlock-line mr-2"></i>{% trans "Управление блокировками" %}
+                </h1>
+
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-lg text-sm font-medium
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800
+                        {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                        {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Активные блокировки -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-1">
+                        <i class="ri-lock-line mr-1 text-red-500"></i>
+                        {% trans "Активные блокировки" %}
+                        <span class="ml-1 text-sm font-normal text-gray-500">({{ active_count }})</span>
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        {% trans "Блокировки, действующие прямо сейчас. Снятие блокировки сбрасывает счётчик попыток." %}
+                    </p>
+
+                    {% if active_blocks %}
+                    <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">
+                                <th class="px-3 py-2 border-b">{% trans "Тип" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "Идентификатор" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "Пользователь" %}</th>
+                                <th class="px-3 py-2 border-b text-center">{% trans "Попытки" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "До конца блокировки" %}</th>
+                                <th class="px-3 py-2 border-b text-center">{% trans "Действие" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in active_blocks %}
+                            <tr class="border-b border-gray-100">
+                                <td class="px-3 py-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                        {% if b.block_type == 'login' %}bg-red-100 text-red-800
+                                        {% elif b.block_type == 'reset' %}bg-orange-100 text-orange-800
+                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                        {{ b.type_label }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-2 font-mono break-all">{{ b.identifier }}</td>
+                                <td class="px-3 py-2">
+                                    {% if b.user %}
+                                        {{ b.user.get_full_name|default:b.user.username }}
+                                        <span class="text-gray-400">({{ b.user.username }})</span>
+                                    {% else %}
+                                        <span class="text-gray-400">{% trans "не определён" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2 text-center font-semibold">{{ b.attempts }}</td>
+                                <td class="px-3 py-2">
+                                    <span class="block-countdown font-medium text-red-600" data-until="{{ b.until|date:'U' }}">—</span>
+                                    <span class="block text-xs text-gray-400">{% trans "до" %} {{ b.until|date:"d.m.Y H:i" }}</span>
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <form method="post" action="{% url 'blocks_unblock' %}"
+                                        onsubmit="return confirm('Снять блокировку для «{{ b.identifier|escapejs }}»?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="block_type" value="{{ b.block_type }}">
+                                        <input type="hidden" name="block_id" value="{{ b.id }}">
+                                        <button type="submit"
+                                            class="text-xs font-medium bg-red-500 text-white rounded px-3 py-1.5 hover:bg-red-600 transition whitespace-nowrap">
+                                            <i class="ri-lock-unlock-line mr-0.5"></i> {% trans "Снять" %}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-400 py-4 text-center">{% trans "Активных блокировок нет." %}</p>
+                    {% endif %}
+                </div>
+
+                <!-- История блокировок -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-1">
+                        <i class="ri-history-line mr-1 text-gray-500"></i>
+                        {% trans "История блокировок" %}
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        {% trans "Журнал событий: когда блокировка была наложена и когда снята." %}
+                    </p>
+
+                    {% if history %}
+                    <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">
+                                <th class="px-3 py-2 border-b">{% trans "Время" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "Тип" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "Идентификатор / Пользователь" %}</th>
+                                <th class="px-3 py-2 border-b text-center">{% trans "Попытки" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "Событие" %}</th>
+                                <th class="px-3 py-2 border-b">{% trans "Снял" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in history %}
+                            <tr class="border-b border-gray-100">
+                                <td class="px-3 py-2 text-gray-500 whitespace-nowrap">{{ h.created_at|date:"d.m.Y H:i" }}</td>
+                                <td class="px-3 py-2">{{ h.get_block_type_display }}</td>
+                                <td class="px-3 py-2">
+                                    {% if h.user %}
+                                        {{ h.user.get_full_name|default:h.user.username }}
+                                        <span class="text-gray-400">({{ h.user.username }})</span>
+                                    {% else %}
+                                        <span class="font-mono break-all">{{ h.identifier }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2 text-center">{{ h.attempts }}</td>
+                                <td class="px-3 py-2">
+                                    {% if h.action == 'lifted' %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="ri-lock-unlock-line mr-1"></i> {{ h.get_action_display }}
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="ri-lock-line mr-1"></i> {{ h.get_action_display }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-2 text-gray-600">
+                                    {% if h.handled_by %}
+                                        {{ h.handled_by.get_full_name|default:h.handled_by.username }}
+                                    {% else %}
+                                        <span class="text-gray-400">{% trans "—" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-400 py-4 text-center">{% trans "История пуста." %}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </main>
+    </div>
+    {% endblock %}
+
+    <script>
+    // Живой отсчёт времени до конца блокировки
+    (function () {
+        function fmt(sec) {
+            if (sec <= 0) return '{% trans "истекла" %}';
+            var h = Math.floor(sec / 3600),
+                m = Math.floor((sec % 3600) / 60),
+                s = Math.floor(sec % 60);
+            if (h > 0) return h + ' ч ' + m + ' мин';
+            if (m > 0) return m + ' мин ' + s + ' сек';
+            return s + ' сек';
+        }
+        function tick() {
+            var now = Date.now() / 1000;
+            document.querySelectorAll('.block-countdown').forEach(function (el) {
+                var until = parseInt(el.dataset.until, 10) || 0;
+                var left = until - now;
+                el.textContent = fmt(left);
+                if (left <= 0) {
+                    el.classList.remove('text-red-600');
+                    el.classList.add('text-gray-400');
+                }
+            });
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+    </script>
+</body>
+</html>

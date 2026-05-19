@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from myprofile.email_utils import send_mail_logged
 from django.utils import timezone
-from register.models import PasswordResetCode
+from register.models import PasswordResetCode, BlockHistory
 from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
@@ -130,6 +130,12 @@ def password_reset_verify(request):
     if reset_code.code != code:
         reset_code.attempts += 1
         reset_code.save()
+        if reset_code.attempts == 5:
+            try:
+                BlockHistory.log('reset', 'created', reset_code.user.username,
+                                 attempts=reset_code.attempts, user=reset_code.user)
+            except Exception:
+                pass
         remaining = 5 - reset_code.attempts
         return JsonResponse({
             'error': f'Неверный код. Осталось попыток: {remaining}.'
