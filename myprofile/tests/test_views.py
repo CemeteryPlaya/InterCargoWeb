@@ -183,110 +183,6 @@ class NotificationsContextTest(TestCase):
 
 
 class UnidentifiedArrivalFlowTest(PickupPointMixin, TestCase):
-    """Подтверждённые «Неопозки» автоматически попадают в сессию прихода."""
-
-    def setUp(self):
-        super().setUp()
-        self.client = Client()
-        self.staff = User.objects.create_user(username='staffu', password='pass123')
-        UserProfile.objects.create(user=self.staff, phone='7002222222',
-                                   pickup=self.pickup_point, is_staff=True)
-        self.client.login(username='staffu', password='pass123')
-
-        self.owner = User.objects.create_user(username='CLIENT0001', password='pass123')
-        UserProfile.objects.create(user=self.owner, phone='7003333333',
-                                   pickup=self.pickup_point)
-
-    def _make_neopozka(self, code='NEOPOZKA01', weight=None, owner=None):
-        """Создаёт неопознанную посылку со старой датой добавления."""
-        from django.utils import timezone
-        from datetime import timedelta
-        old_date = timezone.localdate() - timedelta(days=10)
-        return TrackCode.objects.create(
-            track_code=code, status='unidentified', owner=owner,
-            weight=weight, update_date=old_date, delivered_date=old_date,
-        )
-
-    def test_confirm_marks_awaiting_not_delivered(self):
-        """Подтверждение не переводит сразу в приход — ставит флаг ожидания."""
-        track = self._make_neopozka(owner=self.owner)
-        resp = self.client.post(reverse('unidentified_confirm', args=[track.id]))
-        self.assertEqual(resp.status_code, 200)
-        track.refresh_from_db()
-        self.assertTrue(track.awaiting_arrival)
-        self.assertEqual(track.status, 'unidentified')
-
-    def test_confirmed_excluded_from_claimed_list(self):
-        """Подтверждённая неопозка уходит из «Заявлено» в «Ожидают прихода»."""
-        track = self._make_neopozka(owner=self.owner)
-        track.awaiting_arrival = True
-        track.save(skip_full_clean=True)
-        resp = self.client.get(reverse('unidentified'))
-        self.assertEqual(resp.status_code, 200)
-        self.assertNotIn(track, list(resp.context['claimed']))
-        self.assertIn(track, list(resp.context['awaiting']))
-
-    def test_new_session_drains_awaiting(self):
-        """При создании новой сессии прихода ожидающие посылки встают в неё."""
-        from myprofile.models import ArrivalSession, ArrivalSessionItem
-        from django.utils import timezone
-        track = self._make_neopozka(weight=Decimal('2.500'), owner=self.owner)
-        track.awaiting_arrival = True
-        track.save(skip_full_clean=True)
-
-        resp = self.client.post(reverse('goods_arrival_start'), {
-            'date': timezone.localdate().strftime('%Y-%m-%d'),
-        })
-        self.assertEqual(resp.status_code, 302)
-
-        session = ArrivalSession.objects.latest('id')
-        item = ArrivalSessionItem.objects.get(session=session, track_code='NEOPOZKA01')
-        self.assertEqual(item.weight, Decimal('2.500'))
-        self.assertEqual(item.owner_name, 'CLIENT0001')
-        track.refresh_from_db()
-        self.assertFalse(track.awaiting_arrival)
-
-    def test_complete_session_sets_session_date(self):
-        """Завершение сессии: неопозка становится приходом с датой сессии."""
-        from myprofile.models import ArrivalSession
-        from django.utils import timezone
-        track = self._make_neopozka(weight=Decimal('1.200'), owner=self.owner)
-        track.awaiting_arrival = True
-        track.save(skip_full_clean=True)
-        old_date = track.delivered_date
-
-        session_date = timezone.localdate()
-        self.client.post(reverse('goods_arrival_start'), {
-            'date': session_date.strftime('%Y-%m-%d'),
-        })
-        session = ArrivalSession.objects.latest('id')
-        resp = self.client.post(reverse('goods_arrival_complete', args=[session.id]))
-        self.assertEqual(resp.status_code, 302)
-
-        track.refresh_from_db()
-        self.assertEqual(track.status, 'delivered')
-        self.assertEqual(track.delivered_date, session_date)
-        self.assertNotEqual(track.delivered_date, old_date)
-        self.assertFalse(track.awaiting_arrival)
-
-    def test_set_weight_endpoint(self):
-        """Эндпоинт ввода веса принимает запятую и сохраняет вес."""
-        track = self._make_neopozka(owner=self.owner)
-        resp = self.client.post(reverse('unidentified_set_weight', args=[track.id]),
-                                {'weight': '3,250'})
-        self.assertEqual(resp.status_code, 200)
-        track.refresh_from_db()
-        self.assertEqual(track.weight, Decimal('3.250'))
-
-    def test_set_weight_rejects_invalid(self):
-        """Некорректный вес отклоняется с ошибкой 400."""
-        track = self._make_neopozka(owner=self.owner)
-        resp = self.client.post(reverse('unidentified_set_weight', args=[track.id]),
-                                {'weight': 'abc'})
-        self.assertEqual(resp.status_code, 400)
-
-
-class UnidentifiedArrivalFlowTest(PickupPointMixin, TestCase):
     """Подтверждённые «Неопозки» автоматически попадают в «Сессию прихода»."""
 
     def setUp(self):
@@ -375,3 +271,71 @@ class UnidentifiedArrivalFlowTest(PickupPointMixin, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertNotIn(track, list(resp.context['claimed']))
         self.assertIn(track, list(resp.context['awaiting']))
+
+
+class ReceiptClientStatusTest(PickupPointMixin, TestCase):
+    """Клиентский статус чека выводится из статусов его трек-кодов."""
+
+    def setUp(self):
+        super().setUp()
+        self.owner = User.objects.create_user(username='RC0001', password='pass123')
+        UserProfile.objects.create(user=self.owner, phone='7004444444',
+                                   pickup=self.pickup_point)
+
+    def _make_receipt_with_tracks(self, statuses):
+        """Создаёт чек с N трек-кодами заданных статусов."""
+        from django.utils import timezone
+        receipt = Receipt.objects.create(owner=self.owner, total_weight=0, total_price=0)
+        for i, st in enumerate(statuses):
+            tc = TrackCode.objects.create(
+                track_code=f'CSTEST{receipt.id}_{i}', status=st, owner=self.owner,
+                update_date=timezone.localdate(),
+            )
+            ReceiptItem.objects.create(receipt=receipt, track_code=tc, weight=Decimal('1'))
+        return receipt
+
+    def test_all_delivered_yields_sorting(self):
+        receipt = self._make_receipt_with_tracks(['delivered', 'delivered'])
+        self.assertEqual(receipt.client_status, 'sorting')
+        self.assertEqual(receipt.client_status_display, 'На сортировочном пункте')
+
+    def test_mixed_takes_lowest(self):
+        # delivered + ready → нижний 'delivered' → 'sorting'
+        receipt = self._make_receipt_with_tracks(['ready', 'delivered'])
+        self.assertEqual(receipt.client_status, 'sorting')
+
+    def test_all_shipping_pp_yields_in_delivery(self):
+        receipt = self._make_receipt_with_tracks(['shipping_pp'])
+        self.assertEqual(receipt.client_status, 'in_delivery')
+
+    def test_all_ready_yields_not_issued(self):
+        receipt = self._make_receipt_with_tracks(['ready', 'ready'])
+        self.assertEqual(receipt.client_status, 'not_issued')
+
+    def test_all_claimed_yields_issued(self):
+        receipt = self._make_receipt_with_tracks(['claimed', 'claimed'])
+        self.assertEqual(receipt.client_status, 'issued')
+
+    def test_track_below_delivered_returns_none(self):
+        receipt = self._make_receipt_with_tracks(['shipped_cn', 'delivered'])
+        self.assertIsNone(receipt.client_status)
+        self.assertEqual(receipt.client_status_display, '—')
+
+    def test_empty_receipt_returns_none(self):
+        receipt = Receipt.objects.create(owner=self.owner, total_weight=0, total_price=0)
+        self.assertIsNone(receipt.client_status)
+
+    def test_signal_syncs_is_claimed_when_all_claimed(self):
+        """Когда все трек-коды чека → 'claimed', is_claimed становится True."""
+        receipt = self._make_receipt_with_tracks(['ready', 'ready'])
+        receipt.refresh_from_db()
+        self.assertFalse(receipt.is_claimed)
+
+        for item in receipt.items.all():
+            tc = item.track_code
+            tc.status = 'claimed'
+            tc.save()
+
+        receipt.refresh_from_db()
+        self.assertTrue(receipt.is_claimed)
+        self.assertIsNotNone(receipt.claimed_at)

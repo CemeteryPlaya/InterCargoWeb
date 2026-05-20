@@ -51,6 +51,95 @@ STATUS_DISPLAY = dict(STATUS_CHOICES)
 
 
 # ─────────────────────────────────────────────────────
+# Клиентский статус чека (для отображения клиенту)
+# ─────────────────────────────────────────────────────
+# Клиент видит чек 4 этапами, выводимыми из статусов его трек-кодов.
+# Берётся самый "ранний" (низший) статус среди связанных трек-кодов —
+# чек отображается тем этапом, до которого добрались ещё не все посылки.
+
+# Маппинг TrackCode.status → клиентский статус чека.
+TRACK_TO_CLIENT_STATUS = {
+    'delivered':   'sorting',      # Доставлено на сортировочный склад
+    'shipping_pp': 'in_delivery',  # В доставке
+    'ready':       'not_issued',   # Доставлено на ПВЗ
+    'claimed':     'issued',       # Выдано клиенту
+}
+
+# Иерархия клиентских статусов (от "раннего" к "позднему").
+CLIENT_STATUS_ORDER = ['sorting', 'in_delivery', 'not_issued', 'issued']
+
+CLIENT_STATUS_DISPLAY = {
+    'sorting':     'На сортировочном пункте',
+    'in_delivery': 'В доставке',
+    'not_issued':  'Не выдано',
+    'issued':      'Выдано',
+}
+
+
+def derive_client_status_from_tracks(receipt):
+    """Возвращает клиентский статус чека по статусам его трек-кодов.
+
+    Берётся самый "ранний" статус среди связанных трек-кодов:
+        delivered    → 'sorting'      (На сортировочном пункте)
+        shipping_pp  → 'in_delivery'  (В доставке)
+        ready        → 'not_issued'   (Не выдано)
+        claimed      → 'issued'       (Выдано)
+
+    Если хотя бы один трек имеет статус вне диапазона [delivered..claimed]
+    (например, ещё не доехал до сортировочного склада) — возвращает None.
+    Если у чека вообще нет привязанных трек-кодов — None.
+    """
+    track_statuses = list(
+        receipt.items
+        .filter(track_code__isnull=False)
+        .values_list('track_code__status', flat=True)
+    )
+    if not track_statuses:
+        return None
+
+    mapped = []
+    for ts in track_statuses:
+        client = TRACK_TO_CLIENT_STATUS.get(ts)
+        if client is None:
+            # Хотя бы один трек ниже 'delivered' — статус неопределён.
+            return None
+        mapped.append(client)
+
+    # Самый "ранний" (наименьший индекс) — это и есть статус чека целиком.
+    min_idx = min(CLIENT_STATUS_ORDER.index(s) for s in mapped)
+    return CLIENT_STATUS_ORDER[min_idx]
+
+
+def apply_client_status_from_tracks(receipt, save=True):
+    """Пересчитывает клиентский статус чека из его трек-кодов и синхронизирует
+    флаг ``is_claimed`` / ``claimed_at`` (чек считается выданным только когда
+    все его трек-коды в статусе 'claimed').
+
+    Возвращает рассчитанный клиентский статус (или None — если он не
+    определён, см. ``derive_client_status_from_tracks``).
+    """
+    from django.utils import timezone as _tz
+
+    client_status = derive_client_status_from_tracks(receipt)
+    if client_status is None:
+        return None
+
+    update_fields = []
+    target_is_claimed = (client_status == 'issued')
+    if receipt.is_claimed != target_is_claimed:
+        receipt.is_claimed = target_is_claimed
+        update_fields.append('is_claimed')
+        if target_is_claimed and not receipt.claimed_at:
+            receipt.claimed_at = _tz.now()
+            update_fields.append('claimed_at')
+
+    if save and update_fields:
+        receipt.save(update_fields=update_fields)
+
+    return client_status
+
+
+# ─────────────────────────────────────────────────────
 # Исключения
 # ─────────────────────────────────────────────────────
 
@@ -268,3 +357,87 @@ def safe_transition(receipt, target_status):
     """
     current = receipt.status
     return target_status in VALID_TRANSITIONS.get(current, [])
+
+
+# ─────────────────────────────────────────────────────
+# Клиентский статус чека (derived из статусов трек-кодов)
+# ─────────────────────────────────────────────────────
+#
+# Лицевой статус, который видит клиент в личном кабинете. Вычисляется
+# из статусов трек-кодов внутри чека по правилу "по самой ранней позиции":
+#
+#   TrackCode.status               →  Receipt.client_status
+#   ─────────────────────────────     ──────────────────────────
+#   delivered    (на сорт. складе) →  'sorting'      (На сортировочном пункте)
+#   shipping_pp  (в доставке)      →  'in_delivery'  (В доставке)
+#   ready        (на ПВЗ)          →  'not_issued'   (Не выдано)
+#   claimed      (выдано клиенту)  →  'issued'       (Выдано)
+#
+# Иерархия: sorting → in_delivery → not_issued → issued.
+# Если хотя бы один трек-код имеет статус ниже 'delivered'
+# (т.е. ещё не дошёл до сортировочного склада), возвращается None —
+# чек считается не готовым к показу клиентского статуса.
+
+TRACK_TO_CLIENT_STATUS = {
+    'delivered':   'sorting',
+    'shipping_pp': 'in_delivery',
+    'ready':       'not_issued',
+    'claimed':     'issued',
+}
+
+CLIENT_STATUS_ORDER = ['sorting', 'in_delivery', 'not_issued', 'issued']
+
+CLIENT_STATUS_DISPLAY = {
+    'sorting':     'На сортировочном пункте',
+    'in_delivery': 'В доставке',
+    'not_issued':  'Не выдано',
+    'issued':      'Выдано',
+}
+
+CLIENT_STATUS_CHOICES = [
+    (code, CLIENT_STATUS_DISPLAY[code]) for code in CLIENT_STATUS_ORDER
+]
+
+
+def derive_client_status_from_tracks(receipt):
+    """Возвращает клиентский статус чека по статусам его трек-кодов.
+
+    Берёт "самый ранний" (наименьший по иерархии) статус среди трек-кодов
+    чека. Если хотя бы один трек ниже 'delivered' — возвращает None.
+    Если у чека вовсе нет связанных трек-кодов — также возвращает None.
+    """
+    track_statuses = list(
+        receipt.items
+        .filter(track_code__isnull=False)
+        .values_list('track_code__status', flat=True)
+    )
+    if not track_statuses:
+        return None
+
+    mapped = []
+    for ts in track_statuses:
+        client_status = TRACK_TO_CLIENT_STATUS.get(ts)
+        if client_status is None:
+            # Трек-код ниже 'delivered' (или нераспознанный статус) —
+            # чек ещё не готов к клиентскому отображению.
+            return None
+        mapped.append(client_status)
+
+    min_index = min(CLIENT_STATUS_ORDER.index(s) for s in mapped)
+    return CLIENT_STATUS_ORDER[min_index]
+
+
+def apply_client_status(receipt):
+    """Вычисляет клиентский статус чека и проставляет его на чек.
+
+    Возвращает вычисленный статус (или None). Сохраняет только если статус
+    изменился. Не трогает внутренний lifecycle-`status` чека — это отдельное
+    лицевое поле `client_status`.
+    """
+    new_status = derive_client_status_from_tracks(receipt)
+    if receipt.client_status == new_status:
+        return new_status
+    receipt.client_status = new_status or ''
+    receipt._allow_content_update = True
+    receipt.save(update_fields=['client_status'])
+    return new_status

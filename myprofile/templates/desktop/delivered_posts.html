@@ -68,12 +68,18 @@
         <button @click="filter = 'all'"
           :class="filter === 'all' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
           class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Все" %}</button>
-        <button @click="filter = 'claimed'"
-          :class="filter === 'claimed' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Выдано" %}</button>
-        <button @click="filter = 'unclaimed'"
-          :class="filter === 'unclaimed' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+        <button @click="filter = 'sorting'"
+          :class="filter === 'sorting' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "На сортировочном пункте" %}</button>
+        <button @click="filter = 'in_delivery'"
+          :class="filter === 'in_delivery' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "В доставке" %}</button>
+        <button @click="filter = 'not_issued'"
+          :class="filter === 'not_issued' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
           class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Не выдано" %}</button>
+        <button @click="filter = 'issued'"
+          :class="filter === 'issued' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Выдано" %}</button>
         {% comment %}PAYMENT COMMENTED OUT
         <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">{% trans "Оплаченные" %}</button>
@@ -86,7 +92,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 items-start">
           {% for receipt in receipts %}
           <div
-            x-show="filter === 'all' || (filter === 'claimed' && {{ receipt.is_claimed|yesno:'true,false' }}) || (filter === 'unclaimed' && {{ receipt.is_claimed|yesno:'false,true' }}) || (filter === 'paid' && {{ receipt.is_paid|yesno:'true,false' }}) || (filter === 'unpaid' && {{ receipt.is_paid|yesno:'false,true' }})"
+            data-client-status="{{ receipt.client_status|default_if_none:'' }}"
+            x-show="filter === 'all' || filter === '{{ receipt.client_status|default_if_none:'' }}'"
             class="bg-white border-2 border-gray-300 rounded-lg shadow-lg overflow-hidden">
             <!-- Заголовок чека (кликабельный) -->
             <div @click="activeReceipt = activeReceipt === {{ receipt.id }} ? null : {{ receipt.id }}"
@@ -99,9 +106,16 @@
               </div>
               <div class="flex items-center">
                 <div class="text-right mr-2">
-                  <span class="text-xs font-semibold {% if receipt.is_claimed %}text-green-600{% else %}text-orange-500{% endif %}">
-                    {% if receipt.is_claimed %}Выдано{% else %}Не выдано{% endif %}
+                  {% with cs=receipt.client_status %}
+                  <span class="text-xs font-semibold
+                    {% if cs == 'issued' %}text-green-600
+                    {% elif cs == 'not_issued' %}text-orange-500
+                    {% elif cs == 'in_delivery' %}text-blue-600
+                    {% elif cs == 'sorting' %}text-yellow-600
+                    {% else %}text-gray-500{% endif %}">
+                    {{ receipt.client_status_display }}
                   </span>
+                  {% endwith %}
                   {% if receipt.claimed_at %}
                   <div class="text-[10px] text-gray-500">{{ receipt.claimed_at|date:"d.m.Y H:i" }}</div>
                   {% endif %}

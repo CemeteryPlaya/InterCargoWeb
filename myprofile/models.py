@@ -355,6 +355,23 @@ class Receipt(models.Model):
             return f"{self.owner.username} ({full})" if full else self.owner.username
         return '—'
 
+    @property
+    def client_status(self):
+        """Клиентский статус чека: 'sorting'/'in_delivery'/'not_issued'/'issued'/None.
+
+        Выводится из статусов привязанных трек-кодов
+        (см. ``receipt_lifecycle.derive_client_status_from_tracks``).
+        """
+        from myprofile.receipt_lifecycle import derive_client_status_from_tracks
+        return derive_client_status_from_tracks(self)
+
+    @property
+    def client_status_display(self):
+        """Человекочитаемое название клиентского статуса
+        ("На сортировочном пункте" / "В доставке" / "Не выдано" / "Выдано")."""
+        from myprofile.receipt_lifecycle import CLIENT_STATUS_DISPLAY
+        return CLIENT_STATUS_DISPLAY.get(self.client_status, '—')
+
     def get_qr_base64(self):
         qr = qrcode.make(self.receipt_number, box_size=4, border=1)
         buffer = BytesIO()

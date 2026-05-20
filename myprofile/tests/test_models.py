@@ -145,3 +145,62 @@ class ExtraditionModelTest(TestCase):
         ext = Extradition.objects.create(package=self.package, issued_by=self.staff)
         self.assertEqual(ext.user, self.user)
         self.assertTrue(len(ext.pickup_point) > 0)
+
+
+class ReceiptClientStatusTest(TestCase):
+    """Клиентский статус чека выводится из статусов трек-кодов."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='client1', password='pass123')
+        self.receipt = Receipt.objects.create(owner=self.user, total_weight=0, total_price=0)
+
+    def _add_track(self, code, status, weight=Decimal('1')):
+        track = TrackCode.objects.create(
+            track_code=code, status=status, owner=self.user, weight=weight,
+        )
+        ReceiptItem.objects.create(receipt=self.receipt, track_code=track, weight=weight)
+        return track
+
+    def test_status_none_when_below_delivered(self):
+        """Если хотя бы один трек ниже 'delivered' — статус не определён."""
+        self._add_track('LOW1', 'shipped_cn')
+        self.assertIsNone(self.receipt.client_status)
+
+    def test_status_sorting_when_all_delivered(self):
+        self._add_track('S1', 'delivered')
+        self._add_track('S2', 'delivered')
+        self.assertEqual(self.receipt.client_status, 'sorting')
+        self.assertEqual(self.receipt.client_status_display, 'На сортировочном пункте')
+
+    def test_status_in_delivery_when_all_shipping(self):
+        self._add_track('D1', 'shipping_pp')
+        self.assertEqual(self.receipt.client_status, 'in_delivery')
+
+    def test_status_takes_earliest_track_stage(self):
+        """Чек отображается этапом самого «отстающего» трека."""
+        self._add_track('R1', 'ready')
+        self._add_track('R2', 'delivered')
+        self.assertEqual(self.receipt.client_status, 'sorting')
+
+    def test_status_issued_when_all_claimed(self):
+        self._add_track('C1', 'claimed')
+        self._add_track('C2', 'claimed')
+        self.assertEqual(self.receipt.client_status, 'issued')
+
+    def test_signal_marks_receipt_claimed_when_last_track_claimed(self):
+        """При переводе последнего трека в 'claimed' is_claimed выставляется автоматически."""
+        t1 = self._add_track('A1', 'ready')
+        t2 = self._add_track('A2', 'ready')
+        self.receipt.refresh_from_db()
+        self.assertFalse(self.receipt.is_claimed)
+
+        t1.status = 'claimed'
+        t1.save()
+        self.receipt.refresh_from_db()
+        self.assertFalse(self.receipt.is_claimed)
+
+        t2.status = 'claimed'
+        t2.save()
+        self.receipt.refresh_from_db()
+        self.assertTrue(self.receipt.is_claimed)
+        self.assertIsNotNone(self.receipt.claimed_at)

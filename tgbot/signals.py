@@ -75,6 +75,21 @@ def track_status_changed(sender, instance, **kwargs):
             logger.debug('Telegram notification muted for user_id=%s, track=%s', instance.owner_id, track_code)
             return
 
+        # Статусы, которые часто обновляются массово (несколько десятков трек-кодов
+        # на одного клиента за раз). Кладём их в БД "сырыми" — со стабильным ключом
+        # статуса в title и только трек-кодом в message. Воркер сам соберёт все
+        # такие записи по пользователю и отправит ОДНО сообщение со списком
+        # (см. _format_status_group_notification).
+        BATCHED_TG_STATUSES = {'shipped_cn'}
+        if instance.status in BATCHED_TG_STATUSES:
+            TelegramNotification.objects.create(
+                user_id=instance.owner_id,
+                title=instance.status,
+                message=track_code,
+                notification_type='tracking',
+            )
+            return
+
         # Рендерим title/message под язык получателя, чтобы уведомление
         # пришло уже на его языке (они сохраняются в БД как готовый текст).
         user_lang = _get_user_language(instance.owner_id)
