@@ -40,6 +40,7 @@ def print_documents_view(request):
         if action == 'print_checks':
             check_date_str = request.POST.get('check_date')
             pickup_point_ids = request.POST.getlist('pickup_points')
+            check_template = request.POST.get('check_template', 'normal')
 
             if check_date_str and pickup_point_ids:
 
@@ -126,6 +127,7 @@ def print_documents_view(request):
                     checks.append({
                         'username': client_username,
                         'address': address,
+                        'pickup_short': (address or '').split(' (')[0],
                         'tracks': track_rows,
                         'total_count': len(track_rows),
                         'total_weight': float(total_weight),
@@ -176,6 +178,7 @@ def print_documents_view(request):
                     checks.append({
                         'username': client['username'],
                         'address': client['address'],
+                        'pickup_short': (client['address'] or '').split(' (')[0],
                         'tracks': client['tracks'],
                         'total_count': len(client['tracks']),
                         'total_weight': float(client['total_weight']),
@@ -187,6 +190,7 @@ def print_documents_view(request):
                 return render(request, 'shared/print/client_check_pdf.html', {
                     'checks': checks,
                     'date': check_date,
+                    'check_template': check_template,
                 })
 
         registry_date_str = request.POST.get('registry_date')

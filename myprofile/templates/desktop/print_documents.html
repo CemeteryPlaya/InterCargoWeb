@@ -144,6 +144,33 @@
                                 </div>
                             </div>
 
+                            <!-- Выбор шаблона печати чеков -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Шаблон печати" %}</label>
+                                <input type="hidden" name="check_template" id="check_template" value="normal">
+                                <div class="flex flex-wrap gap-1 bg-gray-100 border border-gray-300 rounded-lg p-1">
+                                    <button type="button" data-tpl="normal" onclick="setCheckTemplate('normal')"
+                                        class="check-tpl-btn active px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 transition">{% trans "Обычная версия" %}</button>
+                                    <button type="button" data-tpl="mini1" onclick="setCheckTemplate('mini1')"
+                                        class="check-tpl-btn px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 transition">{% trans "Мини-этикетка 1" %}</button>
+                                    <button type="button" data-tpl="mini2" onclick="setCheckTemplate('mini2')"
+                                        class="check-tpl-btn px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 transition">{% trans "Мини-этикетка 2" %}</button>
+                                    <button type="button" data-tpl="mini1_full" onclick="setCheckTemplate('mini1_full')"
+                                        class="check-tpl-btn px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 transition">{% trans "Мини-этикетка 1 (большая)" %}</button>
+                                    <button type="button" data-tpl="mini2_full" onclick="setCheckTemplate('mini2_full')"
+                                        class="check-tpl-btn px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 transition">{% trans "Мини-этикетка 2 (большая)" %}</button>
+                                </div>
+                            </div>
+                            <style>.check-tpl-btn.active{background:#3b82f6;color:#fff;}</style>
+                            <script>
+                                function setCheckTemplate(tpl){
+                                    document.getElementById('check_template').value = tpl;
+                                    document.querySelectorAll('.check-tpl-btn').forEach(function(b){
+                                        b.classList.toggle('active', b.dataset.tpl === tpl);
+                                    });
+                                }
+                            </script>
+
                             <button type="submit"
                                 class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 shadow-sm">
                                 <i class="ri-printer-line"></i> {% trans "Печать чеков" %}

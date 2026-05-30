@@ -8,11 +8,183 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Чеки {{ date|date:"d.m.Y" }}</title>
     <link rel="stylesheet" href="{% static 'styles/pdf-check.css' %}?v={{ APP_VERSION }}">
+
+    {% if check_template == 'mini1' or check_template == 'mini2' or check_template == 'mini1_full' or check_template == 'mini2_full' %}
+    <style>
+        {% if check_template == 'mini1' or check_template == 'mini2' %}
+        /* Уменьшенные версии — физический размер этикетки 40 × 30 мм */
+        @page { size: 40mm 30mm; margin: 1mm; }
+        html, body { width: 38mm; margin: 0; padding: 0; }
+        {% endif %}
+
+        .mini-check { width: 100%; page-break-after: always; }
+
+        /* ===== Мини-этикетка 1 (уменьшенная) — табличный вид ===== */
+        .mini-check.mini1 .mini-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            margin: 0;
+            line-height: 1.25;
+            font-size: 10px;          /* как в обычном шаблоне чека */
+        }
+        .mini-check.mini1 .mini-row .m-label { color: #000; }
+        .mini-check.mini1 .mini-row .m-value { font-weight: bold; text-align: right; word-break: break-word; }
+        .mini-check.mini1 .mini-row.mini-sum {
+            margin-top: 2px;
+            padding-top: 2px;
+            border-top: 1px solid #000;
+            font-size: 11px;
+        }
+
+        /* ===== Мини-этикетка 2 (уменьшенная) — компактный вид ===== */
+        .mini-check.mini2 .mini-row {
+            margin: 0;
+            line-height: 1.15;
+            font-size: 10px;          /* как в обычном шаблоне чека */
+        }
+        .mini-check.mini2 .mini-row .m-label { color: #000; }
+        .mini-check.mini2 .mini-row .m-value { font-weight: bold; word-break: break-word; }
+        .mini-check.mini2 .mini-row.mini-sum { font-size: 11px; }
+
+        /* ===== Общая шапка для больших версий ===== */
+        .mini-check.mini1-full, .mini-check.mini2-full { vertical-align: top; }
+        .mini-head {
+            text-align: center;
+            font-weight: 900;
+            font-size: 15px;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+
+        /* ===== Мини-этикетка 1 (большая) — табличный вид, align top ===== */
+        .mini-check.mini1-full .mini-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;   /* align top */
+            gap: 8px;
+            margin: 4px 0;
+            font-size: 12px;
+        }
+        .mini-check.mini1-full .mini-row .m-label { color: #333; }
+        .mini-check.mini1-full .mini-row .m-value { font-weight: bold; text-align: right; word-break: break-word; }
+        .mini-check.mini1-full .mini-row.mini-sum {
+            margin-top: 6px;
+            padding-top: 5px;
+            border-top: 1.5px solid #000;
+            font-size: 15px;
+        }
+
+        /* ===== Мини-этикетка 2 (большая) — компактный вид, align top ===== */
+        .mini-check.mini2-full .mini-row {
+            margin: 4px 0;
+            line-height: 1.3;
+            font-size: 12px;
+        }
+        .mini-check.mini2-full .mini-row .m-label { color: #333; vertical-align: top; }
+        .mini-check.mini2-full .mini-row .m-value { font-weight: bold; vertical-align: top; word-break: break-word; }
+        .mini-check.mini2-full .mini-row.mini-sum { font-size: 15px; margin-top: 6px; }
+    </style>
+    {% endif %}
 </head>
 
 <body>
     <button class="no-print" onclick="window.print()">{% trans "Печать" %}</button>
 
+    {% if check_template == 'mini1' %}
+    {# ===== Мини-этикетка 1 (уменьшенная): табличный вид ===== #}
+    {% for check in checks %}
+    <div class="mini-check mini1">
+        <div class="mini-row">
+            <span class="m-label">{% trans "Клиент" %}:</span>
+            <span class="m-value">{{ check.username }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Дата" %}:</span>
+            <span class="m-value">{{ date|date:"d.m.Y" }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "ПВЗ" %}:</span>
+            <span class="m-value">{{ check.pickup_short|default:"—" }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Посылок" %}:</span>
+            <span class="m-value">{{ check.total_count }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Вес" %}:</span>
+            <span class="m-value">{{ check.total_weight|floatformat:3 }} {% trans "кг" %}</span>
+        </div>
+        <div class="mini-row mini-sum">
+            <span class="m-label">{% trans "Сумма" %}:</span>
+            <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% elif check_template == 'mini2' %}
+    {# ===== Мини-этикетка 2 (уменьшенная): компактный вид ===== #}
+    {% for check in checks %}
+    <div class="mini-check mini2">
+        <div class="mini-row"><span class="m-label">{% trans "Клиент" %}:</span> <span class="m-value">{{ check.username }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Дата" %}:</span> <span class="m-value">{{ date|date:"d.m.Y" }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "ПВЗ" %}:</span> <span class="m-value">{{ check.pickup_short|default:"—" }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Посылок" %}:</span> <span class="m-value">{{ check.total_count }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Вес" %}:</span> <span class="m-value">{{ check.total_weight|floatformat:3 }} {% trans "кг" %}</span></div>
+        <div class="mini-row mini-sum"><span class="m-label">{% trans "Сумма" %}:</span> <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span></div>
+    </div>
+    {% endfor %}
+
+    {% elif check_template == 'mini1_full' %}
+    {# ===== Мини-этикетка 1 (большая): табличный вид, align top ===== #}
+    {% for check in checks %}
+    <div class="mini-check mini1-full">
+        <div class="mini-head">INTER CARGO</div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Клиент" %}:</span>
+            <span class="m-value">{{ check.username }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Дата прихода" %}:</span>
+            <span class="m-value">{{ date|date:"d.m.Y" }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Пункт выдачи" %}:</span>
+            <span class="m-value">{{ check.pickup_short|default:"—" }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Всего посылок" %}:</span>
+            <span class="m-value">{{ check.total_count }}</span>
+        </div>
+        <div class="mini-row">
+            <span class="m-label">{% trans "Общий вес" %}:</span>
+            <span class="m-value">{{ check.total_weight|floatformat:3 }} {% trans "кг" %}</span>
+        </div>
+        <div class="mini-row mini-sum">
+            <span class="m-label">{% trans "Сумма" %}:</span>
+            <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% elif check_template == 'mini2_full' %}
+    {# ===== Мини-этикетка 2 (большая): компактный вид, align top ===== #}
+    {% for check in checks %}
+    <div class="mini-check mini2-full">
+        <div class="mini-head">INTER CARGO</div>
+        <div class="mini-row"><span class="m-label">{% trans "Клиент" %}:</span> <span class="m-value">{{ check.username }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Дата прихода" %}:</span> <span class="m-value">{{ date|date:"d.m.Y" }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Пункт выдачи" %}:</span> <span class="m-value">{{ check.pickup_short|default:"—" }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Всего посылок" %}:</span> <span class="m-value">{{ check.total_count }}</span></div>
+        <div class="mini-row"><span class="m-label">{% trans "Общий вес" %}:</span> <span class="m-value">{{ check.total_weight|floatformat:3 }} {% trans "кг" %}</span></div>
+        <div class="mini-row mini-sum"><span class="m-label">{% trans "Сумма" %}:</span> <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span></div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    {# ===== Обычная версия ===== #}
     {% for check in checks %}
     <div class="check-container">
         <div class="check-header">
@@ -69,6 +241,7 @@
         </div>
     </div>
     {% endfor %}
+    {% endif %}
 
 </body>
 
