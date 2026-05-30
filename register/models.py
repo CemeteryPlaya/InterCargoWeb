@@ -9,7 +9,11 @@ class PickupPoint(models.Model):
     payment_link = models.URLField(blank=True, null=True, verbose_name=_("Ссылка на оплату"))
     working_hours = models.CharField(max_length=100, blank=True, default='', verbose_name=_("Время работы"))
     is_active = models.BooleanField(default=True, verbose_name=_("Активен"))
-    show_in_registration = models.BooleanField(default=True, verbose_name=_("Показывать в регистрации/футере"))
+    show_in_registration = models.BooleanField(default=True, verbose_name=_("Показывать в регистрации"))
+    show_in_footer = models.BooleanField(default=True, verbose_name=_("Показывать в футере"))
+    show_in_pickup_transfer = models.BooleanField(
+        default=True, verbose_name=_("Показывать в заявках для перевода в другой ПВЗ")
+    )
     is_home_delivery = models.BooleanField(default=False, verbose_name=_("Доставка на дом"))
     short_info = models.TextField(blank=True, default='', verbose_name=_("Краткая информация"))
     map_widget_code = models.TextField(blank=True, default='', verbose_name=_("2GIS виджет-код"))
@@ -130,6 +134,49 @@ class LoginAttempt(models.Model):
 
     def __str__(self):
         return f"{self.identifier} — {self.attempts} попыток"
+
+
+class BlockHistory(models.Model):
+    """Журнал событий блокировок (наложение и снятие).
+    Используется страницей «Управление блокировками» как история."""
+    BLOCK_TYPES = [
+        ('login', _("Вход")),
+        ('reset', _("Код сброса пароля")),
+        ('email', _("Код подтверждения email")),
+    ]
+    ACTIONS = [
+        ('created', _("Наложена")),
+        ('lifted', _("Снята")),
+    ]
+    block_type = models.CharField(max_length=20, choices=BLOCK_TYPES, verbose_name=_("Тип блокировки"))
+    action = models.CharField(max_length=20, choices=ACTIONS, verbose_name=_("Событие"))
+    identifier = models.CharField(max_length=255, blank=True, default='', verbose_name=_("Идентификатор"))
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='block_history', verbose_name=_("Пользователь"),
+    )
+    attempts = models.IntegerField(default=0, verbose_name=_("Попытки"))
+    handled_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Снял блокировку"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Время"))
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _("Запись истории блокировок")
+        verbose_name_plural = _("История блокировок")
+
+    def __str__(self):
+        return f"{self.get_block_type_display()} — {self.identifier} — {self.get_action_display()}"
+
+    @classmethod
+    def log(cls, block_type, action, identifier, attempts=0, user=None, handled_by=None):
+        """Создаёт запись журнала. Безопасно — ошибки логирования не критичны."""
+        return cls.objects.create(
+            block_type=block_type, action=action, identifier=identifier or '',
+            attempts=attempts or 0, user=user, handled_by=handled_by,
+        )
 
 
 class RolePermission(models.Model):

@@ -28,11 +28,13 @@ def track_code_capture_old_state(sender, instance, **kwargs):
         instance._old_delivered_date = old.delivered_date
         instance._old_owner_id = old.owner_id
         instance._old_track_code_str = old.track_code
+        instance._old_status = old.status
     except TrackCode.DoesNotExist:
         instance._old_weight = None
         instance._old_delivered_date = None
         instance._old_owner_id = None
         instance._old_track_code_str = None
+        instance._old_status = None
 
 
 @receiver(post_save, sender=TrackCode)
@@ -74,6 +76,32 @@ def track_code_cascade_updates(sender, instance, created, **kwargs):
     if weight_changed:
         _update_item_weight(item, instance.weight)
         _recalc_receipt_safe(old_receipt)
+
+
+@receiver(post_save, sender=TrackCode)
+def track_code_sync_receipt_client_status(sender, instance, created, **kwargs):
+    """При смене статуса трек-кода — пересчитать клиентский статус чека.
+
+    Синхронизирует ``Receipt.is_claimed`` (и ``claimed_at``) с производным
+    клиентским статусом (см. ``apply_client_status_from_tracks``).
+    """
+    if created:
+        return
+    old_status = getattr(instance, '_old_status', None)
+    if old_status == instance.status:
+        return
+    try:
+        item = ReceiptItem.objects.select_related('receipt').get(track_code=instance)
+    except ReceiptItem.DoesNotExist:
+        return
+    from myprofile.receipt_lifecycle import apply_client_status_from_tracks
+    try:
+        apply_client_status_from_tracks(item.receipt)
+    except Exception:
+        logger.exception(
+            "Не удалось пересчитать клиентский статус чека %s после смены статуса трек-кода %s",
+            item.receipt_id, instance.pk,
+        )
 
 
 def _update_item_weight(item, new_weight):

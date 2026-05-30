@@ -106,10 +106,20 @@ def unidentified_view(request):
         .order_by('-update_date', '-id')
     )
 
-    # Заявлены клиентом (owner задан, но статус ещё unidentified)
+    # Заявлены клиентом, но ещё не подтверждены (ожидают действия персонала)
     claimed = (
         TrackCode.all_objects
-        .filter(owner__isnull=False, status='unidentified', is_archived=False)
+        .filter(owner__isnull=False, status='unidentified', is_archived=False,
+                awaiting_arrival=False)
+        .select_related('sorting_location', 'owner')
+        .order_by('-update_date', '-id')
+    )
+
+    # Подтверждены — ожидают добавления в ближайшую "Сессию прихода"
+    awaiting = (
+        TrackCode.all_objects
+        .filter(owner__isnull=False, status='unidentified', is_archived=False,
+                awaiting_arrival=True)
         .select_related('sorting_location', 'owner')
         .order_by('-update_date', '-id')
     )
@@ -119,6 +129,7 @@ def unidentified_view(request):
     return render(request, 'desktop/unidentified.html', {
         'unclaimed': unclaimed,
         'claimed': claimed,
+        'awaiting': awaiting,
         'sorting_locations': sorting_locations,
     })
 
@@ -144,9 +155,11 @@ def unidentified_assign_owner(request, track_id):
     except User.DoesNotExist:
         return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
 
+    # Назначаем владельца, но НЕ переводим сразу в "Приход".
+    # Посылка остаётся неопознанной и помечается как ожидающая прихода —
+    # она будет автоматически добавлена в ближайшую "Сессию прихода".
     track.owner = owner
-    track.status = 'delivered'
-    track.delivered_date = track.delivered_date or timezone.localdate()
+    track.awaiting_arrival = True
     track.update_date = timezone.localdate()
     track.log_status_change(request.user)
     track.save(skip_full_clean=True)
@@ -162,17 +175,24 @@ def unidentified_assign_owner(request, track_id):
 @login_required
 @require_POST
 def unidentified_confirm(request, track_id):
-    """AJAX: подтвердить заявку клиента — перевести в статус 'delivered'."""
+    """AJAX: подтвердить заявку клиента.
+
+    Посылка не переводится сразу в "Приход" — она помечается как ожидающая
+    прихода и будет автоматически добавлена в конец активной/ближайшей
+    "Сессии прихода".
+    """
     if not _is_staff(request.user):
         return JsonResponse({'error': _('Нет доступа.')}, status=403)
 
     try:
-        track = TrackCode.all_objects.get(id=track_id, owner__isnull=False, status='unidentified')
+        track = TrackCode.all_objects.get(
+            id=track_id, owner__isnull=False, status='unidentified',
+            awaiting_arrival=False,
+        )
     except TrackCode.DoesNotExist:
         return JsonResponse({'error': _('Посылка не найдена.')}, status=404)
 
-    track.status = 'delivered'
-    track.delivered_date = track.delivered_date or timezone.localdate()
+    track.awaiting_arrival = True
     track.update_date = timezone.localdate()
     track.log_status_change(request.user)
     track.save(skip_full_clean=True)
@@ -197,7 +217,8 @@ def unidentified_unassign(request, track_id):
         return JsonResponse({'error': _('Посылка не найдена.')}, status=404)
 
     track.owner = None
-    track.save(update_fields=['owner'])
+    track.awaiting_arrival = False
+    track.save(update_fields=['owner', 'awaiting_arrival'])
 
     return JsonResponse({'success': True, 'track_id': track_id})
 
@@ -216,6 +237,43 @@ def unidentified_delete(request, track_id):
 
     track.delete()
     return JsonResponse({'success': True, 'track_id': track_id})
+
+
+@login_required
+@require_POST
+def unidentified_set_weight(request, track_id):
+    """AJAX: задать/изменить вес неопознанной посылки.
+
+    Если вес указан — он автоматически подставится в "Сессию прихода".
+    Если оставить пустым — вес введут вручную в "Сессии прихода".
+    """
+    if not _is_staff(request.user):
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
+
+    try:
+        track = TrackCode.all_objects.get(id=track_id, status='unidentified')
+    except TrackCode.DoesNotExist:
+        return JsonResponse({'error': _('Посылка не найдена.')}, status=404)
+
+    from decimal import Decimal, InvalidOperation
+    weight_raw = request.POST.get('weight', '').strip()
+    weight = None
+    if weight_raw:
+        try:
+            weight = Decimal(weight_raw.replace(',', '.'))
+            if weight <= 0 or weight >= 1000:
+                raise ValueError
+        except (InvalidOperation, ValueError):
+            return JsonResponse({'error': _('Некорректный вес.')}, status=400)
+
+    track.weight = weight
+    track.save(skip_full_clean=True, update_fields=['weight'])
+
+    return JsonResponse({
+        'success': True,
+        'track_id': track_id,
+        'weight': str(weight) if weight is not None else '',
+    })
 
 
 @login_required

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
-from register.models import UserProfile, LoginAttempt
+from register.models import UserProfile, LoginAttempt, BlockHistory
 from django.utils.translation import gettext as _
 
 MAX_LOGIN_ATTEMPTS = 10
@@ -41,11 +41,17 @@ def _record_failed_attempt(identifier):
     """Записывает неудачную попытку входа."""
     if not identifier:
         return
-    attempt, _ = LoginAttempt.objects.get_or_create(identifier=identifier)
+    attempt, _created = LoginAttempt.objects.get_or_create(identifier=identifier)
     attempt.attempts += 1
     if attempt.attempts >= MAX_LOGIN_ATTEMPTS:
         attempt.locked_until = timezone.now() + timedelta(minutes=LOCKOUT_MINUTES)
     attempt.save()
+    # Журналируем момент наложения блокировки (переход через порог)
+    if attempt.attempts == MAX_LOGIN_ATTEMPTS:
+        try:
+            BlockHistory.log('login', 'created', identifier, attempts=attempt.attempts)
+        except Exception:
+            pass
 
 
 def _clear_attempts(identifier):

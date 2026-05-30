@@ -119,6 +119,14 @@ class TrackCode(models.Model):
         verbose_name=_("Требует переноса (прибыл без ПВЗ)")
     )
 
+    # Подтверждённая неопознанная посылка, ожидающая добавления в сессию прихода.
+    # Пока флаг установлен — посылка остаётся в статусе 'unidentified' и будет
+    # автоматически добавлена в конец активной/новой "Сессии прихода".
+    awaiting_arrival = models.BooleanField(
+        default=False,
+        verbose_name=_("Ожидает добавления в приход")
+    )
+
     # Архивация
     is_archived = models.BooleanField(default=False, verbose_name=_("Архивирован"))
     archived_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Дата архивации"))
@@ -346,6 +354,23 @@ class Receipt(models.Model):
             full = self.owner.get_full_name()
             return f"{self.owner.username} ({full})" if full else self.owner.username
         return '—'
+
+    @property
+    def client_status(self):
+        """Клиентский статус чека: 'sorting'/'in_delivery'/'not_issued'/'issued'/None.
+
+        Выводится из статусов привязанных трек-кодов
+        (см. ``receipt_lifecycle.derive_client_status_from_tracks``).
+        """
+        from myprofile.receipt_lifecycle import derive_client_status_from_tracks
+        return derive_client_status_from_tracks(self)
+
+    @property
+    def client_status_display(self):
+        """Человекочитаемое название клиентского статуса
+        ("На сортировочном пункте" / "В доставке" / "Не выдано" / "Выдано")."""
+        from myprofile.receipt_lifecycle import CLIENT_STATUS_DISPLAY
+        return CLIENT_STATUS_DISPLAY.get(self.client_status, '—')
 
     def get_qr_base64(self):
         qr = qrcode.make(self.receipt_number, box_size=4, border=1)
@@ -729,6 +754,10 @@ class ArrivalSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
     paused_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Поставлена на паузу"))
     completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Завершено"))
+    # Резервный сырой снимок последнего автосохранения (на случай потери связи).
+    # Хранит входящий список строк как есть — восстановимая копия, доступная с любого устройства.
+    draft_data = models.JSONField(default=dict, blank=True, verbose_name=_("Черновик (резерв)"))
+    draft_saved_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Черновик сохранён"))
 
     class Meta:
         verbose_name = _("Сессия прихода")

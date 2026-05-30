@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management, blocks
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -119,6 +119,7 @@ urlpatterns = [
     path('unidentified/<int:track_id>/assign/', unidentified.unidentified_assign_owner, name='unidentified_assign_owner'),
     path('unidentified/<int:track_id>/confirm/', unidentified.unidentified_confirm, name='unidentified_confirm'),
     path('unidentified/<int:track_id>/unassign/', unidentified.unidentified_unassign, name='unidentified_unassign'),
+    path('unidentified/<int:track_id>/set-weight/', unidentified.unidentified_set_weight, name='unidentified_set_weight'),
     path('unidentified/<int:track_id>/delete/', unidentified.unidentified_delete, name='unidentified_delete'),
     path('unidentified/search-users/', unidentified.unidentified_search_users, name='unidentified_search_users'),
     path('service/', service.service_view, name='service'),
@@ -128,6 +129,8 @@ urlpatterns = [
     path('service/mark-claimed/', service.service_mark_claimed, name='service_mark_claimed'),
     path('service/restore-archived-tracks/', service.service_restore_archived_tracks, name='service_restore_archived_tracks'),
     path('service/test-notification/', service.service_test_notification, name='service_test_notification'),
+    path('blocks/', blocks.blocks_view, name='blocks_management'),
+    path('blocks/unblock/', blocks.blocks_unblock, name='blocks_unblock'),
     path('mobile-qr/', mobile_qr.mobile_qr_view, name='mobile_qr'),
     path('mobile-parcels/', mobile_parcels.mobile_parcels_view, name='mobile_parcels'),
     path('mobile-parcels/archive/', mobile_parcels.mobile_archive_track, name='mobile_archive_track'),

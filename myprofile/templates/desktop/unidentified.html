@@ -121,8 +121,11 @@
                                     <span class="text-gray-500 text-xs block">{{ pkg.owner.get_full_name }}</span>
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3 text-gray-700">
-                                    {% if pkg.weight %}{{ pkg.weight }} кг{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                <td class="px-4 py-3">
+                                    <input type="text" value="{{ pkg.weight|default_if_none:'' }}"
+                                        data-track-id="{{ pkg.id }}"
+                                        class="weight-input w-24 border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                        placeholder="{% trans "Вес, кг" %}">
                                 </td>
                                 <td class="px-4 py-3 text-gray-700">
                                     {% if pkg.sorting_location %}{{ pkg.sorting_location.name }}{% else %}<span class="text-gray-400">—</span>{% endif %}
@@ -142,6 +145,72 @@
                                             data-track-id="{{ pkg.id }}"
                                             data-track-code="{{ pkg.track_code }}">
                                             <i class="ri-user-unfollow-line"></i> {% trans "Снять" %}
+                                        </button>
+                                        <button
+                                            class="delete-btn text-xs bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Подтверждено — ожидают прихода -->
+            {% if awaiting %}
+            <section class="bg-white rounded-xl shadow-sm border border-green-200">
+                <div class="p-4 border-b border-green-100 bg-green-50 rounded-t-xl flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-green-800">
+                        <i class="ri-checkbox-circle-line mr-1"></i>
+                        {% trans "Подтверждено — ожидают прихода:" %} <span class="text-green-600" id="awaitingCount">{{ awaiting|length }}</span>
+                    </h2>
+                    <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">{% trans "Добавятся в сессию прихода автоматически" %}</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-3 text-left">{% trans "Трек-код" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Клиент" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Вес" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Место сортировки" %}</th>
+                                <th class="px-4 py-3 text-left">{% trans "Дата" %}</th>
+                                <th class="px-4 py-3 text-center">{% trans "Действия" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="awaitingTableBody">
+                            {% for pkg in awaiting %}
+                            <tr id="arow-{{ pkg.id }}" class="hover:bg-green-50 transition">
+                                <td class="px-4 py-3 font-mono font-medium text-gray-800">{{ pkg.track_code }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="font-medium text-gray-800">{{ pkg.owner.username }}</span>
+                                    {% if pkg.owner.get_full_name %}
+                                    <span class="text-gray-500 text-xs block">{{ pkg.owner.get_full_name }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <input type="text" value="{{ pkg.weight|default_if_none:'' }}"
+                                        data-track-id="{{ pkg.id }}"
+                                        class="weight-input w-24 border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-300"
+                                        placeholder="{% trans "Вес, кг" %}">
+                                </td>
+                                <td class="px-4 py-3 text-gray-700">
+                                    {% if pkg.sorting_location %}{{ pkg.sorting_location.name }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-gray-500">{{ pkg.update_date|date:"d.m.Y" }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button
+                                            class="unassign-btn text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded hover:bg-yellow-200 transition"
+                                            data-track-id="{{ pkg.id }}"
+                                            data-track-code="{{ pkg.track_code }}">
+                                            <i class="ri-arrow-go-back-line"></i> {% trans "Отменить" %}
                                         </button>
                                         <button
                                             class="delete-btn text-xs bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition"
@@ -185,8 +254,11 @@
                             {% for pkg in unclaimed %}
                             <tr id="row-{{ pkg.id }}" class="hover:bg-gray-50 transition">
                                 <td class="px-4 py-3 font-mono font-medium text-gray-800">{{ pkg.track_code }}</td>
-                                <td class="px-4 py-3 text-gray-700">
-                                    {% if pkg.weight %}{{ pkg.weight }} кг{% else %}<span class="text-gray-400">—</span>{% endif %}
+                                <td class="px-4 py-3">
+                                    <input type="text" value="{{ pkg.weight|default_if_none:'' }}"
+                                        data-track-id="{{ pkg.id }}"
+                                        class="weight-input w-24 border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                                        placeholder="{% trans "Вес, кг" %}">
                                 </td>
                                 <td class="px-4 py-3 text-gray-700">
                                     {% if pkg.sorting_location %}{{ pkg.sorting_location.name }}{% else %}<span class="text-gray-400">—</span>{% endif %}
@@ -343,9 +415,8 @@
         ajaxPost(`{% url 'unidentified_assign_owner' 0 %}`.replace('/0/', `/${currentAssignTrackId}/`), {user_id: userId})
             .then(data => {
                 if (data.success) {
-                    document.getElementById(`row-${data.track_id}`)?.remove();
-                    updateCount('unclaimedCount', '#unclaimedTableBody');
                     closeAssignModal();
+                    location.reload();
                 } else {
                     alert(data.error || 'Ошибка.');
                     btn.disabled = false;
@@ -359,14 +430,13 @@
         btn.addEventListener('click', () => {
             const trackCode = btn.dataset.trackCode;
             const owner = btn.dataset.owner;
-            if (!confirm(`Подтвердить посылку «${trackCode}» для клиента ${owner}?\nСтатус изменится на "Доставлен на сортировочный склад".`)) return;
+            if (!confirm(`Подтвердить посылку «${trackCode}» для клиента ${owner}?\nОна будет автоматически добавлена в ближайшую сессию прихода.`)) return;
             btn.disabled = true;
 
             ajaxPost(`{% url 'unidentified_confirm' 0 %}`.replace('/0/', `/${btn.dataset.trackId}/`), {})
                 .then(data => {
                     if (data.success) {
-                        document.getElementById(`crow-${data.track_id}`)?.remove();
-                        updateCount('claimedCount', '#claimedTableBody');
+                        location.reload();
                     } else {
                         alert(data.error || 'Ошибка.');
                         btn.disabled = false;
@@ -407,14 +477,48 @@
                         const trackId = data.track_id;
                         document.getElementById(`row-${trackId}`)?.remove();
                         document.getElementById(`crow-${trackId}`)?.remove();
+                        document.getElementById(`arow-${trackId}`)?.remove();
                         updateCount('unclaimedCount', '#unclaimedTableBody');
                         updateCount('claimedCount', '#claimedTableBody');
+                        updateCount('awaitingCount', '#awaitingTableBody');
                     } else {
                         alert(data.error || 'Ошибка.');
                         btn.disabled = false;
                     }
                 })
                 .catch(() => { alert('Ошибка сети.'); btn.disabled = false; });
+        });
+    });
+
+    // ── Ввод / изменение веса неопознанной посылки ──
+    document.querySelectorAll('.weight-input').forEach(inp => {
+        let prevValue = inp.value;
+        inp.addEventListener('keydown', e => {
+            const allowed = ['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight',
+                'ArrowUp','ArrowDown','Home','End','.',','];
+            const isDigit = (e.key >= '0' && e.key <= '9');
+            const isCtrl = e.ctrlKey || e.metaKey;
+            if (!isDigit && allowed.indexOf(e.key) === -1 && !isCtrl) e.preventDefault();
+            if (e.key === 'Enter') inp.blur();
+        });
+        inp.addEventListener('change', () => {
+            const val = inp.value.trim();
+            if (val === prevValue) return;
+            inp.disabled = true;
+            ajaxPost(`{% url 'unidentified_set_weight' 0 %}`.replace('/0/', `/${inp.dataset.trackId}/`), {weight: val})
+                .then(data => {
+                    inp.disabled = false;
+                    if (data.success) {
+                        inp.value = data.weight;
+                        prevValue = data.weight;
+                        inp.classList.add('ring-2', 'ring-green-400');
+                        setTimeout(() => inp.classList.remove('ring-2', 'ring-green-400'), 800);
+                    } else {
+                        alert(data.error || 'Ошибка.');
+                        inp.value = prevValue;
+                    }
+                })
+                .catch(() => { alert('Ошибка сети.'); inp.disabled = false; inp.value = prevValue; });
         });
     });
 

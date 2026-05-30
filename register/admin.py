@@ -3,8 +3,8 @@ from .models import UserProfile, PickupPoint, RolePermission
 
 @admin.register(PickupPoint)
 class PickupPointAdmin(admin.ModelAdmin):
-    list_display = ('id', 'address', 'premise_name', 'working_hours', 'payment_link', 'is_active', 'show_in_registration', 'is_home_delivery', 'short_info', 'reminder_enabled', 'reminder_intervals')
-    list_editable = ('address', 'premise_name', 'working_hours', 'payment_link', 'is_active', 'show_in_registration', 'is_home_delivery', 'reminder_enabled', 'reminder_intervals')
+    list_display = ('id', 'address', 'premise_name', 'working_hours', 'payment_link', 'is_active', 'show_in_registration', 'show_in_footer', 'show_in_pickup_transfer', 'is_home_delivery', 'short_info', 'reminder_enabled', 'reminder_intervals')
+    list_editable = ('address', 'premise_name', 'working_hours', 'payment_link', 'is_active', 'show_in_registration', 'show_in_footer', 'show_in_pickup_transfer', 'is_home_delivery', 'reminder_enabled', 'reminder_intervals')
     list_display_links = ('id',)
     search_fields = ('address', 'premise_name')
     list_filter = ('is_active', 'premise_name')

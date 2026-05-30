@@ -16,6 +16,11 @@ logger = logging.getLogger(__name__)
 
 MAX_RETRY_COUNT = 5  # После этого числа попыток уведомление помечается как failed
 
+# Статусы, для которых per-track уведомления собираются в одно групповое
+# сообщение на пользователя (см. tgbot/signals.py). В БД такие уведомления
+# хранятся с title=<status_key>, message=<track_code>.
+BATCHED_STATUS_KEYS = {'shipped_cn'}
+
 
 async def notification_worker(bot: Bot, interval: int = 10):
     """Фоновый воркер — проверяет неотправленные уведомления каждые N секунд."""
@@ -33,7 +38,7 @@ async def notification_worker(bot: Bot, interval: int = 10):
 
 async def send_pending_notifications(bot: Bot) -> int:
     """Ищет неотправленные уведомления и отправляет их."""
-    grouped_ready, status_notifications, skip_ids = await _get_and_group_pending()
+    grouped_ready, grouped_status, status_notifications, skip_ids = await _get_and_group_pending()
 
     sent_count = 0
 
@@ -82,7 +87,52 @@ async def send_pending_notifications(bot: Bot) -> int:
             logger.error(f"Failed to send delivery notification to user {user_id}: {e}")
             await _increment_retry(group_data['ids'], str(e))
 
-    # 2) Уведомления об изменении статуса (shipped_cn, delivered, shipping_pp и т.д.)
+    # 2) Групповые уведомления по статусам из BATCHED_STATUS_KEYS
+    # (массовые обновления — один список трек-кодов на пользователя)
+    for (user_id, status_key), group_data in grouped_status.items():
+        try:
+            chat_id = group_data['chat_id']
+            if not chat_id:
+                await _mark_sent_bulk(group_data['ids'])
+                continue
+
+            message_text = await _format_status_group_notification(
+                user_id, status_key, group_data['tracks'],
+            )
+
+            await bot.send_message(
+                chat_id=chat_id,
+                text=message_text,
+                parse_mode='HTML',
+                link_preview_options=LinkPreviewOptions(is_disabled=True),
+            )
+            await asyncio.sleep(0.05)
+            await _mark_sent_bulk(group_data['ids'])
+            sent_count += 1
+            logger.info(
+                f"Sent grouped status notification ({status_key}, "
+                f"{len(group_data['tracks'])} tracks) to chat {chat_id}"
+            )
+
+        except TelegramForbiddenError:
+            logger.warning(f"User {user_id} blocked the bot, marking notifications as sent")
+            await _mark_permanently_failed(group_data['ids'], "Пользователь заблокировал бота")
+            await _deactivate_profile(user_id)
+
+        except TelegramRetryAfter as e:
+            logger.warning(f"Rate limited, waiting {e.retry_after}s")
+            await asyncio.sleep(e.retry_after)
+            await _increment_retry(group_data['ids'], str(e))
+
+        except TelegramBadRequest as e:
+            logger.error(f"Bad request for user {user_id}: {e}")
+            await _mark_permanently_failed(group_data['ids'], str(e))
+
+        except Exception as e:
+            logger.error(f"Failed to send grouped status notification to user {user_id}: {e}")
+            await _increment_retry(group_data['ids'], str(e))
+
+    # 3) Уведомления об изменении статуса (shipped_cn, delivered, shipping_pp и т.д.)
     for notif_data in status_notifications:
         try:
             chat_id = notif_data['chat_id']
@@ -120,7 +170,7 @@ async def send_pending_notifications(bot: Bot) -> int:
             logger.error(f"Failed to send status notification {notif_data['id']}: {e}")
             await _increment_retry([notif_data['id']], str(e))
 
-    # 3) Уведомления, которые не нужно отправлять (настройки пользователя)
+    # 4) Уведомления, которые не нужно отправлять (настройки пользователя)
     if skip_ids:
         await _mark_sent_bulk(skip_ids)
 
@@ -190,7 +240,24 @@ def _get_and_group_pending():
             return True
         return False
 
+    def should_send_status_key(user_id, status_key):
+        """Аналог should_send_status, но для уведомлений со стабильным
+        кодом статуса в title (см. BATCHED_STATUS_KEYS)."""
+        s = get_user_settings(user_id)
+        if not s:
+            return False
+        if s.level == 'all':
+            return True
+        if s.level == 'only_ready':
+            return False
+        if s.level == 'selective':
+            if status_key == 'shipped_cn':
+                return s.notify_shipped_cn
+            return True
+        return False
+
     grouped_ready = defaultdict(lambda: {'chat_id': None, 'ids': [], 'tracks': []})
+    grouped_status = defaultdict(lambda: {'chat_id': None, 'ids': [], 'tracks': []})
     status_notifications = []
     skip_ids = []
 
@@ -213,6 +280,17 @@ def _get_and_group_pending():
                 'track_code': track_code,
                 'weight': weight,
             })
+        elif n.title in BATCHED_STATUS_KEYS and n.notification_type == 'tracking':
+            # Массовые статусы (например, shipped_cn) — собираем по
+            # (пользователь, статус) и отправим одним сообщением.
+            if not should_send_status_key(n.user_id, n.title):
+                skip_ids.append(n.id)
+                continue
+            key = (n.user_id, n.title)
+            chat_id = get_chat_id(n.user_id)
+            grouped_status[key]['chat_id'] = chat_id
+            grouped_status[key]['ids'].append(n.id)
+            grouped_status[key]['tracks'].append(n.message)
         elif n.notification_type == 'tracking':
             # Статусные уведомления — проверяем настройки
             if should_send_status(n.user_id, n.title):
@@ -236,7 +314,7 @@ def _get_and_group_pending():
             else:
                 skip_ids.append(n.id)
 
-    return dict(grouped_ready), status_notifications, skip_ids
+    return dict(grouped_ready), dict(grouped_status), status_notifications, skip_ids
 
 
 @sync_to_async
@@ -325,6 +403,46 @@ def _format_delivery_notification(user_id, tracks):
             pass
 
     return '\n'.join(lines), inline_kb
+
+
+@sync_to_async
+def _format_status_group_notification(user_id, status_key, track_codes):
+    """Формирует одно сообщение со списком трек-кодов для группы массовых обновлений.
+
+    Локализуется под язык получателя (UserProfile.language).
+    Длинные списки усекаются — кодов > 30 показываются 30 и счётчик «...и ещё N».
+    """
+    from django.utils.translation import gettext as _
+    from tgbot.bot.i18n import with_lang, get_lang_by_user_id_sync
+
+    lang = get_lang_by_user_id_sync(user_id)
+    with with_lang(lang):
+        if status_key == 'shipped_cn':
+            status_label = _('Отправлен со склада Китая')
+        else:
+            status_label = status_key
+
+        count = len(track_codes)
+        if count == 1:
+            return (
+                f"📦 <b>{_('Статус обновлён')}:</b> {status_label}\n\n"
+                f"• <code>{track_codes[0]}</code>"
+            )
+
+        VISIBLE = 30
+        visible_codes = track_codes[:VISIBLE]
+        lines = [
+            _("📦 <b>Обновлено {count} трек-кодов:</b> {status}").format(
+                count=count, status=status_label,
+            ),
+            "",
+        ]
+        for code in visible_codes:
+            lines.append(f"• <code>{code}</code>")
+        if count > VISIBLE:
+            lines.append("")
+            lines.append(_("…и ещё {n}").format(n=count - VISIBLE))
+        return "\n".join(lines)
 
 
 @sync_to_async

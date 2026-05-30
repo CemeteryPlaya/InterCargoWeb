@@ -123,6 +123,29 @@
                 </div>
             </div>
 
+            <!-- Баннер: найдена несохранённая резервная копия (localStorage / серверный черновик) -->
+            <div id="draft-restore-banner" class="hidden mb-4 p-4 rounded-lg bg-blue-50 border border-blue-300">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class="ri-history-line text-blue-500 text-xl"></i>
+                        <div>
+                            <p class="font-semibold text-blue-800">{% trans "Найдена несохранённая резервная копия" %}</p>
+                            <p class="text-sm text-blue-600" id="draft-restore-detail"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button type="button" id="draft-restore-btn"
+                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                            <i class="ri-arrow-go-back-line mr-1"></i> {% trans "Восстановить" %}
+                        </button>
+                        <button type="button" id="draft-dismiss-btn"
+                            class="border border-blue-300 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium">
+                            {% trans "Отклонить" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {% if messages %}
             <div class="mb-4">
                 {% for message in messages %}
@@ -139,12 +162,27 @@
 
             <div class="bg-white rounded-lg shadow p-6">
                 <!-- Переключение вида -->
-                <div class="flex items-center gap-3 mb-4">
+                <div class="flex items-center gap-3 mb-4 flex-wrap">
                     <button type="button" id="form_toggle_btn"
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition text-sm">
                         <i class="ri-table-line"></i> {% trans "Переключить на текстовый вид" %}
                     </button>
                     <span id="row_counter" class="text-sm font-medium text-gray-600"></span>
+                    {% if can_edit %}
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" id="export_backup_btn"
+                            class="border border-gray-300 px-3 py-2 rounded hover:bg-gray-50 transition text-sm"
+                            title="{% trans 'Скачать данные сессии в файл' %}">
+                            <i class="ri-download-2-line"></i> {% trans "Резервная копия" %}
+                        </button>
+                        <button type="button" id="import_backup_btn"
+                            class="border border-gray-300 px-3 py-2 rounded hover:bg-gray-50 transition text-sm"
+                            title="{% trans 'Загрузить данные из файла' %}">
+                            <i class="ri-upload-2-line"></i> {% trans "Загрузить из файла" %}
+                        </button>
+                        <input type="file" id="import_backup_input" accept=".csv,.json" class="hidden">
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Табличный вид (по умолчанию) -->
@@ -232,12 +270,14 @@
 
     <script>
     var SESSION_CONFIG = {
+        sessionId: {{ session.id }},
         saveUrl: '{% url "goods_arrival_save" session.id %}',
         csrfToken: '{{ csrf_token }}',
         getOwnerUrl: '{% url "get_track_owner" %}',
         searchUsersUrl: '{% url "search_users" %}',
         initialItems: {{ items_json|safe }},
         knownTracks: {{ known_tracks_json|safe }},
+        draft: {{ draft_json|safe }},
         canEdit: {{ can_edit|yesno:"true,false" }}
     };
     </script>

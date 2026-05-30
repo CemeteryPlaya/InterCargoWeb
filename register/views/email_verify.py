@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from myprofile.email_utils import send_mail_logged
 from django.utils import timezone
-from register.models import EmailVerificationCode
+from register.models import EmailVerificationCode, BlockHistory
 from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
@@ -84,6 +84,12 @@ def verify_email_code(request):
     if verification.code != code:
         verification.attempts += 1
         verification.save()
+        if verification.attempts == 5:
+            try:
+                BlockHistory.log('email', 'created', verification.email,
+                                 attempts=verification.attempts)
+            except Exception:
+                pass
         remaining = 5 - verification.attempts
         return JsonResponse({
             'error': f'Неверный код. Осталось попыток: {remaining}.'

@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     var config = SESSION_CONFIG;
+
+    // Метод F: регистрируем service worker (офлайн-кэш страницы + Background Sync).
+    // Делаем безусловно — скрипты push-уведомлений сюда не подключены.
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(function () {});
+    }
+
     var tableBody = document.getElementById('tracks_table_body');
     var addRowBtn = document.getElementById('add_row_btn');
     var toggleBtn = document.getElementById('form_toggle_btn');
@@ -27,6 +34,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var saveTimer = null;
     var isSaving = false;
     var rowNum = 0;
+
+    // ==================== Резервное сохранение (методы A/B/E/F) ====================
+    var dirty = false;                  // есть несохранённые на сервере изменения
+    var lastServerSyncAt = null;        // время последнего подтверждённого серверного сохранения
+    var allowUnload = false;            // намеренный уход (submit формы) — не предупреждать
+    var DRAFT_KEY = 'arrival_session_draft_' + config.sessionId;
+    var DRAFT_TTL = 48 * 3600 * 1000;   // localStorage-черновик живёт 48 ч (как ACTIVE_HOURS_LIMIT)
 
     // ==================== Состояние соединения ====================
     var connectionState = {
@@ -116,8 +130,251 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // ==================== Метод A: черновик в localStorage ====================
+    function writeDraft() {
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({
+                sessionId: config.sessionId,
+                savedAt: Date.now(),
+                serverSyncedAt: lastServerSyncAt,
+                view: isTableView ? 'table' : 'text',
+                items: collectItems()
+            }));
+        } catch (e) { /* localStorage недоступен/переполнен — не критично */ }
+    }
+
+    function readDraft() {
+        try {
+            var raw = localStorage.getItem(DRAFT_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+    }
+
+    function deleteDraft() {
+        try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
+    }
+
+    // Нормализуем вес численно: "1.500" и "1,5" → "1.5" (иначе ложные срабатывания)
+    function normWeight(w) {
+        var s = String(w == null ? '' : w).trim().replace(',', '.');
+        if (s === '') return '';
+        var n = parseFloat(s);
+        return isNaN(n) ? s : String(n);
+    }
+
+    // Сигнатура строк — для сравнения двух наборов данных без учёта пустых строк
+    function itemsSignature(items) {
+        if (!items || !items.length) return '';
+        return items.map(function (i) {
+            return (i.track_code || '').trim() + '|' +
+                   (i.owner_name || '').trim() + '|' +
+                   normWeight(i.weight);
+        }).filter(function (s) { return s !== '||'; }).join('\n');
+    }
+
+    function itemsDiffer(a, b) {
+        return itemsSignature(a) !== itemsSignature(b);
+    }
+
+    // Лучший из доступных черновиков: localStorage и серверный (config.draft)
+    function getBestDraft() {
+        var candidates = [];
+        var local = readDraft();
+        if (local && local.items && local.items.length) {
+            candidates.push({ savedAt: local.savedAt || 0, items: local.items, source: 'local' });
+        }
+        var server = config.draft;
+        if (server && server.items && server.items.length && server.savedAt) {
+            candidates.push({ savedAt: server.savedAt, items: server.items, source: 'server' });
+        }
+        if (!candidates.length) return null;
+        candidates.sort(function (a, b) { return b.savedAt - a.savedAt; });
+        return candidates[0];
+    }
+
+    // Загрузить набор строк в форму (восстановление / импорт)
+    function restoreItemsIntoForm(items) {
+        if (isTableView) {
+            tableBody.innerHTML = '';
+            rowNum = 0;
+            if (items.length) {
+                items.forEach(function (item) { addRow(item); });
+                validateAllRows();
+            } else {
+                addRow();
+            }
+        } else {
+            textTracks.value = items.map(function (i) { return i.track_code || ''; }).join('\n');
+            textOwners.value = items.map(function (i) { return i.owner_name || ''; }).join('\n');
+            textWeights.value = items.map(function (i) { return String(i.weight == null ? '' : i.weight); }).join('\n');
+            updateTextCounters();
+        }
+        scheduleSave();
+    }
+
+    function showRestoreBanner(draft) {
+        var banner = document.getElementById('draft-restore-banner');
+        var detail = document.getElementById('draft-restore-detail');
+        if (!banner || !detail) return;
+        var rows = (draft.items || []).filter(function (i) {
+            return (i.track_code || i.owner_name || i.weight);
+        }).length;
+        var when = draft.savedAt ? new Date(draft.savedAt).toLocaleString('ru-RU') : '';
+        var src = draft.source === 'server' ? 'на сервере' : 'в этом браузере';
+        detail.textContent = 'Копия от ' + when + ' (' + rows + ' строк, сохранена ' + src +
+            '). Восстановить введённые данные?';
+        banner.classList.remove('hidden');
+
+        document.getElementById('draft-restore-btn').onclick = function () {
+            restoreItemsIntoForm(draft.items || []);
+            banner.classList.add('hidden');
+        };
+        document.getElementById('draft-dismiss-btn').onclick = function () {
+            deleteDraft();
+            banner.classList.add('hidden');
+        };
+    }
+
+    // ==================== Метод B: финальная досылка через sendBeacon ====================
+    function beaconSave() {
+        if (!dirty || !config.canEdit || !navigator.sendBeacon) return;
+        try {
+            // form-encoded: sendBeacon не умеет ставить заголовки, CSRF идёт полем
+            var fd = new FormData();
+            fd.append('csrfmiddlewaretoken', config.csrfToken);
+            fd.append('items', JSON.stringify(collectItems()));
+            navigator.sendBeacon(config.saveUrl, fd);
+        } catch (e) { /* ignore */ }
+    }
+
+    // ==================== Метод E: экспорт / импорт резервной копии ====================
+    function csvCell(v) {
+        v = (v == null ? '' : String(v));
+        if (/[",\r\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+        return v;
+    }
+
+    function exportBackup() {
+        var items = collectItems();
+        var lines = ['track_code,owner_name,weight'];
+        items.forEach(function (it) {
+            lines.push(csvCell(it.track_code) + ',' + csvCell(it.owner_name) + ',' + csvCell(it.weight));
+        });
+        var stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'session_' + config.sessionId + '_backup_' + stamp + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    }
+
+    function parseCsvLine(line) {
+        var out = [], cur = '', inQ = false;
+        for (var i = 0; i < line.length; i++) {
+            var ch = line[i];
+            if (inQ) {
+                if (ch === '"') {
+                    if (line[i + 1] === '"') { cur += '"'; i++; }
+                    else inQ = false;
+                } else { cur += ch; }
+            } else {
+                if (ch === '"') inQ = true;
+                else if (ch === ',') { out.push(cur); cur = ''; }
+                else cur += ch;
+            }
+        }
+        out.push(cur);
+        return out;
+    }
+
+    function parseBackupText(text) {
+        text = String(text || '').replace(/^﻿/, '').trim();
+        if (!text) return [];
+        // JSON-формат
+        if (text.charAt(0) === '[' || text.charAt(0) === '{') {
+            try {
+                var j = JSON.parse(text);
+                var arr = Array.isArray(j) ? j : (j.items || []);
+                return arr.map(function (i) {
+                    return {
+                        track_code: i.track_code || '',
+                        owner_name: i.owner_name || '',
+                        weight: i.weight == null ? '' : i.weight
+                    };
+                });
+            } catch (e) { return []; }
+        }
+        // CSV-формат
+        var lines = text.split(/\r?\n/);
+        var start = (lines[0] && /track/i.test(lines[0])) ? 1 : 0;  // пропускаем заголовок
+        var items = [];
+        for (var k = start; k < lines.length; k++) {
+            if (!lines[k].trim()) continue;
+            var c = parseCsvLine(lines[k]);
+            items.push({
+                track_code: (c[0] || '').trim(),
+                owner_name: (c[1] || '').trim(),
+                weight: (c[2] || '').trim()
+            });
+        }
+        return items;
+    }
+
+    function importBackup(file) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            var items = parseBackupText(reader.result);
+            if (!items.length) {
+                alert('Не удалось прочитать файл или он пуст.');
+                return;
+            }
+            if (!confirm('Загрузить ' + items.length + ' строк из файла? Текущие данные таблицы будут заменены.')) return;
+            restoreItemsIntoForm(items);
+        };
+        reader.onerror = function () { alert('Ошибка чтения файла.'); };
+        reader.readAsText(file);
+    }
+
+    // ==================== Метод F: очередь Background Sync (IndexedDB) ====================
+    function idbOpen() {
+        return new Promise(function (resolve, reject) {
+            var req = indexedDB.open('arrival-sync', 1);
+            req.onupgradeneeded = function () {
+                req.result.createObjectStore('queue', { keyPath: 'id', autoIncrement: true });
+            };
+            req.onsuccess = function () { resolve(req.result); };
+            req.onerror = function () { reject(req.error); };
+        });
+    }
+
+    function queueForBackgroundSync(items) {
+        if (!('indexedDB' in window) || !items) return;
+        idbOpen().then(function (db) {
+            var tx = db.transaction('queue', 'readwrite');
+            tx.objectStore('queue').add({
+                url: config.saveUrl,
+                csrf: config.csrfToken,
+                items: items,
+                createdAt: Date.now()
+            });
+            tx.oncomplete = function () {
+                db.close();
+                if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                    navigator.serviceWorker.ready.then(function (reg) {
+                        return reg.sync.register('arrival-session-sync');
+                    }).catch(function () { /* Background Sync недоступен — fallback на метод C */ });
+                }
+            };
+        }).catch(function () { /* ignore */ });
+    }
+
     // ==================== Автосохранение ====================
     function scheduleSave() {
+        dirty = true;
+        writeDraft();   // метод A: синхронная локальная копия при каждом изменении
         if (saveTimer) clearTimeout(saveTimer);
         saveTimer = setTimeout(doSave, 2000);
     }
@@ -151,6 +408,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 saveStatus.textContent = 'Сохранено (' + data.count + ' строк)';
                 saveStatus.className = 'text-sm text-green-600';
                 connectionState.failCount = 0;
+                dirty = false;
+                lastServerSyncAt = Date.now();
+                writeDraft();   // обновляем serverSyncedAt в локальной копии
                 if (connectionState.isLost) showConnectionRestored();
                 if (data.occupied && data.occupied.length > 0) {
                     showOccupiedWarning(data.occupied);
@@ -170,6 +430,9 @@ document.addEventListener('DOMContentLoaded', function () {
             connectionState.failCount++;
             saveStatus.textContent = 'Ошибка связи';
             saveStatus.className = 'text-sm text-red-600';
+            // Метод F: ставим неудавшееся сохранение в очередь Background Sync —
+            // service worker дошлёт его сам, даже если вкладку закроют.
+            queueForBackgroundSync(items);
             if (connectionState.failCount >= 2) {
                 showConnectionLost();
             }
@@ -275,6 +538,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'user_added':   { border: '#60a5fa', bg: '#eff6ff' },  // голубой
         'warehouse_cn': { border: '#34d399', bg: '#f0fdf4' },  // зелёный
         'shipped_cn':   { border: '#34d399', bg: '#f0fdf4' },
+        'unidentified': { border: '#f87171', bg: '#fef2f2' },  // красный (неопозка)
         'delivered':    { border: '#a78bfa', bg: '#f5f3ff' },  // фиолетовый
         'shipping_pp':  { border: '#f97316', bg: '#fff7ed' },  // оранжевый
         'ready':        { border: '#22c55e', bg: '#f0fdf4' },  // зелёный
@@ -833,16 +1097,27 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ==================== Сохранение перед завершением ====================
-    document.getElementById('complete_form').addEventListener('submit', function (e) {
-        if (saveTimer) clearTimeout(saveTimer);
+    var completeForm = document.getElementById('complete_form');
+    if (completeForm) {
+        completeForm.addEventListener('submit', function (e) {
+            if (saveTimer) clearTimeout(saveTimer);
 
-        var items = collectItems();
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', config.saveUrl, false);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('X-CSRFToken', config.csrfToken);
-        xhr.send(JSON.stringify({ items: items }));
-    });
+            var items = collectItems();
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', config.saveUrl, false);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('X-CSRFToken', config.csrfToken);
+                xhr.send(JSON.stringify({ items: items }));
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    dirty = false;
+                    deleteDraft();
+                }
+            } catch (err) {
+                // сеть недоступна — данные останутся в localStorage-черновике и очереди sync
+            }
+        });
+    }
 
     // ==================== Инициализация ====================
     if (config.initialItems && config.initialItems.length > 0) {
@@ -853,4 +1128,67 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         addRow();
     }
+
+    // --- Метод A: предложить восстановление резервной копии ---
+    (function () {
+        var local = readDraft();
+        // Чистим устаревший localStorage-черновик
+        if (local && local.savedAt && (Date.now() - local.savedAt) > DRAFT_TTL) {
+            deleteDraft();
+        }
+        if (!config.canEdit) return;   // сессия на паузе/неактивна — не редактируем
+        var draft = getBestDraft();
+        if (!draft || !draft.items || !draft.items.length) return;
+        if (draft.savedAt && (Date.now() - draft.savedAt) > DRAFT_TTL) return;
+        // Показываем баннер только если копия реально отличается от загруженных данных
+        if (itemsDiffer(draft.items, config.initialItems || [])) {
+            showRestoreBanner(draft);
+        }
+    })();
+
+    // --- Метод E: кнопки экспорта / импорта ---
+    var exportBtn = document.getElementById('export_backup_btn');
+    var importBtn = document.getElementById('import_backup_btn');
+    var importInput = document.getElementById('import_backup_input');
+    if (exportBtn) exportBtn.addEventListener('click', exportBackup);
+    if (importBtn && importInput) {
+        importBtn.addEventListener('click', function () { importInput.click(); });
+        importInput.addEventListener('change', function () {
+            if (importInput.files && importInput.files[0]) {
+                importBackup(importInput.files[0]);
+                importInput.value = '';
+            }
+        });
+    }
+
+    // --- Метод C: реакция на события online / offline ---
+    window.addEventListener('online', function () {
+        if (dirty || connectionState.isLost) {
+            clearAutoRetry();
+            doSave();
+        }
+    });
+    window.addEventListener('offline', function () {
+        if (config.canEdit) showConnectionLost();
+    });
+    if (config.canEdit && !navigator.onLine) {
+        showConnectionLost();
+    }
+
+    // --- Метод B: защита от потери данных при закрытии вкладки ---
+    window.addEventListener('beforeunload', function (e) {
+        if (dirty && config.canEdit && !allowUnload) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    window.addEventListener('pagehide', beaconSave);
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') beaconSave();
+    });
+    // Намеренный уход (Завершить / Пауза / Возобновить) — дослать данные, не предупреждать
+    document.addEventListener('submit', function () {
+        allowUnload = true;
+        beaconSave();
+    });
 });

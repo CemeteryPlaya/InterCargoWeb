@@ -138,3 +138,85 @@ class TelegramViewsTests(TestCase):
         resp = self.client.post(reverse('telegram_relink'))
         self.assertEqual(resp.status_code, 200)
         self.assertIn('link', resp.json())
+
+
+class ShippedCnBatchedNotificationsTests(TestCase):
+    """При массовом изменении статусов в shipped_cn клиент получает
+    одно агрегированное сообщение со списком трек-кодов."""
+
+    @classmethod
+    def setUpTestData(cls):
+        from tgbot.models import UserNotificationSettings
+        cls.user = User.objects.create_user(username='client_sc', password='p')
+        TelegramProfile.objects.create(user=cls.user, telegram_chat_id=999, is_active=True)
+        UserNotificationSettings.objects.create(
+            user=cls.user, level='all', notify_shipped_cn=True,
+        )
+
+    def _make_tracks(self, codes, status='warehouse_cn'):
+        from myprofile.models import TrackCode
+        return [
+            TrackCode.objects.create(track_code=c, status=status, owner=self.user)
+            for c in codes
+        ]
+
+    def test_signal_creates_one_row_per_track_with_status_key_title(self):
+        """Сигнал кладёт по строке на трек: title=ключ статуса, message=код."""
+        from tgbot.models import TelegramNotification
+        tracks = self._make_tracks(['SC001', 'SC002', 'SC003'])
+        TelegramNotification.objects.all().delete()
+
+        for t in tracks:
+            t.status = 'shipped_cn'
+            t.save()
+
+        rows = list(
+            TelegramNotification.objects.filter(user=self.user, title='shipped_cn')
+            .order_by('id')
+        )
+        self.assertEqual(len(rows), 3)
+        self.assertEqual({r.message for r in rows}, {'SC001', 'SC002', 'SC003'})
+
+    def test_worker_groups_batched_into_single_bucket(self):
+        """Воркер группирует записи в один (user, status_key) бакет — одно сообщение."""
+        from tgbot.models import TelegramNotification
+        from asgiref.sync import async_to_sync
+        from tgbot.bot.workers.notifications import _get_and_group_pending
+
+        tracks = self._make_tracks(['G1', 'G2', 'G3', 'G4'])
+        TelegramNotification.objects.all().delete()
+        for t in tracks:
+            t.status = 'shipped_cn'
+            t.save()
+
+        grouped_ready, grouped_status, status_notifications, skip_ids = (
+            async_to_sync(_get_and_group_pending)()
+        )
+
+        key = (self.user.id, 'shipped_cn')
+        self.assertIn(key, grouped_status)
+        self.assertEqual(len(grouped_status[key]['tracks']), 4)
+        self.assertEqual(grouped_status[key]['chat_id'], 999)
+        self.assertEqual(set(grouped_status[key]['tracks']), {'G1', 'G2', 'G3', 'G4'})
+        self.assertEqual(status_notifications, [])
+
+    def test_worker_skips_when_setting_disabled(self):
+        """selective + notify_shipped_cn=False → записи помечаются как отправленные без рассылки."""
+        from tgbot.models import TelegramNotification, UserNotificationSettings
+        from asgiref.sync import async_to_sync
+        from tgbot.bot.workers.notifications import _get_and_group_pending
+
+        UserNotificationSettings.objects.filter(user=self.user).update(
+            level='selective', notify_shipped_cn=False,
+        )
+        tracks = self._make_tracks(['S1', 'S2'])
+        TelegramNotification.objects.all().delete()
+        for t in tracks:
+            t.status = 'shipped_cn'
+            t.save()
+
+        grouped_ready, grouped_status, status_notifications, skip_ids = (
+            async_to_sync(_get_and_group_pending)()
+        )
+        self.assertEqual(grouped_status, {})
+        self.assertEqual(len(skip_ids), 2)

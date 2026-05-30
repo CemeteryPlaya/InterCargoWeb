@@ -25,7 +25,7 @@ def notifications_context(request):
     context = {
         'WEBPUSH_SETTINGS': getattr(django_settings, 'WEBPUSH_SETTINGS', {}),
         'price_per_kg': price_per_kg,
-        'pickup_points': PickupPoint.objects.filter(is_active=True, show_in_registration=True).order_by('id'),
+        'footer_pickup_points': PickupPoint.objects.filter(is_active=True, show_in_footer=True).order_by('id'),
     }
     if request.user.is_authenticated:
         unread_qs = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
