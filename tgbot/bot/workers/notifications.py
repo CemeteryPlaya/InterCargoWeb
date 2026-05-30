@@ -12,6 +12,8 @@ from asgiref.sync import sync_to_async
 from django.conf import settings as django_settings
 from django.utils import timezone
 
+from tgbot.bot.db_utils import refresh_db_connections, drop_dead_connections
+
 logger = logging.getLogger(__name__)
 
 MAX_RETRY_COUNT = 5  # После этого числа попыток уведомление помечается как failed
@@ -27,11 +29,13 @@ async def notification_worker(bot: Bot, interval: int = 10):
     logger.info("Notification worker started.")
     while True:
         try:
+            await refresh_db_connections()
             sent_count = await send_pending_notifications(bot)
             if sent_count > 0:
                 logger.info(f"Worker sent {sent_count} notifications.")
         except Exception as e:
             logger.error(f"Error in notification worker loop: {e}")
+            await drop_dead_connections()
 
         await asyncio.sleep(interval)
 

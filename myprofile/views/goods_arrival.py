@@ -411,7 +411,7 @@ def complete_session(request, session_id):
                     if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                         track.weight = weight_val
                     if owner_name:
-                        user, _ = _resolve_owner(owner_name)
+                        user, _unused = _resolve_owner(owner_name)
                         track.owner = user
                     if sorting_location:
                         track.sorting_location = sorting_location
@@ -434,7 +434,7 @@ def complete_session(request, session_id):
             if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
                 track.weight = weight_val
             if owner_name:
-                user, _ = _resolve_owner(owner_name)
+                user, _unused = _resolve_owner(owner_name)
                 track.owner = user
                 if user and not user.is_active:
                     temp_created += 1
@@ -471,7 +471,7 @@ def complete_session(request, session_id):
 
         except TrackCode.DoesNotExist:
             try:
-                user, _ = _resolve_owner(owner_name) if owner_name else (None, None)
+                user, _unused = _resolve_owner(owner_name) if owner_name else (None, None)
                 new_track = TrackCode.objects.create(
                     track_code=code,
                     status=status,

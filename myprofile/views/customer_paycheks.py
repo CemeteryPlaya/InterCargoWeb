@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from myprofile.models import Receipt
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.views.utils import get_user_discount, get_global_price_per_kg
+from myprofile.views.utils import get_user_discount, get_global_price_per_kg, create_receipts_for_user
 from register.models import UserProfile
 from django.utils.translation import gettext as _
 
@@ -62,13 +62,15 @@ def generate_daily_receipt(request):
         return redirect('delivered_posts')
 
     messages.success(request, f"Создан чек #{receipt.id} на сумму {receipt.total_price} тг.")
-    return redirect('receipt_list')
+    return redirect('delivered_posts')
 
 
 @login_required
 def receipt_list(request):
-    receipts = Receipt.objects.filter(owner=request.user).order_by('-created_at')
-    return render(request, 'receipts.html', {'receipts': receipts})
+    # Канонический список чеков клиента рендерит delivered_trackcodes_by_date
+    # ('delivered_posts') — там считаются computed_weight/price и есть шаблон.
+    # Этот URL ('/profile/receipts/') сохранён для старых ссылок и редиректит туда.
+    return redirect('delivered_posts')
 
 
 @require_POST

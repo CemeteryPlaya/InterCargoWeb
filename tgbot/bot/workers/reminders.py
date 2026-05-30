@@ -11,6 +11,8 @@ from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 
+from tgbot.bot.db_utils import refresh_db_connections, drop_dead_connections
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,9 +21,11 @@ async def reminders_worker(bot: Bot, interval_hours: int = 4):
     logger.info(f'Reminders worker started (check every {interval_hours}h)')
     while True:
         try:
+            await refresh_db_connections()
             await check_and_send_reminders(bot)
         except Exception as e:
             logger.error(f'Reminders loop error: {e}')
+            await drop_dead_connections()
 
         await asyncio.sleep(interval_hours * 3600)
 
