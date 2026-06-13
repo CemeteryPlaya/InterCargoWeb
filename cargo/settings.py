@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'register',
     'pywebpush',
     'tgbot',
+    'dibuyer',
 ]
 
 MIDDLEWARE = [
