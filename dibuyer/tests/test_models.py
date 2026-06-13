@@ -35,3 +35,13 @@ class BuyerOrderModelTests(TestCase):
         BuyerOrderItem.objects.create(order=order, url='https://nike.com/b', quantity=2)
         self.assertEqual(order.items_count, 2)
         self.assertEqual(order.items.get(url='https://nike.com/b').quantity, 2)
+
+
+from register.models import UserProfile
+
+
+class DibuyerStaffFlagTests(TestCase):
+    def test_profile_has_is_dibuyer_staff_default_false(self):
+        user = User.objects.create_user(username='s1', password='p')
+        profile = UserProfile.objects.create(user=user, phone='1')
+        self.assertFalse(profile.is_dibuyer_staff)

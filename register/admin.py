@@ -11,10 +11,10 @@ class PickupPointAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone', 'pickup', 'is_staff', 'is_hr', 'is_driver', 'is_pp_worker', 'is_pp_owner', 'is_accountant', 'is_tg_admin', 'is_registered', 'delivery_rate')
+    list_display = ('user', 'phone', 'pickup', 'is_staff', 'is_hr', 'is_driver', 'is_pp_worker', 'is_pp_owner', 'is_accountant', 'is_tg_admin', 'is_dibuyer_staff', 'is_registered', 'delivery_rate')
     list_editable = ('delivery_rate',)
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'phone')
-    list_filter = ('pickup', 'is_driver', 'is_pp_worker', 'is_pp_owner', 'is_tg_admin', 'is_registered')
+    list_filter = ('pickup', 'is_driver', 'is_pp_worker', 'is_pp_owner', 'is_tg_admin', 'is_dibuyer_staff', 'is_registered')
 
 
 @admin.register(RolePermission)

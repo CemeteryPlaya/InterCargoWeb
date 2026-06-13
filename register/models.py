@@ -45,6 +45,7 @@ class UserProfile(models.Model):
     is_pp_owner = models.BooleanField(default=False, verbose_name=_("Владелец ПВЗ"))
     is_accountant = models.BooleanField(default=False, verbose_name=_("Бухгалтер"))
     is_tg_admin = models.BooleanField(default=False, verbose_name=_("Администратор Telegram-бота"))
+    is_dibuyer_staff = models.BooleanField(default=False, verbose_name=_("Сотрудник Di.Buyer"))
     is_registered = models.BooleanField(default=True, verbose_name=_("Регистрация подтверждена"))
     delivery_rate = models.DecimalField(
         max_digits=8, decimal_places=2, default=0,
