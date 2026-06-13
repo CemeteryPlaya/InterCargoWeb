@@ -58,6 +58,7 @@ class BuyerOrder(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tracking_exported = models.BooleanField(default=False, verbose_name=_("Посылки созданы"))
 
     class Meta:
         ordering = ['-created_at']
@@ -83,6 +84,19 @@ class BuyerOrderItem(models.Model):
         verbose_name=_("Комментарий (размер/цвет/кол-во)"),
     )
     quantity = models.PositiveIntegerField(default=1, verbose_name=_("Количество"))
+    weight = models.DecimalField(
+        max_digits=6, decimal_places=3, null=True, blank=True, verbose_name=_("Вес (кг)"),
+    )
+    delivery_cost_kzt = models.DecimalField(
+        max_digits=10, decimal_places=0, null=True, blank=True, verbose_name=_("Стоимость доставки (₸)"),
+    )
+    exchange_rate = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True, verbose_name=_("Курс ₸/$"),
+    )
+    track_code = models.ForeignKey(
+        'myprofile.TrackCode', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Трек-код посылки"),
+    )
 
     def __str__(self):
         return self.url

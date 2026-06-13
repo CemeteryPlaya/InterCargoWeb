@@ -82,3 +82,20 @@ class TrackRateOverrideTests(TestCase):
                                            item_price=50000, item_rate=_Dec('50000.00'))
         item.refresh_from_db()
         self.assertEqual(item.item_rate, _Dec('50000.00'))
+
+
+class DibuyerExportFieldsTests(TestCase):
+    def test_order_and_item_have_export_fields(self):
+        from decimal import Decimal
+        u = User.objects.create_user(username='ex1', password='p')
+        order = BuyerOrder.objects.create(client=u)
+        self.assertFalse(order.tracking_exported)
+        item = BuyerOrderItem.objects.create(order=order, url='https://nike.com/a')
+        item.weight = Decimal('1.000')
+        item.delivery_cost_kzt = 5424
+        item.exchange_rate = Decimal('480.00')
+        item.save()
+        item.refresh_from_db()
+        self.assertEqual(item.delivery_cost_kzt, 5424)
+        self.assertEqual(item.exchange_rate, Decimal('480.00'))
+        self.assertIsNone(item.track_code)
