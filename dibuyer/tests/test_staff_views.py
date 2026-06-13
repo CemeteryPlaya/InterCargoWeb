@@ -57,3 +57,45 @@ class StaffViewTests(TestCase):
         resp = self.client.get(reverse('dibuyer_home'))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, reverse('dibuyer_manage'))
+
+
+class StaffExportViewTests(TestCase):
+    def setUp(self):
+        self.staff_user = User.objects.create_user(username='s2', password='p')
+        UserProfile.objects.create(user=self.staff_user, phone='9', is_dibuyer_staff=True)
+        self.client_user = User.objects.create_user(username='c2', password='p')
+        UserProfile.objects.create(user=self.client_user, phone='8')
+        self.order = BuyerOrder.objects.create(client=self.client_user)
+        from dibuyer.models import BuyerOrderItem
+        self.item = BuyerOrderItem.objects.create(order=self.order, url='https://nike.com/x')
+        self.http = Client()
+        self.http.login(username='s2', password='p')
+
+    def test_purchase_with_item_data_exports(self):
+        from myprofile.models import TrackCode
+        resp = self.http.post(reverse('dibuyer_manage_update', args=[self.order.pk]), {
+            'status': 'purchased',
+            'staff_response': '',
+            f'track_code_{self.item.id}': '',
+            f'weight_{self.item.id}': '1',
+            f'delivery_cost_{self.item.id}': '5424',
+        })
+        self.assertRedirects(resp, reverse('dibuyer_manage_detail', args=[self.order.pk]))
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, 'purchased')
+        self.assertTrue(self.order.tracking_exported)
+        self.assertTrue(TrackCode.all_objects.filter(track_code=f'DIB-{self.item.id}',
+                                                     owner=self.client_user).exists())
+
+    def test_purchase_without_weight_does_not_export(self):
+        resp = self.http.post(reverse('dibuyer_manage_update', args=[self.order.pk]), {
+            'status': 'purchased',
+            'staff_response': '',
+            f'track_code_{self.item.id}': '',
+            f'weight_{self.item.id}': '',
+            f'delivery_cost_{self.item.id}': '',
+        })
+        self.assertRedirects(resp, reverse('dibuyer_manage_detail', args=[self.order.pk]))
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, 'purchased')
+        self.assertFalse(self.order.tracking_exported)
