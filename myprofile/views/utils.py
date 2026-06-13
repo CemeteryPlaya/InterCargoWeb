@@ -70,10 +70,14 @@ def get_discount_weight_threshold():
 
 
 def _recalc_receipt(receipt, effective_rate):
-    """Пересчитывает total_weight и total_price чека по его items."""
+    """Пересчитывает total_weight (сумма весов) и total_price (сумма позиций) чека.
+
+    Итог считается суммой item_price, т.к. позиции могут иметь разные тарифы
+    (обычные посылки InterCargo + товары Di.Buyer с собственной ставкой).
+    """
     items = receipt.items.select_related('track_code').all()
     total_weight = sum((item.display_weight or Decimal("0")) for item in items)
-    total_price = (total_weight * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    total_price = sum((item.item_price or Decimal("0")) for item in items)
     receipt.total_weight = total_weight
     receipt.total_price = total_price
     receipt.price_per_kg = effective_rate
@@ -131,10 +135,11 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
         )
         for track in date_tracks:
             w = track.weight or Decimal("0")
+            rate = track.rate_override if track.rate_override is not None else effective_rate
             ReceiptItem.objects.create(
                 receipt=receipt, track_code=track,
-                item_rate=effective_rate,
-                item_price=(w * effective_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
+                item_rate=rate,
+                item_price=(w * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
             )
         _recalc_receipt(receipt, effective_rate)
         last_receipt = receipt
