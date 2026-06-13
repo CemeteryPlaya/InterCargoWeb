@@ -59,3 +59,26 @@ class DibuyerSettingsAdminTests(TestCase):
     def test_delete_permission_always_false(self):
         admin_obj = DibuyerSettingsAdmin(DibuyerSettings, AdminSite())
         self.assertFalse(admin_obj.has_delete_permission(request=None))
+
+
+from decimal import Decimal as _Dec
+
+from myprofile.models import TrackCode as _TrackCode, Receipt as _Receipt, ReceiptItem as _ReceiptItem
+
+
+class TrackRateOverrideTests(TestCase):
+    def test_track_accepts_rate_override(self):
+        u = User.objects.create_user(username='ro1', password='p')
+        t = _TrackCode(track_code='RO-1', status='user_added', owner=u,
+                       weight=_Dec('1.000'), rate_override=_Dec('5424.00'))
+        t.save()
+        t.refresh_from_db()
+        self.assertEqual(t.rate_override, _Dec('5424.00'))
+
+    def test_receipt_item_rate_allows_five_integer_digits(self):
+        u = User.objects.create_user(username='ro2', password='p')
+        r = _Receipt.objects.create(owner=u)
+        item = _ReceiptItem.objects.create(receipt=r, track_code_str='X', weight=_Dec('1.000'),
+                                           item_price=50000, item_rate=_Dec('50000.00'))
+        item.refresh_from_db()
+        self.assertEqual(item.item_rate, _Dec('50000.00'))

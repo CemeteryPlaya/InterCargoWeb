@@ -108,6 +108,10 @@ class TrackCode(models.Model):
         max_digits=6, decimal_places=2, null=True, blank=True,
         verbose_name=_("Тариф на момент доставки (₸/кг)")
     )
+    rate_override = models.DecimalField(
+        max_digits=7, decimal_places=2, null=True, blank=True,
+        verbose_name=_("Фиксированный тариф позиции в чеке (₸/кг)")
+    )
     status_history = models.JSONField(default=list, blank=True, verbose_name=_("История статусов"))
 
     # Принятие на ПВЗ / складе
@@ -396,7 +400,7 @@ class ReceiptItem(models.Model):
     track_code_str = models.CharField(max_length=100, blank=True, verbose_name=_("Трек-код (текст)"))
     weight = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, verbose_name=_("Вес (кг)"))
     item_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name=_("Стоимость позиции (₸)"))
-    item_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name=_("Тариф за кг (₸/кг)"))
+    item_rate = models.DecimalField(max_digits=7, decimal_places=2, default=0, verbose_name=_("Тариф за кг (₸/кг)"))
 
     class Meta:
         verbose_name = _("Позиция чека")
