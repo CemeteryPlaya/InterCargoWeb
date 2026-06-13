@@ -30,15 +30,22 @@ def delivered_trackcodes_by_date(request):
             else:
                 receipt_rate = effective_rate
 
-        # Пересчитываем итоги от актуальных items (а не хранимых значений)
+        # Цена позиции — из сохранённого item_price (учитывает индивидуальные тарифы,
+        # включая товары Di.Buyer). Для старых строк без цены — пересчёт по тарифу чека.
         computed_weight = Decimal("0")
+        computed_price = Decimal("0")
         for item in receipt.items_list:
             weight = item.display_weight or Decimal("0")
-            item.price = (weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            if item.item_price:
+                item.price = item.item_price
+            else:
+                item.price = (weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            item.rate = item.item_rate or receipt_rate
             computed_weight += weight
+            computed_price += item.price
 
         receipt.computed_weight = computed_weight
-        receipt.computed_price = (computed_weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        receipt.computed_price = computed_price
 
     # Ссылка на оплату из ПВЗ пользователя
     payment_link = None
@@ -105,17 +112,21 @@ def print_receipt(request, receipt_id):
 
     items = []
     computed_weight = Decimal("0")
+    total_price = Decimal("0")
     for item in receipt.items.select_related('track_code').all():
         weight = item.display_weight or Decimal("0")
-        price = (weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        if item.item_price:
+            price = item.item_price
+        else:
+            price = (weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
         items.append({
             'track_code': item.display_track_code,
             'weight': weight,
             'price': price,
+            'rate': item.item_rate or receipt_rate,
         })
         computed_weight += weight
-
-    total_price = (computed_weight * receipt_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        total_price += price
 
     # Имя клиента и ПВЗ
     full_name = request.user.get_full_name()
