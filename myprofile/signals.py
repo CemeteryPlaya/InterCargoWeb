@@ -114,15 +114,19 @@ def _update_item_weight(item, new_weight):
 
 
 def _recalc_receipt_safe(receipt):
-    """Пересчитывает total_weight и total_price чека. Удаляет пустой чек."""
+    """Пересчитывает total_weight (сумма весов) и total_price (сумма позиций) чека.
+
+    Итог = сумма item_price позиций, т.к. позиции могут иметь разные тарифы
+    (обычные посылки InterCargo + товары Di.Buyer с собственной ставкой).
+    Удаляет пустой чек.
+    """
     items = list(receipt.items.all())
     if not items:
         receipt.delete()
         return
 
     total_weight = sum((i.weight or Decimal('0')) for i in items)
-    rate = receipt.price_per_kg or Decimal('0')
-    total_price = (total_weight * rate).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    total_price = sum((i.item_price or Decimal('0')) for i in items)
 
     receipt.total_weight = total_weight
     receipt.total_price = total_price
