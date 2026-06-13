@@ -102,6 +102,7 @@ TEMPLATES = [
                 'mainview.context_processors.app_version',
                 'mainview.context_processors.current_language',
                 'mainview.context_processors.role_management_access',
+                'dibuyer.context_processors.dibuyer_enabled',
             ],
         },
     },
