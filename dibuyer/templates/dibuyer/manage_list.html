@@ -1,3 +1,28 @@
-{% load i18n %}<!doctype html><title>Di.Buyer — {% trans "Заявки" %}</title>
-<h1>{% trans "Входящие заявки" %}</h1>
-<ul>{% for o in orders %}<li>#{{ o.pk }} — {{ o.client }} — {{ o.get_status_display }}</li>{% endfor %}</ul>
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}
+{% block title %}Di.Buyer — {% trans "Заявки" %}{% endblock %}
+
+{% block content %}
+  <div class="eyebrow">{% trans "Входящие заявки" %}</div>
+
+  <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
+    <a class="chip {% if not status_filter %}chip-purchased{% else %}chip-new{% endif %}" href="{% url 'dibuyer_manage' %}">{% trans "Все" %}</a>
+    {% for key, label in status_choices %}
+      <a class="chip {% if status_filter == key %}chip-purchased{% else %}chip-{{ key }}{% endif %}" href="{% url 'dibuyer_manage' %}?status={{ key }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {% for o in orders %}
+    <a class="card" style="display:block" href="{% url 'dibuyer_manage_detail' o.pk %}">
+      <div class="req">
+        <div>
+          <div class="req-id">№{{ o.pk }} · {{ o.client.get_full_name|default:o.client.username }}</div>
+          <div class="req-meta">{{ o.items.all|length }} {% trans "товар(ов)" %} · {{ o.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        <span class="chip chip-{{ o.status }}">{{ o.get_status_display }}</span>
+      </div>
+    </a>
+  {% empty %}
+    <div class="empty">{% trans "Заявок нет." %}</div>
+  {% endfor %}
+{% endblock %}
