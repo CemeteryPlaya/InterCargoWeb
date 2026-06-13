@@ -1,8 +1,10 @@
 from decimal import Decimal
 
+from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from dibuyer.admin import DibuyerSettingsAdmin
 from dibuyer.models import BuyerOrder, BuyerOrderItem, DibuyerSettings
 
 
@@ -45,3 +47,15 @@ class DibuyerStaffFlagTests(TestCase):
         user = User.objects.create_user(username='s1', password='p')
         profile = UserProfile.objects.create(user=user, phone='1')
         self.assertFalse(profile.is_dibuyer_staff)
+
+
+class DibuyerSettingsAdminTests(TestCase):
+    def test_add_permission_blocked_once_row_exists(self):
+        admin_obj = DibuyerSettingsAdmin(DibuyerSettings, AdminSite())
+        self.assertTrue(admin_obj.has_add_permission(request=None))
+        DibuyerSettings.load()
+        self.assertFalse(admin_obj.has_add_permission(request=None))
+
+    def test_delete_permission_always_false(self):
+        admin_obj = DibuyerSettingsAdmin(DibuyerSettings, AdminSite())
+        self.assertFalse(admin_obj.has_delete_permission(request=None))
