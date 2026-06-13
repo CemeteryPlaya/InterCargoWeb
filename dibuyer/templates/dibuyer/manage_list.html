@@ -1,0 +1,3 @@
+{% load i18n %}<!doctype html><title>Di.Buyer — {% trans "Заявки" %}</title>
+<h1>{% trans "Входящие заявки" %}</h1>
+<ul>{% for o in orders %}<li>#{{ o.pk }} — {{ o.client }} — {{ o.get_status_display }}</li>{% endfor %}</ul>

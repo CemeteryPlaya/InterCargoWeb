@@ -1,0 +1,7 @@
+{% load i18n %}<!doctype html><title>Di.Buyer — №{{ order.pk }}</title>
+<h1>{% trans "Заявка" %} №{{ order.pk }}</h1>
+<form method="post" action="{% url 'dibuyer_manage_update' order.pk %}">{% csrf_token %}
+<select name="status">{% for k, label in status_choices %}<option value="{{ k }}" {% if order.status == k %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<textarea name="staff_response">{{ order.staff_response }}</textarea>
+<button type="submit">{% trans "Сохранить" %}</button>
+</form>
