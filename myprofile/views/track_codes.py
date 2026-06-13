@@ -5,6 +5,7 @@ from django.contrib import messages
 from django import forms
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from myprofile.models import TrackCode, ArchivedTrackCode, ReceiptItem
 from django.utils.translation import gettext as _
 
@@ -17,6 +18,15 @@ def _safe_next_url(request, fallback='track_codes'):
     ):
         return next_url
     return None
+
+
+def _mobile_category(track):
+    """Ключ категории мобильной страницы «Посылки» для данного трека."""
+    if track.is_archived:
+        return 'archived'
+    if track.status in ('delivered', 'unidentified'):
+        return 'in_sorting'
+    return track.status
 
 class TrackCodeForm(forms.ModelForm):
     class Meta:
@@ -41,14 +51,22 @@ def track_codes_view(request):
         description = request.POST.get('description', '').strip()
         next_url = _safe_next_url(request)
 
-        def _redirect(track_id=None):
-            """Редирект на next_url с опциональным ?new=<id> для подсветки."""
+        def _redirect(track=None):
+            """Редирект на next_url с подсветкой трека (?new=<id>).
+
+            Если в next_url есть параметр cat, он заменяется на реальную
+            категорию трека, чтобы открылась вкладка его статуса.
+            """
             if not next_url:
                 return redirect('track_codes')
             url = next_url
-            if track_id:
-                sep = '&' if '?' in url else '?'
-                url = f"{url}{sep}new={track_id}"
+            if track is not None:
+                parts = urlsplit(url)
+                params = dict(parse_qsl(parts.query))
+                if 'cat' in params:
+                    params['cat'] = _mobile_category(track)
+                params['new'] = str(track.id)
+                url = urlunsplit(parts._replace(query=urlencode(params)))
             return redirect(url)
 
         if track_code_str:
@@ -72,7 +90,7 @@ def track_codes_view(request):
                             f"Трек-код добавлен как неопознанная посылка{location_info}. "
                             f"Ожидайте подтверждения оператором — после этого посылка будет обработана."
                         )
-                        return _redirect(existing_track.id)
+                        return _redirect(existing_track)
 
                     # Если трек-код существует, но без владельца, присваиваем его текущему пользователю
                     existing_track.owner = request.user
@@ -89,10 +107,10 @@ def track_codes_view(request):
                     existing_track.log_status_change(request.user)
                     existing_track.save()
                     messages.success(request, f"Трек-код успешно добавлен. Текущий статус: {existing_track.get_status_display()}")
-                    return _redirect(existing_track.id)
+                    return _redirect(existing_track)
                 elif existing_track.owner == request.user:
                     messages.warning(request, _("Этот трек-код уже добавлен в ваш список."))
-                    return _redirect(existing_track.id)
+                    return _redirect(existing_track)
                 else:
                     messages.error(request, _("Этот трек-код уже зарегистрирован другим пользователем."))
                     return _redirect()
@@ -108,7 +126,15 @@ def track_codes_view(request):
                     track_code.log_status_change(request.user)
                     track_code.save()
                     messages.success(request, _("Трек-код успешно добавлен."))
-                    return _redirect(track_code.id)
+                    return _redirect(track_code)
+                elif next_url:
+                    # Мобильная страница: возвращаем ошибки формы через messages,
+                    # иначе пользователь попадёт на десктопную версию
+                    error_text = '; '.join(
+                        err for errs in form.errors.values() for err in errs
+                    )
+                    messages.error(request, error_text or _("Не удалось добавить трек-код."))
+                    return _redirect()
         else:
             messages.error(request, _("Введите трек-код."))
             return _redirect()

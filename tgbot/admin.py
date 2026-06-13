@@ -41,7 +41,7 @@ class TelegramNotificationAdmin(admin.ModelAdmin):
 
 @admin.register(UserNotificationSettings)
 class UserNotificationSettingsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'level', 'notify_shipped_cn', 'notify_delivered_sort', 'notify_shipping_pp')
+    list_display = ('user', 'level', 'notify_shipped_cn', 'notify_at_customs', 'notify_left_almaty', 'notify_delivered_sort', 'notify_shipping_pp')
     list_filter = ('level',)
     search_fields = ('user__username',)
 

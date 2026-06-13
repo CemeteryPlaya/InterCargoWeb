@@ -261,6 +261,16 @@
                             {% trans "Отправлено из Китая" %}
                         </label>
                         <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="notify_at_customs" class="accent-red-500"
+                                {% if notif_settings.notify_at_customs %}checked{% endif %}>
+                            {% trans "Прибыло на таможню (Китай-Казахстан)" %}
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="notify_left_almaty" class="accent-red-500"
+                                {% if notif_settings.notify_left_almaty %}checked{% endif %}>
+                            {% trans "Выехало из Алматы" %}
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
                             <input type="checkbox" name="notify_delivered_sort" class="accent-red-500"
                                 {% if notif_settings.notify_delivered_sort %}checked{% endif %}>
                             {% trans "Сортировочный склад" %}

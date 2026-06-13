@@ -163,6 +163,8 @@ class UserNotificationSettings(models.Model):
     )
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='only_ready', verbose_name=_('Уровень'))
     notify_shipped_cn = models.BooleanField(default=True, verbose_name=_('Отправлено из Китая'))
+    notify_at_customs = models.BooleanField(default=True, verbose_name=_('Прибыло на таможню (Китай-Казахстан)'))
+    notify_left_almaty = models.BooleanField(default=True, verbose_name=_('Выехало из Алматы'))
     notify_delivered_sort = models.BooleanField(default=True, verbose_name=_('Сортировочный склад'))
     notify_shipping_pp = models.BooleanField(default=True, verbose_name=_('В доставке до ПВЗ'))
 

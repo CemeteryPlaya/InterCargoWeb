@@ -60,6 +60,8 @@
                     {% if cat.key == 'user_added' %}#ef4444
                     {% elif cat.key == 'warehouse_cn' %}#f97316
                     {% elif cat.key == 'shipped_cn' %}#eab308
+                    {% elif cat.key == 'at_customs' %}#06b6d4
+                    {% elif cat.key == 'left_almaty' %}#6366f1
                     {% elif cat.key == 'in_sorting' %}#a855f7
                     {% elif cat.key == 'shipping_pp' %}#6b7280
                     {% elif cat.key == 'ready' %}#22c55e
@@ -73,6 +75,8 @@
                             {% if cat.key == 'user_added' %}background:#fee2e2;color:#ef4444
                             {% elif cat.key == 'warehouse_cn' %}background:#ffedd5;color:#f97316
                             {% elif cat.key == 'shipped_cn' %}background:#fef9c3;color:#eab308
+                            {% elif cat.key == 'at_customs' %}background:#cffafe;color:#06b6d4
+                            {% elif cat.key == 'left_almaty' %}background:#e0e7ff;color:#6366f1
                             {% elif cat.key == 'in_sorting' %}background:#f3e8ff;color:#a855f7
                             {% elif cat.key == 'shipping_pp' %}background:#e5e7eb;color:#6b7280
                             {% elif cat.key == 'ready' %}background:#dcfce7;color:#22c55e
@@ -89,6 +93,8 @@
                             {% if cat.key == 'user_added' %}background:#fee2e2;color:#b91c1c
                             {% elif cat.key == 'warehouse_cn' %}background:#ffedd5;color:#c2410c
                             {% elif cat.key == 'shipped_cn' %}background:#fef9c3;color:#a16207
+                            {% elif cat.key == 'at_customs' %}background:#cffafe;color:#0e7490
+                            {% elif cat.key == 'left_almaty' %}background:#e0e7ff;color:#4338ca
                             {% elif cat.key == 'in_sorting' %}background:#f3e8ff;color:#7e22ce
                             {% elif cat.key == 'shipping_pp' %}background:#e5e7eb;color:#374151
                             {% elif cat.key == 'ready' %}background:#dcfce7;color:#15803d
@@ -154,6 +160,8 @@
                         {% elif track.status == 'user_added' %}bg-red-100 border-red-300
                         {% elif track.status == 'warehouse_cn' %}bg-orange-100 border-orange-300
                         {% elif track.status == 'shipped_cn' %}bg-yellow-100 border-yellow-300
+                        {% elif track.status == 'at_customs' %}bg-cyan-100 border-cyan-300
+                        {% elif track.status == 'left_almaty' %}bg-indigo-100 border-indigo-300
                         {% elif track.status == 'delivered' or track.status == 'unidentified' %}bg-purple-100 border-purple-300
                         {% elif track.status == 'shipping_pp' %}bg-gray-200 border-gray-400
                         {% elif track.status == 'claimed' %}bg-blue-100 border-blue-300
@@ -184,9 +192,7 @@
                         {% if track.sorting_location %}
                         <p><strong>{% trans "Где отсортирован:" %}</strong> {{ track.sorting_location }}</p>
                         {% endif %}
-                        {% if track.description %}
-                        <p><strong>{% trans "Описание:" %}</strong> {{ track.description }}</p>
-                        {% endif %}
+                        <p class="track-desc{% if not track.description %} hidden{% endif %}"><strong>{% trans "Описание:" %}</strong> <span class="desc-text">{{ track.description }}</span></p>
                         {% if track.status == 'delivered' or track.status == 'shipping_pp' or track.status == 'claimed' or track.status == 'ready' %}
                             {% if track.weight %}
                             <p><strong>{% trans "Вес:" %}</strong> {{ track.weight }} кг</p>
@@ -202,6 +208,13 @@
                                 <i class="ri-inbox-unarchive-line mr-0.5"></i> {% trans "Восстановить" %}
                             </button>
                             {% else %}
+                            {% if track.status != 'shipping_pp' %}
+                            <button type="button"
+                                class="edit-desc-btn text-xs font-medium bg-white bg-opacity-90 text-gray-700 hover:text-blue-700 hover:bg-blue-50 border border-gray-400 rounded px-3 py-1.5 shadow-sm transition-colors"
+                                data-track-id="{{ track.id }}">
+                                <i class="ri-pencil-line mr-0.5"></i> {% trans "Изменить" %}
+                            </button>
+                            {% endif %}
                             <button type="button"
                                 class="archive-btn text-xs font-medium bg-white bg-opacity-90 text-gray-700 hover:text-red-700 hover:bg-red-50 border border-gray-400 rounded px-3 py-1.5 shadow-sm transition-colors"
                                 data-track-id="{{ track.id }}">
@@ -260,6 +273,29 @@
             <button type="submit"
                 class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-red-600 transition">
                 <i class="ri-add-line mr-1"></i> {% trans "Добавить" %}
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Модалка изменения описания -->
+<div id="edit-desc-modal" class="fixed inset-0 z-50 hidden items-end">
+    <div id="edit-desc-backdrop" class="absolute inset-0 bg-black/0 transition-colors duration-300"></div>
+    <div id="edit-desc-sheet" class="relative bg-white rounded-t-2xl shadow-xl w-full z-10 translate-y-full transition-transform duration-300 ease-out">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3">
+            <h3 class="text-lg font-bold">{% trans "Изменить описание" %}</h3>
+            <button id="edit-desc-close" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+        </div>
+        <form id="edit-desc-form" class="px-5 pb-6 space-y-4">
+            <input type="hidden" name="track_id" id="edit-desc-track-id">
+            <div>
+                <textarea name="description" id="edit-desc-input" rows="2" maxlength="255"
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                    placeholder="{% trans "Описание посылки (необязательно)" %}"></textarea>
+            </div>
+            <button type="submit" id="edit-desc-submit"
+                class="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-red-600 transition">
+                <i class="ri-save-line mr-1"></i> {% trans "Сохранить" %}
             </button>
         </form>
     </div>
@@ -547,8 +583,84 @@
     if (addClose) addClose.addEventListener('click', closeAddModal);
     if (addBackdrop) addBackdrop.addEventListener('click', closeAddModal);
 
+    // === Модалка изменения описания ===
+    var editModal = document.getElementById('edit-desc-modal');
+    var editSheet = document.getElementById('edit-desc-sheet');
+    var editBackdrop = document.getElementById('edit-desc-backdrop');
+    var editClose = document.getElementById('edit-desc-close');
+    var editForm = document.getElementById('edit-desc-form');
+    var editInput = document.getElementById('edit-desc-input');
+    var editTrackIdInput = document.getElementById('edit-desc-track-id');
+
+    function openEditModal(trackId, currentDesc) {
+        editTrackIdInput.value = trackId;
+        editInput.value = currentDesc;
+        editModal.classList.remove('hidden');
+        editModal.classList.add('flex');
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                editSheet.classList.remove('translate-y-full');
+                editSheet.classList.add('translate-y-0');
+                editBackdrop.classList.remove('bg-black/0');
+                editBackdrop.classList.add('bg-black/50');
+            });
+        });
+        setTimeout(function() { editInput.focus(); }, 300);
+    }
+    function closeEditModal() {
+        editSheet.classList.remove('translate-y-0');
+        editSheet.classList.add('translate-y-full');
+        editBackdrop.classList.remove('bg-black/50');
+        editBackdrop.classList.add('bg-black/0');
+        var onEnd = function(e) {
+            if (e.propertyName !== 'transform') return;
+            editModal.classList.add('hidden');
+            editModal.classList.remove('flex');
+            editSheet.removeEventListener('transitionend', onEnd);
+        };
+        editSheet.addEventListener('transitionend', onEnd);
+    }
+
+    if (editClose) editClose.addEventListener('click', closeEditModal);
+    if (editBackdrop) editBackdrop.addEventListener('click', closeEditModal);
+
+    if (editForm) editForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var trackId = editTrackIdInput.value;
+        var desc = editInput.value.trim();
+        var submitBtn = document.getElementById('edit-desc-submit');
+        submitBtn.disabled = true;
+
+        fetch('{% url "mobile_edit_description" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'track_id=' + encodeURIComponent(trackId) + '&description=' + encodeURIComponent(desc)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            submitBtn.disabled = false;
+            if (data.success) {
+                var card = document.querySelector('.track-card[data-track-id="' + trackId + '"]');
+                if (card) {
+                    var p = card.querySelector('.track-desc');
+                    var span = card.querySelector('.desc-text');
+                    if (span) span.textContent = data.description;
+                    if (p) p.classList.toggle('hidden', !data.description);
+                }
+                closeEditModal();
+                showToast(data.message, 'success');
+            } else {
+                showToast(data.error || '{% trans "Ошибка" %}', 'error');
+            }
+        })
+        .catch(function() {
+            submitBtn.disabled = false;
+            showToast('{% trans "Ошибка сети" %}', 'error');
+        });
+    });
+
     // === Toast ===
-    function showToast(message, type) {
+    function showToast(message, type, duration) {
         var toast = document.getElementById('mobile-toast');
         var text = document.getElementById('toast-text');
         var icon = document.getElementById('toast-icon');
@@ -567,8 +679,28 @@
         }
         toast.classList.remove('hidden');
         clearTimeout(toast._timer);
-        toast._timer = setTimeout(function() { toast.classList.add('hidden'); }, 3500);
+        toast._timer = setTimeout(function() { toast.classList.add('hidden'); }, duration || 3500);
     }
+
+    // === Серверные сообщения (Django messages) показываем как toast ===
+    {% if messages %}
+    (function() {
+        var serverMessages = [
+            {% for message in messages %}
+            { text: '{{ message|escapejs }}', tags: '{{ message.tags|escapejs }}' }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        var delay = 0;
+        serverMessages.forEach(function(m) {
+            var type = 'success';
+            var duration = 3500;
+            if (m.tags.indexOf('error') !== -1) { type = 'error'; duration = 6000; }
+            else if (m.tags.indexOf('warning') !== -1) { type = 'warning'; duration = 6000; }
+            setTimeout(function() { showToast(m.text, type, duration); }, delay);
+            delay += duration + 300;
+        });
+    })();
+    {% endif %}
 
     // === Глобальный click handler ===
     document.addEventListener('click', function(e) {
@@ -596,11 +728,21 @@
         var card = e.target.closest('.track-card');
         if (card && activePanelKey && selectModeActive[activePanelKey]) {
             // Не перехватываем клики по кнопкам внутри карточки
-            if (!e.target.closest('.archive-btn') && !e.target.closest('.unarchive-btn')) {
+            if (!e.target.closest('.archive-btn') && !e.target.closest('.unarchive-btn') && !e.target.closest('.edit-desc-btn')) {
                 e.preventDefault();
                 toggleCardSelection(activePanelKey, card);
                 return;
             }
+        }
+
+        // Изменение описания
+        var editBtn = e.target.closest('.edit-desc-btn');
+        if (editBtn) {
+            e.preventDefault();
+            var editCard = editBtn.closest('.track-card');
+            var descEl = editCard ? editCard.querySelector('.desc-text') : null;
+            openEditModal(editBtn.dataset.trackId, descEl ? descEl.textContent.trim() : '');
+            return;
         }
 
         // Одиночная архивация

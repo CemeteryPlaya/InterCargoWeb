@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 trackInput.focus();
                 return;
             }
+            // Китайские символы (CJK) — как в серверной валидации (_INVALID_TRACK_CODE_RE)
+            if (/[一-鿿㐀-䶿豈-﫿　-〿]/.test(val)) {
+                e.preventDefault();
+                trackError.textContent = 'Трек-код не должен содержать китайские символы. Скопируйте только сам код (латинские буквы и цифры)';
+                trackInput.focus();
+                return;
+            }
             trackError.textContent = '';
         });
     }

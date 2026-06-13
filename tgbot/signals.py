@@ -12,6 +12,8 @@ STATUS_DISPLAY = {
     'user_added': _('Добавлен пользователем'),
     'warehouse_cn': _('На складе в Китае'),
     'shipped_cn': _('Отправлен со склада Китая'),
+    'at_customs': _('Прибыло на таможню (Китай-Казахстан)'),
+    'left_almaty': _('Выехало из Алматы'),
     'delivered': _('Доставлен на сортировочный склад'),
     'shipping_pp': _('В доставке до ПВЗ'),
     'ready': _('Доставлен на ПВЗ'),
@@ -80,7 +82,7 @@ def track_status_changed(sender, instance, **kwargs):
         # статуса в title и только трек-кодом в message. Воркер сам соберёт все
         # такие записи по пользователю и отправит ОДНО сообщение со списком
         # (см. _format_status_group_notification).
-        BATCHED_TG_STATUSES = {'shipped_cn'}
+        BATCHED_TG_STATUSES = {'shipped_cn', 'at_customs', 'left_almaty'}
         if instance.status in BATCHED_TG_STATUSES:
             TelegramNotification.objects.create(
                 user_id=instance.owner_id,

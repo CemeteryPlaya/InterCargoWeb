@@ -72,6 +72,8 @@ urlpatterns = [
     path('delivery/take/', delivery.take_delivery, name='take_delivery'),
     path('delivery/complete/', delivery.complete_delivery, name='complete_delivery'),
     path('shipped-cn/', shipped_cn.shipped_cn_view, name='shipped_cn'),
+    path('shipped-cn/advance-almaty/', shipped_cn.shipped_cn_advance_almaty, name='shipped_cn_advance_almaty'),
+    path('shipped-cn/batch-tracks/', shipped_cn.shipped_cn_batch_tracks, name='shipped_cn_batch_tracks'),
     path('warehouse/', warehouse.warehouse_view, name='warehouse'),
     path('warehouse/issue/', warehouse.warehouse_issue_to_client, name='warehouse_issue_to_client'),
     path('warehouse/not-arrived/', warehouse.warehouse_not_arrived, name='warehouse_not_arrived'),
@@ -136,6 +138,7 @@ urlpatterns = [
     path('mobile-parcels/archive/', mobile_parcels.mobile_archive_track, name='mobile_archive_track'),
     path('mobile-parcels/unarchive/', mobile_parcels.mobile_unarchive_track, name='mobile_unarchive_track'),
     path('mobile-parcels/mass-archive/', mobile_parcels.mobile_mass_archive, name='mobile_mass_archive'),
+    path('mobile-parcels/edit-description/', mobile_parcels.mobile_edit_description, name='mobile_edit_description'),
     path('mobile-notifications/', mobile_notifications.mobile_notifications_view, name='mobile_notifications'),
     path('mobile-menu/', mobile_menu.mobile_menu_view, name='mobile_menu'),
 

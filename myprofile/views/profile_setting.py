@@ -192,6 +192,8 @@ def save_notification_settings(request):
     settings_obj.level = level
 
     settings_obj.notify_shipped_cn = request.POST.get('notify_shipped_cn') == 'on'
+    settings_obj.notify_at_customs = request.POST.get('notify_at_customs') == 'on'
+    settings_obj.notify_left_almaty = request.POST.get('notify_left_almaty') == 'on'
     settings_obj.notify_delivered_sort = request.POST.get('notify_delivered_sort') == 'on'
     settings_obj.notify_shipping_pp = request.POST.get('notify_shipping_pp') == 'on'
 

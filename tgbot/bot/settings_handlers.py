@@ -38,6 +38,12 @@ def get_settings_markup(settings):
         mark_cn = "✅" if settings.notify_shipped_cn else "❌"
         kb.append([InlineKeyboardButton(text=f"{mark_cn} " + _("Китай (Отправлено)"), callback_data="toggle_pref:shipped_cn")])
 
+        mark_customs = "✅" if settings.notify_at_customs else "❌"
+        kb.append([InlineKeyboardButton(text=f"{mark_customs} " + _("Таможня (Китай-Казахстан)"), callback_data="toggle_pref:at_customs")])
+
+        mark_almaty = "✅" if settings.notify_left_almaty else "❌"
+        kb.append([InlineKeyboardButton(text=f"{mark_almaty} " + _("Выехало из Алматы"), callback_data="toggle_pref:left_almaty")])
+
         mark_sort = "✅" if settings.notify_delivered_sort else "❌"
         kb.append([InlineKeyboardButton(text=f"{mark_sort} " + _("Сортировочный склад"), callback_data="toggle_pref:delivered_sort")])
 
@@ -126,6 +132,8 @@ def _toggle_field(user_id, field):
         return None
     field_map = {
         'shipped_cn': 'notify_shipped_cn',
+        'at_customs': 'notify_at_customs',
+        'left_almaty': 'notify_left_almaty',
         'delivered_sort': 'notify_delivered_sort',
         'shipping_pp': 'notify_shipping_pp',
     }

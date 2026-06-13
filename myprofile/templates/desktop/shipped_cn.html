@@ -29,9 +29,9 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
-        <div class="flex-1 mx-auto p-6 bg-white rounded-lg shadow mt-10">
+        <div class="flex-1 min-w-0 mx-auto p-4 md:p-6 bg-white rounded-lg shadow mt-10">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-6 -mt-6 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Из Китая" %}</h1>
             </div>
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Отправлено со склада (Китай)" %}</h2>
@@ -50,7 +50,7 @@
                 <!-- Дата -->
                 <label for="update_date" class="block font-medium mb-1">{% trans "Дата отправки" %}</label>
                 <input type="date" name="update_date" id="update_date" required
-                    class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+                    class="w-full sm:w-auto sm:max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Трек-коды вручную -->
@@ -81,13 +81,116 @@
                 </div>
 
                 <button type="submit"
-                    class="bg-primary text-white px-6 py-2 rounded hover:bg-red-600 mt-6 transition">
+                    class="w-full sm:w-auto bg-primary text-white px-6 py-2 rounded hover:bg-red-600 mt-6 transition">
                     <i class="ri-refresh-line"></i> {% trans "Обновить статусы" %}
                 </button>
             </form>
+
+            <!-- Партии в пути -->
+            <div class="mt-10">
+                <h3 class="text-xl font-semibold text-gray-800 mb-1">{% trans "Партии в пути" %}</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    {% blocktrans with days=auto_customs_days %}Через {{ days }} дней после даты отправки партия автоматически переходит в статус «Прибыло на таможню (Китай-Казахстан)». Строка исчезает, когда все её трек-коды попадают в Приход.{% endblocktrans %}
+                </p>
+
+                {% if transit_batches %}
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600">
+                            <tr>
+                                <th class="px-2 md:px-4 py-3 text-left font-medium">{% trans "Дата отправки" %}</th>
+                                <th class="px-2 md:px-4 py-3 text-left font-medium">{% trans "Трек-кодов" %}</th>
+                                <th class="px-2 md:px-4 py-3 text-left font-medium">{% trans "Статус" %}</th>
+                                <th class="px-2 md:px-4 py-3 text-right font-medium"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for batch in transit_batches %}
+                            <tr class="hover:bg-gray-50 align-top">
+                                <td class="px-2 md:px-4 py-3 whitespace-nowrap font-medium">{{ batch.date|date:"d.m.Y" }}</td>
+                                <td class="px-2 md:px-4 py-3">{{ batch.count }}</td>
+                                <td class="px-2 md:px-4 py-3">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold text-center
+                                        {% if batch.status == 'shipped_cn' %}bg-yellow-100 text-yellow-800
+                                        {% elif batch.status == 'at_customs' %}bg-cyan-100 text-cyan-800
+                                        {% elif batch.status == 'left_almaty' %}bg-indigo-100 text-indigo-800
+                                        {% endif %}">{{ batch.status_display }}</span>
+                                    {% if batch.customs_eta %}
+                                    <div class="text-xs text-gray-400 mt-1">{% trans "На таможню:" %} {{ batch.customs_eta|date:"d.m.Y" }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="px-2 md:px-4 py-3">
+                                    <div class="flex flex-col sm:flex-row gap-2 sm:justify-end sm:items-center">
+                                        <button type="button"
+                                            class="batch-tracks-btn text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-100 transition"
+                                            data-date="{{ batch.date|date:'Y-m-d' }}"
+                                            data-status="{{ batch.status }}"
+                                            data-target="batch-detail-{{ forloop.counter }}">
+                                            <i class="ri-list-unordered"></i> {% trans "Трек-коды" %}
+                                        </button>
+                                        {% if batch.can_advance %}
+                                        <form method="post" action="{% url 'shipped_cn_advance_almaty' %}"
+                                            onsubmit="return confirm('{% trans "Перевести партию в статус «Выехало из Алматы»?" %}');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="date" value="{{ batch.date|date:'Y-m-d' }}">
+                                            <button type="submit"
+                                                class="w-full sm:w-auto text-xs font-semibold bg-indigo-600 text-white rounded px-3 py-1.5 hover:bg-indigo-700 transition">
+                                                <i class="ri-roadster-line"></i> {% trans 'Перевести в статус "Выехало из Алматы"' %}
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="batch-detail-{{ forloop.counter }}" class="hidden bg-gray-50">
+                                <td colspan="4" class="px-2 md:px-4 py-3">
+                                    <div class="batch-tracks-box grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-xs text-gray-700 max-h-72 overflow-y-auto"></div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-gray-400">{% trans "Нет партий в пути." %}</p>
+                {% endif %}
+            </div>
         </div>
 
         <script src="{% static 'scripts/shippedCnUpload.js' %}?v={{ APP_VERSION }}"></script>
+        <script>
+        document.querySelectorAll('.batch-tracks-btn').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                var row = document.getElementById(btn.dataset.target);
+                if (!row) return;
+                if (!row.classList.contains('hidden')) {
+                    row.classList.add('hidden');
+                    return;
+                }
+                row.classList.remove('hidden');
+                var box = row.querySelector('.batch-tracks-box');
+                if (box.dataset.loaded) return;
+                box.textContent = '…';
+                try {
+                    var resp = await fetch("{% url 'shipped_cn_batch_tracks' %}?date=" + btn.dataset.date + "&status=" + btn.dataset.status);
+                    var data = await resp.json();
+                    box.innerHTML = '';
+                    (data.tracks || []).forEach(function (t) {
+                        var div = document.createElement('div');
+                        div.className = 'truncate';
+                        div.textContent = t.owner ? (t.track_code + ' — ' + t.owner) : t.track_code;
+                        box.appendChild(div);
+                    });
+                    if (!data.tracks || !data.tracks.length) {
+                        box.textContent = '{% trans "Нет трек-кодов" %}';
+                    }
+                    box.dataset.loaded = '1';
+                } catch (e) {
+                    box.textContent = '{% trans "Ошибка загрузки" %}';
+                }
+            });
+        });
+        </script>
     </div>
     {% endblock %}
 

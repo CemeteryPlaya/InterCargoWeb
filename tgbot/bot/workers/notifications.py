@@ -21,7 +21,7 @@ MAX_RETRY_COUNT = 5  # После этого числа попыток увед�
 # Статусы, для которых per-track уведомления собираются в одно групповое
 # сообщение на пользователя (см. tgbot/signals.py). В БД такие уведомления
 # хранятся с title=<status_key>, message=<track_code>.
-BATCHED_STATUS_KEYS = {'shipped_cn'}
+BATCHED_STATUS_KEYS = {'shipped_cn', 'at_customs', 'left_almaty'}
 
 
 async def notification_worker(bot: Bot, interval: int = 10):
@@ -257,6 +257,10 @@ def _get_and_group_pending():
         if s.level == 'selective':
             if status_key == 'shipped_cn':
                 return s.notify_shipped_cn
+            if status_key == 'at_customs':
+                return s.notify_at_customs
+            if status_key == 'left_almaty':
+                return s.notify_left_almaty
             return True
         return False
 
@@ -423,6 +427,10 @@ def _format_status_group_notification(user_id, status_key, track_codes):
     with with_lang(lang):
         if status_key == 'shipped_cn':
             status_label = _('Отправлен со склада Китая')
+        elif status_key == 'at_customs':
+            status_label = _('Прибыло на таможню (Китай-Казахстан)')
+        elif status_key == 'left_almaty':
+            status_label = _('Выехало из Алматы')
         else:
             status_label = status_key
 

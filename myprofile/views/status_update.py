@@ -84,6 +84,9 @@ def update_tracks(request):
             # Подготовим изменения
             track.status = status
             track.update_date = update_date
+            if status == 'shipped_cn':
+                # Дата отправки = указанная дата: от неё считается автоперевод на таможню
+                track.date_shipped_cn = update_date
 
             if status == 'delivered':
                 # для delivered требуется имя пользователя и вес
@@ -174,6 +177,7 @@ def update_tracks(request):
                         track_code=code,
                         status=status,
                         update_date=update_date,
+                        date_shipped_cn=update_date if status == 'shipped_cn' else None,
                         owner=None,  # Владельца нет
                         weight=None
                     )

@@ -12,7 +12,7 @@ from django.utils.translation import gettext as _
 
 
 # Статусы, при которых архивированный трек всё ещё показывается в своей категории
-VISIBLE_WHEN_ARCHIVED = {'shipped_cn', 'delivered', 'unidentified', 'shipping_pp', 'ready'}
+VISIBLE_WHEN_ARCHIVED = {'shipped_cn', 'at_customs', 'left_almaty', 'delivered', 'unidentified', 'shipping_pp', 'ready'}
 
 
 @login_required
@@ -32,6 +32,8 @@ def mobile_parcels_view(request):
         'user_added':   [],
         'warehouse_cn': [],
         'shipped_cn':   [],
+        'at_customs':   [],
+        'left_almaty':  [],
         'in_sorting':   [],   # delivered + unidentified
         'shipping_pp':  [],
         'ready':        [],
@@ -68,6 +70,20 @@ def mobile_parcels_view(request):
             'icon': 'ri-flight-takeoff-line',
             'tracks': groups['shipped_cn'],
             'count': len(groups['shipped_cn']),
+        },
+        {
+            'key': 'at_customs',
+            'label': _('На таможне'),
+            'icon': 'ri-government-line',
+            'tracks': groups['at_customs'],
+            'count': len(groups['at_customs']),
+        },
+        {
+            'key': 'left_almaty',
+            'label': _('Выехало из Алматы'),
+            'icon': 'ri-roadster-line',
+            'tracks': groups['left_almaty'],
+            'count': len(groups['left_almaty']),
         },
         {
             'key': 'in_sorting',
@@ -149,6 +165,25 @@ def mobile_unarchive_track(request):
     track.save(update_fields=['is_archived', 'archived_at'])
 
     return JsonResponse({'success': True, 'message': 'Трек-код восстановлен из архива.'})
+
+
+@login_required
+@require_POST
+def mobile_edit_description(request):
+    """AJAX: изменение описания трек-кода с мобильной страницы."""
+    track_id = request.POST.get('track_id')
+    track = get_object_or_404(TrackCode.all_objects, id=track_id, owner=request.user)
+
+    description = request.POST.get('description', '').strip()[:255]
+    track.description = description
+    track._skip_status_validation = True
+    track.save(update_fields=['description'])
+
+    return JsonResponse({
+        'success': True,
+        'description': track.description,
+        'message': _('Описание успешно обновлено.'),
+    })
 
 
 @login_required

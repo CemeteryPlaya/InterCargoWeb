@@ -46,6 +46,8 @@ class TrackCode(models.Model):
         ('user_added', _('Добавлен пользователем')),
         ('warehouse_cn', _('Прибыло на склад (Китай)')),
         ('shipped_cn', _('Отправлено со склада (Китай)')),
+        ('at_customs', _('Прибыло на таможню (Китай-Казахстан)')),
+        ('left_almaty', _('Выехало из Алматы')),
         ('unidentified', _('Неопозка (сортировочный склад)')),
         ('delivered', _('Доставлен на сортировочный склад')),
         ('shipping_pp', _('В доставке')),
@@ -59,11 +61,13 @@ class TrackCode(models.Model):
         'user_added': 0,
         'warehouse_cn': 1,
         'shipped_cn': 2,
-        'unidentified': 3,
-        'delivered': 4,
-        'shipping_pp': 5,
-        'ready': 6,
-        'claimed': 7,
+        'at_customs': 3,
+        'left_almaty': 4,
+        'unidentified': 5,
+        'delivered': 6,
+        'shipping_pp': 7,
+        'ready': 8,
+        'claimed': 9,
     }
 
     id = models.AutoField(primary_key=True, verbose_name=_("№ трек кода"))
@@ -92,6 +96,8 @@ class TrackCode(models.Model):
     # Даты по этапам жизненного цикла
     date_user_added = models.DateField(null=True, blank=True, verbose_name=_("Дата добавления пользователем"))
     date_shipped_cn = models.DateField(null=True, blank=True, verbose_name=_("Дата отправки со склада (Китай)"))
+    date_at_customs = models.DateField(null=True, blank=True, verbose_name=_("Дата прибытия на таможню (Китай-Казахстан)"))
+    date_left_almaty = models.DateField(null=True, blank=True, verbose_name=_("Дата выезда из Алматы"))
     delivered_date = models.DateField(null=True, blank=True, verbose_name=_("Дата прихода на сорт. склад"))
     date_shipping_pp = models.DateField(null=True, blank=True, verbose_name=_("Дата принятия в доставку"))
     date_ready = models.DateField(null=True, blank=True, verbose_name=_("Дата прибытия на ПВЗ"))
@@ -174,6 +180,8 @@ class TrackCode(models.Model):
     STATUS_DATE_FIELD = {
         'user_added': 'date_user_added',
         'shipped_cn': 'date_shipped_cn',
+        'at_customs': 'date_at_customs',
+        'left_almaty': 'date_left_almaty',
         'unidentified': 'delivered_date',
         'delivered': 'delivered_date',
         'shipping_pp': 'date_shipping_pp',

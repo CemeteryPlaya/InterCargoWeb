@@ -55,12 +55,14 @@ class Command(BaseCommand):
         from tgbot.bot.create_bot import create_bot
         from tgbot.bot.workers.notifications import notification_worker
         from tgbot.bot.workers.reminders import reminders_worker
+        from tgbot.bot.workers.status_auto import status_auto_worker
 
         bot, dp = create_bot()
 
         # Запускаем фоновые воркеры
         asyncio.create_task(notification_worker(bot, interval=interval))
         asyncio.create_task(reminders_worker(bot, interval_hours=reminder_hours))
+        asyncio.create_task(status_auto_worker())
         logger.info('Background workers started')
 
         # Стартуем polling
