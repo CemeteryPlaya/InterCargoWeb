@@ -1,4 +1,29 @@
-{% load i18n %}<!doctype html><title>Di.Buyer</title>
-<h1>{% trans "Заявка" %} №{{ order.pk }}</h1>
-<p>{{ order.get_status_display }}</p>
-<ul>{% for it in order.items.all %}<li>{{ it.url }} ({{ it.quantity }})</li>{% endfor %}</ul>
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}
+{% block title %}Di.Buyer — №{{ order.pk }}{% endblock %}
+
+{% block content %}
+  <div class="eyebrow">{% trans "Заявка" %} №{{ order.pk }}</div>
+  <div class="card">
+    <div class="req">
+      <div class="req-meta">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+      <span class="chip chip-{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+    {% if order.comment %}<p class="req-meta" style="margin-top:10px">{{ order.comment }}</p>{% endif %}
+  </div>
+
+  <div class="eyebrow">{% trans "Товары" %}</div>
+  {% for it in order.items.all %}
+    <div class="card">
+      <a class="req-id" href="{{ it.url }}" target="_blank" rel="noopener" style="font-size:14px;word-break:break-all">{{ it.url }}</a>
+      <div class="req-meta" style="margin-top:6px">
+        {% if it.comment %}{{ it.comment }} · {% endif %}{% trans "кол-во" %}: {{ it.quantity }}
+      </div>
+    </div>
+  {% endfor %}
+
+  {% if order.staff_response %}
+    <div class="eyebrow">{% trans "Ответ Di.Buyer" %}</div>
+    <div class="card"><p class="req-meta">{{ order.staff_response }}</p></div>
+  {% endif %}
+{% endblock %}

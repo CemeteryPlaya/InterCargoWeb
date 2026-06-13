@@ -1,0 +1,31 @@
+{% load i18n %}{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Di.Buyer{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Jost:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'dibuyer/styles/dibuyer.css' %}?v={{ APP_VERSION }}">
+</head>
+<body>
+  <div class="db-topbar">
+    <a class="db-back" href="{% url 'profile' %}">← {% trans "В InterCargo" %}</a>
+    {% if user.is_authenticated and user.userprofile.is_dibuyer_staff or user.is_superuser %}
+      <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Заявки →" %}</a>
+    {% endif %}
+  </div>
+
+  <div class="db-container">
+    {% if messages %}
+      {% for m in messages %}
+        <div class="flash {{ m.tags }}">{{ m }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

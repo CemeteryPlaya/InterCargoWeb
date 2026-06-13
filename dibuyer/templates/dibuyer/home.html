@@ -1,4 +1,63 @@
-{% load i18n %}<!doctype html><title>Di.Buyer</title>
-<h1>Di.Buyer</h1>
-<p>{% trans "Тариф" %}: ${{ delivery_rate_usd }}/кг</p>
-<ul>{% for o in orders %}<li>#{{ o.pk }} — {{ o.get_status_display }} — {{ o.items_count }}</li>{% endfor %}</ul>
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}{% load static %}
+{% block title %}Di.Buyer{% endblock %}
+
+{% block content %}
+  <div class="db-hero">
+    <div class="db-logo">DI<span class="db-leaf">
+      <svg width="20" height="26" viewBox="0 0 20 26" fill="none"><path d="M10 26 C10 16 4 12 2 4 C9 7 11 13 10 20 C12 13 16 9 18 2 C13 6 11 14 10 26Z" fill="currentColor"/></svg>
+    </span></div>
+    <div class="db-word">BUYER</div>
+    <div class="db-script">the quiet power of style</div>
+    <div class="db-rate">{% trans "Доставка" %} · <b>${{ delivery_rate_usd }}/{% trans "кг" %}</b></div>
+    <div class="db-brands">
+      <span>Tommy Hilfiger</span><span>Louis Vuitton</span><span>Prada</span><span>Adidas</span>
+      <span>Nike</span><span>Michael Kors</span><span>Karl Lagerfeld</span><span>Tom Ford</span>
+    </div>
+  </div>
+
+  <div class="eyebrow">{% trans "Новая заявка" %}</div>
+  <form method="post" action="{% url 'dibuyer_create' %}">
+    {% csrf_token %}
+    <div class="card">
+      <div id="item-list">
+        <div class="item-row">
+          <div class="item-head"><span class="n">1</span>
+            <button type="button" class="link-btn js-remove">{% trans "удалить" %}</button></div>
+          <input class="fld js-url" type="url" name="item_url" placeholder="{% trans "Ссылка на товар (бренд-сайт)" %}">
+          <div class="row2">
+            <input class="fld js-comment" type="text" name="item_comment" placeholder="{% trans "Размер, цвет, детали" %}">
+            <input class="fld qty" type="number" name="item_quantity" min="1" value="1">
+          </div>
+        </div>
+      </div>
+      <div class="add-item">
+        <button type="button" id="add-item-btn">＋ {% trans "Добавить ещё товар" %}</button>
+        <span id="item-counter" class="req-meta"></span>
+      </div>
+    </div>
+    <div class="card">
+      <textarea class="fld" name="comment" rows="2" placeholder="{% trans "Общий комментарий к заявке (необязательно)" %}"></textarea>
+    </div>
+    <button type="submit" class="btn-navy">{% trans "Отправить заявку" %}</button>
+  </form>
+
+  <div class="eyebrow">{% trans "Мои заявки" %}</div>
+  {% for o in orders %}
+    <a class="card" style="display:block" href="{% url 'dibuyer_order_detail' o.pk %}">
+      <div class="req">
+        <div>
+          <div class="req-id">{% trans "Заявка" %} №{{ o.pk }}</div>
+          <div class="req-meta">{{ o.items.all|length }} {% trans "товар(ов)" %} · {{ o.created_at|date:"d.m.Y" }}</div>
+        </div>
+        <span class="chip chip-{{ o.status }}">{{ o.get_status_display }}</span>
+      </div>
+    </a>
+  {% empty %}
+    <div class="empty">{% trans "Пока нет заявок. Создайте первую выше." %}</div>
+  {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'dibuyer/scripts/order_form.js' %}?v={{ APP_VERSION }}"></script>
+{% endblock %}
