@@ -39,7 +39,7 @@ PLAN.md
 *.md
 
 .env
-tests/
+/tests/
 
 bot.log
 test_delivery_perf.py
