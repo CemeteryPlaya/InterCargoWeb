@@ -1,0 +1,4 @@
+{% load i18n %}<!doctype html><title>Di.Buyer</title>
+<h1>Di.Buyer</h1>
+<p>{% trans "Тариф" %}: ${{ delivery_rate_usd }}/кг</p>
+<ul>{% for o in orders %}<li>#{{ o.pk }} — {{ o.get_status_display }} — {{ o.items_count }}</li>{% endfor %}</ul>

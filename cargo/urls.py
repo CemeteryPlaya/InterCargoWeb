@@ -30,6 +30,7 @@ urlpatterns = [
     re_path(r"^register/", include('register.urls')),
     re_path(r"^profile/", include('myprofile.urls')),
     path('profile/telegram/', include('tgbot.urls')),
+    path('dibuyer/', include('dibuyer.urls')),
     path('admin/', admin.site.urls),
     # Main application URLs
     path('', mainview_views.index, name='home'),

@@ -1,0 +1,4 @@
+{% load i18n %}<!doctype html><title>Di.Buyer</title>
+<h1>{% trans "Заявка" %} №{{ order.pk }}</h1>
+<p>{{ order.get_status_display }}</p>
+<ul>{% for it in order.items.all %}<li>{{ it.url }} ({{ it.quantity }})</li>{% endfor %}</ul>
