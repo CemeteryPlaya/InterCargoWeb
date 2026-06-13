@@ -155,6 +155,19 @@
         {% if mobile_stats %}
         <div class="px-4 py-2">
             <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Мои посылки" %}</h2>
+            {% if dibuyer_enabled %}
+            <a href="{% url 'dibuyer_home' %}"
+               class="flex items-center justify-between w-full mb-3 px-4 py-3.5 rounded-2xl shadow-sm active:scale-[0.99] transition"
+               style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
+                <span class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.14);">
+                        <span style="font-family:Georgia,serif;font-weight:700;font-size:17px;letter-spacing:1px;color:#fff;">Di</span>
+                    </span>
+                    <span class="text-white font-semibold text-sm">{% trans "Перейти в Di.Buyer" %}</span>
+                </span>
+                <i class="ri-arrow-right-line text-white/80"></i>
+            </a>
+            {% endif %}
             <div class="grid grid-cols-2 gap-3">
                 <a href="{% url 'mobile_parcels' %}?cat=user_added"
                    class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
@@ -534,6 +547,15 @@
                             {% trans "Обучение по сайту" %}
                         </button>
                     </div>
+                    {% if dibuyer_enabled %}
+                    <a href="{% url 'dibuyer_home' %}"
+                       class="inline-flex items-center gap-3 mt-3 px-6 py-3 !rounded-button font-medium transition w-fit"
+                       style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
+                        <span style="font-family:Georgia,serif;font-weight:700;font-size:18px;letter-spacing:1px;color:#fff;">Di</span>
+                        <span class="text-white">{% trans "Перейти в Di.Buyer" %}</span>
+                        <i class="ri-arrow-right-line text-white/80"></i>
+                    </a>
+                    {% endif %}
                     {% else %}
                     <div class="text-primary font-medium mb-2">{% trans "КАЛЬКУЛЯТОР" %}</div>
                     <h1 class="text-4xl md:text-5xl font-bold mb-6">{% trans "Узнайте цену доставки груза из Китая в Казахстан" %}
