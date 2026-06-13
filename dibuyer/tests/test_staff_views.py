@@ -45,3 +45,15 @@ class StaffViewTests(TestCase):
         })
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, 'new')
+
+    def test_plain_client_has_no_manage_link_on_dibuyer_home(self):
+        self.client.login(username='c1', password='p')
+        resp = self.client.get(reverse('dibuyer_home'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, reverse('dibuyer_manage'))
+
+    def test_staff_has_manage_link_on_dibuyer_home(self):
+        self.client.login(username='s1', password='p')
+        resp = self.client.get(reverse('dibuyer_home'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, reverse('dibuyer_manage'))

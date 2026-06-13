@@ -11,9 +11,12 @@
 </head>
 <body>
   <div class="db-topbar">
-    <a class="db-back" href="{% url 'profile' %}">← {% trans "В InterCargo" %}</a>
-    {% if user.is_authenticated and user.userprofile.is_dibuyer_staff or user.is_superuser %}
-      <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Заявки →" %}</a>
+    <a class="db-back" href="{% url 'home' %}">← {% trans "На главную" %}</a>
+    <a class="db-brandmark" href="{% url 'dibuyer_home' %}">Di.Buyer</a>
+    {% if dibuyer_is_staff %}
+      <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Заявки" %} →</a>
+    {% else %}
+      <span class="db-back" style="visibility:hidden">←</span>
     {% endif %}
   </div>
 

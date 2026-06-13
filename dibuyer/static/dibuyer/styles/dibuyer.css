@@ -9,6 +9,7 @@ a{color:inherit;text-decoration:none}
 .db-container{max-width:680px;margin:0 auto;padding:0 18px 60px}
 .db-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;max-width:680px;margin:0 auto}
 .db-back{font-size:12px;letter-spacing:.5px;color:var(--navy)}
+.db-brandmark{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;color:var(--navy);font-size:19px;letter-spacing:1px}
 .db-hero{text-align:center;padding:18px 0 8px;position:relative}
 .db-logo{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;color:var(--navy);
   font-size:64px;letter-spacing:6px;line-height:.9;display:inline-block;position:relative}
@@ -18,7 +19,13 @@ a{color:inherit;text-decoration:none}
 .db-rate{margin-top:8px;font-size:12px;letter-spacing:1px;color:var(--muted)}
 .db-rate b{color:var(--navy)}
 .db-brands{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin:16px 0 6px;
-  font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;color:var(--navy2);opacity:.8}
+  font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;color:var(--navy2)}
+.db-brands a{color:var(--navy2);border-bottom:1px solid transparent;padding-bottom:1px;transition:color .15s,border-color .15s}
+.db-brands a:hover{color:var(--navy);border-bottom-color:var(--lav)}
+.db-ig{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;letter-spacing:.5px;
+  color:var(--navy);border:1px solid var(--lav);border-radius:999px;padding:5px 13px;transition:background .15s}
+.db-ig:hover{background:var(--lav-soft)}
+.db-ig svg{display:block}
 .eyebrow{text-transform:uppercase;letter-spacing:3px;font-size:10px;color:var(--lav);
   font-weight:500;margin:26px 0 12px}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;

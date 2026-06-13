@@ -154,7 +154,6 @@
         <!-- Карточки статистики -->
         {% if mobile_stats %}
         <div class="px-4 py-2">
-            <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Мои посылки" %}</h2>
             {% if dibuyer_enabled %}
             <a href="{% url 'dibuyer_home' %}"
                class="flex items-center justify-between w-full mb-3 px-4 py-3.5 rounded-2xl shadow-sm active:scale-[0.99] transition"
@@ -168,6 +167,7 @@
                 <i class="ri-arrow-right-line text-white/80"></i>
             </a>
             {% endif %}
+            <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Мои посылки" %}</h2>
             <div class="grid grid-cols-2 gap-3">
                 <a href="{% url 'mobile_parcels' %}?cat=user_added"
                    class="block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.98] transition">
