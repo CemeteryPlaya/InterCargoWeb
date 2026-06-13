@@ -28,3 +28,61 @@ class DibuyerSettings(models.Model):
 
     def __str__(self):
         return "Настройки Di.Buyer"
+
+
+class BuyerOrder(models.Model):
+    STATUS_NEW = 'new'
+    STATUS_IN_PROGRESS = 'in_progress'
+    STATUS_PURCHASED = 'purchased'
+    STATUS_REJECTED = 'rejected'
+    STATUS_CHOICES = [
+        (STATUS_NEW, _("Новая")),
+        (STATUS_IN_PROGRESS, _("В работе")),
+        (STATUS_PURCHASED, _("Выкуплено")),
+        (STATUS_REJECTED, _("Отклонена")),
+    ]
+
+    client = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='buyer_orders',
+        verbose_name=_("Клиент"),
+    )
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_NEW,
+        verbose_name=_("Статус"),
+    )
+    comment = models.TextField(blank=True, default='', verbose_name=_("Комментарий клиента"))
+    staff_response = models.TextField(blank=True, default='', verbose_name=_("Ответ сотрудника"))
+    handled_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
+        verbose_name=_("Обработал"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _("Заявка Di.Buyer")
+        verbose_name_plural = _("Заявки Di.Buyer")
+
+    @property
+    def items_count(self):
+        return self.items.count()
+
+    def __str__(self):
+        return f"Заявка №{self.pk} ({self.client})"
+
+
+class BuyerOrderItem(models.Model):
+    order = models.ForeignKey(
+        BuyerOrder, on_delete=models.CASCADE, related_name='items',
+        verbose_name=_("Заявка"),
+    )
+    url = models.URLField(max_length=1000, verbose_name=_("Ссылка на товар"))
+    comment = models.CharField(
+        max_length=500, blank=True, default='',
+        verbose_name=_("Комментарий (размер/цвет/кол-во)"),
+    )
+    quantity = models.PositiveIntegerField(default=1, verbose_name=_("Количество"))
+
+    def __str__(self):
+        return self.url

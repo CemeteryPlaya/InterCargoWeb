@@ -1,8 +1,9 @@
 from decimal import Decimal
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 
-from dibuyer.models import DibuyerSettings
+from dibuyer.models import BuyerOrder, BuyerOrderItem, DibuyerSettings
 
 
 class DibuyerSettingsTests(TestCase):
@@ -18,3 +19,19 @@ class DibuyerSettingsTests(TestCase):
         second.save()
         self.assertEqual(DibuyerSettings.objects.count(), 1)
         self.assertFalse(DibuyerSettings.load().is_enabled)
+
+
+class BuyerOrderModelTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='c1', password='p')
+
+    def test_default_status_is_new(self):
+        order = BuyerOrder.objects.create(client=self.user)
+        self.assertEqual(order.status, 'new')
+
+    def test_items_count_property(self):
+        order = BuyerOrder.objects.create(client=self.user)
+        BuyerOrderItem.objects.create(order=order, url='https://nike.com/a')
+        BuyerOrderItem.objects.create(order=order, url='https://nike.com/b', quantity=2)
+        self.assertEqual(order.items_count, 2)
+        self.assertEqual(order.items.get(url='https://nike.com/b').quantity, 2)
