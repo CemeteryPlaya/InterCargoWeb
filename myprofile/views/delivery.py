@@ -25,12 +25,15 @@ from myprofile.receipt_lifecycle import (
 logger = logging.getLogger(__name__)
 
 
-from myprofile.permissions import is_driver as _is_driver_perm
+from myprofile.permissions import is_driver as _is_driver_perm, role_grants
 from django.utils.translation import gettext as _
 
 
 def _is_driver(user):
-    return _is_driver_perm(user)
+    # Доступ к странице «Доставка»: водитель ИЛИ роль с правом на delivery
+    # (Сорт.ПВЗ / Директор / Гл.админ). История фильтруется по самому
+    # пользователю, поэтому не-водитель просто видит пустую личную историю.
+    return _is_driver_perm(user) or role_grants(user, 'delivery')
 
 
 def _get_home_delivery_clients(status):

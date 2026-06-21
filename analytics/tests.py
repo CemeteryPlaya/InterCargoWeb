@@ -11,6 +11,7 @@ from django.utils import timezone
 from analytics.middleware import PageViewMiddleware
 from analytics.models import PageView, PageViewDaily
 from analytics.services import aggregate_day, aggregate_pending
+from analytics.views import _app_for_path
 from register.models import UserProfile
 
 
@@ -119,7 +120,8 @@ class DashboardAccessTest(TestCase):
         self.c.force_login(user)
         self.assertEqual(self.c.get('/analytics/').status_code, 403)
 
-    def test_staff_sees_aggregates(self):
+    def test_staff_sees_app_grouping(self):
+        """По умолчанию (режим приложений) показываются аппки, а не сырые пути."""
         boss = User.objects.create_user('boss', password='x', is_superuser=True)
         self.c.force_login(boss)
         PageView.objects.create(path='/profile/track-codes/', duration_ms=4000)
@@ -127,8 +129,20 @@ class DashboardAccessTest(TestCase):
         PageView.objects.create(path='/dibuyer/')
         resp = self.c.get('/analytics/?days=7')
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '/profile/track-codes/')
         self.assertContains(resp, 'Аналитика сайта')
+        self.assertContains(resp, 'Личный кабинет')   # /profile/* → приложение
+        self.assertContains(resp, 'Di.Buyer')         # /dibuyer/* → приложение
+
+    def test_staff_drilldown_shows_pages(self):
+        """Drill-down ?app=<key> показывает страницы выбранного приложения."""
+        boss = User.objects.create_user('boss2', password='x', is_superuser=True)
+        self.c.force_login(boss)
+        PageView.objects.create(path='/profile/track-codes/', duration_ms=4000)
+        PageView.objects.create(path='/dibuyer/')
+        resp = self.c.get('/analytics/?days=7&app=profile')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Личный кабинет')          # заголовок приложения
+        self.assertContains(resp, '/profile/track-codes/')   # страница приложения
 
 
 class AggregationTest(TestCase):
@@ -205,8 +219,24 @@ class DashboardArchiveTest(TestCase):
             date=d, path='/archived-page/', views=12,
             unique_users=4, unique_sessions=5, total_duration_ms=60000, duration_samples=10,
         )
+        # Режим приложений: архивная страница без префикса попадает в «Прочее».
         resp = self.c.get('/analytics/?days=7')
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '/archived-page/')
+        self.assertContains(resp, 'Прочее')
         self.assertContains(resp, '12')
         self.assertContains(resp, '≈')   # уникальные приблизительные при наличии архива
+        # Drill-down показывает конкретный путь из архива.
+        drill = self.c.get('/analytics/?days=7&app=other')
+        self.assertEqual(drill.status_code, 200)
+        self.assertContains(drill, '/archived-page/')
+
+
+class AppGroupingTest(TestCase):
+    def test_app_for_path_maps_known_prefixes(self):
+        self.assertEqual(_app_for_path('/')[0], 'home')
+        self.assertEqual(_app_for_path('/profile/track-codes/')[0], 'profile')
+        self.assertEqual(_app_for_path('/profile/telegram/link/')[0], 'telegram')  # раньше profile
+        self.assertEqual(_app_for_path('/dibuyer/')[0], 'dibuyer')
+        self.assertEqual(_app_for_path('/register/confirm/')[0], 'register')
+        self.assertEqual(_app_for_path('/mainview/about/')[0], 'site')
+        self.assertEqual(_app_for_path('/something-else/')[0], 'other')

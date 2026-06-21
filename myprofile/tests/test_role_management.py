@@ -31,11 +31,13 @@ class AccessTests(RoleManagementBase):
         c.login(username='plain', password='p')
         self.assertEqual(c.get(reverse('role_management')).status_code, 403)
 
-    def test_user_with_users_edit_permission_ok(self):
+    def test_users_edit_no_longer_grants_access(self):
+        # Доступ к «Управление ролями» теперь только у Главного администратора
+        # (is_superuser). Право users.edit больше не открывает страницу.
         RolePermission.objects.create(user=self.plain, aspect='users', can_edit=True)
         c = Client()
         c.login(username='plain', password='p')
-        self.assertEqual(c.get(reverse('role_management')).status_code, 200)
+        self.assertEqual(c.get(reverse('role_management')).status_code, 403)
 
 
 class RoleListTests(RoleManagementBase):
@@ -64,9 +66,12 @@ class RoleEditSaveTests(RoleManagementBase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['target'], self.plain)
 
-    def test_save_flags_and_matrix(self):
+    def test_save_role_flags_and_matrix(self):
+        # Роль 'driver' выводит is_driver; доп-флаг is_hr ставится напрямую;
+        # матрица-донастройка сохраняется поверх роли.
         payload = {
-            'flags': {'is_driver': True},
+            'role': 'driver',
+            'flags': {'is_hr': True},
             'matrix': {'warehouse': {'view': True, 'edit': True}},
         }
         resp = self.client.post(
@@ -75,7 +80,9 @@ class RoleEditSaveTests(RoleManagementBase):
         )
         self.assertEqual(resp.status_code, 200)
         self.plain.userprofile.refresh_from_db()
-        self.assertTrue(self.plain.userprofile.is_driver)
+        self.assertEqual(self.plain.userprofile.role, 'driver')
+        self.assertTrue(self.plain.userprofile.is_driver)   # выведено из роли
+        self.assertTrue(self.plain.userprofile.is_hr)       # доп-флаг
         rp = RolePermission.objects.get(user=self.plain, aspect='warehouse')
         self.assertTrue(rp.can_view)
         self.assertTrue(rp.can_edit)

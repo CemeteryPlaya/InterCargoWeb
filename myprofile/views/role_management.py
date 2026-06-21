@@ -26,20 +26,46 @@ from myprofile.permissions import (
     ROLE_FLAG_DEFAULTS,
     ROLE_FLAG_KEYS,
     ROLE_FLAGS,
-    can,
+    apply_role,
     get_effective_permissions,
+    role_count,
+    role_quota,
+    QuotaExceeded,
+    ROLE_QUOTA_FIELDS,
 )
 
 logger = logging.getLogger(__name__)
 
+# Доп-флаги, которые можно выдавать поверх основной роли (независимые
+# подсистемы / доп-права). Первичные операторские флаги (is_staff/is_pp_worker/
+# is_driver) выводятся из роли в apply_role, поэтому здесь их нет.
+ORTHOGONAL_FLAGS = [
+    ('is_hr', 'HR'),
+    ('is_accountant', 'Бухгалтер'),
+    ('is_pp_owner', 'Владелец ПВЗ'),
+    ('is_tg_admin', 'Админ TG-бота'),
+    ('is_dibuyer_staff', 'Сотрудник Di.Buyer'),
+]
+ORTHOGONAL_FLAG_KEYS = [k for k, _ in ORTHOGONAL_FLAGS]
+
 
 def _can_manage(user):
-    """Super Admin panel access: superuser OR users.edit permission."""
-    if not user or not user.is_authenticated:
-        return False
-    if user.is_superuser:
-        return True
-    return can(user, 'users', 'edit')
+    """Доступ к странице «Управление ролями»: только Главный администратор."""
+    return bool(user and user.is_authenticated and user.is_superuser)
+
+
+def _quota_info():
+    """[{role, label, count, limit}] для ролей с лимитом — для UI."""
+    labels = dict(UserProfile.ROLE_CHOICES)
+    info = []
+    for role in ROLE_QUOTA_FIELDS:
+        info.append({
+            'role': role,
+            'label': labels.get(role, role),
+            'count': role_count(role),
+            'limit': role_quota(role),
+        })
+    return info
 
 
 def _user_role_labels(profile):
@@ -92,6 +118,7 @@ def role_list(request):
             'username': u.username,
             'full_name': u.get_full_name(),
             'phone': profile.phone if profile else '',
+            'role_label': profile.get_role_display() if profile and profile.role else '',
             'roles': _user_role_labels(profile),
             'has_explicit_perms': bool(getattr(u, 'has_perm', False)),
         })
@@ -100,6 +127,7 @@ def role_list(request):
         'items': items,
         'page_obj': page_obj,
         'q': q,
+        'quota_info': _quota_info(),
     })
 
 
@@ -126,13 +154,14 @@ def role_edit(request, user_id):
             })
         rows.append({'key': key, 'label': label, 'cells': cells})
 
+    # Доп-флаги (поверх роли). Первичные операторские флаги выводятся из роли.
     flags = [
         {
             'key': key,
             'label': label,
             'value': bool(getattr(profile, key, False)),
         }
-        for key, label in ROLE_FLAGS
+        for key, label in ORTHOGONAL_FLAGS
     ]
 
     # Serialize defaults map for the "Apply defaults from flags" JS button.
@@ -146,6 +175,9 @@ def role_edit(request, user_id):
         'profile': profile,
         'rows': rows,
         'flags': flags,
+        'roles': UserProfile.ROLE_CHOICES,
+        'current_role': profile.role,
+        'quota_info': _quota_info(),
         'actions': [(a, ACTION_LABELS[a]) for a in ACTIONS],
         'defaults_json': json.dumps(defaults_json),
     })
@@ -166,10 +198,19 @@ def role_save(request, user_id):
     except json.JSONDecodeError:
         return JsonResponse({'error': _('Некорректный JSON.')}, status=400)
 
-    # --- Legacy role flags ----------------------------------------------
+    # --- Основная роль: задаёт доступ + выводит операторские флаги + Django-доступ ---
+    role = (payload.get('role') or '').strip()
+    try:
+        profile = apply_role(target, role)
+    except QuotaExceeded as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except ValueError:
+        return JsonResponse({'error': _('Некорректная роль.')}, status=400)
+
+    # --- Доп-флаги (поверх роли); первичные операторские флаги не трогаем ---
     flags = payload.get('flags', {}) or {}
     updated_flag_fields = []
-    for flag in ROLE_FLAG_KEYS:
+    for flag in ORTHOGONAL_FLAG_KEYS:
         if flag in flags:
             new_val = bool(flags[flag])
             if getattr(profile, flag) != new_val:
@@ -205,6 +246,34 @@ def role_save(request, user_id):
     )
 
     return JsonResponse({'ok': True, 'explicit_rows': len(new_rows)})
+
+
+@login_required
+@require_POST
+def role_quota_save(request):
+    """Сохранение лимитов ролей (только Главный администратор)."""
+    if not _can_manage(request.user):
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': _('Некорректный JSON.')}, status=400)
+
+    from myprofile.models import GlobalSettings
+    gs = GlobalSettings.objects.first() or GlobalSettings.objects.create()
+    updated = []
+    for role, field in ROLE_QUOTA_FIELDS.items():
+        if role in payload:
+            try:
+                val = max(0, int(payload[role]))
+            except (TypeError, ValueError):
+                continue
+            if getattr(gs, field) != val:
+                setattr(gs, field, val)
+                updated.append(field)
+    if updated:
+        gs.save(update_fields=updated)
+    return JsonResponse({'ok': True})
 
 
 @login_required

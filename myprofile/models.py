@@ -587,6 +587,13 @@ class GlobalSettings(models.Model):
         default=30,
         verbose_name=_("Порог веса для скидки (кг)")
     )
+    # Квоты ролей (редактируемые Главным администратором). 0 = без лимита.
+    quota_main_admin = models.PositiveIntegerField(
+        default=5, verbose_name=_("Лимит: Главный администратор"))
+    quota_director = models.PositiveIntegerField(
+        default=3, verbose_name=_("Лимит: Директор"))
+    quota_support = models.PositiveIntegerField(
+        default=3, verbose_name=_("Лимит: Менеджер тех.поддержки"))
 
     class Meta:
         verbose_name = _("Глобальные настройки")

@@ -62,14 +62,36 @@
         <form id="roleForm">
             {% csrf_token %}
 
-            <!-- Флаги ролей -->
+            <!-- Основная роль -->
             <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-3">
-                    <i class="ri-user-settings-line text-red-500"></i> {% trans "Флаги ролей" %}
+                    <i class="ri-shield-user-line text-red-500"></i> {% trans "Основная роль" %}
                 </h3>
                 <p class="text-xs text-gray-500 mb-3">
-                    Устанавливают «тип» пользователя и дают ему дефолтный набор прав, если ничего не
-                    настроено тонко. Используются старой системой проверок в 15+ страницах.
+                    {% trans "Определяет доступ к страницам сайта и Django-админке. Доп-флаги ниже добавляют права поверх роли." %}
+                </p>
+                <select id="roleSelect" class="w-full md:w-96 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="" {% if not current_role %}selected{% endif %}>{% trans "— Без роли —" %}</option>
+                    {% for key, label in roles %}
+                    <option value="{{ key }}" {% if current_role == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if quota_info %}
+                <div class="mt-3 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+                    {% for q in quota_info %}
+                    <span>{{ q.label }}: <b>{{ q.count }}/{{ q.limit }}</b></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Доп-флаги (поверх роли) -->
+            <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                    <i class="ri-user-settings-line text-red-500"></i> {% trans "Доп-флаги" %}
+                </h3>
+                <p class="text-xs text-gray-500 mb-3">
+                    {% trans "Независимые допуски поверх роли: HR, Бухгалтер, Владелец ПВЗ, Telegram-бот, Di.Buyer." %}
                 </p>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {% for flag in flags %}
@@ -205,6 +227,8 @@
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
+        var role = document.getElementById('roleSelect').value;
+
         var flags = {};
         document.querySelectorAll('.role-flag').forEach(function (f) {
             flags[f.dataset.flag] = f.checked;
@@ -230,7 +254,7 @@
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRFToken': csrfToken,
             },
-            body: JSON.stringify({ flags: flags, matrix: matrix }),
+            body: JSON.stringify({ role: role, flags: flags, matrix: matrix }),
         })
         .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
         .then(function (res) {

@@ -1,96 +1,396 @@
-{% load i18n %}<!DOCTYPE html>
+{% load i18n %}{% load static %}
+<!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% trans "Аналитика сайта" %}</title>
-  <style>
-    :root{--bg:#f6f7fb;--card:#fff;--ink:#1f2335;--muted:#7b8094;--line:#e7e9f1;--accent:#4a4f74;--bar:#b9b1d6}
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--ink);
-      font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-    .wrap{max-width:1000px;margin:0 auto;padding:24px 18px 60px}
-    .top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
-    h1{font-size:22px;margin:0;letter-spacing:.3px}
-    .back{font-size:13px;color:var(--accent);text-decoration:none}
-    .ranges{display:flex;gap:6px}
-    .ranges a{font-size:13px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);
-      color:var(--muted);text-decoration:none;background:var(--card)}
-    .ranges a.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:22px}
-    .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-    .stat .v{font-size:28px;font-weight:600;line-height:1.1}
-    .stat .l{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.3px}
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-    table{width:100%;border-collapse:collapse}
-    th,td{text-align:left;padding:11px 14px;font-size:13px;border-bottom:1px solid var(--line)}
-    th{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600}
-    tr:last-child td{border-bottom:none}
-    td.num{text-align:right;white-space:nowrap}
-    .path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink);
-      max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .barcell{min-width:160px}
-    .bar{height:8px;border-radius:999px;background:var(--bar);min-width:3px}
-    .empty{padding:40px;text-align:center;color:var(--muted)}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Inter Cargo - Аналитика сайта" %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/faq.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
 </head>
-<body>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>{% trans "Аналитика сайта" %}</h1>
-        <a class="back" href="/">← {% trans "На сайт" %}</a>
-      </div>
-      <div class="ranges">
-        {% for r in ranges %}
-          <a href="?days={{ r }}" class="{% if r == days %}active{% endif %}">{{ r }} {% trans "дн." %}</a>
-        {% endfor %}
-      </div>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'shared/header.html' %}
+
+    <div class="flex min-h-screen">
+        {% include 'mobile/sidebar.html' %}
+
+        <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
+            <!-- Мобильный хедер -->
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+                <h1 class="text-lg font-bold text-center">
+                    {% if mode == 'pages' %}{{ app_label }}{% else %}{% trans "Аналитика сайта" %}{% endif %}
+                </h1>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div class="hidden md:block">
+                    {% if mode == 'pages' %}
+                    <a href="?days={{ days }}" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1 mb-1">
+                        <i class="ri-arrow-left-line"></i> {% trans "Все приложения" %}
+                    </a>
+                    <h1 class="text-2xl font-bold text-gray-800">
+                        <i class="ri-apps-2-line text-primary"></i> {{ app_label }}
+                    </h1>
+                    {% else %}
+                    <h1 class="text-2xl font-bold text-gray-800">
+                        <i class="ri-line-chart-line text-primary"></i> {% trans "Аналитика сайта" %}
+                    </h1>
+                    {% endif %}
+                </div>
+                <!-- Диапазон -->
+                <div class="flex gap-2">
+                    {% for r in ranges %}
+                    <a href="?days={{ r }}{% if app_key %}&app={{ app_key }}{% endif %}"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                        {% if r == days %}bg-primary text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                        {{ r }} {% trans "дн." %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Итоговые карточки -->
+            {% if mode == 'pages' %}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Просмотры страниц" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ scope_views|default:0 }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Страниц" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ scope_pages|default:0 }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Среднее время на странице" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ scope_avg_label }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Суммарное время всех визитов" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ scope_total_time_label }}</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Просмотры страниц" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ totals.views|default:0 }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Уник. пользователи" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{% if approx %}≈ {% endif %}{{ totals.users|default:0 }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Сессии" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{% if approx %}≈ {% endif %}{{ totals.sessions|default:0 }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Среднее время на странице" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ avg_label }}</div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">{% trans "Суммарное время всех визитов" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ total_time_label }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if approx %}
+            <div class="text-xs text-gray-500 -mt-3 mb-6 flex items-start gap-1.5">
+                <i class="ri-information-line mt-0.5"></i>
+                <span>{% trans "За период есть архивные (свёрнутые) данные — уникальные значения приблизительные (сумма по дням). Просмотры и среднее время точны." %}</span>
+            </div>
+            {% endif %}
+
+            <!-- Чарт -->
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-pie-chart-line text-primary mr-1"></i>
+                        {% if mode == 'pages' %}{% trans "Популярные страницы" %}{% else %}{% trans "Приложения сайта" %}{% endif %}
+                    </h2>
+                    {% if chart_labels %}
+                    <div id="chart-type-toggle" class="inline-flex rounded-lg border border-gray-200 overflow-hidden text-sm">
+                        <button type="button" data-type="pie" class="px-3 py-1.5 font-medium transition-colors">
+                            <i class="ri-pie-chart-line mr-1"></i> {% trans "Круговая" %}
+                        </button>
+                        <button type="button" data-type="bar" class="px-3 py-1.5 font-medium transition-colors border-l border-gray-200">
+                            <i class="ri-bar-chart-horizontal-line mr-1"></i> {% trans "Столбцы" %}
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="p-4">
+                    {% if chart_labels %}
+                    <div id="chart-wrap" style="position:relative;height:360px">
+                        <canvas id="popularPagesChart"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="py-10 text-center text-gray-500">{% trans "Пока нет данных за выбранный период." %}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if mode == 'pages' %}
+            <!-- Таблица: страницы приложения -->
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-file-list-3-line text-primary mr-1"></i> {% trans "Страницы" %}
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Страница" %}</th>
+                                <th class="px-4 py-3 text-left font-medium min-w-[180px]">{% trans "Просмотры" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Уник." %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Ср. время" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for p in pages %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3">
+                                    <span class="font-mono text-xs text-gray-700 block truncate max-w-[420px]" title="{{ p.path }}">{{ p.path }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-2 rounded-full bg-red-200" style="width:{{ p.pct }}%;min-width:3px;max-width:160px"></div>
+                                        <span class="text-gray-800 font-medium">{{ p.views }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ p.users }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ p.avg_label }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-gray-500">{% trans "Пока нет данных за выбранный период." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <!-- Таблица: приложения (клик — детализация по страницам) -->
+            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700">
+                        <i class="ri-apps-2-line text-primary mr-1"></i> {% trans "Приложения" %}
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b">
+                                <th class="px-4 py-3 text-left font-medium">{% trans "Приложение" %}</th>
+                                <th class="px-4 py-3 text-left font-medium min-w-[180px]">{% trans "Просмотры" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Страниц" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Ср. время" %}</th>
+                                <th class="px-4 py-3 text-right font-medium">{% trans "Общее время" %}</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for a in app_rows %}
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='?days={{ days }}&app={{ a.key }}'">
+                                <td class="px-4 py-3 text-gray-800 font-medium">{{ a.label }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-2 rounded-full bg-red-200" style="width:{{ a.pct }}%;min-width:3px;max-width:160px"></div>
+                                        <span class="text-gray-800 font-medium">{{ a.views }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ a.pages }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ a.avg_label }}</td>
+                                <td class="px-4 py-3 text-right text-gray-700">{{ a.total_time_label }}</td>
+                                <td class="px-4 py-3 text-right text-gray-400"><i class="ri-arrow-right-s-line"></i></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">{% trans "Пока нет данных за выбранный период." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="cards">
-      <div class="stat"><div class="v">{{ totals.views|default:0 }}</div><div class="l">{% trans "Просмотры страниц" %}</div></div>
-      <div class="stat"><div class="v">{% if approx %}≈ {% endif %}{{ totals.users|default:0 }}</div><div class="l">{% trans "Уник. пользователи" %}</div></div>
-      <div class="stat"><div class="v">{% if approx %}≈ {% endif %}{{ totals.sessions|default:0 }}</div><div class="l">{% trans "Сессии" %}</div></div>
-      <div class="stat"><div class="v">{{ avg_label }}</div><div class="l">{% trans "Среднее время на странице" %}</div></div>
-    </div>
-    {% if approx %}
-      <div style="font-size:12px;color:var(--muted);margin:-10px 0 18px">
-        {% trans "За период есть архивные (свёрнутые) данные — уникальные значения приблизительные (сумма по дням). Просмотры и среднее время точны." %}
-      </div>
+    {% include 'shared/footer.html' %}
+
+    {% if chart_labels %}
+    {{ chart_labels|json_script:"pp-labels" }}
+    {{ chart_values|json_script:"pp-values" }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            var canvas = document.getElementById('popularPagesChart');
+            if (!canvas || !window.Chart) return;
+            var labels = JSON.parse(document.getElementById('pp-labels').textContent);
+            var values = JSON.parse(document.getElementById('pp-values').textContent);
+            var wrap = document.getElementById('chart-wrap');
+            var toggle = document.getElementById('chart-type-toggle');
+            var barHeight = {{ chart_height }};
+            var total = values.reduce(function (a, b) { return a + b; }, 0);
+            var palette = ['#e53e3e', '#dd6b20', '#d69e2e', '#38a169', '#319795',
+                '#3182ce', '#5a67d8', '#805ad5', '#d53f8c', '#a0aec0'];
+            function colorsFor(n) {
+                var out = [];
+                for (var i = 0; i < n; i++) { out.push(palette[i % palette.length]); }
+                return out;
+            }
+            function shorten(s) { return s.length > 38 ? s.slice(0, 37) + '…' : s; }
+            function isDark() {
+                return document.documentElement.classList.contains('theme-dark') ||
+                    document.body.classList.contains('theme-dark');
+            }
+            function themeColors() {
+                return isDark()
+                    ? { text: '#e5e7eb', grid: 'rgba(148,163,184,0.18)', border: '#020617' }
+                    : { text: '#374151', grid: '#f1f1f4', border: '#ffffff' };
+            }
+            var chart = null;
+            var currentType = 'pie';
+
+            function draw(type) {
+                currentType = type;
+                if (chart) { chart.destroy(); }
+                var isPie = (type === 'pie');
+                var tc = themeColors();
+                wrap.style.height = isPie ? '360px' : (barHeight + 'px');
+                if (isPie) {
+                    chart = new Chart(canvas, {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: values,
+                                backgroundColor: colorsFor(labels.length),
+                                borderColor: tc.border,
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 12, padding: 8, font: { size: 11 }, color: tc.text,
+                                        generateLabels: function (c) {
+                                            var ds = c.data.datasets[0];
+                                            return c.data.labels.map(function (label, i) {
+                                                return {
+                                                    text: shorten(label),
+                                                    fillStyle: ds.backgroundColor[i],
+                                                    strokeStyle: tc.border, lineWidth: 1,
+                                                    fontColor: tc.text,
+                                                    hidden: !c.getDataVisibility(i), index: i
+                                                };
+                                            });
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (ctx) {
+                                            var pct = total ? Math.round(ctx.parsed * 100 / total) : 0;
+                                            return ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    chart = new Chart(canvas, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '{% trans "Просмотры" %}',
+                                data: values,
+                                backgroundColor: '#e53e3e',
+                                hoverBackgroundColor: '#c53030',
+                                borderRadius: 4,
+                                maxBarThickness: 22
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: { title: function (items) { return items[0].label; } } }
+                            },
+                            scales: {
+                                x: { beginAtZero: true, ticks: { precision: 0, color: tc.text }, grid: { color: tc.grid } },
+                                y: {
+                                    ticks: {
+                                        color: tc.text,
+                                        font: { family: 'ui-monospace, SFMono-Regular, Menlo, monospace', size: 11 },
+                                        callback: function (value) { return shorten(this.getLabelForValue(value)); }
+                                    },
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            function setActive(type) {
+                if (!toggle) return;
+                toggle.querySelectorAll('button').forEach(function (btn) {
+                    var on = btn.dataset.type === type;
+                    btn.classList.toggle('bg-primary', on);
+                    btn.classList.toggle('text-white', on);
+                    btn.classList.toggle('bg-white', !on);
+                    btn.classList.toggle('text-gray-600', !on);
+                    btn.classList.toggle('hover:bg-gray-100', !on);
+                });
+            }
+
+            if (toggle) {
+                toggle.addEventListener('click', function (e) {
+                    var btn = e.target.closest('button');
+                    if (!btn) return;
+                    setActive(btn.dataset.type);
+                    draw(btn.dataset.type);
+                });
+            }
+
+            // Перерисовка при переключении светлой/тёмной темы (класс theme-dark на <html>/<body>).
+            var lastDark = isDark();
+            new MutationObserver(function () {
+                if (isDark() !== lastDark) { lastDark = isDark(); draw(currentType); }
+            }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+            setActive('pie');
+            draw('pie');
+        })();
+    </script>
     {% endif %}
-
-    <div class="panel">
-      {% if pages %}
-      <table>
-        <thead>
-          <tr>
-            <th>{% trans "Страница" %}</th>
-            <th class="barcell">{% trans "Просмотры" %}</th>
-            <th class="num">{% trans "Уник." %}</th>
-            <th class="num">{% trans "Ср. время" %}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in pages %}
-          <tr>
-            <td class="path" title="{{ p.path }}">{{ p.path }}</td>
-            <td class="barcell">
-              <div style="display:flex;align-items:center;gap:9px">
-                <div class="bar" style="width:{{ p.pct }}%"></div>
-                <span>{{ p.views }}</span>
-              </div>
-            </td>
-            <td class="num">{{ p.users }}</td>
-            <td class="num">{{ p.avg_label }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="empty">{% trans "Пока нет данных за выбранный период." %}</div>
-      {% endif %}
-    </div>
-  </div>
 </body>
+
 </html>

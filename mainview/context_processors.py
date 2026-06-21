@@ -24,16 +24,23 @@ def current_language(request):
 
 
 def role_management_access(request):
-    """Флаг доступа к Панели главного администратора (управление ролями).
+    """Флаг доступа к странице «Управление ролями».
 
-    True для суперпользователя или для тех, у кого явное право users.edit.
-    Используется в шаблонах сайдбаров для показа ссылки.
+    Только Главный администратор (is_superuser). Используется в шаблонах
+    сайдбаров для показа ссылки.
+    """
+    user = getattr(request, 'user', None)
+    return {'can_manage_users': bool(user and user.is_authenticated and user.is_superuser)}
+
+
+def nav_access(request):
+    """Набор page_key, доступных пользователю — для построения меню/сайдбара.
+
+    В шаблонах: {% if 'attention_required' in nav_pages %}...{% endif %}.
     """
     user = getattr(request, 'user', None)
     if not user or not user.is_authenticated:
-        return {'can_manage_users': False}
-    if user.is_superuser:
-        return {'can_manage_users': True}
+        return {'nav_pages': set()}
     # Импорт тут, чтобы избежать циклов на стадии загрузки Django.
-    from myprofile.permissions import can
-    return {'can_manage_users': can(user, 'users', 'edit')}
+    from myprofile.permissions import allowed_pages
+    return {'nav_pages': allowed_pages(user)}

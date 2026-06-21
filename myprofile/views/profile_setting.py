@@ -203,13 +203,15 @@ def save_notification_settings(request):
 
 
 def _require_hr(user):
-    """Возвращает HttpResponseForbidden если пользователь не HR, иначе None."""
+    """None если есть доступ к «Заявки на смену ПВЗ», иначе HttpResponseForbidden.
+    Доступ: HR-флаг ИЛИ роль с правом на pickup_change_requests (Тех.поддержка/Сорт.ПВЗ/Директор/Гл.админ)."""
+    from myprofile.permissions import role_grants
     try:
-        if not user.userprofile.is_hr:
-            return HttpResponseForbidden(_("Нет доступа."))
+        if user.userprofile.is_hr or role_grants(user, 'pickup_change_requests'):
+            return None
     except UserProfile.DoesNotExist:
-        return HttpResponseForbidden(_("Нет доступа."))
-    return None
+        pass
+    return HttpResponseForbidden(_("Нет доступа."))
 
 
 def _has_active_sorting_session():

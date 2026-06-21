@@ -46,6 +46,29 @@ class UserProfile(models.Model):
     is_accountant = models.BooleanField(default=False, verbose_name=_("Бухгалтер"))
     is_tg_admin = models.BooleanField(default=False, verbose_name=_("Администратор Telegram-бота"))
     is_dibuyer_staff = models.BooleanField(default=False, verbose_name=_("Сотрудник Di.Buyer"))
+
+    # --- Основная роль (RBAC). Источник правды для разграничения доступа.
+    # Старые флаги выше выводятся из роли (см. myprofile.permissions.apply_role)
+    # и сохраняются как обратная совместимость / независимые доп-флаги. ---
+    ROLE_MAIN_ADMIN = 'main_admin'
+    ROLE_DIRECTOR = 'director'
+    ROLE_SUPPORT = 'support'
+    ROLE_SORTING_PVZ = 'sorting_pvz'
+    ROLE_PVZ = 'pvz'
+    ROLE_DRIVER = 'driver'
+    ROLE_CHOICES = [
+        (ROLE_MAIN_ADMIN, _("Главный администратор")),
+        (ROLE_DIRECTOR, _("Директор Inter Cargo")),
+        (ROLE_SUPPORT, _("Менеджер тех.поддержки")),
+        (ROLE_SORTING_PVZ, _("Сотрудник Сортировочного ПВЗ")),
+        (ROLE_PVZ, _("Сотрудник ПВЗ")),
+        (ROLE_DRIVER, _("Доставщик")),
+    ]
+    role = models.CharField(
+        max_length=20, blank=True, default='', choices=ROLE_CHOICES,
+        verbose_name=_("Основная роль"),
+    )
+
     is_registered = models.BooleanField(default=True, verbose_name=_("Регистрация подтверждена"))
     delivery_rate = models.DecimalField(
         max_digits=8, decimal_places=2, default=0,

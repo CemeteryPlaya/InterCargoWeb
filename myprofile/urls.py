@@ -144,6 +144,7 @@ urlpatterns = [
 
     # --- Super Admin: fine-grained role management --------------------------
     path('admin/roles/', role_management.role_list, name='role_management'),
+    path('admin/roles/quota/', role_management.role_quota_save, name='role_quota_save'),
     path('admin/roles/search/', role_management.role_search_users, name='role_search_users'),
     path('admin/roles/<int:user_id>/', role_management.role_edit, name='role_edit'),
     path('admin/roles/<int:user_id>/save/', role_management.role_save, name='role_save'),

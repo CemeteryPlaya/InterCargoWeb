@@ -68,6 +68,62 @@
             </details>
         </div>
 
+        <!-- Лимиты ролей (квоты) -->
+        {% if quota_info %}
+        <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                <i class="ri-group-line text-red-500"></i> {% trans "Лимиты ролей" %}
+            </h3>
+            <div class="flex flex-wrap items-end gap-4" id="quotaBox">
+                {% for q in quota_info %}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">{{ q.label }} <span class="text-gray-400">({% trans "занято" %} {{ q.count }})</span></label>
+                    <input type="number" min="0" data-role="{{ q.role }}" value="{{ q.limit }}"
+                           class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                {% endfor %}
+                <button type="button" id="quotaSaveBtn"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                    <i class="ri-save-line mr-1"></i> {% trans "Сохранить лимиты" %}
+                </button>
+                <span id="quotaStatus" class="text-sm hidden"></span>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var btn = document.getElementById('quotaSaveBtn');
+            if (!btn) return;
+            var status = document.getElementById('quotaStatus');
+            btn.addEventListener('click', function () {
+                var payload = {};
+                document.querySelectorAll('#quotaBox input[data-role]').forEach(function (i) {
+                    payload[i.dataset.role] = parseInt(i.value, 10) || 0;
+                });
+                fetch('{% url "role_quota_save" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(payload),
+                })
+                .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+                .then(function (res) {
+                    status.textContent = (res.ok && res.body.ok) ? '{% trans "Сохранено." %}' : ((res.body && res.body.error) || '{% trans "Ошибка." %}');
+                    status.className = (res.ok && res.body.ok) ? 'text-sm text-green-700' : 'text-sm text-red-600';
+                    status.classList.remove('hidden');
+                })
+                .catch(function () {
+                    status.textContent = '{% trans "Ошибка при отправке." %}';
+                    status.className = 'text-sm text-red-600';
+                    status.classList.remove('hidden');
+                });
+            });
+        })();
+        </script>
+        {% endif %}
+
         <!-- Список пользователей с ролями -->
         <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden mb-6">
             <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">

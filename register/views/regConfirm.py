@@ -5,11 +5,23 @@ from django.core.mail import send_mail
 from django.conf import settings
 from register.models import PendingRegistration, UserProfile
 from django.utils.translation import gettext as _
+from myprofile.permissions import role_grants
+
+
+def _can_confirm(user):
+    """HR-флаг ИЛИ роль с правом на страницу «Подтверждение пользователей»."""
+    if not user.is_authenticated:
+        return False
+    try:
+        if user.userprofile.is_hr:
+            return True
+    except UserProfile.DoesNotExist:
+        pass
+    return role_grants(user, 'confirm')
 
 
 def confirm_view(request):
-    # Только HR имеет доступ
-    if not request.user.is_authenticated or not request.user.userprofile.is_hr:
+    if not _can_confirm(request.user):
         return redirect('profile')
 
     registrations = PendingRegistration.objects.all().order_by('-created_at')
@@ -17,7 +29,7 @@ def confirm_view(request):
 
 
 def approve_registration(request, reg_id):
-    if not request.user.userprofile.is_hr:
+    if not _can_confirm(request.user):
         return redirect('profile')
 
     reg = PendingRegistration.objects.get(id=reg_id)
@@ -86,7 +98,7 @@ def approve_registration(request, reg_id):
 
 
 def reject_registration(request, reg_id):
-    if not request.user.userprofile.is_hr:
+    if not _can_confirm(request.user):
         return redirect('profile')
 
     reg = PendingRegistration.objects.get(id=reg_id)
