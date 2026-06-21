@@ -54,6 +54,47 @@
     {% include 'shared/header.html' %}
     {% block content %}
 
+    <!-- Круглый бейдж США/Европа для кнопок Di.Buyer (используется в моб. и десктоп версиях) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <clipPath id="diBadgeClip"><circle cx="18" cy="18" r="17.5"/></clipPath>
+        <polygon id="diEuStar" points="0,-1.3 0.38,-0.4 1.24,-0.4 0.52,0.15 0.76,1.05 0,0.5 -0.76,1.05 -0.52,0.15 -1.24,-0.4 -0.38,-0.4" fill="#FFCC00"/>
+      </defs>
+      <symbol id="us-eu-badge" viewBox="0 0 36 36">
+        <g clip-path="url(#diBadgeClip)">
+          <!-- Левая половина — флаг США -->
+          <rect x="0" y="0" width="18" height="36" fill="#fff"/>
+          <g fill="#B22234">
+            <rect x="0" y="0" width="18" height="2.77"/>
+            <rect x="0" y="5.54" width="18" height="2.77"/>
+            <rect x="0" y="11.08" width="18" height="2.77"/>
+            <rect x="0" y="16.62" width="18" height="2.77"/>
+            <rect x="0" y="22.15" width="18" height="2.77"/>
+            <rect x="0" y="27.69" width="18" height="2.77"/>
+            <rect x="0" y="33.23" width="18" height="2.77"/>
+          </g>
+          <rect x="0" y="0" width="10" height="15" fill="#3C3B6E"/>
+          <g fill="#fff">
+            <circle cx="2.2" cy="2.4" r="0.7"/><circle cx="5.1" cy="2.4" r="0.7"/><circle cx="8" cy="2.4" r="0.7"/>
+            <circle cx="3.6" cy="5.4" r="0.7"/><circle cx="6.5" cy="5.4" r="0.7"/>
+            <circle cx="2.2" cy="8.4" r="0.7"/><circle cx="5.1" cy="8.4" r="0.7"/><circle cx="8" cy="8.4" r="0.7"/>
+            <circle cx="3.6" cy="11.4" r="0.7"/><circle cx="6.5" cy="11.4" r="0.7"/>
+          </g>
+          <!-- Правая половина — флаг ЕС -->
+          <rect x="18" y="0" width="18" height="36" fill="#003399"/>
+          <use href="#diEuStar" x="33.3" y="18"/>
+          <use href="#diEuStar" x="31.45" y="13.55"/>
+          <use href="#diEuStar" x="27" y="11.7"/>
+          <use href="#diEuStar" x="22.55" y="13.55"/>
+          <use href="#diEuStar" x="20.7" y="18"/>
+          <use href="#diEuStar" x="22.55" y="22.45"/>
+          <use href="#diEuStar" x="27" y="24.3"/>
+          <use href="#diEuStar" x="31.45" y="22.45"/>
+        </g>
+        <circle cx="18" cy="18" r="17.5" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>
+      </symbol>
+    </svg>
+
     <!-- ===== МОБИЛЬНАЯ ГЛАВНАЯ (Kaspi-style) ===== -->
     <div id="mobile-home" class="md:hidden min-h-screen bg-gray-50 pb-20">
 
@@ -159,8 +200,8 @@
                class="flex items-center justify-between w-full mb-3 px-4 py-3.5 rounded-2xl shadow-sm active:scale-[0.99] transition"
                style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
                 <span class="flex items-center gap-3">
-                    <span class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.14);">
-                        <span style="font-family:Georgia,serif;font-weight:700;font-size:17px;letter-spacing:1px;color:#fff;">Di</span>
+                    <span class="w-9 h-9 flex items-center justify-center">
+                        <svg style="width:34px;height:34px;display:block" aria-label="США и Европа"><use href="#us-eu-badge"/></svg>
                     </span>
                     <span class="text-white font-semibold text-sm">{% trans "Доставка с американских сайтов" %}</span>
                 </span>
@@ -551,8 +592,8 @@
                     <a href="{% url 'dibuyer_home' %}"
                        class="inline-flex items-center gap-3 mt-3 px-6 py-3 !rounded-button font-medium transition w-fit"
                        style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
-                        <span style="font-family:Georgia,serif;font-weight:700;font-size:18px;letter-spacing:1px;color:#fff;">Di</span>
-                        <span class="text-white">{% trans "Перейти в Di.Buyer" %}</span>
+                        <svg style="width:34px;height:34px;display:block" aria-label="США и Европа"><use href="#us-eu-badge"/></svg>
+                        <span class="text-white">{% trans "Заказы из Америки и Европы" %}</span>
                         <i class="ri-arrow-right-line text-white/80"></i>
                     </a>
                     {% endif %}
