@@ -278,3 +278,14 @@ LOGGING = {
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME')
 TELEGRAM_SITE_URL = os.getenv('SITE_URL')
+
+# ─────────────────────────────────────────────────────
+# Валидатор выполнения функций (myprofile/execution_validator)
+# ─────────────────────────────────────────────────────
+# ENABLED — мастер-выключатель проверок контрактов (False → декоратор просто
+#           вызывает функцию без проверок).
+# STRICT  — если False, CRITICAL-нарушения не блокируют операцию (только журнал).
+#           Полезно для безопасного выката: сначала journal-only, затем, после
+#           чистки данных (python manage.py audit_receipts --fix), включить strict.
+EXECUTION_VALIDATOR_ENABLED = os.getenv('EXECUTION_VALIDATOR_ENABLED', 'true').lower() != 'false'
+EXECUTION_VALIDATOR_STRICT = os.getenv('EXECUTION_VALIDATOR_STRICT', 'true').lower() != 'false'

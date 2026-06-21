@@ -98,6 +98,10 @@ def print_receipt(request, receipt_id):
     Формат страницы Letter, шрифт x2 для удобства чтения."""
     receipt = get_object_or_404(Receipt, id=receipt_id, owner=request.user)
 
+    # Read-only валидация чека перед печатью (журналирует нарушения, не блокирует)
+    from myprofile.execution_validator.receipt_contracts import validate_receipt_readonly
+    validate_receipt_readonly(receipt, function_name='print_receipt')
+
     RATE = get_global_price_per_kg()
     discount_per_kg = get_user_discount(request.user)
     effective_rate = RATE - discount_per_kg

@@ -85,12 +85,64 @@ def _recalc_receipt(receipt, effective_rate):
     receipt.save(update_fields=['total_weight', 'total_price', 'price_per_kg'])
 
 
+from myprofile.execution_validator import validate_execution, ExecutionValidationError
+from myprofile.execution_validator.receipt_contracts import (
+    authoritative_pickup_obj,
+    one_receipt_per_client_date,
+    receipt_pickup_label_matches_authoritative,
+    all_items_belong_to_receipt_owner,
+    receipt_tracks_pickup_homogeneous,
+)
+
+
+@validate_execution(post=[
+    one_receipt_per_client_date,
+    all_items_belong_to_receipt_owner,
+    receipt_pickup_label_matches_authoritative,
+    receipt_tracks_pickup_homogeneous,
+])
+def _create_or_update_date_receipt(user, receipt_date, date_tracks, effective_rate):
+    """Создаёт ИЛИ дополняет единственный чек на (user, дата).
+
+    Инвариант: на (owner, дата) — ровно один чек, с единым ПВЗ. Если чек этой
+    даты уже есть, новые позиции дописываются в него (вместо второго чека).
+    ПВЗ чека вычисляется детерминированно (authoritative), не «первый override».
+    Пост-контракты проверяют инварианты после выполнения (декоратор).
+    """
+    receipt = Receipt.objects.filter(owner=user, created_at=receipt_date).order_by('id').first()
+    if receipt is None:
+        receipt = Receipt.objects.create(
+            owner=user, total_weight=0, total_price=0,
+            price_per_kg=effective_rate, created_at=receipt_date,
+        )
+
+    for track in date_tracks:
+        w = track.weight or Decimal("0")
+        rate = track.rate_override if track.rate_override is not None else effective_rate
+        ReceiptItem.objects.create(
+            receipt=receipt, track_code=track,
+            item_rate=rate,
+            item_price=(w * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
+        )
+
+    # Единый ПВЗ + ссылка на оплату — из authoritative-правила
+    pickup_obj = authoritative_pickup_obj(receipt)
+    receipt.pickup_point = str(pickup_obj) if pickup_obj else (receipt.pickup_point or '')
+    receipt.payment_link = pickup_obj.payment_link if pickup_obj else receipt.payment_link
+    receipt._allow_content_update = True
+    receipt.save(update_fields=['pickup_point', 'payment_link'])
+
+    _recalc_receipt(receipt, effective_rate)
+    return receipt
+
+
 def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     """
     Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
-    Группирует треки по delivered_date — один чек на каждую дату прихода.
+    Группирует треки по delivered_date — один чек на каждую дату прихода
+    (инвариант «1 дата = 1 чек = 1 ПВЗ» проверяется контрактами).
     Дата чека (created_at) = delivered_date трек-кодов.
-    Возвращает последний созданный чек или None.
+    Возвращает последний обработанный чек или None.
     """
     from collections import defaultdict
 
@@ -104,46 +156,21 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
-    pickup_display = ''
-    payment_link = None
-    first_with_override = next((t for t in new_tracks if t.delivery_pickup_id), None)
-    if first_with_override and first_with_override.delivery_pickup:
-        pickup_display = str(first_with_override.delivery_pickup)
-        payment_link = first_with_override.delivery_pickup.payment_link
-    else:
-        try:
-            profile = UserProfile.objects.get(user=user)
-            if profile.pickup:
-                pickup_display = str(profile.pickup)
-                payment_link = profile.pickup.payment_link
-        except UserProfile.DoesNotExist:
-            pass
-
-    # Группируем по delivered_date
+    # Группируем по delivered_date (детерминированный fallback для None)
     by_date = defaultdict(list)
     for track in new_tracks:
-        by_date[track.delivered_date].append(track)
+        by_date[track.delivered_date or timezone.localdate()].append(track)
 
     last_receipt = None
-    created_receipt_ids = []
-    for d_date, date_tracks in by_date.items():
-        receipt = Receipt.objects.create(
-            owner=user, total_weight=0, total_price=0,
-            price_per_kg=effective_rate,
-            created_at=d_date or timezone.localdate(),
-            pickup_point=pickup_display, payment_link=payment_link
-        )
-        for track in date_tracks:
-            w = track.weight or Decimal("0")
-            rate = track.rate_override if track.rate_override is not None else effective_rate
-            ReceiptItem.objects.create(
-                receipt=receipt, track_code=track,
-                item_rate=rate,
-                item_price=(w * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
-            )
-        _recalc_receipt(receipt, effective_rate)
-        last_receipt = receipt
-        created_receipt_ids.append(receipt.id)
+    for receipt_date, date_tracks in by_date.items():
+        try:
+            receipt = _create_or_update_date_receipt(user, receipt_date, date_tracks, effective_rate)
+        except ExecutionValidationError:
+            # CRITICAL-нарушение уже записано в журнал; эту дату пропускаем,
+            # чтобы не блокировать формирование чеков остальных дат.
+            continue
+        if receipt is not None:
+            last_receipt = receipt
 
     return last_receipt
 

@@ -3,7 +3,7 @@ from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
     DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog, RestructureSession,
-    Arrival, ArrivalSession, ArrivalSessionItem
+    Arrival, ArrivalSession, ArrivalSessionItem, ContractViolation
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -391,3 +391,17 @@ class RestructureSessionAdmin(admin.ModelAdmin):
     list_display = ('id', 'pickup_point', 'status', 'created_by', 'created_at', 'completed_at')
     list_filter = ('status', 'pickup_point')
     readonly_fields = ('created_at', 'cells_backup')
+
+
+@admin.register(ContractViolation)
+class ContractViolationAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'severity', 'function', 'contract', 'resolved')
+    list_filter = ('severity', 'resolved', 'function')
+    search_fields = ('function', 'contract', 'message')
+    readonly_fields = ('function', 'contract', 'severity', 'message', 'context', 'created_at')
+    list_per_page = 50
+    actions = ['mark_resolved']
+
+    @admin.action(description=_("Отметить как разобранные"))
+    def mark_resolved(self, request, queryset):
+        queryset.update(resolved=True)

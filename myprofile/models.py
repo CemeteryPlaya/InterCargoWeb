@@ -958,3 +958,28 @@ class ExtraditionSession(models.Model):
 
     def __str__(self):
         return f"Сессия: {self.package.barcode} ({self.package.user.username})"
+
+
+class ContractViolation(models.Model):
+    """Журнал нарушений контрактов фреймворка валидации выполнения функций."""
+
+    SEVERITY_CHOICES = [
+        ("critical", _("Критично")),
+        ("warning", _("Предупреждение")),
+    ]
+
+    function = models.CharField(max_length=200, verbose_name=_("Функция"))
+    contract = models.CharField(max_length=200, verbose_name=_("Контракт"))
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, db_index=True, verbose_name=_("Серьёзность"))
+    message = models.TextField(verbose_name=_("Сообщение"))
+    context = models.JSONField(default=dict, blank=True, verbose_name=_("Контекст"))
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name=_("Время"))
+    resolved = models.BooleanField(default=False, db_index=True, verbose_name=_("Разобрано"))
+
+    class Meta:
+        verbose_name = _("Нарушение контракта")
+        verbose_name_plural = _("Нарушения контрактов")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.severity}] {self.function} :: {self.contract}"

@@ -187,6 +187,11 @@ def print_documents_view(request):
                         'qr_image': _generate_qr_base64(qr_number),
                     })
 
+                # Защитный контроль: убираем из печати чеки чужих ПВЗ
+                # (нарушение журналируется), чтобы не печатать некорректный пункт.
+                from myprofile.execution_validator.receipt_contracts import filter_foreign_print_checks
+                checks = filter_foreign_print_checks(pickup_names, checks)
+
                 return render(request, 'shared/print/client_check_pdf.html', {
                     'checks': checks,
                     'date': check_date,
