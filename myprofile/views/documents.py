@@ -1,5 +1,5 @@
-import uuid
 import base64
+import logging
 from io import BytesIO
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,10 +11,13 @@ from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 from django.db.models import Q
-# RECEIPTS COMMENTED OUT: auto-creation disabled
-# from myprofile.views.utils import create_receipts_for_user
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount, round_price as _round_price
+from myprofile.views.utils import (
+    get_global_price_per_kg, get_user_discount, round_price as _round_price,
+    create_receipts_for_user,
+)
 from django.utils.translation import gettext as _
+
+logger = logging.getLogger(__name__)
 
 
 def _generate_qr_base64(text):
@@ -57,6 +60,19 @@ def print_documents_view(request):
                 ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
 
                 track_ids = [t.id for t in tracks]
+
+                # Перед печатью формируем недостающие чеки по выбранным пунктам/дате
+                # (та же логика, что кнопка «Создать чеки» в «Сводке прихода»), чтобы у
+                # каждого чека был сканируемый receipt_number и не возникала ошибка
+                # «Неизвестный QR-код» при приёмке. Идемпотентно (уже учтённые треки
+                # пропускаются), уведомления не шлём — это тихая проверка перед печатью.
+                for _owner in {t.owner for t in tracks if t.owner_id}:
+                    try:
+                        create_receipts_for_user(
+                            _owner, statuses=['delivered', 'shipping_pp', 'ready', 'claimed'])
+                    except Exception:
+                        logger.exception(
+                            "print_checks: не удалось сформировать чек для %s", _owner)
 
                 # Находим ReceiptItem через треки И через чеки за эту дату
                 # (для архивированных треков track_code_id = NULL, но receipt.created_at = дата)
@@ -173,8 +189,11 @@ def print_documents_view(request):
                     no_receipt_clients[username]['total_weight'] += weight
 
                 for client in sorted(no_receipt_clients.values(), key=lambda c: c['username']):
-                    # Генерируем QR для клиентов без чека (временные пользователи)
-                    qr_number = f"IC-{uuid.uuid4().hex[:8].upper()}"
+                    # Без чека — печатаем чек БЕЗ QR. Раньше тут генерировался
+                    # случайный IC-{8hex}, который не сохраняется и при приёмке
+                    # даёт «Неизвестный QR-код» (приёмка сверяет receipt_number).
+                    # Сканируемый QR появляется только после создания чека через
+                    # «Сводку прихода». Шаблон скрывает блок при пустом qr_image.
                     checks.append({
                         'username': client['username'],
                         'address': client['address'],
@@ -183,8 +202,8 @@ def print_documents_view(request):
                         'total_count': len(client['tracks']),
                         'total_weight': float(client['total_weight']),
                         'total_sum': _round_price(client['total_weight'] * client['effective_rate']),
-                        'qr_number': qr_number,
-                        'qr_image': _generate_qr_base64(qr_number),
+                        'qr_number': '',
+                        'qr_image': '',
                     })
 
                 # Защитный контроль: убираем из печати чеки чужих ПВЗ
@@ -192,10 +211,15 @@ def print_documents_view(request):
                 from myprofile.execution_validator.receipt_contracts import filter_foreign_print_checks
                 checks = filter_foreign_print_checks(pickup_names, checks)
 
+                # Посылки, оставшиеся без чека после авто-формирования (напр.
+                # незарегистрированные клиенты без аккаунта) — их предупреждаем оператора.
+                no_receipt_count = sum(1 for t in tracks if t.id not in tracks_with_receipt)
+
                 return render(request, 'shared/print/client_check_pdf.html', {
                     'checks': checks,
                     'date': check_date,
                     'check_template': check_template,
+                    'no_receipt_count': no_receipt_count,
                 })
 
         registry_date_str = request.POST.get('registry_date')

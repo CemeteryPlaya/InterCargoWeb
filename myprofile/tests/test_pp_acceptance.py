@@ -1,4 +1,5 @@
 """Тесты приёмки на ПВЗ (pp_acceptance): сортировка, ячейки, «требует внимания»."""
+from datetime import date
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -71,6 +72,82 @@ class AcceptDeliveryTests(PpAcceptanceBase):
         c = Client()
         c.login(username='CLA', password='p')
         self.assertEqual(c.get(reverse('get_acceptance_receipts')).status_code, 403)
+
+
+class PrintCheckQrTests(PpAcceptanceBase):
+    """Печать чеков: QR должен совпадать с тем, что распознаётся при приёмке.
+
+    Баг: клиентам без чека печатался случайный неотслеживаемый QR `IC-{8hex}`,
+    который при сканировании на приёмке даёт «Неизвестный QR-код», т.к. приёмка
+    сверяет только реальные receipt_number. Чеки создаются ТОЛЬКО через «Сводку
+    прихода», поэтому печать не должна выдумывать несканируемый код.
+    """
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username='accpt', password='p')
+
+    def _print(self, d):
+        return self.client.post(reverse('print_documents'), {
+            'action': 'print_checks',
+            'check_date': d.strftime('%Y-%m-%d'),
+            'pickup_points': [str(self.pp.id)],
+        })
+
+    def test_print_autocreates_receipt_and_scannable_qr(self):
+        # Клиент с ready-треком без чека. Печать сама формирует чек (как «Создать
+        # чеки» в Сводке прихода) → печатается реальный receipt_number, без
+        # случайного несканируемого IC-{8hex}, и он распознаётся при приёмке.
+        d = date(2026, 6, 20)
+        track = TrackCode.objects.create(
+            track_code='NR1', status='ready', owner=self.cli, weight=Decimal('1.000'),
+            delivery_pickup=self.pp, delivered_date=d, is_accepted_pp=False,
+        )
+        resp = self._print(d)
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertNotRegex(html, r'IC-[0-9A-F]{8}')        # нет случайного QR
+
+        item = ReceiptItem.objects.filter(track_code=track).select_related('receipt').first()
+        self.assertIsNotNone(item)                          # чек авто-сформирован
+        rn = item.receipt.receipt_number
+        self.assertIn(rn, html)                             # QR = реальный номер чека
+
+        resp2 = self.client.get(reverse('get_acceptance_receipts'), {'pickup_id': str(self.pp.id)})
+        numbers = [r['receipt_number'] for c in resp2.json()['clients'] for r in c['receipts']]
+        self.assertIn(rn, numbers)                          # сканируется на приёмке
+
+    def test_orphan_track_without_owner_warns_and_no_random_qr(self):
+        # Трек без владельца нельзя привязать к чеку → печатается без QR,
+        # оператор предупреждается баннером.
+        d = date(2026, 6, 20)
+        TrackCode.objects.create(
+            track_code='ORPHAN1', status='ready', owner=None, weight=Decimal('1.000'),
+            delivery_pickup=self.pp, delivered_date=d, is_accepted_pp=False,
+        )
+        resp = self._print(d)
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertNotRegex(html, r'IC-[0-9A-F]{8}')        # без случайного QR
+        self.assertIn('Посылок без чека', html)             # предупреждение показано
+
+    def test_receipt_client_qr_is_scannable_at_acceptance(self):
+        d = date(2026, 6, 20)
+        track = TrackCode.objects.create(
+            track_code='RC1', status='ready', owner=self.cli, weight=Decimal('1.000'),
+            delivery_pickup=self.pp, delivered_date=d, is_accepted_pp=False,
+        )
+        receipt = Receipt.objects.create(
+            owner=self.cli, total_weight=Decimal('1.000'), total_price=0,
+            pickup_point=str(self.pp),
+        )
+        ReceiptItem.objects.create(receipt=receipt, track_code=track, weight=Decimal('1.000'))
+
+        html = self._print(d).content.decode()
+        self.assertIn(receipt.receipt_number, html)  # на печати реальный номер чека
+
+        resp = self.client.get(reverse('get_acceptance_receipts'), {'pickup_id': str(self.pp.id)})
+        numbers = [r['receipt_number'] for c in resp.json()['clients'] for r in c['receipts']]
+        self.assertIn(receipt.receipt_number, numbers)  # этот же номер ждут на приёмке
 
 
 class AttentionTests(PpAcceptanceBase):
