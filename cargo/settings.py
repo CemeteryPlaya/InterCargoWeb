@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'pywebpush',
     'tgbot',
     'dibuyer',
+    'analytics',
 ]
 
 MIDDLEWARE = [
@@ -79,9 +80,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'analytics.middleware.PageViewMiddleware',
 ]
 
-APP_VERSION = '1.4.7'
+APP_VERSION = '1.4.9'
 
 ROOT_URLCONF = 'cargo.urls'
 

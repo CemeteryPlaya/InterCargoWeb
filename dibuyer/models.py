@@ -30,6 +30,44 @@ class DibuyerSettings(models.Model):
         return "Настройки Di.Buyer"
 
 
+class Brand(models.Model):
+    """Бренд для витрины Di.Buyer. Управляется из админки: название, ссылка,
+    логотип (картинка) и счётчик кликов для статистики популярности."""
+    name = models.CharField(max_length=100, verbose_name=_("Название"))
+    url = models.URLField(max_length=500, verbose_name=_("Ссылка на сайт бренда"))
+    logo = models.ImageField(
+        upload_to='dibuyer/brands/', blank=True, null=True,
+        verbose_name=_("Логотип"),
+        help_text=_("Если пусто — на кнопке показывается монограмма."),
+    )
+    monogram = models.CharField(
+        max_length=4, blank=True, default='',
+        verbose_name=_("Монограмма"),
+        help_text=_("1–4 буквы для кнопки без логотипа. Пусто — берутся инициалы названия."),
+    )
+    click_count = models.PositiveIntegerField(default=0, editable=False, verbose_name=_("Кликов"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Показывать на витрине"))
+    sort_order = models.IntegerField(default=0, verbose_name=_("Порядок"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Добавлен"))
+
+    class Meta:
+        ordering = ['sort_order', 'name']
+        verbose_name = _("Бренд Di.Buyer")
+        verbose_name_plural = _("Бренды Di.Buyer")
+
+    @property
+    def display_monogram(self):
+        if self.monogram:
+            return self.monogram
+        parts = self.name.split()
+        if len(parts) >= 2:
+            return (parts[0][0] + parts[1][0]).upper()
+        return self.name[:2].upper()
+
+    def __str__(self):
+        return self.name
+
+
 class BuyerOrder(models.Model):
     STATUS_NEW = 'new'
     STATUS_IN_PROGRESS = 'in_progress'

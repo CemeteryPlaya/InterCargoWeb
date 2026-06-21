@@ -18,14 +18,60 @@ a{color:inherit;text-decoration:none}
 .db-script{font-family:'Pinyon Script',cursive;font-size:24px;color:var(--ink);opacity:.85;margin-top:2px}
 .db-rate{margin-top:8px;font-size:12px;letter-spacing:1px;color:var(--muted)}
 .db-rate b{color:var(--navy)}
-.db-brands{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin:16px 0 6px;
-  font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;color:var(--navy2)}
-.db-brands a{color:var(--navy2);border-bottom:1px solid transparent;padding-bottom:1px;transition:color .15s,border-color .15s}
-.db-brands a:hover{color:var(--navy);border-bottom-color:var(--lav)}
-.db-ig{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;letter-spacing:.5px;
-  color:var(--navy);border:1px solid var(--lav);border-radius:999px;padding:5px 13px;transition:background .15s}
+.db-brands-cap{margin:18px 0 9px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--lav);font-weight:500;scroll-margin-top:16px}
+.db-brands-wrap{position:relative}
+.db-brands{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0;
+  overflow:hidden;transition:max-height .45s cubic-bezier(.22,.61,.36,1)}
+/* стартовый клэмп до инициализации JS — чтобы при загрузке не мелькал весь список.
+   Точную высоту 2 рядов JS проставит инлайном (перекроет это значение). */
+.js .db-brands{max-height:250px}
+/* мягкая подсказка «есть ещё», пока список свёрнут */
+.db-brands-wrap.is-collapsed::after{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(250,249,245,0),var(--cream))}
+.db-brands-toggle{display:flex;align-items:center;justify-content:center;width:fit-content;margin:13px auto 6px;
+  background:none;border:1px solid var(--lav);color:var(--navy);
+  font-family:'Jost',-apple-system,Segoe UI,Roboto,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  padding:8px 22px;border-radius:999px;cursor:pointer;transition:background .15s,border-color .15s}
+.db-brands-toggle[hidden]{display:none}
+.db-brands-toggle:hover{background:var(--lav-soft);border-color:var(--navy)}
+.db-brands-toggle:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.db-brands-toggle-chev{display:inline-block;margin-left:8px;font-size:9px;transition:transform .3s ease}
+.db-brands-toggle.is-open .db-brands-toggle-chev{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.db-brands{transition:none}.db-brands-toggle-chev{transition:none}}
+.db-brand{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;
+  padding:15px 10px 13px;background:var(--paper);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 6px 18px rgba(60,60,90,.04);
+  /* identity-трансформы для плавного :hover без сдвига контекста наложения */
+  translate:0 0;scale:1;
+  transition:translate .18s ease,scale .18s ease,border-color .18s ease,box-shadow .18s ease}
+.db-brand:hover{translate:0 -3px;border-color:var(--lav);box-shadow:0 12px 26px rgba(60,60,90,.10)}
+.db-brand:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.db-brand-badge{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;overflow:hidden;
+  border:1px solid var(--lav);background:var(--lav-soft);color:var(--navy);
+  transition:background .18s ease,border-color .18s ease,color .18s ease}
+.db-brand:hover .db-brand-badge{background:var(--navy);border-color:var(--navy);color:var(--cream)}
+.db-brand-mono{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:18px;letter-spacing:1px;line-height:1}
+.db-brand-img{display:none;max-width:74%;max-height:74%;object-fit:contain}
+.db-brand-badge.has-logo{background:var(--paper);border-color:var(--line)}
+.db-brand-badge.has-logo .db-brand-mono{display:none}
+.db-brand-badge.has-logo .db-brand-img{display:block}
+.db-brand:hover .db-brand-badge.has-logo{background:var(--lav-soft);border-color:var(--lav)}
+.db-brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;line-height:1.15;
+  letter-spacing:.3px;color:var(--navy2);transition:color .18s ease}
+.db-brand:hover .db-brand-name{color:var(--navy)}
+@media (prefers-reduced-motion:reduce){
+  .db-brand{transition:border-color .18s ease,box-shadow .18s ease}
+  .db-brand:hover{translate:0 0}
+}
+.db-topbar-actions{display:flex;align-items:center;gap:10px}
+.db-ig{display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.5px;
+  color:var(--navy);border:1px solid var(--lav);border-radius:999px;padding:4px 11px;transition:background .15s}
 .db-ig:hover{background:var(--lav-soft)}
 .db-ig svg{display:block}
+@media (max-width:460px){
+  .db-ig{padding:5px}
+  .db-ig-label{display:none}
+}
 .eyebrow{text-transform:uppercase;letter-spacing:3px;font-size:10px;color:var(--lav);
   font-weight:500;margin:26px 0 12px}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;

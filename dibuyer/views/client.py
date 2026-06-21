@@ -1,12 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from dibuyer.access import require_dibuyer_enabled
-from dibuyer.models import BuyerOrder, BuyerOrderItem, DibuyerSettings
+from dibuyer.models import Brand, BuyerOrder, BuyerOrderItem, DibuyerSettings
 
 
 @login_required
@@ -17,7 +18,17 @@ def dibuyer_home(request):
     return render(request, 'dibuyer/home.html', {
         'orders': orders,
         'delivery_rate_usd': settings_obj.delivery_rate_usd,
+        'brands': Brand.objects.filter(is_active=True),
     })
+
+
+@login_required
+@require_dibuyer_enabled
+def dibuyer_brand_click(request, pk):
+    """Считает клик по бренду и редиректит на сайт бренда (для статистики)."""
+    brand = get_object_or_404(Brand, pk=pk, is_active=True)
+    Brand.objects.filter(pk=pk).update(click_count=F('click_count') + 1)
+    return redirect(brand.url)
 
 
 @login_required

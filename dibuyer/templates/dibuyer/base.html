@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>document.documentElement.classList.add('js')</script>
   <title>{% block title %}Di.Buyer{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Jost:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -13,12 +14,18 @@
 <body>
   <div class="db-topbar">
     <a class="db-back" href="{% url 'home' %}">← {% trans "На главную" %}</a>
-    <a class="db-brandmark" href="{% url 'dibuyer_home' %}">Di.Buyer</a>
-    {% if dibuyer_is_staff %}
-      <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Заявки" %} →</a>
-    {% else %}
-      <span class="db-back" style="visibility:hidden">←</span>
-    {% endif %}
+    {% block topbar_brand %}
+      <a class="db-brandmark" href="{% url 'dibuyer_home' %}">Di.Buyer</a>
+    {% endblock %}
+    <div class="db-topbar-actions">
+      <a class="db-ig" href="https://www.instagram.com/di.buyers/" target="_blank" rel="noopener" aria-label="Instagram @di.buyers">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+        <span class="db-ig-label">@di.buyers</span>
+      </a>
+      {% if dibuyer_is_staff %}
+        <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Заявки" %} →</a>
+      {% endif %}
+    </div>
   </div>
 
   <div class="db-container">

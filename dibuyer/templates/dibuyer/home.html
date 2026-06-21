@@ -2,6 +2,9 @@
 {% load i18n %}{% load static %}
 {% block title %}Di.Buyer{% endblock %}
 
+{# На главной Di.Buyer прячем брендмарк в шапке — логотип и так крупно в hero #}
+{% block topbar_brand %}{% endblock %}
+
 {% block content %}
   <div class="db-hero">
     <div class="db-logo">DI<span class="db-leaf">
@@ -10,20 +13,28 @@
     <div class="db-word">BUYER</div>
     <div class="db-script">the quiet power of style</div>
     <div class="db-rate">{% trans "Доставка" %} · <b>${{ delivery_rate_usd }}/{% trans "кг" %}</b></div>
-    <a class="db-ig" href="https://www.instagram.com/di.buyers/" target="_blank" rel="noopener">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-      @di.buyers
-    </a>
-    <div class="db-brands">
-      <a href="https://www.tommy.com" target="_blank" rel="noopener">Tommy Hilfiger</a>
-      <a href="https://www.louisvuitton.com" target="_blank" rel="noopener">Louis Vuitton</a>
-      <a href="https://www.prada.com" target="_blank" rel="noopener">Prada</a>
-      <a href="https://www.adidas.com" target="_blank" rel="noopener">Adidas</a>
-      <a href="https://www.nike.com" target="_blank" rel="noopener">Nike</a>
-      <a href="https://www.michaelkors.com" target="_blank" rel="noopener">Michael Kors</a>
-      <a href="https://www.karl.com" target="_blank" rel="noopener">Karl Lagerfeld</a>
-      <a href="https://www.tomfordfashion.com" target="_blank" rel="noopener">Tom Ford</a>
+    {% if brands %}
+    <div class="db-brands-cap">{% trans "Бренды, которые мы выкупаем" %}</div>
+    <div class="db-brands-wrap">
+      <div class="db-brands" id="db-brands">
+        {% for b in brands %}
+        <a class="db-brand" href="{% url 'dibuyer_brand_click' b.pk %}" target="_blank" rel="noopener">
+          <span class="db-brand-badge{% if b.logo %} has-logo{% endif %}">
+            {% if b.logo %}<img class="db-brand-img" src="{{ b.logo.url }}" alt="{{ b.name }}">{% endif %}
+            <span class="db-brand-mono" aria-hidden="true">{{ b.display_monogram }}</span>
+          </span>
+          <span class="db-brand-name">{{ b.name }}</span>
+        </a>
+        {% endfor %}
+      </div>
     </div>
+    <button type="button" class="db-brands-toggle" id="db-brands-toggle"
+            aria-controls="db-brands" aria-expanded="false"
+            data-more="{% trans "Показать больше" %}" data-less="{% trans "Свернуть" %}" hidden>
+      <span class="db-brands-toggle-txt">{% trans "Показать больше" %}</span>
+      <span class="db-brands-toggle-chev" aria-hidden="true">▾</span>
+    </button>
+    {% endif %}
   </div>
 
   <div class="eyebrow">{% trans "Новая заявка" %}</div>
@@ -70,4 +81,98 @@
 
 {% block scripts %}
   <script src="{% static 'dibuyer/scripts/order_form.js' %}?v={{ APP_VERSION }}"></script>
+  <script>
+    // Витрина брендов: по умолчанию показываем первые 2 ряда, остальное — по «Показать больше».
+    // Высота двух рядов считается из реального числа колонок (адаптивно), анимация — через max-height.
+    (function () {
+      var grid = document.getElementById('db-brands');
+      var btn = document.getElementById('db-brands-toggle');
+      if (!grid || !btn) return;
+      var wrap = grid.closest('.db-brands-wrap');
+      var txt = btn.querySelector('.db-brands-toggle-txt');
+      var ROWS = 2;
+      var expanded = false;
+
+      function columns() {
+        var tmpl = getComputedStyle(grid).gridTemplateColumns;
+        return tmpl ? tmpl.split(' ').filter(Boolean).length : 1;
+      }
+
+      // Высота первых ROWS рядов (по нижней грани самой высокой карточки 2-го ряда).
+      function collapsedHeight() {
+        var items = grid.children, cols = columns(), visible = cols * ROWS;
+        if (items.length <= visible) return null;          // прятать нечего
+        var top = grid.getBoundingClientRect().top, h = 0;
+        for (var i = cols; i < visible && i < items.length; i++) {
+          var b = items[i].getBoundingClientRect().bottom - top;
+          if (b > h) h = b;
+        }
+        return Math.round(h);
+      }
+
+      function collapse(animate) {
+        var h = collapsedHeight();
+        if (h === null) {                                  // всё помещается в 2 ряда
+          btn.hidden = true; grid.style.maxHeight = 'none';  // снять и стартовый CSS-клэмп
+          wrap.classList.remove('is-collapsed'); expanded = false; return;
+        }
+        btn.hidden = false;
+        if (animate === false) grid.style.transition = 'none';
+        grid.style.maxHeight = h + 'px';
+        wrap.classList.add('is-collapsed');
+        btn.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+        txt.textContent = btn.dataset.more;
+        expanded = false;
+        if (animate === false) { void grid.offsetHeight; grid.style.transition = ''; }
+      }
+
+      function expand() {
+        grid.style.maxHeight = grid.scrollHeight + 'px';
+        wrap.classList.remove('is-collapsed');
+        btn.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        txt.textContent = btn.dataset.less;
+        expanded = true;
+        grid.addEventListener('transitionend', function onEnd(e) {
+          if (e.propertyName !== 'max-height') return;
+          if (expanded) grid.style.maxHeight = 'none';     // снять ограничение после раскрытия
+          grid.removeEventListener('transitionend', onEnd);
+        });
+      }
+
+      function recollapse() {                              // плавно свернуть из состояния auto
+        grid.style.maxHeight = grid.scrollHeight + 'px';
+        void grid.offsetHeight;
+        collapse(true);
+      }
+
+      btn.addEventListener('click', function () {
+        if (expanded) {
+          // прокрутка наверх запускается одновременно со сворачиванием —
+          // страница и список поднимаются вместе
+          var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+          recollapse();
+        } else {
+          expand();
+        }
+      });
+
+      collapse(false);                                     // стартовое состояние
+
+      var t;
+      window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+          if (expanded) grid.style.maxHeight = 'none';
+          else collapse(false);
+        }, 150);
+      });
+      // пересчёт после загрузки шрифтов/переносов строк
+      window.addEventListener('load', function () { if (!expanded) collapse(false); });
+      // возврат из bfcache (кнопки браузера «назад/вперёд») — сбрасываем в свёрнутое
+      window.addEventListener('pageshow', function (e) { if (e.persisted) collapse(false); });
+    })();
+  </script>
 {% endblock %}

@@ -1,6 +1,29 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
-from .models import BuyerOrder, BuyerOrderItem, DibuyerSettings
+from .models import Brand, BuyerOrder, BuyerOrderItem, DibuyerSettings
+
+
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('logo_preview', 'name', 'url', 'click_count', 'is_active', 'sort_order')
+    list_display_links = ('name',)
+    list_editable = ('is_active', 'sort_order')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'url')
+    readonly_fields = ('click_count', 'created_at', 'logo_preview')
+    fields = ('name', 'url', 'logo', 'logo_preview', 'monogram', 'is_active', 'sort_order', 'click_count', 'created_at')
+    ordering = ('sort_order', 'name')
+
+    @admin.display(description='Логотип')
+    def logo_preview(self, obj):
+        if obj.logo:
+            return format_html(
+                '<img src="{}" style="height:34px;width:34px;object-fit:contain;'
+                'border-radius:6px;background:#faf9f5;padding:2px" alt="">',
+                obj.logo.url,
+            )
+        return format_html('<span style="color:#999">{}</span>', obj.display_monogram)
 
 
 class BuyerOrderItemInline(admin.TabularInline):
