@@ -55,6 +55,9 @@ class AdminAutocompleteWidgetsTest(TestCase):
                 self.assertIsInstance(widget, widget_cls)
 
 
+# Скан статический: читает объявленные атрибуты классов (fields/fieldsets/
+# autocomplete_fields и т.д.). Динамические get_fields()/get_inlines()/exclude
+# он не учитывает — при их появлении расширить _form_field_names/_violations.
 LARGE_TABLE_MODELS = {TrackCode, Receipt, ExtraditionPackage}
 
 
