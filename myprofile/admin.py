@@ -160,6 +160,7 @@ class ReceiptItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'receipt', 'track_code', 'weight', 'item_rate', 'item_price')
     search_fields = ('track_code__track_code', 'receipt__owner__username', 'receipt__receipt_number')
     list_filter = ('receipt__created_at',)
+    autocomplete_fields = ('receipt', 'track_code')
 
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):
@@ -199,7 +200,7 @@ class ExtraditionPackageAdmin(admin.ModelAdmin):
     list_filter = ('is_issued', 'created_at')
     search_fields = ('barcode', 'user__username')
     readonly_fields = ('barcode', 'created_at', 'updated_at')
-    filter_horizontal = ('receipts',)
+    autocomplete_fields = ('receipts',)
     date_hierarchy = 'created_at'
 
     def receipts_count(self, obj):
@@ -224,6 +225,7 @@ class ExtraditionAdmin(admin.ModelAdmin):
     list_filter = ('confirmed', 'created_at', 'pickup_point')
     search_fields = ('user__username', 'package__barcode', 'pickup_point')
     readonly_fields = ('created_at',)
+    autocomplete_fields = ('package',)
     date_hierarchy = 'created_at'
     
     fieldsets = (
@@ -269,7 +271,7 @@ class DeliveryHistoryAdmin(admin.ModelAdmin):
     list_filter = ('driver', 'taken_at', 'delivered_at', 'pickup_point')
     search_fields = ('driver__username', 'driver__first_name', 'driver__last_name', 'pickup_point__address', 'pickup_point__premise_name')
     readonly_fields = ('created_at',)
-    filter_horizontal = ('track_codes',)
+    autocomplete_fields = ('track_codes',)
     date_hierarchy = 'taken_at'
     ordering = ('-taken_at',)
 
@@ -287,6 +289,7 @@ class ClientRegistryAdmin(admin.ModelAdmin):
     list_display = ('id', 'registry_date', 'created_at')
     list_filter = ('registry_date', 'created_at')
     readonly_fields = ('created_at',)
+    autocomplete_fields = ('track_codes',)
     ordering = ('-created_at',)
 
 @admin.register(StorageCell)
@@ -354,7 +357,7 @@ class ArrivalAdmin(admin.ModelAdmin):
     list_filter = ('date', 'sorting_location', 'created_at')
     search_fields = ('id', 'created_by__username')
     readonly_fields = ('created_at', 'raw_data')
-    filter_horizontal = ('track_codes',)
+    autocomplete_fields = ('track_codes',)
     date_hierarchy = 'date'
     ordering = ('-date', '-created_at')
 
