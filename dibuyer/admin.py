@@ -29,6 +29,7 @@ class BrandAdmin(admin.ModelAdmin):
 class BuyerOrderItemInline(admin.TabularInline):
     model = BuyerOrderItem
     extra = 0
+    autocomplete_fields = ('track_code',)
 
 
 @admin.register(BuyerOrder)
