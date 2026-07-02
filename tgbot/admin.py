@@ -56,6 +56,7 @@ class SentReminderAdmin(admin.ModelAdmin):
     list_display = ('user', 'track_code', 'interval_day', 'sent_at')
     list_filter = ('interval_day',)
     readonly_fields = ('sent_at',)
+    autocomplete_fields = ('track_code',)
 
 
 @admin.register(BroadcastLog)

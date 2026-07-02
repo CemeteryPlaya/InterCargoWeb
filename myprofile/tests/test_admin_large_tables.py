@@ -18,6 +18,7 @@ from myprofile.models import (
     Arrival, ClientRegistry, DeliveryHistory,
     Extradition, ExtraditionPackage, ReceiptItem,
 )
+from tgbot.models import SentReminder
 
 User = get_user_model()
 
@@ -33,6 +34,7 @@ class AdminAutocompleteWidgetsTest(TestCase):
         (DeliveryHistory, 'track_codes', AutocompleteSelectMultiple),
         (ExtraditionPackage, 'receipts', AutocompleteSelectMultiple),
         (Extradition, 'package', AutocompleteSelect),
+        (SentReminder, 'track_code', AutocompleteSelect),
     ]
 
     @classmethod
