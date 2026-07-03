@@ -30,18 +30,21 @@ def save_push_subscription(request):
 
 
 def send_push(user, title, message, url='/'):
-    """Отправляет browser push-уведомление пользователю."""
+    """Отправляет browser push. Возвращает код результата:
+    'sent' | 'skipped' (нет VAPID) | 'no_sub' | 'gone' (подписка умерла) | 'error'.
+    Вызывается ТОЛЬКО из фонового воркера (myprofile/push_queue.py), не из вьюх.
+    """
     vapid_settings = getattr(settings, 'WEBPUSH_SETTINGS', {})
     private_key = vapid_settings.get('VAPID_PRIVATE_KEY', '')
     admin_email = vapid_settings.get('VAPID_ADMIN_EMAIL', '')
 
     if not private_key:
-        return
+        return 'skipped'
 
     try:
         sub = UserPushSubscription.objects.get(user=user)
     except UserPushSubscription.DoesNotExist:
-        return
+        return 'no_sub'
 
     try:
         webpush(
@@ -50,6 +53,7 @@ def send_push(user, title, message, url='/'):
             vapid_private_key=private_key,
             vapid_claims={"sub": f"mailto:{admin_email}"}
         )
+        return 'sent'
     except WebPushException as e:
         response = getattr(e, 'response', None)
         status_code = response.status_code if response else None
@@ -57,5 +61,6 @@ def send_push(user, title, message, url='/'):
         if status_code == 410:
             UserPushSubscription.objects.filter(user=user).delete()
             logger.info("Removed expired push subscription for user %s", user.username)
-        else:
-            logger.warning("Push error for user %s: %s", user.username, e)
+            return 'gone'
+        logger.warning("Push error for user %s: %s", user.username, e)
+        return 'error'
