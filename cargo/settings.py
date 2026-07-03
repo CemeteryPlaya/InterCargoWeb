@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'tgbot',
     'dibuyer',
     'analytics',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -293,3 +294,16 @@ TELEGRAM_SITE_URL = os.getenv('SITE_URL')
 #           чистки данных (python manage.py audit_receipts --fix), включить strict.
 EXECUTION_VALIDATOR_ENABLED = os.getenv('EXECUTION_VALIDATOR_ENABLED', 'true').lower() != 'false'
 EXECUTION_VALIDATOR_STRICT = os.getenv('EXECUTION_VALIDATOR_STRICT', 'true').lower() != 'false'
+
+# ── django-q2: фоновые задачи (брокер — основная БД, без Redis) ──
+Q_CLUSTER = {
+    'name': 'intercargo',
+    'workers': 2,
+    'timeout': 1800,        # максимум 30 минут на задачу
+    'retry': 2100,          # должен быть > timeout
+    'max_attempts': 2,
+    'orm': 'default',
+    'save_limit': 250,
+    'catch_up': False,
+    'label': 'Фоновые задачи',
+}

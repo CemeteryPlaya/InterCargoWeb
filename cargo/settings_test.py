@@ -45,3 +45,10 @@ LOGGING_CONFIG = None
 
 # Язык по умолчанию фиксируем для предсказуемости проверок строк.
 LANGUAGE_CODE = "ru"
+
+# Фоновые задачи в тестах выполняются синхронно, внутри вызова async_task
+Q_CLUSTER = {
+    'name': 'intercargo-test',
+    'sync': True,
+    'orm': 'default',
+}

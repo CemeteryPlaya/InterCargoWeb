@@ -9,3 +9,4 @@ gunicorn
 qrcode
 aiogram~=3.4.1
 django-rosetta
+django-q2>=1.7,<2
