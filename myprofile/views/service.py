@@ -423,9 +423,9 @@ def service_test_notification(request):
 
     from myprofile.views.utils import is_notification_muted
 
-    # 1. In-app уведомление (+ browser push автоматически через сигнал)
+    # 1. In-app уведомление (push ставится в очередь outbox, отправляет фоновый воркер)
     from myprofile.models import Notification as _Notification
-    _Notification.objects.create(user=user, message=cfg['message'])
+    _Notification.objects.create(user=user, message=cfg['message'], push_status=_Notification.PUSH_PENDING)
     channels = ['in-app ✓', 'push ✓ (если подписан)']
 
     # 2. Telegram

@@ -428,10 +428,29 @@ class ReceiptItem(models.Model):
         return self.display_track_code or str(self.id)
 
 class Notification(models.Model):
+    PUSH_PENDING = 'pending'
+    PUSH_SENT = 'sent'
+    PUSH_FAILED = 'failed'
+    PUSH_SKIPPED = 'skipped'
+    PUSH_STATUS_CHOICES = [
+        (PUSH_PENDING, _("Ожидает отправки")),
+        (PUSH_SENT, _("Отправлено")),
+        (PUSH_FAILED, _("Ошибка")),
+        (PUSH_SKIPPED, _("Пропущено")),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     message = models.CharField(max_length=255, verbose_name=_("Сообщение"))
     is_read = models.BooleanField(default=False, verbose_name=_("Прочитано"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата"))
+    # Outbox для browser push: 'pending' ставится явно (notify_in_user_language),
+    # отправляет фоновый воркер бота (tgbot/bot/workers/push.py), а не HTTP-запрос.
+    # default='sent', чтобы старые строки не попали в очередь без data-миграции.
+    push_status = models.CharField(
+        max_length=10, choices=PUSH_STATUS_CHOICES, default=PUSH_SENT,
+        db_index=True, verbose_name=_("Push-статус"),
+    )
+    push_attempts = models.PositiveSmallIntegerField(default=0, verbose_name=_("Попыток push"))
 
     class Meta:
         verbose_name = _("Уведомление")

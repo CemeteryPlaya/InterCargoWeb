@@ -25,7 +25,7 @@ def notify_in_user_language(user, message_func):
         msg = message_func()
     finally:
         activate(original_lang or 'ru')
-    Notification.objects.create(user=user, message=msg)
+    Notification.objects.create(user=user, message=msg, push_status=Notification.PUSH_PENDING)
 
 def cleanup_expired_temp_discounts():
     """Удаляет просроченные разовые скидки (созданные до сегодня)."""

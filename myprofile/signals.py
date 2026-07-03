@@ -5,7 +5,7 @@ from django.db.models.signals import post_delete, post_save, pre_save, pre_delet
 from django.dispatch import receiver
 
 from myprofile.models import (
-    Arrival, ArrivalSessionItem, Notification, Receipt, ReceiptItem,
+    Arrival, ArrivalSessionItem, Receipt, ReceiptItem,
     StorageCell, TrackCode,
 )
 from register.models import UserProfile
@@ -359,15 +359,3 @@ def remove_receipt_item_on_track_delete(sender, instance, **kwargs):
     receipt = item.receipt
     item.delete()
     _recalc_receipt_safe(receipt)
-
-
-@receiver(post_save, sender=Notification)
-def send_push_on_notification(sender, instance, created, **kwargs):
-    """При создании уведомления отправляем browser push."""
-    if not created:
-        return
-    try:
-        from myprofile.views.push_subscribe import send_push
-        send_push(instance.user, "Inter Cargo", instance.message, "/profile/notifications/")
-    except Exception as e:
-        logger.debug("Push send failed for user %s: %s", instance.user_id, e)
