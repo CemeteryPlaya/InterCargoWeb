@@ -2277,16 +2277,12 @@ msgid "Дата отправки со склада (Китай)"
 msgstr "Date shipped from warehouse (China)"
 
 #: .\myprofile\models.py:99
-#, fuzzy
-#| msgid "Какие сроки доставки из Китая в Казахстан?"
 msgid "Дата прибытия на таможню (Китай-Казахстан)"
-msgstr "What are the delivery times from China to Kazakhstan?"
+msgstr "Date of arrival at customs (China-Kazakhstan)"
 
 #: .\myprofile\models.py:100
-#, fuzzy
-#| msgid "Дата выдачи клиенту"
 msgid "Дата выезда из Алматы"
-msgstr "Date issued to client"
+msgstr "Date of departure from Almaty"
 
 #: .\myprofile\models.py:101
 msgid "Дата прихода на сорт. склад"
@@ -2333,10 +2329,8 @@ msgid "Требует переноса (прибыл без ПВЗ)"
 msgstr "Requires transfer (arrived without PVZ)"
 
 #: .\myprofile\models.py:137
-#, fuzzy
-#| msgid "Ожидает подтверждения возврата"
 msgid "Ожидает добавления в приход"
-msgstr "Awaiting return confirmation"
+msgstr "Awaiting addition to arrival"
 
 #: .\myprofile\models.py:141
 msgid "Архивирован"
@@ -5109,10 +5103,8 @@ msgid "Обновить статусы"
 msgstr "Update statuses"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:91
-#, fuzzy
-#| msgid "Сессии выдачи"
 msgid "Партии в пути"
-msgstr "Issue sessions"
+msgstr "Batches in transit"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:93
 #, python-format
@@ -5123,32 +5115,24 @@ msgid ""
 msgstr ""
 
 #: .\myprofile\templates\desktop\shipped_cn.html:102
-#, fuzzy
-#| msgid "трек-кодов"
 msgid "Трек-кодов"
-msgstr "track codes"
+msgstr "Track codes"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:119
 msgid "На таможню:"
 msgstr ""
 
 #: .\myprofile\templates\desktop\shipped_cn.html:133
-#, fuzzy
-#| msgid "Нет трек-кодов со статусом «Выдано клиенту»."
 msgid "Перевести партию в статус «Выехало из Алматы»?"
-msgstr "No track codes with status 'Issued to client'."
+msgstr "Move batch to status \"Departed Almaty\"?"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:138
-#, fuzzy
-#| msgid "Перенести на выбранную дату"
 msgid "Перевести в статус \"Выехало из Алматы\""
-msgstr "Transfer to selected date"
+msgstr "Move to status \"Departed Almaty\""
 
 #: .\myprofile\templates\desktop\shipped_cn.html:155
-#, fuzzy
-#| msgid "Нет истории выдачи"
 msgid "Нет партий в пути."
-msgstr "No issue history"
+msgstr "No batches in transit."
 
 #: .\myprofile\templates\desktop\shipped_cn.html:185
 #: .\myprofile\templates\mobile\mobile_parcels.html:231
@@ -5156,10 +5140,8 @@ msgid "Нет трек-кодов"
 msgstr "No track codes"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:189
-#, fuzzy
-#| msgid "Ошибка загрузки данных"
 msgid "Ошибка загрузки"
-msgstr "Data loading error"
+msgstr "Loading error"
 
 #: .\myprofile\templates\desktop\track_codes.html:9
 msgid "Inter Cargo - Трек-коды"
@@ -6328,10 +6310,9 @@ msgid "Импорт запущен в фоне: %(count)s трек-кодов."
 msgstr "Import started in background: %(count)s track codes."
 
 #: .\myprofile\views\shipped_cn.py:140
-#, fuzzy, python-format
-#| msgid "📦 Доставлено на ПВЗ: %(count)s трек-кодов"
+#, python-format
 msgid "Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов."
-msgstr "📦 Delivered to pickup point: %(count)s tracking codes"
+msgstr "Moved to status \"Departed Almaty\": %(count)s track codes."
 
 #: .\myprofile\views\shipped_cn.py:143
 #, fuzzy
@@ -6515,20 +6496,16 @@ msgid "Время работы"
 msgstr "Working hours"
 
 #: .\register\models.py:12
-#, fuzzy
-#| msgid "Показывать в регистрации/футере"
 msgid "Показывать в регистрации"
-msgstr "Show in registration/footer"
+msgstr "Show in registration"
 
 #: .\register\models.py:13
-#, fuzzy
-#| msgid "Показывать в регистрации/футере"
 msgid "Показывать в футере"
-msgstr "Show in registration/footer"
+msgstr "Show in footer"
 
 #: .\register\models.py:15
 msgid "Показывать в заявках для перевода в другой ПВЗ"
-msgstr ""
+msgstr "Show in requests for transfer to another pickup point"
 
 #: .\register\models.py:18
 msgid "Краткая информация"
