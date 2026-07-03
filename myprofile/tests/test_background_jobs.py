@@ -1,4 +1,6 @@
 """Smoke-тесты инфраструктуры django-q2 (sync-режим в тестах)."""
+from unittest import mock
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -103,6 +105,24 @@ class DeliveryNotificationsTaskTests(TestCase):
         tg = TelegramNotification.objects.get(user=user)
         self.assertEqual(tg.title, 'ready')
         self.assertEqual(tg.message, 'TRKD001|1.5')
+
+    @mock.patch('myprofile.email_utils.send_mail_batch', side_effect=Exception('smtp down'))
+    def test_email_failure_does_not_block_telegram(self, mocked):
+        """Email-сбой не должен помешать созданию Telegram-уведомлений."""
+        from myprofile.tasks import send_delivery_notifications
+        from tgbot.models import TelegramNotification
+
+        user = User.objects.create_user(username='dlv_client2')
+        UserProfile.objects.get_or_create(user=user, defaults={'phone': ''})
+
+        # Должна отработать без исключений, несмотря на сбой email
+        send_delivery_notifications(
+            [{'recipient': 'a@b.kz', 'subject': 'S', 'body': 'B'}],
+            {user.id: [('TRKF001', 1.0)]},
+        )
+        # Проверяем, что Telegram-уведомление всё равно создано
+        self.assertEqual(
+            TelegramNotification.objects.filter(user=user, title='ready').count(), 1)
 
 
 class ShippedCnBackgroundImportTests(TestCase):
