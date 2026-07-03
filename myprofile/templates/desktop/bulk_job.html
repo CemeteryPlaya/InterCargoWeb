@@ -1,0 +1,89 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Inter Cargo - Фоновая операция" %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'shared/header.html' %}
+
+    <div class="max-w-xl mx-auto mt-16 p-6 bg-white rounded-lg shadow">
+        <h1 class="text-2xl font-semibold text-gray-800 mb-2">{{ job.get_kind_display }}</h1>
+        <p class="text-gray-500 mb-6">{% trans "Операция" %} #{{ job.id }} — <span id="job-status">{{ job.get_status_display }}</span></p>
+
+        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+            <div id="job-bar" class="bg-blue-600 h-4 rounded-full transition-all" style="width: 0%"></div>
+        </div>
+        <p class="text-sm text-gray-600 mb-6"><span id="job-processed">{{ job.processed }}</span> / <span id="job-total">{{ job.total }}</span></p>
+
+        <div id="job-result" class="hidden text-sm text-gray-800 space-y-1"></div>
+        <div id="job-error" class="hidden text-sm text-red-600"></div>
+
+        <a href="javascript:history.back()" class="inline-block mt-6 text-blue-600 hover:underline">{% trans "← Назад" %}</a>
+    </div>
+
+    <script>
+    (function () {
+        const statusUrl = "{% url 'bulk_job_status' job.id %}";
+        const labels = {
+            pending: "{% trans 'В очереди' %}",
+            running: "{% trans 'Выполняется' %}",
+            done: "{% trans 'Завершена' %}",
+            failed: "{% trans 'Ошибка' %}",
+        };
+        const resultLabels = [
+            ['updated', "{% trans 'Обновлено' %}"],
+            ['created', "{% trans 'Создано' %}"],
+            ['skipped', "{% trans 'Пропущено' %}"],
+            ['errors', "{% trans 'Ошибок' %}"],
+        ];
+
+        function tick() {
+            fetch(statusUrl, {credentials: 'same-origin'})
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('job-status').textContent = labels[data.status] || data.status;
+                    document.getElementById('job-total').textContent = data.total;
+                    document.getElementById('job-processed').textContent = data.processed;
+                    const pct = data.total ? Math.round(100 * data.processed / data.total) : 0;
+                    document.getElementById('job-bar').style.width = pct + '%';
+
+                    if (data.status === 'done') {
+                        const box = document.getElementById('job-result');
+                        box.classList.remove('hidden');
+                        box.innerHTML = '';
+                        const r = data.result || {};
+                        resultLabels.forEach(([key, label]) => {
+                            if (r[key] !== undefined) {
+                                const p = document.createElement('p');
+                                p.textContent = label + ': ' + r[key];
+                                box.appendChild(p);
+                            }
+                        });
+                        return;
+                    }
+                    if (data.status === 'failed') {
+                        const box = document.getElementById('job-error');
+                        box.classList.remove('hidden');
+                        box.textContent = data.error;
+                        return;
+                    }
+                    setTimeout(tick, 2000);
+                })
+                .catch(() => setTimeout(tick, 5000));
+        }
+        tick();
+    })();
+    </script>
+</body>
+</html>

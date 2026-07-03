@@ -1009,3 +1009,38 @@ class ContractViolation(models.Model):
 
     def __str__(self):
         return f"[{self.severity}] {self.function} :: {self.contract}"
+
+
+class BulkJob(models.Model):
+    """Фоновая массовая операция (django-q2) со страницей прогресса."""
+    KIND_CHOICES = [
+        ('shipped_cn_import', _("Импорт «Отправлено из Китая»")),
+        ('day_receipts', _("Генерация чеков за день")),
+    ]
+    STATUS_CHOICES = [
+        ('pending', _("В очереди")),
+        ('running', _("Выполняется")),
+        ('done', _("Завершена")),
+        ('failed', _("Ошибка")),
+    ]
+
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES, verbose_name=_("Тип"))
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending',
+                              db_index=True, verbose_name=_("Статус"))
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name=_("Запустил"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создана"))
+    finished_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Завершена в"))
+    total = models.PositiveIntegerField(default=0, verbose_name=_("Всего"))
+    processed = models.PositiveIntegerField(default=0, verbose_name=_("Обработано"))
+    result = models.JSONField(default=dict, blank=True, verbose_name=_("Результат"))
+    error_text = models.TextField(blank=True, default='', verbose_name=_("Ошибка"))
+
+    class Meta:
+        verbose_name = _("Фоновая операция")
+        verbose_name_plural = _("Фоновые операции")
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_kind_display()} #{self.pk} — {self.get_status_display()}"
