@@ -389,6 +389,33 @@ def complete_session(request, session_id):
     sorting_location = session.sorting_location
     update_date = session.date
 
+    # Батч-префетчи: без них каждая строка стоила 5-7 лишних запросов
+    codes = [item.track_code for item in items if item.track_code]
+    existing_tracks = {
+        t.track_code: t
+        for t in TrackCode.all_objects.filter(track_code__in=codes).select_related('owner')
+    }
+    codes_with_receipt = set(
+        ReceiptItem.objects.filter(track_code__track_code__in=codes)
+        .values_list('track_code__track_code', flat=True)
+    )
+    base_price = get_global_price_per_kg()
+    discount_cache = {}
+
+    def _historical_price(user):
+        if user is None:
+            return base_price
+        if user.id not in discount_cache:
+            discount_cache[user.id] = get_user_discount(user)
+        return base_price - discount_cache[user.id]
+
+    owner_cache = {}
+
+    def _cached_resolve_owner(name):
+        if name not in owner_cache:
+            owner_cache[name] = _resolve_owner(name)
+        return owner_cache[name]
+
     for item in items:
         code = item.track_code
         owner_name = item.owner_name
@@ -397,8 +424,8 @@ def complete_session(request, session_id):
         if not code:
             continue
 
-        try:
-            track = TrackCode.all_objects.get(track_code=code)
+        track = existing_tracks.get(code)
+        if track is not None:
             # Если трек был архивирован — восстанавливаем при повторном приходе
             if track.is_archived:
                 track.is_archived = False
@@ -408,10 +435,10 @@ def complete_session(request, session_id):
             if TrackCode.STATUS_ORDER.get(old_status, 0) >= TrackCode.STATUS_ORDER.get(status, 0):
                 try:
                     track.update_date = update_date
-                    if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
+                    if weight_val is not None and code not in codes_with_receipt:
                         track.weight = weight_val
                     if owner_name:
-                        user, _unused = _resolve_owner(owner_name)
+                        user, _unused = _cached_resolve_owner(owner_name)
                         track.owner = user
                     if sorting_location:
                         track.sorting_location = sorting_location
@@ -431,22 +458,18 @@ def complete_session(request, session_id):
             if not track.delivered_date or old_status == 'unidentified':
                 track.delivered_date = update_date
             track.awaiting_arrival = False
-            if weight_val is not None and not ReceiptItem.objects.filter(track_code=track).exists():
+            if weight_val is not None and code not in codes_with_receipt:
                 track.weight = weight_val
             if owner_name:
-                user, _unused = _resolve_owner(owner_name)
+                user, _unused = _cached_resolve_owner(owner_name)
                 track.owner = user
                 if user and not user.is_active:
                     temp_created += 1
             if sorting_location:
                 track.sorting_location = sorting_location
 
-            # Set historical price per kg for delivered status
-            if track.owner:
-                _discount = get_user_discount(track.owner)
-                track.historical_price_per_kg = get_global_price_per_kg() - _discount
-            else:
-                track.historical_price_per_kg = get_global_price_per_kg()
+            # Историческая цена за кг на момент прихода
+            track.historical_price_per_kg = _historical_price(track.owner)
 
             # Если у активного клиента нет ПВЗ — помечаем для переноса через "Перенос прихода"
             if track.owner and track.owner.is_active:
@@ -468,10 +491,9 @@ def complete_session(request, session_id):
             except ValidationError as e:
                 messages.error(request, f"Не удалось обновить трек-код {code}: {e}")
                 errors += 1
-
-        except TrackCode.DoesNotExist:
+        else:
             try:
-                user, _unused = _resolve_owner(owner_name) if owner_name else (None, None)
+                user, _unused = _cached_resolve_owner(owner_name) if owner_name else (None, None)
                 new_track = TrackCode.objects.create(
                     track_code=code,
                     status=status,
@@ -481,12 +503,7 @@ def complete_session(request, session_id):
                     weight=weight_val,
                     sorting_location=sorting_location,
                 )
-                # Set historical price per kg for delivered status
-                if user:
-                    _discount = get_user_discount(user)
-                    new_track.historical_price_per_kg = get_global_price_per_kg() - _discount
-                else:
-                    new_track.historical_price_per_kg = get_global_price_per_kg()
+                new_track.historical_price_per_kg = _historical_price(user)
 
                 # Если у активного клиента нет ПВЗ — помечаем для переноса
                 if user and user.is_active:
