@@ -10,6 +10,17 @@ Postgres необязательно — логика моделей/вьюх н�
 
 from cargo.settings import *  # noqa: F401,F403
 
+# Приглушение информационных логов django-q.
+# Логирование идёт через logger 'django-q', который инициализируется
+# django_q.conf при импорте. Удаляем его StreamHandler (форматированный)
+# и оставляем только WARNING+ уровень.
+import logging
+q_logger = logging.getLogger('django-q')
+for handler in q_logger.handlers[:]:
+    q_logger.removeHandler(handler)
+q_logger.setLevel(logging.WARNING)
+q_logger.addHandler(logging.NullHandler())
+
 # Быстрая in-memory БД.
 DATABASES = {
     "default": {
@@ -51,4 +62,6 @@ Q_CLUSTER = {
     'name': 'intercargo-test',
     'sync': True,
     'orm': 'default',
+    'timeout': 30,
+    'retry': 60,
 }
