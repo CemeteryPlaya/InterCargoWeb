@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
 from myprofile.email_utils import send_mail_batch
 from django.contrib.auth.models import User
 from collections import defaultdict, OrderedDict
@@ -160,17 +161,19 @@ def delivery_view(request):
     home_delivery_clients = _get_home_delivery_clients('delivered')
     home_in_transit_clients = _get_home_delivery_clients('shipping_pp')
 
-    # История доставок текущего водителя
+    # История доставок текущего водителя (последние 60 дней — страница
+    # не должна тяжелеть бесконечно по мере накопления рейсов)
+    history_cutoff = timezone.now() - timedelta(days=60)
     history_qs = (
         DeliveryHistory.objects
-        .filter(driver=request.user)
+        .filter(driver=request.user, taken_at__gte=history_cutoff)
         .select_related('pickup_point')
         .prefetch_related(
             'track_codes',
             'track_codes__owner',
             'track_codes__owner__userprofile',
         )
-    .order_by('-taken_at')
+        .order_by('-taken_at')
     )
 
     # Группируем по дате и для каждой записи считаем клиентов

@@ -1,4 +1,5 @@
 """Тесты outbox-очереди browser push (Задачи 1–2 плана async-heavy-processes)."""
+from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
 
@@ -9,10 +10,11 @@ from django.utils import timezone
 
 from myprofile.models import (
     ExtraditionPackage, Notification, Receipt, ReceiptItem, TrackCode, UserPushSubscription,
+    DeliveryHistory,
 )
 from myprofile.push_queue import send_pending_push
 from myprofile.views.utils import notify_in_user_language
-from register.models import UserProfile
+from register.models import UserProfile, PickupPoint
 
 
 class PushNotSentInRequestTests(TestCase):
@@ -99,3 +101,26 @@ class ExtraditionSingleNotificationTests(TestCase):
         resp = self.client.post(reverse('extradition'), {'barcode': package.barcode})
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(Notification.objects.filter(user=self.owner).count(), 1)
+
+
+class DeliveryHistoryLimitTests(TestCase):
+    def test_history_hides_entries_older_than_60_days(self):
+        driver = User.objects.create_user(username='drv_hist1')
+        profile, _ = UserProfile.objects.get_or_create(user=driver, defaults={'phone': ''})
+        profile.is_driver = True
+        profile.save()
+        pp = PickupPoint.objects.create(address='ул. Тестовая 1', premise_name='Т1')
+
+        old = DeliveryHistory.objects.create(
+            driver=driver, pickup_point=pp, total_weight=0,
+            taken_at=timezone.now() - timedelta(days=90))
+        fresh = DeliveryHistory.objects.create(
+            driver=driver, pickup_point=pp, total_weight=0,
+            taken_at=timezone.now() - timedelta(days=5))
+
+        self.client.force_login(driver)
+        resp = self.client.get(reverse('delivery'))
+        entries = [e for day in resp.context['history_by_date'].values() for e in day]
+        ids = {e.id for e in entries}
+        self.assertIn(fresh.id, ids)
+        self.assertNotIn(old.id, ids)
