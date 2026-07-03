@@ -2,9 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from datetime import datetime
-from collections import defaultdict
 from myprofile.models import TrackCode
 from myprofile.track_lifecycle import (
     AUTO_CUSTOMS_DAYS, TRANSIT_STATUSES,
@@ -90,71 +88,21 @@ def shipped_cn_view(request):
         messages.error(request, _("Введите трек-коды или загрузите xlsx файл."))
         return redirect('shipped_cn')
 
-    status = 'shipped_cn'
-    updated = 0
-    created = 0
-    skipped = 0
-    errors = 0
-    notif_counts = defaultdict(int)
-    skipped_details = defaultdict(list)  # status_display -> [codes]
+    from myprofile.bulk_status import bulk_advance_tracks
 
-    for code in track_codes:
-        try:
-            track = TrackCode.all_objects.get(track_code=code)
-            old_status = track.status
-
-            # Не откатываем если статус уже дальше
-            if TrackCode.STATUS_ORDER.get(old_status, 0) >= TrackCode.STATUS_ORDER.get(status, 0):
-                skipped += 1
-                skipped_details[track.get_status_display()].append(code)
-                continue
-
-            track.status = status
-            track.update_date = update_date
-            # Дата отправки = указанная дата: от неё считается автоперевод на таможню
-            track.date_shipped_cn = update_date
-            track.set_status_date()
-            track.log_status_change(request.user)
-
-            try:
-                track.save()
-                updated += 1
-                if track.owner:
-                    notif_counts[track.owner] += 1
-            except ValidationError as e:
-                messages.error(request, f"Ошибка при обновлении {code}: {e}")
-                errors += 1
-                continue
-
-        except TrackCode.DoesNotExist:
-            # Создаём трек-код без владельца
-            try:
-                new_track = TrackCode.objects.create(
-                    track_code=code,
-                    status=status,
-                    update_date=update_date,
-                    date_shipped_cn=update_date,
-                    owner=None,
-                    weight=None
-                )
-                new_track.set_status_date()
-                new_track.log_status_change(request.user)
-                new_track.save()
-                created += 1
-            except ValidationError as e:
-                messages.error(request, f"Не удалось создать трек-код {code}: {e}")
-                errors += 1
-
-    send_grouped_notifications(notif_counts, status)
-    add_bulk_result_messages(request, updated=updated, created=created,
-                              skipped=skipped, errors=errors)
+    result = bulk_advance_tracks(track_codes, 'shipped_cn', update_date, request.user)
+    send_grouped_notifications(result['notif_counts'], 'shipped_cn')
+    add_bulk_result_messages(request, updated=result['updated'], created=result['created'],
+                              skipped=result['skipped'], errors=result['errors'])
+    if result['error_details']:
+        messages.error(request, "Некорректные трек-коды: " + ', '.join(result['error_details'][:20]))
 
     # Детальный лог пропущенных трек-кодов по статусам
-    for status_display, codes in skipped_details.items():
-        codes_str = ', '.join(codes[:20])
-        if len(codes) > 20:
-            codes_str += f' ... и ещё {len(codes) - 20}'
-        messages.warning(request, f"Пропущено ({status_display}, {len(codes)} шт.): {codes_str}")
+    for status_display, skipped_codes in result['skipped_details'].items():
+        codes_str = ', '.join(skipped_codes[:20])
+        if len(skipped_codes) > 20:
+            codes_str += f' ... и ещё {len(skipped_codes) - 20}'
+        messages.warning(request, f"Пропущено ({status_display}, {len(skipped_codes)} шт.): {codes_str}")
 
     return redirect('shipped_cn')
 

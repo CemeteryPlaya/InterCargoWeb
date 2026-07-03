@@ -10,10 +10,8 @@
 """
 
 import logging
-from collections import defaultdict
 from datetime import timedelta
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
@@ -28,24 +26,12 @@ TRANSIT_STATUSES = ('shipped_cn', 'at_customs', 'left_almaty')
 
 
 def _advance_tracks(tracks, new_status, changed_by):
-    """Переводит треки в new_status. Возвращает (advanced, notif_counts)."""
-    advanced = 0
-    notif_counts = defaultdict(int)
-    today = timezone.localdate()
-    for track in tracks:
-        track.status = new_status
-        track.update_date = today
-        track.set_status_date()
-        track.log_status_change(changed_by)
-        try:
-            track.save()
-        except ValidationError as e:
-            logger.error('Advance %s -> %s failed: %s', track.track_code, new_status, e)
-            continue
-        advanced += 1
-        if track.owner:
-            notif_counts[track.owner] += 1
-    return advanced, notif_counts
+    """Переводит треки в new_status батчем (см. myprofile/bulk_status.py).
+    Возвращает (advanced, notif_counts)."""
+    from myprofile.bulk_status import bulk_advance_instances
+    result = bulk_advance_instances(
+        list(tracks), new_status, timezone.localdate(), changed_by)
+    return result['updated'], result['notif_counts']
 
 
 def auto_advance_shipped_to_customs(changed_by='auto'):
@@ -64,6 +50,7 @@ def auto_advance_shipped_to_customs(changed_by='auto'):
         tracks = (
             TrackCode.all_objects
             .select_for_update(skip_locked=True)
+            .select_related('owner')
             .filter(status='shipped_cn', date_shipped_cn__lte=threshold)
         )
         advanced, notif_counts = _advance_tracks(tracks, 'at_customs', changed_by)
@@ -84,6 +71,7 @@ def advance_customs_to_almaty(date_shipped, changed_by):
         tracks = (
             TrackCode.all_objects
             .select_for_update(skip_locked=True)
+            .select_related('owner')
             .filter(status='at_customs', date_shipped_cn=date_shipped)
         )
         advanced, notif_counts = _advance_tracks(tracks, 'left_almaty', changed_by)
