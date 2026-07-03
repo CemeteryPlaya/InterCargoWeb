@@ -56,6 +56,36 @@ class BulkJobViewsTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
 
+class DayReceiptsBackgroundTests(TestCase):
+    def setUp(self):
+        self.staff = User.objects.create_user(username='rcpt_staff1')
+        profile, _ = UserProfile.objects.get_or_create(user=self.staff, defaults={'phone': ''})
+        profile.is_staff = True
+        profile.save()
+        self.client.force_login(self.staff)
+
+    def test_generate_day_receipts_runs_in_background(self):
+        from decimal import Decimal
+        from django.utils import timezone
+        from myprofile.models import BulkJob, Receipt, TrackCode
+
+        owner = User.objects.create_user(username='rcpt_client1')
+        UserProfile.objects.get_or_create(user=owner, defaults={'phone': ''})
+        day = timezone.localdate()
+        TrackCode.objects.create(
+            track_code='RCPT001A', status='delivered', owner=owner,
+            update_date=day, delivered_date=day, weight=Decimal('2.000'))
+
+        resp = self.client.post(reverse('generate_day_receipts'),
+                                {'date': day.isoformat()})
+        job = BulkJob.objects.get(kind='day_receipts')
+        self.assertRedirects(resp, reverse('bulk_job_page', args=[job.id]),
+                             fetch_redirect_response=False)
+        job.refresh_from_db()
+        self.assertEqual(job.status, 'done')
+        self.assertEqual(Receipt.objects.filter(owner=owner).count(), 1)
+
+
 class ShippedCnBackgroundImportTests(TestCase):
     def setUp(self):
         self.staff = User.objects.create_user(username='imp_staff1')

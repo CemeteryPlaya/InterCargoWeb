@@ -12,7 +12,7 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation, ReceiptItem, Notification
-from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price, notify_in_user_language
+from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
@@ -380,45 +380,18 @@ def generate_day_receipts(request):
     if not _is_staff(request.user):
         return HttpResponseForbidden(_("У вас нет доступа."))
 
-    from myprofile.views.utils import create_receipts_for_user
-
     date_str = request.POST.get('date', '')
     if not date_str:
         messages.error(request, _("Не указана дата."))
         return redirect('arrival_summary')
 
-    statuses = ('delivered', 'shipping_pp', 'ready', 'claimed')
+    from django_q.tasks import async_task
+    from myprofile.models import BulkJob
 
-    # Собираем уникальных владельцев треков за этот день
-    arrival_track_ids = Arrival.objects.filter(date=date_str).values_list('track_codes', flat=True)
-    tracks = TrackCode.all_objects.filter(
-        Q(delivered_date=date_str) | Q(id__in=arrival_track_ids),
-        status__in=statuses,
-    ).select_related('owner').distinct()
-
-    users = set()
-    for track in tracks:
-        if track.owner_id:
-            users.add(track.owner)
-
-    created_count = 0
-    for user in users:
-        receipt = create_receipts_for_user(user, statuses=statuses)
-        if receipt:
-            created_count += 1
-            track_count = receipt.items.count()
-            _rid, _tc, _tp = receipt.id, track_count, receipt.total_price
-            notify_in_user_language(user, lambda: _(
-                "🧾 Создан чек №%(receipt_id)s: %(track_count)s трек-кодов, сумма %(total_price)s тг.") % {
-                'receipt_id': _rid, 'track_count': _tc, 'total_price': _tp,
-            })
-
-    if created_count:
-        messages.success(request, f"Создано чеков: {created_count}")
-    else:
-        messages.info(request, _("Новых чеков не создано — все треки уже учтены в чеках."))
-
-    return redirect(f'/profile/arrival-summary/?date={date_str}')
+    job = BulkJob.objects.create(kind='day_receipts', created_by=request.user)
+    async_task('myprofile.tasks.run_day_receipts', job.id, date_str)
+    messages.info(request, _("Генерация чеков запущена в фоне."))
+    return redirect('bulk_job_page', job_id=job.id)
 
 
 @login_required
