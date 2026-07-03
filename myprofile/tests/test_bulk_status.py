@@ -3,6 +3,7 @@ from datetime import date, timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from myprofile.bulk_status import bulk_advance_tracks, bulk_advance_instances
@@ -92,3 +93,22 @@ class BulkAdvanceTests(TestCase):
     def test_rejects_non_transit_status(self):
         with self.assertRaises(ValueError):
             bulk_advance_instances([], 'delivered', self.d, 'x')
+
+
+class ShippedCnGetNoSideEffectsTests(TestCase):
+    def test_get_does_not_auto_advance(self):
+        staff = User.objects.create_user(username='bulk_staff1')
+        profile, _ = UserProfile.objects.get_or_create(user=staff, defaults={'phone': ''})
+        profile.is_staff = True
+        profile.save()
+
+        old = TrackCode.objects.create(
+            track_code='OLDSHIP1', status='shipped_cn',
+            update_date=timezone.localdate(),
+            date_shipped_cn=timezone.localdate() - timedelta(days=10))
+
+        self.client.force_login(staff)
+        resp = self.client.get(reverse('shipped_cn'))
+        self.assertEqual(resp.status_code, 200)
+        old.refresh_from_db()
+        self.assertEqual(old.status, 'shipped_cn')

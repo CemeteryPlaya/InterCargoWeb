@@ -6,7 +6,7 @@ from datetime import datetime
 from myprofile.models import TrackCode
 from myprofile.track_lifecycle import (
     AUTO_CUSTOMS_DAYS, TRANSIT_STATUSES,
-    auto_advance_shipped_to_customs, advance_customs_to_almaty, get_transit_batches,
+    advance_customs_to_almaty, get_transit_batches,
 )
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, send_grouped_notifications, add_bulk_result_messages
@@ -40,8 +40,6 @@ def shipped_cn_view(request):
         return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
 
     if request.method != 'POST':
-        # Ленивый автоперевод shipped_cn → at_customs (подстраховка, если бот не запущен)
-        auto_advance_shipped_to_customs()
         return render(request, "desktop/shipped_cn.html", {
             'transit_batches': get_transit_batches(),
             'auto_customs_days': AUTO_CUSTOMS_DAYS,

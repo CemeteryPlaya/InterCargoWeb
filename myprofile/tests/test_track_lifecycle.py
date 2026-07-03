@@ -125,17 +125,18 @@ class ShippedCnPageTests(TestCase):
         t = TrackCode.objects.get(track_code='DSC1')
         self.assertEqual(t.date_shipped_cn, date(2025, 1, 12))
 
-    def test_get_runs_auto_advance_and_lists_batches(self):
+    def test_get_does_not_auto_advance_and_lists_batches(self):
         TrackCode.objects.create(
             track_code='GET1', status='shipped_cn',
             date_shipped_cn=_days_ago(AUTO_CUSTOMS_DAYS),
         )
         resp = self.client.get(reverse('shipped_cn'))
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(TrackCode.objects.get(track_code='GET1').status, 'at_customs')
+        # GET no longer runs auto_advance (Task 5: removed lazy side effect)
+        self.assertEqual(TrackCode.objects.get(track_code='GET1').status, 'shipped_cn')
         batches = resp.context['transit_batches']
         self.assertEqual(len(batches), 1)
-        self.assertEqual(batches[0]['status'], 'at_customs')
+        self.assertEqual(batches[0]['status'], 'shipped_cn')
 
     def test_advance_almaty_endpoint(self):
         d = _days_ago(AUTO_CUSTOMS_DAYS + 1)
