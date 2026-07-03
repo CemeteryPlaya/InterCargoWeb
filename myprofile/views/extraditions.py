@@ -125,6 +125,7 @@ def extradition_view(request):
                 )
 
             # Меняем статус всех трек-кодов через чеки
+            issued_count = 0
             for receipt in all_receipts:
                 for item in receipt.items.all():
                     track = item.track_code
@@ -134,14 +135,16 @@ def extradition_view(request):
                     track.set_status_date()
                     track.log_status_change(request.user)
                     track.save()
+                    issued_count += 1
 
-                    if track.owner:
-                        _tc, _pp, _bc = track.track_code, extradition.pickup_point, package.barcode
-                        notify_in_user_language(track.owner, lambda: _(
-                            "📦 Ваш трек %(track_code)s выдан в пункте: %(pickup_point)s. "
-                            "Штрих-код выдачи: %(barcode)s") % {
-                            'track_code': _tc, 'pickup_point': _pp, 'barcode': _bc,
-                        })
+            # Одно уведомление на клиента вместо per-track
+            if issued_count and package.user:
+                _cnt, _pp, _bc = issued_count, extradition.pickup_point, package.barcode
+                notify_in_user_language(package.user, lambda: _(
+                    "📦 Выдано посылок: %(count)s. Пункт: %(pickup_point)s. "
+                    "Штрих-код выдачи: %(barcode)s") % {
+                    'count': _cnt, 'pickup_point': _pp, 'barcode': _bc,
+                })
 
             # Telegram-уведомления по чекам (вместо per-track)
             for receipt in all_receipts:
@@ -517,12 +520,13 @@ def warehouse_quick_issue_receipt(request):
             track.save()
             track_codes_issued.append(track.track_code)
 
-            if track.owner:
-                _tc, _pl = track.track_code, PICKUP_LABEL
-                notify_in_user_language(track.owner, lambda: _(
-                    "📦 Ваш трек %(track_code)s выдан (%(pickup_label)s).") % {
-                    'track_code': _tc, 'pickup_label': _pl,
-                })
+        # Одно уведомление на клиента вместо per-track
+        if track_codes_issued and receipt.owner:
+            _cnt, _pl = len(track_codes_issued), PICKUP_LABEL
+            notify_in_user_language(receipt.owner, lambda: _(
+                "📦 Выдано посылок: %(count)s (%(pickup_label)s).") % {
+                'count': _cnt, 'pickup_label': _pl,
+            })
 
     return JsonResponse({
         'success': True,
