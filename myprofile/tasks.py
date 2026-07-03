@@ -61,6 +61,38 @@ def run_shipped_cn_import(job_id, codes, update_date_iso, changed_by_username):
         raise
 
 
+def send_delivery_notifications(email_batch, tg_track_data):
+    """Email + Telegram после завершения доставки (заменяет threading-версию).
+
+    email_batch: [{'recipient','subject','body'}], tg_track_data: {user_id: [(code, weight)]}.
+    """
+    from myprofile.email_utils import send_mail_batch
+    from myprofile.views.utils import is_notification_muted
+    from tgbot.models import TelegramNotification
+
+    if email_batch:
+        _, failed = send_mail_batch(email_batch)
+        if failed:
+            logger.warning(
+                "complete_delivery email failures (%d): %s",
+                len(failed), ', '.join(f['recipient'] for f in failed))
+
+    if tg_track_data:
+        tg_objects = [
+            TelegramNotification(
+                user_id=user_id,
+                title='ready',
+                message=f'{code}|{weight}',
+                notification_type='tracking',
+            )
+            for user_id, tracks in tg_track_data.items()
+            if not is_notification_muted(user_id, 'telegram')
+            for code, weight in tracks
+        ]
+        if tg_objects:
+            TelegramNotification.objects.bulk_create(tg_objects, ignore_conflicts=True)
+
+
 def run_day_receipts(job_id, date_str):
     """Генерирует чеки по клиентам за день (перенесено из generate_day_receipts)."""
     from django.db.models import Q

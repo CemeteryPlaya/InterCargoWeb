@@ -79,16 +79,14 @@ class CompleteDeliveryTests(DeliveryBase):
         self.assertRedirects(resp, reverse('delivery'))
 
     def test_completes_to_ready(self):
-        # Фоновую отправку (email/TG в отдельном потоке) мокаем: в тестах
-        # in-memory sqlite не терпит конкурентного доступа из демон-потока.
-        from unittest.mock import patch
+        # Email/TG уходят фоновой задачей django-q2 (sync-режим в тестах —
+        # выполняется inline, БД in-memory sqlite не страдает от потоков).
         self._track('C1', 'shipping_pp')
         self._track('C2', 'shipping_pp')
         DeliveryHistory.objects.create(
             driver=self.driver, pickup_point=self.pp, taken_at=timezone.now(),
         )
-        with patch('myprofile.views.delivery._send_delivery_notifications_bg'):
-            resp = self.client.post(reverse('complete_delivery'), {'pickup_ids': [f'{self.pp.id}:']})
+        resp = self.client.post(reverse('complete_delivery'), {'pickup_ids': [f'{self.pp.id}:']})
         self.assertRedirects(resp, reverse('delivery'))
         self.assertEqual(TrackCode.objects.filter(status='ready').count(), 2)
 

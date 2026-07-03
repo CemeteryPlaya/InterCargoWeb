@@ -86,6 +86,25 @@ class DayReceiptsBackgroundTests(TestCase):
         self.assertEqual(Receipt.objects.filter(owner=owner).count(), 1)
 
 
+class DeliveryNotificationsTaskTests(TestCase):
+    def test_send_delivery_notifications_sends_email_and_creates_tg(self):
+        from django.core import mail
+        from myprofile.tasks import send_delivery_notifications
+        from tgbot.models import TelegramNotification
+
+        user = User.objects.create_user(username='dlv_client1')
+        UserProfile.objects.get_or_create(user=user, defaults={'phone': ''})
+
+        send_delivery_notifications(
+            [{'recipient': 'a@b.kz', 'subject': 'S', 'body': 'B'}],
+            {user.id: [('TRKD001', 1.5)]},
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        tg = TelegramNotification.objects.get(user=user)
+        self.assertEqual(tg.title, 'ready')
+        self.assertEqual(tg.message, 'TRKD001|1.5')
+
+
 class ShippedCnBackgroundImportTests(TestCase):
     def setUp(self):
         self.staff = User.objects.create_user(username='imp_staff1')

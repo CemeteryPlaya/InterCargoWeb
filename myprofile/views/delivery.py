@@ -7,7 +7,6 @@ from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
-from myprofile.email_utils import send_mail_batch
 from django.contrib.auth.models import User
 from collections import defaultdict, OrderedDict
 import json
@@ -431,55 +430,6 @@ def _build_email_batch(notif_counts, user_pickup_map):
     return batch
 
 
-def _send_delivery_notifications_bg(email_batch, tg_track_data):
-    """
-    Фоновая задача: отправка email и Telegram-уведомлений.
-    Запускается в отдельном потоке, не блокирует ответ водителю.
-    """
-    import threading
-    from django.db import close_old_connections
-
-    def _run():
-        close_old_connections()
-        try:
-            # Email
-            if email_batch:
-                _, failed = send_mail_batch(email_batch)
-                if failed:
-                    logger.warning(
-                        "complete_delivery email failures (%d): %s",
-                        len(failed),
-                        ', '.join(f['recipient'] for f in failed),
-                    )
-        except Exception:
-            logger.exception("complete_delivery: ошибка при отправке email")
-
-        try:
-            # Telegram
-            if tg_track_data:
-                from tgbot.models import TelegramNotification
-                from myprofile.views.utils import is_notification_muted
-                tg_objects = [
-                    TelegramNotification(
-                        user_id=user_id,
-                        title='ready',
-                        message=f'{code}|{weight}',
-                        notification_type='tracking',
-                    )
-                    for user_id, tracks in tg_track_data.items()
-                    if not is_notification_muted(user_id, 'telegram')
-                    for code, weight in tracks
-                ]
-                if tg_objects:
-                    TelegramNotification.objects.bulk_create(tg_objects, ignore_conflicts=True)
-        except Exception:
-            logger.exception("complete_delivery: ошибка при создании Telegram-уведомлений")
-        finally:
-            close_old_connections()
-
-    threading.Thread(target=_run, daemon=True).start()
-
-
 @login_required
 @require_POST
 def complete_delivery(request):
@@ -589,10 +539,12 @@ def complete_delivery(request):
                 else:
                     notify_in_user_language(user, lambda c=count: _("📦 Доставлено на ПВЗ: %(count)s трек-кодов") % {'count': c})
 
-    # --- 3. Email + Telegram в фоновом потоке (не блокируют ответ) ---
+    # --- 3. Email + Telegram — фоновой задачей django-q2 (переживает рестарты) ---
     if notif_counts:
+        from django_q.tasks import async_task
         email_batch = _build_email_batch(notif_counts, user_pickup_map)
-        _send_delivery_notifications_bg(email_batch, dict(tg_track_data))
+        async_task('myprofile.tasks.send_delivery_notifications',
+                   email_batch, {k: list(v) for k, v in tg_track_data.items()})
 
     if updated:
         messages.success(request, f"Доставлено на ПВЗ: {updated} посылок. Уведомления отправляются.")
