@@ -54,3 +54,41 @@ class BulkJobViewsTests(TestCase):
         self.client.force_login(self.staff)
         resp = self.client.get(reverse('bulk_job_page', args=[job.id]))
         self.assertEqual(resp.status_code, 200)
+
+
+class ShippedCnBackgroundImportTests(TestCase):
+    def setUp(self):
+        self.staff = User.objects.create_user(username='imp_staff1')
+        profile, _ = UserProfile.objects.get_or_create(user=self.staff, defaults={'phone': ''})
+        profile.is_staff = True
+        profile.save()
+        self.client.force_login(self.staff)
+
+    def test_large_import_goes_background_and_completes(self):
+        from myprofile.models import BulkJob, TrackCode
+        codes = '\n'.join(f'IMP{i:05d}' for i in range(201))
+        resp = self.client.post(reverse('shipped_cn'), {
+            'update_date': '2026-07-01',
+            'track_codes': codes,
+        })
+        job = BulkJob.objects.get(kind='shipped_cn_import')
+        self.assertRedirects(resp, reverse('bulk_job_page', args=[job.id]),
+                             fetch_redirect_response=False)
+        job.refresh_from_db()  # sync=True: задача уже выполнена
+        self.assertEqual(job.status, 'done')
+        self.assertEqual(
+            TrackCode.all_objects.filter(status='shipped_cn',
+                                         track_code__startswith='IMP').count(),
+            201)
+
+    def test_small_import_stays_synchronous(self):
+        from myprofile.models import BulkJob, TrackCode
+        resp = self.client.post(reverse('shipped_cn'), {
+            'update_date': '2026-07-01',
+            'track_codes': 'SMALL001\nSMALL002',
+        })
+        self.assertRedirects(resp, reverse('shipped_cn'),
+                             fetch_redirect_response=False)
+        self.assertEqual(BulkJob.objects.count(), 0)
+        self.assertEqual(
+            TrackCode.all_objects.filter(track_code__startswith='SMALL').count(), 2)

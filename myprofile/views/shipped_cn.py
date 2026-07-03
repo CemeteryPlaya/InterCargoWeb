@@ -86,6 +86,19 @@ def shipped_cn_view(request):
         messages.error(request, _("Введите трек-коды или загрузите xlsx файл."))
         return redirect('shipped_cn')
 
+    SYNC_LIMIT = 200
+    if len(track_codes) > SYNC_LIMIT:
+        from django_q.tasks import async_task
+        from myprofile.models import BulkJob
+        job = BulkJob.objects.create(
+            kind='shipped_cn_import', created_by=request.user, total=len(track_codes))
+        async_task(
+            'myprofile.tasks.run_shipped_cn_import',
+            job.id, track_codes, update_date.isoformat(), request.user.username)
+        messages.info(request, _("Импорт запущен в фоне: %(count)s трек-кодов.") % {
+            'count': len(track_codes)})
+        return redirect('bulk_job_page', job_id=job.id)
+
     from myprofile.bulk_status import bulk_advance_tracks
 
     result = bulk_advance_tracks(track_codes, 'shipped_cn', update_date, request.user)
