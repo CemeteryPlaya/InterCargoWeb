@@ -55,6 +55,17 @@ class BulkAdvanceTests(TestCase):
         self.assertEqual(res['errors'], 2)
         self.assertEqual(TrackCode.all_objects.count(), 0)
 
+    def test_rejects_codes_with_missed_cjk_ranges(self):
+        # Regression: previously INVALID_CODE_RE missed CJK Compatibility Ideographs
+        # (U+F900–FAFF) and CJK Symbols/Punctuation (U+3000–303F).
+        # Test with ideographic space (U+3000) and ideographic comma (U+3001).
+        res = bulk_advance_tracks(
+            ['ABC　123', 'ABC、456'],  # U+3000 (ideographic space), U+3001 (ideographic comma)
+            'shipped_cn', self.d, 'tester'
+        )
+        self.assertEqual(res['errors'], 2, "Should reject both codes with banned CJK characters")
+        self.assertEqual(TrackCode.all_objects.count(), 0, "No TrackCode should be created")
+
     def test_creates_batched_telegram_notifications(self):
         self._track('BLK003', owner=self.owner)
         bulk_advance_tracks(['BLK003'], 'shipped_cn', self.d, 'tester')

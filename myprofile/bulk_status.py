@@ -6,19 +6,17 @@
 (batched TelegramNotification при смене статуса) воспроизводится вручную —
 bulk_update сигналы не вызывает.
 """
-import logging
-import re
 from collections import defaultdict
 
 from django.db import transaction
-
-logger = logging.getLogger(__name__)
+from myprofile.models import _INVALID_TRACK_CODE_RE
 
 BULK_STATUSES = ('shipped_cn', 'at_customs', 'left_almaty')
 CHUNK = 500
 
-# Тот же запрет, что в TrackCode.clean(): CJK и кириллица в трек-коде
-INVALID_CODE_RE = re.compile(r'[一-鿿㐀-䶿Ѐ-ӿ]')
+# Переиспользуем канонический regex валидации трек-кодов из TrackCode.clean()
+# (запрет CJK и кириллицы)
+INVALID_CODE_RE = _INVALID_TRACK_CODE_RE
 
 
 def bulk_advance_instances(tracks, new_status, update_date, changed_by):

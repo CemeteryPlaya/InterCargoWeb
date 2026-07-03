@@ -9,14 +9,11 @@
 и лениво при открытии страницы shipped-cn.
 """
 
-import logging
 from datetime import timedelta
 
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
-
-logger = logging.getLogger(__name__)
 
 # Через сколько дней после даты отправки партия считается прибывшей на таможню
 AUTO_CUSTOMS_DAYS = 5
