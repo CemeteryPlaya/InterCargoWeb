@@ -40,36 +40,26 @@ msgid "Сессия"
 msgstr "Session"
 
 #: .\analytics\models.py:16
-#, fuzzy
-#| msgid "Авторизация"
 msgid "Авторизован"
-msgstr "Login"
+msgstr "Authorized"
 
 #: .\analytics\models.py:17
-#, fuzzy
-#| msgid "Вернуться на страницу входа"
 msgid "Время на странице (мс)"
-msgstr "Back to login page"
+msgstr "Time on page (ms)"
 
 #: .\analytics\models.py:18 .\myprofile\models.py:1002
 #: .\myprofile\templates\desktop\blocks.html:140 .\register\models.py:187
-#, fuzzy
-#| msgid "Время работы"
 msgid "Время"
-msgstr "Working hours"
+msgstr "Time"
 
 #: .\analytics\models.py:21
-#, fuzzy
-#| msgid "Номер строки"
 msgid "Просмотр страницы"
-msgstr "Row number"
+msgstr "Page view"
 
 #: .\analytics\models.py:22 .\analytics\templates\analytics\dashboard.html:70
 #: .\analytics\templates\analytics\dashboard.html:89
-#, fuzzy
-#| msgid "Номер строки"
 msgid "Просмотры страниц"
-msgstr "Row number"
+msgstr "Page views"
 
 #: .\analytics\models.py:40 .\myprofile\models.py:445
 #: .\myprofile\templates\desktop\finance_summary.html:62
@@ -92,70 +82,50 @@ msgstr "Date"
 #: .\analytics\models.py:42 .\analytics\templates\analytics\dashboard.html:160
 #: .\analytics\templates\analytics\dashboard.html:202
 #: .\analytics\templates\analytics\dashboard.html:330
-#, fuzzy
-#| msgid "Рассмотрел"
 msgid "Просмотры"
-msgstr "Reviewed by"
+msgstr "Views"
 
 #: .\analytics\models.py:43 .\analytics\templates\analytics\dashboard.html:93
-#, fuzzy
-#| msgid "Заявка пользователя:"
 msgid "Уник. пользователи"
-msgstr "User request:"
+msgstr "Unique users"
 
 #: .\analytics\models.py:44
-#, fuzzy
-#| msgid "Активные сессии"
 msgid "Уник. сессии"
-msgstr "Active sessions"
+msgstr "Unique sessions"
 
 #: .\analytics\models.py:45
-#, fuzzy
-#| msgid "Недостаточно данных."
 msgid "Просмотры авторизованных"
-msgstr "Insufficient data."
+msgstr "Authorized user views"
 
 #: .\analytics\models.py:46
-#, fuzzy
-#| msgid "На определённое время"
 msgid "Суммарное время (мс)"
-msgstr "For a specific time"
+msgstr "Total time (ms)"
 
 #: .\analytics\models.py:47
 msgid "Замеров времени"
 msgstr ""
 
 #: .\analytics\models.py:50
-#, fuzzy
-#| msgid "Финансовая сводка по чекам"
 msgid "Дневная сводка просмотров"
-msgstr "Financial summary by receipts"
+msgstr "Daily views summary"
 
 #: .\analytics\models.py:51
-#, fuzzy
-#| msgid "Финансовая сводка по чекам"
 msgid "Дневные сводки просмотров"
-msgstr "Financial summary by receipts"
+msgstr "Daily views summaries"
 
 #: .\analytics\templates\analytics\dashboard.html:8
-#, fuzzy
-#| msgid "Inter Cargo - Приёмка товара"
 msgid "Inter Cargo - Аналитика сайта"
-msgstr "Inter Cargo - Goods Acceptance"
+msgstr "Inter Cargo - Site Analytics"
 
 #: .\analytics\templates\analytics\dashboard.html:35
 #: .\analytics\templates\analytics\dashboard.html:50
 #: .\mainview\templates\mobile\sidebar.html:115
-#, fuzzy
-#| msgid "Перейти на сайт"
 msgid "Аналитика сайта"
-msgstr "Go to site"
+msgstr "Site analytics"
 
 #: .\analytics\templates\analytics\dashboard.html:43
-#, fuzzy
-#| msgid "Все уведомления"
 msgid "Все приложения"
-msgstr "All notifications"
+msgstr "All apps"
 
 #: .\analytics\templates\analytics\dashboard.html:60
 msgid "дн."
@@ -163,10 +133,8 @@ msgstr ""
 
 #: .\analytics\templates\analytics\dashboard.html:74
 #: .\analytics\templates\analytics\dashboard.html:203
-#, fuzzy
-#| msgid "Сохранить"
 msgid "Страниц"
-msgstr "Save"
+msgstr "Pages"
 
 #: .\analytics\templates\analytics\dashboard.html:78
 #: .\analytics\templates\analytics\dashboard.html:101
@@ -179,10 +147,8 @@ msgid "Суммарное время всех визитов"
 msgstr ""
 
 #: .\analytics\templates\analytics\dashboard.html:97
-#, fuzzy
-#| msgid "Сессия"
 msgid "Сессии"
-msgstr "Session"
+msgstr "Sessions"
 
 #: .\analytics\templates\analytics\dashboard.html:114
 msgid ""
@@ -191,16 +157,12 @@ msgid ""
 msgstr ""
 
 #: .\analytics\templates\analytics\dashboard.html:123
-#, fuzzy
-#| msgid "Проблемы устранены"
 msgid "Популярные страницы"
-msgstr "Issues resolved"
+msgstr "Popular pages"
 
 #: .\analytics\templates\analytics\dashboard.html:123
-#, fuzzy
-#| msgid "Перейти на сайт"
 msgid "Приложения сайта"
-msgstr "Go to site"
+msgstr "Site apps"
 
 #: .\analytics\templates\analytics\dashboard.html:128
 msgid "Круговая"
@@ -213,22 +175,16 @@ msgstr ""
 #: .\analytics\templates\analytics\dashboard.html:142
 #: .\analytics\templates\analytics\dashboard.html:182
 #: .\analytics\templates\analytics\dashboard.html:226
-#, fuzzy
-#| msgid "Нет доставок за выбранный период"
 msgid "Пока нет данных за выбранный период."
-msgstr "No deliveries for the selected period"
+msgstr "No data for the selected period yet."
 
 #: .\analytics\templates\analytics\dashboard.html:152
-#, fuzzy
-#| msgid "Сохранить"
 msgid "Страницы"
-msgstr "Save"
+msgstr "Pages"
 
 #: .\analytics\templates\analytics\dashboard.html:159
-#, fuzzy
-#| msgid "Сохранить"
 msgid "Страница"
-msgstr "Save"
+msgstr "Page"
 
 #: .\analytics\templates\analytics\dashboard.html:161
 msgid "Уник."
@@ -240,16 +196,12 @@ msgid "Ср. время"
 msgstr ""
 
 #: .\analytics\templates\analytics\dashboard.html:194
-#, fuzzy
-#| msgid "Причина отклонения"
 msgid "Приложения"
-msgstr "Rejection reason"
+msgstr "Apps"
 
 #: .\analytics\templates\analytics\dashboard.html:201
-#, fuzzy
-#| msgid "Предупреждение"
 msgid "Приложение"
-msgstr "Warning"
+msgstr "App"
 
 #: .\analytics\templates\analytics\dashboard.html:205
 msgid "Общее время"
@@ -272,22 +224,16 @@ msgid "Сервис Di.Buyer временно недоступен."
 msgstr ""
 
 #: .\dibuyer\models.py:10
-#, fuzzy
-#| msgid "Время отключения"
 msgid "Сервис включён"
-msgstr "Disable time"
+msgstr "Service enabled"
 
 #: .\dibuyer\models.py:13
-#, fuzzy
-#| msgid "Тариф на момент доставки (₸/кг)"
 msgid "Тариф доставки ($/кг)"
-msgstr "Rate at time of delivery (₸/kg)"
+msgstr "Delivery rate ($/kg)"
 
 #: .\dibuyer\models.py:17 .\dibuyer\models.py:18
-#, fuzzy
-#| msgid "Настройки"
 msgid "Настройки Di.Buyer"
-msgstr "Settings"
+msgstr "Di.Buyer settings"
 
 #: .\dibuyer\models.py:36 .\mainview\templates\desktop\index.html:648
 #: .\myprofile\models.py:26
@@ -295,10 +241,8 @@ msgid "Название"
 msgstr "Name"
 
 #: .\dibuyer\models.py:37
-#, fuzzy
-#| msgid "Посылка не найдена."
 msgid "Ссылка на сайт бренда"
-msgstr "Parcel not found."
+msgstr "Brand website link"
 
 #: .\dibuyer\models.py:40
 msgid "Логотип"
@@ -321,10 +265,8 @@ msgid "Кликов"
 msgstr ""
 
 #: .\dibuyer\models.py:49
-#, fuzzy
-#| msgid "Показывать в регистрации/футере"
 msgid "Показывать на витрине"
-msgstr "Show in registration/footer"
+msgstr "Show on storefront"
 
 #: .\dibuyer\models.py:50
 msgid "Порядок"
@@ -347,16 +289,12 @@ msgid "Новая"
 msgstr ""
 
 #: .\dibuyer\models.py:78
-#, fuzzy
-#| msgid "Время работы"
 msgid "В работе"
-msgstr "Working hours"
+msgstr "In progress"
 
 #: .\dibuyer\models.py:79
-#, fuzzy
-#| msgid "Отправлено"
 msgid "Выкуплено"
-msgstr "Sent"
+msgstr "Purchased"
 
 #: .\dibuyer\models.py:80 .\myprofile\models.py:715
 msgid "Отклонена"
@@ -394,26 +332,20 @@ msgid "Статус"
 msgstr "Status"
 
 #: .\dibuyer\models.py:91
-#, fuzzy
-#| msgid "Конкретный клиент"
 msgid "Комментарий клиента"
-msgstr "Specific client"
+msgstr "Client comment"
 
 #: .\dibuyer\models.py:92
-#, fuzzy
-#| msgid "Нет сообщений"
 msgid "Ответ сотрудника"
-msgstr "No messages"
+msgstr "Staff response"
 
 #: .\dibuyer\models.py:95
 msgid "Обработал"
 msgstr ""
 
 #: .\dibuyer\models.py:99
-#, fuzzy
-#| msgid "Дата создания"
 msgid "Посылки созданы"
-msgstr "Creation date"
+msgstr "Parcels created"
 
 #: .\dibuyer\models.py:103
 msgid "Заявка Di.Buyer"
@@ -426,28 +358,20 @@ msgstr ""
 #: .\dibuyer\models.py:117 .\dibuyer\templates\dibuyer\home.html:71
 #: .\dibuyer\templates\dibuyer\manage_detail.html:6
 #: .\dibuyer\templates\dibuyer\order_detail.html:6
-#, fuzzy
-#| msgid "Дата заявки"
 msgid "Заявка"
-msgstr "Request date"
+msgstr "Request"
 
 #: .\dibuyer\models.py:119
-#, fuzzy
-#| msgid "Ссылка на оплату"
 msgid "Ссылка на товар"
-msgstr "Payment link"
+msgstr "Product link"
 
 #: .\dibuyer\models.py:122
-#, fuzzy
-#| msgid "Некорректный размер скидки."
 msgid "Комментарий (размер/цвет/кол-во)"
-msgstr "Invalid discount amount."
+msgstr "Comment (size/color/qty)"
 
 #: .\dibuyer\models.py:124
-#, fuzzy
-#| msgid "Количество часов"
 msgid "Количество"
-msgstr "Number of hours"
+msgstr "Quantity"
 
 #: .\dibuyer\models.py:126 .\mainview\templates\desktop\index.html:271
 #: .\mainview\templates\desktop\index.html:344 .\myprofile\models.py:237
@@ -474,33 +398,25 @@ msgid "Вес (кг)"
 msgstr "Weight (kg)"
 
 #: .\dibuyer\models.py:129
-#, fuzzy
-#| msgid "Стоимость позиции (₸)"
 msgid "Стоимость доставки (₸)"
-msgstr "Item cost (₸)"
+msgstr "Delivery cost (₸)"
 
 #: .\dibuyer\models.py:132
 msgid "Курс ₸/$"
 msgstr ""
 
 #: .\dibuyer\models.py:136
-#, fuzzy
-#| msgid "Трек-коды в доставке"
 msgid "Трек-код посылки"
-msgstr "Track codes in delivery"
+msgstr "Parcel track code"
 
 #: .\dibuyer\templates\dibuyer\base.html:16
-#, fuzzy
-#| msgid "Главная"
 msgid "На главную"
 msgstr "Home"
 
 #: .\dibuyer\templates\dibuyer\base.html:26
 #: .\dibuyer\templates\dibuyer\manage_list.html:3
-#, fuzzy
-#| msgid "Дата заявки"
 msgid "Заявки"
-msgstr "Request date"
+msgstr "Requests"
 
 #: .\dibuyer\templates\dibuyer\home.html:15
 #: .\mainview\templates\mobile\m_sidebar.html:78
@@ -528,50 +444,36 @@ msgstr ""
 
 #: .\dibuyer\templates\dibuyer\home.html:33
 #: .\dibuyer\templates\dibuyer\home.html:34
-#, fuzzy
-#| msgid "Показать все"
 msgid "Показать больше"
-msgstr "Show all"
+msgstr "Show more"
 
 #: .\dibuyer\templates\dibuyer\home.html:33
-#, fuzzy
-#| msgid "Вернуться"
 msgid "Свернуть"
-msgstr "Back"
+msgstr "Collapse"
 
 #: .\dibuyer\templates\dibuyer\home.html:40
-#, fuzzy
-#| msgid "Дата заявки"
 msgid "Новая заявка"
-msgstr "Request date"
+msgstr "New request"
 
 #: .\dibuyer\templates\dibuyer\home.html:47
-#, fuzzy
-#| msgid "Удалить"
 msgid "удалить"
-msgstr "Delete"
+msgstr "delete"
 
 #: .\dibuyer\templates\dibuyer\home.html:48
-#, fuzzy
-#| msgid "Ссылка на оплату"
 msgid "Ссылка на товар (бренд-сайт)"
-msgstr "Payment link"
+msgstr "Product link (brand site)"
 
 #: .\dibuyer\templates\dibuyer\home.html:50
 msgid "Размер, цвет, детали"
 msgstr ""
 
 #: .\dibuyer\templates\dibuyer\home.html:56
-#, fuzzy
-#| msgid "Добавить строку"
 msgid "Добавить ещё товар"
-msgstr "Add row"
+msgstr "Add another product"
 
 #: .\dibuyer\templates\dibuyer\home.html:61
-#, fuzzy
-#| msgid "Описание посылки (необязательно)"
 msgid "Общий комментарий к заявке (необязательно)"
-msgstr "Parcel description (optional)"
+msgstr "General comment for the request (optional)"
 
 #: .\dibuyer\templates\dibuyer\home.html:63
 #: .\myprofile\templates\desktop\settings.html:145
@@ -579,17 +481,13 @@ msgid "Отправить заявку"
 msgstr "Submit request"
 
 #: .\dibuyer\templates\dibuyer\home.html:66
-#, fuzzy
-#| msgid "Дата заявки"
 msgid "Мои заявки"
-msgstr "Request date"
+msgstr "My requests"
 
 #: .\dibuyer\templates\dibuyer\home.html:72
 #: .\dibuyer\templates\dibuyer\manage_list.html:20
-#, fuzzy
-#| msgid "Приход товаров"
 msgid "товар(ов)"
-msgstr "Goods arrival"
+msgstr "item(s)"
 
 #: .\dibuyer\templates\dibuyer\home.html:78
 msgid "Пока нет заявок. Создайте первую выше."
@@ -602,16 +500,12 @@ msgstr ""
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:26
 #: .\dibuyer\templates\dibuyer\order_detail.html:20
-#, fuzzy
-#| msgid "Кол-во"
 msgid "кол-во"
-msgstr "Qty"
+msgstr "qty"
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:31
-#, fuzzy
-#| msgid "Посылки"
 msgid "Посылка"
-msgstr "Parcels"
+msgstr "Parcel"
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:33
 msgid "курс"
@@ -644,10 +538,8 @@ msgid "Вес, кг"
 msgstr "Weight, kg"
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:42
-#, fuzzy
-#| msgid "Доставка"
 msgid "Доставка, ₸"
-msgstr "Delivery"
+msgstr "Delivery, ₸"
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:49
 msgid "Посылки созданы и отслеживаются в «Посылках» клиента."
@@ -664,10 +556,8 @@ msgid "Обработка"
 msgstr ""
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:63
-#, fuzzy
-#| msgid "Все клиенты"
 msgid "Ответ клиенту"
-msgstr "All clients"
+msgstr "Reply to client"
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:65
 #: .\myprofile\templates\desktop\profile.html:242
@@ -679,10 +569,8 @@ msgid "Сохранить"
 msgstr "Save"
 
 #: .\dibuyer\templates\dibuyer\manage_list.html:6
-#, fuzzy
-#| msgid "Отклонение заявки"
 msgid "Входящие заявки"
-msgstr "Request rejection"
+msgstr "Incoming requests"
 
 #: .\dibuyer\templates\dibuyer\manage_list.html:9
 #: .\myprofile\templates\desktop\delivered_posts.html:70
@@ -694,38 +582,29 @@ msgid "Все"
 msgstr "All"
 
 #: .\dibuyer\templates\dibuyer\manage_list.html:26
-#, fuzzy
-#| msgid "Заявка отклонена."
 msgid "Заявок нет."
-msgstr "Request rejected."
+msgstr "No requests."
 
 #: .\dibuyer\templates\dibuyer\order_detail.html:26
 msgid "Ответ Di.Buyer"
 msgstr ""
 
 #: .\dibuyer\views\client.py:59
-#, fuzzy
-#| msgid "Сессия пуста. Добавьте хотя бы одну строку."
 msgid "Добавьте хотя бы одну ссылку на товар."
-msgstr "Session is empty. Add at least one row."
+msgstr "Add at least one product link."
 
 #: .\dibuyer\views\client.py:68
-#, fuzzy
-#| msgid "Заявка отклонена."
 msgid "Заявка отправлена."
-msgstr "Request rejected."
+msgstr "Request sent."
 
 #: .\dibuyer\views\staff.py:53
-#, fuzzy
-#| msgid "Заявка отклонена."
 msgid "Заявка обновлена."
-msgstr "Request rejected."
+msgstr "Request updated."
 
 #: .\dibuyer\views\staff.py:75
-#, fuzzy, python-format
-#| msgid "Выдача посылок"
+#, python-format
 msgid "Создано посылок: %(n)s"
-msgstr "Parcel issue"
+msgstr "Parcels created: %(n)s"
 
 #: .\dibuyer\views\staff.py:78
 msgid ""
@@ -1350,10 +1229,8 @@ msgid "Привязать Telegram"
 msgstr "Link Telegram"
 
 #: .\mainview\templates\desktop\index.html:206
-#, fuzzy
-#| msgid "Доставка из Китая в Казахстан"
 msgid "Доставка с американских сайтов"
-msgstr "Delivery from China to Kazakhstan"
+msgstr "Delivery from US websites"
 
 #: .\mainview\templates\desktop\index.html:211
 msgid "Мои посылки"
@@ -1974,10 +1851,8 @@ msgstr "Menu"
 #: .\myprofile\templates\desktop\blocks.html:33
 #: .\myprofile\templates\mobile\mobile_menu.html:330
 #: .\myprofile\templates\mobile\mobile_menu.html:431
-#, fuzzy
-#| msgid "Сортировка"
 msgid "Блокировки"
-msgstr "Sorting"
+msgstr "Blocks"
 
 #: .\mainview\templates\shared\footer.html:60
 msgid "Директор:"
@@ -2135,10 +2010,8 @@ msgid "Mass Status Update"
 msgstr "Mass Status Update"
 
 #: .\myprofile\admin.py:411
-#, fuzzy
-#| msgid "Отметить без сканирования"
 msgid "Отметить как разобранные"
-msgstr "Mark without scanning"
+msgstr "Mark as resolved"
 
 #: .\myprofile\middleware.py:31 .\myprofile\views\profile_setting.py:214
 #: .\myprofile\views\reschedule_arrival.py:77
@@ -2192,19 +2065,15 @@ msgstr "Shipped from warehouse (China)"
 #: .\myprofile\models.py:49 .\myprofile\templates\desktop\settings.html:266
 #: .\tgbot\bot\workers\notifications.py:431 .\tgbot\models.py:166
 #: .\tgbot\signals.py:15
-#, fuzzy
-#| msgid "Прибыло на склад (Китай)"
 msgid "Прибыло на таможню (Китай-Казахстан)"
-msgstr "Arrived at warehouse (China)"
+msgstr "Arrived at customs (China-Kazakhstan)"
 
 #: .\myprofile\models.py:50 .\myprofile\templates\desktop\settings.html:271
 #: .\myprofile\views\mobile_parcels.py:83 .\tgbot\bot\settings_handlers.py:45
 #: .\tgbot\bot\workers\notifications.py:433 .\tgbot\models.py:167
 #: .\tgbot\signals.py:16
-#, fuzzy
-#| msgid "Отправлено из Китая"
 msgid "Выехало из Алматы"
-msgstr "Shipped from China"
+msgstr "Departed from Almaty"
 
 #: .\myprofile\models.py:51
 msgid "Неопозка (сортировочный склад)"
@@ -2593,16 +2462,12 @@ msgid "Порог веса для скидки (кг)"
 msgstr "Weight threshold for discount (kg)"
 
 #: .\myprofile\models.py:611
-#, fuzzy
-#| msgid "Панель администратора"
 msgid "Лимит: Главный администратор"
-msgstr "Admin panel"
+msgstr "Limit: Chief administrator"
 
 #: .\myprofile\models.py:613
-#, fuzzy
-#| msgid "Директор:"
 msgid "Лимит: Директор"
-msgstr "Director:"
+msgstr "Limit: Director"
 
 #: .\myprofile\models.py:615
 msgid "Лимит: Менеджер тех.поддержки"
@@ -2909,10 +2774,8 @@ msgid "Сессии выдачи"
 msgstr "Issue sessions"
 
 #: .\myprofile\models.py:993
-#, fuzzy
-#| msgid "вам лично"
 msgid "Критично"
-msgstr "to you personally"
+msgstr "Critical"
 
 #: .\myprofile\models.py:994 .\tgbot\models.py:100
 msgid "Предупреждение"
@@ -2923,34 +2786,24 @@ msgid "Функция"
 msgstr ""
 
 #: .\myprofile\models.py:998
-#, fuzzy
-#| msgid "Контакты"
 msgid "Контракт"
-msgstr "Contacts"
+msgstr "Contract"
 
 #: .\myprofile\models.py:999
-#, fuzzy
-#| msgid "Длительность"
 msgid "Серьёзность"
-msgstr "Duration"
+msgstr "Severity"
 
 #: .\myprofile\models.py:1001
-#, fuzzy
-#| msgid "Контакты"
 msgid "Контекст"
-msgstr "Contacts"
+msgstr "Context"
 
 #: .\myprofile\models.py:1003
-#, fuzzy
-#| msgid "Выбрано:"
 msgid "Разобрано"
-msgstr "Selected:"
+msgstr "Resolved"
 
 #: .\myprofile\models.py:1006
-#, fuzzy
-#| msgid "Обучение по сайту"
 msgid "Нарушение контракта"
-msgstr "Site tutorial"
+msgstr "Contract violation"
 
 #: .\myprofile\models.py:1007
 msgid "Нарушения контрактов"
@@ -3290,22 +3143,16 @@ msgid "Все посылки приняты. Нет проблем, требую
 msgstr "All parcels accepted. No issues requiring attention."
 
 #: .\myprofile\templates\desktop\blocks.html:9
-#, fuzzy
-#| msgid "Inter Cargo — Управление ролями"
 msgid "Inter Cargo - Управление блокировками"
-msgstr "Inter Cargo — Role Management"
+msgstr "Inter Cargo - Block Management"
 
 #: .\myprofile\templates\desktop\blocks.html:37
-#, fuzzy
-#| msgid "Управление ролями"
 msgid "Управление блокировками"
-msgstr "Role management"
+msgstr "Block management"
 
 #: .\myprofile\templates\desktop\blocks.html:58
-#, fuzzy
-#| msgid "Активные заглушки"
 msgid "Активные блокировки"
-msgstr "Active mutes"
+msgstr "Active blocks"
 
 #: .\myprofile\templates\desktop\blocks.html:62
 msgid ""
@@ -3325,16 +3172,12 @@ msgid "Попытки"
 msgstr "Attempts"
 
 #: .\myprofile\templates\desktop\blocks.html:74
-#, fuzzy
-#| msgid "Заблокирован до"
 msgid "До конца блокировки"
-msgstr "Blocked until"
+msgstr "Until block ends"
 
 #: .\myprofile\templates\desktop\blocks.html:95
-#, fuzzy
-#| msgid "На определённое время"
 msgid "не определён"
-msgstr "For a specific time"
+msgstr "not defined"
 
 #: .\myprofile\templates\desktop\blocks.html:101
 msgid "до"
@@ -3346,26 +3189,20 @@ msgid "Снять"
 msgstr "Remove"
 
 #: .\myprofile\templates\desktop\blocks.html:121
-#, fuzzy
-#| msgid "Заблокирован до"
 msgid "Активных блокировок нет."
-msgstr "Blocked until"
+msgstr "No active blocks."
 
 #: .\myprofile\templates\desktop\blocks.html:129 .\register\models.py:192
-#, fuzzy
-#| msgid "История доставок"
 msgid "История блокировок"
-msgstr "Delivery histories"
+msgstr "Block history"
 
 #: .\myprofile\templates\desktop\blocks.html:132
 msgid "Журнал событий: когда блокировка была наложена и когда снята."
 msgstr ""
 
 #: .\myprofile\templates\desktop\blocks.html:142
-#, fuzzy
-#| msgid "Информация о пользователе"
 msgid "Идентификатор / Пользователь"
-msgstr "User information"
+msgstr "Identifier / User"
 
 #: .\myprofile\templates\desktop\blocks.html:144 .\register\models.py:176
 msgid "Событие"
@@ -3380,16 +3217,12 @@ msgid "—"
 msgstr ""
 
 #: .\myprofile\templates\desktop\blocks.html:186
-#, fuzzy
-#| msgid "История доставки"
 msgid "История пуста."
-msgstr "Delivery history"
+msgstr "History is empty."
 
 #: .\myprofile\templates\desktop\blocks.html:199
-#, fuzzy
-#| msgid "Истекает"
 msgid "истекла"
-msgstr "Expires"
+msgstr "expired"
 
 #: .\myprofile\templates\desktop\bulk_job.html:9
 msgid "Inter Cargo - Фоновая операция"
@@ -3423,10 +3256,8 @@ msgid "Фильтр:"
 msgstr "Filter:"
 
 #: .\myprofile\templates\desktop\delivered_posts.html:73
-#, fuzzy
-#| msgid "На сортировке"
 msgid "На сортировочном пункте"
-msgstr "At sorting"
+msgstr "At the sorting point"
 
 #: .\myprofile\templates\desktop\delivered_posts.html:79
 msgid "Не выдано"
@@ -4035,10 +3866,8 @@ msgid "Связь восстановлена. Данные сохранены."
 msgstr "Connection restored. Data saved."
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:132
-#, fuzzy
-#| msgid "Надежная доставка грузов из Китая"
 msgid "Найдена несохранённая резервная копия"
-msgstr "Reliable cargo delivery from China"
+msgstr "Unsaved backup found"
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:139
 #: .\myprofile\templates\desktop\track_codes.html:324
@@ -4057,26 +3886,20 @@ msgid "Переключить на текстовый вид"
 msgstr "Switch to text view"
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:175
-#, fuzzy
-#| msgid "Неактивные сессии"
 msgid "Скачать данные сессии в файл"
-msgstr "Inactive sessions"
+msgstr "Download session data to a file"
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:176
 msgid "Резервная копия"
 msgstr ""
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:180
-#, fuzzy
-#| msgid "Заполните данные профиля"
 msgid "Загрузить данные из файла"
-msgstr "Complete your profile"
+msgstr "Load data from a file"
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:181
-#, fuzzy
-#| msgid "Или загрузите xlsx файл"
 msgid "Загрузить из файла"
-msgstr "Or upload xlsx file"
+msgstr "Load from file"
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:206
 #: .\myprofile\templates\desktop\update_tracks.html:123
@@ -4785,38 +4608,28 @@ msgid "Логин или имя (мин. 2 символа)..."
 msgstr "Login or name (min. 2 chars)..."
 
 #: .\myprofile\templates\desktop\role_management.html:75
-#, fuzzy
-#| msgid "Флаги ролей"
 msgid "Лимиты ролей"
-msgstr "Role flags"
+msgstr "Role limits"
 
 #: .\myprofile\templates\desktop\role_management.html:80
 msgid "занято"
 msgstr ""
 
 #: .\myprofile\templates\desktop\role_management.html:87
-#, fuzzy
-#| msgid "Сохранить изменения"
 msgid "Сохранить лимиты"
-msgstr "Save changes"
+msgstr "Save limits"
 
 #: .\myprofile\templates\desktop\role_management.html:113
-#, fuzzy
-#| msgid "Сохранить"
 msgid "Сохранено."
-msgstr "Save"
+msgstr "Saved."
 
 #: .\myprofile\templates\desktop\role_management.html:113
-#, fuzzy
-#| msgid "Ошибка"
 msgid "Ошибка."
-msgstr "Error"
+msgstr "Error."
 
 #: .\myprofile\templates\desktop\role_management.html:118
-#, fuzzy
-#| msgid "Ошибка сервера"
 msgid "Ошибка при отправке."
-msgstr "Server error"
+msgstr "Error while sending."
 
 #: .\myprofile\templates\desktop\role_management.html:132
 msgid "Пользователи с ролями"
@@ -4856,10 +4669,8 @@ msgstr "inherited"
 
 #: .\myprofile\templates\desktop\role_management_edit.html:68
 #: .\register\models.py:69
-#, fuzzy
-#| msgid "Установить пароль"
 msgid "Основная роль"
-msgstr "Set password"
+msgstr "Primary role"
 
 #: .\myprofile\templates\desktop\role_management_edit.html:71
 msgid ""
@@ -5287,20 +5098,16 @@ msgid "Подтвердить"
 msgstr "Confirm"
 
 #: .\myprofile\templates\desktop\unidentified.html:171
-#, fuzzy
-#| msgid "Подтверждено получателем"
 msgid "Подтверждено — ожидают прихода:"
-msgstr "Confirmed by recipient"
+msgstr "Confirmed — awaiting arrival:"
 
 #: .\myprofile\templates\desktop\unidentified.html:173
 msgid "Добавятся в сессию прихода автоматически"
 msgstr ""
 
 #: .\myprofile\templates\desktop\unidentified.html:213
-#, fuzzy
-#| msgid "Применить"
 msgid "Отменить"
-msgstr "Apply"
+msgstr "Cancel"
 
 #: .\myprofile\templates\desktop\unidentified.html:236
 msgid "Без владельца:"
@@ -5604,10 +5411,8 @@ msgid "Смена ПВЗ"
 msgstr "Change PVZ"
 
 #: .\myprofile\templates\mobile\mobile_menu.html:274
-#, fuzzy
-#| msgid "Удалить"
 msgid "Аналитика"
-msgstr "Delete"
+msgstr "Analytics"
 
 #: .\myprofile\templates\mobile\mobile_menu.html:282
 msgid "Админ"
@@ -5728,10 +5533,8 @@ msgid "Выданные посылки будут отображаться зд�
 msgstr "Issued parcels will be displayed here"
 
 #: .\myprofile\templates\shared\print\client_check_pdf.html:98
-#, fuzzy
-#| msgid "Посылка не найдена."
 msgid "Посылок без чека"
-msgstr "Parcel not found."
+msgstr "Parcels without receipt"
 
 #: .\myprofile\templates\shared\print\client_check_pdf.html:98
 msgid ""
@@ -5741,10 +5544,8 @@ msgstr ""
 
 #: .\myprofile\templates\shared\print\client_check_pdf.html:164
 #: .\myprofile\templates\shared\print\client_check_pdf.html:186
-#, fuzzy
-#| msgid "Выдача посылок"
 msgid "Всего посылок"
-msgstr "Parcel issue"
+msgstr "Total parcels"
 
 #: .\myprofile\templates\shared\print\client_check_pdf.html:226
 msgid "Трек-номер"
@@ -5921,41 +5722,29 @@ msgid "Код подтверждения email"
 msgstr "Email confirmation code"
 
 #: .\myprofile\views\blocks.py:157
-#, fuzzy
-#| msgid "Некорректный вес."
 msgid "Некорректный запрос."
-msgstr "Invalid weight."
+msgstr "Invalid request."
 
 #: .\myprofile\views\blocks.py:166
-#, fuzzy
-#| msgid "Сводка прихода за"
 msgid "Блокировка входа снята."
-msgstr "Arrival summary for"
+msgstr "Login block removed."
 
 #: .\myprofile\views\blocks.py:168 .\myprofile\views\blocks.py:178
 #: .\myprofile\views\blocks.py:188
-#, fuzzy
-#| msgid "Посылка не найдена."
 msgid "Блокировка не найдена."
-msgstr "Parcel not found."
+msgstr "Block not found."
 
 #: .\myprofile\views\blocks.py:176
-#, fuzzy
-#| msgid "Код сброса пароля"
 msgid "Блокировка кода сброса пароля снята."
-msgstr "Password reset code"
+msgstr "Password reset code block removed."
 
 #: .\myprofile\views\blocks.py:186
-#, fuzzy
-#| msgid "Код подтверждения email"
 msgid "Блокировка кода подтверждения email снята."
-msgstr "Email confirmation code"
+msgstr "Email confirmation code block removed."
 
 #: .\myprofile\views\blocks.py:190
-#, fuzzy
-#| msgid "Неверный тип клиента."
 msgid "Неизвестный тип блокировки."
-msgstr "Invalid client type."
+msgstr "Unknown block type."
 
 #: .\myprofile\views\customer_paycheks.py:68
 msgid "Нет новых доставленных посылок для формирования чека."
@@ -6279,10 +6068,8 @@ msgid "Некорректный JSON."
 msgstr "Invalid JSON."
 
 #: .\myprofile\views\role_management.py:208
-#, fuzzy
-#| msgid "Некорректная дата."
 msgid "Некорректная роль."
-msgstr "Invalid date."
+msgstr "Invalid role."
 
 #: .\myprofile\views\service.py:132 .\myprofile\views\service.py:192
 msgid "Некорректный формат даты."
@@ -6315,10 +6102,8 @@ msgid "Переведено в статус «Выехало из Алматы»
 msgstr "Moved to status \"Departed Almaty\": %(count)s track codes."
 
 #: .\myprofile\views\shipped_cn.py:143
-#, fuzzy
-#| msgid "Нет треков для переноса."
 msgid "Нет трек-кодов для перевода."
-msgstr "No tracks to transfer."
+msgstr "No track codes to transfer."
 
 #: .\myprofile\views\status_update.py:29
 msgid "Заполните все обязательные поля."
@@ -6345,10 +6130,8 @@ msgid "Трек-код успешно добавлен."
 msgstr "Track code added successfully."
 
 #: .\myprofile\views\track_codes.py:136
-#, fuzzy
-#| msgid "Добавить трек-код"
 msgid "Не удалось добавить трек-код."
-msgstr "Add track code"
+msgstr "Failed to add track code."
 
 #: .\myprofile\views\track_codes.py:139 .\myprofile\views\track_codes.py:236
 #: .\myprofile\views\unidentified.py:36
@@ -6550,32 +6333,24 @@ msgid "Сотрудник Di.Buyer"
 msgstr ""
 
 #: .\register\models.py:60
-#, fuzzy
-#| msgid "Панель администратора"
 msgid "Главный администратор"
-msgstr "Admin panel"
+msgstr "Chief administrator"
 
 #: .\register\models.py:61
-#, fuzzy
-#| msgid "Директор:"
 msgid "Директор Inter Cargo"
-msgstr "Director:"
+msgstr "Inter Cargo director"
 
 #: .\register\models.py:62
 msgid "Менеджер тех.поддержки"
 msgstr ""
 
 #: .\register\models.py:63
-#, fuzzy
-#| msgid "Сотрудник, выдавший посылку"
 msgid "Сотрудник Сортировочного ПВЗ"
-msgstr "Employee who issued the parcel"
+msgstr "Sorting pickup point employee"
 
 #: .\register\models.py:64
-#, fuzzy
-#| msgid "Работник ПВЗ"
 msgid "Сотрудник ПВЗ"
-msgstr "PVZ worker"
+msgstr "Pickup point employee"
 
 #: .\register\models.py:72
 msgid "Регистрация подтверждена"
@@ -6654,28 +6429,20 @@ msgid "Наложена"
 msgstr ""
 
 #: .\register\models.py:173
-#, fuzzy
-#| msgid "Снять"
 msgid "Снята"
-msgstr "Remove"
+msgstr "Removed"
 
 #: .\register\models.py:175
-#, fuzzy
-#| msgid "Заблокирован до"
 msgid "Тип блокировки"
-msgstr "Blocked until"
+msgstr "Block type"
 
 #: .\register\models.py:185
-#, fuzzy
-#| msgid "Заблокирован до"
 msgid "Снял блокировку"
-msgstr "Blocked until"
+msgstr "Block removed by"
 
 #: .\register\models.py:191
-#, fuzzy
-#| msgid "Записи приходов"
 msgid "Запись истории блокировок"
-msgstr "Arrival records"
+msgstr "Block history record"
 
 #: .\register\models.py:219
 msgid "Чтение"
@@ -7023,8 +6790,7 @@ msgid "✅ <b>Аккаунт успешно привязан!</b>"
 msgstr "✅ <b>Account linked successfully!</b>"
 
 #: .\tgbot\bot\handlers.py:91
-#, fuzzy, python-brace-format
-#| msgid "Telegram Username"
+#, python-brace-format
 msgid "📱 Telegram: @{name}"
 msgstr "📱 Telegram: @{name}"
 
@@ -7100,8 +6866,7 @@ msgid "ℹ️ Ваш аккаунт уже подключён."
 msgstr "ℹ️ Your account is already connected."
 
 #: .\tgbot\bot\handlers.py:267
-#, fuzzy, python-brace-format
-#| msgid "Аккаунт:"
+#, python-brace-format
 msgid "Аккаунт: <b>{username}</b>"
 msgstr "Account: <b>{username}</b>"
 
@@ -7147,26 +6912,22 @@ msgid "📱 Telegram: @{tg}"
 msgstr "📱 Telegram: @{tg}"
 
 #: .\tgbot\bot\handlers.py:328
-#, fuzzy, python-brace-format
-#| msgid "Привязан"
+#, python-brace-format
 msgid "📅 Привязан: {at}"
 msgstr "📅 Linked: {at}"
 
 #: .\tgbot\bot\handlers.py:329
-#, fuzzy, python-brace-format
-#| msgid "Уведомления"
+#, python-brace-format
 msgid "Уведомления: {state}"
 msgstr "Notifications: {state}"
 
 #: .\tgbot\bot\handlers.py:330
-#, fuzzy, python-brace-format
-#| msgid "Логи уведомлений"
+#, python-brace-format
 msgid "📬 Всего уведомлений: {total}"
 msgstr "📬 Total notifications: {total}"
 
 #: .\tgbot\bot\handlers.py:331
-#, fuzzy, python-brace-format
-#| msgid "Отправлено:"
+#, python-brace-format
 msgid "✅ Отправлено: {sent}"
 msgstr "✅ Sent: {sent}"
 
@@ -7256,14 +7017,12 @@ msgid "📄 <b>Чек №{num}</b>"
 msgstr "📄 <b>Receipt #{num}</b>"
 
 #: .\tgbot\bot\receipt_handlers.py:78
-#, fuzzy, python-brace-format
-#| msgid "Статус:"
+#, python-brace-format
 msgid "Статус: <b>{status}</b>"
 msgstr "Status: <b>{status}</b>"
 
 #: .\tgbot\bot\receipt_handlers.py:80
-#, fuzzy, python-brace-format
-#| msgid "Количество часов"
+#, python-brace-format
 msgid "📦 Количество посылок: <b>{count}</b>"
 msgstr "📦 Parcels: <b>{count}</b>"
 
@@ -7278,15 +7037,13 @@ msgid "💰 Сумма к оплате: <b>{price} ₸</b>"
 msgstr "💰 Amount due: <b>{price} ₸</b>"
 
 #: .\tgbot\bot\receipt_handlers.py:85
-#, fuzzy, python-brace-format
-#| msgid "Пункт выдачи:"
+#, python-brace-format
 msgid "📍 Пункт выдачи: <b>{pickup}</b>"
 msgstr "📍 Pickup point: <b>{pickup}</b>"
 
 #: .\tgbot\bot\receipt_handlers.py:88 .\tgbot\bot\workers\notifications.py:388
 #: .\tgbot\bot\workers\reminders.py:113
-#, fuzzy, python-brace-format
-#| msgid "Время работы:"
+#, python-brace-format
 msgid "🕒 Время работы: <b>{hours}</b>"
 msgstr "🕒 Working hours: <b>{hours}</b>"
 
@@ -7315,10 +7072,8 @@ msgid "Китай (Отправлено)"
 msgstr "China (Shipped)"
 
 #: .\tgbot\bot\settings_handlers.py:42
-#, fuzzy
-#| msgid "Доставка из Китая в Казахстан"
 msgid "Таможня (Китай-Казахстан)"
-msgstr "Delivery from China to Kazakhstan"
+msgstr "Customs (China-Kazakhstan)"
 
 #: .\tgbot\bot\settings_handlers.py:53
 msgid "ℹ️ Доставка на ПВЗ — всегда ВКЛ"
@@ -7463,8 +7218,7 @@ msgid "💰 Общая стоимость: <b>{price} ₸</b>"
 msgstr "💰 Total cost: <b>{price} ₸</b>"
 
 #: .\tgbot\bot\workers\notifications.py:383
-#, fuzzy, python-brace-format
-#| msgid "Пункт выдачи:"
+#, python-brace-format
 msgid "📍 Пункт выдачи: <b>{address} ({name})</b>"
 msgstr "📍 Pickup point: <b>{address} ({name})</b>"
 
@@ -7473,16 +7227,13 @@ msgid "Отправлен со склада Китая"
 msgstr "Shipped from China warehouse"
 
 #: .\tgbot\bot\workers\notifications.py:440
-#, fuzzy
-#| msgid "📦 Статус обновлён: %(status)s"
 msgid "Статус обновлён"
-msgstr "📦 Status updated: %(status)s"
+msgstr "Status updated"
 
 #: .\tgbot\bot\workers\notifications.py:447
-#, fuzzy, python-brace-format
-#| msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
+#, python-brace-format
 msgid "📦 <b>Обновлено {count} трек-кодов:</b> {status}"
-msgstr "📦 Updated %(count)s tracking codes: %(status)s"
+msgstr "📦 <b>Updated {count} track codes:</b> {status}"
 
 #: .\tgbot\bot\workers\notifications.py:456
 #, python-brace-format
@@ -7494,8 +7245,7 @@ msgid "📦 <b>Напоминание</b>"
 msgstr "📦 <b>Reminder</b>"
 
 #: .\tgbot\bot\workers\reminders.py:108
-#, fuzzy, python-brace-format
-#| msgid "У вас нет доступа к этому пункту выдачи."
+#, python-brace-format
 msgid "У вас {n} посылок на пункте выдачи."
 msgstr "You have {n} parcels at the pickup point."
 
@@ -7504,8 +7254,7 @@ msgid "Пожалуйста, заберите их."
 msgstr "Please pick them up."
 
 #: .\tgbot\bot\workers\reminders.py:110
-#, fuzzy, python-brace-format
-#| msgid "Пункт выдачи:"
+#, python-brace-format
 msgid "📍 Пункт выдачи: <b>{name}</b>"
 msgstr "📍 Pickup point: <b>{name}</b>"
 
@@ -7530,10 +7279,8 @@ msgid "Уведомления активны"
 msgstr "Notifications active"
 
 #: .\tgbot\models.py:49
-#, fuzzy
-#| msgid "Telegram не привязан"
 msgid "Username бота при привязке"
-msgstr "Telegram not linked"
+msgstr "Bot username at link time"
 
 #: .\tgbot\models.py:50
 msgid "Нужен для разделения профилей между разными ботами (prod/test)."
