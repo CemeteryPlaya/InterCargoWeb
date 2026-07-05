@@ -199,3 +199,64 @@ class InventoryUpdateCellTests(InventoryBase):
     def test_storage_cells_untouched(self):
         self._upd('9')
         self.assertFalse(StorageCell.objects.filter(pickup_point=self.pp, cell_number='9').exists())
+
+
+class InventoryLegacyTests(InventoryBase):
+    def setUp(self):
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+
+    def _add(self, **payload):
+        payload.setdefault('session_id', self.session.id)
+        return self.c.post(reverse('inventory_add_legacy'),
+                           json.dumps(payload), content_type='application/json')
+
+    def test_legacy_generated_tracks(self):
+        resp = self._add(client_id=self.cli.id, track_count=3,
+                         total_weight='4.500', total_price='9000')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['qr_base64'].startswith('data:image/png'))
+        receipt = Receipt.objects.get(receipt_number=data['row']['receipt_number'])
+        self.assertEqual(receipt.status, 'accepted_pvz')
+        self.assertEqual(receipt.total_price, Decimal('9000'))
+        codes = [i.track_code.track_code for i in receipt.items.all()]
+        self.assertEqual(codes, ['INVCLI-1', 'INVCLI-2', 'INVCLI-3'])
+        weights = [i.track_code.weight for i in receipt.items.all()]
+        self.assertEqual(sum(weights), Decimal('4.500'))
+        track = receipt.items.first().track_code
+        self.assertEqual(track.status, 'ready')
+        self.assertTrue(track.is_accepted_pp)
+        self.assertEqual(track.delivery_pickup, self.pp)
+
+    def test_legacy_numbering_continues(self):
+        TrackCode.objects.create(track_code='INVCLI-5', status='ready', owner=self.cli)
+        resp = self._add(client_id=self.cli.id, track_count=1,
+                         total_weight='1.000', total_price='1000')
+        receipt = Receipt.objects.get(receipt_number=resp.json()['row']['receipt_number'])
+        self.assertEqual(receipt.items.first().track_code.track_code, 'INVCLI-6')
+
+    def test_legacy_manual_tracks_validated(self):
+        resp = self._add(client_id=self.cli.id, track_codes=['ПР123'],
+                         total_weight='1.000', total_price='1000')
+        self.assertEqual(resp.status_code, 400)
+
+    def test_legacy_manual_duplicate_track_rejected(self):
+        TrackCode.objects.create(track_code='DUP1', status='ready', owner=self.cli)
+        resp = self._add(client_id=self.cli.id, track_codes=['DUP1'],
+                         total_weight='1.000', total_price='1000')
+        self.assertEqual(resp.status_code, 400)
+
+    def test_legacy_new_client_created_unregistered(self):
+        resp = self._add(new_client={'username': 'newguy', 'phone': '777'},
+                         track_count=1, total_weight='1.000', total_price='500')
+        self.assertEqual(resp.status_code, 200)
+        user = User.objects.get(username='newguy')
+        self.assertFalse(user.userprofile.is_registered)
+        self.session.refresh_from_db()
+        self.assertIn(user.id, self.session.created_user_ids)
+
+    def test_legacy_scan_marked(self):
+        self._add(client_id=self.cli.id, track_count=1,
+                  total_weight='1.000', total_price='500')
+        self.assertTrue(self.session.scans.get().is_legacy)
