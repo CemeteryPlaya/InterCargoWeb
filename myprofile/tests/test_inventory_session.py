@@ -260,3 +260,65 @@ class InventoryLegacyTests(InventoryBase):
         self._add(client_id=self.cli.id, track_count=1,
                   total_weight='1.000', total_price='500')
         self.assertTrue(self.session.scans.get().is_legacy)
+
+
+class InventoryFinishTests(InventoryBase):
+    def setUp(self):
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+
+    def _scan_receipt(self, receipt, cell='1'):
+        InventoryScan.objects.create(session=self.session, receipt=receipt,
+                                     cell_number=cell, scanned_by=self.driver)
+
+    def _finish(self):
+        return self.c.post(reverse('inventory_session_finish'),
+                           {'session_id': self.session.id})
+
+    def test_finish_accepts_scanned_pending_acceptance(self):
+        receipt, tracks = self._make_receipt(status='delivered_pvz', is_accepted=False)
+        self._scan_receipt(receipt)
+        self._finish()
+        receipt.refresh_from_db(); tracks[0].refresh_from_db()
+        self.assertEqual(receipt.status, 'accepted_pvz')
+        self.assertTrue(receipt.is_accepted_pp)
+        self.assertTrue(tracks[0].is_accepted_pp)
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.auto_accepted_count, 1)
+
+    def test_finish_silently_issues_unscanned(self):
+        scanned, _t = self._make_receipt()
+        missing, mtracks = self._make_receipt(price='7000')
+        self._scan_receipt(scanned)
+        notif_before = Notification.objects.count()
+        self._finish()
+        missing.refresh_from_db(); mtracks[0].refresh_from_db()
+        self.assertEqual(missing.status, 'claimed')
+        self.assertTrue(missing.is_paid)
+        self.assertEqual(mtracks[0].status, 'claimed')
+        self.assertTrue(Extradition.objects.filter(user=self.cli).exists())
+        self.assertEqual(Notification.objects.count(), notif_before)  # тихо
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.status, 'completed')
+        self.assertEqual(self.session.auto_issued_count, 1)
+        self.assertEqual(self.session.auto_issued_amount, Decimal('7000'))
+        self.assertEqual(self.session.report['issued'][0]['receipt'], missing.receipt_number)
+
+    def test_finish_applies_cells(self):
+        StorageCell.objects.create(pickup_point=self.pp, cell_number='4', user=self.plain)
+        receipt, _t = self._make_receipt()
+        self._scan_receipt(receipt, cell='2')
+        self._finish()
+        cell = StorageCell.objects.get(pickup_point=self.pp, user=self.cli)
+        self.assertEqual(cell.cell_number, '2')
+        # у plain на ПВЗ ничего не отсканировано — ячейка удалена
+        self.assertFalse(StorageCell.objects.filter(user=self.plain).exists())
+
+    def test_finish_scanned_receipt_not_issued(self):
+        receipt, tracks = self._make_receipt()
+        self._scan_receipt(receipt)
+        self._finish()
+        receipt.refresh_from_db()
+        self.assertNotEqual(receipt.status, 'claimed')
+        tracks[0].refresh_from_db()
+        self.assertEqual(tracks[0].status, 'ready')

@@ -9,6 +9,7 @@
 import json
 import logging
 import re
+from collections import defaultdict
 from decimal import Decimal, ROUND_DOWN
 
 from django.contrib.auth.decorators import login_required
@@ -22,8 +23,12 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from myprofile.models import (
-    InventoryScan, InventorySession, Receipt, ReceiptItem, ReceiptQrCode,
-    StorageCell, TrackCode, _INVALID_TRACK_CODE_RE,
+    Extradition, ExtraditionPackage, InventoryScan, InventorySession,
+    Receipt, ReceiptItem, ReceiptQrCode, StorageCell, TrackCode,
+    _INVALID_TRACK_CODE_RE,
+)
+from myprofile.receipt_lifecycle import (
+    accept_at_pvz, issue_to_client, get_receipts_for_tracks, ReceiptLifecycleError,
 )
 from myprofile.scan_utils import find_by_scan
 from register.models import PickupPoint, UserProfile
@@ -367,6 +372,134 @@ def inventory_session_start(request):
 
 
 @login_required
+@require_POST
+def inventory_session_finish(request):
+    """Завершение инвентаризации: сверка фактического состояния с системой.
+
+    В одной транзакции: (1) отсканированные чеки, висевшие в приёмке, —
+    авто-приёмка; (2) числящиеся на ПВЗ, но не отсканированные — тихая
+    выдача (без уведомлений, даты = момент завершения); (3) ячейки
+    применяются по фактам сканов; (4) отчёт со счётчиками и суммой ₸.
+    """
+    if not _can_inventory(request.user):
+        return HttpResponseForbidden(_("У вас нет доступа."))
+    session = _get_active_session(request.POST.get('session_id'))
+    if session is None:
+        messages.error(request, _("Сессия не найдена или уже завершена."))
+        return redirect('warehouse')
+
+    pp = session.pickup_point
+    now = timezone.now()
+    today = timezone.localdate()
+
+    with transaction.atomic():
+        scans = list(session.scans.select_related('receipt', 'receipt__owner'))
+        scanned_ids = {s.receipt_id for s in scans}
+
+        # 1) авто-приёмка отсканированных чеков, висевших в приёмке
+        to_accept = [s.receipt for s in scans if s.receipt.status == 'delivered_pvz']
+        if to_accept:
+            try:
+                accept_at_pvz(to_accept, request.user)
+            except ReceiptLifecycleError as e:
+                logger.warning("inventory finish accept lifecycle: %s", e)
+                Receipt.objects.filter(id__in=[r.id for r in to_accept]).update(
+                    status='accepted_pvz', is_accepted_pp=True,
+                    accepted_pp_at=now, accepted_pp_by=request.user)
+        if scanned_ids:
+            scanned_track_ids = list(ReceiptItem.objects.filter(
+                receipt_id__in=scanned_ids, track_code__isnull=False,
+            ).values_list('track_code_id', flat=True))
+            TrackCode.objects.filter(
+                id__in=scanned_track_ids, status='ready', is_accepted_pp=False,
+            ).update(is_accepted_pp=True, accepted_pp_at=now, accepted_pp_by=request.user)
+
+        # 2) тихая выдача неотсканированных, числящихся на этом ПВЗ
+        expected_track_ids = list(TrackCode.objects.filter(
+            status='ready', delivery_pickup=pp).values_list('id', flat=True))
+        expected = list(get_receipts_for_tracks(expected_track_ids).select_related('owner'))
+        to_issue = [r for r in expected if r.id not in scanned_ids]
+        issued_amount = Decimal('0')
+        issued_report = []
+        if to_issue:
+            try:
+                issue_to_client(to_issue, request.user)
+            except ReceiptLifecycleError as e:
+                logger.warning("inventory finish issue lifecycle: %s", e)
+                Receipt.objects.filter(id__in=[r.id for r in to_issue]).update(
+                    status='claimed', is_paid=True, paid_at=now,
+                    is_claimed=True, claimed_at=now)
+            issue_track_ids = list(ReceiptItem.objects.filter(
+                receipt_id__in=[r.id for r in to_issue], track_code__isnull=False,
+                track_code__status='ready',
+            ).values_list('track_code_id', flat=True))
+            for track in TrackCode.objects.filter(id__in=issue_track_ids):
+                track.status = 'claimed'
+                track.update_date = today
+                track.set_status_date()
+                track.log_status_change(request.user)
+                track.save(skip_full_clean=True)
+            by_owner = defaultdict(list)
+            for r in to_issue:
+                issued_amount += r.total_price or Decimal('0')
+                issued_report.append({
+                    'receipt': r.receipt_number,
+                    'client': r.client_display_name,
+                    'amount': str(r.total_price or 0),
+                })
+                if r.owner_id:
+                    by_owner[r.owner_id].append(r)
+            for owner_id, receipts in by_owner.items():
+                package = ExtraditionPackage.objects.create(user_id=owner_id, is_issued=True)
+                package.receipts.set(receipts)
+                Extradition.objects.create(
+                    package=package, user_id=owner_id, issued_by=request.user,
+                    pickup_point=str(pp), confirmed=True)
+            # Тихая выдача: уведомления клиентам сознательно НЕ отправляются.
+
+        # 3) ячейки по фактам сканов (последний скан клиента побеждает)
+        owner_cells = {}
+        for scan in scans:
+            if scan.receipt.owner_id:
+                owner_cells[scan.receipt.owner_id] = scan.cell_number
+        StorageCell.objects.filter(pickup_point=pp).delete()
+        taken = set()
+        cells_report = []
+        for owner_id, num in owner_cells.items():
+            final = num
+            if final in taken:
+                i = 1
+                while str(i) in taken:
+                    i += 1
+                final = str(i)
+            StorageCell.objects.create(pickup_point=pp, cell_number=final, user_id=owner_id)
+            taken.add(final)
+            cells_report.append({'user_id': owner_id, 'cell': final})
+
+        # 4) отчёт и закрытие сессии
+        report = session.report or {}
+        report.update({
+            'accepted': [r.receipt_number for r in to_accept],
+            'issued': issued_report,
+            'issued_total': str(issued_amount),
+            'legacy': [s.receipt.receipt_number for s in scans if s.is_legacy],
+            'foreign': [s.receipt.receipt_number for s in scans if s.flag == 'foreign_pickup'],
+            'cells': cells_report,
+            'scanned_total': len(scans),
+        })
+        session.report = report
+        session.auto_accepted_count = len(to_accept)
+        session.auto_issued_count = len(to_issue)
+        session.auto_issued_amount = issued_amount
+        session.status = 'completed'
+        session.completed_at = now
+        session.save()
+
+    messages.success(request, _("Инвентаризация завершена."))
+    return redirect('inventory_session_report', session_id=session.id)
+
+
+@login_required
 def inventory_session_view(request, session_id):
     """Страница активной сессии: таблица сканов, камера, ручной ввод."""
     if not _can_inventory(request.user):
@@ -380,4 +513,18 @@ def inventory_session_view(request, session_id):
     return render(request, 'desktop/inventory_session.html', {
         'session': session,
         'rows': [_scan_row(s) for s in scans],
+    })
+
+
+@login_required
+def inventory_session_report(request, session_id):
+    """Печатный отчёт завершённой (или отменённой) сессии инвентаризации."""
+    if not _can_inventory(request.user):
+        return HttpResponseForbidden(_("У вас нет доступа."))
+    session = get_object_or_404(
+        InventorySession.objects.select_related('pickup_point'), id=session_id)
+    return render(request, 'desktop/inventory_report.html', {
+        'session': session,
+        'report': session.report or {},
+        'now': timezone.now(),
     })

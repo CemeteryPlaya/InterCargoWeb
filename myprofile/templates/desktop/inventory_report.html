@@ -1,0 +1,156 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Inter Cargo - Отчёт инвентаризации" %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 12px; color: #333; padding: 20px; }
+        .no-print { margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .header h1 { font-size: 18px; margin-bottom: 4px; }
+        .header p { font-size: 11px; color: #666; }
+        .summary { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-bottom: 15px; padding: 8px 12px; background: #f5f5f5; border-radius: 4px; font-size: 11px; }
+        h2 { font-size: 13px; margin: 16px 0 6px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { border: 1px solid #ccc; padding: 5px 8px; text-align: left; font-size: 11px; }
+        th { background: #e8e8e8; font-weight: 600; }
+        .total-row td { font-weight: 700; background: #f9f9f9; }
+        .muted { color: #888; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 10px; color: #999; border-top: 1px solid #ccc; padding-top: 8px; }
+        .btn-print { display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-print:hover { background: #1d4ed8; }
+        .btn-back { display: inline-flex; align-items: center; gap: 6px; background: #6b7280; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; text-decoration: none; }
+        .btn-back:hover { background: #4b5563; }
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 10px; font-size: 10px; }
+            th, td { font-size: 10px; padding: 3px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <a href="{% url 'warehouse' %}?pickup={{ session.pickup_point.id }}" class="btn-back">
+            {% trans "&larr; Назад на склад" %}
+        </a>
+        <button onclick="window.print()" class="btn-print" style="margin-left: 10px;">
+            {% trans "&#128424; Печать" %}
+        </button>
+    </div>
+
+    <div class="header">
+        <h1>{% trans "Отчёт об инвентаризации склада ПВЗ" %}</h1>
+        <p>{{ session.pickup_point }}</p>
+        <p>{% trans "Начало:" %} {{ session.started_at|date:"d.m.Y H:i" }}
+           {% if session.completed_at %} · {% trans "Завершение:" %} {{ session.completed_at|date:"d.m.Y H:i" }}{% endif %}
+           · {{ session.get_status_display }}
+           {% if session.created_by %} · {{ session.created_by.username }}{% endif %}</p>
+    </div>
+
+    <div class="summary">
+        <span>{% trans "Отсканировано чеков:" %} <strong>{{ report.scanned_total|default:0 }}</strong></span>
+        <span>{% trans "Авто-принято:" %} <strong>{{ session.auto_accepted_count }}</strong></span>
+        <span>{% trans "Тихо выдано:" %} <strong>{{ session.auto_issued_count }}</strong></span>
+        <span>{% trans "Сумма тихо выданного:" %} <strong>{{ session.auto_issued_amount }} ₸</strong></span>
+    </div>
+
+    {% if report.issued %}
+    <h2>{% trans "Автоматически выданные чеки (не найдены при инвентаризации)" %}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Чек" %}</th>
+                <th>{% trans "Клиент" %}</th>
+                <th>{% trans "Сумма (₸)" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in report.issued %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.receipt }}</td>
+                <td>{{ row.client }}</td>
+                <td>{{ row.amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3">{% trans "Итого" %}</td>
+                <td>{{ report.issued_total }} ₸</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if report.accepted %}
+    <h2>{% trans "Авто-принятые на склад (висели в приёмке)" %}</h2>
+    <table>
+        <tbody>
+            {% for num in report.accepted %}
+            <tr><td>{{ forloop.counter }}</td><td>{{ num }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if report.legacy %}
+    <h2>{% trans "Созданные вручную чеки (legacy-посылки)" %}</h2>
+    <table>
+        <tbody>
+            {% for num in report.legacy %}
+            <tr><td>{{ forloop.counter }}</td><td>{{ num }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if report.foreign %}
+    <h2>{% trans "Чеки, числящиеся на других ПВЗ" %}</h2>
+    <table>
+        <tbody>
+            {% for num in report.foreign %}
+            <tr><td>{{ forloop.counter }}</td><td>{{ num }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if report.anomalies %}
+    <h2>{% trans "Аномалии при сканировании" %}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Тип" %}</th>
+                <th>{% trans "Чек" %}</th>
+                <th>{% trans "Клиент" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in report.anomalies %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{% if a.kind == 'already_claimed' %}{% trans "Скан уже выданного чека" %}{% else %}{{ a.kind }}{% endif %}</td>
+                <td>{{ a.receipt }}</td>
+                <td>{{ a.client }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if not report.issued and not report.accepted and not report.legacy and not report.foreign and not report.anomalies %}
+    <p class="muted">{% trans "Расхождений не обнаружено." %}</p>
+    {% endif %}
+
+    <div class="footer">
+        <span>Inter Cargo · {% trans "Отчёт инвентаризации" %} #{{ session.id }}</span>
+        <span>{% trans "Сформировано:" %} {{ now|date:"d.m.Y H:i" }}</span>
+    </div>
+</body>
+</html>
