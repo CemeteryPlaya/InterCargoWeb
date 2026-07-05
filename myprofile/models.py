@@ -938,6 +938,75 @@ class RestructureSession(models.Model):
         return f"Реструктуризация {self.pickup_point} — {self.get_status_display()}"
 
 
+class InventorySession(models.Model):
+    """Сессия инвентаризации склада ПВЗ: сканирование QR чеков, сверка,
+    авто-приёмка и тихая выдача ненайденного при завершении."""
+    STATUS_CHOICES = [
+        ('active', _('Активная')),
+        ('completed', _('Завершена')),
+        ('cancelled', _('Отменена')),
+    ]
+    pickup_point = models.ForeignKey(
+        'register.PickupPoint', on_delete=models.PROTECT,
+        related_name='inventory_sessions', verbose_name=_("Пункт выдачи"))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name=_("Статус"))
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name=_("Создал"))
+    started_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Начало"))
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Завершено"))
+    report = models.JSONField(default=dict, blank=True, verbose_name=_("Отчёт"))
+    # Аккаунты, созданные в сессии (для отката при отмене)
+    created_user_ids = models.JSONField(default=list, blank=True, verbose_name=_("Созданные аккаунты"))
+    auto_accepted_count = models.PositiveIntegerField(default=0, verbose_name=_("Авто-принято чеков"))
+    auto_issued_count = models.PositiveIntegerField(default=0, verbose_name=_("Тихо выдано чеков"))
+    auto_issued_amount = models.DecimalField(
+        max_digits=12, decimal_places=0, default=0, verbose_name=_("Сумма тихо выданного (₸)"))
+
+    class Meta:
+        verbose_name = _("Сессия инвентаризации")
+        verbose_name_plural = _("Сессии инвентаризации")
+        ordering = ['-started_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['pickup_point'], condition=models.Q(status='active'),
+                name='uniq_active_inventory_per_pickup'),
+        ]
+
+    def __str__(self):
+        return f"Инвентаризация {self.pickup_point} — {self.get_status_display()}"
+
+
+class InventoryScan(models.Model):
+    """Строка сессии инвентаризации: отсканированный (или введённый вручную) чек."""
+    FLAG_CHOICES = [
+        ('', _('ОК')),
+        ('foreign_pickup', _('Чек другого ПВЗ')),
+    ]
+    session = models.ForeignKey(
+        InventorySession, on_delete=models.CASCADE,
+        related_name='scans', verbose_name=_("Сессия"))
+    receipt = models.ForeignKey(
+        Receipt, on_delete=models.CASCADE,
+        related_name='inventory_scans', verbose_name=_("Чек"))
+    cell_number = models.CharField(max_length=10, verbose_name=_("Номер ячейки"))
+    is_legacy = models.BooleanField(default=False, verbose_name=_("Введён вручную (legacy)"))
+    flag = models.CharField(max_length=20, blank=True, default='', choices=FLAG_CHOICES, verbose_name=_("Отметка"))
+    scanned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name=_("Кто сканировал"))
+    scanned_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Когда"))
+
+    class Meta:
+        verbose_name = _("Скан инвентаризации")
+        verbose_name_plural = _("Сканы инвентаризации")
+        ordering = ['scanned_at']
+        unique_together = [('session', 'receipt')]
+
+    def __str__(self):
+        return f"{self.receipt.receipt_number} → ячейка {self.cell_number}"
+
+
 class ClientRegistry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата создания"))
     registry_date = models.DateField(verbose_name=_("Дата реестра"))
