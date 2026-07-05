@@ -20,6 +20,13 @@ _REGISTRATION_PATTERNS = re.compile(
     re.IGNORECASE
 )
 
+# Уведомления мессенджеров (техподдержка, Di.Buyer) — все начинаются с 💬;
+# ключевые слова — подстраховка для трёх языков (ru/kk/en).
+_MESSENGER_PATTERNS = re.compile(
+    r'💬|поддержк|қолдау|support',
+    re.IGNORECASE
+)
+
 _PARCEL_PATTERNS = re.compile(
     r'📦|🚚|трек|посыл|ПВЗ|пакет|доставлен|выдан|отправлен|склад|чек|🧾|штрихкод|barcode|PKG',
     re.IGNORECASE
@@ -30,6 +37,8 @@ def _classify(message):
     """Классифицирует уведомление по тексту сообщения."""
     if _REGISTRATION_PATTERNS.search(message):
         return 'registration'
+    if _MESSENGER_PATTERNS.search(message):
+        return 'info'
     if _PARCEL_PATTERNS.search(message):
         return 'parcels'
     return 'parcels'
@@ -77,6 +86,8 @@ def mobile_notifications_view(request):
     parcels_unread = 0
     registration_notifs = []
     registration_unread = 0
+    info_notifs = []
+    info_unread = 0
 
     for n in all_notifs:
         cat = _classify(n.message)
@@ -84,6 +95,10 @@ def mobile_notifications_view(request):
             registration_notifs.append(n)
             if not n.is_read:
                 registration_unread += 1
+        elif cat == 'info':
+            info_notifs.append(n)
+            if not n.is_read:
+                info_unread += 1
         else:
             parcels_notifs.append(n)
             if not n.is_read:
@@ -92,6 +107,7 @@ def mobile_notifications_view(request):
     # Группировка по дате для чат-вида
     parcels_grouped = _group_by_date(parcels_notifs)
     registration_grouped = _group_by_date(registration_notifs) if is_hr else []
+    info_grouped = _group_by_date(info_notifs)
 
     # Telegram: показываем ссылку только если не привязан
     telegram_linked = is_telegram_linked(user)
@@ -150,12 +166,12 @@ def mobile_notifications_view(request):
             'icon': 'ri-information-line',
             'color': '#3b82f6',
             'bg': '#dbeafe',
-            'notifications': [],
-            'notifications_grouped': [],
-            'unread': 0,
-            'last_message': no_messages,
-            'last_date': None,
-            'enabled': False,
+            'notifications': info_notifs,
+            'notifications_grouped': info_grouped,
+            'unread': info_unread,
+            'last_message': info_notifs[0].message if info_notifs else no_messages,
+            'last_date': info_notifs[0].created_at if info_notifs else None,
+            'enabled': True,
         },
     ]
 

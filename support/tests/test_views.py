@@ -303,3 +303,68 @@ class MobileMessagesPageTests(SupportBase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'support-chat-open')
         self.assertContains(resp, 'Иван (cli)')
+
+
+class OperatorNotificationTargetsTests(SupportBase):
+    """Уведомления о новых обращениях получают все, кто видит inbox:
+    роль support, директор/главный администратор, superuser, матрица."""
+
+    def test_superuser_notified_on_queue_message(self):
+        c = self.login('cli')
+        c.post(reverse('support_my_send'), {'text': 'Вопрос'})
+        self.assertTrue(Notification.objects.filter(user=self.boss).exists())
+
+    def test_director_and_main_admin_notified(self):
+        director = User.objects.create_user(username='dir', password='p')
+        UserProfile.objects.create(
+            user=director, phone='4', pickup=self.pp,
+            role=UserProfile.ROLE_DIRECTOR)
+        main_admin = User.objects.create_user(username='madm', password='p')
+        UserProfile.objects.create(
+            user=main_admin, phone='5', pickup=self.pp,
+            role=UserProfile.ROLE_MAIN_ADMIN)
+        c = self.login('cli')
+        c.post(reverse('support_my_send'), {'text': 'Вопрос'})
+        self.assertTrue(Notification.objects.filter(user=director).exists())
+        self.assertTrue(Notification.objects.filter(user=main_admin).exists())
+
+    def test_assigned_chat_notifies_only_owner(self):
+        chat = SupportChat.objects.create(client=self.cli, assigned_to=self.op1)
+        c = self.login('cli')
+        c.post(reverse('support_my_send'), {'text': 'Ещё вопрос'})
+        self.assertTrue(Notification.objects.filter(user=self.op1).exists())
+        self.assertFalse(Notification.objects.filter(user=self.op2).exists())
+        self.assertFalse(Notification.objects.filter(user=self.boss).exists())
+
+
+class MessengerNotificationGroupingTests(SupportBase):
+    """Уведомления мессенджера (💬 / «Поддержка») группируются во вкладке
+    «Информация» на мобильной странице «Сообщения»."""
+
+    def _get_cat(self, resp, key):
+        return next(c for c in resp.context['categories'] if c['key'] == key)
+
+    def test_support_notification_goes_to_info_tab(self):
+        Notification.objects.create(
+            user=self.cli,
+            message='💬 Новое сообщение от техподдержки Inter Cargo. '
+                    'Откройте «Сообщения», чтобы ответить.')
+        Notification.objects.create(
+            user=self.cli, message='📦 Посылка PKG123 доставлена на склад')
+        c = self.login('cli')
+        resp = c.get(reverse('mobile_notifications'))
+        info = self._get_cat(resp, 'info')
+        parcels = self._get_cat(resp, 'parcels')
+        self.assertTrue(info['enabled'])
+        self.assertEqual(len(info['notifications']), 1)
+        self.assertIn('техподдержки', info['notifications'][0].message)
+        self.assertEqual(info['unread'], 1)
+        self.assertEqual(len(parcels['notifications']), 1)
+        self.assertIn('PKG123', parcels['notifications'][0].message)
+
+    def test_info_tab_empty_but_enabled_without_messenger_notifs(self):
+        c = self.login('cli')
+        resp = c.get(reverse('mobile_notifications'))
+        info = self._get_cat(resp, 'info')
+        self.assertTrue(info['enabled'])
+        self.assertEqual(info['notifications'], [])

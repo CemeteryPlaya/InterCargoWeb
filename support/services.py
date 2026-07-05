@@ -45,12 +45,19 @@ def is_support_privileged(user):
 
 
 def support_operators():
-    """Пользователи-операторы для уведомлений о новых обращениях в очереди."""
+    """Пользователи-операторы для уведомлений о новых обращениях в очереди.
+
+    Состав совпадает с доступом к inbox (`is_support_operator`): роли
+    support/director/main_admin, суперпользователи и явные права по матрице
+    (aspect='support') — иначе при отсутствии выделенного менеджера
+    тех.поддержки уведомления не получал бы никто."""
     User = get_user_model()
     matrix_ids = RolePermission.objects.filter(
         aspect='support', can_view=True).values_list('user_id', flat=True)
     return User.objects.filter(
-        Q(userprofile__role=UserProfile.ROLE_SUPPORT) | Q(id__in=list(matrix_ids)),
+        Q(userprofile__role__in=_OPERATOR_ROLES)
+        | Q(id__in=list(matrix_ids))
+        | Q(is_superuser=True),
         is_active=True,
     ).distinct()
 
