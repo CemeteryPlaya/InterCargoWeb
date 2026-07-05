@@ -26,8 +26,11 @@ def is_dibuyer_staff(user):
 
 
 def _disabled_for(user):
-    """True, если сервис выключен и пользователь не superuser."""
-    return not dibuyer_is_enabled() and not (user and user.is_superuser)
+    """True, если сервис выключен и пользователь не superuser и не сотрудник
+    Di.Buyer (сотрудники всегда видят кнопку входа и заходят в раздел)."""
+    if dibuyer_is_enabled():
+        return False
+    return not is_dibuyer_staff(user)
 
 
 def require_dibuyer_enabled(view_func):

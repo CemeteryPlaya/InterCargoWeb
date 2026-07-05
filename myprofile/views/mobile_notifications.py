@@ -10,6 +10,8 @@ from django.utils.translation import gettext as _
 from tgbot.services import is_telegram_linked, get_or_create_link_url
 from support.models import SupportChat, SupportMessage
 from support.services import is_support_operator
+from dibuyer.access import dibuyer_is_enabled, is_dibuyer_staff
+from dibuyer.models import BuyerOrder, DibuyerChat
 
 
 # Паттерны для классификации уведомлений
@@ -184,7 +186,7 @@ def mobile_notifications_view(request):
             'last_date': chat.last_message_at if chat else None,
         }
 
-    return render(request, 'mobile/mobile_notifications.html', {
+    context = {
         'categories': categories,
         'telegram_linked': telegram_linked,
         'telegram_link_url': telegram_link_url,
@@ -192,7 +194,106 @@ def mobile_notifications_view(request):
         'support_client': support_client,
         'support_queue': support_queue,
         'support_mine': support_mine,
-    })
+    }
+    context.update(_dibuyer_context(user))
+    return render(request, 'mobile/mobile_notifications.html', context)
+
+
+_DIBUYER_ACTIVE_STATUSES = (BuyerOrder.STATUS_NEW, BuyerOrder.STATUS_IN_PROGRESS)
+
+
+def _dibuyer_chat_row(chat, for_staff):
+    """Строка чата Di.Buyer для списка «Сообщения»."""
+    last = chat.messages.order_by('-id').first()
+    if for_staff:
+        title = chat.title_for_staff
+    elif chat.order_id:
+        title = _('Di.Buyer — заявка №%(n)s') % {'n': chat.order_id}
+    else:
+        title = 'Di.Buyer'
+    return {
+        'chat_id': chat.id,
+        'order_id': chat.order_id or '',
+        'title': title,
+        'unread': chat.staff_unread if for_staff else chat.client_unread,
+        'last_message': last.text if last else '',
+        'last_date': chat.last_message_at,
+    }
+
+
+def _dibuyer_order_row(order, for_staff):
+    """Строка активной заявки, по которой чат ещё не начат."""
+    if for_staff:
+        client = order.client.get_full_name() or order.client.username
+        title = f"№{order.pk} — {client}"
+    else:
+        title = _('Di.Buyer — заявка №%(n)s') % {'n': order.pk}
+    return {
+        'chat_id': '',
+        'order_id': order.pk,
+        'title': title,
+        'unread': 0,
+        'last_message': '',
+        'last_date': None,
+    }
+
+
+def _dibuyer_context(user):
+    """Чаты Di.Buyer для страницы «Сообщения».
+
+    Сотрудник Di.Buyer: общие чаты и ветки заявок с сообщениями + активные
+    заявки без начатого чата. Клиент (при включённом сервисе и наличии
+    заявок): общий чат Di.Buyer + ветки по своим заявкам.
+    """
+    staff_mode = is_dibuyer_staff(user)
+    ctx = {
+        'dibuyer_chat_staff': staff_mode,
+        'dibuyer_client_entry': None,
+        'dibuyer_client_orders': [],
+        'dibuyer_staff_rows': [],
+    }
+
+    if staff_mode:
+        chats = list(
+            DibuyerChat.objects.filter(last_message_at__isnull=False)
+            .select_related('client', 'order'))
+        rows = [_dibuyer_chat_row(c, for_staff=True) for c in chats]
+        chatted_orders = DibuyerChat.objects.filter(
+            order__isnull=False).values_list('order_id', flat=True)
+        pending = BuyerOrder.objects.filter(
+            status__in=_DIBUYER_ACTIVE_STATUSES,
+        ).exclude(pk__in=chatted_orders).select_related('client')
+        rows += [_dibuyer_order_row(o, for_staff=True) for o in pending]
+        ctx['dibuyer_staff_rows'] = rows
+        return ctx
+
+    if not dibuyer_is_enabled():
+        return ctx
+
+    my_orders = list(BuyerOrder.objects.filter(client=user).only('id', 'status'))
+    general = DibuyerChat.objects.filter(client=user, order__isnull=True).first()
+    if not my_orders and general is None:
+        return ctx
+
+    last = general.messages.order_by('-id').first() if general else None
+    ctx['dibuyer_client_entry'] = {
+        'unread': general.client_unread if general else 0,
+        'last_message': last.text if last else _('Вопросы по выкупу — напишите нам'),
+        'last_date': general.last_message_at if general else None,
+    }
+
+    order_chats = list(
+        DibuyerChat.objects.filter(
+            client=user, order__isnull=False, last_message_at__isnull=False)
+        .select_related('order'))
+    rows = [_dibuyer_chat_row(c, for_staff=False) for c in order_chats]
+    chatted = {c.order_id for c in order_chats}
+    rows += [
+        _dibuyer_order_row(o, for_staff=False) for o in my_orders
+        if o.status in _DIBUYER_ACTIVE_STATUSES and o.pk not in chatted
+    ]
+    ctx['dibuyer_client_orders'] = rows
+    return ctx
 
 
 def _support_chat_entry(chat):

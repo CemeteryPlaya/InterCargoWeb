@@ -60,3 +60,39 @@ def export_order_to_tracking(order, items_data, staff_user=None):
         order.save(update_fields=['tracking_exported', 'handled_by', 'updated_at'])
 
     return created
+
+
+# ---------------------------------------------------------------------------
+# Мессенджер Di.Buyer: получатели и уведомления (аналог support.services)
+# ---------------------------------------------------------------------------
+
+def dibuyer_staff_users():
+    """Активные сотрудники Di.Buyer (для уведомлений о сообщениях клиентов)."""
+    from django.contrib.auth import get_user_model
+    from django.db.models import Q
+    User = get_user_model()
+    return User.objects.filter(
+        Q(userprofile__is_dibuyer_staff=True) | Q(is_superuser=True),
+        is_active=True,
+    ).distinct()
+
+
+def notify_client_new_dibuyer_message(chat):
+    """Уведомляет клиента о новом сообщении Di.Buyer (in-app + webpush
+    через существующий фоновый воркер push-очереди)."""
+    from django.utils.translation import gettext as _
+    from myprofile.views.utils import notify_in_user_language
+    notify_in_user_language(chat.client, lambda: _(
+        "💬 Новое сообщение от Di.Buyer. Откройте «Сообщения», чтобы ответить."))
+
+
+def notify_staff_new_dibuyer_message(chat):
+    """Уведомляет сотрудников Di.Buyer о новом сообщении клиента."""
+    from django.utils.translation import gettext as _
+    from myprofile.views.utils import notify_in_user_language
+    name = chat.title_for_staff
+    for user in dibuyer_staff_users():
+        if user.id == chat.client_id:
+            continue
+        notify_in_user_language(user, lambda: _(
+            "💬 Di.Buyer: новое сообщение от клиента %(name)s") % {'name': name})

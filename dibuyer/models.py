@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import F
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -109,6 +111,115 @@ class BuyerOrder(models.Model):
 
     def __str__(self):
         return f"Заявка №{self.pk} ({self.client})"
+
+
+class DibuyerChat(models.Model):
+    """Чат клиента с администраторами Di.Buyer (аналог SupportChat).
+
+    Два вида чатов:
+    - общий чат с клиентом (``order`` IS NULL, один на клиента);
+    - ветка по конкретной заявке (``order`` задан, один чат на заявку).
+
+    Очереди/назначения операторов нет: все сотрудники Di.Buyer видят все чаты.
+    """
+    client = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='dibuyer_chats',
+        verbose_name=_("Клиент"))
+    order = models.OneToOneField(
+        BuyerOrder, null=True, blank=True, on_delete=models.CASCADE,
+        related_name='chat', verbose_name=_("Заявка"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создан"))
+    last_message_at = models.DateTimeField(
+        null=True, blank=True, db_index=True, verbose_name=_("Последнее сообщение"))
+    client_unread = models.PositiveIntegerField(
+        default=0, verbose_name=_("Непрочитано клиентом"))
+    staff_unread = models.PositiveIntegerField(
+        default=0, verbose_name=_("Непрочитано Di.Buyer"))
+
+    class Meta:
+        verbose_name = _("Чат Di.Buyer")
+        verbose_name_plural = _("Чаты Di.Buyer")
+        ordering = ['-last_message_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client'], condition=models.Q(order__isnull=True),
+                name='dibuyer_unique_general_chat_per_client'),
+        ]
+
+    @property
+    def client_name(self):
+        full = self.client.get_full_name()
+        return f"{full} ({self.client.username})" if full else self.client.username
+
+    @property
+    def title_for_staff(self):
+        """Имя чата на стороне Di.Buyer: клиент (+ № заявки для веток)."""
+        if self.order_id:
+            return f"№{self.order_id} — {self.client_name}"
+        return self.client_name
+
+    def post_message(self, sender, author_role, text):
+        """Единая точка добавления сообщения: создаёт DibuyerMessage и
+        атомарно (F-выражения) обновляет счётчики и last_message_at."""
+        msg = DibuyerMessage.objects.create(
+            chat=self, sender=sender, author_role=author_role, text=text,
+            is_read_by_client=(author_role != DibuyerMessage.ROLE_STAFF),
+            is_read_by_staff=(author_role != DibuyerMessage.ROLE_CLIENT),
+        )
+        updates = {'last_message_at': timezone.now()}
+        if author_role == DibuyerMessage.ROLE_CLIENT:
+            updates['staff_unread'] = F('staff_unread') + 1
+        elif author_role == DibuyerMessage.ROLE_STAFF:
+            updates['client_unread'] = F('client_unread') + 1
+        DibuyerChat.objects.filter(pk=self.pk).update(**updates)
+        self.refresh_from_db()
+        return msg
+
+    def mark_read_by_client(self):
+        self.messages.filter(is_read_by_client=False).update(is_read_by_client=True)
+        DibuyerChat.objects.filter(pk=self.pk).update(client_unread=0)
+        self.client_unread = 0
+
+    def mark_read_by_staff(self):
+        self.messages.filter(is_read_by_staff=False).update(is_read_by_staff=True)
+        DibuyerChat.objects.filter(pk=self.pk).update(staff_unread=0)
+        self.staff_unread = 0
+
+    def __str__(self):
+        return f"Чат Di.Buyer: {self.title_for_staff}"
+
+
+class DibuyerMessage(models.Model):
+    ROLE_CLIENT = 'client'
+    ROLE_STAFF = 'staff'
+    ROLE_CHOICES = [
+        (ROLE_CLIENT, _("Клиент")),
+        (ROLE_STAFF, _("Di.Buyer")),
+    ]
+
+    chat = models.ForeignKey(
+        DibuyerChat, on_delete=models.CASCADE, related_name='messages',
+        verbose_name=_("Чат"))
+    sender = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='dibuyer_messages', verbose_name=_("Отправитель"))
+    author_role = models.CharField(
+        max_length=10, choices=ROLE_CHOICES, verbose_name=_("Роль автора"))
+    text = models.TextField(verbose_name=_("Текст"))
+    created_at = models.DateTimeField(
+        auto_now_add=True, db_index=True, verbose_name=_("Отправлено"))
+    is_read_by_client = models.BooleanField(
+        default=False, verbose_name=_("Прочитано клиентом"))
+    is_read_by_staff = models.BooleanField(
+        default=False, verbose_name=_("Прочитано Di.Buyer"))
+
+    class Meta:
+        verbose_name = _("Сообщение Di.Buyer")
+        verbose_name_plural = _("Сообщения Di.Buyer")
+        ordering = ['id']
+
+    def __str__(self):
+        return f"[{self.get_author_role_display()}] {self.text[:40]}"
 
 
 class BuyerOrderItem(models.Model):
