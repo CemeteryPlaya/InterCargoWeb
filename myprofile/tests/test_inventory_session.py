@@ -75,3 +75,37 @@ class InventoryModelTests(InventoryBase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 InventoryScan.objects.create(session=s, receipt=receipt, cell_number='2')
+
+
+class InventoryAccessTests(InventoryBase):
+    def test_driver_can_start(self):
+        c = Client(); c.login(username='drv', password='p')
+        resp = c.post(reverse('inventory_session_start'), {})
+        s = InventorySession.objects.get(pickup_point=self.pp, status='active')
+        self.assertRedirects(resp, reverse('inventory_session_view', args=[s.id]))
+
+    def test_staff_can_start(self):
+        c = Client(); c.login(username='stf', password='p')
+        resp = c.post(reverse('inventory_session_start'), {})
+        self.assertEqual(resp.status_code, 302)
+
+    def test_plain_user_forbidden(self):
+        c = Client(); c.login(username='pln', password='p')
+        self.assertEqual(c.post(reverse('inventory_session_start'), {}).status_code, 403)
+
+    def test_start_redirects_to_existing_active(self):
+        s = self._session()
+        c = Client(); c.login(username='drv', password='p')
+        resp = c.post(reverse('inventory_session_start'), {})
+        self.assertRedirects(resp, reverse('inventory_session_view', args=[s.id]))
+        self.assertEqual(InventorySession.objects.filter(status='active').count(), 1)
+
+    def test_session_page_renders(self):
+        s = self._session()
+        c = Client(); c.login(username='drv', password='p')
+        self.assertEqual(c.get(reverse('inventory_session_view', args=[s.id])).status_code, 200)
+
+    def test_session_page_forbidden_for_plain(self):
+        s = self._session()
+        c = Client(); c.login(username='pln', password='p')
+        self.assertEqual(c.get(reverse('inventory_session_view', args=[s.id])).status_code, 403)

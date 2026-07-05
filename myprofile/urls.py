@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management, blocks, bulk_jobs
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management, blocks, bulk_jobs, inventory_session
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -84,6 +84,8 @@ urlpatterns = [
     path('warehouse/assign-cell/', warehouse.warehouse_assign_cell, name='warehouse_assign_cell'),
     path('warehouse/find-client/', warehouse.warehouse_find_client_by_receipt, name='warehouse_find_client_by_receipt'),
     path('warehouse/finish-restructure/', warehouse.finish_restructure, name='finish_restructure'),
+    path('warehouse/inventory-session/start/', inventory_session.inventory_session_start, name='inventory_session_start'),
+    path('warehouse/inventory-session/<int:session_id>/', inventory_session.inventory_session_view, name='inventory_session_view'),
     path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
     path('arrival-history/months/<int:year>/', arrival_history.arrival_history_months, name='arrival_history_months'),
     path('arrival-history/days/<int:year>/<int:month>/', arrival_history.arrival_history_days, name='arrival_history_days'),

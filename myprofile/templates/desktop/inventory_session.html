@@ -1,0 +1,101 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo — {% trans "Инвентаризация" %}: {{ session.pickup_point.address }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{% static 'scripts/scanNormalize.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'shared/header.html' %}
+
+    <div class="flex min-h-screen">
+        {% include 'mobile/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-6">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+                <h1 class="text-lg font-bold text-center">{% trans "Инвентаризация" %}</h1>
+            </div>
+
+            <div class="flex items-center gap-3 mb-6 flex-wrap">
+                <a href="{% url 'warehouse' %}" class="text-gray-500 hover:text-gray-700 transition">
+                    <i class="ri-arrow-left-line text-xl"></i>
+                </a>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        <i class="ri-qr-scan-2-line text-primary"></i> {% trans "Инвентаризация склада" %}
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-0.5">
+                        <i class="ri-map-pin-line mr-1"></i>{{ session.pickup_point.address }}{% if session.pickup_point.premise_name %} — {{ session.pickup_point.premise_name }}{% endif %}
+                        &nbsp;·&nbsp;
+                        <i class="ri-time-line mr-1"></i>{{ session.started_at|date:"d.m.Y H:i" }}
+                        &nbsp;·&nbsp;
+                        <span class="font-medium text-gray-700">{% trans "Отсканировано" %}: <span id="scan-count">{{ rows|length }}</span></span>
+                    </p>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="p-3 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Панель управления (кнопки подключаются к endpoint'ам в JS ниже) -->
+            <div id="inv-toolbar" class="flex flex-wrap gap-2 mb-4"></div>
+            <div id="qr-reader" class="hidden max-w-sm mx-auto mb-4 rounded-lg overflow-hidden"></div>
+
+            <!-- Таблица сканов -->
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 text-left">
+                            <th class="px-3 py-2">#</th>
+                            <th class="px-3 py-2">{% trans "Чек" %}</th>
+                            <th class="px-3 py-2">{% trans "Клиент" %}</th>
+                            <th class="px-3 py-2">{% trans "Треков" %}</th>
+                            <th class="px-3 py-2">{% trans "Вес (кг)" %}</th>
+                            <th class="px-3 py-2">{% trans "Сумма (₸)" %}</th>
+                            <th class="px-3 py-2">{% trans "Ячейка" %}</th>
+                            <th class="px-3 py-2">{% trans "Время" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inv-table-body"></tbody>
+                </table>
+                <div id="inv-empty" class="p-8 text-center text-gray-400">
+                    {% trans "Пока пусто — отсканируйте первый чек." %}
+                </div>
+            </div>
+
+            {{ rows|json_script:"initial-rows" }}
+            <script>
+                window.INVENTORY_SESSION_ID = {{ session.id }};
+            </script>
+        </main>
+    </div>
+</body>
+</html>
