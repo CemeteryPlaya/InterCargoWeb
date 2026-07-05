@@ -352,6 +352,28 @@ class InventoryCancelTests(InventoryBase):
         self.assertEqual(receipt.status, 'accepted_pvz')
         self.assertEqual(tracks[0].status, 'ready')
 
+    def test_report_page_renders(self):
+        s = self.session
+        s.status = 'completed'
+        s.report = {'issued': [{'receipt': 'IC-000001', 'client': 'x', 'amount': '100'}],
+                    'issued_total': '100', 'accepted': [], 'legacy': [],
+                    'foreign': [], 'cells': [], 'scanned_total': 0}
+        s.save()
+        resp = self.c.get(reverse('inventory_session_report', args=[s.id]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'IC-000001')
+
+    def test_report_forbidden_for_plain(self):
+        c = Client(); c.login(username='pln', password='p')
+        resp = c.get(reverse('inventory_session_report', args=[self.session.id]))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_completed_session_page_redirects_to_report(self):
+        self.session.status = 'completed'
+        self.session.save(update_fields=['status'])
+        resp = self.c.get(reverse('inventory_session_view', args=[self.session.id]))
+        self.assertRedirects(resp, reverse('inventory_session_report', args=[self.session.id]))
+
     def test_cancel_keeps_created_user_with_other_data(self):
         self.c.post(reverse('inventory_add_legacy'), json.dumps({
             'session_id': self.session.id,
