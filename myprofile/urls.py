@@ -86,6 +86,7 @@ urlpatterns = [
     path('warehouse/finish-restructure/', warehouse.finish_restructure, name='finish_restructure'),
     path('warehouse/inventory-session/start/', inventory_session.inventory_session_start, name='inventory_session_start'),
     path('warehouse/inventory-session/<int:session_id>/', inventory_session.inventory_session_view, name='inventory_session_view'),
+    path('warehouse/inventory-session/scan/', inventory_session.inventory_scan, name='inventory_scan'),
     path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
     path('arrival-history/months/<int:year>/', arrival_history.arrival_history_months, name='arrival_history_months'),
     path('arrival-history/days/<int:year>/<int:month>/', arrival_history.arrival_history_days, name='arrival_history_days'),

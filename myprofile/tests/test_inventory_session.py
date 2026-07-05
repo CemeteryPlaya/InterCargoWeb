@@ -109,3 +109,66 @@ class InventoryAccessTests(InventoryBase):
         s = self._session()
         c = Client(); c.login(username='pln', password='p')
         self.assertEqual(c.get(reverse('inventory_session_view', args=[s.id])).status_code, 403)
+
+
+class InventoryScanTests(InventoryBase):
+    def setUp(self):
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+
+    def _scan(self, code, **extra):
+        payload = {'session_id': self.session.id, 'code': code, **extra}
+        return self.c.post(reverse('inventory_scan'),
+                           json.dumps(payload), content_type='application/json')
+
+    def test_scan_ok_uses_existing_cell(self):
+        StorageCell.objects.create(pickup_point=self.pp, cell_number='7', user=self.cli)
+        receipt, _t = self._make_receipt()
+        resp = self._scan(receipt.receipt_number)
+        self.assertEqual(resp.status_code, 200)
+        row = resp.json()['row']
+        self.assertEqual(row['cell_number'], '7')
+        self.assertEqual(row['receipt_number'], receipt.receipt_number)
+
+    def test_scan_auto_next_free_cell(self):
+        StorageCell.objects.create(pickup_point=self.pp, cell_number='1', user=self.plain)
+        receipt, _t = self._make_receipt()
+        resp = self._scan(receipt.receipt_number)
+        self.assertEqual(resp.json()['row']['cell_number'], '2')
+
+    def test_scan_same_owner_reuses_session_cell(self):
+        r1, _ = self._make_receipt()
+        r2, _ = self._make_receipt()
+        self._scan(r1.receipt_number, cell_number='5')
+        resp = self._scan(r2.receipt_number)
+        self.assertEqual(resp.json()['row']['cell_number'], '5')
+
+    def test_scan_duplicate_409(self):
+        receipt, _t = self._make_receipt()
+        self._scan(receipt.receipt_number)
+        resp = self._scan(receipt.receipt_number)
+        self.assertEqual(resp.status_code, 409)
+        self.assertTrue(resp.json().get('duplicate'))
+
+    def test_scan_not_found_404(self):
+        self.assertEqual(self._scan('IC-999999').status_code, 404)
+
+    def test_scan_claimed_receipt_409_and_anomaly(self):
+        receipt, _t = self._make_receipt(status='claimed')
+        resp = self._scan(receipt.receipt_number)
+        self.assertEqual(resp.status_code, 409)
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.report['anomalies'][0]['kind'], 'already_claimed')
+
+    def test_scan_foreign_pickup_flagged(self):
+        receipt, _t = self._make_receipt(pickup=self.pp2)
+        resp = self._scan(receipt.receipt_number)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()['row']['flag'], 'foreign_pickup')
+
+    def test_scan_old_qr_resolves_via_registry(self):
+        receipt, _t = self._make_receipt()
+        ReceiptQrCode.objects.create(code='IC-OLD001', superseded_by=receipt)
+        resp = self._scan('IC-OLD001')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()['row']['receipt_number'], receipt.receipt_number)
