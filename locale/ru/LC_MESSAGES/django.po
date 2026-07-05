@@ -2094,7 +2094,7 @@ msgstr "Ошибка"
 
 #: .\mainview\templates\shared\header.html:8
 msgid "Загрузка..."
-msgstr "Загрузка месяцев..."
+msgstr "Загрузка..."
 
 #: .\mainview\templates\shared\header.html:9
 msgid "Переключить на светлую тему"
