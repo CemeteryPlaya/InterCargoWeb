@@ -39,7 +39,7 @@
                 </a>
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-800">
-                        <i class="ri-qr-scan-2-line text-primary"></i> {% trans "Инвентаризация склада" %}
+                        <i class="ri-qr-scan-2-line text-blue-600"></i> {% trans "Инвентаризация склада" %}
                     </h2>
                     <p class="text-sm text-gray-500 mt-0.5">
                         <i class="ri-map-pin-line mr-1"></i>{{ session.pickup_point.address }}{% if session.pickup_point.premise_name %} — {{ session.pickup_point.premise_name }}{% endif %}
@@ -65,9 +65,46 @@
             </div>
             {% endif %}
 
-            <!-- Панель управления (кнопки подключаются к endpoint'ам в JS ниже) -->
-            <div id="inv-toolbar" class="flex flex-wrap gap-2 mb-4"></div>
-            <div id="qr-reader" class="hidden max-w-sm mx-auto mb-4 rounded-lg overflow-hidden"></div>
+            <!-- Панель управления -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button type="button" id="btn-camera"
+                    class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                    <i class="ri-camera-line"></i> <span id="btn-camera-label">{% trans "Сканировать камерой" %}</span>
+                </button>
+                <button type="button" id="btn-manual-code"
+                    class="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm font-medium">
+                    <i class="ri-keyboard-line"></i> {% trans "Ввести код чека" %}
+                </button>
+                <button type="button" id="btn-add-legacy"
+                    class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium">
+                    <i class="ri-add-box-line"></i> {% trans "Добавить вручную (без QR)" %}
+                </button>
+                <span class="flex-1"></span>
+                <form method="post" action="{% url 'inventory_session_cancel' %}" class="inline"
+                      onsubmit="return confirm('{% trans "Отменить инвентаризацию? Все изменения будут откатаны, состояние останется как до начала." %}');">
+                    {% csrf_token %}
+                    <input type="hidden" name="session_id" value="{{ session.id }}">
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-medium">
+                        <i class="ri-close-circle-line"></i> {% trans "Отменить" %}
+                    </button>
+                </form>
+                <form method="post" action="{% url 'inventory_session_finish' %}" class="inline"
+                      onsubmit="return confirm('{% trans "Завершить инвентаризацию? Не отсканированные посылки будут автоматически выданы, отсканированные — приняты на склад." %}');">
+                    {% csrf_token %}
+                    <input type="hidden" name="session_id" value="{{ session.id }}">
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium">
+                        <i class="ri-check-double-line"></i> {% trans "Завершить инвентаризацию" %}
+                    </button>
+                </form>
+            </div>
+
+            <!-- Камера -->
+            <div id="qr-reader" class="hidden max-w-sm mx-auto mb-4 rounded-lg overflow-hidden shadow"></div>
+
+            <!-- Тост -->
+            <div id="inv-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium"></div>
 
             <!-- Таблица сканов -->
             <div class="bg-white rounded-lg shadow overflow-x-auto">
@@ -91,9 +128,365 @@
                 </div>
             </div>
 
+            <!-- Модалка: ручной ввод legacy -->
+            <div id="legacy-modal" class="hidden fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">{% trans "Добавить посылку без QR (legacy)" %}</h3>
+                        <button type="button" class="modal-close text-gray-400 hover:text-gray-600"><i class="ri-close-line text-xl"></i></button>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">{% trans "Логин клиента" %}</label>
+                            <input type="text" id="legacy-client" class="w-full border rounded-lg px-3 py-2 text-sm"
+                                   placeholder="{% trans "Логин существующего клиента" %}">
+                            <label class="inline-flex items-center gap-2 mt-2 text-sm text-gray-600">
+                                <input type="checkbox" id="legacy-new-client"> {% trans "Новый клиент (нет аккаунта)" %}
+                            </label>
+                        </div>
+                        <div id="legacy-new-fields" class="hidden grid grid-cols-2 gap-2">
+                            <input type="text" id="legacy-first-name" class="border rounded-lg px-3 py-2 text-sm" placeholder="{% trans "Имя" %}">
+                            <input type="text" id="legacy-last-name" class="border rounded-lg px-3 py-2 text-sm" placeholder="{% trans "Фамилия" %}">
+                            <input type="text" id="legacy-phone" class="border rounded-lg px-3 py-2 text-sm col-span-2" placeholder="{% trans "Телефон" %}">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">{% trans "Трек-коды (по одному в строке; можно сканером штрих-кодов)" %}</label>
+                            <textarea id="legacy-tracks" rows="3" class="w-full border rounded-lg px-3 py-2 text-sm font-mono"
+                                      placeholder="{% trans "Оставьте пустым — коды сгенерируются автоматически (ЛОГИН-1, ЛОГИН-2, …)" %}"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">{% trans "Кол-во трек-кодов" %}</label>
+                                <input type="number" id="legacy-count" min="1" class="w-full border rounded-lg px-3 py-2 text-sm" value="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">{% trans "Ячейка (пусто — авто)" %}</label>
+                                <input type="text" id="legacy-cell" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="{% trans "авто" %}">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">{% trans "Общий вес (кг)" %}</label>
+                                <input type="text" id="legacy-weight" inputmode="decimal" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="0.000">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">{% trans "Стоимость (₸)" %}</label>
+                                <input type="text" id="legacy-price" inputmode="numeric" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="0">
+                            </div>
+                        </div>
+                        <div id="legacy-error" class="hidden text-sm text-red-600"></div>
+                        <button type="button" id="legacy-submit"
+                            class="w-full bg-purple-600 text-white py-2.5 rounded-lg hover:bg-purple-700 transition text-sm font-medium">
+                            {% trans "Создать чек и добавить" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Модалка: QR созданного чека -->
+            <div id="qr-modal" class="hidden fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-6 text-center">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">{% trans "Чек создан" %}</h3>
+                    <p id="qr-modal-number" class="text-sm text-gray-500 mb-3 font-mono"></p>
+                    <div id="qr-modal-print">
+                        <img id="qr-modal-img" src="" alt="QR" class="mx-auto w-40 h-40">
+                        <p id="qr-modal-number-print" class="font-mono text-sm mt-1"></p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" id="qr-print"
+                            class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                            <i class="ri-printer-line"></i> {% trans "Печать" %}
+                        </button>
+                        <button type="button" class="modal-close flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition text-sm font-medium">
+                            {% trans "Закрыть" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Модалка: ручной ввод кода чека -->
+            <div id="code-modal" class="hidden fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-800">{% trans "Код чека" %}</h3>
+                        <button type="button" class="modal-close text-gray-400 hover:text-gray-600"><i class="ri-close-line text-xl"></i></button>
+                    </div>
+                    <input type="text" id="code-input" class="w-full border rounded-lg px-3 py-2 text-sm font-mono" placeholder="IC-000123" autocomplete="off">
+                    <button type="button" id="code-submit"
+                        class="w-full mt-3 bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-800 transition text-sm font-medium">
+                        {% trans "Добавить" %}
+                    </button>
+                </div>
+            </div>
+
             {{ rows|json_script:"initial-rows" }}
             <script>
-                window.INVENTORY_SESSION_ID = {{ session.id }};
+                (function () {
+                    var SESSION_ID = {{ session.id }};
+                    var SCAN_URL = "{% url 'inventory_scan' %}";
+                    var CELL_URL = "{% url 'inventory_scan_update_cell' %}";
+                    var LEGACY_URL = "{% url 'inventory_add_legacy' %}";
+
+                    var tbody = document.getElementById('inv-table-body');
+                    var emptyEl = document.getElementById('inv-empty');
+                    var countEl = document.getElementById('scan-count');
+                    var toastEl = document.getElementById('inv-toast');
+                    var rowCount = 0;
+                    var recentCodes = {};  // код → timestamp (кулдаун повторного скана)
+
+                    function getCsrf() {
+                        var el = document.querySelector('[name=csrfmiddlewaretoken]');
+                        return el ? el.value : '';
+                    }
+
+                    function toast(text, kind) {
+                        toastEl.textContent = text;
+                        toastEl.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ' +
+                            (kind === 'ok' ? 'bg-green-600 text-white' :
+                             kind === 'warn' ? 'bg-yellow-500 text-white' : 'bg-red-600 text-white');
+                        clearTimeout(toastEl._t);
+                        toastEl._t = setTimeout(function () { toastEl.classList.add('hidden'); }, 3500);
+                    }
+
+                    function beep() {
+                        try {
+                            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            var osc = ctx.createOscillator();
+                            osc.frequency.value = 880;
+                            osc.connect(ctx.destination);
+                            osc.start();
+                            setTimeout(function () { osc.stop(); ctx.close(); }, 120);
+                        } catch (e) { /* без звука */ }
+                        if (navigator.vibrate) navigator.vibrate(80);
+                    }
+
+                    function addRow(row, prepend) {
+                        rowCount += 1;
+                        emptyEl.classList.add('hidden');
+                        var tr = document.createElement('tr');
+                        tr.className = 'border-t hover:bg-gray-50';
+                        tr.dataset.scanId = row.scan_id;
+                        var badges = '';
+                        if (row.is_legacy) badges += ' <span class="ml-1 px-1.5 py-0.5 rounded text-xs bg-purple-100 text-purple-700">legacy</span>';
+                        if (row.flag === 'foreign_pickup') badges += ' <span class="ml-1 px-1.5 py-0.5 rounded text-xs bg-orange-100 text-orange-700">{% trans "чужой ПВЗ" %}</span>';
+                        tr.innerHTML =
+                            '<td class="px-3 py-2 text-gray-400 row-num"></td>' +
+                            '<td class="px-3 py-2 font-mono font-medium">' + row.receipt_number + badges + '</td>' +
+                            '<td class="px-3 py-2"></td>' +
+                            '<td class="px-3 py-2">' + row.track_count + '</td>' +
+                            '<td class="px-3 py-2">' + Number(row.total_weight).toFixed(3) + '</td>' +
+                            '<td class="px-3 py-2">' + Number(row.total_price).toFixed(0) + '</td>' +
+                            '<td class="px-3 py-2"><input type="text" value="' + row.cell_number + '" ' +
+                                'class="cell-input w-16 border rounded px-2 py-1 text-sm text-center"></td>' +
+                            '<td class="px-3 py-2 text-gray-400">' + row.scanned_at + '</td>';
+                        tr.children[2].textContent = row.client;
+                        if (prepend && tbody.firstChild) tbody.insertBefore(tr, tbody.firstChild);
+                        else tbody.appendChild(tr);
+                        renumber();
+                        countEl.textContent = rowCount;
+                    }
+
+                    function renumber() {
+                        var rows = tbody.querySelectorAll('tr');
+                        for (var i = 0; i < rows.length; i++) {
+                            rows[i].querySelector('.row-num').textContent = rows.length - i;
+                        }
+                    }
+
+                    // Инициализация из существующих сканов (продолжение сессии)
+                    var initial = JSON.parse(document.getElementById('initial-rows').textContent || '[]');
+                    initial.forEach(function (r) { addRow(r, true); });
+
+                    // ── отправка кода ──
+                    function submitCode(code, cellNumber) {
+                        var body = { session_id: SESSION_ID, code: code };
+                        if (cellNumber) body.cell_number = cellNumber;
+                        return fetch(SCAN_URL, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                            body: JSON.stringify(body)
+                        }).then(function (res) {
+                            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+                        }).then(function (r) {
+                            if (r.ok) {
+                                addRow(r.data.row, true);
+                                beep();
+                                if (r.data.warning) toast(r.data.warning, 'warn');
+                                else toast(r.data.row.receipt_number + ' → ' + r.data.row.cell_number, 'ok');
+                            } else {
+                                toast(r.data.error || '{% trans "Ошибка" %}', r.data.duplicate ? 'warn' : 'err');
+                            }
+                        }).catch(function () {
+                            toast('{% trans "Нет связи с сервером" %}', 'err');
+                        });
+                    }
+
+                    // ── камера ──
+                    var html5QrCode = null;
+                    var scannerActive = false;
+                    var readerEl = document.getElementById('qr-reader');
+                    var btnCamera = document.getElementById('btn-camera');
+                    var btnCameraLabel = document.getElementById('btn-camera-label');
+
+                    function onScanSuccess(decodedText) {
+                        var code = ScanNormalize.normalize(decodedText);
+                        var now = Date.now();
+                        if (recentCodes[code] && now - recentCodes[code] < 3000) return;
+                        recentCodes[code] = now;
+                        submitCode(code);
+                    }
+
+                    btnCamera.addEventListener('click', function () {
+                        if (scannerActive) {
+                            html5QrCode.stop().then(function () {
+                                html5QrCode.clear();
+                            }).catch(function () {});
+                            scannerActive = false;
+                            readerEl.classList.add('hidden');
+                            btnCameraLabel.textContent = '{% trans "Сканировать камерой" %}';
+                            return;
+                        }
+                        readerEl.classList.remove('hidden');
+                        html5QrCode = new Html5Qrcode('qr-reader');
+                        html5QrCode.start(
+                            { facingMode: 'environment' },
+                            { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                            onScanSuccess,
+                            function () {}
+                        ).then(function () {
+                            scannerActive = true;
+                            btnCameraLabel.textContent = '{% trans "Остановить камеру" %}';
+                        }).catch(function () {
+                            readerEl.classList.add('hidden');
+                            toast('{% trans "Камера недоступна. Используйте ручной ввод." %}', 'err');
+                        });
+                    });
+
+                    // ── смена ячейки ──
+                    tbody.addEventListener('change', function (e) {
+                        var input = e.target.closest('.cell-input');
+                        if (!input) return;
+                        var tr = input.closest('tr');
+                        fetch(CELL_URL, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                            body: JSON.stringify({ scan_id: tr.dataset.scanId, cell_number: input.value.trim() })
+                        }).then(function (res) {
+                            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+                        }).then(function (r) {
+                            if (r.ok) {
+                                input.value = r.data.cell_number;
+                                input.classList.add('border-green-400');
+                                setTimeout(function () { input.classList.remove('border-green-400'); }, 1200);
+                            } else {
+                                toast(r.data.error || '{% trans "Ошибка" %}', 'err');
+                                input.classList.add('border-red-400');
+                            }
+                        });
+                    });
+
+                    // ── модалки ──
+                    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+                    function closeModals() {
+                        ['legacy-modal', 'qr-modal', 'code-modal'].forEach(function (id) {
+                            document.getElementById(id).classList.add('hidden');
+                        });
+                    }
+                    document.querySelectorAll('.modal-close').forEach(function (btn) {
+                        btn.addEventListener('click', closeModals);
+                    });
+
+                    // ручной ввод кода чека
+                    document.getElementById('btn-manual-code').addEventListener('click', function () {
+                        openModal('code-modal');
+                        document.getElementById('code-input').focus();
+                    });
+                    function submitManualCode() {
+                        var input = document.getElementById('code-input');
+                        var code = input.value.trim();
+                        if (!code) return;
+                        submitCode(ScanNormalize.normalize(code));
+                        input.value = '';
+                        closeModals();
+                    }
+                    document.getElementById('code-submit').addEventListener('click', submitManualCode);
+                    document.getElementById('code-input').addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') { e.preventDefault(); submitManualCode(); }
+                    });
+
+                    // legacy-модалка
+                    document.getElementById('btn-add-legacy').addEventListener('click', function () {
+                        openModal('legacy-modal');
+                        document.getElementById('legacy-client').focus();
+                    });
+                    document.getElementById('legacy-new-client').addEventListener('change', function () {
+                        document.getElementById('legacy-new-fields').classList.toggle('hidden', !this.checked);
+                    });
+                    document.getElementById('legacy-submit').addEventListener('click', function () {
+                        var errEl = document.getElementById('legacy-error');
+                        errEl.classList.add('hidden');
+                        var username = document.getElementById('legacy-client').value.trim();
+                        var isNew = document.getElementById('legacy-new-client').checked;
+                        var tracks = document.getElementById('legacy-tracks').value
+                            .split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+                        var payload = {
+                            session_id: SESSION_ID,
+                            track_codes: tracks,
+                            track_count: parseInt(document.getElementById('legacy-count').value || '0', 10),
+                            total_weight: document.getElementById('legacy-weight').value.trim().replace(',', '.'),
+                            total_price: document.getElementById('legacy-price').value.trim(),
+                            cell_number: document.getElementById('legacy-cell').value.trim()
+                        };
+                        if (isNew) {
+                            payload.new_client = {
+                                username: username,
+                                first_name: document.getElementById('legacy-first-name').value.trim(),
+                                last_name: document.getElementById('legacy-last-name').value.trim(),
+                                phone: document.getElementById('legacy-phone').value.trim()
+                            };
+                        } else {
+                            payload.client_username = username;
+                        }
+                        fetch(LEGACY_URL, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                            body: JSON.stringify(payload)
+                        }).then(function (res) {
+                            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+                        }).then(function (r) {
+                            if (!r.ok) {
+                                errEl.textContent = r.data.error || '{% trans "Ошибка" %}';
+                                errEl.classList.remove('hidden');
+                                return;
+                            }
+                            addRow(r.data.row, true);
+                            beep();
+                            closeModals();
+                            // показать QR для печати/наклейки
+                            document.getElementById('qr-modal-img').src = r.data.qr_base64;
+                            document.getElementById('qr-modal-number').textContent = r.data.row.receipt_number;
+                            document.getElementById('qr-modal-number-print').textContent = r.data.row.receipt_number;
+                            openModal('qr-modal');
+                        }).catch(function () {
+                            errEl.textContent = '{% trans "Нет связи с сервером" %}';
+                            errEl.classList.remove('hidden');
+                        });
+                    });
+
+                    // печать QR
+                    document.getElementById('qr-print').addEventListener('click', function () {
+                        var img = document.getElementById('qr-modal-img').src;
+                        var num = document.getElementById('qr-modal-number').textContent;
+                        var w = window.open('', '_blank', 'width=340,height=420');
+                        w.document.write('<html><head><title>' + num + '</title></head>' +
+                            '<body style="text-align:center;font-family:monospace">' +
+                            '<img src="' + img + '" style="width:220px;height:220px"><p>' + num + '</p>' +
+                            '<scr' + 'ipt>window.onload=function(){window.print();window.close();}</scr' + 'ipt>' +
+                            '</body></html>');
+                        w.document.close();
+                    });
+                })();
             </script>
         </main>
     </div>

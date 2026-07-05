@@ -79,6 +79,21 @@
                         class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
                         <i class="ri-file-list-3-line"></i> {% trans "Инвентаризация склада" %}
                     </a>
+                    {% if active_inventory %}
+                    <a href="{% url 'inventory_session_view' active_inventory.id %}"
+                        class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium animate-pulse">
+                        <i class="ri-qr-scan-2-line"></i> {% trans "Продолжить инвентаризацию" %}
+                    </a>
+                    {% else %}
+                    <form method="post" action="{% url 'inventory_session_start' %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="pickup_id" value="{{ pickup_point.id }}">
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                            <i class="ri-qr-scan-2-line"></i> {% trans "Инвентаризация (сканирование)" %}
+                        </button>
+                    </form>
+                    {% endif %}
                     {% if not active_restructure %}
                     <form method="post" action="{% url 'warehouse_restructure' %}" class="inline">
                         {% csrf_token %}

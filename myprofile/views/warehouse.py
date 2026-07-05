@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 from myprofile.models import (
     TrackCode, StorageCell, Notification,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
-    RestructureSession,
+    RestructureSession, InventorySession,
 )
 
 from register.models import UserProfile, PickupPoint
@@ -178,6 +178,11 @@ def warehouse_view(request):
         pickup_point=pickup_point, status='active'
     ).exists()
 
+    # Активная сессия инвентаризации (сканирование QR)
+    active_inventory = InventorySession.objects.filter(
+        pickup_point=pickup_point, status='active'
+    ).first()
+
     return render(request, "desktop/warehouse.html", {
         'pickup_point': pickup_point,
         'cells': cells_data,
@@ -185,6 +190,7 @@ def warehouse_view(request):
         'all_pickups': PickupPoint.objects.filter(is_active=True) if user_profile.is_staff else None,
         'hide_description': is_pp_worker_only,
         'active_restructure': active_restructure,
+        'active_inventory': active_inventory,
     })
 
 

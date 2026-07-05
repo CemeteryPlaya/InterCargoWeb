@@ -256,6 +256,18 @@ class InventoryLegacyTests(InventoryBase):
         self.session.refresh_from_db()
         self.assertIn(user.id, self.session.created_user_ids)
 
+    def test_legacy_client_by_username(self):
+        resp = self._add(client_username='invcli', track_count=1,
+                         total_weight='1.000', total_price='500')
+        self.assertEqual(resp.status_code, 200)
+        receipt = Receipt.objects.get(receipt_number=resp.json()['row']['receipt_number'])
+        self.assertEqual(receipt.owner, self.cli)
+
+    def test_legacy_unknown_username_404(self):
+        resp = self._add(client_username='nosuch', track_count=1,
+                         total_weight='1.000', total_price='500')
+        self.assertEqual(resp.status_code, 404)
+
     def test_legacy_scan_marked(self):
         self._add(client_id=self.cli.id, track_count=1,
                   total_weight='1.000', total_price='500')
@@ -322,6 +334,20 @@ class InventoryFinishTests(InventoryBase):
         self.assertNotEqual(receipt.status, 'claimed')
         tracks[0].refresh_from_db()
         self.assertEqual(tracks[0].status, 'ready')
+
+
+class InventoryWarehouseEntryTests(InventoryBase):
+    def test_warehouse_shows_continue_link_for_active_session(self):
+        s = self._session()
+        c = Client(); c.login(username='stf', password='p')
+        resp = c.get(reverse('warehouse'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, reverse('inventory_session_view', args=[s.id]))
+
+    def test_warehouse_shows_start_button_without_session(self):
+        c = Client(); c.login(username='stf', password='p')
+        resp = c.get(reverse('warehouse'))
+        self.assertContains(resp, reverse('inventory_session_start'))
 
 
 class InventoryCancelTests(InventoryBase):

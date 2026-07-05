@@ -246,6 +246,10 @@ def inventory_add_legacy(request):
         owner = User.objects.filter(id=data['client_id']).first()
         if owner is None:
             return JsonResponse({'error': _('Клиент не найден.')}, status=404)
+    elif data.get('client_username'):
+        owner = User.objects.filter(username__iexact=str(data['client_username']).strip()).first()
+        if owner is None:
+            return JsonResponse({'error': _('Клиент %(u)s не найден. Отметьте «Новый клиент», чтобы создать аккаунт.') % {'u': data['client_username']}}, status=404)
     elif data.get('new_client'):
         nc = data['new_client']
         username = str(nc.get('username') or '').strip()
