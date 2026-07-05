@@ -190,6 +190,28 @@ def inventory_scan(request):
 
 @login_required
 @require_POST
+def inventory_scan_update_cell(request):
+    """AJAX: смена номера ячейки строки сессии (StorageCell не трогаем)."""
+    if not _can_inventory(request.user):
+        return JsonResponse({'error': _('Нет доступа.')}, status=403)
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': _('Неверный формат данных.')}, status=400)
+    cell_number = str(data.get('cell_number') or '').strip()
+    if not _CELL_RE.match(cell_number):
+        return JsonResponse({'error': _('Номер ячейки должен быть числом (например: 1, 2.1, 0).')}, status=400)
+    scan = InventoryScan.objects.filter(
+        id=data.get('scan_id'), session__status='active').first()
+    if scan is None:
+        return JsonResponse({'error': _('Строка не найдена или сессия завершена.')}, status=404)
+    scan.cell_number = cell_number
+    scan.save(update_fields=['cell_number'])
+    return JsonResponse({'ok': True, 'cell_number': cell_number})
+
+
+@login_required
+@require_POST
 def inventory_session_start(request):
     """Создаёт активную сессию инвентаризации ПВЗ (или ведёт в существующую)."""
     if not _can_inventory(request.user):

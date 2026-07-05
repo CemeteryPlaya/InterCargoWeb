@@ -172,3 +172,30 @@ class InventoryScanTests(InventoryBase):
         resp = self._scan('IC-OLD001')
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json()['row']['receipt_number'], receipt.receipt_number)
+
+
+class InventoryUpdateCellTests(InventoryBase):
+    def setUp(self):
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+        receipt, _t = self._make_receipt()
+        self.scan = InventoryScan.objects.create(
+            session=self.session, receipt=receipt, cell_number='1')
+
+    def _upd(self, cell):
+        return self.c.post(reverse('inventory_scan_update_cell'),
+                           json.dumps({'scan_id': self.scan.id, 'cell_number': cell}),
+                           content_type='application/json')
+
+    def test_update_ok(self):
+        resp = self._upd('3.2')
+        self.assertEqual(resp.status_code, 200)
+        self.scan.refresh_from_db()
+        self.assertEqual(self.scan.cell_number, '3.2')
+
+    def test_bad_format_400(self):
+        self.assertEqual(self._upd('abc').status_code, 400)
+
+    def test_storage_cells_untouched(self):
+        self._upd('9')
+        self.assertFalse(StorageCell.objects.filter(pickup_point=self.pp, cell_number='9').exists())
