@@ -99,6 +99,7 @@ urlpatterns = [
     path('pp-acceptance/<int:pickup_id>/<str:date_str>/', pp_acceptance.pp_acceptance_detail_view, name='pp_acceptance_detail'),
     path('pp-acceptance/accept/', pp_acceptance.accept_delivery, name='accept_delivery'),
     path('pp-acceptance/receipts/', pp_acceptance.get_acceptance_receipts, name='get_acceptance_receipts'),
+    path('pp-acceptance/resolve-qr/', pp_acceptance.resolve_receipt_qr, name='resolve_receipt_qr'),
     path('pp-acceptance/finish/', pp_acceptance.finish_acceptance_session, name='finish_acceptance_session'),
     path('attention/', pp_acceptance.attention_required_view, name='attention_required'),
     path('attention/resolve/', pp_acceptance.resolve_attention, name='resolve_attention'),

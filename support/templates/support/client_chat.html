@@ -1,0 +1,82 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Inter Cargo — Чат с поддержкой" %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'shared/header.html' %}
+
+    <div class="flex min-h-screen">
+        {% include 'mobile/sidebar.html' %}
+
+        <main class="flex-1 p-4 md:p-6">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-11 h-11 rounded-full bg-primary bg-opacity-10 flex items-center justify-center">
+                        <i class="ri-customer-service-2-line text-primary text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">{% trans "Чат с поддержкой" %}</h2>
+                        <p class="text-xs text-gray-500">{% trans "Обычно отвечаем в рабочее время" %}</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow border border-gray-200 flex flex-col"
+                     style="height: calc(100vh - 220px); min-height: 420px;">
+                    <!-- Лента сообщений -->
+                    <div id="support-messages" class="flex-1 overflow-y-auto px-4 py-3">
+                        <div id="support-empty" class="flex flex-col items-center justify-center h-full text-center text-gray-400">
+                            <i class="ri-customer-service-2-line text-5xl mb-3 text-gray-300"></i>
+                            <p class="font-medium text-gray-500">{% trans "Задайте вопрос — мы на связи" %}</p>
+                            <p class="text-xs mt-1">{% trans "Напишите сообщение, и оператор ответит вам" %}</p>
+                        </div>
+                    </div>
+
+                    <!-- Ввод -->
+                    <div class="border-t border-gray-200 p-3">
+                        <form id="support-send-form" class="flex items-end gap-2">
+                            <textarea id="support-input" rows="1" maxlength="4000"
+                                class="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm resize-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="{% trans "Напишите сообщение..." %}"></textarea>
+                            <button type="submit" id="support-send-btn"
+                                class="w-11 h-11 flex items-center justify-center rounded-full bg-primary text-white hover:bg-red-600 transition flex-shrink-0 disabled:opacity-50">
+                                <i class="ri-send-plane-2-fill text-lg"></i>
+                            </button>
+                        </form>
+                        <p id="support-error" class="hidden text-xs text-red-500 mt-1"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="support-config" class="hidden"
+         data-messages-url="{% url 'support_my_messages' %}"
+         data-send-url="{% url 'support_my_send' %}"
+         data-read-url="{% url 'support_my_read' %}"
+         data-csrf="{{ csrf_token }}"
+         data-label-support="{% trans 'Техподдержка' %}"
+         data-label-error="{% trans 'Не удалось отправить сообщение. Попробуйте ещё раз.' %}"></div>
+
+    {% include 'shared/footer.html' %}
+    <script src="{% static 'scripts/supportChat.js' %}?v={{ APP_VERSION }}"></script>
+</body>
+
+</html>

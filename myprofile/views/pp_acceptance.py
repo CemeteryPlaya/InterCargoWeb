@@ -9,7 +9,8 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 import json
 import logging
-from myprofile.models import TrackCode, ReceiptItem, StorageCell, Receipt
+from myprofile.models import TrackCode, ReceiptItem, StorageCell, Receipt, ReceiptQrCode
+from myprofile.scan_utils import find_by_scan, scan_code_candidates
 from myprofile.views.utils import bulk_get_or_create_storage_cells
 from myprofile.receipt_lifecycle import (
     accept_at_pvz, get_receipts_for_tracks, ReceiptLifecycleError,
@@ -231,6 +232,65 @@ def get_acceptance_receipts(request):
         })
 
     return JsonResponse({'clients': result})
+
+
+@login_required
+def resolve_receipt_qr(request):
+    """AJAX: справка по отсканированному QR-коду чека через реестр QR-кодов.
+
+    Отвечает, что представляет собой код: актуальный чек (и его состояние),
+    заменённый при объединении чеков (superseded), архивный (чек удалён)
+    или неизвестный системе. Ввод нормализуется (регистр, раскладка,
+    AIM-префикс сканера).
+    """
+    if not _can_accept(request.user):
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
+
+    raw = request.GET.get('code', '')
+    candidates = scan_code_candidates(raw)
+    if not candidates:
+        return JsonResponse({'status': 'unknown', 'normalized': ''})
+
+    receipt = find_by_scan(Receipt.objects.select_related('owner'), 'receipt_number', raw)
+    if receipt is not None:
+        tracks = [
+            item.track_code
+            for item in receipt.items.select_related('track_code__delivery_pickup')
+            if item.track_code
+        ]
+        dates = sorted({
+            t.delivered_date.strftime('%d.%m.%Y') for t in tracks if t.delivered_date
+        })
+        pickups = sorted({str(t.delivery_pickup) for t in tracks if t.delivery_pickup_id})
+        return JsonResponse({
+            'status': 'found',
+            'receipt_number': receipt.receipt_number,
+            'owner': receipt.owner.username if receipt.owner else '',
+            'owner_full_name': receipt.owner.get_full_name() if receipt.owner else '',
+            'pickup_point': receipt.pickup_point or (pickups[0] if pickups else ''),
+            'delivered_dates': dates,
+            'is_accepted_pp': bool(receipt.is_accepted_pp),
+            'is_claimed': bool(receipt.is_claimed),
+        })
+
+    entry = find_by_scan(
+        ReceiptQrCode.objects.select_related('superseded_by', 'owner'), 'code', raw)
+    if entry is not None:
+        if entry.superseded_by_id:
+            return JsonResponse({
+                'status': 'superseded',
+                'code': entry.code,
+                'current_receipt_number': entry.superseded_by.receipt_number,
+                'owner': entry.owner.username if entry.owner else '',
+            })
+        return JsonResponse({
+            'status': 'archived',
+            'code': entry.code,
+            'owner': entry.owner.username if entry.owner else '',
+            'archived_at': entry.archived_at.strftime('%d.%m.%Y %H:%M') if entry.archived_at else '',
+        })
+
+    return JsonResponse({'status': 'unknown', 'normalized': candidates[0]})
 
 
 @login_required

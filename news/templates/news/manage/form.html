@@ -1,0 +1,158 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if post %}{% trans "Inter Cargo - Редактирование новости" %}{% else %}{% trans "Inter Cargo - Новая новость" %}{% endif %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+    <!-- Quill 2 (WYSIWYG) -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script src="{% static 'news/manageForm.js' %}?v={{ APP_VERSION }}" defer></script>
+    <style>
+        .ql-container { min-height: 180px; font-size: 0.95rem; border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+        .ql-toolbar { border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+{% include 'shared/header.html' %}
+
+{% block content %}
+<div class="flex min-h-screen">
+    {% include 'mobile/sidebar.html' %}
+
+    <main class="flex-1 p-4 md:p-8">
+        <!-- Мобильный хедер -->
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4 flex items-center">
+            <a href="{% url 'news_manage' %}" class="absolute left-4 text-gray-600"><i class="ri-arrow-left-line text-xl"></i></a>
+            <h1 class="text-lg font-bold text-center flex-1">{% if post %}{% trans "Редактирование" %}{% else %}{% trans "Новая новость" %}{% endif %}</h1>
+        </div>
+
+        <div class="max-w-3xl mx-auto">
+            <a href="{% url 'news_manage' %}" class="hidden md:inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition mb-4">
+                <i class="ri-arrow-left-line"></i> {% trans "К списку новостей" %}
+            </a>
+            <h1 class="text-2xl font-bold mb-6 hidden md:block">
+                {% if post %}{% trans "Редактирование новости" %}{% else %}{% trans "Новая новость" %}{% endif %}
+            </h1>
+
+            {% if form.errors %}
+            <div class="mb-6 p-4 rounded-lg bg-red-100 text-red-800 text-sm">
+                <p class="font-semibold mb-1">{% trans "Исправьте ошибки:" %}</p>
+                <ul class="list-disc pl-5">
+                    {% for field in form %}{% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}{% endfor %}
+                    {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form id="news-post-form" method="post" enctype="multipart/form-data"
+                  action="{% if post %}{% url 'news_post_edit' post.pk %}{% else %}{% url 'news_post_create' %}{% endif %}"
+                  class="space-y-5">
+                {% csrf_token %}
+
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                    <h2 class="font-bold text-gray-900">{% trans "Основное" %}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="text-sm text-gray-600">{% trans "Категория" %}
+                            <div class="mt-1">{{ form.category }}</div>
+                        </label>
+                        <label class="text-sm text-gray-600">{% trans "Обложка" %}
+                            <div class="mt-1">{{ form.cover }}</div>
+                            {% if post and post.cover %}<p class="text-xs text-gray-400 mt-1">{% trans "Сейчас:" %} {{ post.cover.name }}</p>{% endif %}
+                        </label>
+                    </div>
+                    <label class="block text-sm text-gray-600">{% trans "Заголовок (рус)" %}
+                        <div class="mt-1">{{ form.title_ru }}</div>
+                    </label>
+                    <label class="block text-sm text-gray-600">{% trans "Короткое описание (рус)" %}
+                        <div class="mt-1">{{ form.summary_ru }}</div>
+                    </label>
+                    <div class="text-sm text-gray-600">
+                        {% trans "Полный текст (рус)" %}
+                        <div id="editor-ru" class="mt-1 bg-white"></div>
+                    </div>
+                </div>
+
+                <details class="bg-white rounded-2xl border border-gray-100 shadow-sm" {% if form.title_kk.value %}open{% endif %}>
+                    <summary class="px-5 py-4 cursor-pointer select-none font-bold text-gray-900">Қазақша <span class="text-xs font-normal text-gray-400">({% trans "необязательно, фолбэк на русский" %})</span></summary>
+                    <div class="px-5 pb-5 space-y-4">
+                        <label class="block text-sm text-gray-600">{% trans "Заголовок (каз)" %}
+                            <div class="mt-1">{{ form.title_kk }}</div>
+                        </label>
+                        <label class="block text-sm text-gray-600">{% trans "Короткое описание (каз)" %}
+                            <div class="mt-1">{{ form.summary_kk }}</div>
+                        </label>
+                        <div class="text-sm text-gray-600">
+                            {% trans "Полный текст (каз)" %}
+                            <div id="editor-kk" class="mt-1 bg-white"></div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="bg-white rounded-2xl border border-gray-100 shadow-sm" {% if form.title_en.value %}open{% endif %}>
+                    <summary class="px-5 py-4 cursor-pointer select-none font-bold text-gray-900">English <span class="text-xs font-normal text-gray-400">({% trans "необязательно, фолбэк на русский" %})</span></summary>
+                    <div class="px-5 pb-5 space-y-4">
+                        <label class="block text-sm text-gray-600">{% trans "Заголовок (англ)" %}
+                            <div class="mt-1">{{ form.title_en }}</div>
+                        </label>
+                        <label class="block text-sm text-gray-600">{% trans "Короткое описание (англ)" %}
+                            <div class="mt-1">{{ form.summary_en }}</div>
+                        </label>
+                        <div class="text-sm text-gray-600">
+                            {% trans "Полный текст (англ)" %}
+                            <div id="editor-en" class="mt-1 bg-white"></div>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+                    <h2 class="font-bold text-gray-900">{% trans "Публикация" %}</h2>
+                    <p class="text-xs text-gray-400">{% trans "Перед публикацией подготовьте переводы внешним сервисом и вставьте в разделы выше." %}</p>
+                    <div class="flex flex-wrap items-center gap-5">
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            {{ form.is_published }} {% trans "Опубликован" %}
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            {{ form.auth_only }} {% trans "Только авторизованным" %}
+                        </label>
+                        <label class="text-sm text-gray-600">{% trans "Дата публикации" %}
+                            <div class="mt-1">{{ form.published_at }}</div>
+                        </label>
+                    </div>
+                </div>
+
+                {{ form.body_ru }}{{ form.body_kk }}{{ form.body_en }}
+
+                <div class="flex gap-3">
+                    <button type="submit" class="bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-opacity-90 transition">
+                        {% trans "Сохранить" %}
+                    </button>
+                    <a href="{% url 'news_manage' %}" class="px-6 py-3 !rounded-button font-medium border border-gray-200 text-gray-700 hover:bg-gray-100 transition">
+                        {% trans "Отмена" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% include 'shared/footer.html' %}
+</body>
+</html>

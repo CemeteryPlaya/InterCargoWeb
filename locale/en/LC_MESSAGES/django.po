@@ -25,8 +25,8 @@ msgstr ""
 msgid "Имя маршрута"
 msgstr ""
 
-#: .\analytics\models.py:13 .\myprofile\models.py:467 .\myprofile\models.py:718
-#: .\myprofile\templates\desktop\blocks.html:72
+#: .\analytics\models.py:13 .\myprofile\models.py:467
+#: .\myprofile\models.py:718 .\myprofile\templates\desktop\blocks.html:72
 #: .\myprofile\templates\desktop\notification_logs.html:131
 #: .\myprofile\templates\desktop\notification_logs.html:269
 #: .\register\models.py:180 .\register\models.py:216 .\tgbot\models.py:25
@@ -270,7 +270,7 @@ msgstr "Show on storefront"
 
 #: .\dibuyer\models.py:50
 msgid "Порядок"
-msgstr ""
+msgstr "Order"
 
 #: .\dibuyer\models.py:51 .\myprofile\templates\desktop\track_codes.html:177
 msgid "Добавлен"
@@ -638,8 +638,8 @@ msgstr "History & Info"
 msgid ""
 "Inter Cargo — это современная логистическая компания, созданная с целью "
 "упростить процесс доставки товаров из Китая для казахстанских клиентов. Мы "
-"начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней "
-"стремились сделать китайский онлайн-шопинг доступным и понятным каждому. "
+"начали свою деятельность в декабре 2023 года в городе Тараз, и с первых дней"
+" стремились сделать китайский онлайн-шопинг доступным и понятным каждому. "
 "Наши клиенты совершают заказы на популярных китайских маркетплейсах: "
 "Pinduoduo, TaoBao, POIZON и 1688, а мы — берём на себя весь процесс "
 "доставки. Благодаря налаженной системе работы с проверенными посредниками в "
@@ -650,9 +650,9 @@ msgstr ""
 "of goods from China for Kazakh customers. We started our operations in "
 "December 2023 in the city of Taraz, and from the very first days we strived "
 "to make Chinese online shopping accessible and understandable to everyone. "
-"Our clients place orders on popular Chinese marketplaces: Pinduoduo, TaoBao, "
-"POIZON and 1688, and we take care of the entire delivery process. Thanks to "
-"an established system of work with trusted intermediaries in China, we "
+"Our clients place orders on popular Chinese marketplaces: Pinduoduo, TaoBao,"
+" POIZON and 1688, and we take care of the entire delivery process. Thanks to"
+" an established system of work with trusted intermediaries in China, we "
 "guarantee reliability, speed and transparency at all stages of logistics."
 
 #: .\mainview\templates\desktop\about.html:45
@@ -662,19 +662,19 @@ msgstr "Our Journey"
 #: .\mainview\templates\desktop\about.html:46
 msgid ""
 "С первых шагов мы открыли 3 пункта выдачи, а уже спустя несколько месяцев "
-"число выросло до 10, что позволило нам обслуживать клиентов более оперативно "
-"и удобно. За это время нам доверились около 1000 клиентов, которые выбрали "
+"число выросло до 10, что позволило нам обслуживать клиентов более оперативно"
+" и удобно. За это время нам доверились около 1000 клиентов, которые выбрали "
 "Inter Cargo за честность, стабильность и личный подход. Мы не просто "
 "доставляем посылки — мы создаём удобную экосистему для покупок за границей. "
 "Наша команда всегда на связи, а каждое отправление — под контролем до "
 "момента получения."
 msgstr ""
-"From the very first steps we opened 3 pickup points, and within a few months "
-"the number grew to 10, which allowed us to serve clients more promptly and "
-"conveniently. During this time, about 1000 clients have trusted us, choosing "
-"Inter Cargo for its honesty, stability and personal approach. We do not just "
-"deliver parcels — we create a convenient ecosystem for shopping abroad. Our "
-"team is always in touch, and every shipment is under control until the "
+"From the very first steps we opened 3 pickup points, and within a few months"
+" the number grew to 10, which allowed us to serve clients more promptly and "
+"conveniently. During this time, about 1000 clients have trusted us, choosing"
+" Inter Cargo for its honesty, stability and personal approach. We do not "
+"just deliver parcels — we create a convenient ecosystem for shopping abroad."
+" Our team is always in touch, and every shipment is under control until the "
 "moment of receipt."
 
 #: .\mainview\templates\desktop\about.html:49
@@ -741,10 +741,10 @@ msgid ""
 "необходимо связаться с менеджером). Для расчета используйте калькулятор на "
 "нашем сайте."
 msgstr ""
-"The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo. "
-"The minimum weight for calculation is 0 kg, the maximum is 100 kg (above 100 "
-"kg, please contact the manager). Use the calculator on our website for the "
-"calculation."
+"The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo."
+" The minimum weight for calculation is 0 kg, the maximum is 100 kg (above "
+"100 kg, please contact the manager). Use the calculator on our website for "
+"the calculation."
 
 #: .\mainview\templates\desktop\about.html:100
 #: .\mainview\templates\desktop\index.html:698
@@ -771,15 +771,15 @@ msgstr "How to register in the system?"
 #: .\mainview\templates\desktop\about.html:118
 #: .\mainview\templates\desktop\index.html:716
 msgid ""
-"Для регистрации необходимо заполнить форму на странице «Регистрация», указав "
-"свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав "
+"Для регистрации необходимо заполнить форму на странице «Регистрация», указав"
+" свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав "
 "удобный пункт выдачи. После регистрации вы можете авторизоваться в личном "
 "кабинете нажав на кнопку, либо на иконку профиля в верхней части."
 msgstr ""
 "To register, fill out the form on the 'Registration' page, entering your "
-"login (name/nickname + last 4 digits of phone), phone number and selecting a "
-"convenient pickup point. After registration, you can log in to your personal "
-"account by clicking the button or the profile icon at the top."
+"login (name/nickname + last 4 digits of phone), phone number and selecting a"
+" convenient pickup point. After registration, you can log in to your "
+"personal account by clicking the button or the profile icon at the top."
 
 #: .\mainview\templates\desktop\about.html:126
 #: .\mainview\templates\desktop\index.html:428
@@ -794,7 +794,8 @@ msgstr "Prohibited for shipping:"
 
 #: .\mainview\templates\desktop\about.html:133
 #: .\mainview\templates\desktop\index.html:731
-msgid "Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества."
+msgid ""
+"Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества."
 msgstr "Explosive, radioactive, flammable, infectious, toxic substances."
 
 #: .\mainview\templates\desktop\about.html:134
@@ -813,7 +814,8 @@ msgid ""
 "Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в "
 "вакуумных упаковках)."
 msgstr ""
-"Perishable and liquid products (except dry goods and vacuum-packed products)."
+"Perishable and liquid products (except dry goods and vacuum-packed "
+"products)."
 
 #: .\mainview\templates\desktop\about.html:137
 #: .\mainview\templates\desktop\index.html:735
@@ -837,8 +839,8 @@ msgid ""
 "Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, "
 "пузырчатую плёнку, защиту края и т.д.)."
 msgstr ""
-"Fragile, glass goods (or ask the seller for reliable packaging, bubble wrap, "
-"edge protection, etc.)."
+"Fragile, glass goods (or ask the seller for reliable packaging, bubble wrap,"
+" edge protection, etc.)."
 
 #: .\mainview\templates\desktop\about.html:149
 #: .\mainview\templates\desktop\index.html:445
@@ -915,7 +917,8 @@ msgstr ""
 
 #: .\mainview\templates\desktop\about.html:193
 #: .\mainview\templates\desktop\index.html:791
-msgid "Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?"
+msgid ""
+"Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?"
 msgstr "Who is responsible for an order with the status 'Added by user'?"
 
 #: .\mainview\templates\desktop\about.html:198
@@ -927,8 +930,8 @@ msgid ""
 "возникновении проблем с таким заказом менеджеры помогут решить вопрос и "
 "предоставят инструкции."
 msgstr ""
-"The seller from the marketplace is responsible for an order that has not yet "
-"arrived at the warehouse (status \"Added by user\"). Inter Cargo starts "
+"The seller from the marketplace is responsible for an order that has not yet"
+" arrived at the warehouse (status \"Added by user\"). Inter Cargo starts "
 "bearing responsibility from the moment the goods arrive at its warehouse in "
 "China. If problems arise with such an order, managers will help resolve the "
 "issue and provide instructions."
@@ -1052,8 +1055,8 @@ msgid ""
 "Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из "
 "Китая в Казахстан."
 msgstr ""
-"Learn how to track the status of your parcel at every stage of delivery from "
-"China to Kazakhstan."
+"Learn how to track the status of your parcel at every stage of delivery from"
+" China to Kazakhstan."
 
 #: .\mainview\templates\desktop\education1.html:29
 #: .\mainview\templates\desktop\education1.html:129
@@ -1099,7 +1102,8 @@ msgstr ""
 #: .\mainview\templates\desktop\education1.html:112
 #: .\mainview\templates\shared\footer.html:8
 msgid "Надежная доставка грузов из Китая в Казахстан по выгодным тарифам."
-msgstr "Reliable cargo delivery from China to Kazakhstan at competitive rates."
+msgstr ""
+"Reliable cargo delivery from China to Kazakhstan at competitive rates."
 
 #: .\mainview\templates\desktop\education1.html:127
 #: .\mainview\templates\shared\footer.html:23
@@ -1289,8 +1293,8 @@ msgid ""
 "Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. Для "
 "расчета используйте калькулятор выше."
 msgstr ""
-"The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo. "
-"Use the calculator above for the calculation."
+"The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo."
+" Use the calculator above for the calculation."
 
 #: .\mainview\templates\desktop\index.html:410
 msgid "Какие сроки доставки из Китая?"
@@ -1306,12 +1310,12 @@ msgstr ""
 
 #: .\mainview\templates\desktop\index.html:424
 msgid ""
-"Заполните форму на странице «Регистрация», указав логин (имя/ник + последние "
-"4 цифры телефона), номер телефона и выбрав удобный пункт выдачи."
+"Заполните форму на странице «Регистрация», указав логин (имя/ник + последние"
+" 4 цифры телефона), номер телефона и выбрав удобный пункт выдачи."
 msgstr ""
-"Fill out the form on the 'Registration' page, entering a login (name/"
-"nickname + last 4 digits of phone), phone number and selecting a convenient "
-"pickup point."
+"Fill out the form on the 'Registration' page, entering a login "
+"(name/nickname + last 4 digits of phone), phone number and selecting a "
+"convenient pickup point."
 
 #: .\mainview\templates\desktop\index.html:434
 msgid "Взрывоопасные, радиоактивные, горючие, ядовитые вещества"
@@ -1377,8 +1381,8 @@ msgid ""
 "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
 "главной страницы."
 msgstr ""
-"Click on the messenger icons (Telegram, WhatsApp) in the top right corner of "
-"the main page."
+"Click on the messenger icons (Telegram, WhatsApp) in the top right corner of"
+" the main page."
 
 #: .\mainview\templates\desktop\index.html:477
 msgid "Ответственность за статус «Добавлено пользователем»?"
@@ -1545,7 +1549,8 @@ msgstr "For example: ANDREY1234"
 #: .\register\templates\desktop\register.html:59
 #: .\register\templates\desktop\registration.html:64
 msgid "Введите ваше имя или ник и последние 4 цифры номера телефона"
-msgstr "Enter your name or nickname and the last 4 digits of your phone number"
+msgstr ""
+"Enter your name or nickname and the last 4 digits of your phone number"
 
 #: .\mainview\templates\desktop\index.html:859
 #: .\mainview\templates\desktop\index.html:936
@@ -2033,7 +2038,8 @@ msgstr "No access."
 msgid "Активен"
 msgstr "Active"
 
-#: .\myprofile\models.py:30 .\myprofile\models.py:744 .\myprofile\models.py:785
+#: .\myprofile\models.py:30 .\myprofile\models.py:744
+#: .\myprofile\models.py:785
 #: .\myprofile\templates\desktop\goods_arrival.html:64
 #: .\myprofile\templates\desktop\unidentified.html:68
 #: .\myprofile\templates\desktop\unidentified.html:109
@@ -2095,8 +2101,8 @@ msgstr "In delivery"
 msgid "Доставлен на ПВЗ"
 msgstr "Delivered to PVZ"
 
-#: .\myprofile\models.py:55 .\myprofile\models.py:277 .\myprofile\models.py:566
-#: .\myprofile\templates\desktop\warehouse.html:211
+#: .\myprofile\models.py:55 .\myprofile\models.py:277
+#: .\myprofile\models.py:566 .\myprofile\templates\desktop\warehouse.html:211
 msgid "Выдано клиенту"
 msgstr "Issued to client"
 
@@ -2887,8 +2893,7 @@ msgid ""
 "Are you sure you want to update the status of the selected\n"
 "            track code?"
 msgid_plural ""
-"Are you sure you want to update the status of the selected %(counter)s "
-"track\n"
+"Are you sure you want to update the status of the selected %(counter)s track\n"
 "            codes?"
 msgstr[0] ""
 "Are you sure you want to update the status of the selected track code?"
@@ -2983,10 +2988,8 @@ msgid "Сформировать чеки"
 msgstr "Generate receipts"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:97
-msgid ""
-"Нет посылок со статусом \"Доставлен на сортировочный склад\" за эту дату"
-msgstr ""
-"No parcels with status \"Delivered to sorting warehouse\" for this date"
+msgid "Нет посылок со статусом \"Доставлен на сортировочный склад\" за эту дату"
+msgstr "No parcels with status \"Delivered to sorting warehouse\" for this date"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:105
 #: .\myprofile\templates\desktop\delivery.html:126
@@ -4253,7 +4256,8 @@ msgid "Нет посылок для приёмки"
 msgstr "No parcels for acceptance"
 
 #: .\myprofile\templates\desktop\pp_acceptance.html:93
-msgid "Здесь будут отображаться посылки, доставленные водителем для сортировки"
+msgid ""
+"Здесь будут отображаться посылки, доставленные водителем для сортировки"
 msgstr "Parcels delivered by the driver for sorting will be displayed here"
 
 #: .\myprofile\templates\desktop\pp_acceptance_detail.html:34
@@ -4561,8 +4565,8 @@ msgstr "Arrived without PVZ — requires transfer"
 
 #: .\myprofile\templates\desktop\reschedule_arrival.html:178
 msgid ""
-"Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте "
-"дату следующего прихода — они появятся в доставке за эту дату."
+"Посылки клиентов, которые прибыли когда у них не был назначен ПВЗ. Назначьте"
+" дату следующего прихода — они появятся в доставке за эту дату."
 msgstr ""
 "Client parcels that arrived when no PVZ was assigned. Set the next arrival "
 "date — they will appear in delivery for that date."
@@ -4921,8 +4925,8 @@ msgstr "Batches in transit"
 #, python-format
 msgid ""
 "Через %(days)s дней после даты отправки партия автоматически переходит в "
-"статус «Прибыло на таможню (Китай-Казахстан)». Строка исчезает, когда все её "
-"трек-коды попадают в Приход."
+"статус «Прибыло на таможню (Китай-Казахстан)». Строка исчезает, когда все её"
+" трек-коды попадают в Приход."
 msgstr ""
 
 #: .\myprofile\templates\desktop\shipped_cn.html:102
@@ -5590,11 +5594,13 @@ msgstr "Total to pay:"
 #: .\myprofile\views\arrival_history.py:26
 #: .\myprofile\views\arrival_summary.py:40 .\myprofile\views\blocks.py:79
 #: .\myprofile\views\bulk_jobs.py:14 .\myprofile\views\delivery.py:151
-#: .\myprofile\views\extraditions.py:68 .\myprofile\views\finance_summary.py:81
+#: .\myprofile\views\extraditions.py:68
+#: .\myprofile\views\finance_summary.py:81
 #: .\myprofile\views\goods_arrival.py:95
 #: .\myprofile\views\notification_logs.py:23
 #: .\myprofile\views\notification_mutes.py:28
-#: .\myprofile\views\pp_acceptance.py:44 .\myprofile\views\pp_acceptance.py:439
+#: .\myprofile\views\pp_acceptance.py:44
+#: .\myprofile\views\pp_acceptance.py:439
 #: .\myprofile\views\pp_acceptance.py:502
 #: .\myprofile\views\pp_extradition_history.py:26
 #: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
@@ -5685,7 +5691,8 @@ msgstr "Client not specified."
 #: .\myprofile\views\arrival_summary.py:343
 #: .\myprofile\views\notification_mutes.py:80
 #: .\myprofile\views\unidentified.py:156 .\myprofile\views\warehouse.py:641
-#: .\register\views\password_reset.py:55 .\register\views\password_reset.py:173
+#: .\register\views\password_reset.py:55
+#: .\register\views\password_reset.py:173
 msgid "Пользователь не найден."
 msgstr "User not found."
 
@@ -5949,7 +5956,8 @@ msgstr "Ready for pickup"
 msgid "Архивные"
 msgstr "Archived"
 
-#: .\myprofile\views\mobile_parcels.py:185 .\myprofile\views\track_codes.py:188
+#: .\myprofile\views\mobile_parcels.py:185
+#: .\myprofile\views\track_codes.py:188
 msgid "Описание успешно обновлено."
 msgstr "Description updated successfully."
 
@@ -6396,7 +6404,8 @@ msgstr "Used"
 msgid "Коды сброса пароля"
 msgstr "Password reset codes"
 
-#: .\register\models.py:135 .\register\templates\desktop\password_reset.html:65
+#: .\register\models.py:135
+#: .\register\templates\desktop\password_reset.html:65
 msgid "Код подтверждения"
 msgstr "Confirmation code"
 
@@ -6726,7 +6735,8 @@ msgid "Заполните все поля."
 msgstr "Fill in all fields."
 
 #: .\register\views\reg.py:76
-msgid "Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией."
+msgid ""
+"Email не подтверждён. Пожалуйста, подтвердите email перед регистрацией."
 msgstr "Email not confirmed. Please confirm your email before registering."
 
 #: .\register\views\reg.py:89
@@ -6872,13 +6882,11 @@ msgstr "Account: <b>{username}</b>"
 
 #: .\tgbot\bot\handlers.py:275
 msgid ""
-"🔗 Чтобы привязать аккаунт, зайдите на сайт в раздел «Профиль» и нажмите "
-"кнопку «Привязать Telegram».\n"
+"🔗 Чтобы привязать аккаунт, зайдите на сайт в раздел «Профиль» и нажмите кнопку «Привязать Telegram».\n"
 "\n"
 "Ссылка автоматически откроет этого бота и привяжет аккаунт."
 msgstr ""
-"🔗 To link your account, open the site, go to «Profile» and click «Link "
-"Telegram».\n"
+"🔗 To link your account, open the site, go to «Profile» and click «Link Telegram».\n"
 "\n"
 "The link will automatically open this bot and link the account."
 
@@ -7093,7 +7101,8 @@ msgstr "• <b>All statuses</b> — you will receive every status change."
 
 #: .\tgbot\bot\settings_handlers.py:79
 msgid "• <b>Только ПВЗ</b> — только когда посылка готова к выдаче."
-msgstr "• <b>Pickup point only</b> — only when the parcel is ready for pickup."
+msgstr ""
+"• <b>Pickup point only</b> — only when the parcel is ready for pickup."
 
 #: .\tgbot\bot\settings_handlers.py:80
 msgid "• <b>Выборочно</b> — выберите нужные этапы вручную."
@@ -7424,6 +7433,360 @@ msgstr "📦 Status updated: %(status)s"
 msgid "Трек-код %(track_code)s — %(status)s"
 msgstr "Track code %(track_code)s — %(status)s"
 
+#: news:0
+msgid "НОВОСТИ"
+msgstr "NEWS"
+
+#: news:0
+msgid "Объявления и обновления"
+msgstr "Announcements and updates"
+
+#: news:0
+msgid "Вперёд"
+msgstr "Next"
+
+#: news:0
+msgid "Показать все новости"
+msgstr "Show all news"
+
+#: news:0
+msgid "Новости"
+msgstr "News"
+
+#: news:0
+msgid "Inter Cargo - Новости"
+msgstr "Inter Cargo - News"
+
+#: news:0
+msgid "Пока нет новостей"
+msgstr "No news yet"
+
+#: news:0
+msgid "Все новости"
+msgstr "All news"
+
+#: news:0
+msgid "Название (рус)"
+msgstr "Name (Russian)"
+
+#: news:0
+msgid "Название (каз)"
+msgstr "Name (Kazakh)"
+
+#: news:0
+msgid "Название (англ)"
+msgstr "Name (English)"
+
+#: news:0
+msgid "Слаг"
+msgstr "Slug"
+
+#: news:0
+msgid "Цвет"
+msgstr "Color"
+
+#: news:0
+msgid "HEX-цвет бейджа и обложки-заглушки, например #3b82f6."
+msgstr "HEX color for the badge and placeholder cover, e.g. #3b82f6."
+
+#: news:0
+msgid "Иконка"
+msgstr "Icon"
+
+#: news:0
+msgid "Класс Remix Icon, например ri-megaphone-line."
+msgstr "Remix Icon class, e.g. ri-megaphone-line."
+
+#: news:0
+msgid "Категория новостей"
+msgstr "News category"
+
+#: news:0
+msgid "Категории новостей"
+msgstr "News categories"
+
+#: news:0
+msgid "Категория"
+msgstr "Category"
+
+#: news:0
+msgid "Заголовок (рус)"
+msgstr "Title (Russian)"
+
+#: news:0
+msgid "Заголовок (каз)"
+msgstr "Title (Kazakh)"
+
+#: news:0
+msgid "Заголовок (англ)"
+msgstr "Title (English)"
+
+#: news:0
+msgid "Короткое описание (рус)"
+msgstr "Short description (Russian)"
+
+#: news:0
+msgid "Короткое описание (каз)"
+msgstr "Short description (Kazakh)"
+
+#: news:0
+msgid "Короткое описание (англ)"
+msgstr "Short description (English)"
+
+#: news:0
+msgid "Показывается на карточке."
+msgstr "Shown on the card."
+
+#: news:0
+msgid "Полный текст (рус)"
+msgstr "Full text (Russian)"
+
+#: news:0
+msgid "Полный текст (каз)"
+msgstr "Full text (Kazakh)"
+
+#: news:0
+msgid "Полный текст (англ)"
+msgstr "Full text (English)"
+
+#: news:0
+msgid "HTML: абзацы, списки, ссылки."
+msgstr "HTML: paragraphs, lists, links."
+
+#: news:0
+msgid "Обложка"
+msgstr "Cover"
+
+#: news:0
+msgid "Если пусто — карточка заливается цветом категории."
+msgstr "If empty, the card is filled with the category color."
+
+#: news:0
+msgid "Опубликован"
+msgstr "Published"
+
+#: news:0
+msgid "Дата публикации"
+msgstr "Publication date"
+
+#: news:0
+msgid "Только авторизованным"
+msgstr "Authorized users only"
+
+#: news:0
+msgid "Гости этот пост не видят."
+msgstr "Guests cannot see this post."
+
+#: news:0
+msgid "Автор"
+msgstr "Author"
+
+#: news:0
+msgid "Обновлён"
+msgstr "Updated"
+
+#: news:0
+msgid "Новость"
+msgstr "News post"
+
+#: news:0
+msgid "Настройки новостей"
+msgstr "News settings"
+
+#: news:0
+msgid "Секция на главной включена"
+msgstr "Home page section enabled"
+
+#: news:0
+msgid "Режим секции на десктопе"
+msgstr "Desktop section layout"
+
+#: news:0
+msgid "Горизонтальная лента"
+msgstr "Horizontal strip"
+
+#: news:0
+msgid "1 крупная + лента"
+msgstr "1 featured + strip"
+
+#: news:0
+msgid "Постов"
+msgstr "Posts"
+
+#: news:0
+msgid "Основное"
+msgstr "Main"
+
+#: news:0
+msgid "Публикация"
+msgstr "Publication"
+
+#: news:0
+msgid "Управление новостями"
+msgstr "News management"
+
+#: news:0
+msgid "Inter Cargo - Управление новостями"
+msgstr "Inter Cargo - News management"
+
+#: news:0
+msgid "Создать новость"
+msgstr "Create news post"
+
+#: news:0
+msgid "Секция на главной"
+msgstr "Home page section"
+
+#: news:0
+msgid "Секция включена"
+msgstr "Section enabled"
+
+#: news:0
+msgid "Категории"
+msgstr "Categories"
+
+#: news:0
+msgid "скрыта"
+msgstr "hidden"
+
+#: news:0
+msgid "Удалить категорию?"
+msgstr "Delete the category?"
+
+#: news:0
+msgid "Удалить категорию"
+msgstr "Delete category"
+
+#: news:0
+msgid "Добавить категорию"
+msgstr "Add category"
+
+#: news:0
+msgid "Создать"
+msgstr "Create"
+
+#: news:0
+msgid "Категорий пока нет — создайте первую ниже."
+msgstr "No categories yet — create the first one below."
+
+#: news:0
+msgid "Посты"
+msgstr "Posts"
+
+#: news:0
+msgid "Черновик"
+msgstr "Draft"
+
+#: news:0
+msgid "Только клиентам"
+msgstr "Clients only"
+
+#: news:0
+msgid "Опубликовать"
+msgstr "Publish"
+
+#: news:0
+msgid "Снять с публикации"
+msgstr "Unpublish"
+
+#: news:0
+msgid "Удалить новость?"
+msgstr "Delete the news post?"
+
+#: news:0
+msgid "Постов пока нет."
+msgstr "No posts yet."
+
+#: news:0
+msgid "Inter Cargo - Редактирование новости"
+msgstr "Inter Cargo - Edit news post"
+
+#: news:0
+msgid "Inter Cargo - Новая новость"
+msgstr "Inter Cargo - New news post"
+
+#: news:0
+msgid "Новая новость"
+msgstr "New news post"
+
+#: news:0
+msgid "К списку новостей"
+msgstr "Back to news list"
+
+#: news:0
+msgid "Редактирование новости"
+msgstr "Edit news post"
+
+#: news:0
+msgid "Исправьте ошибки:"
+msgstr "Fix the errors:"
+
+#: news:0
+msgid "Сейчас:"
+msgstr "Current:"
+
+#: news:0
+msgid "необязательно, фолбэк на русский"
+msgstr "optional, falls back to Russian"
+
+#: news:0
+msgid ""
+"Перед публикацией подготовьте переводы внешним сервисом и вставьте в разделы"
+" выше."
+msgstr ""
+"Before publishing, prepare translations with an external service and paste "
+"them into the sections above."
+
+#: news:0
+msgid "Настройки секции сохранены."
+msgstr "Section settings saved."
+
+#: news:0
+msgid "Не удалось сохранить настройки."
+msgstr "Failed to save settings."
+
+#: news:0
+msgid "Категория сохранена."
+msgstr "Category saved."
+
+#: news:0
+msgid "Категория не сохранена: "
+msgstr "Category not saved: "
+
+#: news:0
+msgid "Категория удалена."
+msgstr "Category deleted."
+
+#: news:0
+msgid ""
+"Нельзя удалить категорию с постами — снимите флаг «Активна», чтобы скрыть "
+"её."
+msgstr "Cannot delete a category with posts — uncheck “Active” to hide it."
+
+#: news:0
+msgid "Новость создана."
+msgstr "News post created."
+
+#: news:0
+msgid "Новость сохранена."
+msgstr "News post saved."
+
+#: news:0
+msgid "Новость опубликована."
+msgstr "News post published."
+
+#: news:0
+msgid "Новость снята с публикации."
+msgstr "News post unpublished."
+
+#: news:0
+msgid "Новость удалена."
+msgstr "News post deleted."
+
+#: news:0
+msgid "Текст новости пуст (или полностью удалён при очистке HTML)."
+msgstr "News text is empty (or was fully removed by HTML sanitization)."
+
 #~ msgid "Как заполнить адрес склада в Китае?"
 #~ msgstr "How to fill in the warehouse address in China?"
 
@@ -7441,11 +7804,11 @@ msgstr "Track code %(track_code)s — %(status)s"
 #~ "No new receipts created — all tracks are already included in receipts."
 
 #~ msgid ""
-#~ "Введите ваш логин, номер телефона или email. Мы отправим код "
-#~ "подтверждения на привязанную почту."
+#~ "Введите ваш логин, номер телефона или email. Мы отправим код подтверждения "
+#~ "на привязанную почту."
 #~ msgstr ""
-#~ "Enter your login, phone number or email. We will send a confirmation code "
-#~ "to the linked email."
+#~ "Enter your login, phone number or email. We will send a confirmation code to"
+#~ " the linked email."
 
 #~ msgid "Логин, телефон или email"
 #~ msgstr "Login, phone or email"

@@ -1,0 +1,23 @@
+{% load i18n %}
+{% for post in posts %}
+<a href="{% url 'news_detail' post.pk %}"
+   class="flex-shrink-0 w-72 rounded-2xl border border-gray-100 shadow-sm bg-white hover:shadow-md transition overflow-hidden [scroll-snap-align:start]">
+    {% if post.cover %}
+    <div class="h-36 overflow-hidden">
+        <img src="{{ post.cover.url }}" alt="" loading="lazy" class="w-full h-full object-cover">
+    </div>
+    {% else %}
+    <div class="h-36 flex items-center justify-center" style="background:{{ post.category.color }};">
+        <i class="{{ post.category.icon|default:'ri-newspaper-line' }} text-white/40 text-5xl"></i>
+    </div>
+    {% endif %}
+    <div class="p-4">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-white text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:{{ post.category.color }};">{{ post.category.name }}</span>
+            <span class="text-xs text-gray-400">{{ post.published_at|date:"d.m.Y" }}</span>
+        </div>
+        <h3 class="font-semibold text-gray-900 line-clamp-2">{{ post.title }}</h3>
+        <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ post.summary }}</p>
+    </div>
+</a>
+{% endfor %}

@@ -5,7 +5,6 @@ from django.shortcuts import render
 from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 
 from myprofile.models import Receipt, ReceiptItem, ExtraditionPackage, TrackCode
@@ -71,8 +70,9 @@ def quick_issue(request):
     """
     Быстрая выдача: собирает неоплаченные чеки пользователя,
     у которых ВСЕ трек-коды в статусе 'ready'.
-    За один день — один штрихкод: если сегодня уже есть невыданный пакет,
-    обновляем его чеки; иначе создаём новый.
+    Штрихкод пакета стабилен до выдачи: существующий невыданный пакет с тем же
+    набором ПВЗ переиспользуется (обновляется только состав чеков), чтобы
+    сохранённый клиентом QR (скриншот, открытая страница) не устаревал.
     Возвращает JSON с barcode и base64-картинкой штрихкода.
     """
     user = request.user
@@ -98,8 +98,6 @@ def quick_issue(request):
 
     try:
         with transaction.atomic():
-            today = timezone.localdate()
-
             # Группируем чеки по пункту выдачи (pickup_point)
             by_pickup = defaultdict(list)
             for receipt in ready_receipts:
@@ -108,23 +106,28 @@ def quick_issue(request):
 
             packages_created = []
 
-            for pickup_key, pickup_receipts in by_pickup.items():
-                # Ищем невыданный пакет за сегодня с тем же набором ПВЗ
-                today_packages = ExtraditionPackage.objects.filter(
-                    user=user,
-                    is_issued=False,
-                    created_at__date=today
-                )
+            # Все невыданные пакеты пользователя (любой давности) — кандидаты
+            # на переиспользование со стабильным штрихкодом
+            existing_packages = list(
+                ExtraditionPackage.objects
+                .filter(user=user, is_issued=False)
+                .order_by('created_at')
+            )
 
+            for pickup_key, pickup_receipts in by_pickup.items():
                 # Находим пакет, соответствующий этому ПВЗ
                 matched_package = None
-                for tp in today_packages:
-                    existing_pp = set(tp.receipts.values_list('pickup_point', flat=True))
+                for tp in existing_packages:
+                    # NULL и '' — одна группа «без ПВЗ» (как в by_pickup выше)
+                    existing_pp = set(
+                        v or '' for v in tp.receipts.values_list('pickup_point', flat=True)
+                    )
                     if existing_pp == {pickup_key}:
                         matched_package = tp
                         break
 
                 if matched_package:
+                    existing_packages.remove(matched_package)
                     matched_package.receipts.set(pickup_receipts)
                     packages_created.append(matched_package)
                 else:
@@ -144,12 +147,13 @@ def quick_issue(request):
                         'barcode': _bc, 'receipts': _rc, 'tracks': _tc,
                     })
 
-            # Удаляем старые невыданные пакеты (за прошлые дни)
+            # Удаляем только пакеты, не соответствующие ни одной актуальной
+            # группе ПВЗ (их состав чеков устарел); переиспользованные пакеты
+            # сохраняют свой штрихкод
+            keep_ids = [p.id for p in packages_created]
             ExtraditionPackage.objects.filter(
                 user=user, is_issued=False
-            ).exclude(
-                created_at__date=today
-            ).delete()
+            ).exclude(id__in=keep_ids).delete()
 
         # Возвращаем данные первого пакета (или всех)
         total_tracks = sum(r.items.count() for r in ready_receipts)

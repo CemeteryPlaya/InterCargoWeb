@@ -22,6 +22,7 @@
     <script src="{% static 'scripts/calculator.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'news/homeNews.js' %}?v={{ APP_VERSION }}" defer></script>
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
@@ -262,6 +263,8 @@
         </div>
         {% endif %}
 
+        {% include 'news/_home_mobile.html' %}
+
         <!-- Калькулятор (компактный) -->
         <div class="px-4 py-3 mt-1">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
@@ -354,6 +357,8 @@
                 </div>
             </div>
         </div>
+
+        {% include 'news/_home_mobile.html' %}
 
         {% endif %}
 
@@ -667,6 +672,8 @@
             </div>
         </div>
     </section>
+
+    {% include 'news/_home_desktop.html' %}
 
     <!-- FAQ секция -->
     <section class="py-16 bg-gray-50">

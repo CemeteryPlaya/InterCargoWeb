@@ -1,0 +1,175 @@
+{% load i18n %}
+{# Блок чатов техподдержки на мобильной странице «Сообщения». #}
+{# Клиент: один чат «Техподдержка». Оператор: очередь + свои чаты. #}
+
+{% if not support_is_operator %}
+<!-- ===== Клиент: чат «Техподдержка» ===== -->
+<div class="mx-4 mb-3 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <button type="button" id="support-open-btn" class="w-full flex items-center px-4 py-4 hover:bg-gray-50 transition text-left">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style="background:#ccfbf1;color:#0d9488">
+            <i class="ri-customer-service-2-line text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0 ml-3">
+            <p class="font-semibold text-sm">{% trans "Техподдержка" %}</p>
+            <p class="text-xs text-gray-400 truncate">{{ support_client.last_message|truncatechars:45 }}</p>
+        </div>
+        <div class="flex flex-col items-end ml-2 flex-shrink-0">
+            {% if support_client.last_date %}
+            <span class="text-[10px] text-gray-400 mb-1">{{ support_client.last_date|date:"j M" }}</span>
+            {% endif %}
+            {% if support_client.unread > 0 %}
+            <span id="support-entry-badge" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full text-white" style="background:#0d9488">{{ support_client.unread }}</span>
+            {% endif %}
+        </div>
+    </button>
+</div>
+{% else %}
+<!-- ===== Оператор: очередь и мои чаты ===== -->
+{% if support_queue %}
+<div class="mx-4 mb-1 mt-1 flex items-center gap-2">
+    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{% trans "Поддержка — очередь" %}</span>
+    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full text-white bg-orange-500">{{ support_queue|length }}</span>
+</div>
+<div class="mx-4 mb-3 bg-white rounded-2xl shadow-sm border border-orange-200 overflow-hidden divide-y divide-gray-100">
+    {% for chat in support_queue %}
+    <button type="button" class="support-chat-open w-full flex items-center px-4 py-3.5 hover:bg-gray-50 transition text-left"
+            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-orange-100 text-orange-600">
+            <i class="ri-user-voice-line text-lg"></i>
+        </div>
+        <div class="flex-1 min-w-0 ml-3">
+            <p class="font-semibold text-sm truncate">{{ chat.title }}</p>
+            <p class="text-xs text-gray-400 truncate">{{ chat.last_message|truncatechars:45 }}</p>
+        </div>
+        <div class="flex flex-col items-end ml-2 flex-shrink-0">
+            {% if chat.last_date %}
+            <span class="text-[10px] text-gray-400 mb-1">{{ chat.last_date|date:"j M H:i" }}</span>
+            {% endif %}
+            {% if chat.unread > 0 %}
+            <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full text-white bg-orange-500">{{ chat.unread }}</span>
+            {% endif %}
+        </div>
+    </button>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="mx-4 mb-1 mt-1">
+    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{% trans "Поддержка — мои чаты" %}</span>
+</div>
+<div class="mx-4 mb-3 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden divide-y divide-gray-100">
+    {% for chat in support_mine %}
+    <button type="button" class="support-chat-open w-full flex items-center px-4 py-3.5 hover:bg-gray-50 transition text-left"
+            data-chat-id="{{ chat.id }}" data-chat-title="{{ chat.title }}">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#ccfbf1;color:#0d9488">
+            <i class="ri-user-line text-lg"></i>
+        </div>
+        <div class="flex-1 min-w-0 ml-3">
+            <p class="font-semibold text-sm truncate">{{ chat.title }}
+                {% if chat.status == 'closed' %}<span class="text-[10px] text-gray-400 font-normal">({% trans "закрыт" %})</span>{% endif %}
+            </p>
+            <p class="text-xs text-gray-400 truncate">{{ chat.last_message|truncatechars:45 }}</p>
+        </div>
+        <div class="flex flex-col items-end ml-2 flex-shrink-0">
+            {% if chat.last_date %}
+            <span class="text-[10px] text-gray-400 mb-1">{{ chat.last_date|date:"j M H:i" }}</span>
+            {% endif %}
+            {% if chat.unread > 0 %}
+            <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full text-white" style="background:#0d9488">{{ chat.unread }}</span>
+            {% endif %}
+        </div>
+    </button>
+    {% empty %}
+    <div class="px-4 py-6 text-center text-gray-400 text-sm">{% trans "Нет чатов в работе" %}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ===== Полноэкранная панель чата поддержки (общая для клиента и оператора) ===== -->
+<div id="support-panel" class="md:hidden fixed inset-0 z-40 bg-gray-50 hidden">
+    <div class="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+        <div class="flex items-center">
+            <button type="button" id="support-back-btn" class="mr-3 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+                <i class="ri-arrow-left-line text-xl text-gray-700"></i>
+            </button>
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#ccfbf1;color:#0d9488">
+                    <i class="ri-customer-service-2-line text-base"></i>
+                </div>
+                <h2 id="support-panel-title" class="font-bold text-base truncate">{% trans "Техподдержка" %}</h2>
+            </div>
+            {% if support_is_operator %}
+            <button type="button" id="support-escalate-btn" class="hidden ml-1 w-10 h-10 flex items-center justify-center rounded-full hover:bg-violet-50 transition" title="{% trans 'Подключить директора' %}">
+                <i class="ri-user-shared-line text-xl text-violet-500"></i>
+            </button>
+            <button type="button" id="support-return-btn" class="hidden ml-1 w-10 h-10 flex items-center justify-center rounded-full hover:bg-blue-50 transition" title="{% trans 'Вернуть оператору' %}">
+                <i class="ri-arrow-go-back-line text-xl text-blue-500"></i>
+            </button>
+            <button type="button" id="support-close-chat-btn" class="hidden ml-1 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition" title="{% trans 'Закрыть чат' %}">
+                <i class="ri-check-double-line text-xl text-gray-500"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if support_is_operator %}
+    <!-- Бар взятия в работу (чат из очереди) -->
+    <div id="support-claim-bar" class="hidden bg-orange-50 border-b border-orange-200 px-4 py-2.5 flex items-center justify-between">
+        <span class="text-xs text-orange-700">{% trans "Чат не назначен" %}</span>
+        <button type="button" id="support-claim-btn"
+            class="px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded-lg hover:bg-orange-600 transition">
+            <i class="ri-hand-coin-line mr-1"></i>{% trans "Взять в работу" %}
+        </button>
+    </div>
+    {% endif %}
+
+    <div id="support-panel-scroll" class="overflow-y-auto px-4 pt-3" style="height: calc(100% - 128px);">
+        <div id="support-panel-empty" class="flex flex-col items-center justify-center h-full text-center text-gray-400">
+            <i class="ri-customer-service-2-line text-5xl mb-3 text-gray-300"></i>
+            <p class="font-medium text-gray-500">{% trans "Задайте вопрос — мы на связи" %}</p>
+        </div>
+    </div>
+
+    <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3">
+        <form id="support-panel-form" class="flex items-end gap-2">
+            <textarea id="support-panel-input" rows="1" maxlength="4000"
+                class="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm resize-none focus:ring-2 focus:ring-primary focus:border-primary"
+                placeholder="{% trans "Напишите сообщение..." %}"></textarea>
+            <button type="submit" id="support-panel-send"
+                class="w-11 h-11 flex items-center justify-center rounded-full bg-primary text-white hover:bg-red-600 transition flex-shrink-0 disabled:opacity-50">
+                <i class="ri-send-plane-2-fill text-lg"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if support_is_operator %}
+<!-- Оверлей выбора директора (мобильный) -->
+<div id="support-escalate-overlay" class="hidden fixed inset-0 z-50 flex items-end justify-center md:hidden">
+    <div class="absolute inset-0 bg-black/50" id="support-escalate-backdrop"></div>
+    <div class="relative bg-white rounded-t-2xl shadow-xl p-5 w-full z-10 max-h-[70%] overflow-y-auto">
+        <h3 class="text-base font-semibold mb-1">{% trans "Подключить директора" %}</h3>
+        <p class="text-xs text-gray-500 mb-3">{% trans "Чат будет передан выбранному директору, вы потеряете к нему доступ." %}</p>
+        <div id="support-escalate-list" class="space-y-2 mb-3"></div>
+        <button type="button" id="support-escalate-cancel"
+            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm">
+            {% trans "Отмена" %}
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<div id="support-mobile-config" class="hidden"
+     data-is-operator="{{ support_is_operator|yesno:'true,false' }}"
+     data-my-messages-url="{% url 'support_my_messages' %}"
+     data-my-send-url="{% url 'support_my_send' %}"
+     data-my-read-url="{% url 'support_my_read' %}"
+     data-inbox-url="{% url 'support_inbox_data' %}"
+     data-chat-base-url="/support/api/chat/"
+     data-directors-url="{% url 'support_directors' %}"
+     data-label-support="{% trans 'Техподдержка' %}"
+     data-label-system="{% trans 'Системное сообщение' %}"
+     data-label-taken="{% trans 'Чат взят в работу' %}"
+     data-label-conflict="{% trans 'Чат уже взят другим оператором' %}"
+     data-label-close-confirm="{% trans 'Закрыть чат? Новое сообщение клиента снова откроет его.' %}"
+     data-label-error="{% trans 'Ошибка. Попробуйте ещё раз.' %}"></div>

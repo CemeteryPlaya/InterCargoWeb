@@ -1,0 +1,99 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Inter Cargo - Новости" %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifyButton.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+{% include 'shared/header.html' %}
+
+    <!-- Мобильный хедер -->
+    <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 flex items-center">
+        <a href="{% url 'home' %}" class="absolute left-4 text-gray-600"><i class="ri-arrow-left-line text-xl"></i></a>
+        <h1 class="text-lg font-bold text-center flex-1">{% trans "Новости" %}</h1>
+    </div>
+
+    <section class="py-8 md:py-16">
+        <div class="container mx-auto px-4">
+            <div class="hidden md:block text-center mb-10">
+                <div class="text-primary font-medium mb-2">{% trans "НОВОСТИ" %}</div>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Объявления и обновления" %}</h2>
+            </div>
+
+            {% if chip_categories %}
+            <!-- Чипы категорий -->
+            <div class="flex gap-2 flex-wrap justify-start md:justify-center mb-8">
+                <a href="{% url 'news_list' %}"
+                   class="px-4 py-2 rounded-full text-sm font-medium transition {% if not active_slug %}bg-primary text-white shadow{% else %}bg-white border border-gray-200 text-gray-700 hover:bg-gray-100{% endif %}">
+                    {% trans "Все" %}
+                </a>
+                {% for cat in chip_categories %}
+                <a href="{% url 'news_list' %}?cat={{ cat.slug }}"
+                   class="px-4 py-2 rounded-full text-sm font-medium transition {% if active_slug == cat.slug %}bg-primary text-white shadow{% else %}bg-white border border-gray-200 text-gray-700 hover:bg-gray-100{% endif %}">
+                    {% if cat.icon %}<i class="{{ cat.icon }} mr-1"></i>{% endif %}{{ cat.name }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% for category, posts in grouped %}
+            <!-- Подгруппа: категория -->
+            <div class="mb-10">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:{{ category.color }};"></span>
+                    <h3 class="text-lg font-bold text-gray-900">{{ category.name }}</h3>
+                    <span class="text-sm text-gray-400">{{ posts|length }}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for post in posts %}
+                    <a href="{% url 'news_detail' post.pk %}"
+                       class="rounded-2xl border border-gray-100 shadow-sm bg-white hover:shadow-md transition overflow-hidden flex flex-col">
+                        {% if post.cover %}
+                        <div class="h-40 overflow-hidden">
+                            <img src="{{ post.cover.url }}" alt="" loading="lazy" class="w-full h-full object-cover">
+                        </div>
+                        {% else %}
+                        <div class="h-40 flex items-center justify-center" style="background:{{ post.category.color }};">
+                            <i class="{{ post.category.icon|default:'ri-newspaper-line' }} text-white/40 text-5xl"></i>
+                        </div>
+                        {% endif %}
+                        <div class="p-4 flex-1 flex flex-col">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-white text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:{{ post.category.color }};">{{ post.category.name }}</span>
+                                <span class="text-xs text-gray-400">{{ post.published_at|date:"d.m.Y" }}</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 line-clamp-2">{{ post.title }}</h4>
+                            <p class="text-sm text-gray-500 mt-1 line-clamp-3">{{ post.summary }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-16">
+                <i class="ri-newspaper-line text-5xl text-gray-300"></i>
+                <p class="text-gray-500 mt-3">{% trans "Пока нет новостей" %}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+{% include 'shared/footer.html' %}
+</body>
+</html>

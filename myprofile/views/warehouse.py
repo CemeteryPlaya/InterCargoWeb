@@ -751,10 +751,13 @@ def warehouse_find_client_by_receipt(request):
     if not receipt_number:
         return JsonResponse({'found': False, 'error': 'Не указан номер чека.'}, status=400)
 
-    try:
-        receipt = Receipt.objects.select_related('owner').get(receipt_number=receipt_number)
-    except Receipt.DoesNotExist:
-        return JsonResponse({'found': False, 'error': f'Чек {receipt_number} не найден.'}, status=404)
+    from myprofile.scan_utils import find_by_scan, normalize_scan_code
+    receipt = find_by_scan(Receipt.objects.select_related('owner'), 'receipt_number', receipt_number)
+    if receipt is None:
+        return JsonResponse(
+            {'found': False, 'error': f'Чек {normalize_scan_code(receipt_number)} не найден.'},
+            status=404,
+        )
 
     if receipt.owner:
         return JsonResponse({

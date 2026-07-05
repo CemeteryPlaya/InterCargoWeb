@@ -265,12 +265,14 @@
         </a>
         <a href="{% url 'mobile_notifications' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors relative" data-nav="notifications">
             <span class="relative">
-                <i class="ri-notification-3-line text-xl"></i>
-                {% if unread > 0 %}
-                <span class="mobile-nav-badge absolute -top-1 -right-2 inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ unread }}</span>
+                <i class="ri-message-3-line text-xl"></i>
+                {% with messages_total=unread|add:support_unread_total %}
+                {% if messages_total > 0 %}
+                <span class="mobile-nav-badge absolute -top-1 -right-2 inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ messages_total }}</span>
                 {% endif %}
+                {% endwith %}
             </span>
-            <span class="text-[10px] font-medium leading-tight">{% trans "Уведомления" %}</span>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Сообщения" %}</span>
         </a>
         <a href="{% url 'mobile_menu' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="menu">
             <i class="ri-menu-line text-xl"></i>
@@ -290,8 +292,8 @@
             <i class="ri-qr-code-line text-2xl"></i>
         </a>
         <a href="{% url 'login' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="notifications">
-            <i class="ri-notification-3-line text-xl"></i>
-            <span class="text-[10px] font-medium leading-tight">{% trans "Уведомления" %}</span>
+            <i class="ri-message-3-line text-xl"></i>
+            <span class="text-[10px] font-medium leading-tight">{% trans "Сообщения" %}</span>
         </a>
         <a href="{% url 'login' %}" class="mobile-nav-item flex flex-col items-center justify-center gap-0.5 text-gray-500 hover:text-primary transition-colors" data-nav="menu">
             <i class="ri-menu-line text-xl"></i>

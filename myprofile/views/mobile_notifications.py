@@ -8,6 +8,8 @@ from django.utils import timezone
 from myprofile.models import Notification
 from django.utils.translation import gettext as _
 from tgbot.services import is_telegram_linked, get_or_create_link_url
+from support.models import SupportChat, SupportMessage
+from support.services import is_support_operator
 
 
 # Паттерны для классификации уведомлений
@@ -155,8 +157,53 @@ def mobile_notifications_view(request):
         },
     ]
 
+    # --- Чат техподдержки ---
+    support_is_operator = is_support_operator(user)
+    support_client = None
+    support_queue = []
+    support_mine = []
+
+    if support_is_operator:
+        base = (
+            SupportChat.objects
+            .filter(last_message_at__isnull=False)
+            .select_related('client', 'assigned_to')
+        )
+        support_queue = [_support_chat_entry(c) for c in base.filter(
+            assigned_to__isnull=True, status=SupportChat.STATUS_OPEN)]
+        support_mine = [_support_chat_entry(c) for c in base.filter(assigned_to=user)]
+    else:
+        chat = SupportChat.objects.filter(client=user).first()
+        last = None
+        if chat:
+            last = chat.messages.exclude(
+                author_role=SupportMessage.ROLE_SYSTEM).order_by('-id').first()
+        support_client = {
+            'unread': chat.client_unread if chat else 0,
+            'last_message': last.text if last else _('Задайте вопрос — мы на связи'),
+            'last_date': chat.last_message_at if chat else None,
+        }
+
     return render(request, 'mobile/mobile_notifications.html', {
         'categories': categories,
         'telegram_linked': telegram_linked,
         'telegram_link_url': telegram_link_url,
+        'support_is_operator': support_is_operator,
+        'support_client': support_client,
+        'support_queue': support_queue,
+        'support_mine': support_mine,
     })
+
+
+def _support_chat_entry(chat):
+    """Данные чата поддержки для списка «Сообщения» (операторский режим)."""
+    last = chat.messages.exclude(
+        author_role=SupportMessage.ROLE_SYSTEM).order_by('-id').first()
+    return {
+        'id': chat.id,
+        'title': chat.title_for_staff,
+        'unread': chat.staff_unread,
+        'status': chat.status,
+        'last_message': last.text if last else '',
+        'last_date': chat.last_message_at,
+    }

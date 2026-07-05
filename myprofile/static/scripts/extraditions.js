@@ -135,6 +135,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function onQrScanned(code) {
+        // Нормализация: регистр, раскладка сканера, AIM-префикс
+        var numbers = currentReceipts.map(function (r) { return r.receipt_number; });
+        code = ScanNormalize.matchIn(numbers, code) || ScanNormalize.normalize(code);
+
         // Debounce: игнорируем повторные сканы того же кода в течение 2 секунд
         var now = Date.now();
         if (code === lastScannedCode && (now - lastScannedTime) < 2000) {
@@ -512,7 +516,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function performSearch() {
-        var barcode = barcodeInput.value.trim();
+        var barcode = ScanNormalize.normalize(barcodeInput.value);
         if (!barcode) {
             showMessage(_ei18n.enterQr || 'Введите QR-код');
             return;

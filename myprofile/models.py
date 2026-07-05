@@ -327,6 +327,7 @@ class Receipt(models.Model):
             super().save(*args, **kwargs)
             self.receipt_number = f"IC-{self.pk:06d}"
             super().save(update_fields=['receipt_number'])
+            ReceiptQrCode.register(self)
             return
 
         if self.pk and not getattr(self, '_allow_content_update', False):
@@ -359,6 +360,8 @@ class Receipt(models.Model):
                     pass
 
         super().save(*args, **kwargs)
+        if is_new:
+            ReceiptQrCode.register(self)
 
     @property
     def client_display_name(self):
@@ -426,6 +429,82 @@ class ReceiptItem(models.Model):
 
     def __str__(self):
         return self.display_track_code or str(self.id)
+
+
+class ReceiptQrCode(models.Model):
+    """Реестр и архив QR-кодов чеков — единое место хранения каждого
+    когда-либо выданного receipt_number.
+
+    Записи не удаляются: при удалении чека остаётся архивная строка
+    (receipt=NULL, archived_at установлен), при объединении чеков ставится
+    ссылка superseded_by на актуальный чек. Это позволяет при сканировании
+    напечатанного ранее QR-кода объяснить, что с ним произошло, вместо
+    ошибки «код не найден в системе».
+    """
+    code = models.CharField(max_length=32, unique=True, verbose_name=_("Код (содержимое QR)"))
+    receipt = models.ForeignKey(
+        Receipt, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='qr_codes', verbose_name=_("Чек"))
+    superseded_by = models.ForeignKey(
+        Receipt, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='superseded_qr_codes', verbose_name=_("Заменён чеком"))
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='receipt_qr_codes', verbose_name=_("Клиент"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Создано"))
+    archived_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Архивировано"))
+    note = models.CharField(max_length=255, blank=True, default='', verbose_name=_("Примечание"))
+
+    class Meta:
+        verbose_name = _("QR-код чека")
+        verbose_name_plural = _("QR-коды чеков (реестр)")
+
+    @property
+    def is_active(self):
+        return self.receipt_id is not None and self.archived_at is None
+
+    def get_qr_base64(self):
+        qr = qrcode.make(self.code, box_size=4, border=1)
+        buffer = BytesIO()
+        qr.save(buffer, format='PNG')
+        encoded = base64.b64encode(buffer.getvalue()).decode()
+        return f"data:image/png;base64,{encoded}"
+
+    @classmethod
+    def register(cls, receipt):
+        """Регистрирует (или актуализирует) запись реестра для номера чека.
+
+        Временные номера IC-TEMP-* не регистрируются — они живут только
+        между двумя save() при создании чека и никогда не печатаются.
+        """
+        number = receipt.receipt_number
+        if not number or number.startswith('IC-TEMP-'):
+            return None
+        obj, _created = cls.objects.update_or_create(
+            code=number,
+            defaults={'receipt': receipt, 'owner': receipt.owner, 'archived_at': None},
+        )
+        return obj
+
+    def __str__(self):
+        state = "актуален" if self.is_active else "архив"
+        return f"{self.code} ({state})"
+
+
+def _archive_receipt_qr_on_delete(sender, instance, **kwargs):
+    """При удалении чека помечаем его записи реестра как архивные
+    (FK receipt обнулится сам через SET_NULL)."""
+    ReceiptQrCode.objects.filter(receipt=instance, archived_at__isnull=True).update(
+        archived_at=timezone.now(),
+        note="Чек удалён",
+    )
+
+
+models.signals.pre_delete.connect(
+    _archive_receipt_qr_on_delete, sender=Receipt,
+    dispatch_uid='receipt_qr_archive_on_delete',
+)
+
 
 class Notification(models.Model):
     PUSH_PENDING = 'pending'

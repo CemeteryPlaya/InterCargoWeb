@@ -1,0 +1,65 @@
+{% load i18n %}
+{% if home_news %}
+<!-- Секция новостей (между hero и FAQ) -->
+<section id="news-section" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <div class="text-primary font-medium mb-2">{% trans "НОВОСТИ" %}</div>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Объявления и обновления" %}</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" data-news-prev aria-label="{% trans 'Назад' %}"
+                        class="w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-50 transition disabled:opacity-30 disabled:cursor-default">
+                    <i class="ri-arrow-left-s-line text-xl"></i>
+                </button>
+                <button type="button" data-news-next aria-label="{% trans 'Вперёд' %}"
+                        class="w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-gray-50 transition disabled:opacity-30 disabled:cursor-default">
+                    <i class="ri-arrow-right-s-line text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        {% if home_news.settings.desktop_layout == 'featured' %}
+        {% with featured=home_news.posts.0 %}
+        <!-- Крупный баннер: самая свежая новость -->
+        <a href="{% url 'news_detail' featured.pk %}" id="news-featured"
+           class="block relative rounded-2xl overflow-hidden mb-6 h-72 group">
+            {% if featured.cover %}
+            <img src="{{ featured.cover.url }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center" style="background:{{ featured.category.color }};">
+                <i class="{{ featured.category.icon|default:'ri-newspaper-line' }} text-white/30 text-9xl"></i>
+            </div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6">
+                <span class="inline-block text-white text-xs font-semibold px-2.5 py-1 rounded-full mb-2" style="background:{{ featured.category.color }};">{{ featured.category.name }}</span>
+                <h3 class="text-white text-2xl font-bold line-clamp-2">{{ featured.title }}</h3>
+                <p class="text-white/80 text-sm mt-1 line-clamp-2 max-w-3xl">{{ featured.summary }}</p>
+                <p class="text-white/60 text-xs mt-2">{{ featured.published_at|date:"d.m.Y" }}</p>
+            </div>
+        </a>
+        {% endwith %}
+        {% endif %}
+
+        <!-- Горизонтальная лента карточек -->
+        <div data-news-strip
+             class="flex gap-4 overflow-x-auto pb-2 [scroll-snap-type:x_proximity] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {% if home_news.settings.desktop_layout == 'featured' %}
+                {% with strip_posts=home_news.posts|slice:"1:" %}{% include 'news/_home_desktop_cards.html' with posts=strip_posts %}{% endwith %}
+            {% else %}
+                {% include 'news/_home_desktop_cards.html' with posts=home_news.posts %}
+            {% endif %}
+            <!-- Карточка «Показать все новости» -->
+            <a href="{% url 'news_list' %}"
+               class="flex-shrink-0 w-72 rounded-2xl border border-gray-100 shadow-sm bg-gray-50 hover:bg-gray-100 transition flex flex-col items-center justify-center gap-3 text-center p-6 [scroll-snap-align:start]">
+                <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <i class="ri-arrow-right-line text-2xl text-primary"></i>
+                </div>
+                <span class="font-semibold text-gray-900">{% trans "Показать все новости" %}</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}

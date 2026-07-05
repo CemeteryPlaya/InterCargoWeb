@@ -366,6 +366,10 @@ def _merge_receipts(receipt_ids, items_for_date, owner_id, target_date, RATE):
                 ReceiptItem.objects.filter(receipt_id=rid).select_related('track_code')
             )
             if not remaining_items:
+                # Реестр QR: старый номер чека теперь ведёт на основной чек,
+                # чтобы напечатанный ранее QR-код можно было распознать.
+                from myprofile.models import ReceiptQrCode
+                ReceiptQrCode.objects.filter(receipt_id=rid).update(superseded_by=main_receipt)
                 # Удаляем пустой чек (и его связи с ExtraditionPackage)
                 Receipt.objects.filter(id=rid).delete()
             else:

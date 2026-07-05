@@ -15,6 +15,7 @@
     <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{% static 'scripts/scanNormalize.js' %}?v={{ APP_VERSION }}"></script>
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
@@ -74,6 +75,7 @@
                  id="acceptance-panel"
                  data-receipts-url="{% url 'get_acceptance_receipts' %}"
                  data-accept-url="{% url 'accept_delivery' %}"
+                 data-resolve-url="{% url 'resolve_receipt_qr' %}"
                  data-finish-url="{% url 'finish_acceptance_session' %}"
                  data-pickup-id="{{ pickup.id }}"
                  data-delivered-date="{{ date_str }}"
@@ -172,6 +174,7 @@
         var panel        = document.getElementById('acceptance-panel');
         var receiptsUrl  = panel.dataset.receiptsUrl;
         var acceptUrl    = panel.dataset.acceptUrl;
+        var resolveUrl   = panel.dataset.resolveUrl;
         var finishForm   = document.getElementById('finish-session-form');
         var csrfToken    = panel.dataset.csrf;
         var pickupId     = panel.dataset.pickupId;
@@ -405,15 +408,21 @@
 
         function onScanSuccess(decodedText) {
             if (scanProcessing) return;
-            var code = decodedText.trim();
+            // Нормализация: регистр, раскладка сканера, AIM-префикс
+            var matched = ScanNormalize.matchIn(allExpectedReceipts, decodedText);
+            var code = matched || ScanNormalize.normalize(decodedText);
             if (scannedReceipts.indexOf(code) !== -1) {
                 showError('Уже отсканирован: ' + code);
                 return;
             }
-            if (allExpectedReceipts.indexOf(code) === -1) {
-                showError('Неизвестный код: ' + code);
+            if (!matched) {
+                resolveUnknownCode(code);
                 return;
             }
+            acceptScannedCode(code);
+        }
+
+        function acceptScannedCode(code) {
             scanProcessing = true;
             setTimeout(function () { scanProcessing = false; }, 1500);
             scannedReceipts.push(code);
@@ -422,6 +431,42 @@
             showCellInfo(code);
             updateProgress();
             if (scannedReceipts.length >= allExpectedReceipts.length) onAllScanned();
+        }
+
+        // Код не входит в эту приёмку — спрашиваем сервер (реестр QR-кодов),
+        // что это за код, и показываем конкретную причину вместо «не найден».
+        function resolveUnknownCode(code) {
+            fetch(resolveUrl + '?code=' + encodeURIComponent(code), { credentials: 'same-origin' })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.status === 'superseded' && data.current_receipt_number) {
+                        var current = data.current_receipt_number;
+                        if (allExpectedReceipts.indexOf(current) !== -1 &&
+                                scannedReceipts.indexOf(current) === -1) {
+                            // Старый QR ведёт на актуальный чек этой приёмки — засчитываем
+                            acceptScannedCode(current);
+                            lastScanText.textContent = code + ' → заменён чеком ' + current + ' (засчитан)';
+                            lastScanEl.classList.remove('hidden');
+                            return;
+                        }
+                        showError('Чек ' + code + ' объединён в ' + current + ' — этот чек не входит в текущую приёмку.');
+                    } else if (data.status === 'found') {
+                        var details = [];
+                        if (data.owner_full_name || data.owner) details.push(data.owner_full_name || data.owner);
+                        if (data.pickup_point) details.push('ПВЗ: ' + data.pickup_point);
+                        if (data.delivered_dates && data.delivered_dates.length) details.push('приход: ' + data.delivered_dates.join(', '));
+                        if (data.is_accepted_pp) details.push('уже принят');
+                        if (data.is_claimed) details.push('уже выдан');
+                        showError('Чек ' + data.receipt_number + ' есть в системе, но не входит в эту приёмку (' + details.join(', ') + ').');
+                    } else if (data.status === 'archived') {
+                        showError('Чек ' + code + ' был удалён (архив реестра QR' + (data.archived_at ? ', ' + data.archived_at : '') + ').');
+                    } else {
+                        showError('QR-код ' + code + ' не найден в системе. Проверьте, созданы ли чеки в «Сводке прихода».');
+                    }
+                })
+                .catch(function () {
+                    showError('Неизвестный код: ' + code);
+                });
         }
 
         function onAllScanned() {

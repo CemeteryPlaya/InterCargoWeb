@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, CustomerDiscount,
+    TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, ReceiptQrCode, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
     DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog, RestructureSession,
     Arrival, ArrivalSession, ArrivalSessionItem, ContractViolation
@@ -163,6 +163,30 @@ class ReceiptItemAdmin(admin.ModelAdmin):
     search_fields = ('track_code__track_code', 'receipt__owner__username', 'receipt__receipt_number')
     list_filter = ('receipt__created_at',)
     autocomplete_fields = ('receipt', 'track_code')
+
+@admin.register(ReceiptQrCode)
+class ReceiptQrCodeAdmin(admin.ModelAdmin):
+    list_display = ('code', 'state_display', 'owner', 'receipt', 'superseded_by', 'created_at', 'archived_at')
+    list_filter = ('created_at', 'archived_at')
+    search_fields = ('code', 'owner__username', 'receipt__receipt_number', 'superseded_by__receipt_number')
+    readonly_fields = ('code', 'created_at', 'qr_preview')
+    autocomplete_fields = ('receipt', 'superseded_by')
+    ordering = ('-created_at',)
+
+    def state_display(self, obj):
+        if obj.is_active:
+            return "актуален"
+        if obj.superseded_by_id:
+            return f"заменён → {obj.superseded_by.receipt_number}"
+        return "архив"
+    state_display.short_description = "Состояние"
+
+    def qr_preview(self, obj):
+        from django.utils.html import format_html
+        return format_html('<img src="{}" alt="{}" style="width:120px;height:120px">',
+                           obj.get_qr_base64(), obj.code)
+    qr_preview.short_description = "QR-код"
+
 
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):

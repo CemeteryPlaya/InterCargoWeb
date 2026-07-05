@@ -95,6 +95,19 @@
             <i class="ri-tools-line"></i> {% trans "Сервис" %}
         </a>
         {% endif %}
+        {% if 'support_inbox' in nav_pages %}
+        <a href="{% url 'support_inbox' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-customer-service-2-line"></i> {% trans "Чаты поддержки" %}
+            {% if support_unread_total > 0 %}
+            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full text-white bg-red-500">{{ support_unread_total }}</span>
+            {% endif %}
+        </a>
+        {% endif %}
+        {% if 'news_management' in nav_pages %}
+        <a href="{% url 'news_manage' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-newspaper-line"></i> {% trans "Управление новостями" %}
+        </a>
+        {% endif %}
         {% if 'finance_summary' in nav_pages %}
         <a href="{% url 'finance_summary' %}" class="flex items-center gap-2 hover:text-red-500">
             <i class="ri-money-dollar-circle-line"></i> {% trans "Финансовая сводка" %}
@@ -147,6 +160,14 @@
         <a href="{% url 'notifications' %}" class="flex items-center gap-2 hover:text-red-500">
             <i class="ri-notification-3-line"></i> {% trans "Уведомления" %}
         </a>
+        {% if 'support_inbox' not in nav_pages %}
+        <a href="{% url 'support_chat' %}" class="flex items-center gap-2 hover:text-red-500">
+            <i class="ri-customer-service-2-line"></i> {% trans "Чат с поддержкой" %}
+            {% if support_unread_total > 0 %}
+            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full text-white bg-red-500">{{ support_unread_total }}</span>
+            {% endif %}
+        </a>
+        {% endif %}
         <a href="{% url 'settings' %}" class="flex items-center gap-2 hover:text-red-500">
             <i class="ri-settings-line"></i> {% trans "Настройки" %}
         </a>

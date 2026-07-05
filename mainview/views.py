@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from register.models import PickupPoint
+from news.services import home_news
 from tgbot.services import get_telegram_context, is_telegram_linked, get_or_create_link_url
 
 
 def index(request):
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
-    context = {'pickup_points': pickup_points}
+    context = {'pickup_points': pickup_points, 'home_news': home_news(request.user)}
 
     if request.user.is_authenticated:
         from myprofile.models import TrackCode

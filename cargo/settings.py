@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'tgbot',
     'dibuyer',
     'analytics',
+    'support',
+    'news',
     'django_q',
 ]
 
@@ -108,6 +110,7 @@ TEMPLATES = [
                 'mainview.context_processors.role_management_access',
                 'mainview.context_processors.nav_access',
                 'dibuyer.context_processors.dibuyer_enabled',
+                'support.context_processors.support_badges',
             ],
         },
     },

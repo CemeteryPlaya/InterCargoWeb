@@ -115,6 +115,8 @@ ASPECTS = (
     ('notifications',      'Уведомления и логи'),
     ('tg_bot',             'Telegram-бот (админ)'),
     ('service',            'Сервисные / админ-инструменты'),
+    ('support',            'Чат техподдержки (операторы)'),
+    ('news',               'Новости (публикации)'),
 )
 
 ASPECT_KEYS = tuple(k for k, _ in ASPECTS)
@@ -295,6 +297,8 @@ PAGES = {
     'extradition': 'Выдача посылок',
     'warehouse': 'Склад ПВЗ',
     'pp_extradition_history': 'История выдачи ПВЗ',
+    'support_inbox': 'Чаты поддержки (операторы)',
+    'news_management': 'Управление новостями',
 }
 ALL_PAGE_KEYS = frozenset(PAGES)
 
@@ -356,15 +360,25 @@ URLNAME_TO_PAGE = {
     'warehouse_reassign': 'warehouse', 'warehouse_assign_cell': 'warehouse',
     'warehouse_find_client_by_receipt': 'warehouse', 'finish_restructure': 'warehouse',
     'pp_extradition_history': 'pp_extradition_history',
+    'support_inbox': 'support_inbox', 'support_inbox_data': 'support_inbox',
+    'support_chat_messages': 'support_inbox', 'support_chat_claim': 'support_inbox',
+    'support_chat_reply': 'support_inbox', 'support_chat_read': 'support_inbox',
+    'support_chat_close': 'support_inbox', 'support_directors': 'support_inbox',
+    'support_chat_escalate': 'support_inbox', 'support_chat_return': 'support_inbox',
+    'news_manage': 'news_management', 'news_settings_save': 'news_management',
+    'news_category_save': 'news_management', 'news_category_delete': 'news_management',
+    'news_post_create': 'news_management', 'news_post_edit': 'news_management',
+    'news_post_toggle': 'news_management', 'news_post_delete': 'news_management',
 }
 
 # роль -> набор разрешённых page_key (помимо базовых страниц).
 ROLE_PAGES = {
     UserProfile.ROLE_MAIN_ADMIN: set(ALL_PAGE_KEYS),
-    UserProfile.ROLE_DIRECTOR: set(ALL_PAGE_KEYS) - {'role_management'},
+    UserProfile.ROLE_DIRECTOR: set(ALL_PAGE_KEYS) - {'role_management', 'news_management'},
     UserProfile.ROLE_SUPPORT: {
         'attention_required', 'shipped_cn', 'unidentified', 'confirm',
         'pickup_change_requests', 'pp_extradition_history', 'blocks_management',
+        'support_inbox',
     },
     UserProfile.ROLE_SORTING_PVZ: {
         'attention_required', 'shipped_cn', 'goods_arrival', 'unidentified',
@@ -389,7 +403,7 @@ FLAG_PAGES = {
 # Откат для пользователей БЕЗ новой роли: набор страниц для сайдбара по старым
 # флагам (чтобы не пропали ссылки до миграции). На enforcement НЕ влияет —
 # для безролевых middleware пропускает запрос (см. can_access_page).
-_LEGACY_OPERATOR_PAGES = set(ALL_PAGE_KEYS) - {'role_management', 'update_tracks'}
+_LEGACY_OPERATOR_PAGES = set(ALL_PAGE_KEYS) - {'role_management', 'update_tracks', 'news_management'}
 LEGACY_FLAG_PAGES = {
     'is_staff': _LEGACY_OPERATOR_PAGES,
     'is_pp_worker': {'pp_acceptance', 'extradition', 'warehouse', 'pp_extradition_history'},
@@ -413,6 +427,8 @@ ASPECT_TO_PAGES = {
     'users': {'confirm', 'pickup_change_requests'},
     'notifications': {'notification_logs', 'notification_mutes'},
     'track_updates': {'update_tracks'},
+    'support': {'support_inbox'},
+    'news': {'news_management'},
 }
 
 

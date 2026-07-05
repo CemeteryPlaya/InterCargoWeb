@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Inter Cargo - Уведомления" %}</title>
+    <title>{% trans "Inter Cargo - Сообщения" %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
@@ -17,6 +17,7 @@
     <script src="{% static 'scripts/phone.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/forms.js' %}?v={{ APP_VERSION }}"></script>
     <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <script src="{% static 'scripts/supportMobile.js' %}?v={{ APP_VERSION }}" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}"/>
     <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}"/>
@@ -34,9 +35,12 @@
         <!-- ===== Мобильная версия ===== -->
         <div id="notif-main" class="md:hidden">
 
-            <div class="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5">
-                <h1 class="text-lg font-bold text-center">{% trans "Уведомления" %}</h1>
+            <div class="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 mb-3">
+                <h1 class="text-lg font-bold text-center">{% trans "Сообщения" %}</h1>
             </div>
+
+            <!-- Чаты техподдержки -->
+            {% include 'support/_mobile_messages.html' %}
 
             <!-- Список категорий -->
             <div class="mx-4 mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden divide-y divide-gray-100">

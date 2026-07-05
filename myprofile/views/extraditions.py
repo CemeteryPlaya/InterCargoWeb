@@ -10,6 +10,7 @@ from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Receipt, StorageCell, TrackCode
+from myprofile.scan_utils import find_by_scan, normalize_scan_code
 from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
 from myprofile.receipt_lifecycle import issue_to_client as lifecycle_issue, ReceiptLifecycleError
 from register.models import UserProfile, PickupPoint
@@ -75,11 +76,11 @@ def extradition_view(request):
             messages.error(request, _("Введите штрихкод пакета."))
             return redirect('extradition')
 
-        try:
-            package = ExtraditionPackage.objects.get(barcode=barcode)
-        except ExtraditionPackage.DoesNotExist:
-            messages.error(request, f"Пакет с штрихкодом '{barcode}' не найден.")
+        package = find_by_scan(ExtraditionPackage.objects.all(), 'barcode', barcode)
+        if package is None:
+            messages.error(request, f"Пакет с штрихкодом '{normalize_scan_code(barcode)}' не найден.")
             return redirect('extradition')
+        barcode = package.barcode
 
         if package.is_issued:
             messages.warning(request, f"Пакет '{barcode}' уже был выдан.")
@@ -208,7 +209,9 @@ def search_package(request):
         return JsonResponse({'error': _('Введите штрихкод')}, status=400)
 
     try:
-        package = ExtraditionPackage.objects.get(barcode=barcode)
+        package = find_by_scan(ExtraditionPackage.objects.all(), 'barcode', barcode)
+        if package is None:
+            raise ExtraditionPackage.DoesNotExist
 
         receipts = package.receipts.prefetch_related('items__track_code').all()
 

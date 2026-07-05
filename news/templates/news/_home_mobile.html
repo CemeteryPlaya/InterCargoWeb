@@ -1,0 +1,37 @@
+{% load i18n %}
+{% if home_news %}
+<!-- Новости: мобильная свайп-карусель -->
+<div class="px-4 py-3" id="news-mobile">
+    <h2 class="text-base font-bold text-gray-900 mb-3">{% trans "Новости" %}</h2>
+    <div class="flex gap-3 overflow-x-auto -mx-4 px-4 pb-1 [scroll-snap-type:x_proximity] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {% for post in home_news.posts|slice:":5" %}
+        <a href="{% url 'news_detail' post.pk %}"
+           class="relative flex-shrink-0 w-[80vw] max-w-[320px] rounded-2xl overflow-hidden [scroll-snap-align:start] active:scale-[0.98] transition"
+           style="height:140px;">
+            {% if post.cover %}
+            <img src="{{ post.cover.url }}" alt="" loading="lazy" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10"></div>
+            {% else %}
+            <div class="w-full h-full" style="background:{{ post.category.color }};"></div>
+            <i class="{{ post.category.icon|default:'ri-newspaper-line' }} absolute right-3 top-3 text-white/30 text-4xl"></i>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            {% endif %}
+            <div class="absolute inset-x-0 bottom-0 p-3.5">
+                <span class="inline-block text-white text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1" style="background:{{ post.category.color }};">{{ post.category.name }}</span>
+                <p class="text-white font-semibold text-sm leading-snug line-clamp-2">{{ post.title }}</p>
+                <p class="text-white/60 text-[11px] mt-0.5">{{ post.published_at|date:"d.m.Y" }}</p>
+            </div>
+        </a>
+        {% endfor %}
+        <!-- Карточка «Показать все новости» -->
+        <a href="{% url 'news_list' %}"
+           class="flex-shrink-0 w-[60vw] max-w-[240px] rounded-2xl border border-gray-200 bg-white shadow-sm flex flex-col items-center justify-center gap-2 text-center [scroll-snap-align:start] active:scale-[0.98] transition"
+           style="height:140px;">
+            <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+                <i class="ri-arrow-right-line text-xl text-primary"></i>
+            </div>
+            <span class="text-sm font-semibold text-gray-900 px-3">{% trans "Показать все новости" %}</span>
+        </a>
+    </div>
+</div>
+{% endif %}
