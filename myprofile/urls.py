@@ -90,6 +90,7 @@ urlpatterns = [
     path('warehouse/inventory-session/update-cell/', inventory_session.inventory_scan_update_cell, name='inventory_scan_update_cell'),
     path('warehouse/inventory-session/add-legacy/', inventory_session.inventory_add_legacy, name='inventory_add_legacy'),
     path('warehouse/inventory-session/finish/', inventory_session.inventory_session_finish, name='inventory_session_finish'),
+    path('warehouse/inventory-session/cancel/', inventory_session.inventory_session_cancel, name='inventory_session_cancel'),
     path('warehouse/inventory-session/<int:session_id>/report/', inventory_session.inventory_session_report, name='inventory_session_report'),
     path('arrival-history/', arrival_history.arrival_history_view, name='arrival_history'),
     path('arrival-history/months/<int:year>/', arrival_history.arrival_history_months, name='arrival_history_months'),

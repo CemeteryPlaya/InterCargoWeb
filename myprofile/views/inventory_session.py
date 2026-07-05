@@ -517,6 +517,44 @@ def inventory_session_view(request, session_id):
 
 
 @login_required
+@require_POST
+def inventory_session_cancel(request):
+    """Отмена инвентаризации: полный откат — всё как до начала сессии.
+
+    Удаляются legacy-чеки/треки и созданные в сессии аккаунты (если у них
+    не появилось других данных). Ячейки и статусы не менялись по ходу
+    сессии, поэтому больше откатывать нечего.
+    """
+    if not _can_inventory(request.user):
+        return HttpResponseForbidden(_("У вас нет доступа."))
+    session = _get_active_session(request.POST.get('session_id'))
+    if session is None:
+        messages.error(request, _("Сессия не найдена или уже завершена."))
+        return redirect('warehouse')
+
+    with transaction.atomic():
+        legacy_receipt_ids = list(session.scans.filter(
+            is_legacy=True).values_list('receipt_id', flat=True))
+        legacy_track_ids = list(ReceiptItem.objects.filter(
+            receipt_id__in=legacy_receipt_ids, track_code__isnull=False,
+        ).values_list('track_code_id', flat=True))
+        session.scans.all().delete()
+        Receipt.objects.filter(id__in=legacy_receipt_ids).delete()
+        TrackCode.all_objects.filter(id__in=legacy_track_ids).delete()
+        for uid in session.created_user_ids:
+            user = User.objects.filter(id=uid).first()
+            if user and not TrackCode.all_objects.filter(owner=user).exists() \
+                    and not Receipt.objects.filter(owner=user).exists():
+                user.delete()
+        session.status = 'cancelled'
+        session.completed_at = timezone.now()
+        session.save(update_fields=['status', 'completed_at'])
+
+    messages.info(request, _("Инвентаризация отменена — изменения не применялись."))
+    return redirect('warehouse')
+
+
+@login_required
 def inventory_session_report(request, session_id):
     """Печатный отчёт завершённой (или отменённой) сессии инвентаризации."""
     if not _can_inventory(request.user):

@@ -322,3 +322,43 @@ class InventoryFinishTests(InventoryBase):
         self.assertNotEqual(receipt.status, 'claimed')
         tracks[0].refresh_from_db()
         self.assertEqual(tracks[0].status, 'ready')
+
+
+class InventoryCancelTests(InventoryBase):
+    def setUp(self):
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+
+    def test_cancel_rolls_back_legacy(self):
+        resp = self.c.post(reverse('inventory_add_legacy'), json.dumps({
+            'session_id': self.session.id,
+            'new_client': {'username': 'ghost', 'phone': '1'},
+            'track_count': 2, 'total_weight': '2.000', 'total_price': '2000',
+        }), content_type='application/json')
+        receipt_number = resp.json()['row']['receipt_number']
+        self.c.post(reverse('inventory_session_cancel'), {'session_id': self.session.id})
+        self.assertFalse(Receipt.objects.filter(receipt_number=receipt_number).exists())
+        self.assertFalse(TrackCode.all_objects.filter(track_code='GHOST-1').exists())
+        self.assertFalse(User.objects.filter(username='ghost').exists())
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.status, 'cancelled')
+        self.assertEqual(self.session.scans.count(), 0)
+
+    def test_cancel_keeps_existing_data(self):
+        receipt, tracks = self._make_receipt()
+        InventoryScan.objects.create(session=self.session, receipt=receipt, cell_number='1')
+        self.c.post(reverse('inventory_session_cancel'), {'session_id': self.session.id})
+        receipt.refresh_from_db(); tracks[0].refresh_from_db()
+        self.assertEqual(receipt.status, 'accepted_pvz')
+        self.assertEqual(tracks[0].status, 'ready')
+
+    def test_cancel_keeps_created_user_with_other_data(self):
+        self.c.post(reverse('inventory_add_legacy'), json.dumps({
+            'session_id': self.session.id,
+            'new_client': {'username': 'keeper', 'phone': '1'},
+            'track_count': 1, 'total_weight': '1.000', 'total_price': '100',
+        }), content_type='application/json')
+        keeper = User.objects.get(username='keeper')
+        TrackCode.objects.create(track_code='KEEP-EXTRA', status='ready', owner=keeper)
+        self.c.post(reverse('inventory_session_cancel'), {'session_id': self.session.id})
+        self.assertTrue(User.objects.filter(username='keeper').exists())
