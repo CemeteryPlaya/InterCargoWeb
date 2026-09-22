@@ -3,6 +3,9 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
+import logging
+
+logger = logging.getLogger(__name__)
 from django.core.mail import send_mail
 from django.conf import settings
 from register.models import PendingRegistration, UserProfile
@@ -92,8 +95,8 @@ def approve_registration(request, reg_id):
                 recipient_list=[reg.email],
                 fail_silently=True,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to send approval email to %s: %s", reg.email, e)
 
     reg.delete()
     messages.success(request, _("Пользователь успешно подтверждён."))
@@ -125,8 +128,9 @@ def reject_registration(request, reg_id):
                 recipient_list=[reg.email],
                 fail_silently=True,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning("Failed to send rejection email to %s: %s", reg.email, e)
 
     reg.delete()
     messages.success(request, _("Заявка отклонена."))

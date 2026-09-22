@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from myprofile.models import Receipt
 from decimal import Decimal, ROUND_HALF_UP
-from myprofile.views.utils import get_user_discount, get_global_price_per_kg, create_receipts_for_user
+from myprofile.views.utils import get_user_discount, get_global_price_per_kg, create_receipts_for_user, parse_paid_at
 from register.models import UserProfile
 from django.utils.translation import gettext as _
 
@@ -84,11 +84,11 @@ def receipt_list(request):
 @login_required
 def pay_receipt(request, receipt_id):
     receipt = get_object_or_404(Receipt, id=receipt_id, owner=request.user)
-    # PAYMENT COMMENTED OUT: оплата отключена
-    # if not receipt.is_paid:
-    #     receipt.is_paid = True
-    #     receipt.paid_at = parse_paid_at(request)
-    #     receipt.save()
+    # Restored: mark receipt as paid
+    if not receipt.is_paid:
+        receipt.is_paid = True
+        receipt.paid_at = parse_paid_at(request)
+        receipt.save()
     return redirect('delivered_posts')
 
 

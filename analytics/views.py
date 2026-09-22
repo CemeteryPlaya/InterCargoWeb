@@ -6,7 +6,6 @@ from django.db.models import Count, Min, Q, Sum
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from myprofile.permissions import require_staff
@@ -214,7 +213,6 @@ def dashboard(request):
     return render(request, 'analytics/dashboard.html', ctx)
 
 
-@csrf_exempt
 @require_POST
 def ping(request):
     """Принимает время на странице от beacon'а и сохраняет максимум по визиту."""

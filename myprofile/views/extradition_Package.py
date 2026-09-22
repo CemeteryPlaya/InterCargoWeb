@@ -34,6 +34,7 @@ def extradition_package_view(request):
     for pkg in packages:
         package_total = Decimal("0")
         receipts_data = []
+        all_paid = True
         for receipt in pkg.receipts.all():
             rate = receipt.price_per_kg if receipt.price_per_kg else Decimal("0")
             items_list = list(receipt.items.all())
@@ -46,9 +47,9 @@ def extradition_package_view(request):
             receipt.computed_weight = computed_weight
             receipt.computed_price = int((computed_weight * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
             package_total += receipt.computed_price
-            # PAYMENT COMMENTED OUT
-            # if not receipt.is_paid:
-            #     all_paid = False
+            # Security: track unpaid receipts for warning display
+            if not receipt.is_paid:
+                all_paid = False
             receipts_data.append(receipt)
 
         packages_with_barcodes.append({
@@ -56,7 +57,8 @@ def extradition_package_view(request):
             'qr_base64': pkg.get_qr_base64(),
             'receipts': receipts_data,
             'package_total': int(package_total),
-            # PAYMENT COMMENTED OUT: 'payment_link': payment_link if not all_paid else None,
+            # Restored: payment_link shown for unpaid packages
+            'payment_link': payment_link if not all_paid else None,
         })
 
     return render(request, "desktop/extradition_package.html", {

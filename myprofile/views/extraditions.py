@@ -28,9 +28,13 @@ def _next_fst_pkg_barcode():
 
     Защищено pg_advisory_xact_lock: вызывать ТОЛЬКО внутри transaction.atomic(),
     чтобы параллельные запросы не получили один и тот же номер.
+    На SQLite (локальная разработка) pg_advisory_xact_lock недоступен — используем
+    SERIALIZABLE isolation как fallback.
     """
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT pg_advisory_xact_lock(%s)", [_FST_PKG_BARCODE_LOCK_KEY])
+    if connection.vendor == 'postgresql':
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_xact_lock(%s)", [_FST_PKG_BARCODE_LOCK_KEY])
+    # On SQLite we rely on transaction.atomic() + select_for_update() fallback
     last = (
         ExtraditionPackage.objects
         .filter(barcode__startswith='FST-PKG-')
@@ -91,11 +95,11 @@ def extradition_view(request):
             messages.error(request, f"В пакете '{barcode}' нет чеков.")
             return redirect('extradition')
 
-        # PAYMENT COMMENTED OUT: проверка оплаты убрана
-        # unpaid = all_receipts.filter(is_paid=False)
-        # if unpaid.exists():
-        #     messages.error(request, f"Пакет '{barcode}' НЕ ОПЛАЧЕН! Выдача запрещена.")
-        #     return redirect('extradition')
+        # Security: verify all receipts are paid before allowing issue
+        unpaid = all_receipts.filter(is_paid=False)
+        if unpaid.exists():
+            messages.error(request, f"Пакет '{barcode}' НЕ ОПЛАЧЕН! Выдача запрещена.")
+            return redirect('extradition')
 
         with transaction.atomic():
             # Re-fetch with lock to prevent double-submit race condition
@@ -189,7 +193,8 @@ def extradition_view(request):
         if worker_pickup:
             sessions_qs = sessions_qs.filter(pickup_point=worker_pickup)
         context['sessions'] = list(sessions_qs)
-    except Exception:
+    except Exception as e:
+        logger.warning("Extradition list error for user %s: %s", request.user.id, e)
         context['sessions'] = []
 
     return render(request, "desktop/extraditions.html", context)

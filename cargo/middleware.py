@@ -1,3 +1,4 @@
+import logging
 from django.utils import translation
 
 
@@ -17,6 +18,7 @@ class SyncLanguageToProfileMiddleware:
                 if profile.language != lang:
                     profile.language = lang
                     profile.save(update_fields=['language'])
-            except Exception:
-                pass
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.warning("SyncLanguageToProfile error: %s", e)
         return response

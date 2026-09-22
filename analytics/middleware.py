@@ -5,9 +5,12 @@ Middleware на каждый «настоящий» переход (GET, HTML, 2
 который при уходе со страницы отправляет время, проведённое на ней.
 Аналитика не должна влиять на работу сайта — все ошибки проглатываются.
 """
+import logging
 from django.urls import Resolver404, resolve
 
 from .models import PageView
+
+logger = logging.getLogger(__name__)
 
 EXCLUDED_PREFIXES = (
     '/admin', '/static', '/media', '/analytics', '/rosetta', '/i18n',
@@ -33,8 +36,8 @@ class PageViewMiddleware:
         response = self.get_response(request)
         try:
             self._track(request, response)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("PageView tracking error: %s", e)
         return response
 
     def _trackable(self, request, response):

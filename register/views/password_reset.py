@@ -51,9 +51,9 @@ def password_reset_request(request):
             return JsonResponse({'error': _('Введите логин.')}, status=400)
 
         user = _find_user(identifier)
+        # Anti-enumeration: всегда возвращаем success, даже если пользователь не найден
         if not user:
-            return JsonResponse({'error': _('Пользователь не найден.')}, status=404)
-
+            return JsonResponse({'success': True})
         if not user.email:
             return JsonResponse({'error': _('К этому аккаунту не привязан email. Обратитесь в поддержку.')}, status=400)
 

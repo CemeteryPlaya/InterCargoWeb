@@ -11,12 +11,23 @@ from django.utils.translation import gettext as _
 
 
 def _safe_next_url(request, fallback='track_codes'):
-    """Возвращает безопасный URL из POST['next'] или fallback-имя маршрута."""
+    """Возвращает безопасный URL из POST['next'] или fallback-имя маршрута.
+
+    Строго только относительные пути (начинаются с /), без протокольно-относительных
+    URL (//host или /\\host) — это предотвращает обход через /\evil.com.
+    """
     next_url = request.POST.get('next', '').strip()
-    if next_url and url_has_allowed_host_and_scheme(
-        next_url, allowed_hosts={request.get_host()}
-    ):
-        return next_url
+    if next_url:
+        # Reject protocol-relative URLs: //evil.com or /\evil.com
+        if next_url.startswith('//') or next_url.startswith('/\\'):
+            return None
+        # Must be a relative path
+        if not next_url.startswith('/'):
+            return None
+        if url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}
+        ):
+            return next_url
     return None
 
 
