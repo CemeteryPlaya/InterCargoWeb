@@ -66,13 +66,14 @@ def approve_registration(request, reg_id):
                 is_registered=True,
             )
     else:
-        # Создаём нового User — password уже захеширован
-        user = User.objects.create_user(
+        # Создаём нового User — password уже захеширован (make_password в reg.py)
+        # Используем User.objects.create() чтобы не вызвать set_password() повторно
+        user = User.objects.create(
             username=reg.login,
-            password=reg.password,
             first_name=reg.first_name,
             last_name=reg.last_name,
-            email=reg.email
+            email=reg.email,
+            password=reg.password,  # Уже захеширован
         )
         UserProfile.objects.create(
             user=user,

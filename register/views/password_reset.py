@@ -52,10 +52,8 @@ def password_reset_request(request):
 
         user = _find_user(identifier)
         # Anti-enumeration: всегда возвращаем success, даже если пользователь не найден
-        if not user:
+        if not user or not user.email:
             return JsonResponse({'success': True})
-        if not user.email:
-            return JsonResponse({'error': _('К этому аккаунту не привязан email. Обратитесь в поддержку.')}, status=400)
 
         # Rate limit: 1 минута между отправками
         now = timezone.now()
@@ -81,19 +79,16 @@ def password_reset_request(request):
                 fail_silently=False,
             )
         except Exception as e:
+            # Anti-enumeration: log error but still return success
+            # (same response as for nonexistent users — don't reveal email failure)
             logger.error(f"Ошибка отправки кода сброса пароля пользователю {user.username}: {e}")
-            return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=500)
 
         # Сохраняем в сессию
         request.session['reset_user_id'] = user.id
         request.session['reset_masked_login'] = _mask_login(user.username)
         request.session['reset_masked_email'] = _mask_email(user.email)
 
-        return JsonResponse({
-            'success': True,
-            'masked_login': _mask_login(user.username),
-            'masked_email': _mask_email(user.email),
-        })
+        return JsonResponse({'success': True})
 
     return render(request, 'desktop/password_reset.html')
 

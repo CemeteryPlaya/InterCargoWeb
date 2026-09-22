@@ -8,7 +8,6 @@ from django.utils import timezone
 from datetime import timedelta
 from register.models import UserProfile, LoginAttempt, BlockHistory
 from django.utils.translation import gettext as _
-from django.utils.http import url_has_allowed_host_and_scheme
 
 MAX_LOGIN_ATTEMPTS = 10
 LOCKOUT_MINUTES = 30
