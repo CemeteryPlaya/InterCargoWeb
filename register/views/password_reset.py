@@ -1,4 +1,4 @@
-import random
+import secrets
 import logging
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -30,17 +30,17 @@ def _mask_email(email):
 
 
 def _generate_code():
-    """Генерирует код вида 123-456"""
-    digits = random.randint(100000, 999999)
+    """Генерирует криптографически безопасный код вида 123-456"""
+    digits = secrets.randbelow(900000) + 100000
     return f"{digits // 1000:03d}-{digits % 1000:03d}"
 
 
 def _find_user(identifier):
-    """Ищет пользователя по логину."""
+    """Ищет пользователя по логину (регистронезависимо)."""
     identifier = identifier.strip()
     if not identifier:
         return None
-    return User.objects.filter(username=identifier.upper()).first()
+    return User.objects.filter(username__iexact=identifier).first()
 
 
 def password_reset_request(request):

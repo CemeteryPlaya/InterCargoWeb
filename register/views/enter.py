@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 from register.models import UserProfile, LoginAttempt, BlockHistory
 from django.utils.translation import gettext as _
+from django.utils.http import url_has_allowed_host_and_scheme
 
 MAX_LOGIN_ATTEMPTS = 10
 LOCKOUT_MINUTES = 30
@@ -65,7 +66,7 @@ def login_view(request):
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         email = request.POST.get('email', '').strip().lower()
-        username = request.POST.get('login', '').strip().upper()
+        username = request.POST.get('login', '').strip()
         password = request.POST.get('password', '').strip()
 
         # Определяем идентификатор для rate limiting

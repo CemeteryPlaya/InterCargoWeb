@@ -1,6 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
 from django.conf import settings
 from register.models import PendingRegistration, UserProfile
@@ -28,17 +30,18 @@ def confirm_view(request):
     return render(request, 'desktop/register_confirmation.html', {"registrations": registrations})
 
 
+@require_POST
 def approve_registration(request, reg_id):
     if not _can_confirm(request.user):
         return redirect('profile')
 
-    reg = PendingRegistration.objects.get(id=reg_id)
+    reg = get_object_or_404(PendingRegistration, id=reg_id)
 
     # Проверяем: есть ли неактивный User (созданный при приходе товаров)
     existing_user = User.objects.filter(username=reg.login).first()
     if existing_user and not existing_user.is_active:
-        # Обновляем существующего пользователя
-        existing_user.set_password(reg.password)
+        # password хранится в уже захешированном виде (make_password в reg.py)
+        existing_user.password = reg.password
         existing_user.first_name = reg.first_name
         existing_user.last_name = reg.last_name
         existing_user.email = reg.email
@@ -60,7 +63,7 @@ def approve_registration(request, reg_id):
                 is_registered=True,
             )
     else:
-        # Создаём нового User
+        # Создаём нового User — password уже захеширован
         user = User.objects.create_user(
             username=reg.login,
             password=reg.password,
@@ -97,12 +100,13 @@ def approve_registration(request, reg_id):
     return redirect('confirm')
 
 
+@require_POST
 def reject_registration(request, reg_id):
     if not _can_confirm(request.user):
         return redirect('profile')
 
-    reg = PendingRegistration.objects.get(id=reg_id)
-    reason = request.POST.get('reason', '').strip() if request.method == 'POST' else ''
+    reg = get_object_or_404(PendingRegistration, id=reg_id)
+    reason = request.POST.get('reason', '').strip()
 
     # Отправляем email об отклонении
     if reg.email:

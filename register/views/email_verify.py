@@ -1,4 +1,4 @@
-import random
+import secrets
 import logging
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 def _generate_code():
-    """Генерирует код вида 123-456"""
-    digits = random.randint(100000, 999999)
+    """Генерирует криптографически безопасный код вида 123-456"""
+    digits = secrets.randbelow(900000) + 100000
     return f"{digits // 1000:03d}-{digits % 1000:03d}"
 
 

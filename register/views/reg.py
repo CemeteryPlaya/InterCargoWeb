@@ -9,7 +9,7 @@ from myprofile.views.utils import notify_in_user_language
 def pre_register(request):
     pickup_points = PickupPoint.objects.filter(is_active=True, show_in_registration=True)
     if request.method == 'POST':
-        login = request.POST.get('login', '').upper()
+        login = request.POST.get('login', '').strip()
         phone = request.POST.get('phone')
         pickup = request.POST.get('pickup')
 
@@ -58,7 +58,7 @@ def _render_registration(request, username, phone, pickup_id, first_name, last_n
 
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('login', '').upper()
+        username = request.POST.get('login', '').strip()
         password = request.POST.get('password')
         phone = request.POST.get('phone')
         email = request.POST.get('email', '').strip().lower()
@@ -137,13 +137,18 @@ def register_view(request):
             messages.success(request, _("Регистрация прошла успешно! Вы можете войти в систему."))
             return redirect('login')
 
+        from django.contrib.auth.hashers import make_password
+
+        # Хэшируем пароль перед сохранением в PendingRegistration
+        hashed_password = make_password(password)
+
         # Создаём заявку на подтверждение HR
         PendingRegistration.objects.create(
             login=username,
             phone=phone,
             email=email,
             pickup=pickup_point,
-            password=password,
+            password=hashed_password,
             first_name=first_name,
             last_name=last_name
         )
