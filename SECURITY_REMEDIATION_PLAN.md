@@ -3,6 +3,30 @@
 **Branch:** `upgrade-protection` (local only)
 **Base:** `main` @ commit `281732e 1.5.5`
 **Goal:** Fix all 15 identified vulnerabilities without breaking existing site functionality.
+
+## Production Verification (DEBUG=False on local server port 8005)
+
+Tested live with `DJANGO_DEBUG=False` against running Django 5.2.7 server:
+
+| Attack | DEBUG=True | DEBUG=False (production) |
+|--------|-----------|-------------------------|
+| Debug page info leak | ✅ Exploitable (full stack traces) | ❌ Not exploitable (standard 404/500 pages) |
+| Session forgery | ✅ HTTP 200 admin | ✅ HTTP 200 admin (requires `_auth_user_hash`) |
+| CSRF token forgery | ✅ Forged token works | ✅ Implied by same SECRET_KEY leak |
+| GET-based CSRF (registration) | ✅ Account activated via GET | ✅ Account activated via GET + forged session |
+| Payment bypass | ✅ Commented out in code | ✅ Same code, same vuln |
+| Open redirect | ✅ Bypassed `startswith('/')` | ✅ Same vuln |
+| User enumeration | ✅ Differential errors | ✅ Same vuln |
+| Insecure tokens | ✅ `random.randint()` | ✅ Same code |
+| Plaintext passwords | ✅ CharField unhashed | ✅ Same code |
+| DDoS | ✅ 19.5 req/s, 17.7% fail | ✅ Same server, same vuln |
+| Login `.upper()` bug | ✅ Code unchanged | ✅ Same code |
+
+**Critical correction:** Session forgery requires `_auth_user_hash` (Django checks this even in production). The attacker computes it from `user.password` + `SECRET_KEY`. Attack chain:
+1. Leak `SECRET_KEY` (from `.env` file exposure or path traversal)
+2. Read admin `password` hash from database (via SQLi, DB dump, or admin access)
+3. Compute `_auth_user_hash = admin.get_session_auth_hash()`
+4. Forge session → **admin panel HTTP 200** (confirmed with DEBUG=False)
 **Constraint:** No remote push; all commits are local only.
 
 ---
@@ -19,9 +43,11 @@
 ### 1.1 Set `DEBUG=False` in production
 **File:** `cargo/settings.py`
 
-**Changes:**
+**Already configured correctly in production settings:** `DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"` — defaults to False.
+**Verified:** With DEBUG=False, 404/500 pages show standard error messages (no stack traces, no file paths, no env variables exposed).
+
+**Additional hardening:**
 - Split settings into `settings_dev.py` (DEBUG=True) and `settings_prod.py` (DEBUG=False) — OR
-- Use environment variable: `DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'`
 - Add `ALLOWED_HOSTS` validation — read from env var, fail closed if not set in production
 
 **Non-breaking:** Dev workflow continues using `settings_dev.py` or `DJANGO_DEBUG=True` env var.
@@ -99,7 +125,25 @@ SECURE_HSTS_SECONDS = 31536000   # 1 year HSTS
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 ```
 
-**Non-breaking:** Only active when DEBUG=False (HTTPS). Dev environment unchanged.
+**Non-breaking:** Dev environment (DEBUG=True, HTTP) is unaffected.
+
+### 2.5 Add session security monitoring
+**File:** `cargo/settings.py`
+
+**Changes (production)**
+```python
+# Detect session tampering — if SECRET_KEY changes, existing sessions are invalidated
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_SAVE_EVERY_REQUEST = False  # Reduces DB load
+
+# Logout on password change (Django has this built-in, verify it's enabled)
+# Django's SessionAuthenticationMiddleware auto-invalidates on password change
+# for the cookie backend. For db backend, ensure PasswordChangeForm calls
+# session.cycle_key() or use django.contrib.auth.logout() on password change.
+```
+
+**Rationale:** Even with a leaked SECRET_KEY, if the admin changes their password, all existing sessions should be invalidated. Django's default `PasswordChangeForm` calls `update_session_auth_hash()` which cycles the session hash. Ensure this is enabled.
 
 ---
 
@@ -297,3 +341,18 @@ python manage.py test --settings=cargo.settings_test
 | `feat: add rate limiting with django-ratelimit` | Phase 6.1 |
 | `feat: add HSTS and HTTPS security headers` | Phase 6.2 |
 | `test: add security regression tests` | Phase 7.1 |
+| `docs: add production verification results to plan` | Updated with DEBUG=False testing |
+
+---
+
+## Production Testing Notes (verified 2026-09-22)
+
+**Test environment:** Django 5.2.7, SQLite3, `DJANGO_DEBUG=False`, port 8005
+
+**Verified working with DEBUG=False:**
+- Forged admin session (with `_auth_user_hash`) → `/admin/` returns HTTP 200
+- Forged session → `/admin/auth/user/` returns HTTP 200 (user list)
+- GET-based CSRF: `/register/confirm/approve/<id>/` with forged session → account activated, redirected to `/register/confirm/`
+- Debug pages: NOT exploitable (standard 404/500 pages returned)
+
+**Key insight:** Session forgery requires NOT only `_auth_user_id` and `_auth_user_backend`, but also `_auth_user_hash` (Django's `AuthenticationMiddleware` checks this). The hash is computed from `user.password` (PBKDF2 hash) + `SECRET_KEY`. If the attacker has both (e.g., via `.env` leak + DB access), they can forge any user's session.
