@@ -3,16 +3,19 @@
 Production Site Health Monitor for InterCargoWeb.
 
 Standalone script that runs on the production server via system crontab.
-Look up your Telegram chat ID by username (SANZHAR0802) in the Django DB,
-check if the site is alive, and send a Telegram alert if it's down.
+Checks two things every 5 minutes:
+  1. Server uptime — pings https://cargointer.kz/
+  2. Data integrity — scans for NEW ContractViolation records
 
-NO dependency on Hermes — works purely from the production server.
+If either check fails, sends a Telegram alert to your chat.
 
 Installation (on production server):
   1. Place this script at: /opt/cargo/monitor.py
   2. Ensure .env with TELEGRAM_BOT_TOKEN is at /opt/cargo/.env
   3. Add to crontab (crontab -e):
      */5 * * * * /usr/bin/python3 /opt/cargo/monitor.py >> /var/log/cargo_health.log 2>&1
+
+NO dependency on Hermes — works purely from the production server with Django ORM.
 """
 import os
 import sys
@@ -20,18 +23,21 @@ import json
 import urllib.request
 import urllib.error
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
-# --- CONFIGURATION ---
-LOGIN_USERNAME = "SANZHAR0802"         # User's login on the site
+# ─── Configuration ───────────────────────────────────────────────────────────
+LOGIN_USERNAME = "SANZHAR0802"               # Your login on the site
 SITE_URL = "https://cargointer.kz/"
-CHECK_TIMEOUT = 15                     # seconds to wait for site response
-# Fallback chat ID if DB lookup fails (your known chat ID)
-FALLBACK_CHAT_ID = 733256345
+CHECK_INTERVAL_MINUTES = 5                   # How often this script runs via cron
+CHECK_TIMEOUT = 15                           # Seconds to wait for site response
+STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "monitor_state.json")  # Tracks last-seen violation IDs
+FALLBACK_CHAT_ID = 733256345                 # Your known Telegram chat ID
 
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
+
+# ─── Env & DB helpers ────────────────────────────────────────────────────────
 
 def load_env(path=".env"):
     """Load .env file into dict."""
@@ -46,51 +52,51 @@ def load_env(path=".env"):
     return env
 
 
-def get_telegram_chat_id():
+def setup_django():
+    """Set up Django environment for ORM access."""
+    env = load_env()
+    if not env:
+        env = load_env("../../.env")
+    settings_module = env.get('DJANGO_SETTINGS_MODULE', 'cargo.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+    if os.getcwd() not in sys.path:
+        sys.path.insert(0, os.getcwd())
+    import django
+    django.setup()
+    return env
+
+
+# ─── Telegram ────────────────────────────────────────────────────────────────
+
+def get_telegram_config():
     """
-    Look up Telegram chat ID from the database by username.
-    Falls back to FALLBACK_CHAT_ID if DB lookup fails.
+    Look up Telegram bot token and chat ID.
+    Tries DB lookup by username (SANZHAR0802), falls back to env + hardcoded.
+    Returns (bot_token, chat_id, lookup_info) or (None, None, error_msg).
     """
     env = load_env()
     token = env.get('TELEGRAM_BOT_TOKEN', '')
 
     if not token:
-        return None, FALLBACK_CHAT_ID, "TELEGRAM_BOT_TOKEN not found in .env"
+        return None, None, "TELEGRAM_BOT_TOKEN not found in .env"
 
-    # Try to look up via Django ORM
+    # Try DB lookup for user SANZHAR0802
+    chat_id = None
     try:
-        # Set Django settings module
-        settings_module = env.get('DJANGO_SETTINGS_MODULE', 'cargo.settings')
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
-
-        # Add current directory to Python path
-        if os.getcwd() not in sys.path:
-            sys.path.insert(0, os.getcwd())
-
-        import django
-        django.setup()
-
+        setup_django()
         from django.contrib.auth import get_user_model
         User = get_user_model()
-
-        try:
-            user = User.objects.get(username=LOGIN_USERNAME)
-            profile = user.telegram_profile
-            chat_id = profile.telegram_chat_id
-            tg_username = profile.telegram_username or "N/A"
-            return token, chat_id, f"Found via DB: user={user.username}, tg_user=@{tg_username}"
-        except Exception as e:
-            return token, FALLBACK_CHAT_ID, f"DB lookup failed ({e}), using fallback chat_id"
-
-    except ImportError:
-        return token, FALLBACK_CHAT_ID, "Django not available, using fallback chat_id"
+        user = User.objects.get(username=LOGIN_USERNAME)
+        profile = user.telegram_profile
+        chat_id = profile.telegram_chat_id
+        return token, chat_id, f"DB lookup: @{profile.telegram_username} (user={LOGIN_USERNAME})"
     except Exception as e:
-        return token, FALLBACK_CHAT_ID, f"DB error ({e}), using fallback chat_id"
+        return token, FALLBACK_CHAT_ID, f"DB lookup failed ({e}); using fallback chat_id={FALLBACK_CHAT_ID}"
 
 
-def send_telegram_message(token, chat_id, text):
+def send_telegram_message(bot_token, chat_id, text):
     """Send a message via Telegram Bot API."""
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     data = urllib.parse.urlencode({
         'chat_id': chat_id,
         'text': text,
@@ -103,13 +109,15 @@ def send_telegram_message(token, chat_id, text):
         return json.loads(resp.read().decode('utf-8'))
 
 
+# ─── Health check ────────────────────────────────────────────────────────────
+
 def check_site(url, timeout=15):
-    """Check if site is alive. Returns (is_alive, status_code, error)."""
+    """Check if site is alive. Returns (is_alive, status_code, error_message)."""
     try:
-        req = urllib.request.Request(
-            url,
-            headers={'User-Agent': USER_AGENT, 'Accept': 'text/html,*/*'}
-        )
+        req = urllib.request.Request(url, headers={
+            'User-Agent': USER_AGENT,
+            'Accept': 'text/html,*/*'
+        })
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             status = resp.getcode()
             if 200 <= status < 500:
@@ -125,48 +133,173 @@ def check_site(url, timeout=15):
         return False, 0, f"Unexpected error: {e}"
 
 
+# ─── Contract violation check ────────────────────────────────────────────────
+
+def load_state():
+    """Load the state file (tracks which violation IDs have been reported)."""
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"last_notified_violation_id": 0, "last_check": None}
+
+
+def save_state(state):
+    """Save state file."""
+    try:
+        os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        with open(STATE_FILE, 'w') as f:
+            json.dump(state, f, indent=2)
+    except Exception:
+        pass
+
+
+def check_contract_violations():
+    """
+    Scan for NEW ContractViolation records since last check.
+    Returns (list_of_violations, timestamp) or (None, error_msg) if DB not accessible.
+    """
+    try:
+        setup_django()
+        from myprofile.models import ContractViolation
+        from django.utils import timezone
+
+        now = timezone.now()
+        since = now - timedelta(minutes=CHECK_INTERVAL_MINUTES + 1)  # +1 for safety
+
+        new_violations = list(ContractViolation.objects.filter(
+            created_at__gte=since
+        ).order_by('-created_at')[:20])
+
+        result = []
+        for v in new_violations:
+            result.append({
+                'id': v.id,
+                'created_at': v.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'severity': v.severity,
+                'function': v.function,
+                'contract': v.contract,
+                'message': v.message,
+                'resolved': v.resolved,
+            })
+        return result, now.strftime('%Y-%m-%d %H:%M:%S')
+
+    except Exception as e:
+        return None, str(e)
+
+
+# ─── Main ────────────────────────────────────────────────────────────────────
+
 def main():
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    state = load_state()
+
+    # ─── 1. Server health check ───
     is_alive, status, error = check_site(SITE_URL, CHECK_TIMEOUT)
 
-    if is_alive:
-        # Site is alive — silent (watchdog pattern: no output on success)
-        sys.exit(0)
+    if not is_alive:
+        # Site is DOWN — this is critical
+        bot_token, chat_id, lookup_info = get_telegram_config()
 
-    # Site is DOWN — send Telegram alert
-    bot_token, chat_id, lookup_info = get_telegram_chat_id()
+        if bot_token:
+            alert_text = (
+                f"🚨 <b>INTERCARGO САЙТ УПАЛ!</b>\n\n"
+                f"<b>URL:</b> {SITE_URL}\n"
+                f"<b>Статус:</b> {status or 'no response'}\n"
+                f"<b>Ошибка:</b> {error}\n"
+                f"<b>Время:</b> {timestamp}\n\n"
+                f"<b>Получатель:</b> {lookup_info}\n\n"
+                f"<b>Действия:</b>\n"
+                f"1. systemctl status gunicorn\n"
+                f"2. systemctl status nginx\n"
+                f"3. journalctl -u gunicorn -n 50 --no-pager\n"
+                f"4. python manage.py check --deploy"
+            )
+            try:
+                result = send_telegram_message(bot_token, chat_id, alert_text)
+                if result.get('ok'):
+                    print(f"[{timestamp}] ✅ Server-down alert sent to Telegram chat {chat_id}", file=sys.stderr)
+                else:
+                    print(f"[{timestamp}] ❌ Telegram error: {result.get('description')}", file=sys.stderr)
+            except Exception as e:
+                print(f"[{timestamp}] ❌ Telegram API error: {e}", file=sys.stderr)
+        else:
+            print(f"[{timestamp}] ❌ Site DOWN — {error} — bot token not set", file=sys.stderr)
 
-    if not bot_token:
-        print(f"[{timestamp}] ❌ Site {SITE_URL} is DOWN — {error}", file=sys.stderr)
-        print(f"  TELEGRAM_BOT_TOKEN not set — alert NOT sent", file=sys.stderr)
         sys.exit(1)
 
+    # Site is alive — silent (watchdog: no output on success for server check)
+
+    # ─── 2. Contract violation check ───
+    violations, check_info = check_contract_violations()
+
+    if violations is None:
+        # DB not accessible — skip (could be DB restart during deploy)
+        print(f"[{timestamp}] ⚠️ ContractViolation DB check skipped: {check_info}", file=sys.stderr)
+        sys.exit(0)
+
+    if not violations:
+        # No new violations — silent (watchdog pattern)
+        sys.exit(0)
+
+    # Filter out already-notified violations (dedupe using state file)
+    last_notified_id = state.get("last_notified_violation_id", 0)
+    new_unreported = [v for v in violations if v['id'] > last_notified_id]
+
+    if not new_unreported:
+        # All violations were already reported
+        sys.exit(0)
+
+    # Update state with the highest ID we've seen
+    max_id = max(v['id'] for v in violations)
+    state["last_notified_violation_id"] = max_id
+    state["last_check"] = check_info
+    save_state(state)
+
+    # Send alert
+    bot_token, chat_id, lookup_info = get_telegram_config()
+
+    if not bot_token:
+        print(f"[{timestamp}] ⚠️ {len(new_unreported)} new ContractViolation(s) — but bot token not set", file=sys.stderr)
+        for v in new_unreported:
+            print(f"  [{v['severity']}] [{v['created_at']}] {v['function']} :: {v['contract']} — {v['message']}", file=sys.stderr)
+        sys.exit(0)
+
+    # Format message for Telegram
+    msg_lines = []
+    for v in new_unreported[:10]:  # Cap at 10 in message
+        emoji = "🔴" if v['severity'] == 'critical' else "🟡"
+        msg_lines.append(
+            f"{emoji} <b>{v['severity'].upper()}</b>\n"
+            f"  Функция: <code>{v['function']}</code>\n"
+            f"  Контракт: <code>{v['contract']}</code>\n"
+            f"  Сообщение: {v['message']}\n"
+            f"  Время: {v['created_at']}"
+        )
+
+    if len(new_unreported) > 10:
+        msg_lines.append(f"\n... и ещё {len(new_unreported) - 10} нарушений")
+
     alert_text = (
-        f"🚨 <b>INTERCARGO САЙТ УПАЛ!</b>\n\n"
-        f"<b>URL:</b> {SITE_URL}\n"
-        f"<b>Статус:</b> {status or 'no response'}\n"
-        f"<b>Ошибка:</b> {error}\n"
-        f"<b>Время:</b> {timestamp}\n"
-        f"<b>Получатель:</b> {lookup_info}\n\n"
-        f"<b>Действия:</b>\n"
-        f"1. systemctl status gunicorn\n"
-        f"2. systemctl status nginx\n"
-        f"3. journalctl -u gunicorn -n 50 --no-pager\n"
-        f"4. Проверить SSH доступность сервера\n"
-        f"5. python manage.py check --deploy"
+        f"⚠️ <b>Новые нарушения контракта данных</b>\n"
+        f"Количество: {len(new_unreported)}\n"
+        f"Сайт: {SITE_URL}\n\n"
+        f"{chr(10).join(msg_lines)}\n\n"
+        f"<i>Журнал: /admin/myprofile/contractviolation/</i>"
     )
 
     try:
         result = send_telegram_message(bot_token, chat_id, alert_text)
         if result.get('ok'):
-            print(f"[{timestamp}] ✅ Alert sent to Telegram chat {chat_id}", file=sys.stderr)
-            sys.exit(0)
+            print(f"[{timestamp}] ✅ ContractViolation alert sent ({len(new_unreported)} new)", file=sys.stderr)
         else:
             print(f"[{timestamp}] ❌ Telegram error: {result.get('description')}", file=sys.stderr)
-            sys.exit(1)
     except Exception as e:
         print(f"[{timestamp}] ❌ Telegram API error: {e}", file=sys.stderr)
-        sys.exit(1)
+
+    sys.exit(0)
 
 
 if __name__ == '__main__':
