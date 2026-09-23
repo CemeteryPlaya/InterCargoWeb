@@ -1,0 +1,17 @@
+# Crontab entry for production server
+# Install with: crontab -e
+#
+# Run health check every 5 minutes
+# Outputs alert to stdout when site is down (watchdog pattern: silent on success)
+*/5 * * * * BOT_TOKEN="ВАШ_ТОКЕН_БОТА" CHAT_ID="733256345" /bin/bash /opt/cargo/check_health.sh >> /var/log/cargo_health.log 2>&1
+
+# Alternative: without BOT_TOKEN (Hermes handles Telegram delivery)
+# */5 * * * * /bin/bash /opt/cargo/check_health.sh
+
+# Installation instructions:
+#   1. scp check_health.sh user@server:/opt/cargo/
+#   2. chmod +x /opt/cargo/check_health.sh
+#   3. Create bot via @BotFather → get token
+#   4. Replace YOUR_TOKEN_BOT in the crontab line above
+#   5. crontab -e → paste the line
+#   6. Test: /bin/bash /opt/cargo/check_health.sh
