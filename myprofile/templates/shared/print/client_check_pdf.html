@@ -99,6 +99,18 @@
     </div>
     {% endif %}
 
+    {% if excluded_checks %}
+    <div class="no-print" style="margin:8px 0;padding:10px 14px;border-radius:8px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif;">
+        ⚠ {% trans "Не напечатаны — чек оформлен на другой ПВЗ" %}: <b>{{ excluded_checks|length }}</b>.
+        {% trans "Проверьте, где находятся эти посылки, прежде чем отправлять их в пункт." %}
+        <ul style="margin:6px 0 0 18px;padding:0;">
+            {% for check in excluded_checks %}
+            <li>{{ check.username }} — {% trans "чек" %} {{ check.qr_number|default:"—" }} — {% trans "ПВЗ в чеке" %}: {{ check.address|default:"—" }} ({% trans "позиций" %}: {{ check.total_count }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     {% if check_template == 'mini1' %}
     {# ===== Мини-этикетка 1 (уменьшенная): табличный вид ===== #}
     {% for check in checks %}

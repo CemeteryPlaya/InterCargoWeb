@@ -23,6 +23,8 @@ from myprofile.views.utils import (
     is_staff as _is_staff, create_receipts_for_user,
     _recalc_receipt,
 )
+from myprofile.execution_validator.receipt_contracts import resolved_pickup_obj
+from myprofile.receipt_pickup import move_item_to_pending_receipt, sync_pending_receipts_for_user
 from register.models import UserProfile
 from django.utils.translation import gettext as _
 
@@ -214,26 +216,39 @@ def service_normalize_receipts(request):
 
     for owner_key, items in owner_items.items():
         try:
-            # Все чеки, в которых участвуют эти items
-            receipt_ids = set(item.receipt_id for item in items)
-            if len(receipt_ids) <= 1:
-                # Один чек — проверяем нет ли в нём «чужих» items (за другую дату)
-                receipt = items[0].receipt
-                all_receipt_items = list(receipt.items.select_related('track_code').all())
-                foreign_items = [
-                    ri for ri in all_receipt_items
-                    if ri.track_code.delivered_date != target_date
-                ]
-                if not foreign_items:
-                    continue  # Чек уже нормализован
+            # Решение D4: уехавшие/выданные чеки заморожены — нормализуем только pending.
+            pending_items = [item for item in items if item.receipt.status == 'pending']
+            if not pending_items:
+                continue
 
-                # Выносим «чужие» items в отдельный чек
-                _split_foreign_items(receipt, foreign_items, owner_key, RATE)
-                split_count += 1
-            else:
-                # Несколько чеков за одну дату — объединяем
-                _merge_receipts(receipt_ids, items, owner_key, target_date, RATE)
+            # Несколько pending-чеков одного ПВЗ за дату — объединяем (D5);
+            # чеки разных ПВЗ законно раздельны (D2).
+            by_pickup = defaultdict(list)
+            for item in pending_items:
+                pickup = resolved_pickup_obj(item.track_code)
+                by_pickup[pickup.id if pickup else None].append(item)
+            merged_here = False
+            for group in by_pickup.values():
+                group_receipt_ids = {item.receipt_id for item in group}
+                if len(group_receipt_ids) >= 2:
+                    _merge_receipts(group_receipt_ids, group, owner_key, target_date, RATE)
+                    merged_here = True
+
+            if merged_here:
                 merged_count += 1
+            else:
+                # По одному pending-чеку на ПВЗ — выносим «чужие» items (за другую дату)
+                for receipt in Receipt.objects.filter(pk__in={item.receipt_id for item in pending_items}):
+                    foreign_items = [
+                        ri for ri in receipt.items.select_related('track_code')
+                        if ri.track_code_id and ri.track_code.delivered_date != target_date
+                    ]
+                    if foreign_items:
+                        _split_foreign_items(receipt, foreign_items, owner_key, RATE)
+                        split_count += 1
+
+            # Метки/дубли pending-чеков клиента — по правилу ПВЗ
+            sync_pending_receipts_for_user(pending_items[0].track_code.owner)
 
         except Exception as e:
             errors.append(f"{owner_key}: {e}")
@@ -297,36 +312,27 @@ def service_mark_claimed(request):
 
 
 def _split_foreign_items(receipt, foreign_items, owner_id, RATE):
-    """Выносит items за другие даты из чека в новый чек."""
+    """Выносит items за другие даты в pending-чек их ключа (дата и ПВЗ трека) — D4."""
     from django.contrib.auth.models import User
     user = User.objects.get(id=owner_id)
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
-    # Группируем foreign items по их delivered_date
-    from collections import defaultdict as _dd
-    by_date = _dd(list)
+    targets = {}
     for item in foreign_items:
-        by_date[item.track_code.delivered_date].append(item)
-
-    for f_date, date_items in by_date.items():
-        new_receipt = Receipt.objects.create(
-            owner_id=owner_id,
-            total_weight=0, total_price=0,
-            price_per_kg=effective_rate,
-            created_at=f_date or receipt.created_at,
-            pickup_point=receipt.pickup_point,
-            payment_link=receipt.payment_link,
-        )
-        for item in date_items:
-            item.receipt = new_receipt
-            item.save()
-        _recalc_receipt(new_receipt, effective_rate)
+        target = move_item_to_pending_receipt(
+            item, item.track_code.delivered_date or receipt.created_at, effective_rate)
+        targets[target.pk] = target
+    for target in targets.values():
+        _recalc_receipt(target, effective_rate)
 
     # Пересчитываем и устанавливаем дату основного чека
-    remaining_items = list(receipt.items.select_related('track_code').all())
-    if remaining_items:
-        receipt.created_at = remaining_items[0].track_code.delivered_date or receipt.created_at
+    remaining_dates = [
+        ri.track_code.delivered_date for ri in receipt.items.select_related('track_code')
+        if ri.track_code_id and ri.track_code.delivered_date
+    ]
+    if remaining_dates:
+        receipt.created_at = remaining_dates[0]
         receipt._allow_content_update = True
         receipt.save(update_fields=['created_at'])
     _recalc_receipt(receipt, receipt.price_per_kg or effective_rate)

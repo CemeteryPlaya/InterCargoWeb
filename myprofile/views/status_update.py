@@ -7,12 +7,14 @@ from django.core.exceptions import ValidationError
 from myprofile.models import TrackCode
 from register.models import UserProfile
 from myprofile.views.utils import send_grouped_notifications, add_bulk_result_messages
+from myprofile.permissions import require_page
 from django.utils.translation import gettext as _
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from collections import defaultdict
 
 @login_required
+@require_page('update_tracks')
 def update_tracks(request):
     if request.method != 'POST':
         return render(request, "desktop/update_tracks.html", {
@@ -199,6 +201,7 @@ def update_tracks(request):
     return redirect('update_tracks')
 
 @login_required
+@require_page('update_tracks', 'goods_arrival')
 def search_users(request):
     """AJAX: поиск пользователей по логину из User и UserProfile."""
     query = request.GET.get('q', '').strip()
@@ -235,6 +238,7 @@ def search_users(request):
 
 
 @login_required
+@require_page('update_tracks', 'goods_arrival')
 def get_track_owner(request):
     track_code = request.GET.get('track_code')
     if not track_code:

@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from myprofile.models import Receipt, ReceiptItem, TrackCode
@@ -15,7 +16,7 @@ from myprofile.models import ContractViolation
 from myprofile.execution_validator.receipt_contracts import (
     resolved_pickup_label,
     authoritative_pickup_label,
-    one_receipt_per_client_date,
+    one_pending_receipt_per_client_date_pickup,
     receipt_pickup_label_matches_authoritative,
     all_items_belong_to_receipt_owner,
     receipt_tracks_pickup_homogeneous,
@@ -76,16 +77,33 @@ class ResolutionHelperTests(Base):
 
 
 class ReceiptContractTests(Base):
-    def test_one_receipt_per_client_date_passes_when_unique(self):
-        r = self._receipt()
-        self.assertEqual(run_contracts([one_receipt_per_client_date], self._ctx(r)), [])
+    def _receipt_with_track(self, code, status="pending", pickup_point=None):
+        r = self._receipt(pickup_point=pickup_point)
+        Receipt.objects.filter(pk=r.pk).update(status=status)
+        r.refresh_from_db()
+        ReceiptItem.objects.create(receipt=r, track_code=self._track(code))
+        return r
 
-    def test_one_receipt_per_client_date_fails_on_duplicate(self):
-        r1 = self._receipt()
-        r2 = self._receipt()  # тот же owner + дата
-        violations = run_contracts([one_receipt_per_client_date], self._ctx(r2))
+    def test_one_pending_receipt_per_key_passes_when_unique(self):
+        r = self._receipt_with_track("U1")
+        self.assertEqual(run_contracts([one_pending_receipt_per_client_date_pickup], self._ctx(r)), [])
+
+    def test_one_pending_receipt_per_key_fails_on_pending_duplicate(self):
+        self._receipt_with_track("U2")
+        r2 = self._receipt_with_track("U3")  # тот же owner + дата + ПВЗ, оба pending
+        violations = run_contracts([one_pending_receipt_per_client_date_pickup], self._ctx(r2))
         self.assertEqual(len(violations), 1)
         self.assertEqual(violations[0].severity, Severity.CRITICAL)
+
+    def test_shipped_receipt_with_same_key_is_not_a_duplicate(self):
+        self._receipt_with_track("U4", status="in_delivery")
+        r2 = self._receipt_with_track("U5")
+        self.assertEqual(run_contracts([one_pending_receipt_per_client_date_pickup], self._ctx(r2)), [])
+
+    def test_other_pickup_same_date_is_not_a_duplicate(self):
+        self._receipt_with_track("U6", pickup_point=self.label_b)
+        r2 = self._receipt_with_track("U7")
+        self.assertEqual(run_contracts([one_pending_receipt_per_client_date_pickup], self._ctx(r2)), [])
 
     def test_pickup_label_matches_authoritative_passes(self):
         r = self._receipt(pickup_point=self.label_b)
@@ -124,6 +142,69 @@ class ReceiptContractTests(Base):
         self.assertEqual(
             run_contracts([receipt_tracks_pickup_homogeneous], self._ctx(r)), []
         )
+
+
+class FrozenReceiptPickupContractTests(Base):
+    """После pending чек заморожен: метка сверяется только с закреплёнными
+    delivery_pickup треков; без закрепления ПВЗ неизвестен (решение 2.5)."""
+
+    def _frozen(self, tracks, status="claimed", label=None):
+        r = self._receipt(pickup_point=label if label is not None else self.label_a)
+        for t in tracks:
+            ReceiptItem.objects.create(receipt=r, track_code=t)
+        Receipt.objects.filter(pk=r.pk).update(status=status)
+        r.refresh_from_db()
+        return r
+
+    def _move_profile_to_b(self):
+        UserProfile.objects.filter(user=self.user).update(pickup=self.pp_b)
+
+    def test_pinned_frozen_receipt_ignores_profile_change(self):
+        r = self._frozen([self._track("F1", pickup=self.pp_a)])
+        self._move_profile_to_b()
+        self.assertEqual(run_contracts([receipt_pickup_label_matches_authoritative,
+                                        receipt_tracks_pickup_homogeneous], self._ctx(r)), [])
+
+    def test_unpinned_frozen_receipt_is_unknown_not_violation(self):
+        r = self._frozen([self._track("F2")])
+        self._move_profile_to_b()
+        self.assertEqual(run_contracts([receipt_pickup_label_matches_authoritative], self._ctx(r)), [])
+
+    def test_frozen_receipt_with_wrong_pin_violates(self):
+        r = self._frozen([self._track("F3", pickup=self.pp_b)], status="in_delivery")
+        violations = run_contracts([receipt_pickup_label_matches_authoritative], self._ctx(r))
+        self.assertEqual([v.severity for v in violations], [Severity.CRITICAL])
+
+    def test_frozen_homogeneity_counts_only_pins(self):
+        r = self._frozen([self._track("F4", pickup=self.pp_a), self._track("F5")])
+        self._move_profile_to_b()                       # F5 теперь резолвится в B по профилю
+        self.assertEqual(run_contracts([receipt_tracks_pickup_homogeneous], self._ctx(r)), [])
+
+    def test_pending_receipt_with_stale_label_still_violates(self):
+        r = self._receipt(pickup_point=self.label_a)
+        ReceiptItem.objects.create(receipt=r, track_code=self._track("F6"))
+        self._move_profile_to_b()                       # pending следует за профилем → метка устарела
+        violations = run_contracts([receipt_pickup_label_matches_authoritative], self._ctx(r))
+        self.assertEqual([v.severity for v in violations], [Severity.CRITICAL])
+
+
+class Error2ReproTests(Base):
+    """Ошибка #2 (чек #27481): клиент печатает выданный чек «Пушкина 8» после
+    смены ПВЗ на «Акбулак 21» — контракт сверял с текущим профилем."""
+
+    def test_print_old_receipt_after_pickup_change_has_no_violation(self):
+        # Трек без закрепления delivery_pickup (старые посылки): только так прод-ошибка
+        # и возникала — закреплённый трек сверялся бы с закреплением и до фикса.
+        r = self._receipt(pickup_point=self.label_a)
+        ReceiptItem.objects.create(receipt=r, track_code=self._track("E2"))
+        Receipt.objects.filter(pk=r.pk).update(status="claimed")
+        UserProfile.objects.filter(user=self.user).update(pickup=self.pp_b)
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse("print_receipt", args=[r.pk]))
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(ContractViolation.objects.count(), 0)
 
 
 class PrintRunContractTests(Base):

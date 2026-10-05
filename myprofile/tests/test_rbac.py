@@ -76,13 +76,29 @@ class CanAccessPageTest(TestCase):
         u2 = _user('pvzacc', role=UserProfile.ROLE_PVZ, is_accountant=True)
         self.assertTrue(can_access_page(u2, 'finance_summary'))   # от флага Бухгалтер
 
-    def test_unroled_passthrough(self):
-        # Безролевые (включая текущих is_staff и клиентов) проходят middleware —
+    def test_unroled_staff_passthrough(self):
+        # Безролевой сотрудник со служебным флагом проходит middleware —
         # доступ решают существующие проверки во view. can_access_page → True.
         staff = _user('legacy', role='', is_staff=True)
-        client = _user('client', role='')
         self.assertTrue(can_access_page(staff, 'goods_arrival'))
-        self.assertTrue(can_access_page(client, 'warehouse'))
+
+    def test_unroled_service_flags_passthrough(self):
+        for flag in ('is_pp_worker', 'is_driver', 'is_hr', 'is_accountant'):
+            u = _user(f'legacy_{flag}', role='', **{flag: True})
+            self.assertTrue(can_access_page(u, 'warehouse'), flag)
+
+    def test_unroled_client_denied(self):
+        # Клиент (без роли и без служебных флагов) не проходит на служебные страницы.
+        client = _user('client', role='')
+        for page in ('warehouse', 'update_tracks', 'print_documents', 'goods_arrival'):
+            self.assertFalse(can_access_page(client, page), page)
+
+    def test_unroled_matrix_grants_only_listed_page(self):
+        # Безролевой без флагов, но с явной строкой матрицы — получает только её страницы.
+        u = _user('matrix_only', role='')
+        RolePermission.objects.create(user=u, aspect='support', can_view=True)
+        self.assertTrue(can_access_page(u, 'support_inbox'))
+        self.assertFalse(can_access_page(u, 'warehouse'))
 
     def test_matrix_override_adds_page(self):
         u = _user('pvzx', role=UserProfile.ROLE_PVZ)
@@ -255,6 +271,177 @@ class MiddlewareEnforcementTest(TestCase):
     def test_baseline_not_blocked(self):
         self._login('p3', UserProfile.ROLE_PVZ)
         self.assertNotEqual(self.c.get('/profile/track-codes/').status_code, 403)
+
+    def _login_client(self):
+        u = User.objects.create_user('plain_client', password='x')
+        UserProfile.objects.create(user=u, role='')
+        self.c.force_login(u)
+        return u
+
+    def test_client_blocked_from_staff_endpoints(self):
+        from myprofile.models import ClientRegistry, TrackCode
+        self._login_client()
+        TrackCode.objects.create(track_code='VICTIM1', status='shipped_cn')
+        registry = ClientRegistry.objects.create(registry_date='2026-10-05', pickup_points=[])
+        cases = [
+            (reverse('update_tracks'), {}),
+            (reverse('get_track_owner'), {'track_code': 'VICTIM1'}),
+            (reverse('search_users'), {'q': 'vic'}),
+            (reverse('print_documents'), {}),
+            (reverse('client_registry_pdf', args=[registry.id]), {}),
+        ]
+        for url, params in cases:
+            self.assertEqual(self.c.get(url, params).status_code, 403, url)
+
+    def test_client_post_update_tracks_changes_nothing(self):
+        from myprofile.models import TrackCode
+        victim = User.objects.create_user('victim', password='x')
+        UserProfile.objects.create(user=victim)
+        TrackCode.objects.create(track_code='VICTIM2', status='shipped_cn', owner=victim)
+        self._login_client()
+        resp = self.c.post(reverse('update_tracks'), {
+            'status': 'delivered', 'update_date': '2026-10-05',
+            'track_codes': 'VICTIM2', 'owner_usernames': 'plain_client', 'weights': '9',
+        })
+        self.assertEqual(resp.status_code, 403)
+        t = TrackCode.all_objects.get(track_code='VICTIM2')
+        self.assertEqual((t.status, t.owner_id, t.weight), ('shipped_cn', victim.id, None))
+
+    def test_unroled_staff_can_print_documents(self):
+        u = User.objects.create_user('legacy_printer', password='x')
+        UserProfile.objects.create(user=u, is_staff=True, role='')
+        self.c.force_login(u)
+        self.assertEqual(self.c.get(reverse('print_documents')).status_code, 200)
+
+
+class ViewLevelGuardTest(TestCase):
+    """Defense in depth: служебные вьюхи отказывают клиенту и без RoleAccessMiddleware."""
+
+    def setUp(self):
+        from django.test import RequestFactory
+        self.rf = RequestFactory()
+        self.client_user = _user('plain', role='')
+
+    def _call(self, view, user, method='get', data=None, **kwargs):
+        req = getattr(self.rf, method)('/x/', data or {})
+        req.user = user
+        return view(req, **kwargs)
+
+    def test_views_reject_client_without_middleware(self):
+        from myprofile.views import status_update, documents
+        cases = [
+            (status_update.update_tracks, 'get', {}, {}),
+            (status_update.update_tracks, 'post', {}, {}),
+            (status_update.get_track_owner, 'get', {'track_code': 'X'}, {}),
+            (status_update.search_users, 'get', {'q': 'a'}, {}),
+            (documents.print_documents_view, 'get', {}, {}),
+            (documents.print_documents_view, 'post', {'action': 'delete', 'registry_id': '1'}, {}),
+            (documents.client_registry_pdf, 'get', {}, {'registry_id': 1}),
+        ]
+        for view, method, data, kwargs in cases:
+            resp = self._call(view, self.client_user, method, data, **kwargs)
+            self.assertEqual(resp.status_code, 403, f'{view.__name__} {method}')
+
+    def test_view_post_update_tracks_by_client_changes_nothing(self):
+        from myprofile.models import TrackCode
+        from myprofile.views import status_update
+        victim = _user('victim2', role='')
+        TrackCode.objects.create(track_code='VICTIM3', status='shipped_cn', owner=victim)
+        resp = self._call(status_update.update_tracks, self.client_user, 'post', {
+            'status': 'delivered', 'update_date': '2026-10-05',
+            'track_codes': 'VICTIM3', 'owner_usernames': 'plain', 'weights': '9',
+        })
+        self.assertEqual(resp.status_code, 403)
+        t = TrackCode.all_objects.get(track_code='VICTIM3')
+        self.assertEqual((t.status, t.owner_id, t.weight), ('shipped_cn', victim.id, None))
+
+    def test_unroled_driver_blocked_by_view_guard(self):
+        # middleware пропускает безролевого сотрудника, но операторские вьюхи
+        # требуют is_staff — водитель без роли получает 403 от самой вьюхи.
+        c = Client()
+        c.force_login(_user('legacy_driver', role='', is_driver=True))
+        self.assertEqual(c.get(reverse('get_track_owner'), {'track_code': 'X'}).status_code, 403)
+        self.assertEqual(c.get(reverse('print_documents')).status_code, 403)
+
+    def test_unroled_staff_allowed_by_view_guard(self):
+        from myprofile.views import status_update
+        staff = _user('legacy_op', role='', is_staff=True)
+        resp = self._call(status_update.search_users, staff, 'get', {'q': 'leg'})
+        self.assertEqual(resp.status_code, 200)
+
+    def test_unroled_matrix_grant_allowed(self):
+        u = _user('matrix_tracks', role='')
+        RolePermission.objects.create(user=u, aspect='track_updates', can_view=True)
+        c = Client()
+        c.force_login(u)
+        self.assertEqual(c.get(reverse('search_users'), {'q': 'ma'}).status_code, 200)
+
+    def test_sorting_role_can_lookup_owner_in_goods_arrival(self):
+        # Страница сессии прихода (роль «Сорт./ПВЗ») вызывает get_track_owner и
+        # search_users — эти помощники открыты и для goods_arrival, не только update_tracks.
+        from myprofile.models import TrackCode
+        TrackCode.objects.create(track_code='T-SORT', status='shipped_cn')
+        u = User.objects.create_user('sorter', password='x')
+        apply_role(u, UserProfile.ROLE_SORTING_PVZ)
+        c = Client()
+        c.force_login(u)
+        self.assertEqual(c.get(reverse('get_track_owner'), {'track_code': 'T-SORT'}).status_code, 200)
+        self.assertEqual(c.get(reverse('search_users'), {'q': 'so'}).status_code, 200)
+        self.assertEqual(c.get(reverse('update_tracks')).status_code, 403)  # сама страница — нет
+
+    def test_pvz_role_cannot_lookup_owner(self):
+        u = User.objects.create_user('pvz_worker', password='x')
+        apply_role(u, UserProfile.ROLE_PVZ)
+        c = Client()
+        c.force_login(u)
+        self.assertEqual(c.get(reverse('get_track_owner'), {'track_code': 'X'}).status_code, 403)
+
+
+class RbacSweepTest(TestCase):
+    """Регрессия: ни один служебный url-name из URLNAME_TO_PAGE не открывается клиенту.
+
+    Обходит URLconf целиком (включая параметризованные маршруты — параметры
+    подставляются заглушками: middleware отказывает до выполнения view).
+    """
+    _CONVERTER_RE = r'<(?:(\w+):)?\w+>'
+    _DUMMY = {'int': '1', 'uuid': '00000000-0000-0000-0000-000000000000'}
+
+    def _routes(self, patterns=None, prefix=''):
+        from django.urls import get_resolver, URLResolver
+        if patterns is None:
+            patterns = get_resolver().url_patterns
+        for p in patterns:
+            piece = str(p.pattern).lstrip('^').rstrip('$')
+            if isinstance(p, URLResolver):
+                yield from self._routes(p.url_patterns, prefix + piece)
+            elif p.name:
+                yield p.name, prefix + piece
+
+    def _path(self, route):
+        import re
+        return '/' + re.sub(self._CONVERTER_RE, lambda m: self._DUMMY.get(m.group(1), 'x'), route)
+
+    def test_every_staff_url_is_forbidden_for_client(self):
+        from myprofile.permissions import URLNAME_TO_PAGE
+        routes = {}
+        for name, route in self._routes():
+            if name in URLNAME_TO_PAGE:
+                routes.setdefault(name, []).append(route)
+
+        self.assertEqual(set(URLNAME_TO_PAGE) - set(routes), set(),
+                         'url-name из URLNAME_TO_PAGE не найдены в URLconf (устаревшая карта?)')
+
+        c = Client()
+        c.force_login(_user('sweep_client', role=''))
+        leaks = []
+        for name in sorted(routes):
+            for route in routes[name]:
+                path = self._path(route)
+                for method in ('get', 'post'):
+                    code = getattr(c, method)(path).status_code
+                    if code != 403:
+                        leaks.append((name, method.upper(), path, code))
+        self.assertEqual(leaks, [], 'служебные url доступны клиенту')
 
 
 class ContextProcessorTest(TestCase):

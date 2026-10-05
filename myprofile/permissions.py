@@ -14,6 +14,7 @@ Two layers exist side-by-side:
    ``ROLE_FLAG_DEFAULTS``. Superusers always pass.
 """
 from django.http import HttpResponseForbidden
+from django.utils.translation import gettext as _
 from functools import wraps
 
 from django.contrib.auth.models import Group, Permission
@@ -302,15 +303,18 @@ PAGES = {
 }
 ALL_PAGE_KEYS = frozenset(PAGES)
 
-# url-name -> page_key. Покрывает GET-страницы И их action-эндпоинты, чтобы
+# url-name -> page_key (или кортеж page_key — доступ, если разрешена любая из
+# страниц). Покрывает GET-страницы И их action-эндпоинты, чтобы
 # RoleAccessMiddleware закрывал прямые POST-вызовы, а не только открытие страницы.
 # url-name, которого здесь НЕТ, считается базовым (общедоступным) и не ограничивается.
 URLNAME_TO_PAGE = {
     'role_management': 'role_management', 'role_search_users': 'role_management',
     'role_edit': 'role_management', 'role_save': 'role_management',
     'role_quota_save': 'role_management',
-    'update_tracks': 'update_tracks', 'get_track_owner': 'update_tracks',
-    'search_users': 'update_tracks',
+    # помощники поиска владельца/клиента нужны и «Обновлению треков», и сессии прихода
+    'update_tracks': 'update_tracks',
+    'get_track_owner': ('update_tracks', 'goods_arrival'),
+    'search_users': ('update_tracks', 'goods_arrival'),
     'analytics_dashboard': 'analytics_dashboard',
     'finance_summary': 'finance_summary',
     'notification_logs': 'notification_logs',
@@ -401,8 +405,9 @@ FLAG_PAGES = {
 }
 
 # Откат для пользователей БЕЗ новой роли: набор страниц для сайдбара по старым
-# флагам (чтобы не пропали ссылки до миграции). На enforcement НЕ влияет —
-# для безролевых middleware пропускает запрос (см. can_access_page).
+# флагам (чтобы не пропали ссылки до миграции). На enforcement влияют только
+# ключи: безролевой с любым из этих флагов проходит middleware pass-through,
+# без флагов — не проходит (см. can_access_page).
 _LEGACY_OPERATOR_PAGES = set(ALL_PAGE_KEYS) - {'role_management', 'update_tracks', 'news_management'}
 LEGACY_FLAG_PAGES = {
     'is_staff': _LEGACY_OPERATOR_PAGES,
@@ -433,8 +438,16 @@ ASPECT_TO_PAGES = {
 
 
 def page_for_urlname(url_name):
-    """page_key для url-name, либо None если страница базовая/не ограничивается."""
+    """page_key (или кортеж page_key) для url-name, либо None если не ограничивается."""
     return URLNAME_TO_PAGE.get(url_name)
+
+
+def pages_for_urlname(url_name):
+    """Кортеж page_key для url-name (пустой, если страница базовая)."""
+    page = URLNAME_TO_PAGE.get(url_name)
+    if page is None:
+        return ()
+    return (page,) if isinstance(page, str) else tuple(page)
 
 
 def role_of(user):
@@ -487,13 +500,18 @@ def allowed_pages(user):
     return pages
 
 
+def _has_service_flag(profile):
+    """Есть ли у профиля служебный флаг сотрудника (is_staff, is_pp_worker, ...)."""
+    return any(getattr(profile, flag, False) for flag in LEGACY_FLAG_PAGES)
+
+
 def can_access_page(user, page_key):
     """Может ли пользователь открыть защищённую страницу page_key.
 
-    Главный принцип безопасной миграции: для пользователей БЕЗ новой роли
-    возвращаем True (middleware пропускает, доступ решают существующие
-    проверки во view). Строгое разграничение включается только когда роль
-    назначена.
+    Безопасная миграция: безролевой СОТРУДНИК (есть служебный флаг) проходит
+    pass-through — доступ решают существующие проверки во view. Безролевой
+    без флагов (клиент) получает только страницы из явных строк матрицы.
+    Строгое разграничение по роли включается, когда роль назначена.
     """
     if not user or not user.is_authenticated:
         return False
@@ -503,7 +521,9 @@ def can_access_page(user, page_key):
     if profile is None:
         return False
     if not profile.role:
-        return True  # безролевой — pass-through к текущим проверкам view
+        if _has_service_flag(profile):
+            return True  # безролевой сотрудник — pass-through к проверкам view
+        return page_key in _matrix_pages(user)
     allowed = set(ROLE_PAGES.get(profile.role, set()))
     allowed |= _flag_pages(profile)
     allowed |= _matrix_pages(user)
@@ -619,6 +639,36 @@ def apply_role(user, role, *, enforce_quota=True):
         user.is_staff = False
     user.save()
     return profile
+
+
+def _strict_page_access(user, page_keys):
+    """Строгая проверка для операторских вьюх (без pass-through middleware).
+
+    Роль/суперюзер/доп-флаг/матрица — как role_grants; безролевой — только
+    оператор (is_staff) или явная строка матрицы на одну из страниц.
+    """
+    if any(role_grants(user, page) for page in page_keys):
+        return True
+    profile = _get_profile(user)
+    if profile is None or profile.role:
+        return False
+    if profile.is_staff:
+        return True
+    return bool(_matrix_pages(user) & set(page_keys))
+
+
+def require_page(*page_keys):
+    """Декоратор defense in depth поверх RoleAccessMiddleware: 403, если ни одна
+    из page_keys не разрешена строгой проверкой (см. _strict_page_access).
+    Ставить ПОД @login_required, чтобы аноним получал редирект на вход."""
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not _strict_page_access(request.user, page_keys):
+                return HttpResponseForbidden(_("Нет доступа."))
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 
 def role_grants(user, page_key):

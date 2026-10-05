@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 
 from myprofile.models import (
     Arrival, ArrivalSession, ArrivalSessionItem,
-    Receipt, TrackCode,
+    TrackCode,
 )
 from myprofile.permissions import is_staff
 from django.utils.translation import gettext as _
@@ -322,15 +322,10 @@ def reschedule_transfer(request):
         ]
         ArrivalSessionItem.objects.bulk_create(session_items)
 
-        # 6. Обновляем дату создания чеков, содержащих эти треки (если есть)
-        receipts_to_update = Receipt.objects.filter(
-            items__track_code__in=tracks,
-            created_at=original_date,
-        ).distinct()
-        for receipt in receipts_to_update:
-            receipt._allow_content_update = True
-            receipt.created_at = new_date
-            receipt.save(update_fields=['created_at'])
+        # 6. Чеки: позиции перенесённых треков уходят в чеки новой даты
+        #    (чек целиком — меняет дату на месте; частично — в pending-чек ключа, D4/D5)
+        from myprofile.receipt_pickup import move_tracks_to_date
+        move_tracks_to_date(owner, tracks, new_date)
 
     logger.info(
         'Arrival reschedule: user=%s tracks=%d from=%s to=%s by=%s',

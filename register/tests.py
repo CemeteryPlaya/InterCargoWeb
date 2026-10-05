@@ -173,10 +173,12 @@ class ConfirmViewTest(PickupPointMixin, TestCase):
         response = self.client.get(reverse('confirm'))
         self.assertEqual(response.status_code, 200)
 
-    def test_confirm_view_non_hr_redirected(self):
+    def test_confirm_view_non_hr_forbidden(self):
+        # Клиент без роли и служебных флагов отсекается RoleAccessMiddleware (403),
+        # до редиректа внутри view.
         self.client.login(username='normaluser', password='pass123')
         response = self.client.get(reverse('confirm'))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
 
     def test_confirm_view_unauthenticated_redirected(self):
         response = self.client.get(reverse('confirm'))

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-05 22:10+0500\n"
+"POT-Creation-Date: 2026-10-05 16:54+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -73,9 +73,9 @@ msgstr "Page views"
 #: .\myprofile\templates\desktop\notification_logs.html:458
 #: .\myprofile\templates\desktop\unidentified.html:110
 #: .\myprofile\templates\desktop\unidentified.html:183
-#: .\myprofile\templates\shared\print\client_check_pdf.html:111
-#: .\myprofile\templates\shared\print\client_check_pdf.html:138
-#: .\myprofile\templates\shared\print\client_check_pdf.html:209
+#: .\myprofile\templates\shared\print\client_check_pdf.html:123
+#: .\myprofile\templates\shared\print\client_check_pdf.html:150
+#: .\myprofile\templates\shared\print\client_check_pdf.html:221
 #: .\myprofile\templates\shared\print\client_registry_pdf.html:19
 #: .\register\templates\desktop\register_confirmation.html:66
 msgid "Дата"
@@ -239,7 +239,7 @@ msgstr "Delivery rate ($/kg)"
 msgid "Настройки Di.Buyer"
 msgstr "Di.Buyer settings"
 
-#: .\dibuyer\models.py:38 .\mainview\templates\desktop\index.html:653
+#: .\dibuyer\models.py:38 .\mainview\templates\desktop\index.html:654
 #: .\myprofile\models.py:26
 msgid "Название"
 msgstr "Name"
@@ -323,10 +323,10 @@ msgstr "Rejected"
 #: .\myprofile\templates\desktop\unidentified.html:180
 #: .\myprofile\templates\desktop\warehouse_inventory.html:71
 #: .\myprofile\templates\desktop\warehouse_reassign.html:148
-#: .\myprofile\templates\shared\print\client_check_pdf.html:107
-#: .\myprofile\templates\shared\print\client_check_pdf.html:137
-#: .\myprofile\templates\shared\print\client_check_pdf.html:152
-#: .\myprofile\templates\shared\print\client_check_pdf.html:183
+#: .\myprofile\templates\shared\print\client_check_pdf.html:119
+#: .\myprofile\templates\shared\print\client_check_pdf.html:149
+#: .\myprofile\templates\shared\print\client_check_pdf.html:164
+#: .\myprofile\templates\shared\print\client_check_pdf.html:195
 #: .\myprofile\templates\shared\print\client_registry_pdf.html:29
 #: .\myprofile\templates\shared\print\receipt_print.html:352
 #: .\support\models.py:27 .\support\models.py:103
@@ -464,8 +464,8 @@ msgstr "Comment (size/color/qty)"
 msgid "Количество"
 msgstr "Quantity"
 
-#: .\dibuyer\models.py:237 .\mainview\templates\desktop\index.html:274
-#: .\mainview\templates\desktop\index.html:347 .\myprofile\models.py:237
+#: .\dibuyer\models.py:237 .\mainview\templates\desktop\index.html:275
+#: .\mainview\templates\desktop\index.html:348 .\myprofile\models.py:237
 #: .\myprofile\models.py:404 .\myprofile\models.py:901
 #: .\myprofile\templates\desktop\arrival_history.html:300
 #: .\myprofile\templates\desktop\arrival_summary.html:115
@@ -564,10 +564,10 @@ msgstr "Delivery"
 #: .\dibuyer\templates\dibuyer\home.html:15
 #: .\dibuyer\templates\dibuyer\manage_detail.html:32
 #: .\myprofile\templates\desktop\finance_summary.html:388
-#: .\myprofile\templates\shared\print\client_check_pdf.html:124
-#: .\myprofile\templates\shared\print\client_check_pdf.html:141
-#: .\myprofile\templates\shared\print\client_check_pdf.html:169
-#: .\myprofile\templates\shared\print\client_check_pdf.html:187
+#: .\myprofile\templates\shared\print\client_check_pdf.html:136
+#: .\myprofile\templates\shared\print\client_check_pdf.html:153
+#: .\myprofile\templates\shared\print\client_check_pdf.html:181
+#: .\myprofile\templates\shared\print\client_check_pdf.html:199
 msgid "кг"
 msgstr "kg"
 
@@ -795,8 +795,8 @@ msgstr "Inter Cargo - About the Company"
 #: .\mainview\templates\desktop\about.html:30
 #: .\mainview\templates\desktop\about.html:41
 #: .\mainview\templates\desktop\education1.html:132
-#: .\mainview\templates\desktop\index.html:173
-#: .\mainview\templates\desktop\index.html:336
+#: .\mainview\templates\desktop\index.html:174
+#: .\mainview\templates\desktop\index.html:337
 #: .\mainview\templates\shared\footer.html:28
 #: .\mainview\templates\shared\header.html:41
 #: .\mainview\templates\shared\header.html:181
@@ -899,18 +899,18 @@ msgid "Карта пунктов выдачи Inter Cargo"
 msgstr "Inter Cargo pickup points map"
 
 #: .\mainview\templates\desktop\about.html:79
-#: .\mainview\templates\desktop\index.html:683
+#: .\mainview\templates\desktop\index.html:684
 msgid "Часто задаваемые вопросы"
 msgstr "Frequently asked questions"
 
 #: .\mainview\templates\desktop\about.html:87
-#: .\mainview\templates\desktop\index.html:406
-#: .\mainview\templates\desktop\index.html:691
+#: .\mainview\templates\desktop\index.html:407
+#: .\mainview\templates\desktop\index.html:692
 msgid "Как рассчитывается стоимость доставки?"
 msgstr "How is the delivery cost calculated?"
 
 #: .\mainview\templates\desktop\about.html:92
-#: .\mainview\templates\desktop\index.html:696
+#: .\mainview\templates\desktop\index.html:697
 #, python-format
 msgid ""
 "Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. "
@@ -924,12 +924,12 @@ msgstr ""
 "calculation."
 
 #: .\mainview\templates\desktop\about.html:100
-#: .\mainview\templates\desktop\index.html:705
+#: .\mainview\templates\desktop\index.html:706
 msgid "Какие сроки доставки из Китая в Казахстан?"
 msgstr "What are the delivery times from China to Kazakhstan?"
 
 #: .\mainview\templates\desktop\about.html:105
-#: .\mainview\templates\desktop\index.html:710
+#: .\mainview\templates\desktop\index.html:711
 msgid ""
 "Средний срок доставки составляет 8–12 дней с момента отправки товара с "
 "нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и "
@@ -940,13 +940,13 @@ msgstr ""
 "customs workload."
 
 #: .\mainview\templates\desktop\about.html:113
-#: .\mainview\templates\desktop\index.html:424
-#: .\mainview\templates\desktop\index.html:718
+#: .\mainview\templates\desktop\index.html:425
+#: .\mainview\templates\desktop\index.html:719
 msgid "Как зарегистрироваться в системе?"
 msgstr "How to register in the system?"
 
 #: .\mainview\templates\desktop\about.html:118
-#: .\mainview\templates\desktop\index.html:723
+#: .\mainview\templates\desktop\index.html:724
 msgid ""
 "Для регистрации необходимо заполнить форму на странице «Регистрация», указав "
 "свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав "
@@ -959,33 +959,33 @@ msgstr ""
 "account by clicking the button or the profile icon at the top."
 
 #: .\mainview\templates\desktop\about.html:126
-#: .\mainview\templates\desktop\index.html:433
-#: .\mainview\templates\desktop\index.html:731
+#: .\mainview\templates\desktop\index.html:434
+#: .\mainview\templates\desktop\index.html:732
 msgid "Какие товары запрещены к перевозке?"
 msgstr "What goods are prohibited for shipping?"
 
 #: .\mainview\templates\desktop\about.html:131
-#: .\mainview\templates\desktop\index.html:736
+#: .\mainview\templates\desktop\index.html:737
 msgid "К перевозке запрещены:"
 msgstr "Prohibited for shipping:"
 
 #: .\mainview\templates\desktop\about.html:133
-#: .\mainview\templates\desktop\index.html:738
+#: .\mainview\templates\desktop\index.html:739
 msgid "Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества."
 msgstr "Explosive, radioactive, flammable, infectious, toxic substances."
 
 #: .\mainview\templates\desktop\about.html:134
-#: .\mainview\templates\desktop\index.html:739
+#: .\mainview\templates\desktop\index.html:740
 msgid "Холодные оружия, включая макеты, пневматику, арбалеты и др."
 msgstr "Cold weapons, including replicas, pneumatics, crossbows, etc."
 
 #: .\mainview\templates\desktop\about.html:135
-#: .\mainview\templates\desktop\index.html:740
+#: .\mainview\templates\desktop\index.html:741
 msgid "Психотропные и наркотические средства, алкоголь, сигареты."
 msgstr "Psychotropic and narcotic substances, alcohol, cigarettes."
 
 #: .\mainview\templates\desktop\about.html:136
-#: .\mainview\templates\desktop\index.html:741
+#: .\mainview\templates\desktop\index.html:742
 msgid ""
 "Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в "
 "вакуумных упаковках)."
@@ -993,23 +993,23 @@ msgstr ""
 "Perishable and liquid products (except dry goods and vacuum-packed products)."
 
 #: .\mainview\templates\desktop\about.html:137
-#: .\mainview\templates\desktop\index.html:742
+#: .\mainview\templates\desktop\index.html:743
 msgid "Техника, мобильные телефоны, ноутбуки (под свою ответственность)."
 msgstr "Electronics, mobile phones, laptops (at your own risk)."
 
 #: .\mainview\templates\desktop\about.html:138
-#: .\mainview\templates\desktop\index.html:743
+#: .\mainview\templates\desktop\index.html:744
 msgid ""
 "Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы)."
 msgstr "Animals (mammals, reptiles, birds, live insects, mollusks and fish)."
 
 #: .\mainview\templates\desktop\about.html:139
-#: .\mainview\templates\desktop\index.html:744
+#: .\mainview\templates\desktop\index.html:745
 msgid "Дроны."
 msgstr "Drones."
 
 #: .\mainview\templates\desktop\about.html:140
-#: .\mainview\templates\desktop\index.html:745
+#: .\mainview\templates\desktop\index.html:746
 msgid ""
 "Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, "
 "пузырчатую плёнку, защиту края и т.д.)."
@@ -1018,13 +1018,13 @@ msgstr ""
 "edge protection, etc.)."
 
 #: .\mainview\templates\desktop\about.html:149
-#: .\mainview\templates\desktop\index.html:450
-#: .\mainview\templates\desktop\index.html:754
+#: .\mainview\templates\desktop\index.html:451
+#: .\mainview\templates\desktop\index.html:755
 msgid "Как отследить мой заказ?"
 msgstr "How to track my order?"
 
 #: .\mainview\templates\desktop\about.html:154
-#: .\mainview\templates\desktop\index.html:759
+#: .\mainview\templates\desktop\index.html:760
 msgid ""
 "После оформления заказа вам будет предоставлен трек-номер для отслеживания. "
 "Вы можете использовать его на нашем сайте или связаться с менеджером через "
@@ -1035,12 +1035,12 @@ msgstr ""
 "date information about your cargo status."
 
 #: .\mainview\templates\desktop\about.html:162
-#: .\mainview\templates\desktop\index.html:767
+#: .\mainview\templates\desktop\index.html:768
 msgid "Что делать, если заказ пришёл сломанным или повреждённым?"
 msgstr "What to do if the order arrived broken or damaged?"
 
 #: .\mainview\templates\desktop\about.html:168
-#: .\mainview\templates\desktop\index.html:773
+#: .\mainview\templates\desktop\index.html:774
 msgid ""
 "Ваша задача — заранее попросить продавца обеспечить надёжную упаковку "
 "(например, пенопластом)."
@@ -1049,7 +1049,7 @@ msgstr ""
 "(e.g., foam)."
 
 #: .\mainview\templates\desktop\about.html:169
-#: .\mainview\templates\desktop\index.html:774
+#: .\mainview\templates\desktop\index.html:775
 msgid ""
 "Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) "
 "рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера)."
@@ -1058,7 +1058,7 @@ msgstr ""
 "recommended to crate the cargo (ask the manager for the cost)."
 
 #: .\mainview\templates\desktop\about.html:170
-#: .\mainview\templates\desktop\index.html:775
+#: .\mainview\templates\desktop\index.html:776
 msgid ""
 "Если упаковка не соответствовала требованиям, компания не несёт "
 "ответственности за повреждения."
@@ -1067,7 +1067,7 @@ msgstr ""
 "for damage."
 
 #: .\mainview\templates\desktop\about.html:171
-#: .\mainview\templates\desktop\index.html:776
+#: .\mainview\templates\desktop\index.html:777
 msgid ""
 "Если товар был упакован правильно, но повреждён при доставке, "
 "ответственность несёт Inter Cargo."
@@ -1076,13 +1076,13 @@ msgstr ""
 "is responsible."
 
 #: .\mainview\templates\desktop\about.html:180
-#: .\mainview\templates\desktop\index.html:473
-#: .\mainview\templates\desktop\index.html:785
+#: .\mainview\templates\desktop\index.html:474
+#: .\mainview\templates\desktop\index.html:786
 msgid "Как связаться с менеджером?"
 msgstr "How to contact the manager?"
 
 #: .\mainview\templates\desktop\about.html:185
-#: .\mainview\templates\desktop\index.html:790
+#: .\mainview\templates\desktop\index.html:791
 msgid ""
 "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
 "или в левом нижнем углу главной страницы."
@@ -1091,12 +1091,12 @@ msgstr ""
 "the bottom left corner of the main page."
 
 #: .\mainview\templates\desktop\about.html:193
-#: .\mainview\templates\desktop\index.html:798
+#: .\mainview\templates\desktop\index.html:799
 msgid "Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?"
 msgstr "Who is responsible for an order with the status 'Added by user'?"
 
 #: .\mainview\templates\desktop\about.html:198
-#: .\mainview\templates\desktop\index.html:803
+#: .\mainview\templates\desktop\index.html:804
 msgid ""
 "Ответственность за заказ, который ещё не прибыл на склад (статус «Добавлено "
 "пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести "
@@ -1117,13 +1117,13 @@ msgstr "Inter Cargo - Education"
 
 #: .\mainview\templates\desktop\education.html:32
 #: .\mainview\templates\desktop\education1.html:55
-#: .\mainview\templates\desktop\index.html:978
+#: .\mainview\templates\desktop\index.html:979
 msgid "ОБУЧЕНИЕ"
 msgstr "EDUCATION"
 
 #: .\mainview\templates\desktop\education.html:33
 #: .\mainview\templates\desktop\education1.html:56
-#: .\mainview\templates\desktop\index.html:979
+#: .\mainview\templates\desktop\index.html:980
 #: .\register\templates\desktop\success.html:48
 msgid "Как пользоваться нашим сервисом"
 msgstr "How to use our service"
@@ -1155,8 +1155,8 @@ msgstr "Tutorial videos for using the service"
 #: .\mainview\templates\desktop\education.html:57
 #: .\mainview\templates\desktop\education1.html:63
 #: .\mainview\templates\desktop\education1.html:66
-#: .\mainview\templates\desktop\index.html:985
-#: .\mainview\templates\desktop\index.html:989
+#: .\mainview\templates\desktop\index.html:986
+#: .\mainview\templates\desktop\index.html:990
 #: .\register\templates\desktop\success.html:58
 #: .\register\templates\desktop\success.html:62
 msgid "Регистрация на сайте"
@@ -1164,7 +1164,7 @@ msgstr "Registration on the site"
 
 #: .\mainview\templates\desktop\education.html:58
 #: .\mainview\templates\desktop\education1.html:67
-#: .\mainview\templates\desktop\index.html:990
+#: .\mainview\templates\desktop\index.html:991
 msgid ""
 "Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт "
 "выдачи для получения ваших посылок."
@@ -1178,9 +1178,9 @@ msgstr ""
 #: .\mainview\templates\desktop\education1.html:69
 #: .\mainview\templates\desktop\education1.html:83
 #: .\mainview\templates\desktop\education1.html:97
-#: .\mainview\templates\desktop\index.html:993
-#: .\mainview\templates\desktop\index.html:1009
-#: .\mainview\templates\desktop\index.html:1025
+#: .\mainview\templates\desktop\index.html:994
+#: .\mainview\templates\desktop\index.html:1010
+#: .\mainview\templates\desktop\index.html:1026
 #: .\register\templates\desktop\success.html:67
 #: .\register\templates\desktop\success.html:84
 #: .\register\templates\desktop\success.html:101
@@ -1189,21 +1189,21 @@ msgstr "Watch video"
 
 #: .\mainview\templates\desktop\education.html:67
 #: .\mainview\templates\desktop\education1.html:77
-#: .\mainview\templates\desktop\index.html:1001
+#: .\mainview\templates\desktop\index.html:1002
 #: .\register\templates\desktop\success.html:75
 msgid "Оформление заказа"
 msgstr "Placing an order"
 
 #: .\mainview\templates\desktop\education.html:70
 #: .\mainview\templates\desktop\education1.html:80
-#: .\mainview\templates\desktop\index.html:1005
+#: .\mainview\templates\desktop\index.html:1006
 #: .\register\templates\desktop\success.html:79
 msgid "Оформление заказа в Китае"
 msgstr "Placing an order in China"
 
 #: .\mainview\templates\desktop\education.html:71
 #: .\mainview\templates\desktop\education1.html:81
-#: .\mainview\templates\desktop\index.html:1006
+#: .\mainview\templates\desktop\index.html:1007
 msgid ""
 "Пошаговая инструкция по оформлению заказа на китайских торговых площадках и "
 "указанию нашего адреса доставки."
@@ -1215,8 +1215,8 @@ msgstr ""
 #: .\mainview\templates\desktop\education.html:83
 #: .\mainview\templates\desktop\education1.html:91
 #: .\mainview\templates\desktop\education1.html:94
-#: .\mainview\templates\desktop\index.html:1017
-#: .\mainview\templates\desktop\index.html:1021
+#: .\mainview\templates\desktop\index.html:1018
+#: .\mainview\templates\desktop\index.html:1022
 #: .\register\templates\desktop\success.html:92
 #: .\register\templates\desktop\success.html:96
 msgid "Отслеживание посылки"
@@ -1224,7 +1224,7 @@ msgstr "Parcel tracking"
 
 #: .\mainview\templates\desktop\education.html:84
 #: .\mainview\templates\desktop\education1.html:95
-#: .\mainview\templates\desktop\index.html:1022
+#: .\mainview\templates\desktop\index.html:1023
 msgid ""
 "Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из "
 "Китая в Казахстан."
@@ -1244,9 +1244,9 @@ msgstr "Home"
 
 #: .\mainview\templates\desktop\education1.html:30
 #: .\mainview\templates\desktop\education1.html:130
-#: .\mainview\templates\desktop\index.html:324
-#: .\mainview\templates\desktop\index.html:613
-#: .\mainview\templates\desktop\index.html:834
+#: .\mainview\templates\desktop\index.html:325
+#: .\mainview\templates\desktop\index.html:614
+#: .\mainview\templates\desktop\index.html:835
 #: .\mainview\templates\shared\footer.html:26
 #: .\mainview\templates\shared\header.html:153
 #: .\mainview\templates\shared\header.html:183
@@ -1256,7 +1256,7 @@ msgstr "Registration"
 
 #: .\mainview\templates\desktop\education1.html:31
 #: .\mainview\templates\desktop\education1.html:131
-#: .\mainview\templates\desktop\index.html:330
+#: .\mainview\templates\desktop\index.html:331
 #: .\mainview\templates\shared\footer.html:27
 #: .\mainview\templates\shared\header.html:40
 #: .\mainview\templates\shared\header.html:180
@@ -1265,7 +1265,7 @@ msgid "Обучение"
 msgstr "Education"
 
 #: .\mainview\templates\desktop\education1.html:57
-#: .\mainview\templates\desktop\index.html:980
+#: .\mainview\templates\desktop\index.html:981
 msgid ""
 "Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно "
 "использовать наш сервис доставки"
@@ -1338,34 +1338,34 @@ msgstr "Payment methods:"
 msgid "Inter Cargo - доставка из Китая в Казахстан"
 msgstr "Inter Cargo — delivery from China to Kazakhstan"
 
-#: .\mainview\templates\desktop\index.html:111
+#: .\mainview\templates\desktop\index.html:112
 msgid "Добро пожаловать"
 msgstr "Welcome"
 
-#: .\mainview\templates\desktop\index.html:121
-#: .\mainview\templates\desktop\index.html:304
+#: .\mainview\templates\desktop\index.html:122
+#: .\mainview\templates\desktop\index.html:305
 msgid "ТАРИФ"
 msgstr "RATE"
 
-#: .\mainview\templates\desktop\index.html:123
-#: .\mainview\templates\desktop\index.html:295
+#: .\mainview\templates\desktop\index.html:124
+#: .\mainview\templates\desktop\index.html:296
 #: .\myprofile\templates\shared\print\receipt_print.html:342
 msgid "Доставка из Китая в Казахстан"
 msgstr "Delivery from China to Kazakhstan"
 
-#: .\mainview\templates\desktop\index.html:136
+#: .\mainview\templates\desktop\index.html:137
 msgid "QR код"
 msgstr "QR Code"
 
-#: .\mainview\templates\desktop\index.html:142
+#: .\mainview\templates\desktop\index.html:143
 #: .\mainview\templates\shared\header.html:260
 #: .\mainview\templates\shared\header.html:289
 #: .\myprofile\templates\mobile\mobile_parcels.html:41
-#: .\myprofile\views\mobile_notifications.py:105
+#: .\myprofile\views\mobile_notifications.py:121
 msgid "Посылки"
 msgstr "Parcels"
 
-#: .\mainview\templates\desktop\index.html:148
+#: .\mainview\templates\desktop\index.html:149
 #: .\mainview\templates\mobile\m_sidebar.html:98
 #: .\mainview\templates\mobile\sidebar.html:155 .\myprofile\models.py:308
 #: .\myprofile\models.py:638
@@ -1375,7 +1375,7 @@ msgstr "Parcels"
 msgid "Чеки"
 msgstr "Receipts"
 
-#: .\mainview\templates\desktop\index.html:154
+#: .\mainview\templates\desktop\index.html:155
 #: .\mainview\templates\mobile\m_sidebar.html:101
 #: .\mainview\templates\mobile\sidebar.html:158
 #: .\myprofile\templates\desktop\extradition_package.html:56
@@ -1387,80 +1387,80 @@ msgstr "Receipts"
 msgid "История выдачи"
 msgstr "Issue history"
 
-#: .\mainview\templates\desktop\index.html:161
+#: .\mainview\templates\desktop\index.html:162
 msgid "Интерактивное обучение"
 msgstr "Interactive tutorial"
 
-#: .\mainview\templates\desktop\index.html:167
+#: .\mainview\templates\desktop\index.html:168
 msgid "Видеоуроки"
 msgstr "Video lessons"
 
-#: .\mainview\templates\desktop\index.html:179 .\myprofile\models.py:1031
+#: .\mainview\templates\desktop\index.html:180 .\myprofile\models.py:1031
 #: .\myprofile\templates\desktop\notification_logs.html:457
 msgid "Тема"
 msgstr "Theme"
 
-#: .\mainview\templates\desktop\index.html:191
+#: .\mainview\templates\desktop\index.html:192
 #: .\myprofile\templates\desktop\profile.html:88
 msgid "Привязать Telegram"
 msgstr "Link Telegram"
 
-#: .\mainview\templates\desktop\index.html:207
+#: .\mainview\templates\desktop\index.html:208
 msgid "Доставка с американских сайтов"
 msgstr "Delivery from US websites"
 
-#: .\mainview\templates\desktop\index.html:212
+#: .\mainview\templates\desktop\index.html:213
 msgid "Мои посылки"
 msgstr "My parcels"
 
-#: .\mainview\templates\desktop\index.html:222
+#: .\mainview\templates\desktop\index.html:223
 msgid "Добавлено"
 msgstr "Added"
 
-#: .\mainview\templates\desktop\index.html:234
+#: .\mainview\templates\desktop\index.html:235
 #: .\myprofile\templates\desktop\delivery.html:316
 #: .\myprofile\views\mobile_parcels.py:69
 msgid "В пути"
 msgstr "In transit"
 
-#: .\mainview\templates\desktop\index.html:246
+#: .\mainview\templates\desktop\index.html:247
 #: .\myprofile\templates\desktop\track_codes.html:192
 msgid "На сортировке"
 msgstr "At sorting"
 
-#: .\mainview\templates\desktop\index.html:258
+#: .\mainview\templates\desktop\index.html:259
 msgid "Готово"
 msgstr "Ready"
 
-#: .\mainview\templates\desktop\index.html:271
-#: .\mainview\templates\desktop\index.html:344
+#: .\mainview\templates\desktop\index.html:272
+#: .\mainview\templates\desktop\index.html:345
 msgid "Калькулятор доставки"
 msgstr "Delivery calculator"
 
-#: .\mainview\templates\desktop\index.html:276
-#: .\mainview\templates\desktop\index.html:349
+#: .\mainview\templates\desktop\index.html:277
+#: .\mainview\templates\desktop\index.html:350
 msgid "Итого:"
 msgstr "Total:"
 
-#: .\mainview\templates\desktop\index.html:281
-#: .\mainview\templates\desktop\index.html:354
+#: .\mainview\templates\desktop\index.html:282
+#: .\mainview\templates\desktop\index.html:355
 msgid "Итого со скидкой:"
 msgstr "Total with discount:"
 
-#: .\mainview\templates\desktop\index.html:306
+#: .\mainview\templates\desktop\index.html:307
 msgid "Быстро и надёжно"
 msgstr "Fast and reliable"
 
-#: .\mainview\templates\desktop\index.html:318 .\myprofile\views\blocks.py:101
+#: .\mainview\templates\desktop\index.html:319 .\myprofile\views\blocks.py:101
 #: .\register\models.py:167
 msgid "Вход"
 msgstr "Login"
 
-#: .\mainview\templates\desktop\index.html:403
+#: .\mainview\templates\desktop\index.html:404
 msgid "Частые вопросы"
 msgstr "FAQ"
 
-#: .\mainview\templates\desktop\index.html:411
+#: .\mainview\templates\desktop\index.html:412
 #, python-format
 msgid ""
 "Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. Для "
@@ -1469,11 +1469,11 @@ msgstr ""
 "The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo. "
 "Use the calculator above for the calculation."
 
-#: .\mainview\templates\desktop\index.html:415
+#: .\mainview\templates\desktop\index.html:416
 msgid "Какие сроки доставки из Китая?"
 msgstr "What are the delivery times from China?"
 
-#: .\mainview\templates\desktop\index.html:420
+#: .\mainview\templates\desktop\index.html:421
 msgid ""
 "Средний срок доставки составляет 8–12 дней с момента отправки товара с "
 "нашего склада в Китае."
@@ -1481,7 +1481,7 @@ msgstr ""
 "Average delivery time is 8–12 days from the moment the goods are shipped "
 "from our warehouse in China."
 
-#: .\mainview\templates\desktop\index.html:429
+#: .\mainview\templates\desktop\index.html:430
 msgid ""
 "Заполните форму на странице «Регистрация», указав логин (имя/ник + последние "
 "4 цифры телефона), номер телефона и выбрав удобный пункт выдачи."
@@ -1490,35 +1490,35 @@ msgstr ""
 "nickname + last 4 digits of phone), phone number and selecting a convenient "
 "pickup point."
 
-#: .\mainview\templates\desktop\index.html:439
+#: .\mainview\templates\desktop\index.html:440
 msgid "Взрывоопасные, радиоактивные, горючие, ядовитые вещества"
 msgstr "Explosive, radioactive, flammable, toxic substances"
 
-#: .\mainview\templates\desktop\index.html:440
+#: .\mainview\templates\desktop\index.html:441
 msgid "Холодное оружие, макеты, пневматика, арбалеты"
 msgstr "Cold weapons, replicas, pneumatics, crossbows"
 
-#: .\mainview\templates\desktop\index.html:441
+#: .\mainview\templates\desktop\index.html:442
 msgid "Психотропные, наркотические средства, алкоголь, сигареты"
 msgstr "Psychotropic, narcotic substances, alcohol, cigarettes"
 
-#: .\mainview\templates\desktop\index.html:442
+#: .\mainview\templates\desktop\index.html:443
 msgid "Скоропортящиеся и жидкие продукты"
 msgstr "Perishable and liquid products"
 
-#: .\mainview\templates\desktop\index.html:443
+#: .\mainview\templates\desktop\index.html:444
 msgid "Техника, телефоны, ноутбуки (под свою ответственность)"
 msgstr "Electronics, phones, laptops (at your own risk)"
 
-#: .\mainview\templates\desktop\index.html:444
+#: .\mainview\templates\desktop\index.html:445
 msgid "Животные, дроны"
 msgstr "Animals, drones"
 
-#: .\mainview\templates\desktop\index.html:445
+#: .\mainview\templates\desktop\index.html:446
 msgid "Хрупкие, стеклянные товары (просите надёжную упаковку)"
 msgstr "Fragile, glass items (request reliable packaging)"
 
-#: .\mainview\templates\desktop\index.html:455
+#: .\mainview\templates\desktop\index.html:456
 msgid ""
 "После оформления заказа вам будет предоставлен трек-номер. Используйте его "
 "на нашем сайте или свяжитесь с менеджером через WhatsApp."
@@ -1526,30 +1526,30 @@ msgstr ""
 "After placing an order, you will receive a track number. Use it on our "
 "website or contact a manager via WhatsApp."
 
-#: .\mainview\templates\desktop\index.html:459
+#: .\mainview\templates\desktop\index.html:460
 msgid "Что делать, если заказ повреждён?"
 msgstr "What to do if the order is damaged?"
 
-#: .\mainview\templates\desktop\index.html:465
+#: .\mainview\templates\desktop\index.html:466
 msgid "Заранее попросите продавца обеспечить надёжную упаковку"
 msgstr "Ask the seller in advance to provide reliable packaging"
 
-#: .\mainview\templates\desktop\index.html:466
+#: .\mainview\templates\desktop\index.html:467
 msgid "Для хрупких товаров рекомендуется обрешётка груза"
 msgstr "For fragile goods, crating is recommended"
 
-#: .\mainview\templates\desktop\index.html:467
+#: .\mainview\templates\desktop\index.html:468
 msgid "Если упаковка не соответствовала — компания не несёт ответственности"
 msgstr "If packaging was inadequate — the company bears no responsibility"
 
-#: .\mainview\templates\desktop\index.html:468
+#: .\mainview\templates\desktop\index.html:469
 msgid ""
 "Если товар упакован правильно, но повреждён — ответственность несёт Inter "
 "Cargo"
 msgstr ""
 "If the item is properly packaged but damaged — Inter Cargo is responsible"
 
-#: .\mainview\templates\desktop\index.html:478
+#: .\mainview\templates\desktop\index.html:479
 msgid ""
 "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
 "главной страницы."
@@ -1557,11 +1557,11 @@ msgstr ""
 "Click on the messenger icons (Telegram, WhatsApp) in the top right corner of "
 "the main page."
 
-#: .\mainview\templates\desktop\index.html:482
+#: .\mainview\templates\desktop\index.html:483
 msgid "Ответственность за статус «Добавлено пользователем»?"
 msgstr "Responsibility for 'Added by user' status?"
 
-#: .\mainview\templates\desktop\index.html:487
+#: .\mainview\templates\desktop\index.html:488
 msgid ""
 "Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo "
 "отвечает с момента поступления товара на склад в Китае."
@@ -1570,46 +1570,46 @@ msgstr ""
 "Cargo is responsible from the moment the goods arrive at the warehouse in "
 "China."
 
-#: .\mainview\templates\desktop\index.html:582
+#: .\mainview\templates\desktop\index.html:583
 #, python-format
 msgid "Добро пожаловать, %(name)s!"
 msgstr "Welcome, %(name)s!"
 
-#: .\mainview\templates\desktop\index.html:583
-#: .\mainview\templates\desktop\index.html:609
+#: .\mainview\templates\desktop\index.html:584
+#: .\mainview\templates\desktop\index.html:610
 #, python-format
 msgid "Тариф: %(p)s₸/кг"
 msgstr "Rate: %(p)s₸/kg"
 
-#: .\mainview\templates\desktop\index.html:587
+#: .\mainview\templates\desktop\index.html:588
 #: .\myprofile\templates\desktop\profile.html:37
 #: .\myprofile\templates\mobile\mobile_menu.html:501
 msgid "Личный кабинет"
 msgstr "Personal account"
 
-#: .\mainview\templates\desktop\index.html:593
-#: .\mainview\templates\desktop\index.html:624
+#: .\mainview\templates\desktop\index.html:594
+#: .\mainview\templates\desktop\index.html:625
 #: .\mainview\templates\mobile\m_sidebar.html:92
 #: .\mainview\templates\mobile\sidebar.html:149
 msgid "Обучение по сайту"
 msgstr "Site tutorial"
 
-#: .\mainview\templates\desktop\index.html:601
+#: .\mainview\templates\desktop\index.html:602
 msgid "Заказы из Америки и Европы"
 msgstr "Orders from America and Europe"
 
-#: .\mainview\templates\desktop\index.html:606
+#: .\mainview\templates\desktop\index.html:607
 msgid "КАЛЬКУЛЯТОР"
 msgstr "CALCULATOR"
 
-#: .\mainview\templates\desktop\index.html:607
+#: .\mainview\templates\desktop\index.html:608
 msgid "Узнайте цену доставки груза из Китая в Казахстан"
 msgstr "Find out the delivery cost from China to Kazakhstan"
 
-#: .\mainview\templates\desktop\index.html:618
-#: .\mainview\templates\desktop\index.html:839
-#: .\mainview\templates\desktop\index.html:935
-#: .\mainview\templates\desktop\index.html:961
+#: .\mainview\templates\desktop\index.html:619
+#: .\mainview\templates\desktop\index.html:840
+#: .\mainview\templates\desktop\index.html:936
+#: .\mainview\templates\desktop\index.html:962
 #: .\mainview\templates\shared\header.html:155
 #: .\mainview\templates\shared\header.html:184
 #: .\register\templates\desktop\login.html:143
@@ -1619,27 +1619,27 @@ msgstr "Find out the delivery cost from China to Kazakhstan"
 msgid "Войти"
 msgstr "Log in"
 
-#: .\mainview\templates\desktop\index.html:631
+#: .\mainview\templates\desktop\index.html:632
 msgid "Калькулятор"
 msgstr "Calculator"
 
-#: .\mainview\templates\desktop\index.html:633
+#: .\mainview\templates\desktop\index.html:634
 msgid "Напишите количество в кг"
 msgstr "Enter weight in kg"
 
-#: .\mainview\templates\desktop\index.html:649
+#: .\mainview\templates\desktop\index.html:650
 msgid "Мин: 0 - Макс: 100"
 msgstr "Min: 0 - Max: 100"
 
-#: .\mainview\templates\desktop\index.html:654
+#: .\mainview\templates\desktop\index.html:655
 #: .\myprofile\templates\desktop\delivered_posts.html:170
 #: .\myprofile\templates\desktop\finance_summary.html:435
 #: .\myprofile\templates\desktop\inventory_report.html:83
-#: .\myprofile\templates\shared\print\client_check_pdf.html:243
+#: .\myprofile\templates\shared\print\client_check_pdf.html:255
 msgid "Итого"
 msgstr "Total"
 
-#: .\mainview\templates\desktop\index.html:657
+#: .\mainview\templates\desktop\index.html:658
 #: .\myprofile\templates\desktop\reschedule_arrival.html:111
 #: .\myprofile\templates\desktop\reschedule_arrival.html:217
 #: .\myprofile\templates\desktop\unidentified.html:108
@@ -1647,43 +1647,43 @@ msgstr "Total"
 #: .\myprofile\templates\desktop\unidentified.html:246
 #: .\myprofile\templates\desktop\warehouse.html:201
 #: .\myprofile\templates\desktop\warehouse_reassign.html:150
-#: .\myprofile\templates\shared\print\client_check_pdf.html:123
-#: .\myprofile\templates\shared\print\client_check_pdf.html:141
-#: .\myprofile\templates\shared\print\client_check_pdf.html:227
+#: .\myprofile\templates\shared\print\client_check_pdf.html:135
+#: .\myprofile\templates\shared\print\client_check_pdf.html:153
+#: .\myprofile\templates\shared\print\client_check_pdf.html:239
 msgid "Вес"
 msgstr "Weight"
 
-#: .\mainview\templates\desktop\index.html:658
+#: .\mainview\templates\desktop\index.html:659
 msgid "0 кг"
 msgstr "0 kg"
 
-#: .\mainview\templates\desktop\index.html:661
-#: .\myprofile\templates\shared\print\client_check_pdf.html:127
-#: .\myprofile\templates\shared\print\client_check_pdf.html:142
-#: .\myprofile\templates\shared\print\client_check_pdf.html:172
-#: .\myprofile\templates\shared\print\client_check_pdf.html:188
+#: .\mainview\templates\desktop\index.html:662
+#: .\myprofile\templates\shared\print\client_check_pdf.html:139
+#: .\myprofile\templates\shared\print\client_check_pdf.html:154
+#: .\myprofile\templates\shared\print\client_check_pdf.html:184
+#: .\myprofile\templates\shared\print\client_check_pdf.html:200
 msgid "Сумма"
 msgstr "Amount"
 
-#: .\mainview\templates\desktop\index.html:666
+#: .\mainview\templates\desktop\index.html:667
 msgid "Скидка"
 msgstr "Discount"
 
-#: .\mainview\templates\desktop\index.html:821
+#: .\mainview\templates\desktop\index.html:822
 #: .\mainview\templates\shared\header.html:22
 #: .\register\templates\desktop\register.html:31
 #: .\register\templates\desktop\registration.html:36
 msgid "РЕГИСТРАЦИЯ"
 msgstr "REGISTRATION"
 
-#: .\mainview\templates\desktop\index.html:822
+#: .\mainview\templates\desktop\index.html:823
 #: .\mainview\templates\shared\header.html:23
 #: .\register\templates\desktop\register.html:32
 #: .\register\templates\desktop\registration.html:37
 msgid "Регистрация нового клиента"
 msgstr "New client registration"
 
-#: .\mainview\templates\desktop\index.html:824
+#: .\mainview\templates\desktop\index.html:825
 #: .\mainview\templates\shared\header.html:24
 #: .\register\templates\desktop\register.html:34
 #: .\register\templates\desktop\registration.html:39
@@ -1694,15 +1694,15 @@ msgstr ""
 "Fill in the form below to register in our system and start using our "
 "delivery service from China"
 
-#: .\mainview\templates\desktop\index.html:852
-#: .\mainview\templates\desktop\index.html:917
+#: .\mainview\templates\desktop\index.html:853
+#: .\mainview\templates\desktop\index.html:918
 #: .\register\templates\desktop\login.html:125
 #: .\register\templates\desktop\register.html:57
 #: .\register\templates\desktop\registration.html:62
 msgid "Логин (Имя/Ник + 4 цифры номера)"
 msgstr "Login (Name/Nickname + 4 digits of phone)"
 
-#: .\mainview\templates\desktop\index.html:855
+#: .\mainview\templates\desktop\index.html:856
 msgid ""
 "Введите имя или ник (только латинские буквы) и 4 цифры номера, например "
 "ANDREY1234"
@@ -1710,23 +1710,23 @@ msgstr ""
 "Enter a name or nickname (Latin letters only) and 4 digits of the number, "
 "e.g. ANDREY1234"
 
-#: .\mainview\templates\desktop\index.html:856
-#: .\mainview\templates\desktop\index.html:920
+#: .\mainview\templates\desktop\index.html:857
+#: .\mainview\templates\desktop\index.html:921
 #: .\register\templates\desktop\login.html:128
 #: .\register\templates\desktop\register.html:58
 #: .\register\templates\desktop\registration.html:63
 msgid "Например: ANDREY1234"
 msgstr "For example: ANDREY1234"
 
-#: .\mainview\templates\desktop\index.html:859
+#: .\mainview\templates\desktop\index.html:860
 #: .\register\templates\desktop\login.html:129
 #: .\register\templates\desktop\register.html:59
 #: .\register\templates\desktop\registration.html:64
 msgid "Введите ваше имя или ник и последние 4 цифры номера телефона"
 msgstr "Enter your name or nickname and the last 4 digits of your phone number"
 
-#: .\mainview\templates\desktop\index.html:866
-#: .\mainview\templates\desktop\index.html:943
+#: .\mainview\templates\desktop\index.html:867
+#: .\mainview\templates\desktop\index.html:944
 #: .\myprofile\templates\desktop\settings.html:92
 #: .\register\templates\desktop\login.html:154
 #: .\register\templates\desktop\register.html:64
@@ -1734,26 +1734,26 @@ msgstr "Enter your name or nickname and the last 4 digits of your phone number"
 msgid "Номер телефона"
 msgstr "Phone number"
 
-#: .\mainview\templates\desktop\index.html:876
+#: .\mainview\templates\desktop\index.html:877
 #: .\register\templates\desktop\register.html:70
 #: .\register\templates\desktop\registration.html:114
 msgid "Выбор пункта выдачи"
 msgstr "Select pickup point"
 
-#: .\mainview\templates\desktop\index.html:880
+#: .\mainview\templates\desktop\index.html:881
 #: .\myprofile\templates\desktop\profile.html:232
 #: .\register\templates\desktop\register.html:72
 #: .\register\templates\desktop\registration.html:116
 msgid "Выберите пункт выдачи"
 msgstr "Select pickup point"
 
-#: .\mainview\templates\desktop\index.html:890
+#: .\mainview\templates\desktop\index.html:891
 #: .\register\templates\desktop\register.html:107
 #: .\register\templates\desktop\registration.html:151
 msgid "Зарегистрироваться"
 msgstr "Register"
 
-#: .\mainview\templates\desktop\index.html:904
+#: .\mainview\templates\desktop\index.html:905
 #: .\myprofile\templates\desktop\arrival_summary.html:195
 #: .\register\templates\desktop\login.html:106
 #: .\register\templates\desktop\password_reset.html:42
@@ -1761,7 +1761,7 @@ msgstr "Register"
 msgid "Логин"
 msgstr "Login"
 
-#: .\mainview\templates\desktop\index.html:909
+#: .\mainview\templates\desktop\index.html:910
 #: .\myprofile\templates\desktop\arrival_summary.html:113
 #: .\myprofile\templates\desktop\arrival_summary.html:196
 #: .\myprofile\templates\desktop\arrival_summary.html:295
@@ -1771,8 +1771,8 @@ msgstr "Login"
 msgid "Телефон"
 msgstr "Phone"
 
-#: .\mainview\templates\desktop\index.html:923
-#: .\mainview\templates\desktop\index.html:949
+#: .\mainview\templates\desktop\index.html:924
+#: .\mainview\templates\desktop\index.html:950
 #: .\register\templates\desktop\login.html:132
 #: .\register\templates\desktop\login.html:160
 #: .\register\templates\desktop\login.html:188
@@ -1781,8 +1781,8 @@ msgstr "Phone"
 msgid "Пароль"
 msgstr "Password"
 
-#: .\mainview\templates\desktop\index.html:927
-#: .\mainview\templates\desktop\index.html:953
+#: .\mainview\templates\desktop\index.html:928
+#: .\mainview\templates\desktop\index.html:954
 #: .\register\templates\desktop\login.html:136
 #: .\register\templates\desktop\login.html:164
 #: .\register\templates\desktop\login.html:192
@@ -2214,7 +2214,8 @@ msgstr "Mass Status Update"
 msgid "Отметить как разобранные"
 msgstr "Mark as resolved"
 
-#: .\myprofile\middleware.py:31 .\myprofile\views\inventory_session.py:143
+#: .\myprofile\middleware.py:32 .\myprofile\permissions.py:668
+#: .\myprofile\views\inventory_session.py:143
 #: .\myprofile\views\inventory_session.py:233
 #: .\myprofile\views\inventory_session.py:342
 #: .\myprofile\views\profile_setting.py:214
@@ -2222,7 +2223,7 @@ msgstr "Mark as resolved"
 #: .\myprofile\views\reschedule_arrival.py:136
 #: .\myprofile\views\reschedule_arrival.py:161
 #: .\myprofile\views\reschedule_arrival.py:212
-#: .\myprofile\views\reschedule_arrival.py:358
+#: .\myprofile\views\reschedule_arrival.py:353
 #: .\myprofile\views\role_management.py:82
 #: .\myprofile\views\role_management.py:138
 #: .\myprofile\views\unidentified.py:142 .\myprofile\views\unidentified.py:185
@@ -2491,8 +2492,8 @@ msgstr "Receipt number"
 #: .\myprofile\templates\desktop\finance_summary.html:76
 #: .\myprofile\templates\desktop\finance_summary.html:411
 #: .\myprofile\templates\desktop\profile.html:229
-#: .\myprofile\templates\shared\print\client_check_pdf.html:160
-#: .\myprofile\templates\shared\print\client_check_pdf.html:185
+#: .\myprofile\templates\shared\print\client_check_pdf.html:172
+#: .\myprofile\templates\shared\print\client_check_pdf.html:197
 #: .\myprofile\templates\shared\print\receipt_print.html:357
 #: .\register\models.py:28
 msgid "Пункт выдачи"
@@ -2772,8 +2773,8 @@ msgstr "PVZ change request"
 #: .\myprofile\templates\desktop\reschedule_arrival.html:218
 #: .\myprofile\templates\desktop\service.html:89
 #: .\myprofile\templates\desktop\service.html:114
-#: .\myprofile\templates\shared\print\client_check_pdf.html:156
-#: .\myprofile\templates\shared\print\client_check_pdf.html:184
+#: .\myprofile\templates\shared\print\client_check_pdf.html:168
+#: .\myprofile\templates\shared\print\client_check_pdf.html:196
 msgid "Дата прихода"
 msgstr "Arrival date"
 
@@ -3039,8 +3040,8 @@ msgstr "Notification mutes"
 
 #: .\myprofile\models.py:1117
 #: .\myprofile\templates\desktop\finance_summary.html:139
-#: .\myprofile\templates\shared\print\client_check_pdf.html:115
-#: .\myprofile\templates\shared\print\client_check_pdf.html:139
+#: .\myprofile\templates\shared\print\client_check_pdf.html:127
+#: .\myprofile\templates\shared\print\client_check_pdf.html:151
 #: .\register\models.py:39 .\register\models.py:99
 #: .\register\templates\desktop\register_confirmation.html:65
 #: .\tgbot\models.py:192
@@ -3291,8 +3292,8 @@ msgstr "Home delivery (Courier)"
 #: .\myprofile\templates\desktop\finance_summary.html:412
 #: .\myprofile\templates\desktop\warehouse_inventory.html:72
 #: .\myprofile\templates\desktop\warehouse_reassign.html:149
-#: .\myprofile\templates\shared\print\client_check_pdf.html:119
-#: .\myprofile\templates\shared\print\client_check_pdf.html:140
+#: .\myprofile\templates\shared\print\client_check_pdf.html:131
+#: .\myprofile\templates\shared\print\client_check_pdf.html:152
 msgid "Посылок"
 msgstr "Parcels"
 
@@ -4068,8 +4069,8 @@ msgid "Доставок"
 msgstr "Deliveries"
 
 #: .\myprofile\templates\desktop\finance_summary.html:387
-#: .\myprofile\templates\shared\print\client_check_pdf.html:168
-#: .\myprofile\templates\shared\print\client_check_pdf.html:187
+#: .\myprofile\templates\shared\print\client_check_pdf.html:180
+#: .\myprofile\templates\shared\print\client_check_pdf.html:199
 msgid "Общий вес"
 msgstr "Total weight"
 
@@ -5976,7 +5977,7 @@ msgid "Inter Cargo - Сообщения"
 msgstr "Inter Cargo - Messages"
 
 #: .\myprofile\templates\mobile\mobile_notifications.html:130
-#: .\myprofile\views\mobile_notifications.py:100
+#: .\myprofile\views\mobile_notifications.py:116
 msgid "Нет сообщений"
 msgstr "No messages"
 
@@ -6058,16 +6059,36 @@ msgstr ""
 "they are printed without QR and will not scan at acceptance. Generate "
 "receipts for these clients in the “Arrival summary”."
 
-#: .\myprofile\templates\shared\print\client_check_pdf.html:164
-#: .\myprofile\templates\shared\print\client_check_pdf.html:186
+#: .\myprofile\templates\shared\print\client_check_pdf.html:104
+msgid "Не напечатаны — чек оформлен на другой ПВЗ"
+msgstr "Not printed — the receipt is issued for another PVZ"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:105
+msgid "Проверьте, где находятся эти посылки, прежде чем отправлять их в пункт."
+msgstr "Check where these parcels are before sending them to the pickup point."
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:108
+msgid "чек"
+msgstr "receipt"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:108
+msgid "ПВЗ в чеке"
+msgstr "PVZ on the receipt"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:108
+msgid "позиций"
+msgstr "items"
+
+#: .\myprofile\templates\shared\print\client_check_pdf.html:176
+#: .\myprofile\templates\shared\print\client_check_pdf.html:198
 msgid "Всего посылок"
 msgstr "Total parcels"
 
-#: .\myprofile\templates\shared\print\client_check_pdf.html:226
+#: .\myprofile\templates\shared\print\client_check_pdf.html:238
 msgid "Трек-номер"
 msgstr "Track number"
 
-#: .\myprofile\templates\shared\print\client_check_pdf.html:228
+#: .\myprofile\templates\shared\print\client_check_pdf.html:240
 msgid "Стоимость"
 msgstr "Cost"
 
@@ -6104,7 +6125,7 @@ msgid "Итого к оплате:"
 msgstr "Total to pay:"
 
 #: .\myprofile\views\arrival_history.py:26
-#: .\myprofile\views\arrival_summary.py:40 .\myprofile\views\blocks.py:79
+#: .\myprofile\views\arrival_summary.py:41 .\myprofile\views\blocks.py:79
 #: .\myprofile\views\bulk_jobs.py:14 .\myprofile\views\delivery.py:151
 #: .\myprofile\views\extraditions.py:69 .\myprofile\views\finance_summary.py:81
 #: .\myprofile\views\goods_arrival.py:95
@@ -6113,19 +6134,19 @@ msgstr "Total to pay:"
 #: .\myprofile\views\pp_acceptance.py:45 .\myprofile\views\pp_acceptance.py:499
 #: .\myprofile\views\pp_acceptance.py:562
 #: .\myprofile\views\pp_extradition_history.py:26
-#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
+#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:41
 #: .\myprofile\views\shipped_cn.py:40 .\myprofile\views\shipped_cn.py:125
 #: .\myprofile\views\unidentified.py:27 .\myprofile\views\warehouse.py:45
 #: .\support\views\inbox.py:60
 msgid "У вас нет доступа к этой странице."
 msgstr "You do not have access to this page."
 
-#: .\myprofile\views\arrival_summary.py:230
-#: .\myprofile\views\arrival_summary.py:277
-#: .\myprofile\views\arrival_summary.py:308
-#: .\myprofile\views\arrival_summary.py:381
-#: .\myprofile\views\arrival_summary.py:402
-#: .\myprofile\views\arrival_summary.py:505 .\myprofile\views\blocks.py:149
+#: .\myprofile\views\arrival_summary.py:231
+#: .\myprofile\views\arrival_summary.py:288
+#: .\myprofile\views\arrival_summary.py:322
+#: .\myprofile\views\arrival_summary.py:395
+#: .\myprofile\views\arrival_summary.py:416
+#: .\myprofile\views\arrival_summary.py:519 .\myprofile\views\blocks.py:149
 #: .\myprofile\views\bulk_jobs.py:22 .\myprofile\views\delivery.py:216
 #: .\myprofile\views\delivery.py:437 .\myprofile\views\delivery.py:562
 #: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:144
@@ -6142,94 +6163,98 @@ msgstr "You do not have access to this page."
 #: .\myprofile\views\notification_mutes.py:128
 #: .\myprofile\views\pp_acceptance.py:301
 #: .\myprofile\views\pp_acceptance.py:405
-#: .\myprofile\views\pp_acceptance.py:645 .\myprofile\views\service.py:52
-#: .\myprofile\views\service.py:122 .\myprofile\views\service.py:182
-#: .\myprofile\views\service.py:262 .\myprofile\views\service.py:395
-#: .\myprofile\views\service.py:485 .\myprofile\views\warehouse.py:202
+#: .\myprofile\views\pp_acceptance.py:645 .\myprofile\views\service.py:54
+#: .\myprofile\views\service.py:124 .\myprofile\views\service.py:184
+#: .\myprofile\views\service.py:277 .\myprofile\views\service.py:401
+#: .\myprofile\views\service.py:491 .\myprofile\views\warehouse.py:202
 #: .\myprofile\views\warehouse.py:295 .\myprofile\views\warehouse.py:404
 #: .\myprofile\views\warehouse.py:492 .\myprofile\views\warehouse.py:547
 #: .\myprofile\views\warehouse.py:670 .\myprofile\views\warehouse.py:784
 msgid "У вас нет доступа."
 msgstr "You do not have access."
 
-#: .\myprofile\views\arrival_summary.py:237
-#: .\myprofile\views\arrival_summary.py:284
+#: .\myprofile\views\arrival_summary.py:238
+#: .\myprofile\views\arrival_summary.py:295
 msgid "Недостаточно данных."
 msgstr "Insufficient data."
 
-#: .\myprofile\views\arrival_summary.py:249
+#: .\myprofile\views\arrival_summary.py:251
+msgid "Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."
+msgstr "No parcels can be redirected: the PVZ is already fixed."
+
+#: .\myprofile\views\arrival_summary.py:257
 msgid "Пункт 'Доставка на дом' не найден."
 msgstr "Home delivery point not found."
 
-#: .\myprofile\views\arrival_summary.py:252
+#: .\myprofile\views\arrival_summary.py:260
 msgid "Клиент назначен на доставку на дом."
 msgstr "Client assigned to home delivery."
 
-#: .\myprofile\views\arrival_summary.py:256
+#: .\myprofile\views\arrival_summary.py:264
 #: .\myprofile\views\pp_acceptance.py:312
 #: .\myprofile\views\pp_acceptance.py:411
 msgid "Не указан пункт выдачи."
 msgstr "Pickup point not specified."
 
-#: .\myprofile\views\arrival_summary.py:261
-#: .\myprofile\views\arrival_summary.py:290
+#: .\myprofile\views\arrival_summary.py:269
+#: .\myprofile\views\arrival_summary.py:301
 #: .\myprofile\views\pp_acceptance.py:318
 #: .\myprofile\views\pp_acceptance.py:417
 #: .\myprofile\views\pp_acceptance.py:506 .\myprofile\views\warehouse.py:552
 msgid "Пункт выдачи не найден."
 msgstr "Pickup point not found."
 
-#: .\myprofile\views\arrival_summary.py:267
+#: .\myprofile\views\arrival_summary.py:275
 msgid "Клиент возвращён на свой ПВЗ."
 msgstr "Client returned to their PVZ."
 
-#: .\myprofile\views\arrival_summary.py:298
+#: .\myprofile\views\arrival_summary.py:312
 msgid "Нет клиентов для назначения."
 msgstr "No clients to assign."
 
-#: .\myprofile\views\arrival_summary.py:318
-#: .\myprofile\views\arrival_summary.py:319
+#: .\myprofile\views\arrival_summary.py:332
+#: .\myprofile\views\arrival_summary.py:333
 msgid "Укажите размер скидки."
 msgstr "Please specify the discount amount."
 
-#: .\myprofile\views\arrival_summary.py:328
-#: .\myprofile\views\arrival_summary.py:329
+#: .\myprofile\views\arrival_summary.py:342
+#: .\myprofile\views\arrival_summary.py:343
 msgid "Некорректный размер скидки."
 msgstr "Invalid discount amount."
 
-#: .\myprofile\views\arrival_summary.py:334
-#: .\myprofile\views\arrival_summary.py:335 .\myprofile\views\delivery.py:566
+#: .\myprofile\views\arrival_summary.py:348
+#: .\myprofile\views\arrival_summary.py:349 .\myprofile\views\delivery.py:566
 #: .\myprofile\views\pp_acceptance.py:652 .\myprofile\views\warehouse.py:674
 msgid "Не указан клиент."
 msgstr "Client not specified."
 
-#: .\myprofile\views\arrival_summary.py:342
-#: .\myprofile\views\arrival_summary.py:343
+#: .\myprofile\views\arrival_summary.py:356
+#: .\myprofile\views\arrival_summary.py:357
 #: .\myprofile\views\notification_mutes.py:80
 #: .\myprofile\views\unidentified.py:156 .\myprofile\views\warehouse.py:647
 #: .\register\views\password_reset.py:55 .\register\views\password_reset.py:173
 msgid "Пользователь не найден."
 msgstr "User not found."
 
-#: .\myprofile\views\arrival_summary.py:385
-#: .\myprofile\views\arrival_summary.py:513 .\myprofile\views\service.py:126
-#: .\myprofile\views\service.py:186
+#: .\myprofile\views\arrival_summary.py:399
+#: .\myprofile\views\arrival_summary.py:527 .\myprofile\views\service.py:128
+#: .\myprofile\views\service.py:188
 msgid "Не указана дата."
 msgstr "Date not specified."
 
-#: .\myprofile\views\arrival_summary.py:393
+#: .\myprofile\views\arrival_summary.py:407
 msgid "Генерация чеков запущена в фоне."
 msgstr "Receipt generation started in background."
 
-#: .\myprofile\views\arrival_summary.py:412
+#: .\myprofile\views\arrival_summary.py:426
 msgid "Нет исходных данных для актуализации."
 msgstr "No source data to update."
 
-#: .\myprofile\views\arrival_summary.py:420
+#: .\myprofile\views\arrival_summary.py:434
 msgid "Некорректные исходные данные прихода."
 msgstr "Invalid arrival source data."
 
-#: .\myprofile\views\arrival_summary.py:493
+#: .\myprofile\views\arrival_summary.py:507
 msgid "Данные прихода актуальны, изменений не требуется."
 msgstr "Arrival data is up to date, no changes needed."
 
@@ -6313,7 +6338,7 @@ msgstr "Home delivery point is not configured."
 #: .\myprofile\views\delivery.py:577 .\myprofile\views\inventory_session.py:248
 #: .\myprofile\views\reschedule_arrival.py:177
 #: .\myprofile\views\reschedule_arrival.py:234
-#: .\myprofile\views\reschedule_arrival.py:375
+#: .\myprofile\views\reschedule_arrival.py:370
 #: .\myprofile\views\warehouse.py:680
 msgid "Клиент не найден."
 msgstr "Client not found."
@@ -6396,7 +6421,7 @@ msgstr "📦 Parcels issued: %(count)s (%(pickup_label)s)."
 #: .\myprofile\views\reschedule_arrival.py:86
 #: .\myprofile\views\reschedule_arrival.py:172
 #: .\myprofile\views\reschedule_arrival.py:229
-#: .\myprofile\views\reschedule_arrival.py:370
+#: .\myprofile\views\reschedule_arrival.py:365
 #: .\myprofile\views\shipped_cn.py:59 .\myprofile\views\shipped_cn.py:133
 msgid "Неверный формат даты."
 msgstr "Invalid date format."
@@ -6541,40 +6566,40 @@ msgstr "Inventory finished."
 msgid "Инвентаризация отменена — изменения не применялись."
 msgstr "Inventory cancelled — no changes were applied."
 
-#: .\myprofile\views\mobile_notifications.py:50
+#: .\myprofile\views\mobile_notifications.py:59
 msgid "Сегодня"
 msgstr "Today"
 
-#: .\myprofile\views\mobile_notifications.py:52
+#: .\myprofile\views\mobile_notifications.py:61
 msgid "Вчера"
 msgstr "Yesterday"
 
-#: .\myprofile\views\mobile_notifications.py:121 .\register\models.py:112
+#: .\myprofile\views\mobile_notifications.py:137 .\register\models.py:112
 #: .\register\templates\desktop\register_confirmation.html:52
 msgid "Заявки на регистрацию"
 msgstr "Registration requests"
 
-#: .\myprofile\views\mobile_notifications.py:136
+#: .\myprofile\views\mobile_notifications.py:152
 msgid "Рассылка"
 msgstr "Mailing"
 
-#: .\myprofile\views\mobile_notifications.py:149 .\tgbot\models.py:99
+#: .\myprofile\views\mobile_notifications.py:165 .\tgbot\models.py:99
 msgid "Информация"
 msgstr "Information"
 
-#: .\myprofile\views\mobile_notifications.py:185
+#: .\myprofile\views\mobile_notifications.py:201
 #: .\support\templates\support\_mobile_messages.html:129
 #: .\support\templates\support\client_chat.html:47
 msgid "Задайте вопрос — мы на связи"
 msgstr "Ask a question — we are online"
 
-#: .\myprofile\views\mobile_notifications.py:211
-#: .\myprofile\views\mobile_notifications.py:230
+#: .\myprofile\views\mobile_notifications.py:227
+#: .\myprofile\views\mobile_notifications.py:246
 #, python-format
 msgid "Di.Buyer — заявка №%(n)s"
 msgstr "Di.Buyer — request #%(n)s"
 
-#: .\myprofile\views\mobile_notifications.py:281
+#: .\myprofile\views\mobile_notifications.py:297
 msgid "Вопросы по выкупу — напишите нам"
 msgstr "Questions about buyout? Message us"
 
@@ -6698,16 +6723,16 @@ msgid "Исходная и новая даты совпадают."
 msgstr "Source and new dates are the same."
 
 #: .\myprofile\views\reschedule_arrival.py:249
-#: .\myprofile\views\reschedule_arrival.py:387
+#: .\myprofile\views\reschedule_arrival.py:382
 msgid "Некорректные ID треков."
 msgstr "Invalid track IDs."
 
 #: .\myprofile\views\reschedule_arrival.py:254
-#: .\myprofile\views\reschedule_arrival.py:392
+#: .\myprofile\views\reschedule_arrival.py:387
 msgid "Нет треков для переноса."
 msgstr "No tracks to transfer."
 
-#: .\myprofile\views\reschedule_arrival.py:365
+#: .\myprofile\views\reschedule_arrival.py:360
 msgid "Укажите клиента и новую дату."
 msgstr "Please specify client and new date."
 
@@ -6720,15 +6745,15 @@ msgstr "Invalid JSON."
 msgid "Некорректная роль."
 msgstr "Invalid role."
 
-#: .\myprofile\views\service.py:132 .\myprofile\views\service.py:192
+#: .\myprofile\views\service.py:134 .\myprofile\views\service.py:194
 msgid "Некорректный формат даты."
 msgstr "Invalid date format."
 
-#: .\myprofile\views\service.py:272
+#: .\myprofile\views\service.py:287
 msgid "Нет трек-кодов со статусом «Выдано клиенту»."
 msgstr "No track codes with status 'Issued to client'."
 
-#: .\myprofile\views\service.py:284
+#: .\myprofile\views\service.py:299
 msgid "Все чеки уже отмечены как «Выдано клиенту»."
 msgstr "All receipts are already marked as 'Issued to client'."
 
@@ -6754,15 +6779,15 @@ msgstr "Moved to status \"Departed Almaty\": %(count)s track codes."
 msgid "Нет трек-кодов для перевода."
 msgstr "No track codes to transfer."
 
-#: .\myprofile\views\status_update.py:29
+#: .\myprofile\views\status_update.py:31
 msgid "Заполните все обязательные поля."
 msgstr "Fill in all required fields."
 
-#: .\myprofile\views\status_update.py:35
+#: .\myprofile\views\status_update.py:37
 msgid "Неверный формат даты. Ожидается YYYY-MM-DD."
 msgstr "Invalid date format. Expected YYYY-MM-DD."
 
-#: .\myprofile\views\status_update.py:47
+#: .\myprofile\views\status_update.py:49
 msgid "Количество трек-кодов, пользователей и весов должно совпадать."
 msgstr "The number of track codes, users and weights must match."
 
@@ -6820,12 +6845,12 @@ msgstr "User not specified."
 msgid "Посылка не найдена."
 msgstr "Parcel not found."
 
-#: .\myprofile\views\utils.py:295
+#: .\myprofile\views\utils.py:307
 #, python-format
 msgid "📦 Ваш трек-код обновлён: %(status)s"
 msgstr "📦 Your tracking code updated: %(status)s"
 
-#: .\myprofile\views\utils.py:296
+#: .\myprofile\views\utils.py:308
 #, python-format
 msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
 msgstr "📦 Updated %(count)s tracking codes: %(status)s"
@@ -7808,24 +7833,24 @@ msgstr "Support message"
 msgid "Сообщения поддержки"
 msgstr "Support messages"
 
-#: .\support\services.py:74
+#: .\support\services.py:81
 msgid ""
 "💬 Новое сообщение от техподдержки Inter Cargo. Откройте «Сообщения», чтобы "
 "ответить."
 msgstr "💬 New message from Inter Cargo support. Open “Messages” to reply."
 
-#: .\support\services.py:91
+#: .\support\services.py:98
 #, python-format
 msgid "💬 Поддержка: новое сообщение от клиента %(name)s"
 msgstr "💬 Support: new message from client %(name)s"
 
-#: .\support\services.py:100
+#: .\support\services.py:107
 #, python-format
 msgid "💬 Поддержка: оператор %(operator)s передал вам чат клиента %(name)s"
 msgstr ""
 "💬 Support: operator %(operator)s transferred client %(name)s's chat to you"
 
-#: .\support\services.py:109
+#: .\support\services.py:116
 #, python-format
 msgid "💬 Поддержка: чат клиента %(name)s возвращён вам в работу"
 msgstr "💬 Support: client %(name)s's chat has been returned to you"

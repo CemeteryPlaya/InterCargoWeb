@@ -13,6 +13,7 @@ from django.db.models import Q
 
 from myprofile.models import TrackCode, CustomerDiscount, Arrival, SortingLocation, ReceiptItem, Notification
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
+from myprofile.receipt_pickup import sync_pending_receipts_safely
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
@@ -237,11 +238,18 @@ def toggle_home_delivery(request):
         messages.error(request, _("Недостаточно данных."))
         return redirect('arrival_summary')
 
+    # Перенаправлять можно только незакреплённые посылки (решение D1): ещё на
+    # сортировке без чека или в pending-чеке (в т.ч. возвращённые на сортировку).
+    # ПВЗ треков, взятых в доставку/выданных, закреплён и не меняется.
     tracks = TrackCode.all_objects.filter(
+        Q(receiptitem__isnull=True, status='delivered') | Q(receiptitem__receipt__status='pending'),
         owner_id=user_id,
         delivered_date=date,
         status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
     )
+    if not tracks.exists():
+        messages.info(request, _("Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."))
+        return redirect(f'/profile/arrival-summary/?date={date}')
 
     if action == 'home':
         home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
@@ -265,6 +273,9 @@ def toggle_home_delivery(request):
     else:
         tracks.update(delivery_pickup=None)
         messages.success(request, _("Клиент возвращён на свой ПВЗ."))
+
+    # .update() обходит сигналы — перевешиваем pending-чеки клиента явно
+    sync_pending_receipts_safely(User.objects.filter(id=user_id).first())
 
     return redirect(f'/profile/arrival-summary/?date={date}')
 
@@ -291,6 +302,9 @@ def assign_temp_pickup(request):
         return redirect(f'/profile/arrival-summary/?date={date}')
 
     count = UserProfile.objects.filter(user_id__in=user_ids).update(pickup=pickup)
+    # .update() обходит сигналы — перевешиваем pending-чеки клиентов явно (D1)
+    for user in User.objects.filter(id__in=user_ids):
+        sync_pending_receipts_safely(user)
 
     if count:
         messages.success(request, f"Назначен ПВЗ для {count} клиентов: {pickup}")

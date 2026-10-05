@@ -46,3 +46,8 @@ PLAN.md
 
 bot.log
 test_delivery_perf.py
+
+.harness/
+.codebase-memmory/
+.codebase-memory/.gitignore
+.codebase-memory/config.json

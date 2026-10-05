@@ -1,29 +1,35 @@
 """Аудит чеков на инварианты домена (контракты валидатора выполнения).
 
-Без флагов — прогоняет контракты по всем чекам и пишет нарушения в журнал
-(ContractViolation), ничего не меняя. С ``--fix`` — приводит данные к
-инвариантам: схлопывает дубли чеков по (owner, дата) и выставляет корректный
-(authoritative) ПВЗ.
+Без флагов — отчёт (dry-run): показывает, что исправил бы ``--fix``, прогоняет
+контракты по всем чекам и пишет нарушения в журнал (ContractViolation). Данные
+чеков при этом не меняются.
+
+С ``--fix`` — приводит к правилу ПВЗ только pending-чеки, через
+``sync_pending_receipts_for_user``: перевешивает метку и ссылку оплаты, делит
+смешанные по ПВЗ, сливает дубли ключа (клиент, дата, ПВЗ) в старший. Чеки после
+pending заморожены (решения D1/D4): команда их никогда не меняет, а только
+перечисляет нарушения для ручного разбора.
 
 Запуск:  python manage.py audit_receipts
          python manage.py audit_receipts --fix
 """
+from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
-from django.db.models import Count
+from django.db import transaction
 
 from myprofile.models import Receipt
-from myprofile.execution_validator import ExecutionContext, run_contracts
+from myprofile.execution_validator import ExecutionContext, ExecutionValidationError, run_contracts
 from myprofile.execution_validator import runtime
 from myprofile.execution_validator.receipt_contracts import (
-    authoritative_pickup_label,
-    one_receipt_per_client_date,
+    one_pending_receipt_per_client_date_pickup,
     all_items_belong_to_receipt_owner,
     receipt_pickup_label_matches_authoritative,
     receipt_tracks_pickup_homogeneous,
 )
+from myprofile.receipt_pickup import SyncSummary, sync_pending_receipts_for_user
 
 CONTRACTS = [
-    one_receipt_per_client_date,
+    one_pending_receipt_per_client_date_pickup,
     all_items_belong_to_receipt_owner,
     receipt_pickup_label_matches_authoritative,
     receipt_tracks_pickup_homogeneous,
@@ -31,82 +37,75 @@ CONTRACTS = [
 
 
 class Command(BaseCommand):
-    help = "Аудит чеков на инварианты (дубли по дате, корректность ПВЗ). --fix исправляет."
+    help = ("Аудит чеков на инварианты ПВЗ. Без флагов — отчёт (dry-run); "
+            "--fix исправляет только pending-чеки, замороженные — в отчёт для ручного разбора.")
 
     def add_arguments(self, parser):
         parser.add_argument('--fix', action='store_true',
-                            help='Исправлять найденные нарушения (иначе только журнал).')
+                            help='Исправить pending-чеки (иначе только отчёт, данные не меняются).')
 
     def handle(self, *args, **options):
         fix = options['fix']
-        merged = 0
-        fixed_labels = 0
+        mode = '[FIX]' if fix else '[dry-run]'
 
-        if fix:
-            merged = self._merge_duplicates()
-            fixed_labels = self._fix_pickup_labels()
+        totals, rejected = self._sync_pending(apply=fix)
+        frozen_problems, total_violations = self._scan()
+        self._report_frozen(frozen_problems)
 
-        total_violations = self._scan(record=True)
-
-        prefix = '[FIX] ' if fix else ''
         self.stdout.write(self.style.SUCCESS(
-            f"\n{prefix}Слито дублей: {merged}, исправлено меток ПВЗ: {fixed_labels}, "
-            f"нарушений зафиксировано: {total_violations}"
+            f"\n{mode} pending-чеки: перевешено {totals.relabeled}, перенесено позиций "
+            f"{totals.moved_items}, создано {totals.created}, слито {totals.merged}, "
+            f"отклонено контрактом {len(rejected)}; замороженных чеков с нарушениями "
+            f"(вручную): {len(frozen_problems)}; нарушений в журнале: {total_violations}"
         ))
 
-    # ── сканирование (журналирование) ───────────────────────────
-    def _scan(self, record=False):
-        total = 0
-        for receipt in Receipt.objects.all().select_related('owner'):
-            ctx = ExecutionContext(result=receipt)
-            violations = run_contracts(CONTRACTS, ctx)
+    # ── pending-чеки: исправление (--fix) или предпросмотр (dry-run) ──
+    def _sync_pending(self, apply):
+        owner_ids = (Receipt.objects.filter(status='pending', owner__isnull=False)
+                     .values_list('owner_id', flat=True).distinct())
+        totals, rejected = SyncSummary(), []
+        prefix = 'исправлено' if apply else 'будет исправлено'
+        for owner in User.objects.filter(id__in=list(owner_ids)).order_by('id'):
+            try:
+                if apply:
+                    summary = sync_pending_receipts_for_user(owner)
+                else:
+                    with transaction.atomic():
+                        summary = sync_pending_receipts_for_user(owner)
+                        transaction.set_rollback(True)  # предпросмотр: откатываем всё
+            except ExecutionValidationError:
+                rejected.append(owner)
+                self.stdout.write(f"  [отклонено] {owner.username}: синхронизация нарушает контракт — вручную")
+                continue
+            if not summary.changed:
+                continue
+            for field in ('relabeled', 'moved_items', 'created', 'merged'):
+                setattr(totals, field, getattr(totals, field) + getattr(summary, field))
+            self.stdout.write(
+                f"  [pending] {owner.username}: {prefix} — перевешено {summary.relabeled}, "
+                f"перенесено позиций {summary.moved_items}, создано {summary.created}, "
+                f"слито {summary.merged}"
+            )
+        return totals, rejected
+
+    # ── сканирование всех чеков (журналирование) ──
+    def _scan(self):
+        frozen_problems, total = [], 0
+        for receipt in Receipt.objects.all().select_related('owner').order_by('id'):
+            violations = run_contracts(CONTRACTS, ExecutionContext(result=receipt))
             for v in violations:
                 v.function = 'audit_receipts'
-                if record:
-                    runtime.record_violation(v)
+                runtime.record_violation(v)
             total += len(violations)
-        return total
+            if violations and receipt.status != 'pending':
+                frozen_problems.append((receipt, violations))
+        return frozen_problems, total
 
-    # ── исправление: слияние дублей по (owner, дата) ────────────
-    def _merge_duplicates(self):
-        from myprofile.views.utils import _recalc_receipt
-        from myprofile.views.utils import get_global_price_per_kg
-
-        merged = 0
-        dup_groups = (
-            Receipt.objects
-            .exclude(owner_id__isnull=True)
-            .values('owner_id', 'created_at')
-            .annotate(n=Count('id'))
-            .filter(n__gt=1)
-        )
-        for g in dup_groups:
-            receipts = list(
-                Receipt.objects
-                .filter(owner_id=g['owner_id'], created_at=g['created_at'])
-                .order_by('id')
-            )
-            keeper = receipts[0]
-            for r in receipts[1:]:
-                for item in r.items.all():
-                    item.receipt = keeper
-                    item.save(update_fields=['receipt'])
-                r.delete()
-                merged += 1
-            rate = keeper.price_per_kg or get_global_price_per_kg()
-            _recalc_receipt(keeper, rate)
-            self.stdout.write(f"  [merge] owner={g['owner_id']} date={g['created_at']} → чек #{keeper.id}")
-        return merged
-
-    # ── исправление: корректная метка ПВЗ ───────────────────────
-    def _fix_pickup_labels(self):
-        fixed = 0
-        for receipt in Receipt.objects.all().select_related('owner'):
-            expected = authoritative_pickup_label(receipt)
-            if expected and (receipt.pickup_point or '') != expected:
-                receipt.pickup_point = expected
-                receipt._allow_content_update = True
-                receipt.save(update_fields=['pickup_point'])
-                fixed += 1
-                self.stdout.write(f"  [pickup] чек #{receipt.id} → {expected}")
-        return fixed
+    def _report_frozen(self, frozen_problems):
+        for receipt, violations in frozen_problems:
+            owner = receipt.owner.username if receipt.owner else '—'
+            for v in violations:
+                self.stdout.write(
+                    f"  [вручную] чек {receipt.receipt_number} ({owner}, статус {receipt.status}): "
+                    f"{v.contract} — {v.message}"
+                )
