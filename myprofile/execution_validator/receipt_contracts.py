@@ -13,6 +13,8 @@
 заморожен: его факт — только закреплённые delivery_pickup треков; трек без
 закрепления не говорит о ПВЗ ничего (unknown), текущий профиль не учитывается.
 """
+from django.db.models import Q
+
 from .contracts import ExecutionContext, Severity, contract, require, run_contracts
 
 
@@ -79,13 +81,18 @@ def authoritative_pickup_label(receipt):
     return receipt.pickup_point or ""
 
 
-def _pinned_pickup_labels(receipt):
-    """Метки закреплённых ПВЗ (track.delivery_pickup) позиций чека."""
+def _pinned_pickup_objs(receipt):
+    """{pickup_id: PickupPoint} закреплённых ПВЗ (track.delivery_pickup) позиций чека."""
     return {
-        str(item.track_code.delivery_pickup)
+        item.track_code.delivery_pickup_id: item.track_code.delivery_pickup
         for item in receipt.items.select_related("track_code__delivery_pickup")
         if item.track_code_id and item.track_code.delivery_pickup_id
     }
+
+
+def _pinned_pickup_labels(receipt):
+    """Метки закреплённых ПВЗ (track.delivery_pickup) позиций чека."""
+    return {str(o) for o in _pinned_pickup_objs(receipt).values()}
 
 
 def _fact_pickup_labels(receipt):
@@ -114,10 +121,13 @@ def one_pending_receipt_per_client_date_pickup(ctx):
         return
     if not r.items.filter(track_code__isnull=False).exists():
         return
+    from myprofile.receipt_pickup import pickup_q
+
+    same_pickup = pickup_q(r.pickup) if r.pickup_id else Q(pickup__isnull=True, pickup_point=r.pickup_point or "")
     dupes = list(
         Receipt.objects
-        .filter(owner_id=r.owner_id, created_at=r.created_at, status="pending",
-                pickup_point=r.pickup_point or "", items__track_code__isnull=False)
+        .filter(same_pickup, owner_id=r.owner_id, created_at=r.created_at, status="pending",
+                items__track_code__isnull=False)
         .exclude(pk=r.pk)
         .distinct()
         .values_list("pk", flat=True)
@@ -133,28 +143,41 @@ def one_pending_receipt_per_client_date_pickup(ctx):
 
 @contract(severity=Severity.CRITICAL)
 def receipt_pickup_label_matches_authoritative(ctx):
-    """Метка Receipt.pickup_point совпадает с фактическим ПВЗ чека.
+    """Метка и ссылка ПВЗ чека совпадают с фактическим ПВЗ.
 
-    pending — с вычисленным единым ПВЗ (override → профиль), чек перевешивается;
-    после pending — только с закреплённым delivery_pickup треков. Нет закрепления
-    (или закрепления расходятся — это ловит receipt_tracks_pickup_homogeneous) —
-    ПВЗ неизвестен, метку не с чем сверять.
+    pending — с вычисленным единым ПВЗ (override → профиль), чек перевешивается:
+    метка = его текущее название, ссылка (если задана) = он сам.
+    После pending — только с закреплённым delivery_pickup треков; при наличии
+    ссылки сверяется ссылка (переименование ПВЗ не нарушение), иначе метка. Нет
+    закрепления (или закрепления расходятся — это ловит
+    receipt_tracks_pickup_homogeneous) — ПВЗ неизвестен, сверять не с чем.
     """
     r = ctx.result
     if r is None:
         return
+    actual = r.pickup_point or ""
     if r.status == "pending":
-        expected = authoritative_pickup_label(r)
+        obj = authoritative_pickup_obj(r)
+        expected = str(obj) if obj else actual
+        link_ok = obj is None or r.pickup_id in (None, obj.id)
     else:
-        pinned = _pinned_pickup_labels(r)
+        pinned = _pinned_pickup_objs(r)
         if len(pinned) != 1:
             return
-        expected = next(iter(pinned))
-    actual = r.pickup_point or ""
+        obj = next(iter(pinned.values()))
+        expected = str(obj)
+        if r.pickup_id:
+            # Есть ссылка — сверяем её; устаревшее название в метке не нарушение
+            link_ok = r.pickup_id == obj.id
+            actual = expected
+        else:
+            link_ok = True
     require(
-        actual == expected,
-        f"Чек #{r.pk}: метка ПВЗ '{actual}' ≠ фактическому '{expected}'",
-        receipt_id=r.pk, label=actual, expected=expected,
+        actual == expected and link_ok,
+        f"Чек #{r.pk}: метка ПВЗ '{r.pickup_point or ''}' (ссылка #{r.pickup_id}) ≠ "
+        f"фактическому '{expected}' (#{obj.id if obj else None})",
+        receipt_id=r.pk, label=r.pickup_point or "", expected=expected,
+        pickup_id=r.pickup_id, expected_pickup_id=obj.id if obj else None,
     )
 
 
@@ -212,12 +235,14 @@ def owner_pending_receipts_follow_pickup_rule(ctx):
         if len(labels) > 1:
             problems.append({"receipt_id": r.pk, "problem": "mixed", "pickups": labels})
         expected = authoritative_pickup_label(r)
-        if (r.pickup_point or "") != expected:
+        obj = authoritative_pickup_obj(r)
+        if (r.pickup_point or "") != expected or (obj is not None and r.pickup_id != obj.id):
             problems.append({"receipt_id": r.pk, "problem": "label",
-                             "label": r.pickup_point or "", "expected": expected})
+                             "label": r.pickup_point or "", "expected": expected,
+                             "pickup_id": r.pickup_id, "expected_pickup_id": obj.id if obj else None})
         if not labels:
             continue
-        key = (r.created_at, r.pickup_point or "")
+        key = (r.created_at, ("pickup", r.pickup_id) if r.pickup_id else ("label", r.pickup_point or ""))
         if key in seen_keys:
             problems.append({"receipt_id": r.pk, "problem": "duplicate", "same_as": seen_keys[key]})
         seen_keys.setdefault(key, r.pk)

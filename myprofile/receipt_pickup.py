@@ -11,6 +11,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 
+from django.db.models import Q
 from django.utils import timezone
 
 from myprofile.execution_validator import validate_execution
@@ -30,18 +31,35 @@ def receipt_key(track, default_date=None):
     return (track.owner_id, date, pickup.id if pickup else None)
 
 
+def pickup_q(pickup, prefix=''):
+    """Q «чек относится к ПВЗ pickup»: по ссылке Receipt.pickup, а для чеков без
+    ссылки (до backfill_receipt_pickup) — по текущему названию ПВЗ в метке.
+    prefix — путь до чека в запросе, например 'receipt__'."""
+    if pickup is None:
+        return Q(**{f'{prefix}pickup__isnull': True, f'{prefix}pickup_point__in': ['', None]})
+    return (Q(**{f'{prefix}pickup': pickup})
+            | Q(**{f'{prefix}pickup__isnull': True, f'{prefix}pickup_point': str(pickup)}))
+
+
+def receipt_pickup_key(receipt):
+    """Ключ группировки чеков по ПВЗ: ссылка, а для чека без ссылки — метка."""
+    if receipt.pickup_id:
+        return ('pickup', receipt.pickup_id)
+    return ('label', receipt.pickup_point or '')
+
+
 def find_pending_receipt(owner, date, pickup, exclude_ids=()):
     """Старший pending-чек клиента на (дата, ПВЗ), в котором есть позиции с треком.
 
     Чеки без позиций с треком (пустые/только архивные позиции) не считаются
-    носителями ключа и не выбираются целью.
+    носителями ключа и не выбираются целью. ПВЗ сравнивается по ссылке
+    (переименование ПВЗ не мешает найти чек), см. pickup_q.
     """
     from myprofile.models import Receipt
 
     return (
         Receipt.objects
-        .filter(owner=owner, created_at=date, status=PENDING,
-                pickup_point=str(pickup) if pickup else '',
+        .filter(pickup_q(pickup), owner=owner, created_at=date, status=PENDING,
                 items__track_code__isnull=False)
         .exclude(pk__in=list(exclude_ids))
         .distinct()
@@ -56,7 +74,7 @@ def _new_pending_receipt(owner, date, pickup, price_per_kg):
     return Receipt.objects.create(
         owner=owner, created_at=date, status=PENDING,
         total_weight=0, total_price=0, price_per_kg=price_per_kg or 0,
-        pickup_point=str(pickup) if pickup else '',
+        pickup=pickup, pickup_point=str(pickup) if pickup else '',
         payment_link=pickup.payment_link if pickup else None,
     )
 
@@ -231,17 +249,18 @@ def sync_pending_receipts_for_user(user):
     for r in Receipt.objects.filter(pk__in=touched):
         _recalc_receipt(r, r.price_per_kg)
 
-    # 4. Метка и ссылка на оплату — по authoritative-ПВЗ
+    # 4. Ссылка, метка и ссылка на оплату — по authoritative-ПВЗ
+    #    (после переименования ПВЗ метка обновляется до текущего названия)
     for r in Receipt.objects.filter(owner=user, status=PENDING).order_by('id'):
         obj = authoritative_pickup_obj(r)
         if obj is None:
             continue
         label, link = str(obj), obj.payment_link
-        if (r.pickup_point or '') == label and r.payment_link == link:
+        if r.pickup_id == obj.id and (r.pickup_point or '') == label and r.payment_link == link:
             continue
-        r.pickup_point, r.payment_link = label, link
+        r.pickup, r.pickup_point, r.payment_link = obj, label, link
         r._allow_content_update = True
-        r.save(update_fields=['pickup_point', 'payment_link'])
+        r.save(update_fields=['pickup', 'pickup_point', 'payment_link'])
         summary.relabeled += 1
 
     return summary

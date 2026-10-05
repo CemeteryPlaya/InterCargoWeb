@@ -312,7 +312,8 @@ def inventory_add_legacy(request):
             owner=owner, status='accepted_pvz',
             is_accepted_pp=True, accepted_pp_at=now, accepted_pp_by=request.user,
             total_weight=total_weight, total_price=total_price,
-            price_per_kg=Decimal('0'), pickup_point=str(session.pickup_point))
+            price_per_kg=Decimal('0'), pickup=session.pickup_point,
+            pickup_point=str(session.pickup_point))
         for code, weight in zip(codes, weights):
             track = TrackCode(
                 track_code=code, status='ready', owner=owner, weight=weight,

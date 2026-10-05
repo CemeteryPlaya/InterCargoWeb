@@ -116,7 +116,7 @@ def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effe
         receipt = Receipt.objects.create(
             owner=user, total_weight=0, total_price=0,
             price_per_kg=effective_rate, created_at=receipt_date,
-            pickup_point=str(pickup) if pickup else '',
+            pickup=pickup, pickup_point=str(pickup) if pickup else '',
         )
 
     for track in date_tracks:
@@ -130,10 +130,12 @@ def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effe
 
     # Единый ПВЗ + ссылка на оплату — из authoritative-правила
     pickup_obj = authoritative_pickup_obj(receipt)
+    if pickup_obj:
+        receipt.pickup = pickup_obj
     receipt.pickup_point = str(pickup_obj) if pickup_obj else (receipt.pickup_point or '')
     receipt.payment_link = pickup_obj.payment_link if pickup_obj else receipt.payment_link
     receipt._allow_content_update = True
-    receipt.save(update_fields=['pickup_point', 'payment_link'])
+    receipt.save(update_fields=['pickup', 'pickup_point', 'payment_link'])
 
     _recalc_receipt(receipt, effective_rate)
     return receipt

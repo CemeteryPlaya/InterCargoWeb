@@ -89,9 +89,11 @@ def print_documents_view(request):
                     ReceiptItem.objects
                     .filter(
                         Q(track_code_id__in=track_ids) |
-                        Q(track_code__isnull=True, receipt__created_at=check_date, receipt__pickup_point__in=pickup_names)
+                        (Q(track_code__isnull=True, receipt__created_at=check_date)
+                         & (Q(receipt__pickup_id__in=pickup_point_ids)
+                            | Q(receipt__pickup__isnull=True, receipt__pickup_point__in=pickup_names)))
                     )
-                    .select_related('receipt', 'receipt__owner', 'track_code',
+                    .select_related('receipt', 'receipt__owner', 'receipt__pickup', 'track_code',
                                     'track_code__owner__userprofile__pickup', 'track_code__delivery_pickup')
                 )
 
@@ -127,6 +129,8 @@ def print_documents_view(request):
                     # ПВЗ клиента), уехавший/выданный — зафиксированная метка (2.5)
                     if receipt.status == 'pending':
                         address = authoritative_pickup_label(receipt)
+                    elif receipt.pickup_id:
+                        address = str(receipt.pickup)   # по ссылке: переименование ПВЗ не мешает
                     elif receipt.pickup_point:
                         address = receipt.pickup_point
                     else:

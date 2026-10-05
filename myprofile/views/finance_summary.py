@@ -5,12 +5,13 @@ from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponseForbidden
-from django.db.models import Sum, Count, Q, F, DecimalField, Value, CharField, Case, When
+from django.db.models import Sum, Count, Q, DecimalField, Value, CharField, Case, When
 from django.db.models.functions import Coalesce, TruncMonth, TruncDate, Concat
 from django.utils import timezone
 from myprofile.models import Receipt, DeliveryHistory
-from register.models import UserProfile, PickupPoint
+from register.models import PickupPoint
 from myprofile.permissions import is_accountant, is_driver, is_staff
+from myprofile.receipt_pickup import pickup_q
 from django.utils.translation import gettext as _
 
 
@@ -107,7 +108,7 @@ def finance_summary_view(request):
         if pickup_id:
             try:
                 pickup_obj = PickupPoint.objects.get(id=pickup_id)
-                base_qs = base_qs.filter(pickup_point=str(pickup_obj))
+                base_qs = base_qs.filter(pickup_q(pickup_obj))
             except PickupPoint.DoesNotExist:
                 pass
 
@@ -151,8 +152,8 @@ def finance_summary_view(request):
             # Доставка на дом
             if home_pp and not pickup_id:
                 home_qs = Receipt.objects.filter(
+                    pickup_q(home_pp),
                     created_at__year=year, created_at__month=month,
-                    pickup_point=str(home_pp),
                 )
                 context['home_delivery_totals'] = _aggregate_receipts(home_qs)
                 context['home_delivery_clients'] = _home_delivery_clients(home_qs)
@@ -192,8 +193,8 @@ def finance_summary_view(request):
             # Доставка на дом
             if home_pp and not pickup_id:
                 home_qs = Receipt.objects.filter(
+                    pickup_q(home_pp),
                     created_at=sel_date,
-                    pickup_point=str(home_pp),
                 )
                 context['home_delivery_totals'] = _aggregate_receipts(home_qs)
                 context['home_delivery_clients'] = _home_delivery_clients(home_qs)

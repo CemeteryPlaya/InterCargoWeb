@@ -14,7 +14,7 @@ from django.db.models import Q
 from myprofile.models import TrackCode, CustomerDiscount, Arrival, ReceiptItem
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from myprofile.views.utils import add_reprint_messages, pending_receipts_snapshot
-from myprofile.receipt_pickup import sync_pending_receipts_safely
+from myprofile.receipt_pickup import receipt_pickup_key, sync_pending_receipts_safely
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
@@ -164,8 +164,8 @@ def arrival_summary_view(request):
             pp = owner.userprofile.pickup
         except (UserProfile.DoesNotExist, AttributeError):
             pp = None
-        # Проверяем домашнюю доставку
-        if home_pp and receipt.pickup_point == str(home_pp):
+        # Проверяем домашнюю доставку (по ссылке ПВЗ; без ссылки — по метке)
+        if home_pp and receipt_pickup_key(receipt) in (('pickup', home_pp.id), ('label', str(home_pp))):
             if uid not in home_clients:
                 home_clients[uid] = {**base_client, 'is_override': True}
             home_clients[uid]['track_count'] += 1

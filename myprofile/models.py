@@ -301,6 +301,12 @@ class Receipt(models.Model):
     receipt_number = models.CharField(max_length=20, unique=True, blank=True, verbose_name=_("Номер чека"))
 
     pickup_point = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Пункт выдачи"))
+    # Ссылка на ПВЗ: сверки и фильтры идут по ней (переименование ПВЗ их не ломает);
+    # pickup_point остаётся снимком названия для отображения.
+    pickup = models.ForeignKey(
+        'register.PickupPoint', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='receipts', verbose_name=_("Пункт выдачи (ссылка)"),
+    )
     payment_link = models.URLField(blank=True, null=True, verbose_name=_("Ссылка на оплату"))
 
     class Meta:
@@ -344,7 +350,7 @@ class Receipt(models.Model):
                     old = Receipt.objects.get(pk=self.pk)
                     content_fields = [
                         'total_weight', 'total_price', 'price_per_kg',
-                        'owner_id', 'pickup_point',
+                        'owner_id', 'pickup_point', 'pickup_id',
                         'payment_link', 'created_at',
                     ]
                     changed = [
