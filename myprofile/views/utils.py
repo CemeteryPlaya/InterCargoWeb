@@ -309,6 +309,32 @@ def send_grouped_notifications(notif_counts, status):
         notify_in_user_language(user, _make_msg)
 
 
+def pending_receipts_snapshot(user):
+    """{receipt_id: (номер, метка ПВЗ)} pending-чеков клиента — снимок до действия оператора."""
+    if user is None:
+        return {}
+    return {
+        r.id: (r.receipt_number, r.pickup_point or '')
+        for r in Receipt.objects.filter(owner=user, status='pending')
+    }
+
+
+def add_reprint_messages(request, user, before):
+    """Сообщает оператору, какие pending-чеки клиента после действия сменили ПВЗ,
+    появились или были слиты — бумажные копии таких чеков нужно перепечатать."""
+    after = pending_receipts_snapshot(user)
+    for rid, (number, label) in sorted(after.items()):
+        if before.get(rid, (None, None))[1] != label:
+            django_messages.warning(request, _(
+                "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, "
+                "если он уже был напечатан.") % {'number': number, 'pickup': label})
+    for rid, (number, label) in sorted(before.items()):
+        if rid not in after and not Receipt.objects.filter(pk=rid).exists():
+            django_messages.warning(request, _(
+                "Чек %(number)s объединён с другим чеком клиента — старый QR при "
+                "сканировании укажет новый чек.") % {'number': number})
+
+
 def add_bulk_result_messages(request, updated=0, created=0, partially_updated=0,
                               skipped=0, temp_created=0, errors=0):
     """Добавляет стандартные сводные сообщения после массовой операции."""

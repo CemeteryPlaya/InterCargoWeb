@@ -13,6 +13,7 @@ from django.db.models import Q
 
 from myprofile.models import TrackCode, CustomerDiscount, Arrival, ReceiptItem
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
+from myprofile.views.utils import add_reprint_messages, pending_receipts_snapshot
 from myprofile.receipt_pickup import sync_pending_receipts_safely
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
@@ -251,6 +252,9 @@ def toggle_home_delivery(request):
         messages.info(request, _("Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
+    client = User.objects.filter(id=user_id).first()
+    before = pending_receipts_snapshot(client)
+
     if action == 'home':
         home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
         if not home_pp:
@@ -275,7 +279,8 @@ def toggle_home_delivery(request):
         messages.success(request, _("Клиент возвращён на свой ПВЗ."))
 
     # .update() обходит сигналы — перевешиваем pending-чеки клиента явно
-    sync_pending_receipts_safely(User.objects.filter(id=user_id).first())
+    sync_pending_receipts_safely(client)
+    add_reprint_messages(request, client, before)
 
     return redirect(f'/profile/arrival-summary/?date={date}')
 
@@ -301,15 +306,19 @@ def assign_temp_pickup(request):
         messages.error(request, _("Пункт выдачи не найден."))
         return redirect(f'/profile/arrival-summary/?date={date}')
 
+    clients = list(User.objects.filter(id__in=user_ids))
+    before = {client.id: pending_receipts_snapshot(client) for client in clients}
     count = UserProfile.objects.filter(user_id__in=user_ids).update(pickup=pickup)
-    # .update() обходит сигналы — перевешиваем pending-чеки клиентов явно (D1)
-    for user in User.objects.filter(id__in=user_ids):
-        sync_pending_receipts_safely(user)
 
     if count:
         messages.success(request, f"Назначен ПВЗ для {count} клиентов: {pickup}")
     else:
         messages.info(request, _("Нет клиентов для назначения."))
+
+    # .update() обходит сигналы — перевешиваем pending-чеки клиентов явно (D1)
+    for client in clients:
+        sync_pending_receipts_safely(client)
+        add_reprint_messages(request, client, before[client.id])
 
     return redirect(f'/profile/arrival-summary/?date={date}')
 

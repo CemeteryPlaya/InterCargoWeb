@@ -98,6 +98,48 @@ class PickupChangeEntryPointTests(Base):
         self.assertResynced()
 
 
+class OperatorReprintMessageTests(Base):
+    """R1: оператор видит, какие pending-чеки перевешены — бумажный чек надо перепечатать."""
+
+    def _messages(self, resp):
+        from django.contrib.messages import get_messages
+        return [str(m) for m in get_messages(resp.wsgi_request)]
+
+    def _assert_reprint_message(self, resp):
+        msgs = self._messages(resp)
+        self.assertTrue(any(self.pending.receipt_number in m and str(self.pp_b) in m for m in msgs), msgs)
+        self.assertFalse(any(self.shipped.receipt_number in m for m in msgs), msgs)
+
+    def test_hr_approval_reports_relabeled_receipt(self):
+        req = PickupChangeRequest.objects.create(user=self.cli, current_pickup=self.pp_a,
+                                                 requested_pickup=self.pp_b)
+        self.client.login(username="op", password="p")
+        resp = self.client.post(reverse("review_pickup_change", args=[req.id]), {"action": "approve"})
+        self._assert_reprint_message(resp)
+
+    def test_assign_temp_pickup_reports_relabeled_receipt(self):
+        self.client.login(username="op", password="p")
+        resp = self.client.post(reverse("assign_temp_pickup"), {
+            "user_id": [str(self.cli.id)], "pickup_id": str(self.pp_b.id), "date": self.today.isoformat(),
+        })
+        self._assert_reprint_message(resp)
+
+    def test_toggle_reports_relabeled_receipt(self):
+        self.client.login(username="op", password="p")
+        resp = self.client.post(reverse("toggle_home_delivery"), {
+            "user_id": str(self.cli.id), "date": self.today.isoformat(),
+            "action": "warehouse", "pickup_id": str(self.pp_b.id),
+        })
+        self._assert_reprint_message(resp)
+
+    def test_no_message_when_nothing_changed(self):
+        self.client.login(username="op", password="p")
+        resp = self.client.post(reverse("assign_temp_pickup"), {
+            "user_id": [str(self.cli.id)], "pickup_id": str(self.pp_a.id), "date": self.today.isoformat(),
+        })
+        self.assertFalse(any(self.pending.receipt_number in m for m in self._messages(resp)))
+
+
 class ProfileSaveWithoutPickupChangeTests(Base):
     def test_saving_other_fields_does_not_touch_receipts(self):
         Receipt.objects.filter(pk=self.pending.pk).update(pickup_point="устаревшая метка")

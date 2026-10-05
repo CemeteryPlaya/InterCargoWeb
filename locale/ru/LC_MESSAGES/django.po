@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 16:54+0500\n"
+"POT-Creation-Date: 2026-10-05 17:05+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2222,7 +2222,7 @@ msgstr "Отметить как разобранные"
 #: .\myprofile\views\reschedule_arrival.py:136
 #: .\myprofile\views\reschedule_arrival.py:161
 #: .\myprofile\views\reschedule_arrival.py:212
-#: .\myprofile\views\reschedule_arrival.py:353
+#: .\myprofile\views\reschedule_arrival.py:349
 #: .\myprofile\views\role_management.py:82
 #: .\myprofile\views\role_management.py:138
 #: .\myprofile\views\unidentified.py:142 .\myprofile\views\unidentified.py:185
@@ -6068,7 +6068,8 @@ msgstr "Не напечатаны — чек оформлен на другой 
 
 #: .\myprofile\templates\shared\print\client_check_pdf.html:105
 msgid "Проверьте, где находятся эти посылки, прежде чем отправлять их в пункт."
-msgstr "Проверьте, где находятся эти посылки, прежде чем отправлять их в пункт."
+msgstr ""
+"Проверьте, где находятся эти посылки, прежде чем отправлять их в пункт."
 
 #: .\myprofile\templates\shared\print\client_check_pdf.html:108
 msgid "чек"
@@ -6128,7 +6129,7 @@ msgid "Итого к оплате:"
 msgstr "Итого к оплате:"
 
 #: .\myprofile\views\arrival_history.py:26
-#: .\myprofile\views\arrival_summary.py:41 .\myprofile\views\blocks.py:79
+#: .\myprofile\views\arrival_summary.py:42 .\myprofile\views\blocks.py:79
 #: .\myprofile\views\bulk_jobs.py:14 .\myprofile\views\delivery.py:151
 #: .\myprofile\views\extraditions.py:69 .\myprofile\views\finance_summary.py:81
 #: .\myprofile\views\goods_arrival.py:95
@@ -6137,19 +6138,19 @@ msgstr "Итого к оплате:"
 #: .\myprofile\views\pp_acceptance.py:45 .\myprofile\views\pp_acceptance.py:499
 #: .\myprofile\views\pp_acceptance.py:562
 #: .\myprofile\views\pp_extradition_history.py:26
-#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:41
+#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
 #: .\myprofile\views\shipped_cn.py:40 .\myprofile\views\shipped_cn.py:125
 #: .\myprofile\views\unidentified.py:27 .\myprofile\views\warehouse.py:45
 #: .\support\views\inbox.py:60
 msgid "У вас нет доступа к этой странице."
 msgstr "У вас нет доступа к этой странице."
 
-#: .\myprofile\views\arrival_summary.py:231
-#: .\myprofile\views\arrival_summary.py:288
-#: .\myprofile\views\arrival_summary.py:322
-#: .\myprofile\views\arrival_summary.py:395
-#: .\myprofile\views\arrival_summary.py:416
-#: .\myprofile\views\arrival_summary.py:519 .\myprofile\views\blocks.py:149
+#: .\myprofile\views\arrival_summary.py:232
+#: .\myprofile\views\arrival_summary.py:293
+#: .\myprofile\views\arrival_summary.py:331
+#: .\myprofile\views\arrival_summary.py:404
+#: .\myprofile\views\arrival_summary.py:425
+#: .\myprofile\views\arrival_summary.py:528 .\myprofile\views\blocks.py:149
 #: .\myprofile\views\bulk_jobs.py:22 .\myprofile\views\delivery.py:216
 #: .\myprofile\views\delivery.py:437 .\myprofile\views\delivery.py:562
 #: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:144
@@ -6166,98 +6167,98 @@ msgstr "У вас нет доступа к этой странице."
 #: .\myprofile\views\notification_mutes.py:128
 #: .\myprofile\views\pp_acceptance.py:301
 #: .\myprofile\views\pp_acceptance.py:405
-#: .\myprofile\views\pp_acceptance.py:645 .\myprofile\views\service.py:54
-#: .\myprofile\views\service.py:124 .\myprofile\views\service.py:184
-#: .\myprofile\views\service.py:277 .\myprofile\views\service.py:401
-#: .\myprofile\views\service.py:491 .\myprofile\views\warehouse.py:202
+#: .\myprofile\views\pp_acceptance.py:645 .\myprofile\views\service.py:52
+#: .\myprofile\views\service.py:122 .\myprofile\views\service.py:182
+#: .\myprofile\views\service.py:275 .\myprofile\views\service.py:399
+#: .\myprofile\views\service.py:489 .\myprofile\views\warehouse.py:202
 #: .\myprofile\views\warehouse.py:295 .\myprofile\views\warehouse.py:404
 #: .\myprofile\views\warehouse.py:492 .\myprofile\views\warehouse.py:547
 #: .\myprofile\views\warehouse.py:670 .\myprofile\views\warehouse.py:784
 msgid "У вас нет доступа."
 msgstr "У вас нет доступа."
 
-#: .\myprofile\views\arrival_summary.py:238
-#: .\myprofile\views\arrival_summary.py:295
+#: .\myprofile\views\arrival_summary.py:239
+#: .\myprofile\views\arrival_summary.py:300
 msgid "Недостаточно данных."
 msgstr "Недостаточно данных."
 
-#: .\myprofile\views\arrival_summary.py:251
+#: .\myprofile\views\arrival_summary.py:252
 msgid "Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."
 msgstr "Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."
 
-#: .\myprofile\views\arrival_summary.py:257
+#: .\myprofile\views\arrival_summary.py:261
 msgid "Пункт 'Доставка на дом' не найден."
 msgstr "Пункт 'Доставка на дом' не найден."
 
-#: .\myprofile\views\arrival_summary.py:260
+#: .\myprofile\views\arrival_summary.py:264
 msgid "Клиент назначен на доставку на дом."
 msgstr "Клиент назначен на доставку на дом."
 
-#: .\myprofile\views\arrival_summary.py:264
+#: .\myprofile\views\arrival_summary.py:268
 #: .\myprofile\views\pp_acceptance.py:312
 #: .\myprofile\views\pp_acceptance.py:411
 msgid "Не указан пункт выдачи."
 msgstr "Не указан пункт выдачи."
 
-#: .\myprofile\views\arrival_summary.py:269
-#: .\myprofile\views\arrival_summary.py:301
+#: .\myprofile\views\arrival_summary.py:273
+#: .\myprofile\views\arrival_summary.py:306
 #: .\myprofile\views\pp_acceptance.py:318
 #: .\myprofile\views\pp_acceptance.py:417
 #: .\myprofile\views\pp_acceptance.py:506 .\myprofile\views\warehouse.py:552
 msgid "Пункт выдачи не найден."
 msgstr "Пункт выдачи не найден."
 
-#: .\myprofile\views\arrival_summary.py:275
+#: .\myprofile\views\arrival_summary.py:279
 msgid "Клиент возвращён на свой ПВЗ."
 msgstr "Клиент возвращён на свой ПВЗ."
 
-#: .\myprofile\views\arrival_summary.py:312
+#: .\myprofile\views\arrival_summary.py:316
 msgid "Нет клиентов для назначения."
 msgstr "Нет клиентов для назначения."
 
-#: .\myprofile\views\arrival_summary.py:332
-#: .\myprofile\views\arrival_summary.py:333
+#: .\myprofile\views\arrival_summary.py:341
+#: .\myprofile\views\arrival_summary.py:342
 msgid "Укажите размер скидки."
 msgstr "Укажите размер скидки."
 
-#: .\myprofile\views\arrival_summary.py:342
-#: .\myprofile\views\arrival_summary.py:343
+#: .\myprofile\views\arrival_summary.py:351
+#: .\myprofile\views\arrival_summary.py:352
 msgid "Некорректный размер скидки."
 msgstr "Некорректный размер скидки."
 
-#: .\myprofile\views\arrival_summary.py:348
-#: .\myprofile\views\arrival_summary.py:349 .\myprofile\views\delivery.py:566
+#: .\myprofile\views\arrival_summary.py:357
+#: .\myprofile\views\arrival_summary.py:358 .\myprofile\views\delivery.py:566
 #: .\myprofile\views\pp_acceptance.py:652 .\myprofile\views\warehouse.py:674
 msgid "Не указан клиент."
 msgstr "Не указан клиент."
 
-#: .\myprofile\views\arrival_summary.py:356
-#: .\myprofile\views\arrival_summary.py:357
+#: .\myprofile\views\arrival_summary.py:365
+#: .\myprofile\views\arrival_summary.py:366
 #: .\myprofile\views\notification_mutes.py:80
 #: .\myprofile\views\unidentified.py:156 .\myprofile\views\warehouse.py:647
 #: .\register\views\password_reset.py:55 .\register\views\password_reset.py:173
 msgid "Пользователь не найден."
 msgstr "Пользователь не найден."
 
-#: .\myprofile\views\arrival_summary.py:399
-#: .\myprofile\views\arrival_summary.py:527 .\myprofile\views\service.py:128
-#: .\myprofile\views\service.py:188
+#: .\myprofile\views\arrival_summary.py:408
+#: .\myprofile\views\arrival_summary.py:536 .\myprofile\views\service.py:126
+#: .\myprofile\views\service.py:186
 msgid "Не указана дата."
 msgstr "Не указана дата."
 
-#: .\myprofile\views\arrival_summary.py:407
+#: .\myprofile\views\arrival_summary.py:416
 msgid "Генерация чеков запущена в фоне."
 msgstr "Генерация чеков запущена в фоне."
 
-#: .\myprofile\views\arrival_summary.py:426
+#: .\myprofile\views\arrival_summary.py:435
 msgid "Нет исходных данных для актуализации."
 msgstr "Нет исходных данных для актуализации."
 
-#: .\myprofile\views\arrival_summary.py:434
+#: .\myprofile\views\arrival_summary.py:443
 msgid "Некорректные исходные данные прихода."
 msgstr "Некорректные исходные данные прихода."
 
-#: .\myprofile\views\arrival_summary.py:507
+#: .\myprofile\views\arrival_summary.py:516
 msgid "Данные прихода актуальны, изменений не требуется."
 msgstr "Данные прихода актуальны, изменений не требуется."
 
@@ -6341,7 +6342,7 @@ msgstr "Пункт 'Доставка на дом' не настроен."
 #: .\myprofile\views\delivery.py:577 .\myprofile\views\inventory_session.py:248
 #: .\myprofile\views\reschedule_arrival.py:177
 #: .\myprofile\views\reschedule_arrival.py:234
-#: .\myprofile\views\reschedule_arrival.py:370
+#: .\myprofile\views\reschedule_arrival.py:366
 #: .\myprofile\views\warehouse.py:680
 msgid "Клиент не найден."
 msgstr "Клиент не найден."
@@ -6424,7 +6425,7 @@ msgstr "📦 Выдано посылок: %(count)s (%(pickup_label)s)."
 #: .\myprofile\views\reschedule_arrival.py:86
 #: .\myprofile\views\reschedule_arrival.py:172
 #: .\myprofile\views\reschedule_arrival.py:229
-#: .\myprofile\views\reschedule_arrival.py:365
+#: .\myprofile\views\reschedule_arrival.py:361
 #: .\myprofile\views\shipped_cn.py:59 .\myprofile\views\shipped_cn.py:133
 msgid "Неверный формат даты."
 msgstr "Неверный формат даты."
@@ -6698,12 +6699,12 @@ msgstr ""
 "Невозможно изменить ПВЗ: сейчас активна сессия сортировки. Дождитесь её "
 "завершения или поставьте на паузу."
 
-#: .\myprofile\views\profile_setting.py:267
+#: .\myprofile\views\profile_setting.py:268
 #, python-format
 msgid "Ваша заявка на смену ПВЗ одобрена. Новый ПВЗ: %(pickup)s"
 msgstr "Ваша заявка на смену ПВЗ одобрена. Новый ПВЗ: %(pickup)s"
 
-#: .\myprofile\views\profile_setting.py:276
+#: .\myprofile\views\profile_setting.py:278
 msgid "Ваша заявка на смену ПВЗ отклонена."
 msgstr "Ваша заявка на смену ПВЗ отклонена."
 
@@ -6724,16 +6725,16 @@ msgid "Исходная и новая даты совпадают."
 msgstr "Исходная и новая даты совпадают."
 
 #: .\myprofile\views\reschedule_arrival.py:249
-#: .\myprofile\views\reschedule_arrival.py:382
+#: .\myprofile\views\reschedule_arrival.py:378
 msgid "Некорректные ID треков."
 msgstr "Некорректные ID треков."
 
 #: .\myprofile\views\reschedule_arrival.py:254
-#: .\myprofile\views\reschedule_arrival.py:387
+#: .\myprofile\views\reschedule_arrival.py:383
 msgid "Нет треков для переноса."
 msgstr "Нет треков для переноса."
 
-#: .\myprofile\views\reschedule_arrival.py:360
+#: .\myprofile\views\reschedule_arrival.py:356
 msgid "Укажите клиента и новую дату."
 msgstr "Укажите клиента и новую дату."
 
@@ -6746,15 +6747,15 @@ msgstr "Некорректный JSON."
 msgid "Некорректная роль."
 msgstr "Некорректная роль."
 
-#: .\myprofile\views\service.py:134 .\myprofile\views\service.py:194
+#: .\myprofile\views\service.py:132 .\myprofile\views\service.py:192
 msgid "Некорректный формат даты."
 msgstr "Некорректный формат даты."
 
-#: .\myprofile\views\service.py:287
+#: .\myprofile\views\service.py:285
 msgid "Нет трек-кодов со статусом «Выдано клиенту»."
 msgstr "Нет трек-кодов со статусом «Выдано клиенту»."
 
-#: .\myprofile\views\service.py:299
+#: .\myprofile\views\service.py:297
 msgid "Все чеки уже отмечены как «Выдано клиенту»."
 msgstr "Все чеки уже отмечены как «Выдано клиенту»."
 
@@ -6855,6 +6856,20 @@ msgstr "📦 Ваш трек-код обновлён: %(status)s"
 #, python-format
 msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
 msgstr "📦 Обновлено %(count)s трек-кодов: %(status)s"
+
+#: .\myprofile\views\utils.py:329
+#, python-format
+msgid ""
+"Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, если "
+"он уже был напечатан."
+msgstr "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, если он уже был напечатан."
+
+#: .\myprofile\views\utils.py:334
+#, python-format
+msgid ""
+"Чек %(number)s объединён с другим чеком клиента — старый QR при сканировании "
+"укажет новый чек."
+msgstr "Чек %(number)s объединён с другим чеком клиента — старый QR при сканировании укажет новый чек."
 
 #: .\myprofile\views\warehouse.py:206 .\myprofile\views\warehouse.py:299
 msgid "Не указана ячейка."
