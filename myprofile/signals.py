@@ -181,8 +181,12 @@ def _relocate_receipt_item(track, item, old_receipt, weight_changed):
     same_owner = old_receipt.owner_id == owner_id
     same_date = (old_receipt.created_at == delivered_date) if delivered_date else True
 
-    if same_owner and same_date:
-        # Чек уже правильный — только обновляем вес
+    # Уехавший/выданный чек заморожен (D4): смена даты прихода не вынимает из него
+    # позицию. Смена владельца — исправление ошибки, позиция уходит к новому владельцу.
+    frozen_date_change = same_owner and old_receipt.status != 'pending'
+
+    if (same_owner and same_date) or frozen_date_change:
+        # Чек уже правильный (или заморожен) — только обновляем вес
         if weight_changed:
             _update_item_weight(item, track.weight)
             _recalc_receipt_safe(old_receipt)

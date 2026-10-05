@@ -23,7 +23,7 @@ from myprofile.views.utils import (
     _recalc_receipt,
 )
 from myprofile.execution_validator.receipt_contracts import resolved_pickup_obj
-from myprofile.receipt_pickup import move_item_to_pending_receipt, sync_pending_receipts_for_user
+from myprofile.receipt_pickup import move_item_to_pending_receipt, sync_pending_receipts_safely
 from django.utils.translation import gettext as _
 
 
@@ -195,6 +195,7 @@ def service_normalize_receipts(request):
     RATE = get_global_price_per_kg()
     merged_count = 0
     split_count = 0
+    sync_rejected = 0
     errors = []
 
     # Находим все ReceiptItem, чьи track_code имеют delivered_date = target_date
@@ -245,8 +246,10 @@ def service_normalize_receipts(request):
                         _split_foreign_items(receipt, foreign_items, owner_key, RATE)
                         split_count += 1
 
-            # Метки/дубли pending-чеков клиента — по правилу ПВЗ
-            sync_pending_receipts_for_user(pending_items[0].track_code.owner)
+            # Метки/дубли pending-чеков клиента — по правилу ПВЗ. Отказ контракта не
+            # отменяет уже сделанные слияния/разделения: нарушение — в журнале.
+            if sync_pending_receipts_safely(pending_items[0].track_code.owner) is None:
+                sync_rejected += 1
 
         except Exception as e:
             errors.append(f"{owner_key}: {e}")
@@ -255,6 +258,11 @@ def service_normalize_receipts(request):
     if errors:
         msg += f" Ошибок: {len(errors)}."
     messages.success(request, msg)
+    if sync_rejected:
+        messages.warning(request, _(
+            "Синхронизация ПВЗ чеков отклонена контрактом для клиентов: %(count)s — "
+            "подробности в журнале нарушений; объединения и разделения сохранены."
+        ) % {'count': sync_rejected})
 
     if errors:
         for err in errors[:10]:
@@ -316,13 +324,16 @@ def _split_foreign_items(receipt, foreign_items, owner_id, RATE):
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
+    # Цель — pending-чек ключа позиции, но не сам исходный чек (иначе позиция
+    # «нашла бы» его и осталась на месте); у существующей цели свой тариф сохраняется.
     targets = {}
     for item in foreign_items:
         target = move_item_to_pending_receipt(
-            item, item.track_code.delivered_date or receipt.created_at, effective_rate)
+            item, item.track_code.delivered_date or receipt.created_at, effective_rate,
+            exclude_ids=[receipt.pk])
         targets[target.pk] = target
     for target in targets.values():
-        _recalc_receipt(target, effective_rate)
+        _recalc_receipt(target, target.price_per_kg or effective_rate)
 
     # Пересчитываем и устанавливаем дату основного чека
     remaining_dates = [

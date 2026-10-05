@@ -139,13 +139,14 @@ def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effe
     return receipt
 
 
-def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
+def create_receipts_for_user(user, statuses=('shipping_pp', 'ready'), sync=True):
     """
     Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
     Группирует треки по ключу (delivered_date, resolved-ПВЗ): позиции ключа
     дописываются в его pending-чек или в новый (инвариант «клиент + дата + ПВЗ =
     не больше одного pending-чека» проверяется контрактами).
     Дата чека (created_at) = delivered_date трек-кодов.
+    sync=False — вызывающий уже синхронизировал pending-чеки клиента.
     Возвращает последний обработанный чек или None.
     """
     from collections import defaultdict
@@ -158,7 +159,8 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
 
     # Сначала приводим существующие pending-чеки к актуальным ПВЗ (решение D1),
     # чтобы новые позиции нашли свой чек по свежей метке.
-    sync_pending_receipts_safely(user)
+    if sync:
+        sync_pending_receipts_safely(user)
 
     RATE = get_global_price_per_kg()
     discount = get_user_discount(user)

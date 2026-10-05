@@ -437,11 +437,6 @@ ASPECT_TO_PAGES = {
 }
 
 
-def page_for_urlname(url_name):
-    """page_key (или кортеж page_key) для url-name, либо None если не ограничивается."""
-    return URLNAME_TO_PAGE.get(url_name)
-
-
 def pages_for_urlname(url_name):
     """Кортеж page_key для url-name (пустой, если страница базовая)."""
     page = URLNAME_TO_PAGE.get(url_name)

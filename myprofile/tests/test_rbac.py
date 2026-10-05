@@ -11,7 +11,7 @@ from myprofile.permissions import (
     allowed_pages,
     apply_role,
     can_access_page,
-    page_for_urlname,
+    pages_for_urlname,
     role_count,
     GROUP_ADMIN_FULL,
     GROUP_ADMIN_READONLY,
@@ -126,17 +126,20 @@ class AllowedPagesTest(TestCase):
         self.assertEqual(allowed_pages(u), set(ALL_PAGE_KEYS))
 
 
-class PageForUrlnameTest(TestCase):
+class PagesForUrlnameTest(TestCase):
     def test_maps_page_and_action_endpoints(self):
-        self.assertEqual(page_for_urlname('warehouse'), 'warehouse')
-        self.assertEqual(page_for_urlname('warehouse_issue_to_client'), 'warehouse')
-        self.assertEqual(page_for_urlname('goods_arrival_save'), 'goods_arrival')
-        self.assertEqual(page_for_urlname('confirm'), 'confirm')
+        self.assertEqual(pages_for_urlname('warehouse'), ('warehouse',))
+        self.assertEqual(pages_for_urlname('warehouse_issue_to_client'), ('warehouse',))
+        self.assertEqual(pages_for_urlname('goods_arrival_save'), ('goods_arrival',))
+        self.assertEqual(pages_for_urlname('confirm'), ('confirm',))
 
-    def test_baseline_urlname_is_none(self):
-        self.assertIsNone(page_for_urlname('track_codes'))
-        self.assertIsNone(page_for_urlname('extradition_package'))
-        self.assertIsNone(page_for_urlname('settings'))
+    def test_shared_helper_endpoint_maps_to_several_pages(self):
+        self.assertEqual(pages_for_urlname('get_track_owner'), ('update_tracks', 'goods_arrival'))
+
+    def test_baseline_urlname_is_empty(self):
+        self.assertEqual(pages_for_urlname('track_codes'), ())
+        self.assertEqual(pages_for_urlname('extradition_package'), ())
+        self.assertEqual(pages_for_urlname('settings'), ())
 
 
 class ApplyRoleTest(TestCase):

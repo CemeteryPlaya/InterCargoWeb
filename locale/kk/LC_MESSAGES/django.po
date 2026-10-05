@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 17:05+0500\n"
+"POT-Creation-Date: 2026-10-05 17:20+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2213,16 +2213,16 @@ msgstr "Mass Status Update"
 msgid "Отметить как разобранные"
 msgstr "Қаралды деп белгілеу"
 
-#: .\myprofile\middleware.py:32 .\myprofile\permissions.py:668
+#: .\myprofile\middleware.py:32 .\myprofile\permissions.py:663
 #: .\myprofile\views\inventory_session.py:143
 #: .\myprofile\views\inventory_session.py:233
 #: .\myprofile\views\inventory_session.py:342
 #: .\myprofile\views\profile_setting.py:214
-#: .\myprofile\views\reschedule_arrival.py:77
-#: .\myprofile\views\reschedule_arrival.py:136
-#: .\myprofile\views\reschedule_arrival.py:161
-#: .\myprofile\views\reschedule_arrival.py:212
-#: .\myprofile\views\reschedule_arrival.py:349
+#: .\myprofile\views\reschedule_arrival.py:78
+#: .\myprofile\views\reschedule_arrival.py:137
+#: .\myprofile\views\reschedule_arrival.py:162
+#: .\myprofile\views\reschedule_arrival.py:213
+#: .\myprofile\views\reschedule_arrival.py:363
 #: .\myprofile\views\role_management.py:82
 #: .\myprofile\views\role_management.py:138
 #: .\myprofile\views\unidentified.py:142 .\myprofile\views\unidentified.py:185
@@ -6139,7 +6139,7 @@ msgstr "Төленетін барлығы:"
 #: .\myprofile\views\pp_acceptance.py:45 .\myprofile\views\pp_acceptance.py:499
 #: .\myprofile\views\pp_acceptance.py:562
 #: .\myprofile\views\pp_extradition_history.py:26
-#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
+#: .\myprofile\views\reschedule_arrival.py:35 .\myprofile\views\service.py:39
 #: .\myprofile\views\shipped_cn.py:40 .\myprofile\views\shipped_cn.py:125
 #: .\myprofile\views\unidentified.py:27 .\myprofile\views\warehouse.py:45
 #: .\support\views\inbox.py:60
@@ -6170,8 +6170,8 @@ msgstr "Сізде бұл бетке қол жеткізу жоқ."
 #: .\myprofile\views\pp_acceptance.py:405
 #: .\myprofile\views\pp_acceptance.py:645 .\myprofile\views\service.py:52
 #: .\myprofile\views\service.py:122 .\myprofile\views\service.py:182
-#: .\myprofile\views\service.py:275 .\myprofile\views\service.py:399
-#: .\myprofile\views\service.py:489 .\myprofile\views\warehouse.py:202
+#: .\myprofile\views\service.py:283 .\myprofile\views\service.py:410
+#: .\myprofile\views\service.py:500 .\myprofile\views\warehouse.py:202
 #: .\myprofile\views\warehouse.py:295 .\myprofile\views\warehouse.py:404
 #: .\myprofile\views\warehouse.py:492 .\myprofile\views\warehouse.py:547
 #: .\myprofile\views\warehouse.py:670 .\myprofile\views\warehouse.py:784
@@ -6341,9 +6341,9 @@ msgid "Пункт 'Доставка на дом' не настроен."
 msgstr "«Үйге жеткізу» нүктесі бапталмаған."
 
 #: .\myprofile\views\delivery.py:577 .\myprofile\views\inventory_session.py:248
-#: .\myprofile\views\reschedule_arrival.py:177
-#: .\myprofile\views\reschedule_arrival.py:234
-#: .\myprofile\views\reschedule_arrival.py:366
+#: .\myprofile\views\reschedule_arrival.py:178
+#: .\myprofile\views\reschedule_arrival.py:235
+#: .\myprofile\views\reschedule_arrival.py:380
 #: .\myprofile\views\warehouse.py:680
 msgid "Клиент не найден."
 msgstr "Клиент табылмады."
@@ -6424,10 +6424,10 @@ msgid "📦 Выдано посылок: %(count)s (%(pickup_label)s)."
 msgstr "📦 Берілген сәлемдемелер: %(count)s (%(pickup_label)s)."
 
 #: .\myprofile\views\goods_arrival.py:152
-#: .\myprofile\views\reschedule_arrival.py:86
-#: .\myprofile\views\reschedule_arrival.py:172
-#: .\myprofile\views\reschedule_arrival.py:229
-#: .\myprofile\views\reschedule_arrival.py:361
+#: .\myprofile\views\reschedule_arrival.py:87
+#: .\myprofile\views\reschedule_arrival.py:173
+#: .\myprofile\views\reschedule_arrival.py:230
+#: .\myprofile\views\reschedule_arrival.py:375
 #: .\myprofile\views\shipped_cn.py:59 .\myprofile\views\shipped_cn.py:133
 msgid "Неверный формат даты."
 msgstr "Күн форматы қате."
@@ -6710,33 +6710,39 @@ msgstr "ТБН ауыстыру өтінішіңіз мақұлданды. Жа�
 msgid "Ваша заявка на смену ПВЗ отклонена."
 msgstr "ТБН ауыстыру өтінішіңіз қабылданбады."
 
-#: .\myprofile\views\reschedule_arrival.py:81
+#: .\myprofile\views\reschedule_arrival.py:82
 msgid "Укажите дату."
 msgstr "Күнді көрсетіңіз."
 
-#: .\myprofile\views\reschedule_arrival.py:167
+#: .\myprofile\views\reschedule_arrival.py:168
 msgid "Укажите клиента и дату."
 msgstr "Клиент пен күнді көрсетіңіз."
 
-#: .\myprofile\views\reschedule_arrival.py:220
+#: .\myprofile\views\reschedule_arrival.py:221
 msgid "Необходимо указать клиента, исходную дату и новую дату."
 msgstr "Клиент, бастапқы күн және жаңа күн көрсетілуі қажет."
 
-#: .\myprofile\views\reschedule_arrival.py:223
+#: .\myprofile\views\reschedule_arrival.py:224
 msgid "Исходная и новая даты совпадают."
 msgstr "Бастапқы және жаңа күндер сәйкес келеді."
 
-#: .\myprofile\views\reschedule_arrival.py:249
-#: .\myprofile\views\reschedule_arrival.py:378
+#: .\myprofile\views\reschedule_arrival.py:250
+#: .\myprofile\views\reschedule_arrival.py:392
 msgid "Некорректные ID треков."
 msgstr "Трек ID-лері қате."
 
-#: .\myprofile\views\reschedule_arrival.py:254
-#: .\myprofile\views\reschedule_arrival.py:383
+#: .\myprofile\views\reschedule_arrival.py:255
+#: .\myprofile\views\reschedule_arrival.py:397
 msgid "Нет треков для переноса."
 msgstr "Ауыстыратын трек жоқ."
 
-#: .\myprofile\views\reschedule_arrival.py:356
+#: .\myprofile\views\reschedule_arrival.py:337
+msgid ""
+"Перенос отменён: чеки клиента нарушают правило ПВЗ. Подробности — в журнале "
+"нарушений."
+msgstr "Ауыстыру тоқтатылды: клиенттің чектері ПВЗ ережесін бұзады. Толығырақ — бұзушылықтар журналында."
+
+#: .\myprofile\views\reschedule_arrival.py:370
 msgid "Укажите клиента и новую дату."
 msgstr "Клиент пен жаңа күнді көрсетіңіз."
 
@@ -6753,11 +6759,18 @@ msgstr "Қате рөл."
 msgid "Некорректный формат даты."
 msgstr "Күн форматы қате."
 
-#: .\myprofile\views\service.py:285
+#: .\myprofile\views\service.py:263
+#, python-format
+msgid ""
+"Синхронизация ПВЗ чеков отклонена контрактом для клиентов: %(count)s — "
+"подробности в журнале нарушений; объединения и разделения сохранены."
+msgstr "Чектердің ПВЗ синхрондауын келісімшарт қабылдамады, клиенттер: %(count)s — толығырақ бұзушылықтар журналында; біріктірулер мен бөлулер сақталды."
+
+#: .\myprofile\views\service.py:293
 msgid "Нет трек-кодов со статусом «Выдано клиенту»."
 msgstr "«Клиентке берілді» мәртебесіндегі трек-кодтар жоқ."
 
-#: .\myprofile\views\service.py:297
+#: .\myprofile\views\service.py:305
 msgid "Все чеки уже отмечены как «Выдано клиенту»."
 msgstr "Барлық чектер «Клиентке берілді» деп бұрыннан белгіленген."
 
@@ -6849,29 +6862,33 @@ msgstr "Пайдаланушы көрсетілмеген."
 msgid "Посылка не найдена."
 msgstr "Жіберілім табылмады."
 
-#: .\myprofile\views\utils.py:307
+#: .\myprofile\views\utils.py:309
 #, python-format
 msgid "📦 Ваш трек-код обновлён: %(status)s"
 msgstr "📦 Сіздің трек-кодыңыз жаңартылды: %(status)s"
 
-#: .\myprofile\views\utils.py:308
+#: .\myprofile\views\utils.py:310
 #, python-format
 msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
 msgstr "📦 %(count)s трек-код жаңартылды: %(status)s"
 
-#: .\myprofile\views\utils.py:329
+#: .\myprofile\views\utils.py:331
 #, python-format
 msgid ""
 "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, если "
 "он уже был напечатан."
-msgstr "%(number)s чегі енді «%(pickup)s» ПВЗ-ға тиесілі — егер ол басып шығарылған болса, қайта басып шығарыңыз."
+msgstr ""
+"%(number)s чегі енді «%(pickup)s» ПВЗ-ға тиесілі — егер ол басып шығарылған "
+"болса, қайта басып шығарыңыз."
 
-#: .\myprofile\views\utils.py:334
+#: .\myprofile\views\utils.py:336
 #, python-format
 msgid ""
 "Чек %(number)s объединён с другим чеком клиента — старый QR при сканировании "
 "укажет новый чек."
-msgstr "%(number)s чегі клиенттің басқа чегімен біріктірілді — ескі QR сканерленгенде жаңа чекті көрсетеді."
+msgstr ""
+"%(number)s чегі клиенттің басқа чегімен біріктірілді — ескі QR "
+"сканерленгенде жаңа чекті көрсетеді."
 
 #: .\myprofile\views\warehouse.py:206 .\myprofile\views\warehouse.py:299
 msgid "Не указана ячейка."

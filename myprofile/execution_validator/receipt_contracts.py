@@ -47,7 +47,9 @@ def resolved_pickup_label(track):
 def _item_pickup_objs(receipt):
     """{pickup_id: PickupPoint} по позициям чека (только с трек-кодом)."""
     objs = {}
-    for item in receipt.items.select_related("track_code", "track_code__owner").all():
+    items = receipt.items.select_related(
+        "track_code__delivery_pickup", "track_code__owner__userprofile__pickup")
+    for item in items:
         if item.track_code_id and item.track_code:
             obj = resolved_pickup_obj(item.track_code)
             if obj:
@@ -272,11 +274,6 @@ def split_foreign_print_checks(selected_pickup_names, checks, function_name="pri
         return checks, []
     return ([c for c in checks if c.get("address") in selected],
             [c for c in checks if c.get("address") not in selected])
-
-
-def filter_foreign_print_checks(selected_pickup_names, checks, function_name="print_documents_view.print_checks"):
-    """Как split_foreign_print_checks, но возвращает только чеки к печати."""
-    return split_foreign_print_checks(selected_pickup_names, checks, function_name)[0]
 
 
 def validate_receipt_readonly(receipt, function_name, contracts=None):

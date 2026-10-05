@@ -72,10 +72,12 @@ def print_documents_view(request):
                 # пропускаются), уведомления не шлём — это тихая проверка перед печатью.
                 for _owner in {t.owner for t in tracks if t.owner_id}:
                     try:
-                        create_receipts_for_user(
-                            _owner, statuses=['delivered', 'shipping_pp', 'ready', 'claimed'])
-                        # pending-чеки — к актуальному ПВЗ клиента (метка, дубли), D1
+                        # pending-чеки — к актуальному ПВЗ клиента (метка, дубли), D1;
+                        # один раз на клиента, поэтому формирование чеков без повторной синхронизации
                         sync_pending_receipts_safely(_owner)
+                        create_receipts_for_user(
+                            _owner, statuses=['delivered', 'shipping_pp', 'ready', 'claimed'],
+                            sync=False)
                     except Exception:
                         logger.exception(
                             "print_checks: не удалось сформировать чек для %s", _owner)
@@ -137,15 +139,17 @@ def print_documents_view(request):
                             address = ''
 
                     # Цена позиции — item_price (как в чеке: у позиций бывают свои тарифы —
-                    # rate_override, товары Di.Buyer); фолбэк — вес × тариф чека.
+                    # rate_override, товары Di.Buyer); фолбэк — вес × тариф чека. При явном
+                    # тарифе трека (rate_override, в т.ч. 0 — бесплатно) item_price окончателен.
                     effective_rate = receipt.price_per_kg or get_global_price_per_kg()
                     total_weight = Decimal("0")
                     total_sum = 0
                     track_rows = []
                     for item in receipt_items:
                         weight = item.display_weight or Decimal("0")
-                        if item.item_price:
-                            price = _round_price(item.item_price)
+                        explicit_rate = item.track_code_id and item.track_code.rate_override is not None
+                        if item.item_price or explicit_rate:
+                            price = _round_price(item.item_price or 0)
                         else:
                             price = _round_price(weight * effective_rate)
                         track_rows.append({

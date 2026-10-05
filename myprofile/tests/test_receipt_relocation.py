@@ -144,6 +144,67 @@ class RescheduleRelocationTests(Base):
         self.assertEqual(ReceiptQrCode.objects.get(code=moved_number).superseded_by_id, older.pk)
 
 
+class FrozenReceiptDateChangeTests(Base):
+    """Ревью 4.4 (#1): смена даты прихода не вынимает позиции из уехавшего чека (D4)."""
+
+    def setUp(self):
+        super().setUp()
+        self.client.login(username="op", password="p")
+
+    def _transfer(self, tracks):
+        return self.client.post(reverse("reschedule_transfer"), {
+            "user_id": str(self.u1.id), "original_date": D.isoformat(), "new_date": D2.isoformat(),
+            "track_ids": [str(t.id) for t in tracks],
+        })
+
+    def test_partial_reschedule_keeps_item_in_shipped_receipt(self):
+        t1 = self._track("T1", self.u1, status="shipping_pp", pickup=self.pp_a)
+        t2 = self._track("T2", self.u1, status="shipping_pp", pickup=self.pp_a)
+        shipped = self._receipt(self.u1, self.pp_a, [t1, t2], status="in_delivery")
+
+        self.assertEqual(self._transfer([t1]).status_code, 200)
+
+        self.assertEqual(self._receipt_of(t1).pk, shipped.pk)
+        shipped.refresh_from_db()
+        self.assertEqual((shipped.created_at, self._codes(shipped)), (D, ["T1", "T2"]))
+
+    def test_whole_reschedule_does_not_redate_shipped_receipt(self):
+        t1 = self._track("T1", self.u1, status="shipping_pp", pickup=self.pp_a)
+        shipped = self._receipt(self.u1, self.pp_a, [t1], status="in_delivery")
+
+        self.assertEqual(self._transfer([t1]).status_code, 200)
+
+        shipped.refresh_from_db()
+        self.assertEqual(shipped.created_at, D)
+
+    def test_track_date_edit_keeps_item_in_shipped_receipt(self):
+        t1 = self._track("T1", self.u1, status="shipping_pp", pickup=self.pp_a)
+        shipped = self._receipt(self.u1, self.pp_a, [t1, self._track("T0", self.u1, status="shipping_pp",
+                                                                        pickup=self.pp_a)],
+                                status="in_delivery")
+        t1.delivered_date = D2
+        t1.save()
+        self.assertEqual(self._receipt_of(t1).pk, shipped.pk)
+
+    def test_reschedule_rejected_by_contract_is_rolled_back_and_journaled(self):
+        # Ревью #9: перенос даты — операция целостности чеков под контрактом.
+        from unittest import mock
+        from myprofile.models import ContractViolation
+        from myprofile.receipt_pickup import SyncSummary
+        stale = self._receipt(self.u1, self.pp_b, [self._track("X1", self.u1, date=D2)], date=D2)  # метка ≠ факт
+        t1 = self._track("T1", self.u1)
+        self._receipt(self.u1, self.pp_a, [t1])
+        with mock.patch("myprofile.receipt_pickup.sync_pending_receipts_for_user",
+                        return_value=SyncSummary()):
+            resp = self._transfer([t1])
+        self.assertEqual(resp.status_code, 409)
+        t1.refresh_from_db()
+        self.assertEqual(t1.delivered_date, D)                       # перенос откатан
+        self.assertTrue(ContractViolation.objects.filter(
+            contract="owner_pending_receipts_follow_pickup_rule").exists())
+        self.assertEqual(stale.pickup_point, str(self.pp_b))
+
+
 class NormalizeReceiptsTests(Base):
     def setUp(self):
         super().setUp()
@@ -183,6 +244,36 @@ class NormalizeReceiptsTests(Base):
         self._normalize()
 
         self.assertEqual((self._codes(r_a), self._codes(r_b)), (["T1"], ["T2"]))
+
+    def test_foreign_item_never_targets_its_own_source_receipt(self):
+        # Ревью #2: чек с датой D держит трек A (D) и B (D2); нормализация за D2 —
+        # A должен уйти в отдельный чек своей даты, а не «найти» исходный.
+        ta, tb = self._track("A", self.u1), self._track("B", self.u1, date=D2)
+        source = self._receipt(self.u1, self.pp_a, [ta, tb], date=D)
+
+        self._normalize(D2)
+
+        self.assertNotEqual(self._receipt_of(ta).pk, self._receipt_of(tb).pk)
+        self.assertEqual(self._receipt_of(ta).created_at, D)
+        self.assertEqual(self._receipt_of(tb).created_at, D2)
+        self.assertEqual(self._receipt_of(tb).pk, source.pk)
+
+    def test_rejected_sync_keeps_merge_and_says_so(self):
+        # Ревью #4: отказ синхронизации не выдаётся за ошибку слияния — слияние
+        # сохранено, оператор видит, что синхронизация отклонена (см. журнал).
+        from unittest import mock
+        from django.contrib.messages import get_messages
+        from myprofile.execution_validator import ExecutionValidationError
+        older = self._receipt(self.u1, self.pp_a, [self._track("T1", self.u1)])
+        self._receipt(self.u1, self.pp_a, [self._track("T2", self.u1)])
+        with mock.patch("myprofile.receipt_pickup.sync_pending_receipts_for_user",
+                        side_effect=ExecutionValidationError("sync", [])):
+            resp = self.client.post(reverse("service_normalize_receipts"), {"date": D.isoformat()})
+        self.assertEqual(self._codes(older), ["T1", "T2"])
+        msgs = " ".join(str(m) for m in get_messages(resp.wsgi_request))
+        self.assertIn("объединено 1", msgs)
+        self.assertNotIn("Ошибок", msgs)
+        self.assertIn("журнал", msgs)
 
     def test_pending_duplicates_of_same_key_are_merged_into_older(self):
         older = self._receipt(self.u1, self.pp_a, [self._track("T1", self.u1)])

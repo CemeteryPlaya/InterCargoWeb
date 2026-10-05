@@ -14,6 +14,7 @@ from myprofile.models import (
     Arrival, ArrivalSession, ArrivalSessionItem,
     TrackCode,
 )
+from myprofile.execution_validator import ExecutionValidationError, runtime
 from myprofile.permissions import is_staff
 from django.utils.translation import gettext as _
 
@@ -254,6 +255,7 @@ def reschedule_transfer(request):
         return JsonResponse({'error': _('Нет треков для переноса.')}, status=400)
 
     track_ids = [t.id for t in tracks]
+    rejected = None
 
     with transaction.atomic():
         # 1. Убираем треки из исходных Arrival
@@ -319,9 +321,21 @@ def reschedule_transfer(request):
         ArrivalSessionItem.objects.bulk_create(session_items)
 
         # 6. Чеки: позиции перенесённых треков уходят в чеки новой даты
-        #    (чек целиком — меняет дату на месте; частично — в pending-чек ключа, D4/D5)
+        #    (только pending-чеки; уехавшие/выданные заморожены — D4/D5)
         from myprofile.receipt_pickup import move_tracks_to_date
-        move_tracks_to_date(owner, tracks, new_date)
+        try:
+            move_tracks_to_date(owner, tracks, new_date)
+        except ExecutionValidationError as exc:
+            rejected = exc
+            transaction.set_rollback(True)  # перенос целиком отменяется
+
+    if rejected is not None:
+        # Журнал пишем после отката, иначе запись нарушения откатится вместе с переносом
+        for violation in rejected.violations:
+            runtime.record_violation(violation)
+        return JsonResponse({'error': _(
+            'Перенос отменён: чеки клиента нарушают правило ПВЗ. Подробности — в журнале нарушений.'
+        )}, status=409)
 
     logger.info(
         'Arrival reschedule: user=%s tracks=%d from=%s to=%s by=%s',

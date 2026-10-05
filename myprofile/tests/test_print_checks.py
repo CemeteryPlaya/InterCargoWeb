@@ -104,6 +104,33 @@ class PrintCheckAddressTests(PrintChecksBase):
         self.assertEqual(printed & listed, set())
 
 
+class PrintCheckReviewFixTests(PrintChecksBase):
+    def test_explicit_zero_rate_prints_zero_price(self):
+        # Ревью #3: явный нулевой тариф (бесплатная доставка) — цена 0, а не вес × тариф.
+        self.profile.pickup = self.akb
+        self.profile.save()
+        self._track("Z1", rate_override=Decimal("0"))
+        receipt = create_receipts_for_user(self.cli, statuses=["delivered"])
+
+        check = self._print(self.akb).context["checks"][0]
+
+        self.assertEqual(check["tracks"][0]["price"], 0)
+        self.assertEqual(check["total_sum"], int(receipt.total_price))
+
+    def test_print_syncs_each_owner_once(self):
+        # Ревью #6: перед печатью синхронизация pending-чеков клиента — один раз.
+        from unittest import mock
+        from myprofile.receipt_pickup import sync_pending_receipts_safely as real
+        self.profile.pickup = self.akb
+        self.profile.save()
+        self._track("S1")
+        calls = mock.MagicMock(side_effect=real)
+        with mock.patch("myprofile.views.documents.sync_pending_receipts_safely", calls), \
+                mock.patch("myprofile.views.utils.sync_pending_receipts_safely", calls):
+            self._print(self.akb)
+        self.assertEqual(calls.call_count, 1)
+
+
 class PrintCheckSumTests(PrintChecksBase):
     def test_sum_uses_item_prices_with_rate_override(self):
         self.profile.pickup = self.akb

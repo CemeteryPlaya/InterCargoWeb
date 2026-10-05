@@ -145,6 +145,17 @@ class AuditReceiptsSafetyTests(AuditBase):
         self.assertIn("dry-run", out)
         self.assertIn("cli", out)                      # клиент, чьи pending-чеки будут исправлены
 
+    def test_dry_run_is_read_only_and_names_problem_receipts(self):
+        # Ревью #5: отчёт не запускает исправление даже в откатываемой транзакции
+        # (на Postgres это расходовало номера чеков IC-xxxxxx).
+        from unittest import mock
+        stale = self._receipt(pickup_point=str(self.pp_a))
+        ReceiptItem.objects.create(receipt=stale, track_code=self._track("R1", pickup=self.pp_b))
+        with mock.patch("myprofile.management.commands.audit_receipts.sync_pending_receipts_for_user") as sync:
+            out = self._out()
+        sync.assert_not_called()
+        self.assertIn(stale.receipt_number, out)
+
     def test_frozen_problem_is_reported_for_manual_review(self):
         wrong = self._frozen(self._track("W1", pickup=self.pp_b), status="in_delivery")
 

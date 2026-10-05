@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 17:05+0500\n"
+"POT-Creation-Date: 2026-10-05 17:20+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2214,16 +2214,16 @@ msgstr "Mass Status Update"
 msgid "Отметить как разобранные"
 msgstr "Mark as resolved"
 
-#: .\myprofile\middleware.py:32 .\myprofile\permissions.py:668
+#: .\myprofile\middleware.py:32 .\myprofile\permissions.py:663
 #: .\myprofile\views\inventory_session.py:143
 #: .\myprofile\views\inventory_session.py:233
 #: .\myprofile\views\inventory_session.py:342
 #: .\myprofile\views\profile_setting.py:214
-#: .\myprofile\views\reschedule_arrival.py:77
-#: .\myprofile\views\reschedule_arrival.py:136
-#: .\myprofile\views\reschedule_arrival.py:161
-#: .\myprofile\views\reschedule_arrival.py:212
-#: .\myprofile\views\reschedule_arrival.py:349
+#: .\myprofile\views\reschedule_arrival.py:78
+#: .\myprofile\views\reschedule_arrival.py:137
+#: .\myprofile\views\reschedule_arrival.py:162
+#: .\myprofile\views\reschedule_arrival.py:213
+#: .\myprofile\views\reschedule_arrival.py:363
 #: .\myprofile\views\role_management.py:82
 #: .\myprofile\views\role_management.py:138
 #: .\myprofile\views\unidentified.py:142 .\myprofile\views\unidentified.py:185
@@ -6134,7 +6134,7 @@ msgstr "Total to pay:"
 #: .\myprofile\views\pp_acceptance.py:45 .\myprofile\views\pp_acceptance.py:499
 #: .\myprofile\views\pp_acceptance.py:562
 #: .\myprofile\views\pp_extradition_history.py:26
-#: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
+#: .\myprofile\views\reschedule_arrival.py:35 .\myprofile\views\service.py:39
 #: .\myprofile\views\shipped_cn.py:40 .\myprofile\views\shipped_cn.py:125
 #: .\myprofile\views\unidentified.py:27 .\myprofile\views\warehouse.py:45
 #: .\support\views\inbox.py:60
@@ -6165,8 +6165,8 @@ msgstr "You do not have access to this page."
 #: .\myprofile\views\pp_acceptance.py:405
 #: .\myprofile\views\pp_acceptance.py:645 .\myprofile\views\service.py:52
 #: .\myprofile\views\service.py:122 .\myprofile\views\service.py:182
-#: .\myprofile\views\service.py:275 .\myprofile\views\service.py:399
-#: .\myprofile\views\service.py:489 .\myprofile\views\warehouse.py:202
+#: .\myprofile\views\service.py:283 .\myprofile\views\service.py:410
+#: .\myprofile\views\service.py:500 .\myprofile\views\warehouse.py:202
 #: .\myprofile\views\warehouse.py:295 .\myprofile\views\warehouse.py:404
 #: .\myprofile\views\warehouse.py:492 .\myprofile\views\warehouse.py:547
 #: .\myprofile\views\warehouse.py:670 .\myprofile\views\warehouse.py:784
@@ -6336,9 +6336,9 @@ msgid "Пункт 'Доставка на дом' не настроен."
 msgstr "Home delivery point is not configured."
 
 #: .\myprofile\views\delivery.py:577 .\myprofile\views\inventory_session.py:248
-#: .\myprofile\views\reschedule_arrival.py:177
-#: .\myprofile\views\reschedule_arrival.py:234
-#: .\myprofile\views\reschedule_arrival.py:366
+#: .\myprofile\views\reschedule_arrival.py:178
+#: .\myprofile\views\reschedule_arrival.py:235
+#: .\myprofile\views\reschedule_arrival.py:380
 #: .\myprofile\views\warehouse.py:680
 msgid "Клиент не найден."
 msgstr "Client not found."
@@ -6418,10 +6418,10 @@ msgid "📦 Выдано посылок: %(count)s (%(pickup_label)s)."
 msgstr "📦 Parcels issued: %(count)s (%(pickup_label)s)."
 
 #: .\myprofile\views\goods_arrival.py:152
-#: .\myprofile\views\reschedule_arrival.py:86
-#: .\myprofile\views\reschedule_arrival.py:172
-#: .\myprofile\views\reschedule_arrival.py:229
-#: .\myprofile\views\reschedule_arrival.py:361
+#: .\myprofile\views\reschedule_arrival.py:87
+#: .\myprofile\views\reschedule_arrival.py:173
+#: .\myprofile\views\reschedule_arrival.py:230
+#: .\myprofile\views\reschedule_arrival.py:375
 #: .\myprofile\views\shipped_cn.py:59 .\myprofile\views\shipped_cn.py:133
 msgid "Неверный формат даты."
 msgstr "Invalid date format."
@@ -6706,33 +6706,39 @@ msgstr ""
 msgid "Ваша заявка на смену ПВЗ отклонена."
 msgstr "Your pickup point change request has been rejected."
 
-#: .\myprofile\views\reschedule_arrival.py:81
+#: .\myprofile\views\reschedule_arrival.py:82
 msgid "Укажите дату."
 msgstr "Please specify a date."
 
-#: .\myprofile\views\reschedule_arrival.py:167
+#: .\myprofile\views\reschedule_arrival.py:168
 msgid "Укажите клиента и дату."
 msgstr "Please specify client and date."
 
-#: .\myprofile\views\reschedule_arrival.py:220
+#: .\myprofile\views\reschedule_arrival.py:221
 msgid "Необходимо указать клиента, исходную дату и новую дату."
 msgstr "Client, source date and new date must be specified."
 
-#: .\myprofile\views\reschedule_arrival.py:223
+#: .\myprofile\views\reschedule_arrival.py:224
 msgid "Исходная и новая даты совпадают."
 msgstr "Source and new dates are the same."
 
-#: .\myprofile\views\reschedule_arrival.py:249
-#: .\myprofile\views\reschedule_arrival.py:378
+#: .\myprofile\views\reschedule_arrival.py:250
+#: .\myprofile\views\reschedule_arrival.py:392
 msgid "Некорректные ID треков."
 msgstr "Invalid track IDs."
 
-#: .\myprofile\views\reschedule_arrival.py:254
-#: .\myprofile\views\reschedule_arrival.py:383
+#: .\myprofile\views\reschedule_arrival.py:255
+#: .\myprofile\views\reschedule_arrival.py:397
 msgid "Нет треков для переноса."
 msgstr "No tracks to transfer."
 
-#: .\myprofile\views\reschedule_arrival.py:356
+#: .\myprofile\views\reschedule_arrival.py:337
+msgid ""
+"Перенос отменён: чеки клиента нарушают правило ПВЗ. Подробности — в журнале "
+"нарушений."
+msgstr "Transfer cancelled: the client's receipts break the PVZ rule. Details are in the violation log."
+
+#: .\myprofile\views\reschedule_arrival.py:370
 msgid "Укажите клиента и новую дату."
 msgstr "Please specify client and new date."
 
@@ -6749,11 +6755,18 @@ msgstr "Invalid role."
 msgid "Некорректный формат даты."
 msgstr "Invalid date format."
 
-#: .\myprofile\views\service.py:285
+#: .\myprofile\views\service.py:263
+#, python-format
+msgid ""
+"Синхронизация ПВЗ чеков отклонена контрактом для клиентов: %(count)s — "
+"подробности в журнале нарушений; объединения и разделения сохранены."
+msgstr "Receipt PVZ sync was rejected by a contract for clients: %(count)s — details are in the violation log; merges and splits were kept."
+
+#: .\myprofile\views\service.py:293
 msgid "Нет трек-кодов со статусом «Выдано клиенту»."
 msgstr "No track codes with status 'Issued to client'."
 
-#: .\myprofile\views\service.py:297
+#: .\myprofile\views\service.py:305
 msgid "Все чеки уже отмечены как «Выдано клиенту»."
 msgstr "All receipts are already marked as 'Issued to client'."
 
@@ -6845,29 +6858,33 @@ msgstr "User not specified."
 msgid "Посылка не найдена."
 msgstr "Parcel not found."
 
-#: .\myprofile\views\utils.py:307
+#: .\myprofile\views\utils.py:309
 #, python-format
 msgid "📦 Ваш трек-код обновлён: %(status)s"
 msgstr "📦 Your tracking code updated: %(status)s"
 
-#: .\myprofile\views\utils.py:308
+#: .\myprofile\views\utils.py:310
 #, python-format
 msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
 msgstr "📦 Updated %(count)s tracking codes: %(status)s"
 
-#: .\myprofile\views\utils.py:329
+#: .\myprofile\views\utils.py:331
 #, python-format
 msgid ""
 "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, если "
 "он уже был напечатан."
-msgstr "Receipt %(number)s now belongs to PVZ “%(pickup)s” — reprint it if it was already printed."
+msgstr ""
+"Receipt %(number)s now belongs to PVZ “%(pickup)s” — reprint it if it was "
+"already printed."
 
-#: .\myprofile\views\utils.py:334
+#: .\myprofile\views\utils.py:336
 #, python-format
 msgid ""
 "Чек %(number)s объединён с другим чеком клиента — старый QR при сканировании "
 "укажет новый чек."
-msgstr "Receipt %(number)s was merged into another receipt of this client — scanning the old QR will point to the new receipt."
+msgstr ""
+"Receipt %(number)s was merged into another receipt of this client — scanning "
+"the old QR will point to the new receipt."
 
 #: .\myprofile\views\warehouse.py:206 .\myprofile\views\warehouse.py:299
 msgid "Не указана ячейка."

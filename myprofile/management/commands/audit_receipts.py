@@ -1,8 +1,9 @@
 """Аудит чеков на инварианты домена (контракты валидатора выполнения).
 
-Без флагов — отчёт (dry-run): показывает, что исправил бы ``--fix``, прогоняет
-контракты по всем чекам и пишет нарушения в журнал (ContractViolation). Данные
-чеков при этом не меняются.
+Без флагов — отчёт (dry-run, только чтение): перечисляет pending-чеки, которые
+исправит ``--fix`` (контракт правила ПВЗ уровня клиента), прогоняет контракты по
+всем чекам и пишет нарушения в журнал (ContractViolation). Данные чеков не
+меняются, исправление даже не пробуется (не расходует номера чеков).
 
 С ``--fix`` — приводит к правилу ПВЗ только pending-чеки, через
 ``sync_pending_receipts_for_user``: перевешивает метку и ссылку оплаты, делит
@@ -15,7 +16,6 @@ pending заморожены (решения D1/D4): команда их ник�
 """
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
-from django.db import transaction
 
 from myprofile.models import Receipt
 from myprofile.execution_validator import ExecutionContext, ExecutionValidationError, run_contracts
@@ -23,10 +23,17 @@ from myprofile.execution_validator import runtime
 from myprofile.execution_validator.receipt_contracts import (
     one_pending_receipt_per_client_date_pickup,
     all_items_belong_to_receipt_owner,
+    owner_pending_receipts_follow_pickup_rule,
     receipt_pickup_label_matches_authoritative,
     receipt_tracks_pickup_homogeneous,
 )
 from myprofile.receipt_pickup import SyncSummary, sync_pending_receipts_for_user
+
+_PROBLEM_LABELS = {
+    'label': 'устаревшая метка ПВЗ',
+    'mixed': 'разные ПВЗ в одном чеке',
+    'duplicate': 'дубль чека на дату и ПВЗ',
+}
 
 CONTRACTS = [
     one_pending_receipt_per_client_date_pickup,
@@ -45,34 +52,54 @@ class Command(BaseCommand):
                             help='Исправить pending-чеки (иначе только отчёт, данные не меняются).')
 
     def handle(self, *args, **options):
-        fix = options['fix']
-        mode = '[FIX]' if fix else '[dry-run]'
+        if options['fix']:
+            totals, rejected = self._fix_pending()
+            summary = (f"[FIX] pending-чеки: перевешено {totals.relabeled}, перенесено позиций "
+                       f"{totals.moved_items}, создано {totals.created}, слито {totals.merged}, "
+                       f"отклонено контрактом {len(rejected)}")
+        else:
+            owners_with_problems = self._preview_pending()
+            summary = f"[dry-run] клиентов с pending-чеками к исправлению (--fix): {owners_with_problems}"
 
-        totals, rejected = self._sync_pending(apply=fix)
         frozen_problems, total_violations = self._scan()
         self._report_frozen(frozen_problems)
-
         self.stdout.write(self.style.SUCCESS(
-            f"\n{mode} pending-чеки: перевешено {totals.relabeled}, перенесено позиций "
-            f"{totals.moved_items}, создано {totals.created}, слито {totals.merged}, "
-            f"отклонено контрактом {len(rejected)}; замороженных чеков с нарушениями "
-            f"(вручную): {len(frozen_problems)}; нарушений в журнале: {total_violations}"
+            f"\n{summary}; замороженных чеков с нарушениями (вручную): {len(frozen_problems)}; "
+            f"нарушений в журнале: {total_violations}"
         ))
 
-    # ── pending-чеки: исправление (--fix) или предпросмотр (dry-run) ──
-    def _sync_pending(self, apply):
+    def _pending_owners(self):
         owner_ids = (Receipt.objects.filter(status='pending', owner__isnull=False)
                      .values_list('owner_id', flat=True).distinct())
+        return User.objects.filter(id__in=list(owner_ids)).order_by('id')
+
+    # ── dry-run: только чтение — что исправит --fix ──
+    def _preview_pending(self):
+        owners_with_problems = 0
+        for owner in self._pending_owners():
+            violations = run_contracts([owner_pending_receipts_follow_pickup_rule],
+                                       ExecutionContext(args=(owner,)))
+            if not violations:
+                continue
+            owners_with_problems += 1
+            by_kind = {}
+            for problem in violations[0].context.get('problems', []):
+                by_kind.setdefault(problem['problem'], set()).add(problem['receipt_id'])
+            numbers = dict(Receipt.objects.filter(
+                pk__in=set().union(*by_kind.values())).values_list('pk', 'receipt_number'))
+            details = '; '.join(
+                f"{_PROBLEM_LABELS.get(kind, kind)}: {', '.join(numbers[pk] for pk in sorted(ids))}"
+                for kind, ids in sorted(by_kind.items())
+            )
+            self.stdout.write(f"  [pending] {owner.username}: будет исправлено — {details}")
+        return owners_with_problems
+
+    # ── --fix: только pending-чеки ──
+    def _fix_pending(self):
         totals, rejected = SyncSummary(), []
-        prefix = 'исправлено' if apply else 'будет исправлено'
-        for owner in User.objects.filter(id__in=list(owner_ids)).order_by('id'):
+        for owner in self._pending_owners():
             try:
-                if apply:
-                    summary = sync_pending_receipts_for_user(owner)
-                else:
-                    with transaction.atomic():
-                        summary = sync_pending_receipts_for_user(owner)
-                        transaction.set_rollback(True)  # предпросмотр: откатываем всё
+                summary = sync_pending_receipts_for_user(owner)
             except ExecutionValidationError:
                 rejected.append(owner)
                 self.stdout.write(f"  [отклонено] {owner.username}: синхронизация нарушает контракт — вручную")
@@ -82,7 +109,7 @@ class Command(BaseCommand):
             for field in ('relabeled', 'moved_items', 'created', 'merged'):
                 setattr(totals, field, getattr(totals, field) + getattr(summary, field))
             self.stdout.write(
-                f"  [pending] {owner.username}: {prefix} — перевешено {summary.relabeled}, "
+                f"  [pending] {owner.username}: исправлено — перевешено {summary.relabeled}, "
                 f"перенесено позиций {summary.moved_items}, создано {summary.created}, "
                 f"слито {summary.merged}"
             )

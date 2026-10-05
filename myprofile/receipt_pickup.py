@@ -61,29 +61,35 @@ def _new_pending_receipt(owner, date, pickup, price_per_kg):
     )
 
 
-def pending_receipt_for(owner, date, pickup, price_per_kg=0):
-    """Pending-чек ключа (owner, date, pickup): существующий или новый (решение D4)."""
-    return find_pending_receipt(owner, date, pickup) or _new_pending_receipt(owner, date, pickup, price_per_kg)
+def pending_receipt_for(owner, date, pickup, price_per_kg=0, exclude_ids=()):
+    """Pending-чек ключа (owner, date, pickup): существующий или новый (решение D4).
+    exclude_ids — чеки, которые не могут быть целью (например, чек-источник)."""
+    return (find_pending_receipt(owner, date, pickup, exclude_ids=exclude_ids)
+            or _new_pending_receipt(owner, date, pickup, price_per_kg))
 
 
-def move_item_to_pending_receipt(item, date, price_per_kg=0):
+def move_item_to_pending_receipt(item, date, price_per_kg=0, exclude_ids=()):
     """Переносит позицию в pending-чек её ключа (date, resolved-ПВЗ трека) и
     возвращает чек-цель. Итоги чеков пересчитывает вызывающая сторона."""
     track = item.track_code
-    target = pending_receipt_for(track.owner, date, resolved_pickup_obj(track), price_per_kg)
+    target = pending_receipt_for(track.owner, date, resolved_pickup_obj(track), price_per_kg, exclude_ids)
     if item.receipt_id != target.id:
         item.receipt = target
         item.save(update_fields=['receipt'])
     return target
 
 
+@validate_execution(post=[owner_pending_receipts_follow_pickup_rule])
 def move_tracks_to_date(owner, tracks, new_date):
     """Перенос даты прихода: позиции треков уходят в чеки новой даты.
 
-    Чек, целиком состоящий из переносимых треков, меняет дату на месте (номер и
-    QR сохраняются). Из остальных чеков переносимые позиции уходят в pending-чек
-    ключа (owner, new_date, ПВЗ) или в новый (D4). Затем pending-чеки клиента
-    синхронизируются: дубль ключа сливается в старший (D5).
+    Затрагивает только pending-чеки: уехавший/выданный чек заморожен (D4) — его
+    позиции и дата не меняются, у трека меняется лишь delivered_date. Pending-чек,
+    целиком состоящий из переносимых треков, меняет дату на месте (номер и QR
+    сохраняются); из остальных переносимые позиции уходят в pending-чек ключа
+    (owner, new_date, ПВЗ) или в новый. Затем pending-чеки клиента
+    синхронизируются (дубль ключа — в старший, D5). Пост-контракт проверяет
+    правило ПВЗ; при нарушении операция откатывается.
     """
     from myprofile.models import Receipt, ReceiptItem
     from myprofile.views.utils import _recalc_receipt
@@ -97,6 +103,8 @@ def move_tracks_to_date(owner, tracks, new_date):
 
     touched = set()
     for receipt, moved in by_receipt.items():
+        if receipt.status != PENDING:
+            continue  # заморожен (D4)
         if receipt.items.count() == len(moved):
             receipt.created_at = new_date
             receipt._allow_content_update = True

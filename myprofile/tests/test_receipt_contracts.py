@@ -21,7 +21,7 @@ from myprofile.execution_validator.receipt_contracts import (
     all_items_belong_to_receipt_owner,
     receipt_tracks_pickup_homogeneous,
     print_run_has_no_foreign_items,
-    filter_foreign_print_checks,
+    split_foreign_print_checks,
     validate_receipt_readonly,
 )
 
@@ -226,21 +226,22 @@ class PrintRunContractTests(Base):
 
 
 class PrintWiringTests(Base):
-    def test_filter_drops_foreign_check_and_journals(self):
+    def test_split_separates_foreign_check_and_journals(self):
         checks = [
             {"username": "a", "address": self.label_a, "tracks": []},
             {"username": "b", "address": self.label_b, "tracks": []},  # чужой ПВЗ
         ]
-        clean = filter_foreign_print_checks([self.label_a], checks, function_name="t")
+        clean, excluded = split_foreign_print_checks([self.label_a], checks, function_name="t")
         self.assertEqual([c["username"] for c in clean], ["a"])
+        self.assertEqual([c["username"] for c in excluded], ["b"])
         crit = ContractViolation.objects.filter(severity="critical")
         self.assertEqual(crit.count(), 1)
         self.assertEqual(crit.first().contract, "print_run_has_no_foreign_items")
 
-    def test_filter_keeps_all_when_clean(self):
+    def test_split_keeps_all_when_clean(self):
         checks = [{"username": "a", "address": self.label_a, "tracks": []}]
-        clean = filter_foreign_print_checks([self.label_a], checks, function_name="t")
-        self.assertEqual(clean, checks)
+        clean, excluded = split_foreign_print_checks([self.label_a], checks, function_name="t")
+        self.assertEqual((clean, excluded), (checks, []))
         self.assertEqual(ContractViolation.objects.count(), 0)
 
     def test_validate_receipt_readonly_journals_violation(self):
