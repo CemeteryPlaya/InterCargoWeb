@@ -247,7 +247,7 @@ def bulk_get_or_create_storage_cells(pickup_point, users):
                 user=user,
             ))
 
-        created = StorageCell.objects.bulk_create(new_cells, ignore_conflicts=True)
+        StorageCell.objects.bulk_create(new_cells, ignore_conflicts=True)
         # bulk_create may not return ids on all backends; re-fetch created cells
         re_fetched = StorageCell.objects.filter(
             pickup_point=pickup_point, user__in=new_users

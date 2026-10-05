@@ -5,17 +5,15 @@ from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem, Arrival
+from myprofile.models import TrackCode, ClientRegistry, ReceiptItem, Arrival
 from register.models import UserProfile, PickupPoint
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
-from collections import defaultdict
+from decimal import Decimal
 from django.db.models import Q
 from myprofile.views.utils import (
     get_global_price_per_kg, get_user_discount, round_price as _round_price,
     create_receipts_for_user,
 )
-from django.utils.translation import gettext as _
 from myprofile.permissions import require_page
 from myprofile.execution_validator.receipt_contracts import (
     authoritative_pickup_label, split_foreign_print_checks,

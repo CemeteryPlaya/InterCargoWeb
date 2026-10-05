@@ -4,19 +4,18 @@
 """
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 from datetime import datetime
 
 from myprofile.models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, ExtraditionPackage,
-    Notification, Arrival, CustomerDiscount, StorageCell,
+    Arrival,
 )
 from myprofile.views.utils import (
     get_global_price_per_kg, get_user_discount,
@@ -25,7 +24,6 @@ from myprofile.views.utils import (
 )
 from myprofile.execution_validator.receipt_contracts import resolved_pickup_obj
 from myprofile.receipt_pickup import move_item_to_pending_receipt, sync_pending_receipts_for_user
-from register.models import UserProfile
 from django.utils.translation import gettext as _
 
 
@@ -461,7 +459,7 @@ def service_test_notification(request):
         try:
             from myprofile.email_utils import send_mail_logged
             if is_notification_muted(user.id, 'email'):
-                channels.append(f'Email — заглушено (настройка уведомлений)')
+                channels.append('Email — заглушено (настройка уведомлений)')
             else:
                 send_mail_logged(
                     subject=f'[Inter Cargo] {cfg["title"]}',

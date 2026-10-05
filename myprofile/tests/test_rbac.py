@@ -13,7 +13,6 @@ from myprofile.permissions import (
     can_access_page,
     page_for_urlname,
     role_count,
-    role_of,
     GROUP_ADMIN_FULL,
     GROUP_ADMIN_READONLY,
     QuotaExceeded,

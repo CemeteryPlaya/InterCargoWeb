@@ -268,10 +268,6 @@ def reschedule_transfer(request):
 
         # 2. Удаляем ArrivalSessionItem записи в исходных сессиях
         track_codes_strs = [t.track_code for t in tracks]
-        old_sessions = ArrivalSession.objects.filter(
-            date=original_date,
-            items__track_code__in=track_codes_strs,
-        ).distinct()
         ArrivalSessionItem.objects.filter(
             session__date=original_date,
             track_code__in=track_codes_strs,
