@@ -10,12 +10,17 @@ from django_q.models import Schedule
 class Command(BaseCommand):
     help = 'Создаёт расписания фоновых задач django-q2 (идемпотентно).'
 
+    SCHEDULES = [
+        ('myprofile.track_lifecycle.auto_advance_shipped_to_customs',
+         'auto-advance shipped_cn -> at_customs'),
+        ('myprofile.arrival_autosave.prune_snapshots',
+         'prune arrival session snapshots'),
+    ]
+
     def handle(self, *args, **options):
-        obj, created = Schedule.objects.get_or_create(
-            func='myprofile.track_lifecycle.auto_advance_shipped_to_customs',
-            defaults={
-                'name': 'auto-advance shipped_cn -> at_customs',
-                'schedule_type': Schedule.DAILY,
-            },
-        )
-        self.stdout.write(('Создано: ' if created else 'Уже есть: ') + obj.func)
+        for func, name in self.SCHEDULES:
+            obj, created = Schedule.objects.get_or_create(
+                func=func,
+                defaults={'name': name, 'schedule_type': Schedule.DAILY},
+            )
+            self.stdout.write(('Создано: ' if created else 'Уже есть: ') + obj.func)

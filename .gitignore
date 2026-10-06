@@ -46,3 +46,9 @@ PLAN.md
 
 bot.log
 test_delivery_perf.py
+logs/
+
+# Служебные файлы инструментов (не коммитить)
+.codebase-memory/
+.harness/
+.playwright-mcp/

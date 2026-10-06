@@ -3,7 +3,7 @@ from .models import (
     TrackCode, ArchivedTrackCode, Receipt, ReceiptItem, ReceiptQrCode, CustomerDiscount,
     Notification, UserPushSubscription, Extradition, ExtraditionPackage, GlobalSettings, ClientRegistry,
     DeliveryHistory, StorageCell, SortingLocation, PickupChangeRequest, EmailLog, RestructureSession,
-    Arrival, ArrivalSession, ArrivalSessionItem, ContractViolation
+    Arrival, ArrivalSession, ArrivalSessionItem, ArrivalSessionSnapshot, ContractViolation
 )
 from django import forms
 from django.shortcuts import render, redirect
@@ -89,6 +89,9 @@ class TrackCodeAdmin(admin.ModelAdmin):
                 for track in queryset:
                     # Update status
                     track.status = new_status
+                    # Дата статуса (для 'shipped_cn' — дата отправки: без неё автоперевод
+                    # на таможню трек не увидит)
+                    track.set_status_date()
                     track._skip_status_validation = True
                     track.save()
                     updated_count += 1
@@ -136,6 +139,8 @@ class TrackCodeAdmin(admin.ModelAdmin):
         """
         # Убеждаемся, что флаг установлен перед сохранением
         obj._skip_status_validation = True
+        if 'status' in form.changed_data:
+            obj.set_status_date()   # для 'shipped_cn' — дата отправки (от неё автоперевод)
         # Используем стандартный save_model, но флаг уже установлен
         super().save_model(request, obj, form, change)
 
@@ -414,6 +419,23 @@ class ArrivalSessionAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     ordering = ('-created_at',)
     inlines = [ArrivalSessionItemInline]
+
+
+@admin.register(ArrivalSessionSnapshot)
+class ArrivalSessionSnapshotAdmin(admin.ModelAdmin):
+    """Журнал сохранений сессий прихода — только просмотр (восстановление — на
+    странице «История сохранений» сессии)."""
+    list_display = ('id', 'session', 'created_at', 'row_count', 'outcome', 'source', 'revision', 'user')
+    list_filter = ('outcome', 'source')
+    search_fields = ('session__id',)
+    list_select_related = ('session', 'user')
+    date_hierarchy = 'created_at'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(RestructureSession)

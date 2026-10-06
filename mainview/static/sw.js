@@ -3,7 +3,7 @@
  * - офлайн-резерв для «Сессии прихода»: кэш страницы + Background Sync несохранённых данных
  */
 
-var CACHE_NAME = 'intercargo-v1';
+var CACHE_NAME = 'intercargo-v2';   // v2: новый протокол сохранения сессии прихода — сбросить старые скрипты
 
 // ==================== Push-уведомления ====================
 self.addEventListener('push', function (event) {
@@ -81,18 +81,24 @@ self.addEventListener('fetch', function (event) {
         return;
     }
 
-    // Статика — cache-first (URL версионируются ?v=APP_VERSION, поэтому не устаревает).
+    // Статика — stale-while-revalidate: отдаём копию из кэша (работает офлайн), а свежую
+    // версию тут же докачиваем в кэш к следующему открытию. Чистый cache-first держал
+    // старые скрипты навсегда, если при выкате забыли поднять APP_VERSION.
     if (url.pathname.indexOf('/static/') === 0) {
         event.respondWith(
             caches.match(req).then(function (cached) {
-                if (cached) return cached;
-                return fetch(req).then(function (resp) {
+                var network = fetch(req).then(function (resp) {
                     if (resp && resp.status === 200) {
                         var copy = resp.clone();
                         caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
                     }
                     return resp;
                 });
+                if (cached) {
+                    event.waitUntil(network.catch(function () {}));
+                    return cached;
+                }
+                return network;
             })
         );
     }
@@ -133,8 +139,15 @@ function idbDelete(db, id) {
     });
 }
 
+// Сервер ответил окончательно — снимок либо принят, либо отклонён осознанно
+// (устарел, конфликт версий, сессия закрыта): повторять бессмысленно. Сам снимок
+// в любом случае лёг в журнал сессии на сервере.
+var FINAL_STATUSES = [400, 403, 404, 409];
+
 // Отправляем по самому свежему снимку на каждую сессию (каждый снимок — полное состояние).
-// При сбое промис отклоняется → браузер повторит sync позже.
+// Снимок несёт id вкладки и порядковый номер: если вкладка уже сохранила что-то новее,
+// сервер отклонит его как устаревший и не затрёт свежие строки.
+// При сетевом сбое или 5xx промис отклоняется → браузер повторит sync позже.
 function replayQueue() {
     return idbOpen().then(function (db) {
         return idbGetAll(db).then(function (entries) {
@@ -142,7 +155,8 @@ function replayQueue() {
 
             var byUrl = {};
             entries.forEach(function (e) {
-                if (!byUrl[e.url] || e.createdAt > byUrl[e.url].createdAt) {
+                var cur = byUrl[e.url];
+                if (!cur || (e.seq || e.createdAt) > (cur.seq || cur.createdAt)) {
                     byUrl[e.url] = e;
                 }
             });
@@ -152,21 +166,27 @@ function replayQueue() {
                 var fd = new FormData();
                 fd.append('csrfmiddlewaretoken', latest.csrf);
                 fd.append('items', JSON.stringify(latest.items));
+                fd.append('source', 'sw');
+                if (latest.client_id) fd.append('client_id', latest.client_id);
+                if (latest.seq) fd.append('seq', latest.seq);
+                if (latest.base_revision !== undefined && latest.base_revision !== null) {
+                    fd.append('base_revision', latest.base_revision);
+                }
                 return fetch(url, {
                     method: 'POST',
                     body: fd,
                     credentials: 'include'
                 }).then(function (resp) {
-                    if (!resp || !resp.ok) throw new Error('replay failed');
+                    if (!resp || !(resp.ok || FINAL_STATUSES.indexOf(resp.status) !== -1)) {
+                        throw new Error('replay failed');
+                    }
+                    // Снимки этой сессии отработаны — удаляем только их
+                    return Promise.all(entries.filter(function (e) { return e.url === url; })
+                        .map(function (e) { return idbDelete(db, e.id); }));
                 });
             });
 
-            return Promise.all(tasks).then(function () {
-                // Все снимки отправлены — очищаем очередь полностью.
-                return Promise.all(entries.map(function (e) {
-                    return idbDelete(db, e.id);
-                }));
-            });
+            return Promise.all(tasks);
         });
     });
 }

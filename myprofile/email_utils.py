@@ -1,4 +1,5 @@
 import logging
+import smtplib
 import time
 from django.core.mail import get_connection, EmailMessage
 from django.conf import settings as django_settings
@@ -30,17 +31,24 @@ def send_mail_logged(subject, body, recipient_list, from_email=None, fail_silent
 
     for recipient in recipient_list:
         last_error = None
+        last_exc = None
         sent = False
 
         for attempt in range(MAX_RETRIES):
+            connection = None
             try:
                 connection = get_connection(fail_silently=False)
                 msg = EmailMessage(subject, body, from_email, [recipient], connection=connection)
                 msg.send(fail_silently=False)
                 sent = True
                 break
+            except smtplib.SMTPRecipientsRefused as e:
+                # Сервер отверг адрес — повтор не поможет (опечатка в email и т.п.)
+                last_error, last_exc = str(e), e
+                logger.warning("Адрес %s отклонён почтовым сервером: %s", recipient, last_error)
+                break
             except Exception as e:
-                last_error = str(e)
+                last_error, last_exc = str(e), e
                 logger.warning(
                     "Попытка %d/%d отправки email на %s: %s",
                     attempt + 1, MAX_RETRIES, recipient, last_error,
@@ -71,7 +79,9 @@ def send_mail_logged(subject, body, recipient_list, from_email=None, fail_silent
                 error_message=last_error,
             )
             if not fail_silently:
-                raise Exception(last_error)
+                # Пробрасываем исходное исключение: вызывающий код различает
+                # «адрес отклонён» (ошибка клиента) и сбой SMTP.
+                raise last_exc
 
 
 def send_mail_batch(messages_data, from_email=None):

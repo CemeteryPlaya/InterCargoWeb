@@ -96,6 +96,7 @@
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
                             <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
                             {% endif %}
@@ -131,6 +132,7 @@
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
                             <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
                             {% endif %}
@@ -170,6 +172,7 @@
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
                             <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
                             {% endif %}
@@ -216,6 +219,7 @@
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
                             <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.arrival %}
                             <span class="text-xs text-blue-600">Приход #{{ s.arrival.id }}</span>
                             {% endif %}

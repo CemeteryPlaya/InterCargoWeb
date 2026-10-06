@@ -93,6 +93,23 @@
                     {% blocktrans with days=auto_customs_days %}Через {{ days }} дней после даты отправки партия автоматически переходит в статус «Прибыло на таможню (Китай-Казахстан)». Строка исчезает, когда все её трек-коды попадают в Приход.{% endblocktrans %}
                 </p>
 
+                {% if overdue_count %}
+                <div class="mb-4 p-4 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="ri-time-line text-amber-600 text-xl flex-shrink-0"></i>
+                        <p class="text-sm text-amber-800">
+                            {% blocktrans with count=overdue_count days=auto_customs_days %}{{ count }} трек-кодов отправлены больше {{ days }} дней назад, но ещё не переведены «на таможню» автоматически.{% endblocktrans %}
+                        </p>
+                    </div>
+                    <form method="post" action="{% url 'shipped_cn_auto_advance' %}" class="flex-shrink-0">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition text-sm font-medium">
+                            <i class="ri-play-line mr-1"></i> {% trans "Перевести сейчас" %}
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
                 {% if transit_batches %}
                 <div class="overflow-x-auto border border-gray-200 rounded-lg">
                     <table class="min-w-full text-sm">

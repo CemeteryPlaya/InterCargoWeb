@@ -2,15 +2,18 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
+from django.db import IntegrityError
+from django.views.decorators.http import require_POST
 from datetime import datetime
 from myprofile.models import TrackCode
 from myprofile.track_lifecycle import (
     AUTO_CUSTOMS_DAYS, TRANSIT_STATUSES,
-    advance_customs_to_almaty, get_transit_batches,
+    advance_customs_to_almaty, auto_advance_shipped_to_customs, get_transit_batches,
+    overdue_shipped_count,
 )
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, send_grouped_notifications, add_bulk_result_messages
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, gettext_lazy
 
 
 def _parse_xlsx(file):
@@ -43,6 +46,9 @@ def shipped_cn_view(request):
         return render(request, "desktop/shipped_cn.html", {
             'transit_batches': get_transit_batches(),
             'auto_customs_days': AUTO_CUSTOMS_DAYS,
+            # Автоперевод должен был сработать, но не сработал (воркер не запущен,
+            # БД отвергает статус) — подсвечиваем и даём перевести вручную
+            'overdue_count': overdue_shipped_count(),
         })
 
     update_date_str = request.POST.get('update_date')
@@ -133,12 +139,42 @@ def shipped_cn_advance_almaty(request):
         messages.error(request, _("Неверный формат даты."))
         return redirect('shipped_cn')
 
-    advanced = advance_customs_to_almaty(batch_date, request.user)
+    try:
+        advanced = advance_customs_to_almaty(batch_date, request.user)
+    except IntegrityError:
+        messages.error(request, _STATUS_REJECTED)
+        return redirect('shipped_cn')
     if advanced:
         messages.success(
             request,
             _("Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов.") % {'count': advanced}
         )
+    else:
+        messages.info(request, _("Нет трек-кодов для перевода."))
+    return redirect('shipped_cn')
+
+
+_STATUS_REJECTED = gettext_lazy(
+    "База данных отвергла новый статус. Администратору: выполните на сервере "
+    "«python manage.py migrate» — он удалит устаревшее ограничение статусов."
+)
+
+
+@login_required
+@require_POST
+def shipped_cn_auto_advance(request):
+    """Ручной запуск автоперевода просроченных партий «Отправлено» → «На таможне»
+    (если фоновые исполнители не сработали)."""
+    if not _is_staff(request.user):
+        return HttpResponseForbidden(_("У вас нет доступа к этой странице."))
+    try:
+        advanced = auto_advance_shipped_to_customs(changed_by=request.user.username)
+    except IntegrityError:
+        messages.error(request, _STATUS_REJECTED)
+        return redirect('shipped_cn')
+    if advanced:
+        messages.success(request, _("Переведено в статус «Прибыло на таможню»: %(count)s трек-кодов.")
+                         % {'count': advanced})
     else:
         messages.info(request, _("Нет трек-кодов для перевода."))
     return redirect('shipped_cn')

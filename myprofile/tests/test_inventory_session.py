@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from myprofile.models import (
-    Extradition, ExtraditionPackage, InventoryScan, InventorySession,
+    Extradition, InventoryScan, InventorySession,
     Notification, Receipt, ReceiptItem, ReceiptQrCode, StorageCell, TrackCode,
 )
 from register.models import PickupPoint, UserProfile
@@ -334,6 +334,98 @@ class InventoryFinishTests(InventoryBase):
         self.assertNotEqual(receipt.status, 'claimed')
         tracks[0].refresh_from_db()
         self.assertEqual(tracks[0].status, 'ready')
+
+
+class InventoryLongStorageNotifyTests(InventoryBase):
+    """После завершения — уведомление клиентам, чьи посылки лежат на ПВЗ > 10 дней."""
+
+    def setUp(self):
+        from django.utils import timezone
+        self.today = timezone.localdate()
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+
+    def _aged(self, days, owner=None, scanned=True, n=1):
+        import datetime
+        receipt, tracks = self._make_receipt(owner=owner, n=n)
+        TrackCode.objects.filter(id__in=[t.id for t in tracks]).update(
+            date_ready=self.today - datetime.timedelta(days=days))
+        if scanned:
+            InventoryScan.objects.create(session=self.session, receipt=receipt,
+                                         cell_number='1', scanned_by=self.driver)
+        return receipt
+
+    def _finish(self):
+        return self.c.post(reverse('inventory_session_finish'), {'session_id': self.session.id})
+
+    def _notified(self, user):
+        return list(Notification.objects.filter(user=user).values_list('message', flat=True))
+
+    def test_client_with_parcel_older_than_10_days_is_notified(self):
+        from tgbot.models import TelegramNotification
+        self._aged(11, n=2)
+        self._finish()
+        msgs = self._notified(self.cli)
+        self.assertEqual(len(msgs), 1)                       # одно сообщение на клиента
+        self.assertIn('2', msgs[0])
+        self.assertIn('PP-INV', msgs[0])
+        self.assertTrue(TelegramNotification.objects.filter(user=self.cli).exists())
+
+    def test_exactly_10_days_is_not_notified(self):
+        self._aged(10)
+        self._finish()
+        self.assertEqual(self._notified(self.cli), [])
+
+    def test_issued_unscanned_parcel_stays_silent(self):
+        self._aged(30, scanned=False)                        # не найдена → тихо выдана
+        self._finish()
+        self.assertEqual(self._notified(self.cli), [])
+
+    def test_other_pickup_clients_are_not_notified(self):
+        import datetime
+        receipt, tracks = self._make_receipt(owner=self.plain, pickup=self.pp2)
+        TrackCode.objects.filter(id=tracks[0].id).update(
+            date_ready=self.today - datetime.timedelta(days=20))
+        self._finish()
+        self.assertEqual(self._notified(self.plain), [])
+
+    def test_telegram_mute_respected(self):
+        from myprofile.models import NotificationMute
+        from tgbot.models import TelegramNotification
+        NotificationMute.objects.create(user=self.cli, channel='telegram', is_active=True)
+        self._aged(15)
+        self._finish()
+        self.assertEqual(len(self._notified(self.cli)), 1)
+        self.assertFalse(TelegramNotification.objects.filter(user=self.cli).exists())
+
+    def test_report_and_operator_message(self):
+        from django.contrib.messages import get_messages
+        self._aged(12)
+        resp = self._finish()
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.report['reminded'], [self.cli.username])
+        self.assertTrue(any('1' in str(m) and 'уведомлен' in str(m).lower()
+                            for m in get_messages(resp.wsgi_request)))
+        report_page = self.c.get(reverse('inventory_session_report', args=[self.session.id]))
+        self.assertContains(report_page, self.cli.username)
+        self.assertContains(report_page, 'более 10 дней')
+
+
+class InventorySessionPageTests(InventoryBase):
+    """Страница сессии: закрытие ручного ввода, очистка формы, подтверждение ячейки."""
+
+    def setUp(self):
+        self.session = self._session()
+        self.c = Client(); self.c.login(username='drv', password='p')
+        self.html = self.c.get(reverse('inventory_session_view', args=[self.session.id])).content.decode()
+
+    def test_legacy_modal_has_close_button_and_resets(self):
+        self.assertIn('id="legacy-cancel"', self.html)
+        self.assertIn('function resetLegacyForm()', self.html)
+
+    def test_cell_confirmation_modal_after_scan(self):
+        self.assertIn('id="cell-modal"', self.html)
+        self.assertIn('openCellPrompt(r.data.row, tr)', self.html)
 
 
 class InventoryWarehouseEntryTests(InventoryBase):

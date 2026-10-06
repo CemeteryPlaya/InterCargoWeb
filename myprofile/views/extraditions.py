@@ -103,6 +103,13 @@ def extradition_view(request):
             if package.is_issued:
                 messages.warning(request, f"Пакет '{barcode}' уже был выдан.")
                 return redirect('extradition')
+            if Extradition.objects.filter(package=package).exists():
+                # Выдача уже оформлена, а флаг пакета не выставлен — чиним флаг,
+                # повторную выдачу не создаём (иначе IntegrityError package_id)
+                package.is_issued = True
+                package.save(update_fields=['is_issued'])
+                messages.warning(request, f"Пакет '{barcode}' уже был выдан.")
+                return redirect('extradition')
 
             extradition = Extradition.objects.create(
                 package=package,
@@ -468,6 +475,10 @@ def warehouse_quick_issue_receipt(request):
     PICKUP_LABEL = "Быстрая выдача со Склад ПВЗ"
 
     with transaction.atomic():
+        # Двойное нажатие: повторная проверка под блокировкой строки чека
+        if Receipt.objects.select_for_update().filter(id=receipt.id, is_claimed=True).exists():
+            return JsonResponse({'error': _('Чек уже выдан')}, status=400)
+
         # Убираем чек из всех невыданных пакетов
         for pkg in receipt.extradition_packages.filter(is_issued=False):
             pkg.receipts.remove(receipt)

@@ -3,11 +3,37 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+from django.db import IntegrityError, transaction
 from myprofile.models import TrackCode, ArchivedTrackCode, ReceiptItem
 from django.utils.translation import gettext as _
+
+
+def _create_track_or_existing(track):
+    """Сохраняет новый трек; при гонке двойной отправки формы (уникальность
+    track_code нарушена соседним запросом) возвращает уже созданный трек.
+    Возвращает (трек, создан ли этим запросом)."""
+    try:
+        with transaction.atomic():
+            track.save()
+        return track, True
+    except (IntegrityError, ValidationError):
+        # save() делает full_clean(): сосед мог успеть до проверки уникальности
+        # (ValidationError) или между проверкой и INSERT (IntegrityError)
+        existing = TrackCode.all_objects.filter(track_code=track.track_code).first()
+        if existing is None:
+            raise
+        return existing, False
+
+
+def _duplicate_message(request, existing):
+    if existing is not None and existing.owner_id == request.user.id:
+        messages.warning(request, _("Этот трек-код уже добавлен в ваш список."))
+    else:
+        messages.error(request, _("Этот трек-код уже зарегистрирован другим пользователем."))
 
 
 def _safe_next_url(request, fallback='track_codes'):
@@ -124,7 +150,10 @@ def track_codes_view(request):
                     track_code.status = 'user_added'
                     track_code.set_status_date()
                     track_code.log_status_change(request.user)
-                    track_code.save()
+                    track_code, created = _create_track_or_existing(track_code)
+                    if not created:
+                        _duplicate_message(request, track_code)
+                        return _redirect(track_code if track_code and track_code.owner_id == request.user.id else None)
                     messages.success(request, _("Трек-код успешно добавлен."))
                     return _redirect(track_code)
                 elif next_url:
@@ -229,7 +258,10 @@ def add_track_code_view(request):
                     track_code.status = 'user_added'
                     track_code.set_status_date()
                     track_code.log_status_change(request.user)
-                    track_code.save()
+                    track_code, created = _create_track_or_existing(track_code)
+                    if not created:
+                        _duplicate_message(request, track_code)
+                        return redirect('track_codes')
                     messages.success(request, _("Трек-код успешно добавлен."))
                     return redirect('track_codes')
         else:

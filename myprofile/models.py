@@ -875,6 +875,24 @@ class ArrivalSession(models.Model):
     # Хранит входящий список строк как есть — восстановимая копия, доступная с любого устройства.
     draft_data = models.JSONField(default=dict, blank=True, verbose_name=_("Черновик (резерв)"))
     draft_saved_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Черновик сохранён"))
+    # Защита от затирания (myprofile/arrival_autosave.py): номер версии строк сессии,
+    # хеш текущего содержимого и последний применённый (клиент, порядковый номер).
+    revision = models.PositiveIntegerField(default=0, verbose_name=_("Версия строк"))
+    content_hash = models.CharField(max_length=64, blank=True, default='', verbose_name=_("Хеш содержимого"))
+    # Сколько строк записано последним сохранением — сверка для повторного сохранения:
+    # совпал хеш, но строк в БД меньше → строки пропали, записываем заново
+    applied_rows = models.PositiveIntegerField(default=0, verbose_name=_("Записано строк"))
+    last_client_id = models.CharField(max_length=64, blank=True, default='', verbose_name=_("Последний клиент"))
+    last_client_seq = models.BigIntegerField(default=0, verbose_name=_("Порядковый номер клиента"))
+    # 48-часовой лимит считается от последнего сохранения, а не от создания
+    last_activity_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Последняя активность"))
+    # Кто сейчас редактирует (одно устройство/вкладка за раз)
+    editor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='+', verbose_name=_("Редактирует")
+    )
+    editor_client_id = models.CharField(max_length=64, blank=True, default='', verbose_name=_("Устройство редактора"))
+    editor_seen_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Редактор был в сети"))
 
     class Meta:
         verbose_name = _("Сессия прихода")
@@ -909,6 +927,56 @@ class ArrivalSessionItem(models.Model):
 
     def __str__(self):
         return f"{self.track_code} — {self.owner_name} ({self.weight} кг)"
+
+
+class ArrivalSessionSnapshot(models.Model):
+    """Журнал сохранений сессии прихода: каждый присланный набор строк хранится
+    отдельной записью (в т.ч. отклонённые), чтобы любую точку можно было восстановить."""
+    SOURCE_CHOICES = [
+        ('fetch', _('Автосохранение')),
+        ('beacon', _('Уход со страницы')),
+        ('sw', _('Досылка из фона')),
+        ('complete', _('Перед завершением')),
+        ('restore', _('Восстановление')),
+        ('legacy', _('Старая версия страницы')),
+    ]
+    OUTCOME_CHOICES = [
+        ('received', _('Получен')),
+        ('applied', _('Применён')),
+        ('stale', _('Устаревший (есть новее)')),
+        ('conflict', _('Конфликт версий')),
+        ('shrink', _('Резкое сокращение строк')),
+        ('locked', _('Редактирует другое устройство')),
+        ('inactive', _('Сессия не активна')),
+        ('error', _('Ошибка')),
+    ]
+
+    session = models.ForeignKey(
+        ArrivalSession, on_delete=models.CASCADE,
+        related_name='snapshots', verbose_name=_("Сессия")
+    )
+    items = models.JSONField(default=list, verbose_name=_("Строки"))
+    row_count = models.PositiveIntegerField(default=0, verbose_name=_("Строк"))
+    items_hash = models.CharField(max_length=64, blank=True, default='')
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='fetch', verbose_name=_("Источник"))
+    outcome = models.CharField(max_length=10, choices=OUTCOME_CHOICES, default='received', verbose_name=_("Результат"))
+    base_revision = models.IntegerField(null=True, blank=True, verbose_name=_("Базовая версия"))
+    revision = models.PositiveIntegerField(default=0, verbose_name=_("Версия после сохранения"))
+    client_id = models.CharField(max_length=64, blank=True, default='', verbose_name=_("Устройство"))
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='+', verbose_name=_("Пользователь")
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Время"))
+
+    class Meta:
+        verbose_name = _("Снимок сессии прихода")
+        verbose_name_plural = _("Снимки сессий прихода")
+        ordering = ['-created_at', '-id']
+        indexes = [models.Index(fields=['session', 'created_at'])]
+
+    def __str__(self):
+        return f"#{self.session_id} {self.created_at:%d.%m %H:%M:%S} — {self.row_count} ({self.outcome})"
 
 
 class RestructureSession(models.Model):

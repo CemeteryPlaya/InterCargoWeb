@@ -148,6 +148,17 @@
     <p class="muted">{% trans "Расхождений не обнаружено." %}</p>
     {% endif %}
 
+    {% if report.reminded %}
+    <h2>{% blocktrans with days=report.reminded_days %}Отправлены напоминания о долгом хранении (более {{ days }} дней){% endblocktrans %}</h2>
+    <table>
+        <tbody>
+            {% for username in report.reminded %}
+            <tr><td>{{ forloop.counter }}</td><td>{{ username }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
     <div class="footer">
         <span>Inter Cargo · {% trans "Отчёт инвентаризации" %} #{{ session.id }}</span>
         <span>{% trans "Сформировано:" %} {{ now|date:"d.m.Y H:i" }}</span>

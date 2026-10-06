@@ -27,8 +27,10 @@ def notifications_context(request):
         'price_per_kg': price_per_kg,
         'footer_pickup_points': PickupPoint.objects.filter(is_active=True, show_in_footer=True).order_by('id'),
     }
-    if request.user.is_authenticated:
-        unread_qs = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
+    # Запрос, оборвавшийся до AuthenticationMiddleware (страница ошибки), user не имеет
+    user = getattr(request, 'user', None)
+    if user is not None and user.is_authenticated:
+        unread_qs = Notification.objects.filter(user=user, is_read=False).order_by('-created_at')
         unread_count = unread_qs.count()
         header_notifications = unread_qs[:5]
         context.update({

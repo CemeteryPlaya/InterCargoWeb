@@ -3,6 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
@@ -93,7 +94,12 @@ def unidentified_view(request):
         )
         track.set_status_date()
         track.log_status_change(request.user)
-        track.save()
+        try:
+            track.save()
+        except ValidationError as exc:
+            # Например, иероглифы/кириллица в трек-коде — сообщение вместо 500
+            messages.error(request, '; '.join(exc.messages))
+            return redirect('unidentified')
 
         messages.success(request, f"Неопознанная посылка «{track_code_str}» добавлена.")
         return redirect('unidentified')

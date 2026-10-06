@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-05 22:10+0500\n"
+"POT-Creation-Date: 2026-10-06 12:51+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,8 @@ msgid "Имя маршрута"
 msgstr "Route name"
 
 #: .\analytics\models.py:13 .\myprofile\models.py:546 .\myprofile\models.py:797
-#: .\myprofile\templates\desktop\blocks.html:72
+#: .\myprofile\models.py:968 .\myprofile\templates\desktop\blocks.html:72
+#: .\myprofile\templates\desktop\goods_arrival_history.html:148
 #: .\myprofile\templates\desktop\notification_logs.html:131
 #: .\myprofile\templates\desktop\notification_logs.html:269
 #: .\register\models.py:180 .\register\models.py:216 .\tgbot\models.py:25
@@ -35,7 +36,8 @@ msgstr "Route name"
 msgid "Пользователь"
 msgstr "User"
 
-#: .\analytics\models.py:15 .\myprofile\models.py:892 .\myprofile\models.py:988
+#: .\analytics\models.py:15 .\myprofile\models.py:910 .\myprofile\models.py:956
+#: .\myprofile\models.py:1056
 msgid "Сессия"
 msgstr "Session"
 
@@ -47,8 +49,9 @@ msgstr "Authorized"
 msgid "Время на странице (мс)"
 msgstr "Time on page (ms)"
 
-#: .\analytics\models.py:18 .\myprofile\models.py:1150
-#: .\myprofile\templates\desktop\blocks.html:140
+#: .\analytics\models.py:18 .\myprofile\models.py:970
+#: .\myprofile\models.py:1218 .\myprofile\templates\desktop\blocks.html:140
+#: .\myprofile\templates\desktop\goods_arrival_history.html:143
 #: .\myprofile\templates\desktop\inventory_session.html:121
 #: .\register\models.py:187
 msgid "Время"
@@ -239,7 +242,7 @@ msgstr "Delivery rate ($/kg)"
 msgid "Настройки Di.Buyer"
 msgstr "Di.Buyer settings"
 
-#: .\dibuyer\models.py:38 .\mainview\templates\desktop\index.html:653
+#: .\dibuyer\models.py:38 .\mainview\templates\desktop\index.html:654
 #: .\myprofile\models.py:26
 msgid "Название"
 msgstr "Name"
@@ -334,14 +337,14 @@ msgid "Клиент"
 msgstr "Client"
 
 #: .\dibuyer\models.py:91 .\myprofile\models.py:231 .\myprofile\models.py:800
-#: .\myprofile\models.py:857 .\myprofile\models.py:923
-#: .\myprofile\models.py:952 .\myprofile\models.py:1033
-#: .\myprofile\models.py:1177
+#: .\myprofile\models.py:857 .\myprofile\models.py:991
+#: .\myprofile\models.py:1020 .\myprofile\models.py:1101
+#: .\myprofile\models.py:1245
 #: .\myprofile\templates\desktop\notification_logs.html:130
 #: .\myprofile\templates\desktop\notification_logs.html:268
 #: .\myprofile\templates\desktop\notification_logs.html:455
 #: .\myprofile\templates\desktop\reschedule_arrival.html:112
-#: .\myprofile\templates\desktop\shipped_cn.html:103 .\support\models.py:37
+#: .\myprofile\templates\desktop\shipped_cn.html:120 .\support\models.py:37
 msgid "Статус"
 msgstr "Status"
 
@@ -421,7 +424,7 @@ msgstr "Author role"
 msgid "Текст"
 msgstr "Text"
 
-#: .\dibuyer\models.py:210 .\myprofile\models.py:516 .\myprofile\models.py:1026
+#: .\dibuyer\models.py:210 .\myprofile\models.py:516 .\myprofile\models.py:1094
 #: .\myprofile\templates\desktop\notification_logs.html:216
 #: .\myprofile\templates\desktop\notification_logs.html:239
 #: .\myprofile\templates\desktop\notification_logs.html:273
@@ -464,9 +467,9 @@ msgstr "Comment (size/color/qty)"
 msgid "Количество"
 msgstr "Quantity"
 
-#: .\dibuyer\models.py:237 .\mainview\templates\desktop\index.html:274
-#: .\mainview\templates\desktop\index.html:347 .\myprofile\models.py:237
-#: .\myprofile\models.py:404 .\myprofile\models.py:901
+#: .\dibuyer\models.py:237 .\mainview\templates\desktop\index.html:275
+#: .\mainview\templates\desktop\index.html:348 .\myprofile\models.py:237
+#: .\myprofile\models.py:404 .\myprofile\models.py:919
 #: .\myprofile\templates\desktop\arrival_history.html:300
 #: .\myprofile\templates\desktop\arrival_summary.html:115
 #: .\myprofile\templates\desktop\arrival_summary.html:199
@@ -480,7 +483,8 @@ msgstr "Quantity"
 #: .\myprofile\templates\desktop\finance_summary.html:304
 #: .\myprofile\templates\desktop\finance_summary.html:413
 #: .\myprofile\templates\desktop\finance_summary.html:461
-#: .\myprofile\templates\desktop\goods_arrival_session.html:197
+#: .\myprofile\templates\desktop\goods_arrival_history.html:119
+#: .\myprofile\templates\desktop\goods_arrival_session.html:206
 #: .\myprofile\templates\desktop\inventory_session.html:118
 #: .\myprofile\templates\desktop\unidentified.html:62
 #: .\myprofile\templates\desktop\update_tracks.html:111
@@ -645,11 +649,12 @@ msgid "курс"
 msgstr "rate"
 
 #: .\dibuyer\templates\dibuyer\manage_detail.html:38 .\myprofile\models.py:219
-#: .\myprofile\models.py:894
+#: .\myprofile\models.py:912
 #: .\myprofile\templates\desktop\arrival_history.html:299
 #: .\myprofile\templates\desktop\delivered_posts.html:154
 #: .\myprofile\templates\desktop\extradition_package.html:108
-#: .\myprofile\templates\desktop\goods_arrival_session.html:195
+#: .\myprofile\templates\desktop\goods_arrival_history.html:117
+#: .\myprofile\templates\desktop\goods_arrival_session.html:204
 #: .\myprofile\templates\desktop\reschedule_arrival.html:110
 #: .\myprofile\templates\desktop\reschedule_arrival.html:216
 #: .\myprofile\templates\desktop\unidentified.html:106
@@ -729,9 +734,10 @@ msgid "Ответ Di.Buyer"
 msgstr "Di.Buyer reply"
 
 #: .\dibuyer\views\chat.py:25 .\myprofile\views\delivery.py:665
-#: .\myprofile\views\extraditions.py:205 .\myprofile\views\extraditions.py:316
-#: .\myprofile\views\extraditions.py:355 .\myprofile\views\extraditions.py:381
-#: .\myprofile\views\extraditions.py:453 .\myprofile\views\goods_arrival.py:227
+#: .\myprofile\views\extraditions.py:212 .\myprofile\views\extraditions.py:323
+#: .\myprofile\views\extraditions.py:362 .\myprofile\views\extraditions.py:388
+#: .\myprofile\views\extraditions.py:460 .\myprofile\views\goods_arrival.py:250
+#: .\myprofile\views\goods_arrival.py:296
 #: .\myprofile\views\notification_mutes.py:151
 #: .\myprofile\views\pp_acceptance.py:115
 #: .\myprofile\views\pp_acceptance.py:247
@@ -795,8 +801,8 @@ msgstr "Inter Cargo - About the Company"
 #: .\mainview\templates\desktop\about.html:30
 #: .\mainview\templates\desktop\about.html:41
 #: .\mainview\templates\desktop\education1.html:132
-#: .\mainview\templates\desktop\index.html:173
-#: .\mainview\templates\desktop\index.html:336
+#: .\mainview\templates\desktop\index.html:174
+#: .\mainview\templates\desktop\index.html:337
 #: .\mainview\templates\shared\footer.html:28
 #: .\mainview\templates\shared\header.html:41
 #: .\mainview\templates\shared\header.html:181
@@ -881,7 +887,7 @@ msgstr "Attention to every client"
 #: .\mainview\templates\desktop\about.html:62
 #: .\mainview\templates\desktop\education1.html:137
 #: .\mainview\templates\mobile\mobile_footer.html:58
-#: .\mainview\templates\shared\footer.html:33 .\myprofile\models.py:1013
+#: .\mainview\templates\shared\footer.html:33 .\myprofile\models.py:1081
 #: .\myprofile\templates\desktop\delivery.html:88
 #: .\myprofile\templates\desktop\delivery.html:182
 #: .\myprofile\templates\desktop\print_documents.html:64
@@ -899,18 +905,18 @@ msgid "Карта пунктов выдачи Inter Cargo"
 msgstr "Inter Cargo pickup points map"
 
 #: .\mainview\templates\desktop\about.html:79
-#: .\mainview\templates\desktop\index.html:683
+#: .\mainview\templates\desktop\index.html:684
 msgid "Часто задаваемые вопросы"
 msgstr "Frequently asked questions"
 
 #: .\mainview\templates\desktop\about.html:87
-#: .\mainview\templates\desktop\index.html:406
-#: .\mainview\templates\desktop\index.html:691
+#: .\mainview\templates\desktop\index.html:407
+#: .\mainview\templates\desktop\index.html:692
 msgid "Как рассчитывается стоимость доставки?"
 msgstr "How is the delivery cost calculated?"
 
 #: .\mainview\templates\desktop\about.html:92
-#: .\mainview\templates\desktop\index.html:696
+#: .\mainview\templates\desktop\index.html:697
 #, python-format
 msgid ""
 "Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. "
@@ -924,12 +930,12 @@ msgstr ""
 "calculation."
 
 #: .\mainview\templates\desktop\about.html:100
-#: .\mainview\templates\desktop\index.html:705
+#: .\mainview\templates\desktop\index.html:706
 msgid "Какие сроки доставки из Китая в Казахстан?"
 msgstr "What are the delivery times from China to Kazakhstan?"
 
 #: .\mainview\templates\desktop\about.html:105
-#: .\mainview\templates\desktop\index.html:710
+#: .\mainview\templates\desktop\index.html:711
 msgid ""
 "Средний срок доставки составляет 8–12 дней с момента отправки товара с "
 "нашего склада в Китае. Сроки могут варьироваться в зависимости от сезона и "
@@ -940,13 +946,13 @@ msgstr ""
 "customs workload."
 
 #: .\mainview\templates\desktop\about.html:113
-#: .\mainview\templates\desktop\index.html:424
-#: .\mainview\templates\desktop\index.html:718
+#: .\mainview\templates\desktop\index.html:425
+#: .\mainview\templates\desktop\index.html:719
 msgid "Как зарегистрироваться в системе?"
 msgstr "How to register in the system?"
 
 #: .\mainview\templates\desktop\about.html:118
-#: .\mainview\templates\desktop\index.html:723
+#: .\mainview\templates\desktop\index.html:724
 msgid ""
 "Для регистрации необходимо заполнить форму на странице «Регистрация», указав "
 "свой логин (имя/ник + последние 4 цифры телефона), номер телефона и выбрав "
@@ -959,33 +965,33 @@ msgstr ""
 "account by clicking the button or the profile icon at the top."
 
 #: .\mainview\templates\desktop\about.html:126
-#: .\mainview\templates\desktop\index.html:433
-#: .\mainview\templates\desktop\index.html:731
+#: .\mainview\templates\desktop\index.html:434
+#: .\mainview\templates\desktop\index.html:732
 msgid "Какие товары запрещены к перевозке?"
 msgstr "What goods are prohibited for shipping?"
 
 #: .\mainview\templates\desktop\about.html:131
-#: .\mainview\templates\desktop\index.html:736
+#: .\mainview\templates\desktop\index.html:737
 msgid "К перевозке запрещены:"
 msgstr "Prohibited for shipping:"
 
 #: .\mainview\templates\desktop\about.html:133
-#: .\mainview\templates\desktop\index.html:738
+#: .\mainview\templates\desktop\index.html:739
 msgid "Взрывоопасные, радиоактивные, горючие, инфекционные, ядовитые вещества."
 msgstr "Explosive, radioactive, flammable, infectious, toxic substances."
 
 #: .\mainview\templates\desktop\about.html:134
-#: .\mainview\templates\desktop\index.html:739
+#: .\mainview\templates\desktop\index.html:740
 msgid "Холодные оружия, включая макеты, пневматику, арбалеты и др."
 msgstr "Cold weapons, including replicas, pneumatics, crossbows, etc."
 
 #: .\mainview\templates\desktop\about.html:135
-#: .\mainview\templates\desktop\index.html:740
+#: .\mainview\templates\desktop\index.html:741
 msgid "Психотропные и наркотические средства, алкоголь, сигареты."
 msgstr "Psychotropic and narcotic substances, alcohol, cigarettes."
 
 #: .\mainview\templates\desktop\about.html:136
-#: .\mainview\templates\desktop\index.html:741
+#: .\mainview\templates\desktop\index.html:742
 msgid ""
 "Скоропортящиеся и жидкие продукты (за исключением сухих и продуктов в "
 "вакуумных упаковках)."
@@ -993,23 +999,23 @@ msgstr ""
 "Perishable and liquid products (except dry goods and vacuum-packed products)."
 
 #: .\mainview\templates\desktop\about.html:137
-#: .\mainview\templates\desktop\index.html:742
+#: .\mainview\templates\desktop\index.html:743
 msgid "Техника, мобильные телефоны, ноутбуки (под свою ответственность)."
 msgstr "Electronics, mobile phones, laptops (at your own risk)."
 
 #: .\mainview\templates\desktop\about.html:138
-#: .\mainview\templates\desktop\index.html:743
+#: .\mainview\templates\desktop\index.html:744
 msgid ""
 "Животные (млекопитающие, рептилии, птицы, живые насекомые, моллюски и рыбы)."
 msgstr "Animals (mammals, reptiles, birds, live insects, mollusks and fish)."
 
 #: .\mainview\templates\desktop\about.html:139
-#: .\mainview\templates\desktop\index.html:744
+#: .\mainview\templates\desktop\index.html:745
 msgid "Дроны."
 msgstr "Drones."
 
 #: .\mainview\templates\desktop\about.html:140
-#: .\mainview\templates\desktop\index.html:745
+#: .\mainview\templates\desktop\index.html:746
 msgid ""
 "Хрупкие, стеклянные товары (либо просите продавца надёжную упаковку, "
 "пузырчатую плёнку, защиту края и т.д.)."
@@ -1018,13 +1024,13 @@ msgstr ""
 "edge protection, etc.)."
 
 #: .\mainview\templates\desktop\about.html:149
-#: .\mainview\templates\desktop\index.html:450
-#: .\mainview\templates\desktop\index.html:754
+#: .\mainview\templates\desktop\index.html:451
+#: .\mainview\templates\desktop\index.html:755
 msgid "Как отследить мой заказ?"
 msgstr "How to track my order?"
 
 #: .\mainview\templates\desktop\about.html:154
-#: .\mainview\templates\desktop\index.html:759
+#: .\mainview\templates\desktop\index.html:760
 msgid ""
 "После оформления заказа вам будет предоставлен трек-номер для отслеживания. "
 "Вы можете использовать его на нашем сайте или связаться с менеджером через "
@@ -1035,12 +1041,12 @@ msgstr ""
 "date information about your cargo status."
 
 #: .\mainview\templates\desktop\about.html:162
-#: .\mainview\templates\desktop\index.html:767
+#: .\mainview\templates\desktop\index.html:768
 msgid "Что делать, если заказ пришёл сломанным или повреждённым?"
 msgstr "What to do if the order arrived broken or damaged?"
 
 #: .\mainview\templates\desktop\about.html:168
-#: .\mainview\templates\desktop\index.html:773
+#: .\mainview\templates\desktop\index.html:774
 msgid ""
 "Ваша задача — заранее попросить продавца обеспечить надёжную упаковку "
 "(например, пенопластом)."
@@ -1049,7 +1055,7 @@ msgstr ""
 "(e.g., foam)."
 
 #: .\mainview\templates\desktop\about.html:169
-#: .\mainview\templates\desktop\index.html:774
+#: .\mainview\templates\desktop\index.html:775
 msgid ""
 "Для хрупких товаров (стекло, зеркала, посуда, крупногабаритные товары) "
 "рекомендуется сделать обрешётку груза (стоимость уточняйте у менеджера)."
@@ -1058,7 +1064,7 @@ msgstr ""
 "recommended to crate the cargo (ask the manager for the cost)."
 
 #: .\mainview\templates\desktop\about.html:170
-#: .\mainview\templates\desktop\index.html:775
+#: .\mainview\templates\desktop\index.html:776
 msgid ""
 "Если упаковка не соответствовала требованиям, компания не несёт "
 "ответственности за повреждения."
@@ -1067,7 +1073,7 @@ msgstr ""
 "for damage."
 
 #: .\mainview\templates\desktop\about.html:171
-#: .\mainview\templates\desktop\index.html:776
+#: .\mainview\templates\desktop\index.html:777
 msgid ""
 "Если товар был упакован правильно, но повреждён при доставке, "
 "ответственность несёт Inter Cargo."
@@ -1076,13 +1082,13 @@ msgstr ""
 "is responsible."
 
 #: .\mainview\templates\desktop\about.html:180
-#: .\mainview\templates\desktop\index.html:473
-#: .\mainview\templates\desktop\index.html:785
+#: .\mainview\templates\desktop\index.html:474
+#: .\mainview\templates\desktop\index.html:786
 msgid "Как связаться с менеджером?"
 msgstr "How to contact the manager?"
 
 #: .\mainview\templates\desktop\about.html:185
-#: .\mainview\templates\desktop\index.html:790
+#: .\mainview\templates\desktop\index.html:791
 msgid ""
 "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
 "или в левом нижнем углу главной страницы."
@@ -1091,12 +1097,12 @@ msgstr ""
 "the bottom left corner of the main page."
 
 #: .\mainview\templates\desktop\about.html:193
-#: .\mainview\templates\desktop\index.html:798
+#: .\mainview\templates\desktop\index.html:799
 msgid "Кто несёт ответственность за заказ в статусе «Добавлено пользователем»?"
 msgstr "Who is responsible for an order with the status 'Added by user'?"
 
 #: .\mainview\templates\desktop\about.html:198
-#: .\mainview\templates\desktop\index.html:803
+#: .\mainview\templates\desktop\index.html:804
 msgid ""
 "Ответственность за заказ, который ещё не прибыл на склад (статус «Добавлено "
 "пользователем»), несёт продавец с маркетплейса. Inter Cargo начинает нести "
@@ -1117,13 +1123,13 @@ msgstr "Inter Cargo - Education"
 
 #: .\mainview\templates\desktop\education.html:32
 #: .\mainview\templates\desktop\education1.html:55
-#: .\mainview\templates\desktop\index.html:978
+#: .\mainview\templates\desktop\index.html:979
 msgid "ОБУЧЕНИЕ"
 msgstr "EDUCATION"
 
 #: .\mainview\templates\desktop\education.html:33
 #: .\mainview\templates\desktop\education1.html:56
-#: .\mainview\templates\desktop\index.html:979
+#: .\mainview\templates\desktop\index.html:980
 #: .\register\templates\desktop\success.html:48
 msgid "Как пользоваться нашим сервисом"
 msgstr "How to use our service"
@@ -1155,8 +1161,8 @@ msgstr "Tutorial videos for using the service"
 #: .\mainview\templates\desktop\education.html:57
 #: .\mainview\templates\desktop\education1.html:63
 #: .\mainview\templates\desktop\education1.html:66
-#: .\mainview\templates\desktop\index.html:985
-#: .\mainview\templates\desktop\index.html:989
+#: .\mainview\templates\desktop\index.html:986
+#: .\mainview\templates\desktop\index.html:990
 #: .\register\templates\desktop\success.html:58
 #: .\register\templates\desktop\success.html:62
 msgid "Регистрация на сайте"
@@ -1164,7 +1170,7 @@ msgstr "Registration on the site"
 
 #: .\mainview\templates\desktop\education.html:58
 #: .\mainview\templates\desktop\education1.html:67
-#: .\mainview\templates\desktop\index.html:990
+#: .\mainview\templates\desktop\index.html:991
 msgid ""
 "Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт "
 "выдачи для получения ваших посылок."
@@ -1178,9 +1184,9 @@ msgstr ""
 #: .\mainview\templates\desktop\education1.html:69
 #: .\mainview\templates\desktop\education1.html:83
 #: .\mainview\templates\desktop\education1.html:97
-#: .\mainview\templates\desktop\index.html:993
-#: .\mainview\templates\desktop\index.html:1009
-#: .\mainview\templates\desktop\index.html:1025
+#: .\mainview\templates\desktop\index.html:994
+#: .\mainview\templates\desktop\index.html:1010
+#: .\mainview\templates\desktop\index.html:1026
 #: .\register\templates\desktop\success.html:67
 #: .\register\templates\desktop\success.html:84
 #: .\register\templates\desktop\success.html:101
@@ -1189,21 +1195,21 @@ msgstr "Watch video"
 
 #: .\mainview\templates\desktop\education.html:67
 #: .\mainview\templates\desktop\education1.html:77
-#: .\mainview\templates\desktop\index.html:1001
+#: .\mainview\templates\desktop\index.html:1002
 #: .\register\templates\desktop\success.html:75
 msgid "Оформление заказа"
 msgstr "Placing an order"
 
 #: .\mainview\templates\desktop\education.html:70
 #: .\mainview\templates\desktop\education1.html:80
-#: .\mainview\templates\desktop\index.html:1005
+#: .\mainview\templates\desktop\index.html:1006
 #: .\register\templates\desktop\success.html:79
 msgid "Оформление заказа в Китае"
 msgstr "Placing an order in China"
 
 #: .\mainview\templates\desktop\education.html:71
 #: .\mainview\templates\desktop\education1.html:81
-#: .\mainview\templates\desktop\index.html:1006
+#: .\mainview\templates\desktop\index.html:1007
 msgid ""
 "Пошаговая инструкция по оформлению заказа на китайских торговых площадках и "
 "указанию нашего адреса доставки."
@@ -1215,8 +1221,8 @@ msgstr ""
 #: .\mainview\templates\desktop\education.html:83
 #: .\mainview\templates\desktop\education1.html:91
 #: .\mainview\templates\desktop\education1.html:94
-#: .\mainview\templates\desktop\index.html:1017
-#: .\mainview\templates\desktop\index.html:1021
+#: .\mainview\templates\desktop\index.html:1018
+#: .\mainview\templates\desktop\index.html:1022
 #: .\register\templates\desktop\success.html:92
 #: .\register\templates\desktop\success.html:96
 msgid "Отслеживание посылки"
@@ -1224,7 +1230,7 @@ msgstr "Parcel tracking"
 
 #: .\mainview\templates\desktop\education.html:84
 #: .\mainview\templates\desktop\education1.html:95
-#: .\mainview\templates\desktop\index.html:1022
+#: .\mainview\templates\desktop\index.html:1023
 msgid ""
 "Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из "
 "Китая в Казахстан."
@@ -1244,9 +1250,9 @@ msgstr "Home"
 
 #: .\mainview\templates\desktop\education1.html:30
 #: .\mainview\templates\desktop\education1.html:130
-#: .\mainview\templates\desktop\index.html:324
-#: .\mainview\templates\desktop\index.html:613
-#: .\mainview\templates\desktop\index.html:834
+#: .\mainview\templates\desktop\index.html:325
+#: .\mainview\templates\desktop\index.html:614
+#: .\mainview\templates\desktop\index.html:835
 #: .\mainview\templates\shared\footer.html:26
 #: .\mainview\templates\shared\header.html:153
 #: .\mainview\templates\shared\header.html:183
@@ -1256,7 +1262,7 @@ msgstr "Registration"
 
 #: .\mainview\templates\desktop\education1.html:31
 #: .\mainview\templates\desktop\education1.html:131
-#: .\mainview\templates\desktop\index.html:330
+#: .\mainview\templates\desktop\index.html:331
 #: .\mainview\templates\shared\footer.html:27
 #: .\mainview\templates\shared\header.html:40
 #: .\mainview\templates\shared\header.html:180
@@ -1265,7 +1271,7 @@ msgid "Обучение"
 msgstr "Education"
 
 #: .\mainview\templates\desktop\education1.html:57
-#: .\mainview\templates\desktop\index.html:980
+#: .\mainview\templates\desktop\index.html:981
 msgid ""
 "Ознакомьтесь с нашими обучающими материалами, чтобы узнать, как эффективно "
 "использовать наш сервис доставки"
@@ -1338,34 +1344,34 @@ msgstr "Payment methods:"
 msgid "Inter Cargo - доставка из Китая в Казахстан"
 msgstr "Inter Cargo — delivery from China to Kazakhstan"
 
-#: .\mainview\templates\desktop\index.html:111
+#: .\mainview\templates\desktop\index.html:112
 msgid "Добро пожаловать"
 msgstr "Welcome"
 
-#: .\mainview\templates\desktop\index.html:121
-#: .\mainview\templates\desktop\index.html:304
+#: .\mainview\templates\desktop\index.html:122
+#: .\mainview\templates\desktop\index.html:305
 msgid "ТАРИФ"
 msgstr "RATE"
 
-#: .\mainview\templates\desktop\index.html:123
-#: .\mainview\templates\desktop\index.html:295
+#: .\mainview\templates\desktop\index.html:124
+#: .\mainview\templates\desktop\index.html:296
 #: .\myprofile\templates\shared\print\receipt_print.html:342
 msgid "Доставка из Китая в Казахстан"
 msgstr "Delivery from China to Kazakhstan"
 
-#: .\mainview\templates\desktop\index.html:136
+#: .\mainview\templates\desktop\index.html:137
 msgid "QR код"
 msgstr "QR Code"
 
-#: .\mainview\templates\desktop\index.html:142
+#: .\mainview\templates\desktop\index.html:143
 #: .\mainview\templates\shared\header.html:260
 #: .\mainview\templates\shared\header.html:289
 #: .\myprofile\templates\mobile\mobile_parcels.html:41
-#: .\myprofile\views\mobile_notifications.py:105
+#: .\myprofile\views\mobile_notifications.py:121
 msgid "Посылки"
 msgstr "Parcels"
 
-#: .\mainview\templates\desktop\index.html:148
+#: .\mainview\templates\desktop\index.html:149
 #: .\mainview\templates\mobile\m_sidebar.html:98
 #: .\mainview\templates\mobile\sidebar.html:155 .\myprofile\models.py:308
 #: .\myprofile\models.py:638
@@ -1375,7 +1381,7 @@ msgstr "Parcels"
 msgid "Чеки"
 msgstr "Receipts"
 
-#: .\mainview\templates\desktop\index.html:154
+#: .\mainview\templates\desktop\index.html:155
 #: .\mainview\templates\mobile\m_sidebar.html:101
 #: .\mainview\templates\mobile\sidebar.html:158
 #: .\myprofile\templates\desktop\extradition_package.html:56
@@ -1387,80 +1393,80 @@ msgstr "Receipts"
 msgid "История выдачи"
 msgstr "Issue history"
 
-#: .\mainview\templates\desktop\index.html:161
+#: .\mainview\templates\desktop\index.html:162
 msgid "Интерактивное обучение"
 msgstr "Interactive tutorial"
 
-#: .\mainview\templates\desktop\index.html:167
+#: .\mainview\templates\desktop\index.html:168
 msgid "Видеоуроки"
 msgstr "Video lessons"
 
-#: .\mainview\templates\desktop\index.html:179 .\myprofile\models.py:1031
+#: .\mainview\templates\desktop\index.html:180 .\myprofile\models.py:1099
 #: .\myprofile\templates\desktop\notification_logs.html:457
 msgid "Тема"
 msgstr "Theme"
 
-#: .\mainview\templates\desktop\index.html:191
+#: .\mainview\templates\desktop\index.html:192
 #: .\myprofile\templates\desktop\profile.html:88
 msgid "Привязать Telegram"
 msgstr "Link Telegram"
 
-#: .\mainview\templates\desktop\index.html:207
+#: .\mainview\templates\desktop\index.html:208
 msgid "Доставка с американских сайтов"
 msgstr "Delivery from US websites"
 
-#: .\mainview\templates\desktop\index.html:212
+#: .\mainview\templates\desktop\index.html:213
 msgid "Мои посылки"
 msgstr "My parcels"
 
-#: .\mainview\templates\desktop\index.html:222
+#: .\mainview\templates\desktop\index.html:223
 msgid "Добавлено"
 msgstr "Added"
 
-#: .\mainview\templates\desktop\index.html:234
+#: .\mainview\templates\desktop\index.html:235
 #: .\myprofile\templates\desktop\delivery.html:316
 #: .\myprofile\views\mobile_parcels.py:69
 msgid "В пути"
 msgstr "In transit"
 
-#: .\mainview\templates\desktop\index.html:246
+#: .\mainview\templates\desktop\index.html:247
 #: .\myprofile\templates\desktop\track_codes.html:192
 msgid "На сортировке"
 msgstr "At sorting"
 
-#: .\mainview\templates\desktop\index.html:258
+#: .\mainview\templates\desktop\index.html:259
 msgid "Готово"
 msgstr "Ready"
 
-#: .\mainview\templates\desktop\index.html:271
-#: .\mainview\templates\desktop\index.html:344
+#: .\mainview\templates\desktop\index.html:272
+#: .\mainview\templates\desktop\index.html:345
 msgid "Калькулятор доставки"
 msgstr "Delivery calculator"
 
-#: .\mainview\templates\desktop\index.html:276
-#: .\mainview\templates\desktop\index.html:349
+#: .\mainview\templates\desktop\index.html:277
+#: .\mainview\templates\desktop\index.html:350
 msgid "Итого:"
 msgstr "Total:"
 
-#: .\mainview\templates\desktop\index.html:281
-#: .\mainview\templates\desktop\index.html:354
+#: .\mainview\templates\desktop\index.html:282
+#: .\mainview\templates\desktop\index.html:355
 msgid "Итого со скидкой:"
 msgstr "Total with discount:"
 
-#: .\mainview\templates\desktop\index.html:306
+#: .\mainview\templates\desktop\index.html:307
 msgid "Быстро и надёжно"
 msgstr "Fast and reliable"
 
-#: .\mainview\templates\desktop\index.html:318 .\myprofile\views\blocks.py:101
+#: .\mainview\templates\desktop\index.html:319 .\myprofile\views\blocks.py:101
 #: .\register\models.py:167
 msgid "Вход"
 msgstr "Login"
 
-#: .\mainview\templates\desktop\index.html:403
+#: .\mainview\templates\desktop\index.html:404
 msgid "Частые вопросы"
 msgstr "FAQ"
 
-#: .\mainview\templates\desktop\index.html:411
+#: .\mainview\templates\desktop\index.html:412
 #, python-format
 msgid ""
 "Стоимость доставки рассчитывается по тарифу %(p)s₸ за килограмм груза. Для "
@@ -1469,11 +1475,11 @@ msgstr ""
 "The delivery cost is calculated at the rate of %(p)s₸ per kilogram of cargo. "
 "Use the calculator above for the calculation."
 
-#: .\mainview\templates\desktop\index.html:415
+#: .\mainview\templates\desktop\index.html:416
 msgid "Какие сроки доставки из Китая?"
 msgstr "What are the delivery times from China?"
 
-#: .\mainview\templates\desktop\index.html:420
+#: .\mainview\templates\desktop\index.html:421
 msgid ""
 "Средний срок доставки составляет 8–12 дней с момента отправки товара с "
 "нашего склада в Китае."
@@ -1481,7 +1487,7 @@ msgstr ""
 "Average delivery time is 8–12 days from the moment the goods are shipped "
 "from our warehouse in China."
 
-#: .\mainview\templates\desktop\index.html:429
+#: .\mainview\templates\desktop\index.html:430
 msgid ""
 "Заполните форму на странице «Регистрация», указав логин (имя/ник + последние "
 "4 цифры телефона), номер телефона и выбрав удобный пункт выдачи."
@@ -1490,35 +1496,35 @@ msgstr ""
 "nickname + last 4 digits of phone), phone number and selecting a convenient "
 "pickup point."
 
-#: .\mainview\templates\desktop\index.html:439
+#: .\mainview\templates\desktop\index.html:440
 msgid "Взрывоопасные, радиоактивные, горючие, ядовитые вещества"
 msgstr "Explosive, radioactive, flammable, toxic substances"
 
-#: .\mainview\templates\desktop\index.html:440
+#: .\mainview\templates\desktop\index.html:441
 msgid "Холодное оружие, макеты, пневматика, арбалеты"
 msgstr "Cold weapons, replicas, pneumatics, crossbows"
 
-#: .\mainview\templates\desktop\index.html:441
+#: .\mainview\templates\desktop\index.html:442
 msgid "Психотропные, наркотические средства, алкоголь, сигареты"
 msgstr "Psychotropic, narcotic substances, alcohol, cigarettes"
 
-#: .\mainview\templates\desktop\index.html:442
+#: .\mainview\templates\desktop\index.html:443
 msgid "Скоропортящиеся и жидкие продукты"
 msgstr "Perishable and liquid products"
 
-#: .\mainview\templates\desktop\index.html:443
+#: .\mainview\templates\desktop\index.html:444
 msgid "Техника, телефоны, ноутбуки (под свою ответственность)"
 msgstr "Electronics, phones, laptops (at your own risk)"
 
-#: .\mainview\templates\desktop\index.html:444
+#: .\mainview\templates\desktop\index.html:445
 msgid "Животные, дроны"
 msgstr "Animals, drones"
 
-#: .\mainview\templates\desktop\index.html:445
+#: .\mainview\templates\desktop\index.html:446
 msgid "Хрупкие, стеклянные товары (просите надёжную упаковку)"
 msgstr "Fragile, glass items (request reliable packaging)"
 
-#: .\mainview\templates\desktop\index.html:455
+#: .\mainview\templates\desktop\index.html:456
 msgid ""
 "После оформления заказа вам будет предоставлен трек-номер. Используйте его "
 "на нашем сайте или свяжитесь с менеджером через WhatsApp."
@@ -1526,30 +1532,30 @@ msgstr ""
 "After placing an order, you will receive a track number. Use it on our "
 "website or contact a manager via WhatsApp."
 
-#: .\mainview\templates\desktop\index.html:459
+#: .\mainview\templates\desktop\index.html:460
 msgid "Что делать, если заказ повреждён?"
 msgstr "What to do if the order is damaged?"
 
-#: .\mainview\templates\desktop\index.html:465
+#: .\mainview\templates\desktop\index.html:466
 msgid "Заранее попросите продавца обеспечить надёжную упаковку"
 msgstr "Ask the seller in advance to provide reliable packaging"
 
-#: .\mainview\templates\desktop\index.html:466
+#: .\mainview\templates\desktop\index.html:467
 msgid "Для хрупких товаров рекомендуется обрешётка груза"
 msgstr "For fragile goods, crating is recommended"
 
-#: .\mainview\templates\desktop\index.html:467
+#: .\mainview\templates\desktop\index.html:468
 msgid "Если упаковка не соответствовала — компания не несёт ответственности"
 msgstr "If packaging was inadequate — the company bears no responsibility"
 
-#: .\mainview\templates\desktop\index.html:468
+#: .\mainview\templates\desktop\index.html:469
 msgid ""
 "Если товар упакован правильно, но повреждён — ответственность несёт Inter "
 "Cargo"
 msgstr ""
 "If the item is properly packaged but damaged — Inter Cargo is responsible"
 
-#: .\mainview\templates\desktop\index.html:478
+#: .\mainview\templates\desktop\index.html:479
 msgid ""
 "Нажмите на значки мессенджеров (Telegram, WhatsApp) в правом верхнем углу "
 "главной страницы."
@@ -1557,11 +1563,11 @@ msgstr ""
 "Click on the messenger icons (Telegram, WhatsApp) in the top right corner of "
 "the main page."
 
-#: .\mainview\templates\desktop\index.html:482
+#: .\mainview\templates\desktop\index.html:483
 msgid "Ответственность за статус «Добавлено пользователем»?"
 msgstr "Responsibility for 'Added by user' status?"
 
-#: .\mainview\templates\desktop\index.html:487
+#: .\mainview\templates\desktop\index.html:488
 msgid ""
 "Пока заказ не прибыл на склад — ответственность несёт продавец. Inter Cargo "
 "отвечает с момента поступления товара на склад в Китае."
@@ -1570,46 +1576,46 @@ msgstr ""
 "Cargo is responsible from the moment the goods arrive at the warehouse in "
 "China."
 
-#: .\mainview\templates\desktop\index.html:582
+#: .\mainview\templates\desktop\index.html:583
 #, python-format
 msgid "Добро пожаловать, %(name)s!"
 msgstr "Welcome, %(name)s!"
 
-#: .\mainview\templates\desktop\index.html:583
-#: .\mainview\templates\desktop\index.html:609
+#: .\mainview\templates\desktop\index.html:584
+#: .\mainview\templates\desktop\index.html:610
 #, python-format
 msgid "Тариф: %(p)s₸/кг"
 msgstr "Rate: %(p)s₸/kg"
 
-#: .\mainview\templates\desktop\index.html:587
+#: .\mainview\templates\desktop\index.html:588
 #: .\myprofile\templates\desktop\profile.html:37
 #: .\myprofile\templates\mobile\mobile_menu.html:501
 msgid "Личный кабинет"
 msgstr "Personal account"
 
-#: .\mainview\templates\desktop\index.html:593
-#: .\mainview\templates\desktop\index.html:624
+#: .\mainview\templates\desktop\index.html:594
+#: .\mainview\templates\desktop\index.html:625
 #: .\mainview\templates\mobile\m_sidebar.html:92
 #: .\mainview\templates\mobile\sidebar.html:149
 msgid "Обучение по сайту"
 msgstr "Site tutorial"
 
-#: .\mainview\templates\desktop\index.html:601
+#: .\mainview\templates\desktop\index.html:602
 msgid "Заказы из Америки и Европы"
 msgstr "Orders from America and Europe"
 
-#: .\mainview\templates\desktop\index.html:606
+#: .\mainview\templates\desktop\index.html:607
 msgid "КАЛЬКУЛЯТОР"
 msgstr "CALCULATOR"
 
-#: .\mainview\templates\desktop\index.html:607
+#: .\mainview\templates\desktop\index.html:608
 msgid "Узнайте цену доставки груза из Китая в Казахстан"
 msgstr "Find out the delivery cost from China to Kazakhstan"
 
-#: .\mainview\templates\desktop\index.html:618
-#: .\mainview\templates\desktop\index.html:839
-#: .\mainview\templates\desktop\index.html:935
-#: .\mainview\templates\desktop\index.html:961
+#: .\mainview\templates\desktop\index.html:619
+#: .\mainview\templates\desktop\index.html:840
+#: .\mainview\templates\desktop\index.html:936
+#: .\mainview\templates\desktop\index.html:962
 #: .\mainview\templates\shared\header.html:155
 #: .\mainview\templates\shared\header.html:184
 #: .\register\templates\desktop\login.html:143
@@ -1619,19 +1625,19 @@ msgstr "Find out the delivery cost from China to Kazakhstan"
 msgid "Войти"
 msgstr "Log in"
 
-#: .\mainview\templates\desktop\index.html:631
+#: .\mainview\templates\desktop\index.html:632
 msgid "Калькулятор"
 msgstr "Calculator"
 
-#: .\mainview\templates\desktop\index.html:633
+#: .\mainview\templates\desktop\index.html:634
 msgid "Напишите количество в кг"
 msgstr "Enter weight in kg"
 
-#: .\mainview\templates\desktop\index.html:649
+#: .\mainview\templates\desktop\index.html:650
 msgid "Мин: 0 - Макс: 100"
 msgstr "Min: 0 - Max: 100"
 
-#: .\mainview\templates\desktop\index.html:654
+#: .\mainview\templates\desktop\index.html:655
 #: .\myprofile\templates\desktop\delivered_posts.html:170
 #: .\myprofile\templates\desktop\finance_summary.html:435
 #: .\myprofile\templates\desktop\inventory_report.html:83
@@ -1639,7 +1645,7 @@ msgstr "Min: 0 - Max: 100"
 msgid "Итого"
 msgstr "Total"
 
-#: .\mainview\templates\desktop\index.html:657
+#: .\mainview\templates\desktop\index.html:658
 #: .\myprofile\templates\desktop\reschedule_arrival.html:111
 #: .\myprofile\templates\desktop\reschedule_arrival.html:217
 #: .\myprofile\templates\desktop\unidentified.html:108
@@ -1653,11 +1659,11 @@ msgstr "Total"
 msgid "Вес"
 msgstr "Weight"
 
-#: .\mainview\templates\desktop\index.html:658
+#: .\mainview\templates\desktop\index.html:659
 msgid "0 кг"
 msgstr "0 kg"
 
-#: .\mainview\templates\desktop\index.html:661
+#: .\mainview\templates\desktop\index.html:662
 #: .\myprofile\templates\shared\print\client_check_pdf.html:127
 #: .\myprofile\templates\shared\print\client_check_pdf.html:142
 #: .\myprofile\templates\shared\print\client_check_pdf.html:172
@@ -1665,25 +1671,25 @@ msgstr "0 kg"
 msgid "Сумма"
 msgstr "Amount"
 
-#: .\mainview\templates\desktop\index.html:666
+#: .\mainview\templates\desktop\index.html:667
 msgid "Скидка"
 msgstr "Discount"
 
-#: .\mainview\templates\desktop\index.html:821
+#: .\mainview\templates\desktop\index.html:822
 #: .\mainview\templates\shared\header.html:22
 #: .\register\templates\desktop\register.html:31
 #: .\register\templates\desktop\registration.html:36
 msgid "РЕГИСТРАЦИЯ"
 msgstr "REGISTRATION"
 
-#: .\mainview\templates\desktop\index.html:822
+#: .\mainview\templates\desktop\index.html:823
 #: .\mainview\templates\shared\header.html:23
 #: .\register\templates\desktop\register.html:32
 #: .\register\templates\desktop\registration.html:37
 msgid "Регистрация нового клиента"
 msgstr "New client registration"
 
-#: .\mainview\templates\desktop\index.html:824
+#: .\mainview\templates\desktop\index.html:825
 #: .\mainview\templates\shared\header.html:24
 #: .\register\templates\desktop\register.html:34
 #: .\register\templates\desktop\registration.html:39
@@ -1694,15 +1700,15 @@ msgstr ""
 "Fill in the form below to register in our system and start using our "
 "delivery service from China"
 
-#: .\mainview\templates\desktop\index.html:852
-#: .\mainview\templates\desktop\index.html:917
+#: .\mainview\templates\desktop\index.html:853
+#: .\mainview\templates\desktop\index.html:918
 #: .\register\templates\desktop\login.html:125
 #: .\register\templates\desktop\register.html:57
 #: .\register\templates\desktop\registration.html:62
 msgid "Логин (Имя/Ник + 4 цифры номера)"
 msgstr "Login (Name/Nickname + 4 digits of phone)"
 
-#: .\mainview\templates\desktop\index.html:855
+#: .\mainview\templates\desktop\index.html:856
 msgid ""
 "Введите имя или ник (только латинские буквы) и 4 цифры номера, например "
 "ANDREY1234"
@@ -1710,23 +1716,23 @@ msgstr ""
 "Enter a name or nickname (Latin letters only) and 4 digits of the number, "
 "e.g. ANDREY1234"
 
-#: .\mainview\templates\desktop\index.html:856
-#: .\mainview\templates\desktop\index.html:920
+#: .\mainview\templates\desktop\index.html:857
+#: .\mainview\templates\desktop\index.html:921
 #: .\register\templates\desktop\login.html:128
 #: .\register\templates\desktop\register.html:58
 #: .\register\templates\desktop\registration.html:63
 msgid "Например: ANDREY1234"
 msgstr "For example: ANDREY1234"
 
-#: .\mainview\templates\desktop\index.html:859
+#: .\mainview\templates\desktop\index.html:860
 #: .\register\templates\desktop\login.html:129
 #: .\register\templates\desktop\register.html:59
 #: .\register\templates\desktop\registration.html:64
 msgid "Введите ваше имя или ник и последние 4 цифры номера телефона"
 msgstr "Enter your name or nickname and the last 4 digits of your phone number"
 
-#: .\mainview\templates\desktop\index.html:866
-#: .\mainview\templates\desktop\index.html:943
+#: .\mainview\templates\desktop\index.html:867
+#: .\mainview\templates\desktop\index.html:944
 #: .\myprofile\templates\desktop\settings.html:92
 #: .\register\templates\desktop\login.html:154
 #: .\register\templates\desktop\register.html:64
@@ -1734,26 +1740,26 @@ msgstr "Enter your name or nickname and the last 4 digits of your phone number"
 msgid "Номер телефона"
 msgstr "Phone number"
 
-#: .\mainview\templates\desktop\index.html:876
+#: .\mainview\templates\desktop\index.html:877
 #: .\register\templates\desktop\register.html:70
 #: .\register\templates\desktop\registration.html:114
 msgid "Выбор пункта выдачи"
 msgstr "Select pickup point"
 
-#: .\mainview\templates\desktop\index.html:880
+#: .\mainview\templates\desktop\index.html:881
 #: .\myprofile\templates\desktop\profile.html:232
 #: .\register\templates\desktop\register.html:72
 #: .\register\templates\desktop\registration.html:116
 msgid "Выберите пункт выдачи"
 msgstr "Select pickup point"
 
-#: .\mainview\templates\desktop\index.html:890
+#: .\mainview\templates\desktop\index.html:891
 #: .\register\templates\desktop\register.html:107
 #: .\register\templates\desktop\registration.html:151
 msgid "Зарегистрироваться"
 msgstr "Register"
 
-#: .\mainview\templates\desktop\index.html:904
+#: .\mainview\templates\desktop\index.html:905
 #: .\myprofile\templates\desktop\arrival_summary.html:195
 #: .\register\templates\desktop\login.html:106
 #: .\register\templates\desktop\password_reset.html:42
@@ -1761,7 +1767,7 @@ msgstr "Register"
 msgid "Логин"
 msgstr "Login"
 
-#: .\mainview\templates\desktop\index.html:909
+#: .\mainview\templates\desktop\index.html:910
 #: .\myprofile\templates\desktop\arrival_summary.html:113
 #: .\myprofile\templates\desktop\arrival_summary.html:196
 #: .\myprofile\templates\desktop\arrival_summary.html:295
@@ -1771,8 +1777,8 @@ msgstr "Login"
 msgid "Телефон"
 msgstr "Phone"
 
-#: .\mainview\templates\desktop\index.html:923
-#: .\mainview\templates\desktop\index.html:949
+#: .\mainview\templates\desktop\index.html:924
+#: .\mainview\templates\desktop\index.html:950
 #: .\register\templates\desktop\login.html:132
 #: .\register\templates\desktop\login.html:160
 #: .\register\templates\desktop\login.html:188
@@ -1781,8 +1787,8 @@ msgstr "Phone"
 msgid "Пароль"
 msgstr "Password"
 
-#: .\mainview\templates\desktop\index.html:927
-#: .\mainview\templates\desktop\index.html:953
+#: .\mainview\templates\desktop\index.html:928
+#: .\mainview\templates\desktop\index.html:954
 #: .\register\templates\desktop\login.html:136
 #: .\register\templates\desktop\login.html:164
 #: .\register\templates\desktop\login.html:192
@@ -1917,9 +1923,9 @@ msgstr "PVZ change requests"
 
 #: .\mainview\templates\mobile\m_sidebar.html:95
 #: .\mainview\templates\mobile\sidebar.html:152 .\myprofile\models.py:220
-#: .\myprofile\models.py:827 .\myprofile\models.py:1014
+#: .\myprofile\models.py:827 .\myprofile\models.py:1082
 #: .\myprofile\templates\desktop\profile.html:131
-#: .\myprofile\templates\desktop\shipped_cn.html:129
+#: .\myprofile\templates\desktop\shipped_cn.html:146
 #: .\myprofile\templates\desktop\track_codes.html:39
 #: .\myprofile\templates\mobile\mobile_menu.html:77
 #: .\myprofile\templates\mobile\mobile_parcels.html:244
@@ -2069,12 +2075,13 @@ msgid "Копировать код"
 msgstr "Copy code"
 
 #: .\mainview\templates\shared\header.html:6 .\myprofile\models.py:517
-#: .\myprofile\models.py:1027 .\myprofile\models.py:1034
-#: .\myprofile\models.py:1172 .\myprofile\models.py:1186
-#: .\myprofile\templates\desktop\bulk_job.html:42
-#: .\myprofile\templates\desktop\inventory_session.html:316
-#: .\myprofile\templates\desktop\inventory_session.html:382
-#: .\myprofile\templates\desktop\inventory_session.html:459
+#: .\myprofile\models.py:951 .\myprofile\models.py:1095
+#: .\myprofile\models.py:1102 .\myprofile\models.py:1240
+#: .\myprofile\models.py:1254 .\myprofile\templates\desktop\bulk_job.html:42
+#: .\myprofile\templates\desktop\inventory_session.html:345
+#: .\myprofile\templates\desktop\inventory_session.html:424
+#: .\myprofile\templates\desktop\inventory_session.html:480
+#: .\myprofile\templates\desktop\inventory_session.html:570
 #: .\myprofile\templates\desktop\notification_logs.html:275
 #: .\myprofile\templates\desktop\notification_logs.html:296
 #: .\myprofile\templates\desktop\notification_logs.html:353
@@ -2205,18 +2212,70 @@ msgstr "Open menu"
 msgid "Сообщения"
 msgstr "Messages"
 
-#: .\myprofile\admin.py:123
+#: .\myprofile\admin.py:126
 #: .\myprofile\templates\admin\myprofile\trackcode\mass_update.html:15
 msgid "Mass Status Update"
 msgstr "Mass Status Update"
 
-#: .\myprofile\admin.py:435
+#: .\myprofile\admin.py:457
 msgid "Отметить как разобранные"
 msgstr "Mark as resolved"
 
-#: .\myprofile\middleware.py:31 .\myprofile\views\inventory_session.py:143
-#: .\myprofile\views\inventory_session.py:233
-#: .\myprofile\views\inventory_session.py:342
+#: .\myprofile\arrival_autosave.py:197
+#, python-format
+msgid ""
+"⚠️ Сессия прихода #%(id)s: изменения не сохраняются на сервере уже "
+"%(minutes)s мин (причина: %(reason)s). Проверьте устройство приёмки."
+msgstr ""
+"⚠️ Arrival session #%(id)s: changes have not been saved on the server for "
+"%(minutes)s min (reason: %(reason)s). Check the receiving device."
+
+#: .\myprofile\arrival_autosave.py:317
+msgid "На сервере более новая версия сессии."
+msgstr "The server has a newer version of the session."
+
+#: .\myprofile\arrival_autosave.py:321
+#, python-format
+msgid ""
+"⚠️ Сессия прихода #%(id)s: сохранение удаляло %(removed)s из %(total)s строк "
+"и было остановлено до подтверждения оператора."
+msgstr ""
+"⚠️ Arrival session #%(id)s: a save would have deleted %(removed)s of "
+"%(total)s rows and was stopped until the operator confirms."
+
+#: .\myprofile\arrival_autosave.py:326
+#, python-format
+msgid "Сохранение удалит %(removed)s из %(total)s строк."
+msgstr "Saving will delete %(removed)s of %(total)s rows."
+
+#: .\myprofile\arrival_autosave.py:330
+msgid "Сессию сейчас редактирует другое устройство."
+msgstr "The session is being edited on another device."
+
+#: .\myprofile\arrival_autosave.py:334
+#, python-format
+msgid ""
+"⚠️ Сессия прихода #%(id)s не активна, но с неё продолжают приходить данные. "
+"Возобновите сессию — присланные строки сохранены в истории."
+msgstr ""
+"⚠️ Arrival session #%(id)s is not active, but data keeps arriving from it. "
+"Resume the session — the received rows are saved in the history."
+
+#: .\myprofile\arrival_autosave.py:338
+msgid "Сессия не активна — данные сохранены как черновик."
+msgstr "The session is not active — data was saved as a draft."
+
+#: .\myprofile\arrival_autosave.py:340
+msgid "Трек-коды только что заняты другим сохранением. Повторите сохранение."
+msgstr "These track codes were just taken by another save. Please save again."
+
+#: .\myprofile\arrival_autosave.py:427
+msgid "Сессия прихода: риск потери данных"
+msgstr "Arrival session: risk of data loss"
+
+#: .\myprofile\middleware.py:31 .\myprofile\views\inventory_session.py:188
+#: .\myprofile\views\inventory_session.py:278
+#: .\myprofile\views\inventory_session.py:387
 #: .\myprofile\views\profile_setting.py:214
 #: .\myprofile\views\reschedule_arrival.py:77
 #: .\myprofile\views\reschedule_arrival.py:136
@@ -2225,9 +2284,9 @@ msgstr "Mark as resolved"
 #: .\myprofile\views\reschedule_arrival.py:358
 #: .\myprofile\views\role_management.py:82
 #: .\myprofile\views\role_management.py:138
-#: .\myprofile\views\unidentified.py:142 .\myprofile\views\unidentified.py:185
-#: .\myprofile\views\unidentified.py:212 .\myprofile\views\unidentified.py:231
-#: .\myprofile\views\unidentified.py:251 .\myprofile\views\unidentified.py:283
+#: .\myprofile\views\unidentified.py:148 .\myprofile\views\unidentified.py:191
+#: .\myprofile\views\unidentified.py:218 .\myprofile\views\unidentified.py:237
+#: .\myprofile\views\unidentified.py:257 .\myprofile\views\unidentified.py:289
 #: .\myprofile\views\warehouse.py:358 .\myprofile\views\warehouse.py:597
 #: .\myprofile\views\warehouse.py:752
 msgid "Нет доступа."
@@ -2418,7 +2477,8 @@ msgid "Трек-код не может содержать китайские с�
 msgstr "Track code cannot contain Chinese characters or Cyrillic."
 
 #: .\myprofile\models.py:234 .\myprofile\models.py:262
-#: .\myprofile\templates\desktop\goods_arrival_session.html:196
+#: .\myprofile\templates\desktop\goods_arrival_history.html:118
+#: .\myprofile\templates\desktop\goods_arrival_session.html:205
 #: .\myprofile\templates\desktop\update_tracks.html:108
 msgid "Владелец"
 msgstr "Owner"
@@ -2432,7 +2492,7 @@ msgid "Архивные трек-коды"
 msgstr "Archived track codes"
 
 #: .\myprofile\models.py:263 .\myprofile\models.py:816
-#: .\myprofile\models.py:1011
+#: .\myprofile\models.py:1079
 msgid "Дата создания"
 msgstr "Creation date"
 
@@ -2487,7 +2547,7 @@ msgstr "Receipt number"
 
 #: .\myprofile\models.py:303 .\myprofile\models.py:590
 #: .\myprofile\models.py:709 .\myprofile\models.py:762
-#: .\myprofile\models.py:921 .\myprofile\models.py:951
+#: .\myprofile\models.py:989 .\myprofile\models.py:1019
 #: .\myprofile\templates\desktop\finance_summary.html:76
 #: .\myprofile\templates\desktop\finance_summary.html:411
 #: .\myprofile\templates\desktop\profile.html:229
@@ -2503,7 +2563,7 @@ msgid "Ссылка на оплату"
 msgstr "Payment link"
 
 #: .\myprofile\models.py:307 .\myprofile\models.py:447
-#: .\myprofile\models.py:991
+#: .\myprofile\models.py:1059
 #: .\myprofile\templates\desktop\inventory_report.html:68
 #: .\myprofile\templates\desktop\inventory_report.html:130
 #: .\myprofile\templates\desktop\inventory_session.html:115
@@ -2572,7 +2632,7 @@ msgstr "Pending"
 msgid "Пропущено"
 msgstr "Skipped"
 
-#: .\myprofile\models.py:522 .\myprofile\models.py:1148
+#: .\myprofile\models.py:522 .\myprofile\models.py:1216
 #: .\myprofile\templates\desktop\notification_logs.html:132
 #: .\myprofile\templates\desktop\notification_logs.html:271
 #: .\tgbot\models.py:112
@@ -2635,12 +2695,12 @@ msgid "Push-подписки"
 msgstr "Push subscriptions"
 
 #: .\myprofile\models.py:582 .\myprofile\models.py:648
-#: .\myprofile\models.py:1110
+#: .\myprofile\models.py:1178
 msgid "Пакет выдачи"
 msgstr "Issue package"
 
 #: .\myprofile\models.py:588 .\myprofile\models.py:632
-#: .\myprofile\models.py:1030
+#: .\myprofile\models.py:1098
 #: .\myprofile\templates\desktop\notification_logs.html:456
 msgid "Получатель"
 msgstr "Recipient"
@@ -2698,7 +2758,7 @@ msgstr "Limit: Support manager"
 msgid "Глобальные настройки"
 msgstr "Global settings"
 
-#: .\myprofile\models.py:711 .\myprofile\models.py:992
+#: .\myprofile\models.py:711 .\myprofile\models.py:1060
 msgid "Номер ячейки"
 msgstr "Cell number"
 
@@ -2778,7 +2838,7 @@ msgid "Дата прихода"
 msgstr "Arrival date"
 
 #: .\myprofile\models.py:819 .\myprofile\models.py:860
-#: .\myprofile\models.py:926 .\myprofile\models.py:955
+#: .\myprofile\models.py:994 .\myprofile\models.py:1023
 msgid "Создал"
 msgstr "Created by"
 
@@ -2798,29 +2858,29 @@ msgstr "Arrival"
 msgid "Приходы"
 msgstr "Arrivals"
 
-#: .\myprofile\models.py:849 .\myprofile\models.py:916
-#: .\myprofile\models.py:945
+#: .\myprofile\models.py:849 .\myprofile\models.py:984
+#: .\myprofile\models.py:1013
 #: .\myprofile\templates\desktop\goods_arrival.html:91
 msgid "Активная"
 msgstr "Active"
 
 #: .\myprofile\models.py:850
-#: .\myprofile\templates\desktop\goods_arrival.html:118
-#: .\myprofile\templates\desktop\goods_arrival.html:126
+#: .\myprofile\templates\desktop\goods_arrival.html:119
+#: .\myprofile\templates\desktop\goods_arrival.html:127
 #: .\myprofile\templates\desktop\goods_arrival_session.html:44
 msgid "На паузе"
 msgstr "Paused"
 
 #: .\myprofile\models.py:851
-#: .\myprofile\templates\desktop\goods_arrival.html:165
+#: .\myprofile\templates\desktop\goods_arrival.html:167
 #: .\myprofile\templates\desktop\goods_arrival_session.html:48
 msgid "Неактивная"
 msgstr "Inactive"
 
-#: .\myprofile\models.py:852 .\myprofile\models.py:917
-#: .\myprofile\models.py:946 .\myprofile\models.py:1171
+#: .\myprofile\models.py:852 .\myprofile\models.py:985
+#: .\myprofile\models.py:1014 .\myprofile\models.py:1239
 #: .\myprofile\templates\desktop\bulk_job.html:41
-#: .\myprofile\templates\desktop\goods_arrival.html:211
+#: .\myprofile\templates\desktop\goods_arrival.html:214
 msgid "Завершена"
 msgstr "Completed"
 
@@ -2832,8 +2892,8 @@ msgstr "Arrival (after completion)"
 msgid "Поставлена на паузу"
 msgstr "Paused"
 
-#: .\myprofile\models.py:873 .\myprofile\models.py:930
-#: .\myprofile\models.py:957
+#: .\myprofile\models.py:873 .\myprofile\models.py:998
+#: .\myprofile\models.py:1025
 msgid "Завершено"
 msgstr "Completed"
 
@@ -2846,198 +2906,325 @@ msgid "Черновик сохранён"
 msgstr "Draft saved"
 
 #: .\myprofile\models.py:880
+msgid "Версия строк"
+msgstr "Rows version"
+
+#: .\myprofile\models.py:881
+msgid "Хеш содержимого"
+msgstr "Content hash"
+
+#: .\myprofile\models.py:884
+msgid "Записано строк"
+msgstr "Rows written"
+
+#: .\myprofile\models.py:885
+msgid "Последний клиент"
+msgstr "Last client"
+
+#: .\myprofile\models.py:886
+msgid "Порядковый номер клиента"
+msgstr "Client sequence number"
+
+#: .\myprofile\models.py:888
+msgid "Последняя активность"
+msgstr "Last activity"
+
+#: .\myprofile\models.py:892
+msgid "Редактирует"
+msgstr "Editing"
+
+#: .\myprofile\models.py:894
+msgid "Устройство редактора"
+msgstr "Editor device"
+
+#: .\myprofile\models.py:895
+msgid "Редактор был в сети"
+msgstr "Editor last seen"
+
+#: .\myprofile\models.py:898
 #: .\myprofile\templates\desktop\goods_arrival_session.html:35
 msgid "Сессия прихода"
 msgstr "Arrival session"
 
-#: .\myprofile\models.py:881
+#: .\myprofile\models.py:899
 msgid "Сессии прихода"
 msgstr "Arrival sessions"
 
-#: .\myprofile\models.py:898
+#: .\myprofile\models.py:916
 msgid "Трек (объект)"
 msgstr "Track (object)"
 
-#: .\myprofile\models.py:900
+#: .\myprofile\models.py:918
 msgid "Владелец (логин)"
 msgstr "Owner (login)"
 
-#: .\myprofile\models.py:902
+#: .\myprofile\models.py:920
 msgid "Номер строки"
 msgstr "Row number"
 
-#: .\myprofile\models.py:906
+#: .\myprofile\models.py:924
 msgid "Строка сессии прихода"
 msgstr "Arrival session row"
 
-#: .\myprofile\models.py:907
+#: .\myprofile\models.py:925
 msgid "Строки сессии прихода"
 msgstr "Arrival session rows"
 
-#: .\myprofile\models.py:928
+#: .\myprofile\models.py:936
+msgid "Автосохранение"
+msgstr "Autosave"
+
+#: .\myprofile\models.py:937
+msgid "Уход со страницы"
+msgstr "Leaving the page"
+
+#: .\myprofile\models.py:938
+msgid "Досылка из фона"
+msgstr "Background resend"
+
+#: .\myprofile\models.py:939
+msgid "Перед завершением"
+msgstr "Before completion"
+
+#: .\myprofile\models.py:940
+msgid "Восстановление"
+msgstr "Restore"
+
+#: .\myprofile\models.py:941
+msgid "Старая версия страницы"
+msgstr "Old page version"
+
+#: .\myprofile\models.py:944
+msgid "Получен"
+msgstr "Received"
+
+#: .\myprofile\models.py:945
+msgid "Применён"
+msgstr "Applied"
+
+#: .\myprofile\models.py:946
+msgid "Устаревший (есть новее)"
+msgstr "Stale (newer exists)"
+
+#: .\myprofile\models.py:947
+msgid "Конфликт версий"
+msgstr "Version conflict"
+
+#: .\myprofile\models.py:948
+msgid "Резкое сокращение строк"
+msgstr "Sharp drop in rows"
+
+#: .\myprofile\models.py:949
+msgid "Редактирует другое устройство"
+msgstr "Another device is editing"
+
+#: .\myprofile\models.py:950
+msgid "Сессия не активна"
+msgstr "Session is not active"
+
+#: .\myprofile\models.py:958
+msgid "Строки"
+msgstr "Rows"
+
+#: .\myprofile\models.py:959
+#: .\myprofile\templates\desktop\goods_arrival_history.html:144
+msgid "Строк"
+msgstr "Rows"
+
+#: .\myprofile\models.py:961
+#: .\myprofile\templates\desktop\goods_arrival_history.html:147
+msgid "Источник"
+msgstr "Source"
+
+#: .\myprofile\models.py:962 .\myprofile\models.py:1253
+#: .\myprofile\templates\desktop\goods_arrival_history.html:146
+msgid "Результат"
+msgstr "Result"
+
+#: .\myprofile\models.py:963
+msgid "Базовая версия"
+msgstr "Base version"
+
+#: .\myprofile\models.py:964
+msgid "Версия после сохранения"
+msgstr "Version after save"
+
+#: .\myprofile\models.py:965
+msgid "Устройство"
+msgstr "Device"
+
+#: .\myprofile\models.py:973
+msgid "Снимок сессии прихода"
+msgstr "Arrival session snapshot"
+
+#: .\myprofile\models.py:974
+msgid "Снимки сессий прихода"
+msgstr "Arrival session snapshots"
+
+#: .\myprofile\models.py:996
 msgid "Бэкап ячеек"
 msgstr "Cell backup"
 
-#: .\myprofile\models.py:929 .\myprofile\models.py:956
+#: .\myprofile\models.py:997 .\myprofile\models.py:1024
 msgid "Начало"
 msgstr "Start"
 
-#: .\myprofile\models.py:933
+#: .\myprofile\models.py:1001
 msgid "Сессия реструктуризации"
 msgstr "Restructuring session"
 
-#: .\myprofile\models.py:934
+#: .\myprofile\models.py:1002
 msgid "Сессии реструктуризации"
 msgstr "Restructuring sessions"
 
-#: .\myprofile\models.py:947
+#: .\myprofile\models.py:1015
 msgid "Отменена"
 msgstr "Cancelled"
 
-#: .\myprofile\models.py:958
+#: .\myprofile\models.py:1026
 msgid "Отчёт"
 msgstr "Report"
 
-#: .\myprofile\models.py:960
+#: .\myprofile\models.py:1028
 msgid "Созданные аккаунты"
 msgstr "Created accounts"
 
-#: .\myprofile\models.py:961
+#: .\myprofile\models.py:1029
 msgid "Авто-принято чеков"
 msgstr "Receipts auto-accepted"
 
-#: .\myprofile\models.py:962
+#: .\myprofile\models.py:1030
 msgid "Тихо выдано чеков"
 msgstr "Receipts silently issued"
 
-#: .\myprofile\models.py:964
+#: .\myprofile\models.py:1032
 msgid "Сумма тихо выданного (₸)"
 msgstr "Amount silently issued (₸)"
 
-#: .\myprofile\models.py:967
+#: .\myprofile\models.py:1035
 msgid "Сессия инвентаризации"
 msgstr "Inventory session"
 
-#: .\myprofile\models.py:968
+#: .\myprofile\models.py:1036
 msgid "Сессии инвентаризации"
 msgstr "Inventory sessions"
 
-#: .\myprofile\models.py:983
+#: .\myprofile\models.py:1051
 msgid "ОК"
 msgstr "OK"
 
-#: .\myprofile\models.py:984
+#: .\myprofile\models.py:1052
 msgid "Чек другого ПВЗ"
 msgstr "Receipt of another pickup point"
 
-#: .\myprofile\models.py:993
+#: .\myprofile\models.py:1061
 msgid "Введён вручную (legacy)"
 msgstr "Entered manually (legacy)"
 
-#: .\myprofile\models.py:994
+#: .\myprofile\models.py:1062
 msgid "Отметка"
 msgstr "Mark"
 
-#: .\myprofile\models.py:997
+#: .\myprofile\models.py:1065
 msgid "Кто сканировал"
 msgstr "Scanned by"
 
-#: .\myprofile\models.py:998
+#: .\myprofile\models.py:1066
 msgid "Когда"
 msgstr "When"
 
-#: .\myprofile\models.py:1001
+#: .\myprofile\models.py:1069
 msgid "Скан инвентаризации"
 msgstr "Inventory scan"
 
-#: .\myprofile\models.py:1002
+#: .\myprofile\models.py:1070
 msgid "Сканы инвентаризации"
 msgstr "Inventory scans"
 
-#: .\myprofile\models.py:1012
+#: .\myprofile\models.py:1080
 msgid "Дата реестра"
 msgstr "Registry date"
 
-#: .\myprofile\models.py:1017
+#: .\myprofile\models.py:1085
 msgid "Реестр клиентов"
 msgstr "Client registry"
 
-#: .\myprofile\models.py:1018
+#: .\myprofile\models.py:1086
 msgid "Реестры клиентов"
 msgstr "Client registries"
 
-#: .\myprofile\models.py:1032
+#: .\myprofile\models.py:1100
 msgid "Текст письма"
 msgstr "Email body"
 
-#: .\myprofile\models.py:1035 .\myprofile\templates\desktop\shipped_cn.html:51
-#: .\myprofile\templates\desktop\shipped_cn.html:101
+#: .\myprofile\models.py:1103 .\myprofile\templates\desktop\shipped_cn.html:51
+#: .\myprofile\templates\desktop\shipped_cn.html:118
 msgid "Дата отправки"
 msgstr "Send date"
 
-#: .\myprofile\models.py:1038
+#: .\myprofile\models.py:1106
 msgid "Лог email"
 msgstr "Email log"
 
-#: .\myprofile\models.py:1039
+#: .\myprofile\models.py:1107
 msgid "Логи email"
 msgstr "Email logs"
 
-#: .\myprofile\models.py:1048
+#: .\myprofile\models.py:1116
 msgid "Telegram"
 msgstr "Telegram"
 
-#: .\myprofile\models.py:1049 .\register\models.py:97 .\register\models.py:134
+#: .\myprofile\models.py:1117 .\register\models.py:97 .\register\models.py:134
 msgid "Email"
 msgstr "Email"
 
-#: .\myprofile\models.py:1050
+#: .\myprofile\models.py:1118
 #: .\myprofile\templates\desktop\notification_mutes.html:97
 #: .\myprofile\templates\desktop\notification_mutes.html:193
 msgid "Все каналы"
 msgstr "All channels"
 
-#: .\myprofile\models.py:1058
+#: .\myprofile\models.py:1126
 msgid "Клиент (пусто = все клиенты)"
 msgstr "Client (empty = all clients)"
 
-#: .\myprofile\models.py:1062
+#: .\myprofile\models.py:1130
 #: .\myprofile\templates\desktop\notification_mutes.html:93
 msgid "Канал"
 msgstr "Channel"
 
-#: .\myprofile\models.py:1069
+#: .\myprofile\models.py:1137
 msgid "Кто отключил"
 msgstr "Disabled by"
 
-#: .\myprofile\models.py:1071
+#: .\myprofile\models.py:1139
 msgid "Время отключения"
 msgstr "Disable time"
 
-#: .\myprofile\models.py:1074
+#: .\myprofile\models.py:1142
 msgid "Истекает (пусто = только вручную)"
 msgstr "Expires (empty = manual only)"
 
-#: .\myprofile\models.py:1076 .\news\models.py:36
+#: .\myprofile\models.py:1144 .\news\models.py:36
 #: .\news\templates\news\manage\list.html:116
 #: .\news\templates\news\manage\list.html:159
 msgid "Активна"
 msgstr "Active"
 
-#: .\myprofile\models.py:1077
+#: .\myprofile\models.py:1145
 #: .\myprofile\templates\desktop\notification_mutes.html:143
 msgid "Причина"
 msgstr "Reason"
 
-#: .\myprofile\models.py:1080
+#: .\myprofile\models.py:1148
 msgid "Заглушка уведомлений"
 msgstr "Notification mute"
 
-#: .\myprofile\models.py:1081
+#: .\myprofile\models.py:1149
 msgid "Заглушки уведомлений"
 msgstr "Notification mutes"
 
-#: .\myprofile\models.py:1117
+#: .\myprofile\models.py:1185
 #: .\myprofile\templates\desktop\finance_summary.html:139
 #: .\myprofile\templates\shared\print\client_check_pdf.html:115
 #: .\myprofile\templates\shared\print\client_check_pdf.html:139
@@ -3047,67 +3234,67 @@ msgstr "Notification mutes"
 msgid "ПВЗ"
 msgstr "PVZ"
 
-#: .\myprofile\models.py:1124
+#: .\myprofile\models.py:1192
 msgid "Открыл"
 msgstr "Opened by"
 
-#: .\myprofile\models.py:1126
+#: .\myprofile\models.py:1194
 msgid "Открыта в"
 msgstr "Opened at"
 
-#: .\myprofile\models.py:1129
+#: .\myprofile\models.py:1197
 msgid "Сессия выдачи"
 msgstr "Issue session"
 
-#: .\myprofile\models.py:1130
+#: .\myprofile\models.py:1198
 msgid "Сессии выдачи"
 msgstr "Issue sessions"
 
-#: .\myprofile\models.py:1141
+#: .\myprofile\models.py:1209
 msgid "Критично"
 msgstr "Critical"
 
-#: .\myprofile\models.py:1142 .\tgbot\models.py:100
+#: .\myprofile\models.py:1210 .\tgbot\models.py:100
 msgid "Предупреждение"
 msgstr "Warning"
 
-#: .\myprofile\models.py:1145
+#: .\myprofile\models.py:1213
 msgid "Функция"
 msgstr "Function"
 
-#: .\myprofile\models.py:1146
+#: .\myprofile\models.py:1214
 msgid "Контракт"
 msgstr "Contract"
 
-#: .\myprofile\models.py:1147
+#: .\myprofile\models.py:1215
 msgid "Серьёзность"
 msgstr "Severity"
 
-#: .\myprofile\models.py:1149
+#: .\myprofile\models.py:1217
 msgid "Контекст"
 msgstr "Context"
 
-#: .\myprofile\models.py:1151
+#: .\myprofile\models.py:1219
 msgid "Разобрано"
 msgstr "Resolved"
 
-#: .\myprofile\models.py:1154
+#: .\myprofile\models.py:1222
 msgid "Нарушение контракта"
 msgstr "Contract violation"
 
-#: .\myprofile\models.py:1155
+#: .\myprofile\models.py:1223
 msgid "Нарушения контрактов"
 msgstr "Contract violations"
 
-#: .\myprofile\models.py:1165
+#: .\myprofile\models.py:1233
 msgid "Импорт «Отправлено из Китая»"
 msgstr "Shipped from China import"
 
-#: .\myprofile\models.py:1166
+#: .\myprofile\models.py:1234
 msgid "Генерация чеков за день"
 msgstr "Daily receipt generation"
 
-#: .\myprofile\models.py:1169 .\myprofile\templates\desktop\bulk_job.html:39
+#: .\myprofile\models.py:1237 .\myprofile\templates\desktop\bulk_job.html:39
 #: .\myprofile\templates\desktop\notification_logs.html:220
 #: .\myprofile\templates\desktop\notification_logs.html:244
 #: .\myprofile\templates\desktop\notification_logs.html:292
@@ -3115,47 +3302,43 @@ msgstr "Daily receipt generation"
 msgid "В очереди"
 msgstr "In queue"
 
-#: .\myprofile\models.py:1170 .\myprofile\templates\desktop\bulk_job.html:40
+#: .\myprofile\models.py:1238 .\myprofile\templates\desktop\bulk_job.html:40
 msgid "Выполняется"
 msgstr "Running"
 
-#: .\myprofile\models.py:1175 .\myprofile\templates\desktop\blocks.html:70
+#: .\myprofile\models.py:1243 .\myprofile\templates\desktop\blocks.html:70
 #: .\myprofile\templates\desktop\blocks.html:141
 #: .\myprofile\templates\desktop\inventory_report.html:129
 msgid "Тип"
 msgstr "Type"
 
-#: .\myprofile\models.py:1180
+#: .\myprofile\models.py:1248
 msgid "Запустил"
 msgstr "Started by"
 
-#: .\myprofile\models.py:1181
+#: .\myprofile\models.py:1249
 msgid "Создана"
 msgstr "Created"
 
-#: .\myprofile\models.py:1182
+#: .\myprofile\models.py:1250
 msgid "Завершена в"
 msgstr "Finished at"
 
-#: .\myprofile\models.py:1183
+#: .\myprofile\models.py:1251
 #: .\myprofile\templates\desktop\notification_logs.html:83
 #: .\myprofile\templates\desktop\notification_logs.html:212
 msgid "Всего"
 msgstr "Total"
 
-#: .\myprofile\models.py:1184
+#: .\myprofile\models.py:1252
 msgid "Обработано"
 msgstr "Processed"
 
-#: .\myprofile\models.py:1185
-msgid "Результат"
-msgstr "Result"
-
-#: .\myprofile\models.py:1189
+#: .\myprofile\models.py:1257
 msgid "Фоновая операция"
 msgstr "Background job"
 
-#: .\myprofile\models.py:1190
+#: .\myprofile\models.py:1258
 msgid "Фоновые операции"
 msgstr "Background jobs"
 
@@ -3259,13 +3442,14 @@ msgid "Inter Cargo - Сводка прихода"
 msgstr "Inter Cargo - Arrival Summary"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:55
+#: .\myprofile\templates\desktop\goods_arrival_history.html:39
 #: .\myprofile\templates\desktop\goods_arrival_session.html:53
 msgid "Дата:"
 msgstr "Date:"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:59
 #: .\myprofile\templates\desktop\finance_summary.html:89
-#: .\myprofile\templates\desktop\goods_arrival.html:200
+#: .\myprofile\templates\desktop\goods_arrival.html:203
 msgid "Показать"
 msgstr "Show"
 
@@ -3599,8 +3783,8 @@ msgid "Больше не показывать"
 msgstr "Don't show again"
 
 #: .\myprofile\templates\desktop\delivered_posts.html:228
-#: .\myprofile\templates\desktop\goods_arrival.html:106
-#: .\myprofile\templates\desktop\goods_arrival.html:144
+#: .\myprofile\templates\desktop\goods_arrival.html:107
+#: .\myprofile\templates\desktop\goods_arrival.html:146
 #: .\myprofile\templates\desktop\profile.html:314
 msgid "Продолжить"
 msgstr "Continue"
@@ -3950,7 +4134,10 @@ msgid "Сканирование QR-кода"
 msgstr "QR code scanning"
 
 #: .\myprofile\templates\desktop\extraditions.html:229
-#: .\myprofile\templates\desktop\inventory_session.html:199
+#: .\myprofile\templates\desktop\inventory_session.html:136
+#: .\myprofile\templates\desktop\inventory_session.html:179
+#: .\myprofile\templates\desktop\inventory_session.html:205
+#: .\myprofile\templates\desktop\inventory_session.html:231
 msgid "Закрыть"
 msgstr "Close"
 
@@ -4101,154 +4288,258 @@ msgstr "Start session"
 msgid "Активные сессии"
 msgstr "Active sessions"
 
-#: .\myprofile\templates\desktop\goods_arrival.html:157
+#: .\myprofile\templates\desktop\goods_arrival.html:99
+#: .\myprofile\templates\desktop\goods_arrival.html:135
+#: .\myprofile\templates\desktop\goods_arrival.html:175
+#: .\myprofile\templates\desktop\goods_arrival.html:222
+#: .\myprofile\templates\desktop\goods_arrival_history.html:9
+#: .\myprofile\templates\desktop\goods_arrival_history.html:30
+#: .\myprofile\templates\desktop\goods_arrival_history.html:36
+#: .\myprofile\templates\desktop\goods_arrival_session.html:64
+msgid "История сохранений"
+msgstr "Save history"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:99
+#: .\myprofile\templates\desktop\goods_arrival.html:135
+#: .\myprofile\templates\desktop\goods_arrival.html:175
+#: .\myprofile\templates\desktop\goods_arrival.html:222
+msgid "История"
+msgstr "History"
+
+#: .\myprofile\templates\desktop\goods_arrival.html:159
 msgid "Неактивные сессии"
 msgstr "Inactive sessions"
 
-#: .\myprofile\templates\desktop\goods_arrival.html:158
+#: .\myprofile\templates\desktop\goods_arrival.html:160
 msgid "(превышен 48-часовой лимит)"
 msgstr "(48-hour limit exceeded)"
 
-#: .\myprofile\templates\desktop\goods_arrival.html:181
+#: .\myprofile\templates\desktop\goods_arrival.html:184
 msgid "Возобновить"
 msgstr "Resume"
 
-#: .\myprofile\templates\desktop\goods_arrival.html:194
+#: .\myprofile\templates\desktop\goods_arrival.html:197
 msgid "Завершённые сессии"
 msgstr "Completed sessions"
 
-#: .\myprofile\templates\desktop\goods_arrival.html:233
+#: .\myprofile\templates\desktop\goods_arrival.html:237
 msgid "Нет завершённых сессий за эту дату."
 msgstr "No completed sessions for this date."
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:36
+msgid "сессия прихода"
+msgstr "arrival session"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:40
+#: .\myprofile\templates\desktop\profile.html:173
+#: .\myprofile\templates\desktop\track_codes.html:245
+#: .\myprofile\templates\desktop\track_codes.html:313
+#: .\myprofile\templates\mobile\mobile_parcels.html:190
+msgid "Статус:"
+msgstr "Status:"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:41
+msgid "Строк в сессии сейчас:"
+msgstr "Rows in session now:"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:42
+msgid "Версия:"
+msgstr "Version:"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:48
+msgid "К сессии"
+msgstr "To session"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:52
+#: .\myprofile\templates\desktop\goods_arrival_session.html:67
+#: .\news\templates\news\_home_desktop.html:12
+msgid "Назад"
+msgstr "Back"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:71
+#, python-format
+msgid ""
+"Каждое сохранение сессии записывается сюда отдельно — даже отклонённое. Если "
+"строки пропали, найдите снимок с нужным числом строк и восстановите его. "
+"Восстановление тоже попадает в журнал, его можно отменить. Снимки хранятся "
+"%(keep_days)s дней; старше часа — по одному-два на каждые 10 минут."
+msgstr ""
+"Every save of the session is recorded here separately — even rejected ones. "
+"If rows went missing, find a snapshot with the right number of rows and "
+"restore it. A restore is also recorded and can be undone. Snapshots are kept "
+"for %(keep_days)s days; older than an hour — one or two per 10 minutes."
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:75
+msgid ""
+"Заменить строки сессии строками этого снимка? Текущее состояние останется в "
+"журнале."
+msgstr ""
+"Replace the session rows with the rows of this snapshot? The current state "
+"stays in the history."
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:76
+msgid ""
+"Создать новую сессию из строк снимка? Уже обработанные трек-коды будут "
+"пропущены."
+msgstr ""
+"Create a new session from the snapshot rows? Already processed track codes "
+"will be skipped."
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:81
+msgid "Снимок от"
+msgstr "Snapshot of"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:84
+msgid "Строк:"
+msgstr "Rows:"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:98
+msgid "Восстановить в сессию"
+msgstr "Restore to session"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:106
+msgid "Новая сессия из снимка"
+msgstr "New session from snapshot"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:131
+msgid "Снимок пуст."
+msgstr "The snapshot is empty."
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:145
+msgid "Изменение"
+msgstr "Change"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:149
+msgid "Версия"
+msgstr "Version"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:175
+msgid "Открыть"
+msgstr "Open"
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:179
+msgid "Сохранений пока нет."
+msgstr "No saves yet."
+
+#: .\myprofile\templates\desktop\goods_arrival_history.html:184
+msgid "Показаны последние 500 снимков."
+msgstr "Showing the last 500 snapshots."
 
 #: .\myprofile\templates\desktop\goods_arrival_session.html:56
 msgid "| Начата:"
 msgstr "| Started:"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:64
-#: .\news\templates\news\_home_desktop.html:12
-msgid "Назад"
-msgstr "Back"
+#: .\myprofile\templates\desktop\goods_arrival_session.html:63
+msgid "Все сохранения сессии — можно восстановить любое"
+msgstr "All saves of the session — any of them can be restored"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:77
+#: .\myprofile\templates\desktop\goods_arrival_session.html:96
+msgid "Работать здесь"
+msgstr "Work here"
+
+#: .\myprofile\templates\desktop\goods_arrival_session.html:109
 msgid "Сессия на паузе"
 msgstr "Session paused"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:78
+#: .\myprofile\templates\desktop\goods_arrival_session.html:110
 msgid ""
 "Редактирование недоступно. Нажмите «Продолжить», чтобы возобновить работу."
 msgstr "Editing unavailable. Click 'Continue' to resume."
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:83
+#: .\myprofile\templates\desktop\goods_arrival_session.html:115
 msgid "Сессия неактивна"
 msgstr "Session inactive"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:84
+#: .\myprofile\templates\desktop\goods_arrival_session.html:116
 msgid ""
 "Превышен 48-часовой лимит активности. Нажмите «Возобновить» для продолжения."
 msgstr "48-hour activity limit exceeded. Click 'Resume' to continue."
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:104
+#: .\myprofile\templates\desktop\goods_arrival_session.html:136
 msgid "Потеряна связь с сессией"
 msgstr "Session connection lost"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:105
+#: .\myprofile\templates\desktop\goods_arrival_session.html:137
 msgid "Автосохранение не работает. Данные в браузере сохранены."
 msgstr "Autosave is not working. Data saved in browser."
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:112
+#: .\myprofile\templates\desktop\goods_arrival_session.html:144
 msgid "Переподключиться"
 msgstr "Reconnect"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:122
+#: .\myprofile\templates\desktop\goods_arrival_session.html:154
 msgid "Связь восстановлена. Данные сохранены."
 msgstr "Connection restored. Data saved."
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:132
-msgid "Найдена несохранённая резервная копия"
-msgstr "Unsaved backup found"
-
-#: .\myprofile\templates\desktop\goods_arrival_session.html:139
-#: .\myprofile\templates\desktop\track_codes.html:324
-#: .\myprofile\templates\mobile\mobile_parcels.html:208
-msgid "Восстановить"
-msgstr "Restore"
-
-#: .\myprofile\templates\desktop\goods_arrival_session.html:143
-#: .\myprofile\templates\desktop\pickup_change_requests.html:83
-#: .\register\templates\desktop\register_confirmation.html:88
-msgid "Отклонить"
-msgstr "Reject"
-
-#: .\myprofile\templates\desktop\goods_arrival_session.html:168
+#: .\myprofile\templates\desktop\goods_arrival_session.html:177
 msgid "Переключить на текстовый вид"
 msgstr "Switch to text view"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:175
+#: .\myprofile\templates\desktop\goods_arrival_session.html:184
 msgid "Скачать данные сессии в файл"
 msgstr "Download session data to a file"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:176
+#: .\myprofile\templates\desktop\goods_arrival_session.html:185
 msgid "Резервная копия"
 msgstr "Backup"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:180
+#: .\myprofile\templates\desktop\goods_arrival_session.html:189
 msgid "Загрузить данные из файла"
 msgstr "Load data from a file"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:181
+#: .\myprofile\templates\desktop\goods_arrival_session.html:190
 msgid "Загрузить из файла"
 msgstr "Load from file"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:206
+#: .\myprofile\templates\desktop\goods_arrival_session.html:215
 #: .\myprofile\templates\desktop\update_tracks.html:123
 msgid "Добавить строку"
 msgstr "Add row"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:213
+#: .\myprofile\templates\desktop\goods_arrival_session.html:222
 #: .\myprofile\templates\desktop\shipped_cn.html:58
 #: .\myprofile\templates\desktop\update_tracks.html:78
 msgid "Трек-коды (по одному в строке)"
 msgstr "Track codes (one per line)"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:219
+#: .\myprofile\templates\desktop\goods_arrival_session.html:228
 msgid "Владельцы (по одному в строке)"
 msgstr "Owners (one per line)"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:225
+#: .\myprofile\templates\desktop\goods_arrival_session.html:234
 msgid "Вес (кг, по одному в строке)"
 msgstr "Weight (kg, one per line)"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:235
+#: .\myprofile\templates\desktop\goods_arrival_session.html:244
 msgid "Незаполненных ячеек:"
 msgstr "Empty cells:"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:241
+#: .\myprofile\templates\desktop\goods_arrival_session.html:250
 msgid "Подозрительных ячеек:"
 msgstr "Suspicious cells:"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:242
+#: .\myprofile\templates\desktop\goods_arrival_session.html:251
 msgid "Предыдущая"
 msgstr "Previous"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:242
+#: .\myprofile\templates\desktop\goods_arrival_session.html:251
 msgid "&#8593; Пред."
 msgstr "&#8593; Prev."
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:243
+#: .\myprofile\templates\desktop\goods_arrival_session.html:252
 msgid "Следующая"
 msgstr "Next"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:243
+#: .\myprofile\templates\desktop\goods_arrival_session.html:252
 msgid "&#8595; След."
 msgstr "&#8595; Next"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:254
+#: .\myprofile\templates\desktop\goods_arrival_session.html:264
 #: .\myprofile\templates\desktop\pp_acceptance_detail.html:159
 msgid "Завершить сессию"
 msgstr "Complete session"
 
-#: .\myprofile\templates\desktop\goods_arrival_session.html:262
+#: .\myprofile\templates\desktop\goods_arrival_session.html:272
 msgid "Пауза"
 msgstr "Pause"
 
@@ -4323,10 +4614,15 @@ msgid "Расхождений не обнаружено."
 msgstr "No discrepancies found."
 
 #: .\myprofile\templates\desktop\inventory_report.html:152
+#, python-format
+msgid "Отправлены напоминания о долгом хранении (более %(days)s дней)"
+msgstr "Long-storage reminders sent (more than %(days)s days)"
+
+#: .\myprofile\templates\desktop\inventory_report.html:163
 msgid "Отчёт инвентаризации"
 msgstr "Inventory report"
 
-#: .\myprofile\templates\desktop\inventory_report.html:153
+#: .\myprofile\templates\desktop\inventory_report.html:164
 msgid "Сформировано:"
 msgstr "Generated:"
 
@@ -4345,7 +4641,7 @@ msgid "Отсканировано"
 msgstr "Scanned"
 
 #: .\myprofile\templates\desktop\inventory_session.html:72
-#: .\myprofile\templates\desktop\inventory_session.html:345
+#: .\myprofile\templates\desktop\inventory_session.html:376
 msgid "Сканировать камерой"
 msgstr "Scan with camera"
 
@@ -4387,6 +4683,7 @@ msgid "Треков"
 msgstr "Tracks"
 
 #: .\myprofile\templates\desktop\inventory_session.html:120
+#: .\myprofile\templates\desktop\inventory_session.html:230
 #: .\myprofile\templates\desktop\warehouse_inventory.html:70
 #: .\myprofile\templates\desktop\warehouse_reassign.html:151
 #: .\myprofile\templates\shared\print\client_registry_pdf.html:33
@@ -4449,46 +4746,57 @@ msgstr "Cell (empty — auto)"
 msgid "авто"
 msgstr "auto"
 
-#: .\myprofile\templates\desktop\inventory_session.html:178
+#: .\myprofile\templates\desktop\inventory_session.html:183
 msgid "Создать чек и добавить"
 msgstr "Create receipt and add"
 
-#: .\myprofile\templates\desktop\inventory_session.html:187
+#: .\myprofile\templates\desktop\inventory_session.html:193
 msgid "Чек создан"
 msgstr "Receipt created"
 
-#: .\myprofile\templates\desktop\inventory_session.html:196
+#: .\myprofile\templates\desktop\inventory_session.html:202
 #: .\myprofile\templates\mobile\mobile_menu.html:290
 #: .\myprofile\templates\shared\print\client_check_pdf.html:94
 #: .\myprofile\templates\shared\print\client_registry_pdf.html:14
 msgid "Печать"
 msgstr "Print"
 
-#: .\myprofile\templates\desktop\inventory_session.html:209
+#: .\myprofile\templates\desktop\inventory_session.html:215
 msgid "Код чека"
 msgstr "Receipt code"
 
-#: .\myprofile\templates\desktop\inventory_session.html:215
+#: .\myprofile\templates\desktop\inventory_session.html:221
 #: .\myprofile\templates\desktop\track_codes.html:96
 #: .\myprofile\templates\desktop\unidentified.html:86
 #: .\myprofile\templates\mobile\mobile_parcels.html:275
 msgid "Добавить"
 msgstr "Add"
 
-#: .\myprofile\templates\desktop\inventory_session.html:269
+#: .\myprofile\templates\desktop\inventory_session.html:237
+msgid "Предложенный номер — подтвердите или введите свой"
+msgstr "Suggested number — confirm it or enter your own"
+
+#: .\myprofile\templates\desktop\inventory_session.html:243
+#: .\myprofile\templates\desktop\unidentified.html:141
+#: .\register\templates\desktop\registration.html:91
+msgid "Подтвердить"
+msgstr "Confirm"
+
+#: .\myprofile\templates\desktop\inventory_session.html:297
 msgid "чужой ПВЗ"
 msgstr "other pickup point"
 
-#: .\myprofile\templates\desktop\inventory_session.html:319
-#: .\myprofile\templates\desktop\inventory_session.html:472
+#: .\myprofile\templates\desktop\inventory_session.html:348
+#: .\myprofile\templates\desktop\inventory_session.html:405
+#: .\myprofile\templates\desktop\inventory_session.html:584
 msgid "Нет связи с сервером"
 msgstr "No connection to the server"
 
-#: .\myprofile\templates\desktop\inventory_session.html:357
+#: .\myprofile\templates\desktop\inventory_session.html:388
 msgid "Остановить камеру"
 msgstr "Stop camera"
 
-#: .\myprofile\templates\desktop\inventory_session.html:360
+#: .\myprofile\templates\desktop\inventory_session.html:391
 msgid "Камера недоступна. Используйте ручной ввод."
 msgstr "Camera is unavailable. Use manual input."
 
@@ -4739,6 +5047,11 @@ msgstr "Inter Cargo - PVZ Change Requests"
 msgid "Одобрить"
 msgstr "Approve"
 
+#: .\myprofile\templates\desktop\pickup_change_requests.html:83
+#: .\register\templates\desktop\register_confirmation.html:88
+msgid "Отклонить"
+msgstr "Reject"
+
 #: .\myprofile\templates\desktop\pickup_change_requests.html:94
 msgid "Нет заявок на рассмотрении."
 msgstr "No requests under review."
@@ -4957,13 +5270,6 @@ msgstr "Take the interactive tutorial on the main features"
 #: .\myprofile\templates\mobile\mobile_parcels.html:189
 msgid "Код:"
 msgstr "Code:"
-
-#: .\myprofile\templates\desktop\profile.html:173
-#: .\myprofile\templates\desktop\track_codes.html:245
-#: .\myprofile\templates\desktop\track_codes.html:313
-#: .\myprofile\templates\mobile\mobile_parcels.html:190
-msgid "Статус:"
-msgstr "Status:"
 
 #: .\myprofile\templates\desktop\profile.html:174
 #: .\myprofile\templates\desktop\track_codes.html:246
@@ -5460,32 +5766,43 @@ msgstr ""
 "“Arrived at customs (China–Kazakhstan)” status. The row disappears once all "
 "its track codes are included in an Arrival."
 
-#: .\myprofile\templates\desktop\shipped_cn.html:102
+#: .\myprofile\templates\desktop\shipped_cn.html:101
+#, python-format
+msgid ""
+"%(count)s трек-кодов отправлены больше %(days)s дней назад, но ещё не "
+"переведены «на таможню» автоматически."
+msgstr "%(count)s track codes were shipped more than %(days)s days ago but have not been moved to “at customs” automatically."
+
+#: .\myprofile\templates\desktop\shipped_cn.html:107
+msgid "Перевести сейчас"
+msgstr "Move now"
+
+#: .\myprofile\templates\desktop\shipped_cn.html:119
 msgid "Трек-кодов"
 msgstr "Track codes"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:119
+#: .\myprofile\templates\desktop\shipped_cn.html:136
 msgid "На таможню:"
 msgstr "To customs:"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:133
+#: .\myprofile\templates\desktop\shipped_cn.html:150
 msgid "Перевести партию в статус «Выехало из Алматы»?"
 msgstr "Move batch to status \"Departed Almaty\"?"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:138
+#: .\myprofile\templates\desktop\shipped_cn.html:155
 msgid "Перевести в статус \"Выехало из Алматы\""
 msgstr "Move to status \"Departed Almaty\""
 
-#: .\myprofile\templates\desktop\shipped_cn.html:155
+#: .\myprofile\templates\desktop\shipped_cn.html:172
 msgid "Нет партий в пути."
 msgstr "No batches in transit."
 
-#: .\myprofile\templates\desktop\shipped_cn.html:185
+#: .\myprofile\templates\desktop\shipped_cn.html:202
 #: .\myprofile\templates\mobile\mobile_parcels.html:231
 msgid "Нет трек-кодов"
 msgstr "No track codes"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:189
+#: .\myprofile\templates\desktop\shipped_cn.html:206
 msgid "Ошибка загрузки"
 msgstr "Loading error"
 
@@ -5584,6 +5901,11 @@ msgstr "Track codes not found."
 msgid "Изменить описание"
 msgstr "Edit description"
 
+#: .\myprofile\templates\desktop\track_codes.html:324
+#: .\myprofile\templates\mobile\mobile_parcels.html:208
+msgid "Восстановить"
+msgstr "Restore"
+
 #: .\myprofile\templates\desktop\unidentified.html:8
 msgid "Inter Cargo — Неопознанные посылки"
 msgstr "Inter Cargo — Unidentified Parcels"
@@ -5615,11 +5937,6 @@ msgstr "Claimed by clients:"
 #: .\myprofile\templates\desktop\unidentified.html:100
 msgid "Требует подтверждения"
 msgstr "Requires confirmation"
-
-#: .\myprofile\templates\desktop\unidentified.html:141
-#: .\register\templates\desktop\registration.html:91
-msgid "Подтвердить"
-msgstr "Confirm"
 
 #: .\myprofile\templates\desktop\unidentified.html:171
 msgid "Подтверждено — ожидают прихода:"
@@ -5976,7 +6293,7 @@ msgid "Inter Cargo - Сообщения"
 msgstr "Inter Cargo - Messages"
 
 #: .\myprofile\templates\mobile\mobile_notifications.html:130
-#: .\myprofile\views\mobile_notifications.py:100
+#: .\myprofile\views\mobile_notifications.py:116
 msgid "Нет сообщений"
 msgstr "No messages"
 
@@ -6107,16 +6424,16 @@ msgstr "Total to pay:"
 #: .\myprofile\views\arrival_summary.py:40 .\myprofile\views\blocks.py:79
 #: .\myprofile\views\bulk_jobs.py:14 .\myprofile\views\delivery.py:151
 #: .\myprofile\views\extraditions.py:69 .\myprofile\views\finance_summary.py:81
-#: .\myprofile\views\goods_arrival.py:95
+#: .\myprofile\views\goods_arrival.py:100
 #: .\myprofile\views\notification_logs.py:23
 #: .\myprofile\views\notification_mutes.py:28
 #: .\myprofile\views\pp_acceptance.py:45 .\myprofile\views\pp_acceptance.py:499
 #: .\myprofile\views\pp_acceptance.py:562
 #: .\myprofile\views\pp_extradition_history.py:26
 #: .\myprofile\views\reschedule_arrival.py:34 .\myprofile\views\service.py:39
-#: .\myprofile\views\shipped_cn.py:40 .\myprofile\views\shipped_cn.py:125
-#: .\myprofile\views\unidentified.py:27 .\myprofile\views\warehouse.py:45
-#: .\support\views\inbox.py:60
+#: .\myprofile\views\shipped_cn.py:43 .\myprofile\views\shipped_cn.py:131
+#: .\myprofile\views\shipped_cn.py:169 .\myprofile\views\unidentified.py:28
+#: .\myprofile\views\warehouse.py:45 .\support\views\inbox.py:60
 msgid "У вас нет доступа к этой странице."
 msgstr "You do not have access to this page."
 
@@ -6128,16 +6445,20 @@ msgstr "You do not have access to this page."
 #: .\myprofile\views\arrival_summary.py:505 .\myprofile\views\blocks.py:149
 #: .\myprofile\views\bulk_jobs.py:22 .\myprofile\views\delivery.py:216
 #: .\myprofile\views\delivery.py:437 .\myprofile\views\delivery.py:562
-#: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:144
-#: .\myprofile\views\goods_arrival.py:180
-#: .\myprofile\views\goods_arrival.py:328
-#: .\myprofile\views\goods_arrival.py:343
-#: .\myprofile\views\goods_arrival.py:367
-#: .\myprofile\views\inventory_session.py:364
-#: .\myprofile\views\inventory_session.py:389
-#: .\myprofile\views\inventory_session.py:510
-#: .\myprofile\views\inventory_session.py:533
-#: .\myprofile\views\inventory_session.py:565
+#: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:149
+#: .\myprofile\views\goods_arrival.py:186
+#: .\myprofile\views\goods_arrival.py:317
+#: .\myprofile\views\goods_arrival.py:332
+#: .\myprofile\views\goods_arrival.py:357
+#: .\myprofile\views\goods_arrival_history.py:23
+#: .\myprofile\views\goods_arrival_history.py:60
+#: .\myprofile\views\goods_arrival_history.py:81
+#: .\myprofile\views\goods_arrival_history.py:111
+#: .\myprofile\views\inventory_session.py:409
+#: .\myprofile\views\inventory_session.py:434
+#: .\myprofile\views\inventory_session.py:563
+#: .\myprofile\views\inventory_session.py:586
+#: .\myprofile\views\inventory_session.py:618
 #: .\myprofile\views\notification_mutes.py:64
 #: .\myprofile\views\notification_mutes.py:128
 #: .\myprofile\views\pp_acceptance.py:301
@@ -6206,7 +6527,7 @@ msgstr "Client not specified."
 #: .\myprofile\views\arrival_summary.py:342
 #: .\myprofile\views\arrival_summary.py:343
 #: .\myprofile\views\notification_mutes.py:80
-#: .\myprofile\views\unidentified.py:156 .\myprofile\views\warehouse.py:647
+#: .\myprofile\views\unidentified.py:162 .\myprofile\views\warehouse.py:647
 #: .\register\views\password_reset.py:55 .\register\views\password_reset.py:173
 msgid "Пользователь не найден."
 msgstr "User not found."
@@ -6310,7 +6631,7 @@ msgstr "No parcels to complete delivery in selected points."
 msgid "Пункт 'Доставка на дом' не настроен."
 msgstr "Home delivery point is not configured."
 
-#: .\myprofile\views\delivery.py:577 .\myprofile\views\inventory_session.py:248
+#: .\myprofile\views\delivery.py:577 .\myprofile\views\inventory_session.py:293
 #: .\myprofile\views\reschedule_arrival.py:177
 #: .\myprofile\views\reschedule_arrival.py:234
 #: .\myprofile\views\reschedule_arrival.py:375
@@ -6346,7 +6667,7 @@ msgstr ""
 msgid "Введите штрихкод пакета."
 msgstr "Enter package barcode."
 
-#: .\myprofile\views\extraditions.py:145
+#: .\myprofile\views\extraditions.py:152
 #, python-format
 msgid ""
 "📦 Выдано посылок: %(count)s. Пункт: %(pickup_point)s. Штрих-код выдачи: "
@@ -6355,162 +6676,213 @@ msgstr ""
 "📦 Parcels issued: %(count)s. Point: %(pickup_point)s. Issue barcode: "
 "%(barcode)s"
 
-#: .\myprofile\views\extraditions.py:209
+#: .\myprofile\views\extraditions.py:216
 msgid "Введите штрихкод"
 msgstr "Enter barcode"
 
-#: .\myprofile\views\extraditions.py:359
+#: .\myprofile\views\extraditions.py:366
 msgid "Не указан ID сессии"
 msgstr "Session ID not specified"
 
-#: .\myprofile\views\extraditions.py:372
+#: .\myprofile\views\extraditions.py:379
 msgid "Оплата временно отключена"
 msgstr "Payment temporarily disabled"
 
-#: .\myprofile\views\extraditions.py:385
+#: .\myprofile\views\extraditions.py:392
 msgid "Не указан клиент"
 msgstr "Client not specified"
 
-#: .\myprofile\views\extraditions.py:392
+#: .\myprofile\views\extraditions.py:399
 msgid "Клиент не найден"
 msgstr "Client not found"
 
-#: .\myprofile\views\extraditions.py:458
+#: .\myprofile\views\extraditions.py:465
 msgid "Не указан ID чека"
 msgstr "Receipt ID not specified"
 
-#: .\myprofile\views\extraditions.py:463
+#: .\myprofile\views\extraditions.py:470
 msgid "Чек не найден"
 msgstr "Receipt not found"
 
-#: .\myprofile\views\extraditions.py:466
+#: .\myprofile\views\extraditions.py:473 .\myprofile\views\extraditions.py:480
 msgid "Чек уже выдан"
 msgstr "Receipt already issued"
 
-#: .\myprofile\views\extraditions.py:530
+#: .\myprofile\views\extraditions.py:541
 #, python-format
 msgid "📦 Выдано посылок: %(count)s (%(pickup_label)s)."
 msgstr "📦 Parcels issued: %(count)s (%(pickup_label)s)."
 
-#: .\myprofile\views\goods_arrival.py:152
+#: .\myprofile\views\goods_arrival.py:157
 #: .\myprofile\views\reschedule_arrival.py:86
 #: .\myprofile\views\reschedule_arrival.py:172
 #: .\myprofile\views\reschedule_arrival.py:229
 #: .\myprofile\views\reschedule_arrival.py:370
-#: .\myprofile\views\shipped_cn.py:59 .\myprofile\views\shipped_cn.py:133
+#: .\myprofile\views\shipped_cn.py:65 .\myprofile\views\shipped_cn.py:139
 msgid "Неверный формат даты."
 msgstr "Invalid date format."
 
-#: .\myprofile\views\goods_arrival.py:186
+#: .\myprofile\views\goods_arrival.py:192
 msgid "Эта сессия уже завершена."
 msgstr "This session is already completed."
 
-#: .\myprofile\views\goods_arrival.py:242
-#: .\myprofile\views\goods_arrival.py:244
+#: .\myprofile\views\goods_arrival.py:268
+#: .\myprofile\views\goods_arrival.py:270
 msgid "Неверные данные"
 msgstr "Invalid data"
 
-#: .\myprofile\views\goods_arrival.py:347
+#: .\myprofile\views\goods_arrival.py:336
 msgid "Эту сессию нельзя возобновить."
 msgstr "This session cannot be resumed."
 
-#: .\myprofile\views\goods_arrival.py:378
+#: .\myprofile\views\goods_arrival.py:366
+msgid ""
+"Строки сессии изменились на сервере. Проверьте данные и завершите ещё раз."
+msgstr ""
+"The session rows changed on the server. Check the data and complete again."
+
+#: .\myprofile\views\goods_arrival.py:376
 msgid "Сессия пуста. Добавьте хотя бы одну строку."
 msgstr "Session is empty. Add at least one row."
 
-#: .\myprofile\views\inventory_session.py:102
+#: .\myprofile\views\goods_arrival_history.py:85
+msgid "Сессия уже завершена — создайте из снимка новую сессию."
+msgstr ""
+"The session is already completed — create a new session from the snapshot."
+
+#: .\myprofile\views\goods_arrival_history.py:90
+msgid "Не удалось восстановить снимок."
+msgstr "Could not restore the snapshot."
+
+#: .\myprofile\views\goods_arrival_history.py:93
+#, python-format
+msgid "Восстановлено строк: %(count)s (снимок от %(time)s)."
+msgstr "Rows restored: %(count)s (snapshot of %(time)s)."
+
+#: .\myprofile\views\goods_arrival_history.py:98
+#, python-format
+msgid "Пропущены трек-коды, уже лежащие в других сессиях: %(codes)s"
+msgstr "Skipped track codes already in other sessions: %(codes)s"
+
+#: .\myprofile\views\goods_arrival_history.py:115
+msgid "Не удалось создать сессию из снимка."
+msgstr "Could not create a session from the snapshot."
+
+#: .\myprofile\views\goods_arrival_history.py:120
+#, python-format
+msgid ""
+"Создана сессия #%(id)s из снимка: строк %(count)s, пропущено уже "
+"обработанных %(skipped)s."
+msgstr ""
+"Session #%(id)s created from the snapshot: %(count)s rows, %(skipped)s "
+"already processed skipped."
+
+#: .\myprofile\views\inventory_session.py:110
 #, python-format
 msgid "QR-код архивирован (%(note)s)."
 msgstr "QR code is archived (%(note)s)."
 
-#: .\myprofile\views\inventory_session.py:103
+#: .\myprofile\views\inventory_session.py:111
 msgid "Чек не найден."
 msgstr "Receipt not found."
 
-#: .\myprofile\views\inventory_session.py:147
-#: .\myprofile\views\inventory_session.py:237
-#: .\myprofile\views\inventory_session.py:346
+#: .\myprofile\views\inventory_session.py:155
+#, python-format
+msgid ""
+"📦 Посылок на пункте выдачи «%(pickup)s» дольше %(days)s дней: %(count)s. "
+"Пожалуйста, заберите их."
+msgstr ""
+"📦 Parcels waiting at pickup point “%(pickup)s” for more than %(days)s days: "
+"%(count)s. Please collect them."
+
+#: .\myprofile\views\inventory_session.py:162
+msgid "Напоминание о посылках"
+msgstr "Parcel reminder"
+
+#: .\myprofile\views\inventory_session.py:192
+#: .\myprofile\views\inventory_session.py:282
+#: .\myprofile\views\inventory_session.py:391
 #: .\myprofile\views\warehouse.py:364 .\myprofile\views\warehouse.py:603
 msgid "Неверный формат данных."
 msgstr "Invalid data format."
 
-#: .\myprofile\views\inventory_session.py:150
-#: .\myprofile\views\inventory_session.py:240
+#: .\myprofile\views\inventory_session.py:195
+#: .\myprofile\views\inventory_session.py:285
 msgid "Сессия не найдена или завершена."
 msgstr "Session not found or already finished."
 
-#: .\myprofile\views\inventory_session.py:153
+#: .\myprofile\views\inventory_session.py:198
 msgid "Пустой код."
 msgstr "Empty code."
 
-#: .\myprofile\views\inventory_session.py:161
+#: .\myprofile\views\inventory_session.py:206
 #, python-format
 msgid "Чек %(num)s уже выдан клиенту."
 msgstr "Receipt %(num)s has already been issued to the client."
 
-#: .\myprofile\views\inventory_session.py:165
+#: .\myprofile\views\inventory_session.py:210
 #, python-format
 msgid "Чек %(num)s уже отсканирован."
 msgstr "Receipt %(num)s has already been scanned."
 
-#: .\myprofile\views\inventory_session.py:187
-#: .\myprofile\views\inventory_session.py:304
+#: .\myprofile\views\inventory_session.py:232
 #: .\myprofile\views\inventory_session.py:349
+#: .\myprofile\views\inventory_session.py:394
 #: .\myprofile\views\warehouse.py:375
 msgid "Номер ячейки должен быть числом (например: 1, 2.1, 0)."
 msgstr "Cell number must be a number (e.g.: 1, 2.1, 0)."
 
-#: .\myprofile\views\inventory_session.py:196
+#: .\myprofile\views\inventory_session.py:241
 msgid "Чек числится на другом ПВЗ — будет отмечен в отчёте."
 msgstr ""
 "The receipt is registered at another pickup point — it will be marked in the "
 "report."
 
-#: .\myprofile\views\inventory_session.py:252
+#: .\myprofile\views\inventory_session.py:297
 #, python-format
 msgid "Клиент %(u)s не найден. Отметьте «Новый клиент», чтобы создать аккаунт."
 msgstr "Client %(u)s not found. Check “New client” to create an account."
 
-#: .\myprofile\views\inventory_session.py:257
+#: .\myprofile\views\inventory_session.py:302
 msgid "Не указан логин нового клиента."
 msgstr "New client's username not specified."
 
-#: .\myprofile\views\inventory_session.py:259
+#: .\myprofile\views\inventory_session.py:304
 #, python-format
 msgid "Логин %(u)s уже занят."
 msgstr "Username %(u)s is already taken."
 
-#: .\myprofile\views\inventory_session.py:269
+#: .\myprofile\views\inventory_session.py:314
 msgid "Не указан владелец."
 msgstr "Owner not specified."
 
-#: .\myprofile\views\inventory_session.py:278
+#: .\myprofile\views\inventory_session.py:323
 msgid "Неверные вес/стоимость/количество."
 msgstr "Invalid weight/cost/quantity."
 
-#: .\myprofile\views\inventory_session.py:281
+#: .\myprofile\views\inventory_session.py:326
 msgid "Укажите количество трек-кодов или введите их."
 msgstr "Specify the number of track codes or enter them."
 
-#: .\myprofile\views\inventory_session.py:283
+#: .\myprofile\views\inventory_session.py:328
 msgid "Вес должен быть больше нуля, стоимость — неотрицательной."
 msgstr "Weight must be greater than zero, cost must be non-negative."
 
-#: .\myprofile\views\inventory_session.py:288
+#: .\myprofile\views\inventory_session.py:333
 #, python-format
 msgid "Трек-код %(c)s содержит недопустимые символы."
 msgstr "Track code %(c)s contains invalid characters."
 
-#: .\myprofile\views\inventory_session.py:290
+#: .\myprofile\views\inventory_session.py:335
 msgid "Дубликаты среди введённых трек-кодов."
 msgstr "Duplicates among the entered track codes."
 
-#: .\myprofile\views\inventory_session.py:294
+#: .\myprofile\views\inventory_session.py:339
 #, python-format
 msgid "Трек-коды уже существуют: %(c)s"
 msgstr "Track codes already exist: %(c)s"
 
-#: .\myprofile\views\inventory_session.py:299
+#: .\myprofile\views\inventory_session.py:344
 msgid ""
 "Логин клиента содержит недопустимые для трек-кода символы — введите трек-"
 "коды вручную."
@@ -6518,63 +6890,72 @@ msgstr ""
 "The client's username contains characters not allowed in track codes — enter "
 "track codes manually."
 
-#: .\myprofile\views\inventory_session.py:353
+#: .\myprofile\views\inventory_session.py:398
 msgid "Строка не найдена или сессия завершена."
 msgstr "Row not found or the session is finished."
 
-#: .\myprofile\views\inventory_session.py:367
+#: .\myprofile\views\inventory_session.py:412
 #: .\myprofile\views\warehouse.py:421 .\myprofile\views\warehouse.py:509
 msgid "Не выбран пункт выдачи."
 msgstr "Pickup point not selected."
 
-#: .\myprofile\views\inventory_session.py:392
-#: .\myprofile\views\inventory_session.py:536
+#: .\myprofile\views\inventory_session.py:437
+#: .\myprofile\views\inventory_session.py:589
 #: .\myprofile\views\warehouse.py:794
 msgid "Сессия не найдена или уже завершена."
 msgstr "Session not found or already completed."
 
-#: .\myprofile\views\inventory_session.py:502
+#: .\myprofile\views\inventory_session.py:552
 msgid "Инвентаризация завершена."
 msgstr "Inventory finished."
 
-#: .\myprofile\views\inventory_session.py:557
+#: .\myprofile\views\inventory_session.py:554
+#, python-format
+msgid ""
+"Уведомления о долгом хранении (более %(days)s дней) отправлены клиентам: "
+"%(count)s."
+msgstr ""
+"Long-storage notifications (more than %(days)s days) sent to clients: "
+"%(count)s."
+
+#: .\myprofile\views\inventory_session.py:610
 msgid "Инвентаризация отменена — изменения не применялись."
 msgstr "Inventory cancelled — no changes were applied."
 
-#: .\myprofile\views\mobile_notifications.py:50
+#: .\myprofile\views\mobile_notifications.py:59
 msgid "Сегодня"
 msgstr "Today"
 
-#: .\myprofile\views\mobile_notifications.py:52
+#: .\myprofile\views\mobile_notifications.py:61
 msgid "Вчера"
 msgstr "Yesterday"
 
-#: .\myprofile\views\mobile_notifications.py:121 .\register\models.py:112
+#: .\myprofile\views\mobile_notifications.py:137 .\register\models.py:112
 #: .\register\templates\desktop\register_confirmation.html:52
 msgid "Заявки на регистрацию"
 msgstr "Registration requests"
 
-#: .\myprofile\views\mobile_notifications.py:136
+#: .\myprofile\views\mobile_notifications.py:152
 msgid "Рассылка"
 msgstr "Mailing"
 
-#: .\myprofile\views\mobile_notifications.py:149 .\tgbot\models.py:99
+#: .\myprofile\views\mobile_notifications.py:165 .\tgbot\models.py:99
 msgid "Информация"
 msgstr "Information"
 
-#: .\myprofile\views\mobile_notifications.py:185
+#: .\myprofile\views\mobile_notifications.py:201
 #: .\support\templates\support\_mobile_messages.html:129
 #: .\support\templates\support\client_chat.html:47
 msgid "Задайте вопрос — мы на связи"
 msgstr "Ask a question — we are online"
 
-#: .\myprofile\views\mobile_notifications.py:211
-#: .\myprofile\views\mobile_notifications.py:230
+#: .\myprofile\views\mobile_notifications.py:227
+#: .\myprofile\views\mobile_notifications.py:246
 #, python-format
 msgid "Di.Buyer — заявка №%(n)s"
 msgstr "Di.Buyer — request #%(n)s"
 
-#: .\myprofile\views\mobile_notifications.py:281
+#: .\myprofile\views\mobile_notifications.py:297
 msgid "Вопросы по выкупу — напишите нам"
 msgstr "Questions about buyout? Message us"
 
@@ -6598,7 +6979,7 @@ msgstr "Ready for pickup"
 msgid "Архивные"
 msgstr "Archived"
 
-#: .\myprofile\views\mobile_parcels.py:185 .\myprofile\views\track_codes.py:188
+#: .\myprofile\views\mobile_parcels.py:185 .\myprofile\views\track_codes.py:217
 msgid "Описание успешно обновлено."
 msgstr "Description updated successfully."
 
@@ -6732,27 +7113,38 @@ msgstr "No track codes with status 'Issued to client'."
 msgid "Все чеки уже отмечены как «Выдано клиенту»."
 msgstr "All receipts are already marked as 'Issued to client'."
 
-#: .\myprofile\views\shipped_cn.py:53
+#: .\myprofile\views\shipped_cn.py:59
 msgid "Укажите дату обновления."
 msgstr "Please specify the update date."
 
-#: .\myprofile\views\shipped_cn.py:86
+#: .\myprofile\views\shipped_cn.py:92
 msgid "Введите трек-коды или загрузите xlsx файл."
 msgstr "Enter track codes or upload an xlsx file."
 
-#: .\myprofile\views\shipped_cn.py:98
+#: .\myprofile\views\shipped_cn.py:104
 #, python-format
 msgid "Импорт запущен в фоне: %(count)s трек-кодов."
 msgstr "Import started in background: %(count)s track codes."
 
-#: .\myprofile\views\shipped_cn.py:140
+#: .\myprofile\views\shipped_cn.py:150
 #, python-format
 msgid "Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов."
 msgstr "Moved to status \"Departed Almaty\": %(count)s track codes."
 
-#: .\myprofile\views\shipped_cn.py:143
+#: .\myprofile\views\shipped_cn.py:153 .\myprofile\views\shipped_cn.py:179
 msgid "Нет трек-кодов для перевода."
 msgstr "No track codes to transfer."
+
+#: .\myprofile\views\shipped_cn.py:158
+msgid ""
+"База данных отвергла новый статус. Администратору: выполните на сервере "
+"«python manage.py migrate» — он удалит устаревшее ограничение статусов."
+msgstr "The database rejected the new status. Administrator: run “python manage.py migrate” on the server — it removes the outdated status constraint."
+
+#: .\myprofile\views\shipped_cn.py:176
+#, python-format
+msgid "Переведено в статус «Прибыло на таможню»: %(count)s трек-кодов."
+msgstr "Moved to “Arrived at customs”: %(count)s track codes."
 
 #: .\myprofile\views\status_update.py:29
 msgid "Заполните все обязательные поля."
@@ -6766,66 +7158,68 @@ msgstr "Invalid date format. Expected YYYY-MM-DD."
 msgid "Количество трек-кодов, пользователей и весов должно совпадать."
 msgstr "The number of track codes, users and weights must match."
 
-#: .\myprofile\views\track_codes.py:112 .\myprofile\views\track_codes.py:219
+#: .\myprofile\views\track_codes.py:34 .\myprofile\views\track_codes.py:138
+#: .\myprofile\views\track_codes.py:248
 msgid "Этот трек-код уже добавлен в ваш список."
 msgstr "This track code is already in your list."
 
-#: .\myprofile\views\track_codes.py:115 .\myprofile\views\track_codes.py:221
+#: .\myprofile\views\track_codes.py:36 .\myprofile\views\track_codes.py:141
+#: .\myprofile\views\track_codes.py:250
 msgid "Этот трек-код уже зарегистрирован другим пользователем."
 msgstr "This track code is already registered by another user."
 
-#: .\myprofile\views\track_codes.py:128 .\myprofile\views\track_codes.py:233
+#: .\myprofile\views\track_codes.py:157 .\myprofile\views\track_codes.py:265
 msgid "Трек-код успешно добавлен."
 msgstr "Track code added successfully."
 
-#: .\myprofile\views\track_codes.py:136
+#: .\myprofile\views\track_codes.py:165
 msgid "Не удалось добавить трек-код."
 msgstr "Failed to add track code."
 
-#: .\myprofile\views\track_codes.py:139 .\myprofile\views\track_codes.py:236
-#: .\myprofile\views\unidentified.py:36
+#: .\myprofile\views\track_codes.py:168 .\myprofile\views\track_codes.py:268
+#: .\myprofile\views\unidentified.py:37
 msgid "Введите трек-код."
 msgstr "Enter track code."
 
-#: .\myprofile\views\track_codes.py:190
+#: .\myprofile\views\track_codes.py:219
 msgid "Некорректные данные."
 msgstr "Invalid data."
 
-#: .\myprofile\views\track_codes.py:250
+#: .\myprofile\views\track_codes.py:282
 msgid "Трек-код перемещён в архив."
 msgstr "Track code moved to archive."
 
-#: .\myprofile\views\track_codes.py:262
+#: .\myprofile\views\track_codes.py:294
 msgid "Трек-код восстановлен из архива."
 msgstr "Track code restored from archive."
 
-#: .\myprofile\views\track_codes.py:272
+#: .\myprofile\views\track_codes.py:304
 msgid "Не выбрано ни одного трек-кода."
 msgstr "No track codes selected."
 
-#: .\myprofile\views\unidentified.py:47 .\myprofile\views\unidentified.py:267
+#: .\myprofile\views\unidentified.py:48 .\myprofile\views\unidentified.py:273
 msgid "Некорректный вес."
 msgstr "Invalid weight."
 
-#: .\myprofile\views\unidentified.py:147
+#: .\myprofile\views\unidentified.py:153
 msgid "Посылка не найдена или уже назначена."
 msgstr "Parcel not found or already assigned."
 
-#: .\myprofile\views\unidentified.py:151
+#: .\myprofile\views\unidentified.py:157
 msgid "Не указан пользователь."
 msgstr "User not specified."
 
-#: .\myprofile\views\unidentified.py:193 .\myprofile\views\unidentified.py:217
-#: .\myprofile\views\unidentified.py:236 .\myprofile\views\unidentified.py:256
+#: .\myprofile\views\unidentified.py:199 .\myprofile\views\unidentified.py:223
+#: .\myprofile\views\unidentified.py:242 .\myprofile\views\unidentified.py:262
 msgid "Посылка не найдена."
 msgstr "Parcel not found."
 
-#: .\myprofile\views\utils.py:295
+#: .\myprofile\views\utils.py:300
 #, python-format
 msgid "📦 Ваш трек-код обновлён: %(status)s"
 msgstr "📦 Your tracking code updated: %(status)s"
 
-#: .\myprofile\views\utils.py:296
+#: .\myprofile\views\utils.py:301
 #, python-format
 msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
 msgstr "📦 Updated %(count)s tracking codes: %(status)s"
@@ -7658,27 +8052,33 @@ msgstr ""
 msgid "Войти в аккаунт"
 msgstr "Log in to account"
 
-#: .\register\views\email_verify.py:24
+#: .\register\views\email_verify.py:25
 msgid "Введите email."
 msgstr "Enter email."
 
-#: .\register\views\email_verify.py:51 .\register\views\password_reset.py:85
+#: .\register\views\email_verify.py:53
+msgid "Почтовый сервер отклонил этот адрес. Проверьте правильность email."
+msgstr ""
+"The mail server rejected this address. Please check that the email is "
+"correct."
+
+#: .\register\views\email_verify.py:56 .\register\views\password_reset.py:85
 msgid "Не удалось отправить письмо. Попробуйте позже."
 msgstr "Failed to send email. Please try again later."
 
-#: .\register\views\email_verify.py:66
+#: .\register\views\email_verify.py:71
 msgid "Введите email и код."
 msgstr "Enter email and code."
 
-#: .\register\views\email_verify.py:74 .\register\views\password_reset.py:119
+#: .\register\views\email_verify.py:79 .\register\views\password_reset.py:119
 msgid "Код не найден. Запросите новый код."
 msgstr "Code not found. Request a new code."
 
-#: .\register\views\email_verify.py:78 .\register\views\password_reset.py:123
+#: .\register\views\email_verify.py:83 .\register\views\password_reset.py:123
 msgid "Код истёк. Запросите новый."
 msgstr "Code expired. Request a new one."
 
-#: .\register\views\email_verify.py:82 .\register\views\password_reset.py:127
+#: .\register\views\email_verify.py:87 .\register\views\password_reset.py:127
 msgid "Слишком много попыток. Запросите новый код."
 msgstr "Too many attempts. Request a new code."
 
@@ -7752,11 +8152,24 @@ msgstr "Registration successful! You can now log in."
 msgid "Новая заявка на регистрацию клиента: %(username)s"
 msgstr "New client registration request: %(username)s"
 
-#: .\register\views\regConfirm.py:96
+#: .\register\views\regConfirm.py:40 .\register\views\regConfirm.py:128
+msgid "Заявка уже обработана."
+msgstr "This request has already been processed."
+
+#: .\register\views\regConfirm.py:47
+#, python-format
+msgid ""
+"Пользователь с логином %(login)s уже существует. Отклоните заявку или "
+"свяжитесь с клиентом."
+msgstr ""
+"A user with login %(login)s already exists. Reject the request or contact "
+"the client."
+
+#: .\register\views\regConfirm.py:74
 msgid "Пользователь успешно подтверждён."
 msgstr "User confirmed successfully."
 
-#: .\register\views\regConfirm.py:128
+#: .\register\views\regConfirm.py:153
 msgid "Заявка отклонена."
 msgstr "Request rejected."
 
@@ -7808,24 +8221,24 @@ msgstr "Support message"
 msgid "Сообщения поддержки"
 msgstr "Support messages"
 
-#: .\support\services.py:74
+#: .\support\services.py:81
 msgid ""
 "💬 Новое сообщение от техподдержки Inter Cargo. Откройте «Сообщения», чтобы "
 "ответить."
 msgstr "💬 New message from Inter Cargo support. Open “Messages” to reply."
 
-#: .\support\services.py:91
+#: .\support\services.py:98
 #, python-format
 msgid "💬 Поддержка: новое сообщение от клиента %(name)s"
 msgstr "💬 Support: new message from client %(name)s"
 
-#: .\support\services.py:100
+#: .\support\services.py:107
 #, python-format
 msgid "💬 Поддержка: оператор %(operator)s передал вам чат клиента %(name)s"
 msgstr ""
 "💬 Support: operator %(operator)s transferred client %(name)s's chat to you"
 
-#: .\support\services.py:109
+#: .\support\services.py:116
 #, python-format
 msgid "💬 Поддержка: чат клиента %(name)s возвращён вам в работу"
 msgstr "💬 Support: client %(name)s's chat has been returned to you"
@@ -8625,6 +9038,9 @@ msgstr "📦 Status updated: %(status)s"
 #, python-format
 msgid "Трек-код %(track_code)s — %(status)s"
 msgstr "Track code %(track_code)s — %(status)s"
+
+#~ msgid "Найдена несохранённая резервная копия"
+#~ msgstr "Unsaved backup found"
 
 #~ msgid "Как заполнить адрес склада в Китае?"
 #~ msgstr "How to fill in the warehouse address in China?"

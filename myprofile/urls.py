@@ -19,7 +19,7 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management, blocks, bulk_jobs, inventory_session
+from .views import customer_paycheks, notifications, profile_setting, personal_profile, status_update, track_codes, push_subscribe, extraditions, extradition_Package, documents, goods_arrival, goods_arrival_history, delivery, shipped_cn, warehouse, arrival_history, arrival_summary, pp_acceptance, pp_extradition_history, email_logs, finance_summary, service, notification_logs, notification_mutes, unidentified, reschedule_arrival, mobile_qr, mobile_parcels, mobile_notifications, mobile_menu, role_management, blocks, bulk_jobs, inventory_session
 
 urlpatterns = [
     path('track-codes/', track_codes.track_codes_view, name='track_codes'),
@@ -68,11 +68,17 @@ urlpatterns = [
     path('goods-arrival/session/<int:session_id>/complete/', goods_arrival.complete_session, name='goods_arrival_complete'),
     path('goods-arrival/session/<int:session_id>/pause/', goods_arrival.pause_session, name='goods_arrival_pause'),
     path('goods-arrival/session/<int:session_id>/resume/', goods_arrival.resume_session, name='goods_arrival_resume'),
+    path('goods-arrival/session/<int:session_id>/heartbeat/', goods_arrival.session_heartbeat, name='goods_arrival_heartbeat'),
+    path('goods-arrival/session/<int:session_id>/history/', goods_arrival_history.session_history, name='goods_arrival_history'),
+    path('goods-arrival/session/<int:session_id>/history/<int:snapshot_id>/csv/', goods_arrival_history.snapshot_csv, name='goods_arrival_snapshot_csv'),
+    path('goods-arrival/session/<int:session_id>/history/<int:snapshot_id>/restore/', goods_arrival_history.snapshot_restore, name='goods_arrival_snapshot_restore'),
+    path('goods-arrival/session/<int:session_id>/history/<int:snapshot_id>/new-session/', goods_arrival_history.snapshot_new_session, name='goods_arrival_snapshot_new_session'),
     path('delivery/', delivery.delivery_view, name='delivery'),
     path('delivery/take/', delivery.take_delivery, name='take_delivery'),
     path('delivery/complete/', delivery.complete_delivery, name='complete_delivery'),
     path('shipped-cn/', shipped_cn.shipped_cn_view, name='shipped_cn'),
     path('shipped-cn/advance-almaty/', shipped_cn.shipped_cn_advance_almaty, name='shipped_cn_advance_almaty'),
+    path('shipped-cn/auto-advance/', shipped_cn.shipped_cn_auto_advance, name='shipped_cn_auto_advance'),
     path('shipped-cn/batch-tracks/', shipped_cn.shipped_cn_batch_tracks, name='shipped_cn_batch_tracks'),
     path('warehouse/', warehouse.warehouse_view, name='warehouse'),
     path('warehouse/issue/', warehouse.warehouse_issue_to_client, name='warehouse_issue_to_client'),

@@ -60,9 +60,41 @@
                     {% if can_edit %}
                     <span id="save-status" class="text-sm text-gray-400"></span>
                     {% endif %}
+                    <a href="{% url 'goods_arrival_history' session.id %}" target="_blank" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition text-sm" title="{% trans 'Все сохранения сессии — можно восстановить любое' %}">
+                        <i class="ri-history-line"></i> {% trans "История сохранений" %}
+                    </a>
                     <a href="{% url 'goods_arrival' %}" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition text-sm">
                         <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
                     </a>
+                </div>
+            </div>
+
+            <!-- Плашка: данные не сохраняются на сервере (причина + действие) -->
+            <div id="save-alert" class="hidden sticky top-0 md:top-[90px] z-30 mb-4 p-4 rounded-lg bg-red-600 text-white shadow-lg">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <i class="ri-error-warning-fill text-3xl flex-shrink-0"></i>
+                        <div class="min-w-0">
+                            <p class="font-bold text-lg" id="save-alert-title"></p>
+                            <p class="text-sm text-red-50" id="save-alert-detail"></p>
+                        </div>
+                    </div>
+                    <button type="button" id="save-alert-action"
+                        class="bg-white text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition flex-shrink-0"></button>
+                </div>
+            </div>
+
+            <!-- Баннер: сессию редактирует другое устройство — здесь только просмотр -->
+            <div id="editor-lock-banner" class="hidden mb-4 p-4 rounded-lg bg-purple-50 border border-purple-300">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="ri-lock-line text-purple-500 text-xl flex-shrink-0"></i>
+                        <p class="text-sm text-purple-800" id="editor-lock-text"></p>
+                    </div>
+                    <button type="button" id="editor-lock-takeover"
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium flex-shrink-0">
+                        <i class="ri-edit-line mr-1"></i> {% trans "Работать здесь" %}
+                    </button>
                 </div>
             </div>
 
@@ -123,29 +155,6 @@
                 </div>
             </div>
 
-            <!-- Баннер: найдена несохранённая резервная копия (localStorage / серверный черновик) -->
-            <div id="draft-restore-banner" class="hidden mb-4 p-4 rounded-lg bg-blue-50 border border-blue-300">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-2">
-                        <i class="ri-history-line text-blue-500 text-xl"></i>
-                        <div>
-                            <p class="font-semibold text-blue-800">{% trans "Найдена несохранённая резервная копия" %}</p>
-                            <p class="text-sm text-blue-600" id="draft-restore-detail"></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <button type="button" id="draft-restore-btn"
-                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm font-medium">
-                            <i class="ri-arrow-go-back-line mr-1"></i> {% trans "Восстановить" %}
-                        </button>
-                        <button type="button" id="draft-dismiss-btn"
-                            class="border border-blue-300 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium">
-                            {% trans "Отклонить" %}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             {% if messages %}
             <div class="mb-4">
                 {% for message in messages %}
@@ -160,7 +169,7 @@
             </div>
             {% endif %}
 
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6" id="session-editor">
                 <!-- Переключение вида -->
                 <div class="flex items-center gap-3 mb-4 flex-wrap">
                     <button type="button" id="form_toggle_btn"
@@ -248,6 +257,7 @@
                     {% if can_edit %}
                     <form method="post" action="{% url 'goods_arrival_complete' session.id %}" id="complete_form">
                         {% csrf_token %}
+                        <input type="hidden" name="revision" id="complete_revision" value="{{ session.revision }}">
                         <button type="submit" id="complete_btn"
                             class="bg-primary text-white px-6 py-2 rounded hover:bg-red-600 transition font-medium"
                             onclick="return confirm('Завершить сессию и обработать все трек-коды?')">
@@ -268,16 +278,30 @@
         </div>
     </div>
 
+    <div id="decision-modal" class="hidden fixed inset-0 z-[80] bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <h3 id="decision-title" class="text-xl font-semibold text-gray-800 mb-3"></h3>
+            <div id="decision-body" class="text-sm text-gray-700 space-y-2"></div>
+            <div id="decision-buttons" class="flex flex-wrap gap-2 mt-5"></div>
+        </div>
+    </div>
+
     <script>
     var SESSION_CONFIG = {
         sessionId: {{ session.id }},
         saveUrl: '{% url "goods_arrival_save" session.id %}',
+        heartbeatUrl: '{% url "goods_arrival_heartbeat" session.id %}',
+        historyUrl: '{% url "goods_arrival_history" session.id %}',
+        resumeUrl: '{% url "goods_arrival_resume" session.id %}',
+        revision: {{ session.revision }},
+        lock: {{ lock_json|safe }},
         csrfToken: '{{ csrf_token }}',
         getOwnerUrl: '{% url "get_track_owner" %}',
         searchUsersUrl: '{% url "search_users" %}',
         initialItems: {{ items_json|safe }},
         knownTracks: {{ known_tracks_json|safe }},
         draft: {{ draft_json|safe }},
+        serverRaw: {{ server_raw_json|safe }},
         canEdit: {{ can_edit|yesno:"true,false" }}
     };
     </script>

@@ -5,36 +5,32 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import F, Max, Q
 from django.utils import timezone
 from myprofile.models import TrackCode, SortingLocation, Arrival, ArrivalSession, ArrivalSessionItem, ReceiptItem
 from register.models import UserProfile
+from myprofile import arrival_autosave
 from myprofile.views.utils import is_staff as _is_staff, resolve_owner as _resolve_owner, send_grouped_notifications, add_bulk_result_messages, get_global_price_per_kg, get_user_discount
 from django.utils.translation import gettext as _
-from decimal import Decimal, InvalidOperation
+from decimal import InvalidOperation
 from datetime import datetime
 from collections import defaultdict
 import json
-import re
+import logging
 
-_INVALID_TRACK_CODE_RE = re.compile(
-    r'['
-    r'\u4E00-\u9FFF'
-    r'\u3400-\u4DBF'
-    r'\uF900-\uFAFF'
-    r'\u3000-\u303F'
-    r'\u0400-\u04FF'
-    r']'
-)
+logger = logging.getLogger(__name__)
 
 
 def _expire_stale_sessions():
-    """Помечает активные/приостановленные сессии старше 48 часов как неактивные."""
+    """Помечает неактивными сессии без сохранений дольше 48 часов.
+
+    Отсчёт — от последней активности (сохранения/возобновления), а не от создания:
+    иначе сессия гасла посреди работы и дальше ничего не сохранялось.
+    """
     from datetime import timedelta
     cutoff = timezone.now() - timedelta(hours=ArrivalSession.ACTIVE_HOURS_LIMIT)
-    ArrivalSession.objects.filter(
-        status__in=['active', 'paused'],
-        created_at__lt=cutoff,
+    ArrivalSession.objects.filter(status__in=['active', 'paused']).filter(
+        Q(last_activity_at__lt=cutoff) | Q(last_activity_at__isnull=True, created_at__lt=cutoff)
     ).update(status='inactive')
 
 
@@ -83,8 +79,17 @@ def _drain_awaiting_unidentified(session):
     with transaction.atomic():
         if new_items:
             ArrivalSessionItem.objects.bulk_create(new_items)
+            # Строки добавлены мимо автосохранения — новая версия сессии: открытая
+            # вкладка получит конфликт и объединит, а не сотрёт их своим сохранением
+            ArrivalSession.objects.filter(pk=session.pk).update(
+                revision=F('revision') + 1,
+                applied_rows=F('applied_rows') + len(new_items),
+                last_client_id='',
+            )
         TrackCode.all_objects.filter(id__in=drained_ids).update(awaiting_arrival=False)
 
+    if new_items:
+        session.refresh_from_db(fields=['revision', 'applied_rows', 'last_client_id'])
     return len(new_items)
 
 
@@ -163,6 +168,7 @@ def start_session(request):
         date=date,
         created_by=request.user,
         sorting_location=sorting_location,
+        last_activity_at=timezone.now(),
     )
 
     # Подтверждённые неопознанные посылки автоматически добавляем в новую сессию.
@@ -203,10 +209,24 @@ def session_form(request, session_id):
 
     can_edit = session.status == 'active'
 
-    # Серверный резервный черновик — клиент сравнит его с локальной копией (localStorage)
+    # Серверный черновик — сырой ввод последнего присланного набора. Если он и есть
+    # применённая версия (хеш совпал), предлагать его нечего: строки сессии — это он же,
+    # только нормализованный (вес округлён, дубли и запрещённые коды отброшены).
+    # Тогда отдаём его как «сырую» базу для сравнения с локальной копией.
+    draft_items = (session.draft_data or {}).get('items', [])
+    draft_is_applied = bool(draft_items) and session.content_hash == arrival_autosave.items_hash(
+        arrival_autosave.clean_items(draft_items))
     draft = {
-        'items': (session.draft_data or {}).get('items', []),
+        'items': [] if draft_is_applied else draft_items,
         'savedAt': session.draft_saved_at.timestamp() * 1000 if session.draft_saved_at else None,
+    }
+    server_raw = draft_items if draft_is_applied else None
+
+    # Кто держит редактирование — вкладка сравнит со своим id и откроется только
+    # на чтение, если сессию прямо сейчас ведёт другое устройство
+    lock = {
+        'clientId': session.editor_client_id if arrival_autosave.lock_is_live(session) else '',
+        'name': arrival_autosave.editor_name(session),
     }
 
     return render(request, "desktop/goods_arrival_session.html", {
@@ -215,6 +235,9 @@ def session_form(request, session_id):
         'items_json': json.dumps(items, default=str),
         'known_tracks_json': json.dumps(known_tracks),
         'draft_json': json.dumps(draft, default=str),
+        'server_raw_json': json.dumps(server_raw, default=str),
+        'lock_json': json.dumps(lock).replace('<', '\\u003c'),   # имя не закроет <script>
+
         'can_edit': can_edit,
     })
 
@@ -226,7 +249,7 @@ def session_save_items(request, session_id):
     if not _is_staff(request.user):
         return JsonResponse({'error': _('Нет доступа')}, status=403)
 
-    session = get_object_or_404(ArrivalSession, id=session_id, status='active')
+    session = get_object_or_404(ArrivalSession, id=session_id)
 
     # Поддерживаем два формата запроса:
     #   - JSON-body (обычный fetch с заголовком X-CSRFToken);
@@ -235,89 +258,55 @@ def session_save_items(request, session_id):
     try:
         if request.content_type and request.content_type.startswith('application/json'):
             data = json.loads(request.body)
-            items = data.get('items', [])
+            if not isinstance(data, dict):
+                raise TypeError
         else:
-            items = json.loads(request.POST.get('items', '[]'))
+            data = request.POST.dict()
+            data['items'] = json.loads(data.get('items', '[]'))
+        items = data.get('items', [])
     except (json.JSONDecodeError, AttributeError, TypeError):
         return JsonResponse({'error': _('Неверные данные')}, status=400)
     if not isinstance(items, list):
         return JsonResponse({'error': _('Неверные данные')}, status=400)
 
-    # Резервный сырой снимок — пишем сразу, до нормализации и валидации,
-    # чтобы восстановимая копия пережила любые ошибки обработки ниже.
-    session.draft_data = {'items': items}
-    session.draft_saved_at = timezone.now()
-    session.save(update_fields=['draft_data', 'draft_saved_at'])
+    def _int_or_none(value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
 
-    # Собираем трек-коды из запроса (без пустых, без дублей внутри сессии)
-    seen = set()
-    invalid_codes = []
-    parsed = []
-    for i, item in enumerate(items):
-        track_code = str(item.get('track_code', '')).strip()
-        if not track_code or track_code in seen:
-            continue
-        if _INVALID_TRACK_CODE_RE.search(track_code):
-            invalid_codes.append(track_code)
-            continue
-        seen.add(track_code)
-        weight_str = str(item.get('weight', '') or '').replace(',', '.').strip()
-        weight_val = None
-        if weight_str:
-            try:
-                w = Decimal(weight_str)
-                if 0 < w < 1000:
-                    weight_val = w
-            except (InvalidOperation, ValueError):
-                pass
-        parsed.append({
-            'track_code': track_code,
-            'owner_name': str(item.get('owner_name', '')).strip(),
-            'weight': weight_val,
-            'row_number': i,
-        })
-
-    # Проверяем: какие трек-коды уже заняты ДРУГОЙ сессией
-    incoming_codes = [p['track_code'] for p in parsed]
-    occupied = set(
-        ArrivalSessionItem.objects
-        .filter(track_code__in=incoming_codes)
-        .exclude(session=session)
-        .values_list('track_code', flat=True)
+    status, payload = arrival_autosave.save_items(
+        session, items,
+        user=request.user,
+        source=str(data.get('source') or 'fetch'),
+        client_id=str(data.get('client_id') or ''),
+        seq=_int_or_none(data.get('seq')),
+        base_revision=_int_or_none(data.get('base_revision')),
+        confirm_shrink=str(data.get('confirm_shrink', '')).lower() in ('1', 'true'),
+        periodic=str(data.get('periodic', '')).lower() in ('1', 'true'),
     )
+    return JsonResponse(payload, status=status)
 
-    # Ищем соответствующие TrackCode объекты для FK
-    track_objs = {
-        tc.track_code: tc
-        for tc in TrackCode.objects.filter(track_code__in=incoming_codes)
-    }
 
-    new_items = []
-    for p in parsed:
-        if p['track_code'] in occupied:
-            continue  # пропускаем трек, занятый другой сессией
-        new_items.append(ArrivalSessionItem(
-            session=session,
-            track_code=p['track_code'],
-            track_obj=track_objs.get(p['track_code']),
-            owner_name=p['owner_name'],
-            weight=p['weight'],
-            row_number=p['row_number'],
-        ))
-
-    # Замена строк сессии — атомарно: при обрыве посередине БД не остаётся
-    # с удалёнными, но не пересозданными строками.
-    with transaction.atomic():
-        session.items.all().delete()
-        if new_items:
-            ArrivalSessionItem.objects.bulk_create(new_items)
-
-    return JsonResponse({
-        'success': True,
-        'count': len(new_items),
-        'occupied': sorted(occupied),
-        'invalid_chars': sorted(invalid_codes),
-    })
+@login_required
+@require_POST
+def session_heartbeat(request, session_id):
+    """AJAX: вкладка жива. Захват/перехват/освобождение редактирования сессии."""
+    if not _is_staff(request.user):
+        return JsonResponse({'error': _('Нет доступа')}, status=403)
+    session = get_object_or_404(ArrivalSession, id=session_id)
+    try:
+        unsaved = max(0, int(request.POST.get('unsaved_seconds') or 0))
+    except ValueError:
+        unsaved = 0
+    payload = arrival_autosave.heartbeat(
+        session, request.user, request.POST.get('client_id', ''),
+        take_over=request.POST.get('take_over') == '1',
+        release=request.POST.get('release') == '1',
+        unsaved_seconds=unsaved,
+        unsaved_reason=request.POST.get('unsaved_reason', ''),
+    )
+    return JsonResponse(payload)
 
 
 @login_required
@@ -355,7 +344,8 @@ def resume_session(request, session_id):
 
     session.status = 'active'
     session.paused_at = None
-    session.save(update_fields=['status', 'paused_at'])
+    session.last_activity_at = timezone.now()   # отсчёт 48 ч начинается заново
+    session.save(update_fields=['status', 'paused_at', 'last_activity_at'])
     return redirect('goods_arrival_session', session_id=session.id)
 
 
@@ -367,6 +357,14 @@ def complete_session(request, session_id):
         return HttpResponseForbidden(_("У вас нет доступа."))
 
     session = get_object_or_404(ArrivalSession, id=session_id, status='active')
+
+    # Страница присылает версию строк, которую видит оператор. Если на сервере уже
+    # другая (сохранило другое устройство или восстановили из истории) — не
+    # завершаем вслепую, а возвращаем к сессии.
+    seen_revision = request.POST.get('revision', '')
+    if seen_revision.isdigit() and int(seen_revision) != session.revision:
+        messages.error(request, _("Строки сессии изменились на сервере. Проверьте данные и завершите ещё раз."))
+        return redirect('goods_arrival_session', session_id=session.id)
 
     # Финальная подстраховка: добавляем подтверждённые неопознанные посылки,
     # которые подтвердили во время сессии и ещё не попали в неё.

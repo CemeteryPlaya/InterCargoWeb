@@ -104,7 +104,7 @@
             <div id="qr-reader" class="hidden max-w-sm mx-auto mb-4 rounded-lg overflow-hidden shadow"></div>
 
             <!-- Тост -->
-            <div id="inv-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium"></div>
+            <div id="inv-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] px-4 py-3 rounded-lg shadow-lg text-sm font-medium"></div>
 
             <!-- Таблица сканов -->
             <div class="bg-white rounded-lg shadow overflow-x-auto">
@@ -129,11 +129,11 @@
             </div>
 
             <!-- Модалка: ручной ввод legacy -->
-            <div id="legacy-modal" class="hidden fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
-                <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-                    <div class="flex items-center justify-between mb-4">
+            <div id="legacy-modal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto px-6 pb-6">
+                    <div class="sticky top-0 z-10 bg-white flex items-center justify-between pt-6 pb-3 mb-1">
                         <h3 class="text-lg font-semibold text-gray-800">{% trans "Добавить посылку без QR (legacy)" %}</h3>
-                        <button type="button" class="modal-close text-gray-400 hover:text-gray-600"><i class="ri-close-line text-xl"></i></button>
+                        <button type="button" class="modal-close text-gray-400 hover:text-gray-600" aria-label="{% trans "Закрыть" %}"><i class="ri-close-line text-xl"></i></button>
                     </div>
                     <div class="space-y-3">
                         <div>
@@ -173,16 +173,22 @@
                             </div>
                         </div>
                         <div id="legacy-error" class="hidden text-sm text-red-600"></div>
-                        <button type="button" id="legacy-submit"
-                            class="w-full bg-purple-600 text-white py-2.5 rounded-lg hover:bg-purple-700 transition text-sm font-medium">
-                            {% trans "Создать чек и добавить" %}
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" id="legacy-cancel"
+                                class="modal-close flex-1 bg-gray-200 text-gray-700 py-2.5 rounded-lg hover:bg-gray-300 transition text-sm font-medium">
+                                {% trans "Закрыть" %}
+                            </button>
+                            <button type="button" id="legacy-submit"
+                                class="flex-[2] bg-purple-600 text-white py-2.5 rounded-lg hover:bg-purple-700 transition text-sm font-medium">
+                                {% trans "Создать чек и добавить" %}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Модалка: QR созданного чека -->
-            <div id="qr-modal" class="hidden fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
+            <div id="qr-modal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
                 <div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-6 text-center">
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">{% trans "Чек создан" %}</h3>
                     <p id="qr-modal-number" class="text-sm text-gray-500 mb-3 font-mono"></p>
@@ -203,7 +209,7 @@
             </div>
 
             <!-- Модалка: ручной ввод кода чека -->
-            <div id="code-modal" class="hidden fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4">
+            <div id="code-modal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
                 <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-lg font-semibold text-gray-800">{% trans "Код чека" %}</h3>
@@ -213,6 +219,28 @@
                     <button type="button" id="code-submit"
                         class="w-full mt-3 bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-800 transition text-sm font-medium">
                         {% trans "Добавить" %}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Модалка: подтверждение ячейки после скана -->
+            <div id="cell-modal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-6">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-lg font-semibold text-gray-800">{% trans "Ячейка" %}</h3>
+                        <button type="button" class="modal-close text-gray-400 hover:text-gray-600" aria-label="{% trans "Закрыть" %}"><i class="ri-close-line text-xl"></i></button>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-3">
+                        <span id="cell-modal-receipt" class="font-mono font-medium text-gray-700"></span>
+                        — <span id="cell-modal-client"></span>
+                    </p>
+                    <label for="cell-modal-input" class="block text-sm text-gray-600 mb-1">{% trans "Предложенный номер — подтвердите или введите свой" %}</label>
+                    <input type="text" id="cell-modal-input" inputmode="decimal" autocomplete="off"
+                           class="w-full border rounded-lg px-3 py-3 text-2xl font-semibold text-center">
+                    <div id="cell-modal-error" class="hidden text-sm text-red-600 mt-2"></div>
+                    <button type="button" id="cell-modal-confirm"
+                        class="w-full mt-3 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                        <i class="ri-check-line"></i> {% trans "Подтвердить" %}
                     </button>
                 </div>
             </div>
@@ -239,7 +267,7 @@
 
                     function toast(text, kind) {
                         toastEl.textContent = text;
-                        toastEl.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ' +
+                        toastEl.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] px-4 py-3 rounded-lg shadow-lg text-sm font-medium ' +
                             (kind === 'ok' ? 'bg-green-600 text-white' :
                              kind === 'warn' ? 'bg-yellow-500 text-white' : 'bg-red-600 text-white');
                         clearTimeout(toastEl._t);
@@ -282,6 +310,7 @@
                         else tbody.appendChild(tr);
                         renumber();
                         countEl.textContent = rowCount;
+                        return tr;
                     }
 
                     function renumber() {
@@ -308,10 +337,10 @@
                             return res.json().then(function (data) { return { ok: res.ok, data: data }; });
                         }).then(function (r) {
                             if (r.ok) {
-                                addRow(r.data.row, true);
+                                var tr = addRow(r.data.row, true);
                                 beep();
                                 if (r.data.warning) toast(r.data.warning, 'warn');
-                                else toast(r.data.row.receipt_number + ' → ' + r.data.row.cell_number, 'ok');
+                                openCellPrompt(r.data.row, tr);
                             } else {
                                 toast(r.data.error || '{% trans "Ошибка" %}', r.data.duplicate ? 'warn' : 'err');
                             }
@@ -328,6 +357,8 @@
                     var btnCameraLabel = document.getElementById('btn-camera-label');
 
                     function onScanSuccess(decodedText) {
+                        // Пока оператор подтверждает ячейку предыдущего чека — новые сканы не принимаем
+                        if (isOpen('cell-modal')) return;
                         var code = ScanNormalize.normalize(decodedText);
                         var now = Date.now();
                         if (recentCodes[code] && now - recentCodes[code] < 3000) return;
@@ -362,38 +393,107 @@
                     });
 
                     // ── смена ячейки ──
+                    function saveCell(scanId, value) {
+                        return fetch(CELL_URL, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                            body: JSON.stringify({ scan_id: scanId, cell_number: value })
+                        }).then(function (res) {
+                            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+                        }).catch(function () {
+                            return { ok: false, data: { error: '{% trans "Нет связи с сервером" %}' } };
+                        });
+                    }
+
+                    function flashCell(input, ok) {
+                        input.classList.remove('border-green-400', 'border-red-400');
+                        input.classList.add(ok ? 'border-green-400' : 'border-red-400');
+                        if (ok) setTimeout(function () { input.classList.remove('border-green-400'); }, 1200);
+                    }
+
                     tbody.addEventListener('change', function (e) {
                         var input = e.target.closest('.cell-input');
                         if (!input) return;
                         var tr = input.closest('tr');
-                        fetch(CELL_URL, {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
-                            body: JSON.stringify({ scan_id: tr.dataset.scanId, cell_number: input.value.trim() })
-                        }).then(function (res) {
-                            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
-                        }).then(function (r) {
+                        saveCell(tr.dataset.scanId, input.value.trim()).then(function (r) {
                             if (r.ok) {
                                 input.value = r.data.cell_number;
-                                input.classList.add('border-green-400');
-                                setTimeout(function () { input.classList.remove('border-green-400'); }, 1200);
+                                flashCell(input, true);
                             } else {
                                 toast(r.data.error || '{% trans "Ошибка" %}', 'err');
-                                input.classList.add('border-red-400');
+                                flashCell(input, false);
                             }
                         });
                     });
 
                     // ── модалки ──
+                    var MODAL_IDS = ['legacy-modal', 'qr-modal', 'code-modal', 'cell-modal'];
                     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+                    function isOpen(id) { return !document.getElementById(id).classList.contains('hidden'); }
                     function closeModals() {
-                        ['legacy-modal', 'qr-modal', 'code-modal'].forEach(function (id) {
+                        MODAL_IDS.forEach(function (id) {
                             document.getElementById(id).classList.add('hidden');
                         });
                     }
                     document.querySelectorAll('.modal-close').forEach(function (btn) {
                         btn.addEventListener('click', closeModals);
+                    });
+                    // Закрытие по клику на затемнение и по Esc
+                    MODAL_IDS.forEach(function (id) {
+                        var overlay = document.getElementById(id);
+                        overlay.addEventListener('click', function (e) {
+                            if (e.target === overlay) closeModals();
+                        });
+                    });
+                    document.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape') closeModals();
+                    });
+
+                    // ── подтверждение ячейки после скана ──
+                    var cellPrompt = { scanId: null, suggested: '', input: null };
+                    var cellModalInput = document.getElementById('cell-modal-input');
+                    var cellModalError = document.getElementById('cell-modal-error');
+
+                    function openCellPrompt(row, tr) {
+                        cellPrompt.scanId = row.scan_id;
+                        cellPrompt.suggested = row.cell_number;
+                        cellPrompt.input = tr ? tr.querySelector('.cell-input') : null;
+                        document.getElementById('cell-modal-receipt').textContent = row.receipt_number;
+                        document.getElementById('cell-modal-client').textContent = row.client;
+                        cellModalInput.value = row.cell_number;
+                        cellModalError.classList.add('hidden');
+                        openModal('cell-modal');
+                        cellModalInput.focus();
+                        cellModalInput.select();
+                    }
+
+                    function confirmCellPrompt() {
+                        var value = cellModalInput.value.trim();
+                        if (!value || value === cellPrompt.suggested) {
+                            closeModals();   // номер верный — просто подтвердили
+                            toast(document.getElementById('cell-modal-receipt').textContent + ' → ' + cellPrompt.suggested, 'ok');
+                            return;
+                        }
+                        saveCell(cellPrompt.scanId, value).then(function (r) {
+                            if (!r.ok) {
+                                cellModalError.textContent = r.data.error || '{% trans "Ошибка" %}';
+                                cellModalError.classList.remove('hidden');
+                                cellModalInput.focus();
+                                cellModalInput.select();
+                                return;
+                            }
+                            if (cellPrompt.input) {
+                                cellPrompt.input.value = r.data.cell_number;
+                                flashCell(cellPrompt.input, true);
+                            }
+                            closeModals();
+                            toast(document.getElementById('cell-modal-receipt').textContent + ' → ' + r.data.cell_number, 'ok');
+                        });
+                    }
+                    document.getElementById('cell-modal-confirm').addEventListener('click', confirmCellPrompt);
+                    cellModalInput.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') { e.preventDefault(); confirmCellPrompt(); }
                     });
 
                     // ручной ввод кода чека
@@ -414,8 +514,19 @@
                         if (e.key === 'Enter') { e.preventDefault(); submitManualCode(); }
                     });
 
-                    // legacy-модалка
+                    // legacy-модалка: каждый новый ввод начинается с пустой формы
+                    function resetLegacyForm() {
+                        ['legacy-client', 'legacy-first-name', 'legacy-last-name', 'legacy-phone',
+                         'legacy-tracks', 'legacy-cell', 'legacy-weight', 'legacy-price'].forEach(function (id) {
+                            document.getElementById(id).value = '';
+                        });
+                        document.getElementById('legacy-count').value = '1';
+                        document.getElementById('legacy-new-client').checked = false;
+                        document.getElementById('legacy-new-fields').classList.add('hidden');
+                        document.getElementById('legacy-error').classList.add('hidden');
+                    }
                     document.getElementById('btn-add-legacy').addEventListener('click', function () {
+                        resetLegacyForm();
                         openModal('legacy-modal');
                         document.getElementById('legacy-client').focus();
                     });
@@ -463,6 +574,7 @@
                             addRow(r.data.row, true);
                             beep();
                             closeModals();
+                            resetLegacyForm();
                             // показать QR для печати/наклейки
                             document.getElementById('qr-modal-img').src = r.data.qr_base64;
                             document.getElementById('qr-modal-number').textContent = r.data.row.receipt_number;

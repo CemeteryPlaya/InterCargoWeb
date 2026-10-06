@@ -435,7 +435,7 @@ def refresh_arrival(request, arrival_id):
 
             try:
                 new_weight = Decimal(weights[i].replace(',', '.'))
-                user, _ = _resolve_owner(usernames[i])
+                user, _created = _resolve_owner(usernames[i])
 
                 changed = False
                 has_receipt = ReceiptItem.objects.filter(track_code=track).exists()
@@ -465,7 +465,7 @@ def refresh_arrival(request, arrival_id):
         except TrackCode.DoesNotExist:
             try:
                 weight = Decimal(weights[i].replace(',', '.'))
-                user, _ = _resolve_owner(usernames[i])
+                user, _created = _resolve_owner(usernames[i])
                 new_track = TrackCode.all_objects.create(
                     track_code=code,
                     status=status,
@@ -539,7 +539,7 @@ def refresh_day_arrivals(request):
                 track = TrackCode.all_objects.get(track_code=code)
                 try:
                     new_weight = Decimal(weights[i].replace(',', '.'))
-                    user, _ = _resolve_owner(usernames[i])
+                    user, _created = _resolve_owner(usernames[i])
 
                     changed = False
                     has_receipt = ReceiptItem.objects.filter(track_code=track).exists()
@@ -565,7 +565,7 @@ def refresh_day_arrivals(request):
             except TrackCode.DoesNotExist:
                 try:
                     weight = Decimal(weights[i].replace(',', '.'))
-                    user, _ = _resolve_owner(usernames[i])
+                    user, _created = _resolve_owner(usernames[i])
                     new_track = TrackCode.all_objects.create(
                         track_code=code, status='delivered',
                         update_date=arrival.date, delivered_date=arrival.date,
