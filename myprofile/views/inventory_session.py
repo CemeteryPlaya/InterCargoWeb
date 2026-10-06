@@ -3,19 +3,23 @@
 Работник (флажок «Водитель» или staff) открывает сессию, сканирует чеки
 камерой; посылки без QR вводит вручную (создаётся новый чек). При
 завершении — сверка: отсканированные принимаются на склад, ненайденные
-тихо выдаются (без уведомлений), ячейки применяются по фактам сканов.
-Отмена — полный откат, включая созданные в сессии legacy-чеки и аккаунты.
+тихо выдаются (без уведомлений), ячейки применяются по фактам сканов;
+клиентам, чьи посылки лежат на ПВЗ дольше LONG_STORAGE_DAYS, уходит
+напоминание. Отмена — полный откат, включая созданные в сессии legacy-чеки
+и аккаунты.
 """
 import json
 import logging
 import re
 from collections import defaultdict
+from datetime import timedelta
 from decimal import Decimal, ROUND_DOWN
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -31,11 +35,15 @@ from myprofile.receipt_lifecycle import (
     accept_at_pvz, issue_to_client, get_receipts_for_tracks, ReceiptLifecycleError,
 )
 from myprofile.scan_utils import find_by_scan
+from myprofile.views.utils import is_notification_muted, notify_in_user_language, translate_for_user
 from register.models import PickupPoint, UserProfile
 
 logger = logging.getLogger(__name__)
 
 _CELL_RE = re.compile(r'^\d+(\.\d+)?$')
+
+# После инвентаризации напоминаем о посылках, лежащих на ПВЗ дольше стольких дней
+LONG_STORAGE_DAYS = 10
 
 
 def _can_inventory(user):
@@ -120,6 +128,43 @@ def _auto_cell_number(session, owner):
     while str(num) in taken:
         num += 1
     return str(num)
+
+
+def _notify_long_stored(pickup_point):
+    """Напоминание клиентам, чьи посылки лежат на ПВЗ дольше LONG_STORAGE_DAYS дней
+    (после сверки это подтверждённые сканом посылки). Возраст — от даты прибытия на
+    ПВЗ (date_ready, фолбэк — update_date). Одно сообщение на клиента: в приложении
+    (с push) и в Telegram, если канал не заглушён. Возвращает логины уведомлённых.
+    """
+    from tgbot.models import TelegramNotification
+
+    cutoff = timezone.localdate() - timedelta(days=LONG_STORAGE_DAYS)
+    counts = (
+        TrackCode.objects
+        .filter(status='ready', delivery_pickup=pickup_point, owner__isnull=False)
+        .filter(Q(date_ready__lt=cutoff) | Q(date_ready__isnull=True, update_date__lt=cutoff))
+        .values('owner_id').annotate(n=Count('id'))
+    )
+    by_owner = {row['owner_id']: row['n'] for row in counts}
+    pickup_name = str(pickup_point)
+    notified = []
+    for owner in User.objects.filter(id__in=by_owner).order_by('username'):
+        params = {'count': by_owner[owner.id], 'pickup': pickup_name, 'days': LONG_STORAGE_DAYS}
+
+        def _message(p=params):
+            return _("📦 Посылок на пункте выдачи «%(pickup)s» дольше %(days)s дней: "
+                     "%(count)s. Пожалуйста, заберите их.") % p
+
+        notify_in_user_language(owner, _message)
+        if not is_notification_muted(owner.id, 'telegram'):
+            TelegramNotification.objects.create(
+                user=owner,
+                title=translate_for_user(owner, lambda: _("Напоминание о посылках")),
+                message=translate_for_user(owner, _message),
+                notification_type='warning',
+            )
+        notified.append(owner.username)
+    return notified
 
 
 def _append_anomaly(session, kind, receipt):
@@ -481,7 +526,10 @@ def inventory_session_finish(request):
             taken.add(final)
             cells_report.append({'user_id': owner_id, 'cell': final})
 
-        # 4) отчёт и закрытие сессии
+        # 4) напоминание о долгом хранении (выданным при сверке — тихо, их тут нет)
+        reminded = _notify_long_stored(pp)
+
+        # 5) отчёт и закрытие сессии
         report = session.report or {}
         report.update({
             'accepted': [r.receipt_number for r in to_accept],
@@ -491,6 +539,8 @@ def inventory_session_finish(request):
             'foreign': [s.receipt.receipt_number for s in scans if s.flag == 'foreign_pickup'],
             'cells': cells_report,
             'scanned_total': len(scans),
+            'reminded': reminded,
+            'reminded_days': LONG_STORAGE_DAYS,
         })
         session.report = report
         session.auto_accepted_count = len(to_accept)
@@ -501,6 +551,9 @@ def inventory_session_finish(request):
         session.save()
 
     messages.success(request, _("Инвентаризация завершена."))
+    if reminded:
+        messages.info(request, _("Уведомления о долгом хранении (более %(days)s дней) отправлены "
+                                 "клиентам: %(count)s.") % {'days': LONG_STORAGE_DAYS, 'count': len(reminded)})
     return redirect('inventory_session_report', session_id=session.id)
 
 

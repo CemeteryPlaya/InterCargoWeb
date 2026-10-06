@@ -37,4 +37,5 @@ def resend_email(request, log_id):
     except Exception as e:
         messages.error(request, f"Ошибка переотправки: {e}")
 
-    return redirect('email_logs')
+    # Журнал писем — вкладка страницы «Логи уведомлений» (маршрута 'email_logs' нет)
+    return redirect('notification_logs')

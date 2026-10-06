@@ -244,6 +244,14 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 ADMINS = [(os.getenv('EMAIL_HOST_USER', ''), os.getenv('EMAIL_HOST_USER', ''))]
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
+# Всё пишется в logs/django.log (ротация); на почту — только необработанные
+# исключения на проде (DEBUG=False), без шума сканеров и осознанных 5xx —
+# см. cargo/logging_filters.EmailWorthy. ERROR_EMAILS=false отключает письма
+# (например, на локальной машине с DEBUG=False).
+LOG_DIR = BASE_DIR / 'logs'
+os.makedirs(LOG_DIR, exist_ok=True)
+ERROR_EMAILS = os.getenv('ERROR_EMAILS', 'true').lower() != 'false'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -253,30 +261,58 @@ LOGGING = {
             'style': '{',
         },
     },
+    'filters': {
+        'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
+        'email_worthy': {'()': 'cargo.logging_filters.EmailWorthy'},
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'mail_admins': {
-            'class': 'django.utils.log.AdminEmailHandler',
-            'level': 'ERROR',
-            'include_html': True,
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'django.log'),
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 5,
+            'encoding': 'utf-8',
+            'delay': True,
+            'level': 'WARNING',
+            'formatter': 'verbose',
         },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler' if ERROR_EMAILS else 'logging.NullHandler',
+            'level': 'ERROR',
+            'filters': ['require_debug_false', 'email_worthy'],
+            **({'include_html': True} if ERROR_EMAILS else {}),
+        },
+    },
+    'root': {
+        # Логи приложения (logger = logging.getLogger(__name__)) — в консоль и файл
+        'handlers': ['console', 'file'],
+        'level': 'WARNING',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console', 'file', 'mail_admins'],
             'level': 'ERROR',
             'propagate': False,
         },
-        'django.security.DisallowedHost': {
-            'handlers': [],
+        'django.request': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            # Сканеры (чужой Host, /static/../.env) — только в файл
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.server': {
+            # Строки лога runserver — только консоль
+            'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': False,
         },
     },

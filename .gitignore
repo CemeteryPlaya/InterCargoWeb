@@ -46,8 +46,9 @@ PLAN.md
 
 bot.log
 test_delivery_perf.py
+logs/
 
+# Служебные файлы инструментов (не коммитить)
+.codebase-memory/
 .harness/
-.codebase-memmory/
-.codebase-memory/.gitignore
-.codebase-memory/config.json
+.playwright-mcp/

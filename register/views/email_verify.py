@@ -1,5 +1,6 @@
 import random
 import logging
+import smtplib
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from myprofile.email_utils import send_mail_logged
@@ -46,9 +47,13 @@ def send_email_code(request):
             [email],
             fail_silently=False,
         )
+    except smtplib.SMTPRecipientsRefused as e:
+        # Адрес отклонён почтовым сервером — ошибка ввода, а не сбой сервиса
+        logger.warning("Email %s отклонён при отправке кода подтверждения: %s", email, e)
+        return JsonResponse({'error': _('Почтовый сервер отклонил этот адрес. Проверьте правильность email.')}, status=400)
     except Exception as e:
-        logger.error(f"Ошибка отправки кода подтверждения email на {email}: {e}")
-        return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=500)
+        logger.error("Ошибка отправки кода подтверждения email на %s: %s", email, e)
+        return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=503)
 
     # Сохраняем email в сессию
     request.session['verification_email'] = email

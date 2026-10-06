@@ -1,0 +1,192 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter Cargo - {% trans "История сохранений" %} #{{ session.id }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/core.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/menu.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/notifications.js' %}?v={{ APP_VERSION }}"></script>
+    <script src="{% static 'scripts/cdn.min.js' %}?v={{ APP_VERSION }}" defer></script>
+    <link rel="stylesheet" href="{% static 'styles/css2.css' %}?v={{ APP_VERSION }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}?v={{ APP_VERSION }}" />
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}" />
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {% include 'shared/header.html' %}
+
+    <div class="flex min-h-screen">
+        {% include 'mobile/sidebar.html' %}
+        <div class="flex-1 mx-auto p-6 min-w-0">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-6 -mt-6 mb-4">
+                <h1 class="text-lg font-bold text-center">{% trans "История сохранений" %}</h1>
+            </div>
+
+            <div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        {% trans "История сохранений" %} — {% trans "сессия прихода" %} #{{ session.id }}
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">
+                        {% trans "Дата:" %} <strong>{{ session.date|date:"d.m.Y" }}</strong>
+                        | {% trans "Статус:" %} <strong>{{ session.get_status_display }}</strong>
+                        | {% trans "Строк в сессии сейчас:" %} <strong>{{ current_rows }}</strong>
+                        | {% trans "Версия:" %} <strong>{{ session.revision }}</strong>
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    {% if session.status != 'completed' %}
+                    <a href="{% url 'goods_arrival_session' session.id %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition text-sm">
+                        <i class="ri-edit-line"></i> {% trans "К сессии" %}
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'goods_arrival' %}" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition text-sm">
+                        <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="p-3 mb-2 rounded-lg text-sm font-medium
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-800">
+                <i class="ri-information-line mr-1"></i>
+                {% blocktrans %}Каждое сохранение сессии записывается сюда отдельно — даже отклонённое. Если строки пропали, найдите снимок с нужным числом строк и восстановите его. Восстановление тоже попадает в журнал, его можно отменить. Снимки хранятся {{ keep_days }} дней; старше часа — по одному-два на каждые 10 минут.{% endblocktrans %}
+            </div>
+
+            {% if selected %}
+            {% trans "Заменить строки сессии строками этого снимка? Текущее состояние останется в журнале." as confirm_restore %}
+            {% trans "Создать новую сессию из строк снимка? Уже обработанные трек-коды будут пропущены." as confirm_new %}
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            {% trans "Снимок от" %} {{ selected.created_at|date:"d.m.Y H:i:s" }}
+                        </h3>
+                        <p class="text-sm text-gray-500">
+                            {% trans "Строк:" %} <strong>{{ selected.row_count }}</strong>
+                            | {{ selected.get_source_display }} | {{ selected.get_outcome_display }}
+                            {% if selected.user %}| {{ selected.user.get_full_name|default:selected.user.username }}{% endif %}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <a href="{% url 'goods_arrival_snapshot_csv' session.id selected.id %}" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition text-sm">
+                            <i class="ri-download-2-line"></i> CSV
+                        </a>
+                        {% if session.status != 'completed' %}
+                        <form method="post" action="{% url 'goods_arrival_snapshot_restore' session.id selected.id %}"
+                              onsubmit="return confirm('{{ confirm_restore|escapejs }}')">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm font-medium">
+                                <i class="ri-arrow-go-back-line"></i> {% trans "Восстановить в сессию" %}
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'goods_arrival_snapshot_new_session' session.id selected.id %}"
+                              onsubmit="return confirm('{{ confirm_new|escapejs }}')">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm font-medium">
+                                <i class="ri-add-box-line"></i> {% trans "Новая сессия из снимка" %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-[28rem] overflow-y-auto border border-gray-200 rounded">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600 w-12">№</th>
+                                <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Трек-код" %}</th>
+                                <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Владелец" %}</th>
+                                <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Вес (кг)" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in selected.items %}
+                            <tr class="border-t border-gray-100">
+                                <td class="px-3 py-1 text-gray-400">{{ forloop.counter }}</td>
+                                <td class="px-3 py-1 font-mono">{{ item.track_code }}</td>
+                                <td class="px-3 py-1">{{ item.owner_name }}</td>
+                                <td class="px-3 py-1">{{ item.weight }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-400">{% trans "Снимок пуст." %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Время" %}</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600">{% trans "Строк" %}</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600">{% trans "Изменение" %}</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Результат" %}</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Источник" %}</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">{% trans "Пользователь" %}</th>
+                            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-600">{% trans "Версия" %}</th>
+                            <th class="px-3 py-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for snap in snapshots %}
+                        <tr class="border-t border-gray-100 {% if selected and selected.id == snap.id %}bg-blue-50{% elif snap.outcome != 'applied' %}bg-orange-50{% endif %}">
+                            <td class="px-3 py-2 whitespace-nowrap">{{ snap.created_at|date:"d.m.Y H:i:s" }}</td>
+                            <td class="px-3 py-2 text-right font-semibold">{{ snap.row_count }}</td>
+                            <td class="px-3 py-2 text-right whitespace-nowrap">
+                                {% if snap.delta is not None %}
+                                    {% if snap.delta < 0 %}<span class="text-red-600 font-semibold">{{ snap.delta }}</span>
+                                    {% elif snap.delta > 0 %}<span class="text-green-600">+{{ snap.delta }}</span>
+                                    {% else %}<span class="text-gray-400">0</span>{% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-2">
+                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium
+                                    {% if snap.outcome == 'applied' %}bg-green-100 text-green-800
+                                    {% elif snap.outcome == 'stale' %}bg-gray-100 text-gray-600
+                                    {% else %}bg-orange-100 text-orange-800{% endif %}">{{ snap.get_outcome_display }}</span>
+                            </td>
+                            <td class="px-3 py-2 text-gray-600">{{ snap.get_source_display }}</td>
+                            <td class="px-3 py-2 text-gray-600">{% if snap.user %}{{ snap.user.get_full_name|default:snap.user.username }}{% endif %}</td>
+                            <td class="px-3 py-2 text-right text-gray-500">{{ snap.revision }}</td>
+                            <td class="px-3 py-2 text-right whitespace-nowrap">
+                                <a href="?snap={{ snap.id }}" class="text-blue-600 hover:underline">{% trans "Открыть" %}</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="8" class="px-3 py-6 text-center text-gray-400">{% trans "Сохранений пока нет." %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if limit_reached %}
+                <p class="px-3 py-2 text-xs text-gray-400">{% trans "Показаны последние 500 снимков." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include 'shared/footer.html' %}
+</body>
+</html>

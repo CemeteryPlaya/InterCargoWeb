@@ -82,7 +82,7 @@ def password_reset_request(request):
             )
         except Exception as e:
             logger.error(f"Ошибка отправки кода сброса пароля пользователю {user.username}: {e}")
-            return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=500)
+            return JsonResponse({'error': _('Не удалось отправить письмо. Попробуйте позже.')}, status=503)
 
         # Сохраняем в сессию
         request.session['reset_user_id'] = user.id

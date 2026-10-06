@@ -9,12 +9,8 @@ from register.models import UserProfile
 from django.utils.translation import gettext as _, get_language, activate
 
 
-def notify_in_user_language(user, message_func):
-    """
-    Создаёт уведомление на языке получателя.
-    message_func — callable, возвращающий переведённую строку.
-    Вызывается после активации языка пользователя.
-    """
+def translate_for_user(user, message_func):
+    """Строка на языке пользователя: message_func вызывается после активации его языка."""
     original_lang = get_language()
     try:
         user_lang = user.userprofile.language
@@ -22,9 +18,18 @@ def notify_in_user_language(user, message_func):
         user_lang = 'ru'
     try:
         activate(user_lang)
-        msg = message_func()
+        return message_func()
     finally:
         activate(original_lang or 'ru')
+
+
+def notify_in_user_language(user, message_func):
+    """
+    Создаёт уведомление на языке получателя.
+    message_func — callable, возвращающий переведённую строку.
+    Вызывается после активации языка пользователя.
+    """
+    msg = translate_for_user(user, message_func)
     Notification.objects.create(user=user, message=msg, push_status=Notification.PUSH_PENDING)
 
 def cleanup_expired_temp_discounts():
