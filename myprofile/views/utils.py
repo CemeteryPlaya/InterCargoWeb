@@ -88,32 +88,35 @@ def _recalc_receipt(receipt, effective_rate):
 from myprofile.execution_validator import validate_execution, ExecutionValidationError
 from myprofile.execution_validator.receipt_contracts import (
     authoritative_pickup_obj,
-    one_receipt_per_client_date,
+    one_pending_receipt_per_client_date_pickup,
     receipt_pickup_label_matches_authoritative,
     all_items_belong_to_receipt_owner,
     receipt_tracks_pickup_homogeneous,
+    resolved_pickup_obj,
 )
+from myprofile.receipt_pickup import find_pending_receipt, receipt_key, sync_pending_receipts_safely
 
 
 @validate_execution(post=[
-    one_receipt_per_client_date,
+    one_pending_receipt_per_client_date_pickup,
     all_items_belong_to_receipt_owner,
     receipt_pickup_label_matches_authoritative,
     receipt_tracks_pickup_homogeneous,
 ])
-def _create_or_update_date_receipt(user, receipt_date, date_tracks, effective_rate):
-    """Создаёт ИЛИ дополняет единственный чек на (user, дата).
+def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effective_rate):
+    """Дописывает позиции в pending-чек ключа (user, дата, ПВЗ) или создаёт новый.
 
-    Инвариант: на (owner, дата) — ровно один чек, с единым ПВЗ. Если чек этой
-    даты уже есть, новые позиции дописываются в него (вместо второго чека).
+    Инвариант (решения D2/D4): на (клиент, дата, ПВЗ) — не больше одного
+    pending-чека; чеки, уехавшие в доставку или выданные, не дополняются.
     ПВЗ чека вычисляется детерминированно (authoritative), не «первый override».
     Пост-контракты проверяют инварианты после выполнения (декоратор).
     """
-    receipt = Receipt.objects.filter(owner=user, created_at=receipt_date).order_by('id').first()
+    receipt = find_pending_receipt(user, receipt_date, pickup)
     if receipt is None:
         receipt = Receipt.objects.create(
             owner=user, total_weight=0, total_price=0,
             price_per_kg=effective_rate, created_at=receipt_date,
+            pickup=pickup, pickup_point=str(pickup) if pickup else '',
         )
 
     for track in date_tracks:
@@ -127,21 +130,25 @@ def _create_or_update_date_receipt(user, receipt_date, date_tracks, effective_ra
 
     # Единый ПВЗ + ссылка на оплату — из authoritative-правила
     pickup_obj = authoritative_pickup_obj(receipt)
+    if pickup_obj:
+        receipt.pickup = pickup_obj
     receipt.pickup_point = str(pickup_obj) if pickup_obj else (receipt.pickup_point or '')
     receipt.payment_link = pickup_obj.payment_link if pickup_obj else receipt.payment_link
     receipt._allow_content_update = True
-    receipt.save(update_fields=['pickup_point', 'payment_link'])
+    receipt.save(update_fields=['pickup', 'pickup_point', 'payment_link'])
 
     _recalc_receipt(receipt, effective_rate)
     return receipt
 
 
-def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
+def create_receipts_for_user(user, statuses=('shipping_pp', 'ready'), sync=True):
     """
     Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
-    Группирует треки по delivered_date — один чек на каждую дату прихода
-    (инвариант «1 дата = 1 чек = 1 ПВЗ» проверяется контрактами).
+    Группирует треки по ключу (delivered_date, resolved-ПВЗ): позиции ключа
+    дописываются в его pending-чек или в новый (инвариант «клиент + дата + ПВЗ =
+    не больше одного pending-чека» проверяется контрактами).
     Дата чека (created_at) = delivered_date трек-кодов.
+    sync=False — вызывающий уже синхронизировал pending-чеки клиента.
     Возвращает последний обработанный чек или None.
     """
     from collections import defaultdict
@@ -152,19 +159,28 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready')):
     if not new_tracks:
         return None
 
+    # Сначала приводим существующие pending-чеки к актуальным ПВЗ (решение D1),
+    # чтобы новые позиции нашли свой чек по свежей метке.
+    if sync:
+        sync_pending_receipts_safely(user)
+
     RATE = get_global_price_per_kg()
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
-    # Группируем по delivered_date (детерминированный fallback для None)
-    by_date = defaultdict(list)
+    # Группируем по (delivered_date, ПВЗ) (детерминированный fallback даты для None)
+    by_key = defaultdict(list)
+    pickups = {}
     for track in new_tracks:
-        by_date[track.delivered_date or timezone.localdate()].append(track)
+        _owner_id, receipt_date, pickup_id = receipt_key(track)
+        pickups[pickup_id] = resolved_pickup_obj(track)
+        by_key[(receipt_date, pickup_id)].append(track)
 
     last_receipt = None
-    for receipt_date, date_tracks in by_date.items():
+    for (receipt_date, pickup_id), key_tracks in by_key.items():
         try:
-            receipt = _create_or_update_date_receipt(user, receipt_date, date_tracks, effective_rate)
+            receipt = _create_or_update_date_receipt(
+                user, receipt_date, pickups[pickup_id], key_tracks, effective_rate)
         except ExecutionValidationError:
             # CRITICAL-нарушение уже записано в журнал; эту дату пропускаем,
             # чтобы не блокировать формирование чеков остальных дат.
@@ -235,7 +251,7 @@ def bulk_get_or_create_storage_cells(pickup_point, users):
                 user=user,
             ))
 
-        created = StorageCell.objects.bulk_create(new_cells, ignore_conflicts=True)
+        StorageCell.objects.bulk_create(new_cells, ignore_conflicts=True)
         # bulk_create may not return ids on all backends; re-fetch created cells
         re_fetched = StorageCell.objects.filter(
             pickup_point=pickup_point, user__in=new_users
@@ -295,6 +311,62 @@ def send_grouped_notifications(notif_counts, status):
                 return _("📦 Ваш трек-код обновлён: %(status)s") % {'status': status_display}
             return _("📦 Обновлено %(count)s трек-кодов: %(status)s") % {'count': c, 'status': status_display}
         notify_in_user_language(user, _make_msg)
+
+
+def reprice_pending_receipts(user, receipt_date, new_rate):
+    """Новый тариф клиента для его чеков за дату (разовая скидка из сводки).
+
+    Пересчитываются только pending-чеки (ещё не отправлены — D4) и только позиции по
+    тарифу чека: у товаров Di.Buyer своя ставка, её не трогаем. Возвращает
+    (номера пересчитанных чеков, номера уже отправленных — их не меняем).
+    """
+    repriced, frozen = [], []
+    receipts = Receipt.objects.filter(owner=user, created_at=receipt_date).order_by('id')
+    for receipt in receipts:
+        if receipt.status != 'pending':
+            frozen.append(receipt.receipt_number)
+            continue
+        old_rate = receipt.price_per_kg
+        changed = False
+        for item in receipt.items.select_related('track_code'):
+            override = item.track_code.rate_override if item.track_code_id else None
+            if override is not None or (item.item_rate and item.item_rate != old_rate):
+                continue
+            weight = item.display_weight or Decimal("0")
+            item.item_rate = new_rate
+            item.item_price = (weight * new_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            item.save(update_fields=['item_rate', 'item_price'])
+            changed = True
+        if changed or old_rate != new_rate:
+            _recalc_receipt(receipt, new_rate)
+            repriced.append(receipt.receipt_number)
+    return repriced, frozen
+
+
+def pending_receipts_snapshot(user):
+    """{receipt_id: (номер, метка ПВЗ)} pending-чеков клиента — снимок до действия оператора."""
+    if user is None:
+        return {}
+    return {
+        r.id: (r.receipt_number, r.pickup_point or '')
+        for r in Receipt.objects.filter(owner=user, status='pending')
+    }
+
+
+def add_reprint_messages(request, user, before):
+    """Сообщает оператору, какие pending-чеки клиента после действия сменили ПВЗ,
+    появились или были слиты — бумажные копии таких чеков нужно перепечатать."""
+    after = pending_receipts_snapshot(user)
+    for rid, (number, label) in sorted(after.items()):
+        if before.get(rid, (None, None))[1] != label:
+            django_messages.warning(request, _(
+                "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, "
+                "если он уже был напечатан.") % {'number': number, 'pickup': label})
+    for rid, (number, label) in sorted(before.items()):
+        if rid not in after and not Receipt.objects.filter(pk=rid).exists():
+            django_messages.warning(request, _(
+                "Чек %(number)s объединён с другим чеком клиента — старый QR при "
+                "сканировании укажет новый чек.") % {'number': number})
 
 
 def add_bulk_result_messages(request, updated=0, created=0, partially_updated=0,

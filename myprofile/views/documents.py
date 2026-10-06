@@ -5,17 +5,20 @@ from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from myprofile.models import TrackCode, ClientRegistry, GlobalSettings, Receipt, ReceiptItem, Arrival
+from myprofile.models import TrackCode, ClientRegistry, ReceiptItem, Arrival
 from register.models import UserProfile, PickupPoint
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
-from collections import defaultdict
+from decimal import Decimal
 from django.db.models import Q
 from myprofile.views.utils import (
     get_global_price_per_kg, get_user_discount, round_price as _round_price,
     create_receipts_for_user,
 )
-from django.utils.translation import gettext as _
+from myprofile.permissions import require_page
+from myprofile.execution_validator.receipt_contracts import (
+    authoritative_pickup_label, split_foreign_print_checks,
+)
+from myprofile.receipt_pickup import sync_pending_receipts_safely
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +33,7 @@ def _generate_qr_base64(text):
     return f"data:image/png;base64,{encoded}"
 
 @login_required
+@require_page('print_documents')
 def print_documents_view(request):
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -51,10 +55,12 @@ def print_documents_view(request):
 
                 # Треки, пришедшие на сорт. склад в выбранную дату (любой статус >= delivered)
                 arrival_track_ids = Arrival.objects.filter(date=check_date).values_list('track_codes', flat=True)
+                # Посылки, ждущие «Переноса прихода» (ПВЗ выбран после прихода), не
+                # печатаем: доставка их не возит, пока их не перенесут на новую дату
                 tracks = TrackCode.all_objects.filter(
                     Q(delivered_date=check_date) | Q(id__in=arrival_track_ids),
                     status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-                ).filter(
+                ).exclude(needs_pickup_reschedule=True).filter(
                     Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
                     Q(delivery_pickup_id__in=pickup_point_ids)
                 ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
@@ -68,8 +74,12 @@ def print_documents_view(request):
                 # пропускаются), уведомления не шлём — это тихая проверка перед печатью.
                 for _owner in {t.owner for t in tracks if t.owner_id}:
                     try:
+                        # pending-чеки — к актуальному ПВЗ клиента (метка, дубли), D1;
+                        # один раз на клиента, поэтому формирование чеков без повторной синхронизации
+                        sync_pending_receipts_safely(_owner)
                         create_receipts_for_user(
-                            _owner, statuses=['delivered', 'shipping_pp', 'ready', 'claimed'])
+                            _owner, statuses=['delivered', 'shipping_pp', 'ready', 'claimed'],
+                            sync=False)
                     except Exception:
                         logger.exception(
                             "print_checks: не удалось сформировать чек для %s", _owner)
@@ -81,9 +91,11 @@ def print_documents_view(request):
                     ReceiptItem.objects
                     .filter(
                         Q(track_code_id__in=track_ids) |
-                        Q(track_code__isnull=True, receipt__created_at=check_date, receipt__pickup_point__in=pickup_names)
+                        (Q(track_code__isnull=True, receipt__created_at=check_date)
+                         & (Q(receipt__pickup_id__in=pickup_point_ids)
+                            | Q(receipt__pickup__isnull=True, receipt__pickup_point__in=pickup_names)))
                     )
-                    .select_related('receipt', 'receipt__owner', 'track_code',
+                    .select_related('receipt', 'receipt__owner', 'receipt__pickup', 'track_code',
                                     'track_code__owner__userprofile__pickup', 'track_code__delivery_pickup')
                 )
 
@@ -115,8 +127,13 @@ def print_documents_view(request):
                     else:
                         client_username = ''
 
-                    # Адрес
-                    if receipt.pickup_point:
+                    # Адрес: pending-чек — фактический ПВЗ по трекам (он следует за
+                    # ПВЗ клиента), уехавший/выданный — зафиксированная метка (2.5)
+                    if receipt.status == 'pending':
+                        address = authoritative_pickup_label(receipt)
+                    elif receipt.pickup_id:
+                        address = str(receipt.pickup)   # по ссылке: переименование ПВЗ не мешает
+                    elif receipt.pickup_point:
                         address = receipt.pickup_point
                     else:
                         try:
@@ -127,18 +144,27 @@ def print_documents_view(request):
                         except (UserProfile.DoesNotExist, AttributeError):
                             address = ''
 
+                    # Цена позиции — item_price (как в чеке: у позиций бывают свои тарифы —
+                    # rate_override, товары Di.Buyer); фолбэк — вес × тариф чека. При явном
+                    # тарифе трека (rate_override, в т.ч. 0 — бесплатно) item_price окончателен.
                     effective_rate = receipt.price_per_kg or get_global_price_per_kg()
                     total_weight = Decimal("0")
+                    total_sum = 0
                     track_rows = []
                     for item in receipt_items:
                         weight = item.display_weight or Decimal("0")
-                        price = _round_price(weight * effective_rate)
+                        explicit_rate = item.track_code_id and item.track_code.rate_override is not None
+                        if item.item_price or explicit_rate:
+                            price = _round_price(item.item_price or 0)
+                        else:
+                            price = _round_price(weight * effective_rate)
                         track_rows.append({
                             'track_code': item.display_track_code,
                             'weight': float(weight),
                             'price': price,
                         })
                         total_weight += weight
+                        total_sum += price
 
                     checks.append({
                         'username': client_username,
@@ -147,7 +173,7 @@ def print_documents_view(request):
                         'tracks': track_rows,
                         'total_count': len(track_rows),
                         'total_weight': float(total_weight),
-                        'total_sum': _round_price(total_weight * effective_rate),
+                        'total_sum': total_sum,
                         'qr_number': receipt.receipt_number,
                         'qr_image': receipt.get_qr_base64(),
                     })
@@ -206,10 +232,9 @@ def print_documents_view(request):
                         'qr_image': '',
                     })
 
-                # Защитный контроль: убираем из печати чеки чужих ПВЗ
-                # (нарушение журналируется), чтобы не печатать некорректный пункт.
-                from myprofile.execution_validator.receipt_contracts import filter_foreign_print_checks
-                checks = filter_foreign_print_checks(pickup_names, checks)
+                # Защитный контроль: чек чужого ПВЗ не печатается для выбранного
+                # (нарушение журналируется), но и не теряется — оператор видит его списком.
+                checks, excluded_checks = split_foreign_print_checks(pickup_names, checks)
 
                 # Посылки, оставшиеся без чека после авто-формирования (напр.
                 # незарегистрированные клиенты без аккаунта) — их предупреждаем оператора.
@@ -217,6 +242,7 @@ def print_documents_view(request):
 
                 return render(request, 'shared/print/client_check_pdf.html', {
                     'checks': checks,
+                    'excluded_checks': excluded_checks,
                     'date': check_date,
                     'check_template': check_template,
                     'no_receipt_count': no_receipt_count,
@@ -237,7 +263,7 @@ def print_documents_view(request):
             tracks = TrackCode.all_objects.filter(
                 Q(delivered_date=registry_date) | Q(id__in=arrival_track_ids2),
                 status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-            ).filter(
+            ).exclude(needs_pickup_reschedule=True).filter(
                 Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
                 Q(delivery_pickup_id__in=pickup_point_ids)
             )
@@ -260,6 +286,7 @@ def print_documents_view(request):
     })
 
 @login_required
+@require_page('print_documents')
 def client_registry_pdf(request, registry_id):
     registry = get_object_or_404(ClientRegistry, id=registry_id)
 

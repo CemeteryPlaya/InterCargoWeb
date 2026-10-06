@@ -12,8 +12,9 @@ from django.views.decorators.http import require_POST
 
 from myprofile.models import (
     Arrival, ArrivalSession, ArrivalSessionItem,
-    Receipt, TrackCode,
+    TrackCode,
 )
+from myprofile.execution_validator import ExecutionValidationError, runtime
 from myprofile.permissions import is_staff
 from django.utils.translation import gettext as _
 
@@ -254,6 +255,7 @@ def reschedule_transfer(request):
         return JsonResponse({'error': _('Нет треков для переноса.')}, status=400)
 
     track_ids = [t.id for t in tracks]
+    rejected = None
 
     with transaction.atomic():
         # 1. Убираем треки из исходных Arrival
@@ -268,10 +270,6 @@ def reschedule_transfer(request):
 
         # 2. Удаляем ArrivalSessionItem записи в исходных сессиях
         track_codes_strs = [t.track_code for t in tracks]
-        old_sessions = ArrivalSession.objects.filter(
-            date=original_date,
-            items__track_code__in=track_codes_strs,
-        ).distinct()
         ArrivalSessionItem.objects.filter(
             session__date=original_date,
             track_code__in=track_codes_strs,
@@ -322,15 +320,22 @@ def reschedule_transfer(request):
         ]
         ArrivalSessionItem.objects.bulk_create(session_items)
 
-        # 6. Обновляем дату создания чеков, содержащих эти треки (если есть)
-        receipts_to_update = Receipt.objects.filter(
-            items__track_code__in=tracks,
-            created_at=original_date,
-        ).distinct()
-        for receipt in receipts_to_update:
-            receipt._allow_content_update = True
-            receipt.created_at = new_date
-            receipt.save(update_fields=['created_at'])
+        # 6. Чеки: позиции перенесённых треков уходят в чеки новой даты
+        #    (только pending-чеки; уехавшие/выданные заморожены — D4/D5)
+        from myprofile.receipt_pickup import move_tracks_to_date
+        try:
+            move_tracks_to_date(owner, tracks, new_date)
+        except ExecutionValidationError as exc:
+            rejected = exc
+            transaction.set_rollback(True)  # перенос целиком отменяется
+
+    if rejected is not None:
+        # Журнал пишем после отката, иначе запись нарушения откатится вместе с переносом
+        for violation in rejected.violations:
+            runtime.record_violation(violation)
+        return JsonResponse({'error': _(
+            'Перенос отменён: чеки клиента нарушают правило ПВЗ. Подробности — в журнале нарушений.'
+        )}, status=409)
 
     logger.info(
         'Arrival reschedule: user=%s tracks=%d from=%s to=%s by=%s',

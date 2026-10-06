@@ -91,7 +91,7 @@
             </div>
             {% endif %}
 
-            {% if not pickups and not home_clients and not no_pickup_clients %}
+            {% if not pickups and not home_clients and not no_pickup_clients and not reschedule_clients %}
             <div class="text-center py-12 text-gray-500">
                 <i class="ri-inbox-line text-4xl mb-2"></i>
                 <p>{% trans 'Нет посылок со статусом "Доставлен на сортировочный склад" за эту дату' %}</p>
@@ -146,6 +146,49 @@
                                         </button>
                                     </form>
                                 </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Прибыли без ПВЗ, ПВЗ выбран позже: ждут «Переноса прихода» (в доставке и накладных их нет) -->
+            {% if reschedule_clients %}
+            <div class="mb-8">
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                    <h3 class="text-lg font-semibold text-amber-700">
+                        <i class="ri-calendar-schedule-line"></i> {% trans "Ждут переноса прихода" %}
+                    </h3>
+                    <a href="{% url 'reschedule_arrival' %}" class="text-xs bg-amber-100 text-amber-800 px-3 py-1.5 rounded hover:bg-amber-200 transition">
+                        <i class="ri-arrow-right-line"></i> {% trans "Перейти к переносу" %}
+                    </a>
+                </div>
+                <p class="text-sm text-gray-500 mb-3">{% trans "Посылки пришли, когда у клиента не было ПВЗ. ПВЗ выбран позже — перенесите их на дату отправки, тогда они появятся в доставке и накладных." %}</p>
+                <div class="bg-white rounded-lg shadow border border-amber-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-amber-50 text-gray-600 border-b border-amber-200">
+                                <th class="py-3 px-4 text-left font-medium">{% trans "Клиент" %}</th>
+                                <th class="py-3 px-4 text-left font-medium">{% trans "ПВЗ" %}</th>
+                                <th class="py-3 px-4 text-center font-medium">{% trans "Посылок" %}</th>
+                                <th class="py-3 px-4 text-right font-medium">{% trans "Вес (кг)" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for uid, client in reschedule_clients.items %}
+                            <tr class="border-b border-gray-100 last:border-0">
+                                <td class="py-3 px-4 text-gray-800">
+                                    <i class="ri-user-line text-gray-400 mr-1"></i>
+                                    {{ client.full_name }}
+                                    <span class="text-xs text-gray-400">({{ client.username }})</span>
+                                </td>
+                                <td class="py-3 px-4 text-gray-600">{{ client.pickup }}</td>
+                                <td class="py-3 px-4 text-center">{{ client.track_count }}</td>
+                                <td class="py-3 px-4 text-right">{{ client.total_weight }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

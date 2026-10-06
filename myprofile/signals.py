@@ -14,6 +14,31 @@ logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────────────────────────
+# Смена ПВЗ клиента → перевешиваем его pending-чеки (решение D1)
+# ─────────────────────────────────────────────────────────────
+
+@receiver(pre_save, sender=UserProfile)
+def user_profile_capture_old_pickup(sender, instance, update_fields=None, **kwargs):
+    """Запоминаем прежний ПВЗ профиля (только если поле pickup может измениться)."""
+    if not instance.pk or (update_fields is not None and 'pickup' not in update_fields):
+        instance._old_pickup_id = instance.pickup_id
+        return
+    instance._old_pickup_id = (
+        UserProfile.objects.filter(pk=instance.pk).values_list('pickup_id', flat=True).first()
+    )
+
+
+@receiver(post_save, sender=UserProfile)
+def user_profile_resync_receipts_on_pickup_change(sender, instance, created, **kwargs):
+    """Настройки, одобрение заявки, админка: после смены ПВЗ pending-чеки клиента
+    перевешиваются; уехавшие/выданные чеки не меняются."""
+    if created or getattr(instance, '_old_pickup_id', instance.pickup_id) == instance.pickup_id:
+        return
+    from myprofile.receipt_pickup import sync_pending_receipts_safely
+    sync_pending_receipts_safely(instance.user)
+
+
+# ─────────────────────────────────────────────────────────────
 # Каскадное обновление при изменении TrackCode
 # ─────────────────────────────────────────────────────────────
 
@@ -136,9 +161,9 @@ def _recalc_receipt_safe(receipt):
 
 def _relocate_receipt_item(track, item, old_receipt, weight_changed):
     """
-    Переносит ReceiptItem в подходящий чек (по владельцу + delivered_date).
-    Если подходящего чека нет — создаёт новый.
-    Пересчитывает старый и новый чеки.
+    Переносит ReceiptItem в pending-чек ключа (владелец, delivered_date, ПВЗ трека).
+    Если такого чека нет — создаёт новый; уехавшие/выданные чеки позицию не
+    принимают (решение D4). Пересчитывает старый и новый чеки.
     """
     owner = track.owner
     delivered_date = track.delivered_date
@@ -152,43 +177,32 @@ def _relocate_receipt_item(track, item, old_receipt, weight_changed):
             _recalc_receipt_safe(old_receipt)
         return
 
-    # Ищем существующий чек за нужную дату для этого владельца
-    target_receipt = None
-    receipt_qs = Receipt.objects.exclude(pk=old_receipt.pk).filter(owner_id=owner_id)
-
-    if delivered_date:
-        target_receipt = receipt_qs.filter(created_at=delivered_date).first()
-
     # Проверяем: может item уже в правильном чеке
     same_owner = old_receipt.owner_id == owner_id
     same_date = (old_receipt.created_at == delivered_date) if delivered_date else True
 
-    if same_owner and same_date:
-        # Чек уже правильный — только обновляем вес
+    # Уехавший/выданный чек заморожен (D4): смена даты прихода не вынимает из него
+    # позицию. Смена владельца — исправление ошибки, позиция уходит к новому владельцу.
+    frozen_date_change = same_owner and old_receipt.status != 'pending'
+
+    if (same_owner and same_date) or frozen_date_change:
+        # Чек уже правильный (или заморожен) — только обновляем вес
         if weight_changed:
             _update_item_weight(item, track.weight)
             _recalc_receipt_safe(old_receipt)
         return
 
-    if not target_receipt:
-        # Создаём новый чек
-        target_receipt = Receipt.objects.create(
-            owner_id=owner_id,
-            total_weight=0,
-            total_price=0,
-            price_per_kg=old_receipt.price_per_kg,
-            created_at=delivered_date or old_receipt.created_at,
-            pickup_point=old_receipt.pickup_point,
-            payment_link=old_receipt.payment_link,
-        )
+    # Pending-чек ключа (владелец, дата, ПВЗ трека) или новый
+    from myprofile.receipt_pickup import move_item_to_pending_receipt
+    target_receipt = move_item_to_pending_receipt(
+        item, delivered_date or old_receipt.created_at, old_receipt.price_per_kg)
 
     # Обновляем вес item если изменился
     w = track.weight or Decimal('0')
     rate = item.item_rate or Decimal('0')
-    item.receipt = target_receipt
     item.weight = track.weight
     item.item_price = (w * rate).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
-    item.save(update_fields=['receipt', 'weight', 'item_price'])
+    item.save(update_fields=['weight', 'item_price'])
 
     # Пересчитываем оба чека
     _recalc_receipt_safe(old_receipt)

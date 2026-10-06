@@ -7,9 +7,9 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from decimal import Decimal, ROUND_HALF_UP
 
-from myprofile.models import Receipt, ReceiptItem, ExtraditionPackage, TrackCode
+from myprofile.models import Receipt, ExtraditionPackage
+from myprofile.receipt_pickup import receipt_pickup_key
 
-from register.models import UserProfile
 from django.utils.translation import gettext as _
 from myprofile.views.utils import notify_in_user_language
 
@@ -21,14 +21,6 @@ def extradition_package_view(request):
     packages = ExtraditionPackage.objects.filter(user=user) \
         .prefetch_related('receipts', 'receipts__items', 'receipts__items__track_code') \
         .order_by('-created_at')
-
-    # Получаем ссылку на оплату из ПВЗ пользователя
-    payment_link = None
-    try:
-        if user.userprofile.pickup and user.userprofile.pickup.payment_link:
-            payment_link = user.userprofile.pickup.payment_link
-    except UserProfile.DoesNotExist:
-        pass
 
     packages_with_barcodes = []
     for pkg in packages:
@@ -78,7 +70,8 @@ def quick_issue(request):
     user = request.user
 
     # Находим чеки, у которых все трек-коды в статусе 'ready'
-    user_receipts = Receipt.objects.filter(owner=user).prefetch_related('items__track_code')
+    user_receipts = (Receipt.objects.filter(owner=user)
+                     .select_related('pickup').prefetch_related('items__track_code'))
 
     # Опциональный фильтр по ПВЗ
     filter_pickup = request.POST.get('pickup_point')
@@ -89,7 +82,10 @@ def quick_issue(request):
         if not items:
             continue
         if all(item.track_code and item.track_code.status == 'ready' for item in items):
-            if filter_pickup is not None and (receipt.pickup_point or '') != filter_pickup:
+            names = {receipt.pickup_point or ''}
+            if receipt.pickup_id:
+                names.add(str(receipt.pickup))      # текущее название ПВЗ по ссылке
+            if filter_pickup is not None and filter_pickup not in names:
                 continue
             ready_receipts.append(receipt)
 
@@ -98,11 +94,11 @@ def quick_issue(request):
 
     try:
         with transaction.atomic():
-            # Группируем чеки по пункту выдачи (pickup_point)
+            # Группируем чеки по ПВЗ: по ссылке (переименование ПВЗ не делит пакет),
+            # для чеков без ссылки — по метке
             by_pickup = defaultdict(list)
             for receipt in ready_receipts:
-                pp = receipt.pickup_point or ''
-                by_pickup[pp].append(receipt)
+                by_pickup[receipt_pickup_key(receipt)].append(receipt)
 
             packages_created = []
 
@@ -118,10 +114,8 @@ def quick_issue(request):
                 # Находим пакет, соответствующий этому ПВЗ
                 matched_package = None
                 for tp in existing_packages:
-                    # NULL и '' — одна группа «без ПВЗ» (как в by_pickup выше)
-                    existing_pp = set(
-                        v or '' for v in tp.receipts.values_list('pickup_point', flat=True)
-                    )
+                    # тот же ключ группировки, что и в by_pickup выше
+                    existing_pp = {receipt_pickup_key(r) for r in tp.receipts.all()}
                     if existing_pp == {pickup_key}:
                         matched_package = tp
                         break
@@ -131,7 +125,9 @@ def quick_issue(request):
                     matched_package.receipts.set(pickup_receipts)
                     packages_created.append(matched_package)
                 else:
-                    comment = f"Быстрая выдача — {pickup_key}" if pickup_key else "Быстрая выдача"
+                    first = pickup_receipts[0]
+                    pickup_name = str(first.pickup) if first.pickup_id else (first.pickup_point or '')
+                    comment = f"Быстрая выдача — {pickup_name}" if pickup_name else "Быстрая выдача"
                     package = ExtraditionPackage.objects.create(
                         user=user,
                         comment=comment,

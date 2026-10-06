@@ -1,0 +1,10 @@
+# Только конфигурация инструментов (проект не пакетируется).
+
+[tool.ruff]
+extend-exclude = ["migrations", "locale", "staticfiles"]
+
+[tool.ruff.lint]
+# Минимальный гейт: ошибки (pyflakes) и синтаксис, без стилевых правил —
+# legacy-код не переформатируется. Проверять изменённые файлы:
+#   ruff check $(git diff --name-only main...HEAD -- '*.py')
+select = ["F", "E9"]

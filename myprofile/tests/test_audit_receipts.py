@@ -14,7 +14,7 @@ from myprofile.models import Receipt, ReceiptItem, TrackCode, ContractViolation
 from register.models import PickupPoint, UserProfile
 
 
-class AuditReceiptsTests(TestCase):
+class AuditBase(TestCase):
     def setUp(self):
         self.pp_a = PickupPoint.objects.create(address="ул. А", premise_name="ПВЗ-А")
         self.pp_b = PickupPoint.objects.create(address="ул. Б", premise_name="ПВЗ-Б")
@@ -38,6 +38,8 @@ class AuditReceiptsTests(TestCase):
     def _run(self, *args):
         call_command("audit_receipts", *args, stdout=StringIO(), stderr=StringIO())
 
+
+class AuditReceiptsTests(AuditBase):
     def test_audit_detects_wrong_pickup_label(self):
         r = self._receipt(pickup_point=str(self.pp_a))
         ReceiptItem.objects.create(receipt=r, track_code=self._track("A1", pickup=self.pp_b))
@@ -74,3 +76,92 @@ class AuditReceiptsTests(TestCase):
         remaining = Receipt.objects.filter(owner=self.user, created_at=d)
         self.assertEqual(remaining.count(), 1)
         self.assertEqual(remaining.first().items.count(), 2)
+
+
+class AuditReceiptsSafetyTests(AuditBase):
+    """4.1: --fix чинит только pending-чеки; замороженные — только в отчёт."""
+
+    def _frozen(self, track, status="claimed", label=None):
+        r = self._receipt(pickup_point=label or str(self.pp_a))
+        ReceiptItem.objects.create(receipt=r, track_code=track)
+        Receipt.objects.filter(pk=r.pk).update(status=status)
+        r.refresh_from_db()
+        return r
+
+    def _snapshot(self):
+        return sorted(
+            (r.id, r.status, r.pickup_point, r.created_at,
+             tuple(sorted(r.items.values_list("track_code_id", flat=True))))
+            for r in Receipt.objects.all()
+        )
+
+    def _out(self, *args):
+        out = StringIO()
+        call_command("audit_receipts", *args, stdout=out, stderr=StringIO())
+        return out.getvalue()
+
+    def test_fix_never_rewrites_claimed_receipt_label(self):
+        claimed = self._frozen(self._track("S1"))
+        UserProfile.objects.filter(user=self.user).update(pickup=self.pp_b)
+
+        self._run("--fix")
+
+        claimed.refresh_from_db()
+        self.assertEqual(claimed.pickup_point, str(self.pp_a))
+
+    def test_fix_splits_mixed_pending_receipt(self):
+        r = self._receipt(pickup_point=str(self.pp_a))
+        ReceiptItem.objects.create(receipt=r, track_code=self._track("M1", pickup=self.pp_a))
+        ReceiptItem.objects.create(receipt=r, track_code=self._track("M2", pickup=self.pp_b))
+
+        self._run("--fix")
+
+        self.assertEqual(
+            sorted(Receipt.objects.filter(owner=self.user).values_list("pickup_point", flat=True)),
+            sorted([str(self.pp_a), str(self.pp_b)]),
+        )
+
+    def test_fix_does_not_merge_shipped_with_pending_of_same_date(self):
+        self._frozen(self._track("S2", pickup=self.pp_a), status="in_delivery")
+        pending = self._receipt(pickup_point=str(self.pp_a))
+        ReceiptItem.objects.create(receipt=pending, track_code=self._track("P2", pickup=self.pp_a))
+
+        self._run("--fix")
+
+        self.assertEqual(Receipt.objects.filter(owner=self.user).count(), 2)
+
+    def test_default_run_is_dry_run_and_previews_fix(self):
+        stale = self._receipt(pickup_point=str(self.pp_a))
+        ReceiptItem.objects.create(receipt=stale, track_code=self._track("D1", pickup=self.pp_b))
+        mixed = self._receipt(pickup_point=str(self.pp_a))
+        ReceiptItem.objects.create(receipt=mixed, track_code=self._track("D2", pickup=self.pp_a))
+        ReceiptItem.objects.create(receipt=mixed, track_code=self._track("D3", pickup=self.pp_b))
+        self._frozen(self._track("D4", pickup=self.pp_b), status="in_delivery")
+        before = self._snapshot()
+
+        out = self._out()
+
+        self.assertEqual(self._snapshot(), before)
+        self.assertIn("dry-run", out)
+        self.assertIn("cli", out)                      # клиент, чьи pending-чеки будут исправлены
+
+    def test_dry_run_is_read_only_and_names_problem_receipts(self):
+        # Ревью #5: отчёт не запускает исправление даже в откатываемой транзакции
+        # (на Postgres это расходовало номера чеков IC-xxxxxx).
+        from unittest import mock
+        stale = self._receipt(pickup_point=str(self.pp_a))
+        ReceiptItem.objects.create(receipt=stale, track_code=self._track("R1", pickup=self.pp_b))
+        with mock.patch("myprofile.management.commands.audit_receipts.sync_pending_receipts_for_user") as sync:
+            out = self._out()
+        sync.assert_not_called()
+        self.assertIn(stale.receipt_number, out)
+
+    def test_frozen_problem_is_reported_for_manual_review(self):
+        wrong = self._frozen(self._track("W1", pickup=self.pp_b), status="in_delivery")
+
+        out = self._out("--fix")
+
+        wrong.refresh_from_db()
+        self.assertEqual(wrong.pickup_point, str(self.pp_a))  # не тронут
+        self.assertIn(wrong.receipt_number, out)
+        self.assertIn("вручную", out)

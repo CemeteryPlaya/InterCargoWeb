@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from register.models import UserProfile, PickupPoint
 from myprofile.models import PickupChangeRequest, ArrivalSession
-from myprofile.views.utils import notify_in_user_language
+from myprofile.views.utils import add_reprint_messages, notify_in_user_language, pending_receipts_snapshot
 from django.utils.translation import gettext as _
 from tgbot.models import UserNotificationSettings
 from tgbot.services import get_telegram_context
@@ -256,7 +256,8 @@ def review_pickup_change(request, req_id):
         change_req.reviewed_by = request.user
         change_req.save()
 
-        # Обновляем ПВЗ пользователя
+        # Обновляем ПВЗ пользователя (сигнал перевешивает его pending-чеки)
+        before = pending_receipts_snapshot(change_req.user)
         profile = change_req.user.userprofile
         profile.pickup = change_req.requested_pickup
         profile.pickup_changed_at = timezone.now()
@@ -266,6 +267,7 @@ def review_pickup_change(request, req_id):
         notify_in_user_language(change_req.user, lambda: _(
             "Ваша заявка на смену ПВЗ одобрена. Новый ПВЗ: %(pickup)s") % {'pickup': _pp})
         messages.success(request, f"Заявка пользователя {change_req.user.username} одобрена.")
+        add_reprint_messages(request, change_req.user, before)
 
     elif action == 'reject':
         change_req.status = 'rejected'
