@@ -36,9 +36,11 @@
             </a>
             <!-- Навигация для десктопа (скрыта на мобильных) -->
             <nav id="desktop-menu" class="hidden md:flex space-x-8">
-                <a href="/" class="text-gray-900 font-medium hover:text-primary transition">{% trans "Главная" %}</a>
-                <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition">{% trans "Обучение" %}</a>
-                <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition">{% trans "О компании" %}</a>
+                {% with nav=request.resolver_match.url_name %}
+                <a href="/" class="{% if nav == 'home' %}text-primary font-medium{% else %}text-gray-700{% endif %} hover:text-primary transition">{% trans "Главная" %}</a>
+                <a href="{% url 'education' %}" class="{% if nav == 'education' %}text-primary font-medium{% else %}text-gray-700{% endif %} hover:text-primary transition">{% trans "Обучение" %}</a>
+                <a href="{% url 'info_page' 'about' %}" class="{% if nav == 'info_page' %}text-primary font-medium{% else %}text-gray-700{% endif %} hover:text-primary transition">{% trans "Инфо" %}</a>
+                {% endwith %}
             </nav>
         </div>
         <div class="flex items-center space-x-4">
@@ -72,7 +74,7 @@
                 target="_blank" rel="noopener noreferrer">
                 <img src="{% static 'images/telegram.svg' %}" style="height: 35px; width: 35px;" alt="Telegram">
             </a>
-            <a href="https://wa.me/77066440624"
+            <a href="https://wa.me/{{ COMPANY.whatsapp }}"
                 class="w-10 h-10 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition hidden md:flex"
                 target="_blank" rel="noopener noreferrer">
                 <img src="{% static 'images/whatsapp.svg' %}" style="height: 35px; width: 35px;" alt="WhatsApp">
@@ -178,7 +180,7 @@
             <nav class="flex-grow flex flex-col p-4 space-y-4">
                 <a href="/" class="text-gray-900 font-medium hover:text-primary transition py-2">{% trans "Главная" %}</a>
                 <a href="{% url 'education' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Обучение" %}</a>
-                <a href="{% url 'about' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "О компании" %}</a>
+                <a href="{% url 'info_page' 'about' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Инфо" %}</a>
                 {% if not user.is_authenticated %}
                 <a href="{% url 'register' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Регистрация" %}</a>
                 <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary transition py-2">{% trans "Войти" %}</a>
@@ -197,7 +199,7 @@
                         target="_blank" rel="noopener noreferrer">
                         <img src="{% static 'images/telegram.svg' %}" style="height: 28px; width: 28px;" alt="Telegram">
                     </a>
-                    <a href="https://wa.me/77066440624"
+                    <a href="https://wa.me/{{ COMPANY.whatsapp }}"
                         class="w-8 h-8 flex items-center justify-center rounded-full bg-white-100 hover:bg-white-100 transition"
                         target="_blank" rel="noopener noreferrer">
                         <img src="{% static 'images/whatsapp.svg' %}" style="height: 28px; width: 28px;" alt="WhatsApp">

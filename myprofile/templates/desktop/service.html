@@ -27,13 +27,13 @@
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
 
-        <main class="flex-1 p-4 md:p-8">
+        <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Сервис" %}</h1>
             </div>
             <div class="max-w-4xl mx-auto">
-                <h1 class="text-2xl font-bold mb-6 hidden md:block">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
                     <i class="ri-tools-line mr-2"></i>{% trans "Сервис" %}
                 </h1>
 
@@ -53,7 +53,7 @@
                 {% endif %}
 
                 <!-- 1. Прогрузить все QR-коды -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-qr-code-line mr-1 text-blue-500"></i>
                         {% trans "Прогрузить все QR-коды" %}
@@ -73,7 +73,7 @@
                 </div>
 
                 <!-- 2. Подгрузить чеки -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-file-list-3-line mr-1 text-green-500"></i>
                         {% trans "Подгрузить чеки" %}
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- 3. Нормализовать чеки -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-exchange-line mr-1 text-orange-500"></i>
                         {% trans "Нормализовать чеки" %}
@@ -123,7 +123,7 @@
                 </div>
 
                 <!-- 4. Отметить чеки как «Выдано клиенту» -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-checkbox-circle-line mr-1 text-purple-500"></i>
                         {% trans "Отметить чеки как «Выдано клиенту»" %}
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- 5. Перенос архивных трек-кодов -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-inbox-unarchive-line mr-1 text-teal-500"></i>
                         {% trans "Перенос архивных трек-кодов" %}
@@ -161,7 +161,7 @@
                 </div>
 
                 <!-- 6. Тест уведомлений -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <h2 class="text-lg font-semibold mb-2">
                         <i class="ri-notification-3-line mr-1 text-rose-500"></i>
                         {% trans "Тест уведомлений" %}
@@ -207,6 +207,8 @@
             </div>
         </main>
     </div>
+
+    {% include 'shared/footer.html' %}
     {% endblock %}
 </body>
 </html>

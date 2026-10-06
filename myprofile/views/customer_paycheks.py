@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
@@ -17,7 +18,15 @@ def delivered_trackcodes_by_date(request):
 
     receipts = Receipt.objects.filter(owner=request.user).order_by('-created_at')
 
+    # Онлайн-оплата картой (payments): чеки с товарами партнёра Di.Buyer
+    # оплачиваются только на ПВЗ.
+    partner_receipt_ids = set()
+    if settings.EPAY_ENABLED:
+        from payments.services import receipts_with_partner_items
+        partner_receipt_ids = receipts_with_partner_items(receipts.values_list('id', flat=True))
+
     for receipt in receipts:
+        receipt.has_partner_items = receipt.id in partner_receipt_ids
         receipt.display_pickup_point = receipt.pickup_point or ''
         receipt.items_list = list(receipt.items.select_related('track_code').all())
 
@@ -83,7 +92,8 @@ def receipt_list(request):
 @require_POST
 @login_required
 def pay_receipt(request, receipt_id):
-    receipt = get_object_or_404(Receipt, id=receipt_id, owner=request.user)
+    # Онлайн-оплата — в приложении payments (Halyk ePay); здесь только проверка владельца.
+    get_object_or_404(Receipt, id=receipt_id, owner=request.user)
     # PAYMENT COMMENTED OUT: оплата отключена
     # if not receipt.is_paid:
     #     receipt.is_paid = True

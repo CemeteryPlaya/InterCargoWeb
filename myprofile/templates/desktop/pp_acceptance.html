@@ -26,12 +26,12 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
-        <main class="flex-1 p-4 md:p-6">
+        <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Приёмка товара" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
                 <i class="ri-inbox-archive-line text-green-600"></i> {% trans "Приёмка товара на ПВЗ" %}
             </h2>
 

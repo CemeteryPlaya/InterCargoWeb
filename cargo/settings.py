@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'analytics',
     'support',
     'news',
+    'payments',
     'django_q',
 ]
 
@@ -109,6 +110,7 @@ TEMPLATES = [
                 'mainview.context_processors.current_language',
                 'mainview.context_processors.role_management_access',
                 'mainview.context_processors.nav_access',
+                'mainview.context_processors.company_info',
                 'dibuyer.context_processors.dibuyer_enabled',
                 'support.context_processors.support_badges',
             ],
@@ -322,6 +324,74 @@ LOGGING = {
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME')
 TELEGRAM_SITE_URL = os.getenv('SITE_URL')
+
+# ─────────────────────────────────────────────────────
+# Реквизиты компании (страницы «Контакты», оферта, футер)
+# ─────────────────────────────────────────────────────
+# Требование банка-эквайера: на сайте — страна, город, юр. и факт. адреса,
+# БИН/ИИН, график работы, телефоны поддержки. Пустые значения не выводятся,
+# а `manage.py check` предупреждает о них (mainview/checks.py).
+_DEFAULT_ADDRESS = 'Республика Казахстан, Жамбылская обл., г. Тараз, мкр. Акбулак (1), д. 21'
+COMPANY_INFO = {
+    'brand': os.getenv('COMPANY_BRAND', 'Inter Cargo'),
+    'legal_name': os.getenv('COMPANY_LEGAL_NAME', 'ИП INTER Service'),
+    'iin': os.getenv('COMPANY_IIN', '021104501914'),            # ИИН ИП
+    'country': os.getenv('COMPANY_COUNTRY', 'Республика Казахстан'),
+    'city': os.getenv('COMPANY_CITY', 'Тараз'),
+    'legal_address': os.getenv('COMPANY_LEGAL_ADDRESS', _DEFAULT_ADDRESS),
+    'actual_address': os.getenv('COMPANY_ACTUAL_ADDRESS', _DEFAULT_ADDRESS),
+    'schedule': os.getenv('COMPANY_SCHEDULE', '09:00–21:00'),  # тех. поддержка
+    'phone_director': os.getenv('COMPANY_PHONE_DIRECTOR', '+7 (777) 977-36-96'),
+    'phone_support': os.getenv('COMPANY_PHONE_SUPPORT', '+7 (706) 644-06-25'),  # менеджер
+    'whatsapp': os.getenv('COMPANY_WHATSAPP', '77066440625'),     # только цифры, для wa.me
+    'email': os.getenv('COMPANY_EMAIL', 'cargo.inter.kz@gmail.com'),
+    'bank_name': os.getenv('COMPANY_BANK_NAME', 'АО «Народный Банк Казахстана»'),
+    'iban': os.getenv('COMPANY_IBAN', ''),
+    'bik': os.getenv('COMPANY_BIK', 'HSBKKZKX'),
+    # Плательщик НДС? Влияет на формулировку цен («включая НДС» / «НДС не облагается»).
+    'vat_payer': os.getenv('COMPANY_VAT_PAYER', 'false').lower() == 'true',
+}
+
+# Видеоуроки на главной / «Обучении». Пустая ссылка — кнопка «Смотреть видео» скрыта
+# (банк-эквайер не допускает ссылок-заглушек и ссылок на недоступные ресурсы).
+# Ссылки в закрытый канал (t.me/c/…) — платный контент: видны только вошедшим
+# клиентам (mainview.context_processors._education_videos).
+EDUCATION_VIDEOS = {
+    'registration': os.getenv('EDU_VIDEO_REGISTRATION', 'https://t.me/c/3896488034/3'),
+    'order': os.getenv('EDU_VIDEO_ORDER', ''),
+    'tracking': os.getenv('EDU_VIDEO_TRACKING', 'https://t.me/c/3896488034/4'),
+}
+
+# ─────────────────────────────────────────────────────
+# Интернет-эквайринг Halyk ePay (приложение payments)
+# ─────────────────────────────────────────────────────
+# EPAY_ENABLED=false — кнопка «Оплатить картой» скрыта, эндпоинты оплаты 404.
+# EPAY_TEST_MODE=true — тестовый контур банка; без своих ключей используются
+# публичные тестовые реквизиты из https://epayment.kz/docs/Test-credentials.
+EPAY_ENABLED = os.getenv('EPAY_ENABLED', 'false').lower() == 'true'
+EPAY_TEST_MODE = os.getenv('EPAY_TEST_MODE', 'true').lower() != 'false'
+_EPAY_TEST_CREDENTIALS = {
+    'client_id': 'test',
+    'client_secret': 'yF587AV9Ms94qN2QShFzVR3vFnWkhjbAK3sG',
+    'terminal': '67e34d63-102f-4bd1-898e-370781d0074d',
+}
+EPAY_CLIENT_ID = os.getenv('EPAY_CLIENT_ID') or (_EPAY_TEST_CREDENTIALS['client_id'] if EPAY_TEST_MODE else '')
+EPAY_CLIENT_SECRET = os.getenv('EPAY_CLIENT_SECRET') or (_EPAY_TEST_CREDENTIALS['client_secret'] if EPAY_TEST_MODE else '')
+EPAY_TERMINAL_ID = os.getenv('EPAY_TERMINAL_ID') or (_EPAY_TEST_CREDENTIALS['terminal'] if EPAY_TEST_MODE else '')
+if EPAY_TEST_MODE:
+    EPAY_OAUTH_URL = 'https://test-epay-oauth.epayment.kz/oauth2/token'
+    EPAY_PAYFORM_JS = 'https://test-epay.epayment.kz/payform/payment-api.js'
+    EPAY_API_URL = 'https://test-epay-api.epayment.kz'
+else:
+    EPAY_OAUTH_URL = 'https://epay-oauth.homebank.kz/oauth2/token'
+    EPAY_PAYFORM_JS = 'https://epay.homebank.kz/payform/payment-api.js'
+    EPAY_API_URL = 'https://epay-api.homebank.kz'
+# Абсолютный адрес сайта для postLink/backLink (за Nginx request.scheme = http).
+EPAY_SITE_URL = (os.getenv('EPAY_SITE_URL') or os.getenv('SITE_URL') or '').rstrip('/')
+# Логотипы платёжных систем в футере — только те, что приняты по договору с банком.
+EPAY_CARD_BRANDS = [
+    b.strip() for b in os.getenv('EPAY_CARD_BRANDS', 'visa,mastercard,unionpay,amex').split(',') if b.strip()
+]
 
 # ─────────────────────────────────────────────────────
 # Валидатор выполнения функций (myprofile/execution_validator)

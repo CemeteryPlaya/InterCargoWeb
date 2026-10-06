@@ -1,0 +1,54 @@
+<p>This Policy sets out how personal data of users of cargointer.kz (the “Website”) is processed and protected in accordance with Law of the Republic of Kazakhstan No. 94-V of 21 May 2013 “On Personal Data and Their Protection”.</p>
+
+<h2>1. Operator</h2>
+<p>The owner and operator of the database containing personal data is {% if COMPANY.legal_name %}{{ COMPANY.legal_name }}{% if COMPANY.iin %}, IIN/BIN {{ COMPANY.iin }}{% endif %}{% else %}the individual entrepreneur listed in “Contacts and company details”{% endif %} (trade mark “{{ COMPANY.brand }}”), address: {{ COMPANY.actual_address }}{% if COMPANY.email %}, e-mail: <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}.</p>
+
+<h2>2. Data we process</h2>
+<ul>
+    <li>account data: login, password (stored only as an irreversible hash), first name, last name;</li>
+    <li>contact data: phone number, e-mail address, delivery address (for door-to-door delivery), selected pickup point;</li>
+    <li>order data: tracking numbers, parcel weights and statuses, receipts, handover history;</li>
+    <li>payment data received from the bank: amount, date, transaction number, masked card number and payment result. The Website does not receive or store the full card number, expiry date or CVV2/CVC2;</li>
+    <li>correspondence with customer support; Telegram ID — if you link the bot;</li>
+    <li>technical data: IP address, cookies, browser and device type, pages visited, push notification subscription.</li>
+</ul>
+
+<h2>3. Purposes of processing</h2>
+<ul>
+    <li>registering and identifying the user, concluding and performing the agreement (public offer);</li>
+    <li>receiving, delivering and handing over parcels, creating receipts, accepting payments and making refunds;</li>
+    <li>parcel status notifications and replies to enquiries;</li>
+    <li>fraud prevention, account protection, handling disputed payments (chargebacks);</li>
+    <li>compliance with the laws of the Republic of Kazakhstan (including tax and customs law);</li>
+    <li>improving the Website (anonymised visit statistics).</li>
+</ul>
+
+<h2>4. Legal grounds</h2>
+<p>Processing is based on the data subject's consent given at registration (<a href="{% url 'info_page' 'personal-data' %}">Consent to personal data processing</a>), as well as on the need to perform the agreement and comply with the law.</p>
+
+<h2>5. Disclosure to third parties</h2>
+<p>We do not sell personal data. Data is shared only to the extent necessary to provide the services:</p>
+<ul>
+    <li>Halyk Bank of Kazakhstan JSC — to process payments and refunds (Halyk ePay service);</li>
+    <li>transport and customs clearance partners — recipient data required to clear the cargo;</li>
+    <li>notification services (e-mail, Telegram, browser push services) — only the contact and the notification text;</li>
+    <li>state authorities — on grounds provided by law.</li>
+</ul>
+<p>Recipients must keep the data confidential and secure.</p>
+
+<h2>6. Storage and protection</h2>
+<ul>
+    <li>Personal data is stored on servers of the hosting provider PS.kz in Almaty (Republic of Kazakhstan).</li>
+    <li>Only authorised employees have access to the data, to the extent needed for their duties; access rights are role-based.</li>
+    <li>Data exchanged between the browser and the Website is protected by HTTPS (TLS); passwords are stored as hashes.</li>
+    <li>Data is kept for as long as the account exists and, after its deletion, for the periods required by law (including for accounting and payment documents), after which it is destroyed.</li>
+</ul>
+
+<h2>7. Cookies</h2>
+<p>The Website uses cookies required for signing in, form protection (CSRF), remembering the language, and anonymised visit statistics. Disabling cookies in your browser may make signing in impossible.</p>
+
+<h2>8. Your rights</h2>
+<p>You have the right to: know which of your data is processed; request its correction, completion or blocking; withdraw consent to processing (unless this contradicts the law or the performance of the agreement); request deletion of your data; appeal against the operator's actions to the competent authority or court. You can edit your profile data in your personal account; send other requests{% if COMPANY.email %} to <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %} — we respond within the time limits set by law.</p>
+
+<h2>9. Changes to this Policy</h2>
+<p>The current version of the Policy is always available on this page. Material changes take effect upon publication.</p>

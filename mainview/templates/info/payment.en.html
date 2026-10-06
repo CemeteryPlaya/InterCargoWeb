@@ -1,0 +1,39 @@
+<h2>What is paid and when</h2>
+<p>The delivery service is paid after the parcel arrives in Kazakhstan — by a receipt that is created automatically and shown in your personal account (“Receipts”). The receipt lists tracking numbers, weight, rate and the total in tenge. No prepayment is required for delivery from China.</p>
+<p>The parcel is handed over after the receipt is paid. You can pay online in advance or at the pickup point on collection.</p>
+
+<h2>Payment methods</h2>
+<ul>
+    <li><b>Bank card online</b> — in your personal account, “Receipts”, the “Pay by card” button. Cards of the payment systems listed below, issued by any bank, are accepted. Payment is made on the secure payment page of Halyk Bank of Kazakhstan JSC (Halyk ePay service).</li>
+    <li><b>At the pickup point — Kaspi QR.</b> Payment goes to the account of {{ COMPANY.legal_name|default:"the seller" }}; each pickup point has its own QR code (different addresses and cash desks). Receipts containing items of the partner service Di.Buyer are paid by this method only.</li>
+</ul>
+<p>Accepted payment systems:</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:0 0 1rem">
+    {% include 'shared/_payment_logos.html' with logo_height='32px' %}
+</div>
+
+<h2>Card payment rules and conditions</h2>
+<ol>
+    <li>Sign in to your personal account and open “Receipts”.</li>
+    <li>Click “Pay by card” next to the receipt — the amount is taken from the receipt.</li>
+    <li>You will be redirected to the Halyk ePay payment page. Enter the card number, expiry date, CVV2/CVC2 and cardholder name.</li>
+    <li>Confirm the payment with the 3-D Secure one-time code from your card-issuing bank.</li>
+    <li>After a successful payment you return to the website and the receipt is marked “Paid”. The electronic payment confirmation is kept in your personal account.</li>
+</ol>
+<ul>
+    <li>Payment currency — Kazakhstani tenge (₸). If your card is in another currency, your bank converts the amount at its own rate.</li>
+    <li>We charge <b>no fee</b> for card payments. Your bank may apply its own fees according to its tariffs.</li>
+    <li>The amount is debited immediately after the payment is confirmed (single-step payment).</li>
+    <li>If a payment fails, no money is debited; any blocked amount is released by the bank automatically. Try again or contact support.</li>
+</ul>
+<p>Payment cancellation and refunds — see <a href="{% url 'info_page' 'returns' %}">“Cancellation, exchange and refunds”</a>.</p>
+
+<h2 id="security">Payment security and confidentiality</h2>
+<ul>
+    <li>Card details are entered only on the payment page of Halyk Bank of Kazakhstan JSC (Halyk ePay). They are not transmitted to {{ COMPANY.brand }} servers and are not stored by us: we receive only the transaction result and a masked card number (e.g. 440043…0128).</li>
+    <li>The bank's payment gateway complies with the Payment Card Industry Data Security Standard (PCI DSS).</li>
+    <li>3-D Secure technology (Visa Secure, Mastercard Identity Check) is used: the payment is confirmed with a one-time code from the issuing bank.</li>
+    <li>All pages of the website and the payment page are transmitted over the secure HTTPS (TLS) protocol.</li>
+    <li>{{ COMPANY.brand }} staff will never ask for your card details, CVV2/CVC2 or SMS codes — by phone or in messengers. If someone asks you for them, it is fraud.</li>
+    <li>Payment information is processed in accordance with the <a href="{% url 'info_page' 'privacy' %}">Privacy Policy</a>.</li>
+</ul>

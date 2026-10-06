@@ -21,13 +21,13 @@
     {% include 'shared/header.html' %}
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
-        <main class="flex-1 px-4 md:px-8 py-8 space-y-8">
+        <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8 space-y-8">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Неопознанные посылки" %}</h1>
             </div>
             <header class="hidden md:block">
-                <h1 class="text-xl font-bold text-red-500">{% trans "Неопознанные посылки" %}</h1>
+                <h1 class="text-2xl font-bold text-gray-900 hidden md:block">{% trans "Неопознанные посылки" %}</h1>
                 <p class="text-sm text-gray-500 mt-1">{% trans "Посылки без владельца на сортировочном складе" %}</p>
             </header>
 
@@ -46,7 +46,7 @@
             {% endif %}
 
             <!-- Форма добавления -->
-            <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h2 class="text-base font-semibold text-gray-800 mb-4">
                     <i class="ri-add-circle-line text-red-500 mr-1"></i> {% trans "Добавить неопознанную посылку" %}
                 </h2>
@@ -91,7 +91,7 @@
 
             <!-- Заявлены клиентами -->
             {% if claimed %}
-            <section class="bg-white rounded-xl shadow-sm border border-orange-200">
+            <section class="bg-white rounded-2xl shadow-sm border border-orange-200">
                 <div class="p-4 border-b border-orange-100 bg-orange-50 rounded-t-xl flex items-center justify-between">
                     <h2 class="text-base font-semibold text-orange-800">
                         <i class="ri-user-received-line mr-1"></i>
@@ -164,7 +164,7 @@
 
             <!-- Подтверждено — ожидают прихода -->
             {% if awaiting %}
-            <section class="bg-white rounded-xl shadow-sm border border-green-200">
+            <section class="bg-white rounded-2xl shadow-sm border border-green-200">
                 <div class="p-4 border-b border-green-100 bg-green-50 rounded-t-xl flex items-center justify-between">
                     <h2 class="text-base font-semibold text-green-800">
                         <i class="ri-checkbox-circle-line mr-1"></i>
@@ -229,7 +229,7 @@
             {% endif %}
 
             <!-- Без владельца -->
-            <section class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100">
                 <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                     <h2 class="text-base font-semibold text-gray-800">
                         <i class="ri-question-mark text-yellow-500 mr-1"></i>
@@ -298,6 +298,8 @@
         </main>
     </div>
 
+    {% include 'shared/footer.html' %}
+
     <!-- Модальное окно: назначить клиента вручную -->
     <div id="assignModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -315,7 +317,7 @@
                 <input type="text" id="userSearchInput" autocomplete="off"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                     placeholder="{% trans "Введите имя или логин..." %}">
-                <div id="userSearchResults" class="mt-1 border border-gray-200 rounded-lg bg-white shadow hidden max-h-48 overflow-y-auto"></div>
+                <div id="userSearchResults" class="mt-1 border border-gray-100 rounded-2xl bg-white shadow-sm hidden max-h-48 overflow-y-auto"></div>
             </div>
             <div id="selectedUserInfo" class="hidden mb-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
                 <i class="ri-user-line mr-1"></i>

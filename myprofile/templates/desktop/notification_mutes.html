@@ -25,12 +25,12 @@
 <div class="flex min-h-screen">
     {% include 'mobile/sidebar.html' %}
 
-    <main class="flex-1 p-4 md:p-6 max-w-5xl">
+    <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8 max-w-5xl w-full">
         <!-- Мобильный хедер -->
-        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
             <h1 class="text-lg font-bold text-center">{% trans "Управление уведомлениями" %}</h1>
         </div>
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
             <i class="ri-notification-off-line text-red-500"></i> {% trans "Управление уведомлениями" %}
         </h2>
 
@@ -48,7 +48,7 @@
         {% endif %}
 
         <!-- Форма создания заглушки -->
-        <div class="bg-white rounded-xl shadow border border-gray-200 p-5 mb-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">
                 <i class="ri-add-circle-line text-red-500"></i> {% trans "Отключить уведомления" %}
             </h3>
@@ -157,7 +157,7 @@
         </div>
 
         <!-- Активные заглушки -->
-        <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden mb-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
             <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="font-semibold text-gray-800">
                     <i class="ri-pause-circle-line text-red-500"></i>
@@ -226,7 +226,7 @@
 
         <!-- История (последние 50) -->
         {% if history_mutes %}
-        <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <details>
                 <summary class="px-5 py-3 cursor-pointer font-semibold text-gray-600 text-sm hover:bg-gray-50">
                     <i class="ri-history-line"></i> История отключений (последние {{ history_mutes|length }})

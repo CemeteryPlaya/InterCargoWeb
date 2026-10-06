@@ -6,7 +6,7 @@ from .models import (
     Arrival, ArrivalSession, ArrivalSessionItem, ArrivalSessionSnapshot, ContractViolation
 )
 from django import forms
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib import messages
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -204,6 +204,44 @@ class CustomerDiscountAdmin(admin.ModelAdmin):
             return obj.user.username
         return "—"
     client_display.short_description = "Клиент"
+
+    # Скидка меняет тариф клиента → pending-чеки (печатные и цифровые) должны
+    # пересчитаться сразу; чеки «В доставке» и дальше не меняются (D4).
+    def _discounts_before(self, users):
+        from myprofile.views.utils import get_user_discount
+        return {u.pk: (u, get_user_discount(u)) for u in users if u is not None}
+
+    def _reprice(self, request, before):
+        from myprofile.views.utils import get_user_discount, reprice_after_discount_change
+        for user, old in before.values():
+            repriced, frozen = reprice_after_discount_change(user, old, get_user_discount(user))
+            if repriced:
+                messages.info(request, _("%(user)s: пересчитаны чеки %(numbers)s — перепечатайте их.")
+                              % {'user': user.username, 'numbers': ', '.join(repriced)})
+            if frozen:
+                messages.warning(request, _("%(user)s: чеки уже отправлены, скидка в них не применена: %(numbers)s.")
+                                 % {'user': user.username, 'numbers': ', '.join(frozen)})
+
+    def save_model(self, request, obj, form, change):
+        users = [obj.user]
+        if change and obj.pk:
+            prev = CustomerDiscount.objects.filter(pk=obj.pk).select_related('user').first()
+            if prev and prev.user_id != obj.user_id:
+                users.append(prev.user)
+        before = self._discounts_before(users)
+        super().save_model(request, obj, form, change)
+        self._reprice(request, before)
+
+    def delete_model(self, request, obj):
+        before = self._discounts_before([obj.user])
+        super().delete_model(request, obj)
+        self._reprice(request, before)
+
+    def delete_queryset(self, request, queryset):
+        users = {d.user for d in queryset.select_related('user') if d.user_id}
+        before = self._discounts_before(users)
+        super().delete_queryset(request, queryset)
+        self._reprice(request, before)
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

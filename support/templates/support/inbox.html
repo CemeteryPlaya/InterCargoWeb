@@ -26,17 +26,17 @@
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
 
-        <main class="flex-1 p-4 md:p-6">
+        <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-11 h-11 rounded-full bg-primary bg-opacity-10 flex items-center justify-center">
                     <i class="ri-customer-service-2-line text-primary text-xl"></i>
                 </div>
-                <h2 class="text-xl font-semibold text-gray-800">{% trans "Чаты поддержки" %}</h2>
+                <h2 class="text-2xl font-bold text-gray-900">{% trans "Чаты поддержки" %}</h2>
             </div>
 
             <div class="flex gap-4" style="height: calc(100vh - 200px); min-height: 480px;">
                 <!-- Левая колонка: список чатов -->
-                <div class="w-80 flex-shrink-0 bg-white rounded-xl shadow border border-gray-200 flex flex-col overflow-hidden">
+                <div class="w-80 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
                     <div class="flex border-b border-gray-200 text-sm font-medium">
                         <button type="button" data-tab="queue"
                             class="inbox-tab flex-1 px-2 py-2.5 text-center border-b-2 border-primary text-primary">
@@ -61,7 +61,7 @@
                 </div>
 
                 <!-- Правая колонка: чат -->
-                <div class="flex-1 bg-white rounded-xl shadow border border-gray-200 flex flex-col overflow-hidden">
+                <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
                     <div id="chat-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-400">
                         <i class="ri-chat-3-line text-6xl mb-3 text-gray-300"></i>
                         <p class="font-medium">{% trans "Выберите чат из списка" %}</p>

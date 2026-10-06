@@ -1,0 +1,15 @@
+<h2>Сведения о продавце</h2>
+{% include 'info/_requisites.html' %}
+
+<h2>Служба поддержки</h2>
+<p>Вопросы по заказам, оплате, доставке и возврату принимаются по телефону, в мессенджерах и по электронной почте.{% if COMPANY.schedule %} График работы: {{ COMPANY.schedule }}.{% endif %}</p>
+<ul>
+    {% if COMPANY.phone_support %}<li>Телефон / WhatsApp: <a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_support }}</a></li>{% endif %}
+    <li>Telegram: <a href="https://t.me/inter_cargo" target="_blank" rel="noopener">t.me/inter_cargo</a> (откроется приложение Telegram)</li>
+    {% if COMPANY.email %}<li>E-mail: <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a></li>{% endif %}
+    <li>Чат поддержки — в личном кабинете после входа на сайт.</li>
+</ul>
+<p>Письменные претензии рассматриваются в течение 10 календарных дней со дня получения.</p>
+
+<h2>Пункты выдачи</h2>
+{% include 'info/_pickup_points.html' %}

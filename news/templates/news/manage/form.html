@@ -34,9 +34,9 @@
 <div class="flex min-h-screen">
     {% include 'mobile/sidebar.html' %}
 
-    <main class="flex-1 p-4 md:p-8">
+    <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
         <!-- Мобильный хедер -->
-        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4 flex items-center">
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4 flex items-center">
             <a href="{% url 'news_manage' %}" class="absolute left-4 text-gray-600"><i class="ri-arrow-left-line text-xl"></i></a>
             <h1 class="text-lg font-bold text-center flex-1">{% if post %}{% trans "Редактирование" %}{% else %}{% trans "Новая новость" %}{% endif %}</h1>
         </div>
@@ -45,7 +45,7 @@
             <a href="{% url 'news_manage' %}" class="hidden md:inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition mb-4">
                 <i class="ri-arrow-left-line"></i> {% trans "К списку новостей" %}
             </a>
-            <h1 class="text-2xl font-bold mb-6 hidden md:block">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
                 {% if post %}{% trans "Редактирование новости" %}{% else %}{% trans "Новая новость" %}{% endif %}
             </h1>
 

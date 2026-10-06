@@ -128,9 +128,29 @@ class RegistrationFlowTest(PickupPointMixin, TestCase):
             'pickup': str(self.pickup_point.id),
             'first_name': 'Иван',
             'last_name': 'Иванов',
+            'agree_terms': '1',
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(PendingRegistration.objects.filter(login='BRANDNEW').exists())
+
+    def test_register_requires_offer_consent(self):
+        """Без согласия с офертой и обработкой ПД заявка не создаётся."""
+        session = self.client.session
+        session['email_verified'] = 'noconsent@test.com'
+        session.save()
+
+        response = self.client.post(reverse('register'), {
+            'login': 'noconsent',
+            'password': 'securepass',
+            'phone': '7008888899',
+            'email': 'noconsent@test.com',
+            'pickup': str(self.pickup_point.id),
+            'first_name': 'Иван',
+            'last_name': 'Иванов',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(PendingRegistration.objects.filter(login='NOCONSENT').exists())
+        self.assertContains(response, 'agree_terms')
 
     def test_register_duplicate_username(self):
         User.objects.create_user(username='EXISTING', password='pass123')

@@ -102,6 +102,17 @@ from myprofile.execution_validator.receipt_contracts import (
 from myprofile.receipt_pickup import find_pending_receipt, receipt_key, sync_pending_receipts_safely
 
 
+def client_track_rate(track, effective_rate):
+    """Тариф позиции клиента: текущий (база − скидка) или «тариф на момент доставки»
+    трека, если он ниже. historical_price_per_kg ставит приход (с учётом скидки на тот
+    момент) и разовая скидка сводки — она не теряется, если чек создают на другой
+    день, когда разовая скидка уже истекла; новая скидка ниже — применяется она."""
+    historical = track.historical_price_per_kg
+    if historical is not None and 0 < historical < effective_rate:
+        return historical
+    return effective_rate
+
+
 @validate_execution(post=[
     one_pending_receipt_per_client_date_pickup,
     all_items_belong_to_receipt_owner,
@@ -124,14 +135,22 @@ def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effe
             pickup=pickup, pickup_point=str(pickup) if pickup else '',
         )
 
+    client_rates = []
     for track in date_tracks:
         w = track.weight or Decimal("0")
-        rate = track.rate_override if track.rate_override is not None else effective_rate
+        if track.rate_override is not None:
+            rate = track.rate_override
+        else:
+            rate = client_track_rate(track, effective_rate)
+            client_rates.append(rate)
         ReceiptItem.objects.create(
             receipt=receipt, track_code=track,
             item_rate=rate,
             item_price=(w * rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP),
         )
+    if client_rates:
+        # Тариф чека = тариф его клиентских позиций (по нему пересчитывает скидка)
+        effective_rate = min(client_rates)
 
     # Единый ПВЗ + ссылка на оплату — из authoritative-правила
     pickup_obj = authoritative_pickup_obj(receipt)
@@ -318,32 +337,68 @@ def send_grouped_notifications(notif_counts, status):
         notify_in_user_language(user, _make_msg)
 
 
-def reprice_pending_receipts(user, receipt_date, new_rate):
+def _reprice_receipt_items(receipt, old_rate, new_rate):
+    """Позиции pending-чека по тарифу old_rate → new_rate; True, если чек изменился.
+
+    Не трогаем позиции со своей ставкой: rate_override трека (товары Di.Buyer,
+    бесплатные) и позиции, тариф которых не совпадает с old_rate (например, разовая
+    скидка другой даты)."""
+    changed = False
+    for item in receipt.items.select_related('track_code'):
+        override = item.track_code.rate_override if item.track_code_id else None
+        if override is not None or (item.item_rate and item.item_rate != old_rate):
+            continue
+        weight = item.display_weight or Decimal("0")
+        item.item_rate = new_rate
+        item.item_price = (weight * new_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+        item.save(update_fields=['item_rate', 'item_price'])
+        changed = True
+    if changed or (receipt.price_per_kg == old_rate and old_rate != new_rate):
+        _recalc_receipt(receipt, new_rate)
+        return True
+    return False
+
+
+def reprice_pending_receipts(user, receipt_date, new_rate, track_ids=()):
     """Новый тариф клиента для его чеков за дату (разовая скидка из сводки).
 
-    Пересчитываются только pending-чеки (ещё не отправлены — D4) и только позиции по
-    тарифу чека: у товаров Di.Buyer своя ставка, её не трогаем. Возвращает
-    (номера пересчитанных чеков, номера уже отправленных — их не меняем).
+    Чеки даты — с created_at = receipt_date, а также чеки с посылками track_ids
+    (сводка показывает посылки прихода этой даты, у которых delivered_date бывает
+    другой). Пересчитываются только pending-чеки (ещё не отправлены — D4) и только
+    позиции по тарифу чека: у товаров Di.Buyer своя ставка, её не трогаем.
+    Возвращает (номера пересчитанных чеков, номера уже отправленных — их не меняем).
     """
     repriced, frozen = [], []
-    receipts = Receipt.objects.filter(owner=user, created_at=receipt_date).order_by('id')
+    receipts = Receipt.objects.filter(owner=user).filter(
+        models_q(created_at=receipt_date) | models_q(items__track_code_id__in=list(track_ids))
+    ).distinct().order_by('id')
     for receipt in receipts:
         if receipt.status != 'pending':
             frozen.append(receipt.receipt_number)
             continue
-        old_rate = receipt.price_per_kg
-        changed = False
-        for item in receipt.items.select_related('track_code'):
-            override = item.track_code.rate_override if item.track_code_id else None
-            if override is not None or (item.item_rate and item.item_rate != old_rate):
-                continue
-            weight = item.display_weight or Decimal("0")
-            item.item_rate = new_rate
-            item.item_price = (weight * new_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-            item.save(update_fields=['item_rate', 'item_price'])
-            changed = True
-        if changed or old_rate != new_rate:
-            _recalc_receipt(receipt, new_rate)
+        if _reprice_receipt_items(receipt, receipt.price_per_kg, new_rate):
+            repriced.append(receipt.receipt_number)
+    return repriced, frozen
+
+
+def reprice_after_discount_change(user, old_discount, new_discount):
+    """Скидку клиента изменили (админка): pending-чеки, посчитанные по прежнему
+    тарифу клиента, пересчитываются по новому. Чеки после pending не меняются (D4).
+
+    Позиции с особой ставкой (Di.Buyer, разовая скидка сводки на другую дату)
+    остаются как были. Возвращает (пересчитанные, уже отправленные по старому тарифу).
+    """
+    base = get_global_price_per_kg()
+    old_rate, new_rate = base - old_discount, base - new_discount
+    repriced, frozen = [], []
+    if user is None or old_rate == new_rate:
+        return repriced, frozen
+    for receipt in Receipt.objects.filter(owner=user).exclude(status='claimed').order_by('id'):
+        if receipt.status != 'pending':
+            if receipt.price_per_kg == old_rate:
+                frozen.append(receipt.receipt_number)
+            continue
+        if _reprice_receipt_items(receipt, old_rate, new_rate):
             repriced.append(receipt.receipt_number)
     return repriced, frozen
 

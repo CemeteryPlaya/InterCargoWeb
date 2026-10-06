@@ -56,9 +56,9 @@
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Регистрация на сайте" %}</h3>
                         <p class="text-gray-700 mb-4">{% trans "Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт выдачи для получения ваших посылок." %}</p>
-                        <a href="https://t.me/c/3896488034/3" class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                        {% if EDUCATION_VIDEOS.registration %}<a href="{{ EDUCATION_VIDEOS.registration }}" target="_blank" rel="noopener" title="Telegram" class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                             {% trans "Смотреть видео" %} <i class="ri-play-circle-line ml-2"></i>
-                        </a>
+                        </a>{% endif %}
                     </div>
                 </div>
 
@@ -69,9 +69,9 @@
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Оформление заказа в Китае" %}</h3>
                         <p class="text-gray-700 mb-4">{% trans "Пошаговая инструкция по оформлению заказа на китайских торговых площадках и указанию нашего адреса доставки." %}</p>
-                        <a href="#" class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                        {% if EDUCATION_VIDEOS.order %}<a href="{{ EDUCATION_VIDEOS.order }}" target="_blank" rel="noopener" title="Telegram" class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                             {% trans "Смотреть видео" %} <i class="ri-play-circle-line ml-2"></i>
-                        </a>
+                        </a>{% endif %}
                     </div>
                 </div>
 
@@ -82,9 +82,9 @@
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Отслеживание посылки" %}</h3>
                         <p class="text-gray-700 mb-4">{% trans "Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из Китая в Казахстан." %}</p>
-                        <a href="https://t.me/c/3896488034/4" class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
+                        {% if EDUCATION_VIDEOS.tracking %}<a href="{{ EDUCATION_VIDEOS.tracking }}" target="_blank" rel="noopener" title="Telegram" class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                             {% trans "Смотреть видео" %} <i class="ri-play-circle-line ml-2"></i>
-                        </a>
+                        </a>{% endif %}
                     </div>
                 </div>
             </div>

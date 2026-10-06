@@ -34,7 +34,7 @@
     {% include 'mobile/sidebar.html' %}
 
     <!-- Main Content -->
-    <div class="w-full px-4 py-6 mx-auto">
+    <div class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
       {% if messages %}
       <div class="mb-6">
         {% for message in messages %}
@@ -52,10 +52,10 @@
       <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
           <h1 class="text-lg font-bold text-center">{% trans "Чеки" %}</h1>
       </div>
-      <h1 class="text-2xl font-bold mb-6 ml-2 hidden md:block">{% trans "Чеки" %}</h1>
+      <h1 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">{% trans "Чеки" %}</h1>
 
       {% if payment_link %}
-      <div class="mb-4 ml-2">
+      <div class="mb-4">
           <button type="button" id="pay-btn"
               class="inline-flex items-center gap-2 bg-green-600 text-white font-medium px-6 py-2.5 rounded-lg hover:bg-green-700 transition text-sm">
               <i class="ri-bank-card-line"></i> {% trans "Оплатить" %}
@@ -63,29 +63,31 @@
       </div>
       {% endif %}
 
-      <div x-data="{ filter: 'all', activeReceipt: null }" class="mb-4 ml-2">
-        <label class="mr-2 font-medium">{% trans "Фильтр:" %}</label>
+      <div x-data="{ filter: 'all', activeReceipt: null }" class="mb-4">
+        <div class="flex flex-wrap items-center gap-2">
+        <span class="font-medium mr-1">{% trans "Фильтр:" %}</span>
         <button @click="filter = 'all'"
           :class="filter === 'all' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Все" %}</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors">{% trans "Все" %}</button>
         <button @click="filter = 'sorting'"
           :class="filter === 'sorting' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "На сортировочном пункте" %}</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors">{% trans "На сортировочном пункте" %}</button>
         <button @click="filter = 'in_delivery'"
           :class="filter === 'in_delivery' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "В доставке" %}</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors">{% trans "В доставке" %}</button>
         <button @click="filter = 'not_issued'"
           :class="filter === 'not_issued' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Не выдано" %}</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors">{% trans "Не выдано" %}</button>
         <button @click="filter = 'issued'"
           :class="filter === 'issued' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
-          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors mr-1">{% trans "Выдано" %}</button>
+          class="px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors">{% trans "Выдано" %}</button>
         {% comment %}PAYMENT COMMENTED OUT
         <button @click="filter = 'paid'" :class="{ 'bg-red-500 text-white': filter === 'paid' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100 mr-1">{% trans "Оплаченные" %}</button>
         <button @click="filter = 'unpaid'" :class="{ 'bg-red-500 text-white': filter === 'unpaid' }"
           class="px-3 py-1 border rounded text-sm hover:bg-red-100">{% trans "Неоплаченные" %}</button>
         {% endcomment %}
+        </div>
 
         {% if receipts %}
         <!-- Сетка чеков -->
@@ -94,7 +96,7 @@
           <div
             data-client-status="{{ receipt.client_status|default_if_none:'' }}"
             x-show="filter === 'all' || filter === '{{ receipt.client_status|default_if_none:'' }}'"
-            class="bg-white border-2 border-gray-300 rounded-lg shadow-lg overflow-hidden">
+            class="bg-white border-2 border-gray-300 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
             <!-- Заголовок чека (кликабельный) -->
             <div @click="activeReceipt = activeReceipt === {{ receipt.id }} ? null : {{ receipt.id }}"
               class="cursor-pointer bg-gray-100 hover:bg-gray-200 transition p-3 flex justify-between items-center">
@@ -118,6 +120,9 @@
                   {% endwith %}
                   {% if receipt.claimed_at %}
                   <div class="text-[10px] text-gray-500">{{ receipt.claimed_at|date:"d.m.Y H:i" }}</div>
+                  {% endif %}
+                  {% if EPAY_ENABLED and receipt.is_paid %}
+                  <div class="text-[10px] font-semibold text-green-600"><i class="ri-checkbox-circle-line"></i> {% trans "Оплачен" %}</div>
                   {% endif %}
                 </div>
                 <svg :class="activeReceipt === {{ receipt.id }} ? 'rotate-180' : ''"
@@ -143,6 +148,25 @@
               </div>
               {% endif %}
               {% endcomment %}
+
+              {% if EPAY_ENABLED and not receipt.is_paid and receipt.has_partner_items %}
+              <p class="mb-3 text-center text-[11px] text-gray-500">{% trans "В чеке есть товары партнёрского сервиса Di.Buyer — оплата на пункте выдачи." %}</p>
+              {% elif EPAY_ENABLED and not receipt.is_paid and receipt.computed_price > 0 %}
+              <!-- Онлайн-оплата картой (Halyk ePay) -->
+              <form method="post" action="{% url 'epay_pay_receipt' receipt.id %}" class="mb-3 text-center">
+                {% csrf_token %}
+                <button type="submit"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
+                  <i class="ri-bank-card-line"></i> {% blocktrans with amount=receipt.computed_price|floatformat:0 %}Оплатить картой {{ amount }} ₸{% endblocktrans %}
+                </button>
+                <div class="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+                  {% include 'shared/_payment_logos.html' with logo_height='18px' %}
+                </div>
+                <p class="text-[11px] text-gray-500 mt-1">
+                  {% url 'info_page' 'payment' as payment_url %}{% blocktrans trimmed %}Без комиссии. <a href="{{ payment_url }}" class="underline">Условия оплаты и безопасность</a>{% endblocktrans %}
+                </p>
+              </form>
+              {% endif %}
 
               <!-- Таблица с товарами -->
               <div class="overflow-x-auto">
@@ -193,7 +217,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-gray-500 ml-2 mt-4">{% trans "Чеки ещё не сформированы." %}</p>
+        <p class="text-gray-500 mt-4">{% trans "Чеки ещё не сформированы." %}</p>
         {% endif %}
       </div>
     </div>

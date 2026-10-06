@@ -414,13 +414,18 @@ def apply_discount(request):
     client_name = target_user.username
     # Обновляем historical_price_per_kg на треках клиента за эту дату
     if date:
-        TrackCode.all_objects.filter(
-            owner=target_user, delivered_date=date,
-            status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-        ).update(historical_price_per_kg=effective_rate)
+        # Те же посылки, что показывает сводка за дату: delivered_date = дате или
+        # посылка из прихода этой даты (delivered_date у неё бывает другой).
+        arrival_track_ids = Arrival.objects.filter(date=date).values_list('track_codes', flat=True)
+        day_tracks = TrackCode.all_objects.filter(
+            Q(delivered_date=date) | Q(id__in=arrival_track_ids),
+            owner=target_user, status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
+        )
+        day_track_ids = list(day_tracks.values_list('id', flat=True))
+        TrackCode.all_objects.filter(id__in=day_track_ids).update(historical_price_per_kg=effective_rate)
         # Уже созданные чеки этой даты: pending — пересчитываем (иначе накладная и
         # чек клиента остаются со старой ценой), уехавшие — только предупреждаем
-        repriced, frozen = reprice_pending_receipts(target_user, date, effective_rate)
+        repriced, frozen = reprice_pending_receipts(target_user, date, effective_rate, day_track_ids)
         if repriced:
             messages.info(request, _("Пересчитаны чеки: %(numbers)s — перепечатайте накладные.")
                           % {'numbers': ', '.join(repriced)})

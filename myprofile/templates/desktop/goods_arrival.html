@@ -29,12 +29,12 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
-        <div class="flex-1 mx-auto p-4 md:p-6">
+        <div class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Приход товаров" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Приход товаров" %}</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">{% trans "Приход товаров" %}</h2>
 
             {% if messages %}
             <div class="mb-4">
@@ -51,7 +51,7 @@
             {% endif %}
 
             <!-- Новая сессия -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="ri-add-circle-line text-green-500"></i> {% trans "Начать новую сессию" %}</h3>
                 <form method="post" action="{% url 'goods_arrival_start' %}" class="flex items-end gap-4 flex-wrap">
                     {% csrf_token %}
@@ -78,7 +78,7 @@
 
             <!-- Активные сессии -->
             {% if active_sessions %}
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">
                     <i class="ri-loader-4-line text-orange-500"></i> {% trans "Активные сессии" %}
                     <span class="text-sm font-normal text-gray-500">({{ active_sessions|length }})</span>
@@ -90,12 +90,12 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                 {% trans "Активная" %}
                             </span>
-                            <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
+                            <span class="font-medium text-gray-800">{% blocktrans with id=s.id %}Сессия #{{ id }}{% endblocktrans %}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
                             {% if s.sorting_location %}
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
-                            <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <span class="text-sm text-gray-500">{% blocktrans with n=s.item_count %}{{ n }} строк{% endblocktrans %}</span>
                             <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
@@ -114,7 +114,7 @@
 
             <!-- Приостановленные сессии -->
             {% if paused_sessions %}
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">
                     <i class="ri-pause-circle-line text-yellow-500"></i> {% trans "На паузе" %}
                     <span class="text-sm font-normal text-gray-500">({{ paused_sessions|length }})</span>
@@ -126,12 +126,12 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 {% trans "На паузе" %}
                             </span>
-                            <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
+                            <span class="font-medium text-gray-800">{% blocktrans with id=s.id %}Сессия #{{ id }}{% endblocktrans %}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
                             {% if s.sorting_location %}
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
-                            <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <span class="text-sm text-gray-500">{% blocktrans with n=s.item_count %}{{ n }} строк{% endblocktrans %}</span>
                             <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
@@ -154,7 +154,7 @@
 
             <!-- Неактивные сессии (истёк 48-часовой лимит) -->
             {% if inactive_sessions %}
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">
                     <i class="ri-timer-flash-line text-gray-400"></i> {% trans "Неактивные сессии" %}
                     <span class="text-sm font-normal text-gray-500">{% trans "(превышен 48-часовой лимит)" %}</span>
@@ -166,12 +166,12 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
                                 {% trans "Неактивная" %}
                             </span>
-                            <span class="font-medium text-gray-700">Сессия #{{ s.id }}</span>
+                            <span class="font-medium text-gray-700">{% blocktrans with id=s.id %}Сессия #{{ id }}{% endblocktrans %}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
                             {% if s.sorting_location %}
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
-                            <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <span class="text-sm text-gray-500">{% blocktrans with n=s.item_count %}{{ n }} строк{% endblocktrans %}</span>
                             <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.created_by %}
                             <span class="text-xs text-gray-400">{{ s.created_by.get_full_name|default:s.created_by.username }}</span>
@@ -191,7 +191,7 @@
             {% endif %}
 
             <!-- Выбор даты для завершённых сессий -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
                 <div class="flex flex-wrap items-center gap-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700">
                         <i class="ri-check-double-line text-green-500"></i> {% trans "Завершённые сессии" %}
@@ -209,16 +209,16 @@
                 <div class="space-y-2">
                     {% for s in completed_sessions %}
                     <div class="flex flex-wrap items-center justify-between border border-green-200 bg-green-50 rounded-lg px-4 py-3 gap-2">
-                        <div class="flex items-center gap-4">
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 {% trans "Завершена" %}
                             </span>
-                            <span class="font-medium text-gray-800">Сессия #{{ s.id }}</span>
+                            <span class="font-medium text-gray-800">{% blocktrans with id=s.id %}Сессия #{{ id }}{% endblocktrans %}</span>
                             <span class="text-sm text-gray-600">{{ s.date|date:"d.m.Y" }}</span>
                             {% if s.sorting_location %}
                             <span class="text-sm text-gray-500">{{ s.sorting_location }}</span>
                             {% endif %}
-                            <span class="text-sm text-gray-500">{{ s.item_count }} строк</span>
+                            <span class="text-sm text-gray-500">{% blocktrans with n=s.item_count %}{{ n }} строк{% endblocktrans %}</span>
                             <a href="{% url 'goods_arrival_history' s.id %}" class="text-xs text-blue-600 hover:underline" title="{% trans 'История сохранений' %}"><i class="ri-history-line"></i> {% trans "История" %}</a>
                             {% if s.arrival %}
                             <span class="text-xs text-blue-600">Приход #{{ s.arrival.id }}</span>

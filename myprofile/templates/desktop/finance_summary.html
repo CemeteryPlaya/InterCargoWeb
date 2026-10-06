@@ -30,17 +30,17 @@
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
 
-        <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
+        <div class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8 max-w-7xl w-full">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Финансовая сводка" %}</h1>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-6 hidden md:block">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">
                 <i class="ri-money-dollar-circle-line text-primary"></i> {% trans "Финансовая сводка" %}
             </h1>
 
             <!-- Переключатель режима и фильтры -->
-            <div class="bg-white border rounded-lg shadow-sm p-4 mb-6">
+            <div class="bg-white border rounded-2xl shadow-sm p-4 mb-6">
                 <div class="flex flex-wrap gap-4 items-end">
                     <div class="flex gap-2">
                         <a href="{% url 'finance_summary' %}?mode=daily&date={{ selected_date|date:'Y-m-d' }}{% if selected_pickup %}&pickup={{ selected_pickup }}{% endif %}"
@@ -101,21 +101,21 @@
 
             <!-- Итоговые карточки -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Всего чеков" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ totals.total_receipts }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Общая сумма" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ totals.total_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">{{ totals.total_weight|floatformat:3 }} кг</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
+                <div class="bg-white border border-green-200 rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Оплачено" %}</div>
                     <div class="text-2xl font-bold text-green-600">{{ totals.paid_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">{{ totals.paid_count }} чеков</div>
                 </div>
-                <div class="bg-white border border-red-200 rounded-lg p-4 shadow-sm">
+                <div class="bg-white border border-red-200 rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Не оплачено" %}</div>
                     <div class="text-2xl font-bold text-red-600">{{ totals.unpaid_amount|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">{{ totals.unpaid_count }} чеков</div>
@@ -124,7 +124,7 @@
 
             <!-- Сводка по ПВЗ -->
             {% if by_pickup %}
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-map-pin-line text-primary mr-1"></i>
@@ -210,7 +210,7 @@
 
             <!-- Доставка на дом (отдельный блок если нет в by_pickup) -->
             {% if home_delivery_clients and not by_pickup %}
-            <div class="bg-white border border-purple-200 rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white border border-purple-200 rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-purple-50 border-b border-purple-200">
                     <h2 class="font-semibold text-purple-800">
                         <i class="ri-home-line text-purple-600 mr-1"></i>
@@ -246,7 +246,7 @@
 
             {% if view_mode == 'daily' %}
             <!-- Таблица по дням (последние 30 дней) -->
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-calendar-line text-primary mr-1"></i> {% trans "Последние 30 дней" %}
@@ -289,7 +289,7 @@
 
             {% else %}
             <!-- Ежемесячный режим: дни внутри месяца -->
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-calendar-line text-primary mr-1"></i> По дням за {{ selected_month }}
@@ -332,7 +332,7 @@
 
             <!-- Сводка по месяцам (последние 12) -->
             {% if monthly_rows %}
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-calendar-2-line text-primary mr-1"></i> {% trans "Последние 12 месяцев" %}
@@ -379,15 +379,15 @@
 
             <!-- Итоговые карточки водителя -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Доставок" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_deliveries }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Общий вес" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ driver_totals.total_weight|floatformat:3 }} <span class="text-sm font-normal text-gray-500">{% trans "кг" %}</span></div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
+                <div class="bg-white border border-green-200 rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "К выплате" %}</div>
                     <div class="text-2xl font-bold text-green-600">{{ driver_totals.total_earnings|floatformat:0 }} <span class="text-sm font-normal text-gray-500">₸</span></div>
                     <div class="text-xs text-gray-400">Ставка: {{ delivery_rate|floatformat:0 }} ₸/кг</div>
@@ -395,7 +395,7 @@
             </div>
 
             <!-- Таблица: Оплата за доставку по Дата-Пункт -->
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h3 class="font-semibold text-gray-700">
                         <i class="ri-wallet-3-line text-primary mr-1"></i>
@@ -445,7 +445,7 @@
 
             <!-- Сводная таблица доставок по дням -->
             {% if driver_daily_summary %}
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h3 class="font-semibold text-gray-700">
                         <i class="ri-calendar-line text-primary mr-1"></i>

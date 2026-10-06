@@ -29,15 +29,15 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
-        <div class="flex-1 mx-auto p-6">
+        <div class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-6 -mt-6 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Сессия прихода" %}</h1>
             </div>
             <!-- Заголовок -->
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">
+                    <h2 class="text-2xl font-bold text-gray-900 hidden md:block">
                         Сессия прихода #{{ session.id }}
                         {% if session.status == 'paused' %}
                         <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
@@ -169,7 +169,7 @@
             </div>
             {% endif %}
 
-            <div class="bg-white rounded-lg shadow p-6" id="session-editor">
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100" id="session-editor">
                 <!-- Переключение вида -->
                 <div class="flex items-center gap-3 mb-4 flex-wrap">
                     <button type="button" id="form_toggle_btn"

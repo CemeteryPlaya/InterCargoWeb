@@ -86,7 +86,7 @@
         <div class="mb-6">
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
           <div class="flex gap-2">
-            <input type="email" id="email" name="email" required value="{{ email }}" class="flex-1 px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="example@mail.com">
+            <input type="email" id="email" name="email" required value="{{ email }}" class="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="example@mail.com">
             <button type="button" id="sendCodeBtn" class="px-4 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm whitespace-nowrap">
               {% trans "Подтвердить" %}
             </button>
@@ -94,7 +94,7 @@
           <!-- Блок ввода кода (скрыт по умолчанию) -->
           <div id="codeBlock" class="hidden mt-3">
             <div class="flex gap-2">
-              <input type="text" id="emailCode" maxlength="7" class="flex-1 px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition text-center tracking-widest font-mono text-lg" placeholder="___-___">
+              <input type="text" id="emailCode" maxlength="7" class="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary transition text-center tracking-widest font-mono text-lg" placeholder="___-___">
               <button type="button" id="verifyCodeBtn" class="px-4 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm whitespace-nowrap">
                 {% trans "Проверить код" %}
               </button>
@@ -145,6 +145,16 @@
             </button>
           </div>
         </div>
+
+        <!-- Согласие с офертой и обработкой ПД (требование банка-эквайера и Закона РК о ПД) -->
+        <label class="flex items-start gap-3 mb-6 cursor-pointer">
+          <input type="checkbox" id="agree_terms" name="agree_terms" value="1" required
+            class="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary flex-shrink-0">
+          <span class="text-sm text-gray-600 leading-relaxed">
+            {% url 'info_page' 'offer' as offer_url %}{% url 'info_page' 'privacy' as privacy_url %}{% url 'info_page' 'personal-data' as pd_url %}
+            {% blocktrans trimmed %}Я принимаю условия <a href="{{ offer_url }}" target="_blank" class="text-primary underline">публичной оферты</a>, ознакомлен(-а) с <a href="{{ privacy_url }}" target="_blank" class="text-primary underline">политикой конфиденциальности</a> и даю <a href="{{ pd_url }}" target="_blank" class="text-primary underline">согласие на обработку персональных данных</a>{% endblocktrans %}
+          </span>
+        </label>
 
         <!-- Кнопка -->
         <button type="submit" id="registerBtn" disabled class="w-full bg-gray-400 text-white px-6 py-3 rounded-button font-medium transition whitespace-nowrap cursor-not-allowed">

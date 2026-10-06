@@ -28,9 +28,9 @@
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
 
-        <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-7xl">
+        <div class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8 max-w-7xl w-full">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">
                     {% if mode == 'pages' %}{{ app_label }}{% else %}{% trans "Аналитика сайта" %}{% endif %}
                 </h1>
@@ -42,7 +42,7 @@
                     <a href="?days={{ days }}" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1 mb-1">
                         <i class="ri-arrow-left-line"></i> {% trans "Все приложения" %}
                     </a>
-                    <h1 class="text-2xl font-bold text-gray-800">
+                    <h1 class="text-2xl font-bold text-gray-900 hidden md:block">
                         <i class="ri-apps-2-line text-primary"></i> {{ app_label }}
                     </h1>
                     {% else %}
@@ -66,42 +66,42 @@
             <!-- Итоговые карточки -->
             {% if mode == 'pages' %}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Просмотры страниц" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ scope_views|default:0 }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Страниц" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ scope_pages|default:0 }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Среднее время на странице" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ scope_avg_label }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Суммарное время всех визитов" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ scope_total_time_label }}</div>
                 </div>
             </div>
             {% else %}
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Просмотры страниц" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ totals.views|default:0 }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Уник. пользователи" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{% if approx %}≈ {% endif %}{{ totals.users|default:0 }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Сессии" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{% if approx %}≈ {% endif %}{{ totals.sessions|default:0 }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Среднее время на странице" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ avg_label }}</div>
                 </div>
-                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
                     <div class="text-xs text-gray-500 mb-1">{% trans "Суммарное время всех визитов" %}</div>
                     <div class="text-2xl font-bold text-gray-800">{{ total_time_label }}</div>
                 </div>
@@ -116,7 +116,7 @@
             {% endif %}
 
             <!-- Чарт -->
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-2">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-pie-chart-line text-primary mr-1"></i>
@@ -146,7 +146,7 @@
 
             {% if mode == 'pages' %}
             <!-- Таблица: страницы приложения -->
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-file-list-3-line text-primary mr-1"></i> {% trans "Страницы" %}
@@ -188,7 +188,7 @@
             </div>
             {% else %}
             <!-- Таблица: приложения (клик — детализация по страницам) -->
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 border-b">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-apps-2-line text-primary mr-1"></i> {% trans "Приложения" %}

@@ -1,0 +1,46 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANGUAGE|default:'ru' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Оплата картой" %} — Inter Cargo</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="{% static 'scripts/tailwindConfig.js' %}?v={{ APP_VERSION }}"></script>
+    <link rel="stylesheet" href="{% static 'styles/remixicon/remixicon.css' %}?v={{ APP_VERSION }}"/>
+    <script src="{{ payform_js }}"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 max-w-md w-full text-center">
+        <i class="ri-secure-payment-line text-4xl text-primary"></i>
+        <h1 class="text-xl font-bold text-gray-900 mt-3">{% trans "Переход к оплате" %}</h1>
+        <p class="text-sm text-gray-600 mt-2">{% blocktrans with number=payment.receipt_number amount=payment.amount|floatformat:0 %}Чек {{ number }} · к оплате {{ amount }} ₸{% endblocktrans %}</p>
+        <p class="text-sm text-gray-500 mt-4">{% trans "Сейчас откроется защищённая платёжная страница АО «Народный Банк Казахстана» (Halyk ePay). Данные карты вводятся только на ней." %}</p>
+        {% if payment.test_mode %}<p class="text-xs text-orange-600 mt-3">{% trans "Тестовый режим: деньги не списываются." %}</p>{% endif %}
+        <button type="button" id="epay-go" class="mt-6 w-full bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-opacity-90 transition">
+            {% trans "Перейти к оплате" %}
+        </button>
+        <p id="epay-error" class="hidden text-sm text-red-600 mt-3">{% trans "Не удалось загрузить платёжную страницу банка. Проверьте соединение и попробуйте ещё раз." %}</p>
+        <a href="{% url 'delivered_posts' %}" class="inline-block text-sm text-gray-500 hover:text-primary mt-4">{% trans "Вернуться к чекам" %}</a>
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
+            {% include 'shared/_payment_logos.html' with logo_height='22px' %}
+        </div>
+    </div>
+    {{ payment_object|json_script:"epay-payment-object" }}
+    <script>
+    (function () {
+        var paymentObject = JSON.parse(document.getElementById('epay-payment-object').textContent);
+        function go() {
+            if (window.halyk && typeof window.halyk.pay === 'function') {
+                window.halyk.pay(paymentObject);
+            } else {
+                document.getElementById('epay-error').classList.remove('hidden');
+            }
+        }
+        document.getElementById('epay-go').addEventListener('click', go);
+        window.addEventListener('load', go);
+    })();
+    </script>
+</body>
+</html>
