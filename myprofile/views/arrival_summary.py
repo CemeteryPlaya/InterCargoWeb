@@ -13,7 +13,7 @@ from django.db.models import Q
 
 from myprofile.models import TrackCode, CustomerDiscount, Arrival, ReceiptItem
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
-from myprofile.views.utils import add_reprint_messages, pending_receipts_snapshot
+from myprofile.views.utils import add_reprint_messages, pending_receipts_snapshot, reprice_pending_receipts
 from myprofile.receipt_pickup import receipt_pickup_key, sync_pending_receipts_safely
 from register.models import UserProfile, PickupPoint
 from django.contrib.auth.models import User
@@ -63,6 +63,7 @@ def arrival_summary_view(request):
     pickups = OrderedDict()  # pickup_id -> {name, clients: {key -> data}}
     home_clients = OrderedDict()  # key -> data (клиенты с доставкой на дом)
     no_pickup_clients = OrderedDict()  # key -> data (клиенты без ПВЗ)
+    reschedule_clients = OrderedDict()  # key -> data (ПВЗ выбран после прихода — ждут переноса)
 
     for track in tracks:
         owner = track.owner
@@ -72,6 +73,28 @@ def arrival_summary_view(request):
             continue
 
         has_override = track.delivery_pickup_id and track.delivery_pickup
+
+        # Прибыла без ПВЗ, ПВЗ появился позже (клиент выбрал в профиле): посылка ждёт
+        # «Переноса прихода» и не видна в доставке — значит, не считаем её под ПВЗ
+        # (иначе сводка и накладные расходятся с доставкой). Без ПВЗ вовсе — ниже,
+        # в «Без пункта», где ПВЗ можно назначить сразу.
+        if track.needs_pickup_reschedule:
+            try:
+                profile_pp = owner.userprofile.pickup
+            except (UserProfile.DoesNotExist, AttributeError):
+                profile_pp = None
+            target_pp = track.delivery_pickup if has_override else profile_pp
+            if target_pp:
+                entry = reschedule_clients.setdefault(owner.id, {
+                    'username': owner.username,
+                    'full_name': owner.get_full_name() or owner.username,
+                    'pickup': str(target_pp),
+                    'track_count': 0,
+                    'total_weight': Decimal("0"),
+                })
+                entry['track_count'] += 1
+                entry['total_weight'] += weight
+                continue
         is_home = has_override and track.delivery_pickup.is_home_delivery
         is_warehouse_override = has_override and not track.delivery_pickup.is_home_delivery
 
@@ -200,6 +223,9 @@ def arrival_summary_view(request):
         client['total_price'] = _round_price(client['total_weight'] * client['effective_rate'])
         client['total_weight'] = float(client['total_weight'])
 
+    for client in reschedule_clients.values():
+        client['total_weight'] = float(client['total_weight'])
+
     # ПВЗ "Со склада" (Акбулак 21, id=1)
     warehouse_pp = PickupPoint.objects.filter(id=1, is_active=True).first()
 
@@ -216,6 +242,7 @@ def arrival_summary_view(request):
         'pickups': pickups,
         'home_clients': home_clients,
         'no_pickup_clients': no_pickup_clients,
+        'reschedule_clients': reschedule_clients,
         'all_pickups': all_pickups,
         'home_pp_id': home_pp.id if home_pp else None,
         'warehouse_pp_id': warehouse_pp.id if warehouse_pp else None,
@@ -260,7 +287,8 @@ def toggle_home_delivery(request):
         if not home_pp:
             messages.error(request, _("Пункт 'Доставка на дом' не найден."))
             return redirect(f'/profile/arrival-summary/?date={date}')
-        tracks.update(delivery_pickup=home_pp)
+        # Оператор явно решил, куда везти, — посылка едет с этим приходом
+        tracks.update(delivery_pickup=home_pp, needs_pickup_reschedule=False)
         messages.success(request, _("Клиент назначен на доставку на дом."))
     elif action == 'warehouse':
         pickup_id = request.POST.get('pickup_id')
@@ -272,10 +300,12 @@ def toggle_home_delivery(request):
         except PickupPoint.DoesNotExist:
             messages.error(request, _("Пункт выдачи не найден."))
             return redirect(f'/profile/arrival-summary/?date={date}')
-        tracks.update(delivery_pickup=warehouse_pp)
+        tracks.update(delivery_pickup=warehouse_pp, needs_pickup_reschedule=False)
         messages.success(request, f"Клиент назначен на пункт: {warehouse_pp}")
     else:
-        tracks.update(delivery_pickup=None)
+        # На свой ПВЗ: если его нет — посылка снова ждёт назначения ПВЗ
+        has_own_pickup = UserProfile.objects.filter(user_id=user_id, pickup__isnull=False).exists()
+        tracks.update(delivery_pickup=None, needs_pickup_reschedule=not has_own_pickup)
         messages.success(request, _("Клиент возвращён на свой ПВЗ."))
 
     # .update() обходит сигналы — перевешиваем pending-чеки клиента явно
@@ -309,6 +339,11 @@ def assign_temp_pickup(request):
     clients = list(User.objects.filter(id__in=user_ids))
     before = {client.id: pending_receipts_snapshot(client) for client in clients}
     count = UserProfile.objects.filter(user_id__in=user_ids).update(pickup=pickup)
+    # Посылки этого прихода больше не ждут «Переноса прихода»: ПВЗ назначен прямо в
+    # сводке — они появляются в доставке и накладных за эту же дату
+    TrackCode.all_objects.filter(
+        owner_id__in=user_ids, delivered_date=date, needs_pickup_reschedule=True,
+    ).update(needs_pickup_reschedule=False)
 
     if count:
         messages.success(request, f"Назначен ПВЗ для {count} клиентов: {pickup}")
@@ -383,6 +418,16 @@ def apply_discount(request):
             owner=target_user, delivered_date=date,
             status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
         ).update(historical_price_per_kg=effective_rate)
+        # Уже созданные чеки этой даты: pending — пересчитываем (иначе накладная и
+        # чек клиента остаются со старой ценой), уехавшие — только предупреждаем
+        repriced, frozen = reprice_pending_receipts(target_user, date, effective_rate)
+        if repriced:
+            messages.info(request, _("Пересчитаны чеки: %(numbers)s — перепечатайте накладные.")
+                          % {'numbers': ', '.join(repriced)})
+        if frozen:
+            messages.warning(request, _(
+                "Чеки уже отправлены, скидка в них не применена: %(numbers)s."
+            ) % {'numbers': ', '.join(frozen)})
     messages.success(request, f"Скидка {amount} ₸/кг применена для {target_user.username}")
 
     if is_ajax:

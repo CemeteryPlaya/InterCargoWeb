@@ -55,10 +55,12 @@ def print_documents_view(request):
 
                 # Треки, пришедшие на сорт. склад в выбранную дату (любой статус >= delivered)
                 arrival_track_ids = Arrival.objects.filter(date=check_date).values_list('track_codes', flat=True)
+                # Посылки, ждущие «Переноса прихода» (ПВЗ выбран после прихода), не
+                # печатаем: доставка их не возит, пока их не перенесут на новую дату
                 tracks = TrackCode.all_objects.filter(
                     Q(delivered_date=check_date) | Q(id__in=arrival_track_ids),
                     status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-                ).filter(
+                ).exclude(needs_pickup_reschedule=True).filter(
                     Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
                     Q(delivery_pickup_id__in=pickup_point_ids)
                 ).select_related('owner', 'owner__userprofile', 'owner__userprofile__pickup', 'delivery_pickup')
@@ -261,7 +263,7 @@ def print_documents_view(request):
             tracks = TrackCode.all_objects.filter(
                 Q(delivered_date=registry_date) | Q(id__in=arrival_track_ids2),
                 status__in=['delivered', 'shipping_pp', 'ready', 'claimed'],
-            ).filter(
+            ).exclude(needs_pickup_reschedule=True).filter(
                 Q(delivery_pickup__isnull=True, owner__userprofile__pickup_id__in=pickup_point_ids) |
                 Q(delivery_pickup_id__in=pickup_point_ids)
             )

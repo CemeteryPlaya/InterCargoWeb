@@ -313,6 +313,36 @@ def send_grouped_notifications(notif_counts, status):
         notify_in_user_language(user, _make_msg)
 
 
+def reprice_pending_receipts(user, receipt_date, new_rate):
+    """Новый тариф клиента для его чеков за дату (разовая скидка из сводки).
+
+    Пересчитываются только pending-чеки (ещё не отправлены — D4) и только позиции по
+    тарифу чека: у товаров Di.Buyer своя ставка, её не трогаем. Возвращает
+    (номера пересчитанных чеков, номера уже отправленных — их не меняем).
+    """
+    repriced, frozen = [], []
+    receipts = Receipt.objects.filter(owner=user, created_at=receipt_date).order_by('id')
+    for receipt in receipts:
+        if receipt.status != 'pending':
+            frozen.append(receipt.receipt_number)
+            continue
+        old_rate = receipt.price_per_kg
+        changed = False
+        for item in receipt.items.select_related('track_code'):
+            override = item.track_code.rate_override if item.track_code_id else None
+            if override is not None or (item.item_rate and item.item_rate != old_rate):
+                continue
+            weight = item.display_weight or Decimal("0")
+            item.item_rate = new_rate
+            item.item_price = (weight * new_rate).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            item.save(update_fields=['item_rate', 'item_price'])
+            changed = True
+        if changed or old_rate != new_rate:
+            _recalc_receipt(receipt, new_rate)
+            repriced.append(receipt.receipt_number)
+    return repriced, frozen
+
+
 def pending_receipts_snapshot(user):
     """{receipt_id: (номер, метка ПВЗ)} pending-чеков клиента — снимок до действия оператора."""
     if user is None:

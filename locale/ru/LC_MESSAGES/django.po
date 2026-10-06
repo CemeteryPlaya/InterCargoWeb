@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 17:32+0500\n"
+"POT-Creation-Date: 2026-10-06 12:28+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -311,7 +311,8 @@ msgstr "Отклонена"
 #: .\dibuyer\models.py:87 .\dibuyer\models.py:127 .\dibuyer\models.py:196
 #: .\myprofile\models.py:459 .\myprofile\models.py:723
 #: .\myprofile\templates\desktop\arrival_summary.html:112
-#: .\myprofile\templates\desktop\arrival_summary.html:294
+#: .\myprofile\templates\desktop\arrival_summary.html:175
+#: .\myprofile\templates\desktop\arrival_summary.html:337
 #: .\myprofile\templates\desktop\delivery.html:328
 #: .\myprofile\templates\desktop\finance_summary.html:178
 #: .\myprofile\templates\desktop\finance_summary.html:224
@@ -469,8 +470,9 @@ msgstr "Количество"
 #: .\myprofile\models.py:410 .\myprofile\models.py:907
 #: .\myprofile\templates\desktop\arrival_history.html:300
 #: .\myprofile\templates\desktop\arrival_summary.html:115
-#: .\myprofile\templates\desktop\arrival_summary.html:199
-#: .\myprofile\templates\desktop\arrival_summary.html:297
+#: .\myprofile\templates\desktop\arrival_summary.html:178
+#: .\myprofile\templates\desktop\arrival_summary.html:242
+#: .\myprofile\templates\desktop\arrival_summary.html:340
 #: .\myprofile\templates\desktop\delivered_posts.html:155
 #: .\myprofile\templates\desktop\delivery.html:330
 #: .\myprofile\templates\desktop\extradition_package.html:109
@@ -1753,7 +1755,7 @@ msgid "Зарегистрироваться"
 msgstr "Зарегистрироваться"
 
 #: .\mainview\templates\desktop\index.html:905
-#: .\myprofile\templates\desktop\arrival_summary.html:195
+#: .\myprofile\templates\desktop\arrival_summary.html:238
 #: .\register\templates\desktop\login.html:106
 #: .\register\templates\desktop\password_reset.html:42
 #: .\register\templates\desktop\register_confirmation.html:61
@@ -1762,8 +1764,8 @@ msgstr "Логин"
 
 #: .\mainview\templates\desktop\index.html:910
 #: .\myprofile\templates\desktop\arrival_summary.html:113
-#: .\myprofile\templates\desktop\arrival_summary.html:196
-#: .\myprofile\templates\desktop\arrival_summary.html:295
+#: .\myprofile\templates\desktop\arrival_summary.html:239
+#: .\myprofile\templates\desktop\arrival_summary.html:338
 #: .\myprofile\templates\desktop\inventory_session.html:150
 #: .\register\models.py:37 .\register\templates\desktop\login.html:111
 #: .\register\templates\desktop\register_confirmation.html:63
@@ -2605,7 +2607,7 @@ msgid "Уведомление"
 msgstr "Уведомление"
 
 #: .\myprofile\models.py:559
-#: .\myprofile\templates\desktop\arrival_summary.html:385
+#: .\myprofile\templates\desktop\arrival_summary.html:428
 msgid "Скидка (₸/кг)"
 msgstr "Скидка (₸/кг)"
 
@@ -3042,6 +3044,7 @@ msgid "Заглушки уведомлений"
 msgstr "Заглушки уведомлений"
 
 #: .\myprofile\models.py:1123
+#: .\myprofile\templates\desktop\arrival_summary.html:176
 #: .\myprofile\templates\desktop\finance_summary.html:139
 #: .\myprofile\templates\shared\print\client_check_pdf.html:127
 #: .\myprofile\templates\shared\print\client_check_pdf.html:151
@@ -3287,8 +3290,9 @@ msgid "Доставка на дом (Курьер)"
 msgstr "Доставка на дом (Курьер)"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:114
-#: .\myprofile\templates\desktop\arrival_summary.html:198
-#: .\myprofile\templates\desktop\arrival_summary.html:296
+#: .\myprofile\templates\desktop\arrival_summary.html:177
+#: .\myprofile\templates\desktop\arrival_summary.html:241
+#: .\myprofile\templates\desktop\arrival_summary.html:339
 #: .\myprofile\templates\desktop\delivery.html:329
 #: .\myprofile\templates\desktop\finance_summary.html:412
 #: .\myprofile\templates\desktop\warehouse_inventory.html:72
@@ -3299,61 +3303,75 @@ msgid "Посылок"
 msgstr "Посылок"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:116
-#: .\myprofile\templates\desktop\arrival_summary.html:200
-#: .\myprofile\templates\desktop\arrival_summary.html:298
+#: .\myprofile\templates\desktop\arrival_summary.html:243
+#: .\myprofile\templates\desktop\arrival_summary.html:341
 msgid "Цена/кг (₸)"
 msgstr "Цена/кг (₸)"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:117
-#: .\myprofile\templates\desktop\arrival_summary.html:201
-#: .\myprofile\templates\desktop\arrival_summary.html:299
+#: .\myprofile\templates\desktop\arrival_summary.html:244
+#: .\myprofile\templates\desktop\arrival_summary.html:342
 #: .\myprofile\templates\desktop\inventory_session.html:171
 msgid "Стоимость (₸)"
 msgstr "Стоимость (₸)"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:118
-#: .\myprofile\templates\desktop\arrival_summary.html:300
+#: .\myprofile\templates\desktop\arrival_summary.html:343
 #: .\myprofile\templates\desktop\blocks.html:75
 msgid "Действие"
 msgstr "Действие"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:145
-#: .\myprofile\templates\desktop\arrival_summary.html:329
+#: .\myprofile\templates\desktop\arrival_summary.html:372
 msgid "Вернуть на ПВЗ"
 msgstr "Вернуть на ПВЗ"
 
 #: .\myprofile\templates\desktop\arrival_summary.html:163
+msgid "Ждут переноса прихода"
+msgstr "Ждут переноса прихода"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:166
+msgid "Перейти к переносу"
+msgstr "Перейти к переносу"
+
+#: .\myprofile\templates\desktop\arrival_summary.html:169
+msgid ""
+"Посылки пришли, когда у клиента не было ПВЗ. ПВЗ выбран позже — перенесите "
+"их на дату отправки, тогда они появятся в доставке и накладных."
+msgstr "Посылки пришли, когда у клиента не было ПВЗ. ПВЗ выбран позже — перенесите их на дату отправки, тогда они появятся в доставке и накладных."
+
+#: .\myprofile\templates\desktop\arrival_summary.html:206
 msgid "Без пункта"
 msgstr "Без пункта"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:167
+#: .\myprofile\templates\desktop\arrival_summary.html:210
 msgid "Копировать логины"
 msgstr "Копировать логины"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:170
+#: .\myprofile\templates\desktop\arrival_summary.html:213
 msgid "Выбрать несколько"
 msgstr "Выбрать несколько"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:177
+#: .\myprofile\templates\desktop\arrival_summary.html:220
 #: .\myprofile\templates\desktop\reschedule_arrival.html:102
 #: .\myprofile\templates\desktop\track_codes.html:105
 #: .\myprofile\templates\mobile\mobile_parcels.html:139
 msgid "Выбрано:"
 msgstr "Выбрано:"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:179
+#: .\myprofile\templates\desktop\arrival_summary.html:222
 msgid "Выбрать всех"
 msgstr "Выбрать всех"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:182
-#: .\myprofile\templates\desktop\arrival_summary.html:197
-#: .\myprofile\templates\desktop\arrival_summary.html:250
+#: .\myprofile\templates\desktop\arrival_summary.html:225
+#: .\myprofile\templates\desktop\arrival_summary.html:240
+#: .\myprofile\templates\desktop\arrival_summary.html:293
 msgid "Назначить ПВЗ"
 msgstr "Назначить ПВЗ"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:185
-#: .\myprofile\templates\desktop\arrival_summary.html:264
-#: .\myprofile\templates\desktop\arrival_summary.html:391
+#: .\myprofile\templates\desktop\arrival_summary.html:228
+#: .\myprofile\templates\desktop\arrival_summary.html:307
+#: .\myprofile\templates\desktop\arrival_summary.html:434
 #: .\myprofile\templates\desktop\delivered_posts.html:224
 #: .\myprofile\templates\desktop\delivery.html:405
 #: .\myprofile\templates\desktop\extraditions.html:275
@@ -3370,42 +3388,42 @@ msgstr "Назначить ПВЗ"
 msgid "Отмена"
 msgstr "Отмена"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:230
-#: .\myprofile\templates\desktop\arrival_summary.html:267
+#: .\myprofile\templates\desktop\arrival_summary.html:273
+#: .\myprofile\templates\desktop\arrival_summary.html:310
 #: .\myprofile\templates\desktop\unidentified.html:330
 #: .\myprofile\templates\desktop\warehouse_reassign.html:99
 msgid "Назначить"
 msgstr "Назначить"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:252
+#: .\myprofile\templates\desktop\arrival_summary.html:295
 msgid "Выбрано клиентов:"
 msgstr "Выбрано клиентов:"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:337
+#: .\myprofile\templates\desktop\arrival_summary.html:380
 msgid "Ввести скидку"
 msgstr "Ввести скидку"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:346
+#: .\myprofile\templates\desktop\arrival_summary.html:389
 msgid "На дом"
 msgstr "На дом"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:357
+#: .\myprofile\templates\desktop\arrival_summary.html:400
 msgid "Со склада"
 msgstr "Со склада"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:378
+#: .\myprofile\templates\desktop\arrival_summary.html:421
 msgid "Ввести разовую скидку"
 msgstr "Ввести разовую скидку"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:380
+#: .\myprofile\templates\desktop\arrival_summary.html:423
 msgid "Клиент:"
 msgstr "Клиент:"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:388
+#: .\myprofile\templates\desktop\arrival_summary.html:431
 msgid "Например: 100"
 msgstr "Например: 100"
 
-#: .\myprofile\templates\desktop\arrival_summary.html:394
+#: .\myprofile\templates\desktop\arrival_summary.html:437
 #: .\myprofile\templates\desktop\pp_extradition_history.html:55
 msgid "Применить"
 msgstr "Применить"
@@ -6149,12 +6167,12 @@ msgstr "Итого к оплате:"
 msgid "У вас нет доступа к этой странице."
 msgstr "У вас нет доступа к этой странице."
 
-#: .\myprofile\views\arrival_summary.py:232
-#: .\myprofile\views\arrival_summary.py:293
-#: .\myprofile\views\arrival_summary.py:331
-#: .\myprofile\views\arrival_summary.py:404
-#: .\myprofile\views\arrival_summary.py:425
-#: .\myprofile\views\arrival_summary.py:528 .\myprofile\views\blocks.py:149
+#: .\myprofile\views\arrival_summary.py:259
+#: .\myprofile\views\arrival_summary.py:323
+#: .\myprofile\views\arrival_summary.py:366
+#: .\myprofile\views\arrival_summary.py:449
+#: .\myprofile\views\arrival_summary.py:470
+#: .\myprofile\views\arrival_summary.py:573 .\myprofile\views\blocks.py:149
 #: .\myprofile\views\bulk_jobs.py:22 .\myprofile\views\delivery.py:216
 #: .\myprofile\views\delivery.py:437 .\myprofile\views\delivery.py:562
 #: .\myprofile\views\email_logs.py:25 .\myprofile\views\goods_arrival.py:144
@@ -6181,88 +6199,98 @@ msgstr "У вас нет доступа к этой странице."
 msgid "У вас нет доступа."
 msgstr "У вас нет доступа."
 
-#: .\myprofile\views\arrival_summary.py:239
-#: .\myprofile\views\arrival_summary.py:300
+#: .\myprofile\views\arrival_summary.py:266
+#: .\myprofile\views\arrival_summary.py:330
 msgid "Недостаточно данных."
 msgstr "Недостаточно данных."
 
-#: .\myprofile\views\arrival_summary.py:252
+#: .\myprofile\views\arrival_summary.py:279
 msgid "Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."
 msgstr "Нет посылок, которые можно перенаправить: ПВЗ уже закреплён."
 
-#: .\myprofile\views\arrival_summary.py:261
+#: .\myprofile\views\arrival_summary.py:288
 msgid "Пункт 'Доставка на дом' не найден."
 msgstr "Пункт 'Доставка на дом' не найден."
 
-#: .\myprofile\views\arrival_summary.py:264
+#: .\myprofile\views\arrival_summary.py:292
 msgid "Клиент назначен на доставку на дом."
 msgstr "Клиент назначен на доставку на дом."
 
-#: .\myprofile\views\arrival_summary.py:268
+#: .\myprofile\views\arrival_summary.py:296
 #: .\myprofile\views\pp_acceptance.py:312
 #: .\myprofile\views\pp_acceptance.py:411
 msgid "Не указан пункт выдачи."
 msgstr "Не указан пункт выдачи."
 
-#: .\myprofile\views\arrival_summary.py:273
-#: .\myprofile\views\arrival_summary.py:306
+#: .\myprofile\views\arrival_summary.py:301
+#: .\myprofile\views\arrival_summary.py:336
 #: .\myprofile\views\pp_acceptance.py:318
 #: .\myprofile\views\pp_acceptance.py:417
 #: .\myprofile\views\pp_acceptance.py:506 .\myprofile\views\warehouse.py:552
 msgid "Пункт выдачи не найден."
 msgstr "Пункт выдачи не найден."
 
-#: .\myprofile\views\arrival_summary.py:279
+#: .\myprofile\views\arrival_summary.py:309
 msgid "Клиент возвращён на свой ПВЗ."
 msgstr "Клиент возвращён на свой ПВЗ."
 
-#: .\myprofile\views\arrival_summary.py:316
+#: .\myprofile\views\arrival_summary.py:351
 msgid "Нет клиентов для назначения."
 msgstr "Нет клиентов для назначения."
 
-#: .\myprofile\views\arrival_summary.py:341
-#: .\myprofile\views\arrival_summary.py:342
+#: .\myprofile\views\arrival_summary.py:376
+#: .\myprofile\views\arrival_summary.py:377
 msgid "Укажите размер скидки."
 msgstr "Укажите размер скидки."
 
-#: .\myprofile\views\arrival_summary.py:351
-#: .\myprofile\views\arrival_summary.py:352
+#: .\myprofile\views\arrival_summary.py:386
+#: .\myprofile\views\arrival_summary.py:387
 msgid "Некорректный размер скидки."
 msgstr "Некорректный размер скидки."
 
-#: .\myprofile\views\arrival_summary.py:357
-#: .\myprofile\views\arrival_summary.py:358 .\myprofile\views\delivery.py:566
+#: .\myprofile\views\arrival_summary.py:392
+#: .\myprofile\views\arrival_summary.py:393 .\myprofile\views\delivery.py:566
 #: .\myprofile\views\pp_acceptance.py:652 .\myprofile\views\warehouse.py:674
 msgid "Не указан клиент."
 msgstr "Не указан клиент."
 
-#: .\myprofile\views\arrival_summary.py:365
-#: .\myprofile\views\arrival_summary.py:366
+#: .\myprofile\views\arrival_summary.py:400
+#: .\myprofile\views\arrival_summary.py:401
 #: .\myprofile\views\notification_mutes.py:80
 #: .\myprofile\views\unidentified.py:156 .\myprofile\views\warehouse.py:647
 #: .\register\views\password_reset.py:55 .\register\views\password_reset.py:173
 msgid "Пользователь не найден."
 msgstr "Пользователь не найден."
 
-#: .\myprofile\views\arrival_summary.py:408
-#: .\myprofile\views\arrival_summary.py:536 .\myprofile\views\service.py:126
+#: .\myprofile\views\arrival_summary.py:425
+#, python-format
+msgid "Пересчитаны чеки: %(numbers)s — перепечатайте накладные."
+msgstr "Пересчитаны чеки: %(numbers)s — перепечатайте накладные."
+
+#: .\myprofile\views\arrival_summary.py:429
+#, python-format
+msgid "Чеки уже отправлены, скидка в них не применена: %(numbers)s."
+msgstr "Чеки уже отправлены, скидка в них не применена: %(numbers)s."
+
+#: .\myprofile\views\arrival_summary.py:453
+#: .\myprofile\views\arrival_summary.py:581 .\myprofile\views\service.py:126
 #: .\myprofile\views\service.py:186
 msgid "Не указана дата."
 msgstr "Не указана дата."
 
-#: .\myprofile\views\arrival_summary.py:416
+#: .\myprofile\views\arrival_summary.py:461
 msgid "Генерация чеков запущена в фоне."
 msgstr "Генерация чеков запущена в фоне."
 
-#: .\myprofile\views\arrival_summary.py:435
+#: .\myprofile\views\arrival_summary.py:480
 msgid "Нет исходных данных для актуализации."
 msgstr "Нет исходных данных для актуализации."
 
-#: .\myprofile\views\arrival_summary.py:443
+#: .\myprofile\views\arrival_summary.py:488
 msgid "Некорректные исходные данные прихода."
 msgstr "Некорректные исходные данные прихода."
 
-#: .\myprofile\views\arrival_summary.py:516
+#: .\myprofile\views\arrival_summary.py:561
 msgid "Данные прихода актуальны, изменений не требуется."
 msgstr "Данные прихода актуальны, изменений не требуется."
 
@@ -6878,7 +6906,7 @@ msgstr "📦 Ваш трек-код обновлён: %(status)s"
 msgid "📦 Обновлено %(count)s трек-кодов: %(status)s"
 msgstr "📦 Обновлено %(count)s трек-кодов: %(status)s"
 
-#: .\myprofile\views\utils.py:333
+#: .\myprofile\views\utils.py:363
 #, python-format
 msgid ""
 "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, если "
@@ -6887,7 +6915,7 @@ msgstr ""
 "Чек %(number)s теперь относится к ПВЗ «%(pickup)s» — перепечатайте его, если "
 "он уже был напечатан."
 
-#: .\myprofile\views\utils.py:338
+#: .\myprofile\views\utils.py:368
 #, python-format
 msgid ""
 "Чек %(number)s объединён с другим чеком клиента — старый QR при сканировании "
