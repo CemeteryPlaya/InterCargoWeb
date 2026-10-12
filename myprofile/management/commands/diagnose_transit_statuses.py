@@ -5,16 +5,15 @@
     python manage.py diagnose_transit_statuses --fix    # удалить устаревший CHECK,
                                                         # восстановить даты, перевести просроченные
 """
-from datetime import timedelta
 
 from django.core.management.base import BaseCommand
 from django.db import connection
-from django.utils import timezone
 
 from myprofile.models import TrackCode
 from myprofile.track_lifecycle import (
-    AUTO_CUSTOMS_DAYS, LEGACY_STATUS_CHECK, TRANSIT_STATUSES,
+    AUTO_CUSTOMS_DAYS, AUTO_CUSTOMS_MAX_AGE_DAYS, LEGACY_STATUS_CHECK, TRANSIT_STATUSES,
     auto_advance_shipped_to_customs, backfill_transit_dates, drop_legacy_status_check,
+    overdue_shipped_count, stale_shipped_count,
     legacy_status_check_exists,
 )
 
@@ -33,7 +32,6 @@ class Command(BaseCommand):
         self.stdout.write(f'{mark} {text}')
 
     def handle(self, *args, **options):
-        threshold = timezone.localdate() - timedelta(days=AUTO_CUSTOMS_DAYS)
 
         has_check = legacy_status_check_exists(connection)
         self._line(not has_check, f'Устаревший CHECK {LEGACY_STATUS_CHECK} на БД: '
@@ -42,8 +40,11 @@ class Command(BaseCommand):
         no_date = TrackCode.all_objects.filter(status__in=TRANSIT_STATUSES, date_shipped_cn__isnull=True).count()
         self._line(no_date == 0, f'Треки «в пути» без даты отправки (автоперевод их не видит): {no_date}')
 
-        overdue = TrackCode.all_objects.filter(status='shipped_cn', date_shipped_cn__lte=threshold).count()
+        overdue = overdue_shipped_count()
         self._line(overdue == 0, f'Просроченные «Отправлено» (старше {AUTO_CUSTOMS_DAYS} дн.): {overdue}')
+        stale = stale_shipped_count()
+        self.stdout.write(f'INFO «Отправлено» старше {AUTO_CUSTOMS_MAX_AGE_DAYS} дн. — автоматика не трогает, '
+                          f'разобрать вручную: {stale}')
 
         for status in TRANSIT_STATUSES:
             count = TrackCode.all_objects.filter(status=status).count()

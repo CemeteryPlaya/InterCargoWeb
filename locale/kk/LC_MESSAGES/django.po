@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-12 18:47+0500\n"
+"POT-Creation-Date: 2026-10-12 19:17+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1026,7 +1026,7 @@ msgstr "Клиент"
 #: .\myprofile\templates\desktop\notification_logs.html:268
 #: .\myprofile\templates\desktop\notification_logs.html:455
 #: .\myprofile\templates\desktop\reschedule_arrival.html:112
-#: .\myprofile\templates\desktop\shipped_cn.html:120 .\payments\models.py:54
+#: .\myprofile\templates\desktop\shipped_cn.html:129 .\payments\models.py:54
 #: .\support\models.py:37
 msgid "Статус"
 msgstr "Мәртебе"
@@ -3240,7 +3240,7 @@ msgstr "Мәзірді жабу"
 #: .\mainview\templates\mobile\sidebar.html:29 .\myprofile\models.py:220
 #: .\myprofile\models.py:848 .\myprofile\models.py:1103
 #: .\myprofile\templates\desktop\profile.html:131
-#: .\myprofile\templates\desktop\shipped_cn.html:146
+#: .\myprofile\templates\desktop\shipped_cn.html:155
 #: .\myprofile\templates\desktop\track_codes.html:39
 #: .\myprofile\templates\mobile\mobile_menu.html:82
 #: .\myprofile\templates\mobile\mobile_parcels.html:244
@@ -3363,8 +3363,6 @@ msgid "Смотреть все пункты"
 msgstr "Барлық нүктелерді қарау"
 
 #: .\mainview\templates\shared\footer.html:63
-#| msgid ""
-#| "Республика Казахстан, Жамбылская обл., г. Тараз, мкр.Акбулак(1), д.21"
 msgid "Республика Казахстан, Жамбылская обл., г. Тараз, массив Арай-2, д. 13"
 msgstr ""
 "Қазақстан Республикасы, Жамбыл облысы, Тараз қ., Арай-2 тұрғын алабы, 13-үй"
@@ -3600,7 +3598,7 @@ msgstr "Күні жоқ"
 msgid "С датой"
 msgstr "Күні бар"
 
-#: .\myprofile\arrival_autosave.py:197
+#: .\myprofile\arrival_autosave.py:198
 #, python-format
 msgid ""
 "⚠️ Сессия прихода #%(id)s: изменения не сохраняются на сервере уже "
@@ -3609,11 +3607,11 @@ msgstr ""
 "⚠️ Қабылдау сессиясы #%(id)s: өзгерістер серверде %(minutes)s минуттан бері "
 "сақталмай тұр (себебі: %(reason)s). Қабылдау құрылғысын тексеріңіз."
 
-#: .\myprofile\arrival_autosave.py:317
+#: .\myprofile\arrival_autosave.py:318
 msgid "На сервере более новая версия сессии."
 msgstr "Серверде сессияның жаңарақ нұсқасы бар."
 
-#: .\myprofile\arrival_autosave.py:321
+#: .\myprofile\arrival_autosave.py:322
 #, python-format
 msgid ""
 "⚠️ Сессия прихода #%(id)s: сохранение удаляло %(removed)s из %(total)s строк"
@@ -3622,16 +3620,16 @@ msgstr ""
 "⚠️ Қабылдау сессиясы #%(id)s: сақтау %(total)s жолдың %(removed)s жолын "
 "өшіретін еді, оператор растағанға дейін тоқтатылды."
 
-#: .\myprofile\arrival_autosave.py:326
+#: .\myprofile\arrival_autosave.py:327
 #, python-format
 msgid "Сохранение удалит %(removed)s из %(total)s строк."
 msgstr "Сақтау %(total)s жолдың %(removed)s жолын өшіреді."
 
-#: .\myprofile\arrival_autosave.py:330
+#: .\myprofile\arrival_autosave.py:331
 msgid "Сессию сейчас редактирует другое устройство."
 msgstr "Сессияны қазір басқа құрылғы өңдеп жатыр."
 
-#: .\myprofile\arrival_autosave.py:334
+#: .\myprofile\arrival_autosave.py:335
 #, python-format
 msgid ""
 "⚠️ Сессия прихода #%(id)s не активна, но с неё продолжают приходить данные. "
@@ -3640,15 +3638,15 @@ msgstr ""
 "⚠️ Қабылдау сессиясы #%(id)s белсенді емес, бірақ одан деректер келіп жатыр."
 " Сессияны жалғастырыңыз — жіберілген жолдар тарихта сақталды."
 
-#: .\myprofile\arrival_autosave.py:338
+#: .\myprofile\arrival_autosave.py:339
 msgid "Сессия не активна — данные сохранены как черновик."
 msgstr "Сессия белсенді емес — деректер жоба ретінде сақталды."
 
-#: .\myprofile\arrival_autosave.py:340
+#: .\myprofile\arrival_autosave.py:341
 msgid "Трек-коды только что заняты другим сохранением. Повторите сохранение."
 msgstr "Трек-кодтарды басқа сақтау жаңа ғана алып қойды. Сақтауды қайталаңыз."
 
-#: .\myprofile\arrival_autosave.py:427
+#: .\myprofile\arrival_autosave.py:428
 msgid "Сессия прихода: риск потери данных"
 msgstr "Қабылдау сессиясы: деректерді жоғалту қаупі"
 
@@ -4510,7 +4508,7 @@ msgid "Текст письма"
 msgstr "Хат мәтіні"
 
 #: .\myprofile\models.py:1124 .\myprofile\templates\desktop\shipped_cn.html:51
-#: .\myprofile\templates\desktop\shipped_cn.html:118
+#: .\myprofile\templates\desktop\shipped_cn.html:127
 msgid "Дата отправки"
 msgstr "Жіберілу күні"
 
@@ -7196,32 +7194,45 @@ msgstr ""
 msgid "Перевести сейчас"
 msgstr "Қазір ауыстыру"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:119
+#: .\myprofile\templates\desktop\shipped_cn.html:117
+#, python-format
+#| msgid ""
+#| "%(count)s трек-кодов отправлены больше %(days)s дней назад, но ещё не "
+#| "переведены «на таможню» автоматически."
+msgid ""
+"%(count)s трек-кодов в статусе «Отправлено» дольше %(days)s дней. Автоматика"
+" их не переводит — проверьте эти партии в таблице ниже вручную."
+msgstr ""
+"%(count)s трек-код «Жөнелтілді» мәртебесінде %(days)s күннен артық тұр. "
+"Автоматика оларды ауыстырмайды — бұл партияларды төмендегі кестеде қолмен "
+"тексеріңіз."
+
+#: .\myprofile\templates\desktop\shipped_cn.html:128
 msgid "Трек-кодов"
 msgstr "Трек-кодтар"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:136
+#: .\myprofile\templates\desktop\shipped_cn.html:145
 msgid "На таможню:"
 msgstr "Кеденге:"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:150
+#: .\myprofile\templates\desktop\shipped_cn.html:159
 msgid "Перевести партию в статус «Выехало из Алматы»?"
 msgstr "Партияны «Алматыдан шықты» мәртебесіне ауыстыру керек пе?"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:155
+#: .\myprofile\templates\desktop\shipped_cn.html:164
 msgid "Перевести в статус \"Выехало из Алматы\""
 msgstr "«Алматыдан шықты» мәртебесіне ауыстыру"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:172
+#: .\myprofile\templates\desktop\shipped_cn.html:181
 msgid "Нет партий в пути."
 msgstr "Жолдағы партиялар жоқ."
 
-#: .\myprofile\templates\desktop\shipped_cn.html:202
+#: .\myprofile\templates\desktop\shipped_cn.html:211
 #: .\myprofile\templates\mobile\mobile_parcels.html:231
 msgid "Нет трек-кодов"
 msgstr "Трек-кодтар жоқ"
 
-#: .\myprofile\templates\desktop\shipped_cn.html:206
+#: .\myprofile\templates\desktop\shipped_cn.html:215
 msgid "Ошибка загрузки"
 msgstr "Жүктеу қатесі"
 
@@ -7802,8 +7813,8 @@ msgstr "Төленетін барлығы:"
 #: .\myprofile\views\pp_acceptance.py:562
 #: .\myprofile\views\pp_extradition_history.py:26
 #: .\myprofile\views\reschedule_arrival.py:35 .\myprofile\views\service.py:39
-#: .\myprofile\views\shipped_cn.py:43 .\myprofile\views\shipped_cn.py:131
-#: .\myprofile\views\shipped_cn.py:169 .\myprofile\views\unidentified.py:28
+#: .\myprofile\views\shipped_cn.py:43 .\myprofile\views\shipped_cn.py:134
+#: .\myprofile\views\shipped_cn.py:172 .\myprofile\views\unidentified.py:28
 #: .\myprofile\views\warehouse.py:45 .\support\views\inbox.py:60
 msgid "У вас нет доступа к этой странице."
 msgstr "Сізде бұл бетке қол жеткізу жоқ."
@@ -8107,7 +8118,7 @@ msgstr "📦 Берілген сәлемдемелер: %(count)s (%(pickup_labe
 #: .\myprofile\views\reschedule_arrival.py:173
 #: .\myprofile\views\reschedule_arrival.py:230
 #: .\myprofile\views\reschedule_arrival.py:375
-#: .\myprofile\views\shipped_cn.py:65 .\myprofile\views\shipped_cn.py:139
+#: .\myprofile\views\shipped_cn.py:68 .\myprofile\views\shipped_cn.py:142
 msgid "Неверный формат даты."
 msgstr "Күн форматы қате."
 
@@ -8509,29 +8520,29 @@ msgstr "«Клиентке берілді» мәртебесіндегі тре�
 msgid "Все чеки уже отмечены как «Выдано клиенту»."
 msgstr "Барлық чектер «Клиентке берілді» деп бұрыннан белгіленген."
 
-#: .\myprofile\views\shipped_cn.py:59
+#: .\myprofile\views\shipped_cn.py:62
 msgid "Укажите дату обновления."
 msgstr "Жаңарту күнін көрсетіңіз."
 
-#: .\myprofile\views\shipped_cn.py:92
+#: .\myprofile\views\shipped_cn.py:95
 msgid "Введите трек-коды или загрузите xlsx файл."
 msgstr "Трек-кодтарды енгізіңіз немесе xlsx файлды жүктеңіз."
 
-#: .\myprofile\views\shipped_cn.py:104
+#: .\myprofile\views\shipped_cn.py:107
 #, python-format
 msgid "Импорт запущен в фоне: %(count)s трек-кодов."
 msgstr "Импорт фонда іске қосылды: %(count)s трек-код."
 
-#: .\myprofile\views\shipped_cn.py:150
+#: .\myprofile\views\shipped_cn.py:153
 #, python-format
 msgid "Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов."
 msgstr "«Алматыдан шықты» мәртебесіне ауыстырылды: %(count)s трек-код."
 
-#: .\myprofile\views\shipped_cn.py:153 .\myprofile\views\shipped_cn.py:179
+#: .\myprofile\views\shipped_cn.py:156 .\myprofile\views\shipped_cn.py:182
 msgid "Нет трек-кодов для перевода."
 msgstr "Ауыстыруға трек-кодтар жоқ."
 
-#: .\myprofile\views\shipped_cn.py:158
+#: .\myprofile\views\shipped_cn.py:161
 msgid ""
 "База данных отвергла новый статус. Администратору: выполните на сервере "
 "«python manage.py migrate» — он удалит устаревшее ограничение статусов."
@@ -8539,7 +8550,7 @@ msgstr ""
 "Дерекқор жаңа мәртебені қабылдамады. Әкімшіге: серверде «python manage.py "
 "migrate» орындаңыз — ол ескірген мәртебе шектеуін жояды."
 
-#: .\myprofile\views\shipped_cn.py:176
+#: .\myprofile\views\shipped_cn.py:179
 #, python-format
 msgid "Переведено в статус «Прибыло на таможню»: %(count)s трек-кодов."
 msgstr "«Кеденге келді» мәртебесіне ауыстырылды: %(count)s трек-код."

@@ -149,3 +149,43 @@ class DiagnoseCommandTests(TestCase):
         call_command('diagnose_transit_statuses', '--fix', stdout=out)
         self.assertIn('Переведено «на таможню»: 1', out.getvalue())
         self.assertEqual(TrackCode.objects.get(track_code='DG1').status, 'at_customs')
+
+
+class StaleShippedTests(Base):
+    """Посылки, «отправленные» больше AUTO_CUSTOMS_MAX_AGE_DAYS назад, автоматика не
+    трогает: за такой срок они должны были доехать — это повод для ручного разбора, а не
+    уведомление клиенту «Прибыло на таможню» (решение владельца 2026-10-12: на проде
+    889 посылок февраль–август)."""
+
+    def setUp(self):
+        super().setUp()
+        from myprofile.track_lifecycle import AUTO_CUSTOMS_MAX_AGE_DAYS
+        self.max_age = AUTO_CUSTOMS_MAX_AGE_DAYS
+        TrackCode.objects.create(track_code='STALE1', status='shipped_cn',
+                                 date_shipped_cn=days_ago(self.max_age + 1))
+        TrackCode.objects.create(track_code='EDGE1', status='shipped_cn',
+                                 date_shipped_cn=days_ago(self.max_age))
+        TrackCode.objects.create(track_code='FRESH1', status='shipped_cn',
+                                 date_shipped_cn=days_ago(AUTO_CUSTOMS_DAYS + 1))
+
+    def test_auto_advance_skips_stale(self):
+        self.assertEqual(auto_advance_shipped_to_customs(), 2)
+        statuses = dict(TrackCode.objects.values_list('track_code', 'status'))
+        self.assertEqual(statuses, {'STALE1': 'shipped_cn', 'EDGE1': 'at_customs', 'FRESH1': 'at_customs'})
+
+    def test_counts(self):
+        from myprofile.track_lifecycle import overdue_shipped_count, stale_shipped_count
+        self.assertEqual(overdue_shipped_count(), 2)
+        self.assertEqual(stale_shipped_count(), 1)
+
+    def test_page_overdue_excludes_stale(self):
+        resp = self.client.get(reverse('shipped_cn'))
+        self.assertEqual(resp.context['overdue_count'], 2)
+        self.assertEqual(resp.context['stale_count'], 1)
+
+    def test_diagnose_reports_stale_separately(self):
+        out = StringIO()
+        call_command('diagnose_transit_statuses', stdout=out)
+        text = out.getvalue()
+        self.assertIn(f'старше {AUTO_CUSTOMS_DAYS} дн.): 2', text)
+        self.assertIn(f'старше {self.max_age} дн. — автоматика не трогает, разобрать вручную: 1', text)

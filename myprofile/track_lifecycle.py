@@ -2,7 +2,9 @@
 
 Партия — трек-коды с общей датой отправки со склада Китая (date_shipped_cn).
 Автоматика: 'shipped_cn' → 'at_customs' через AUTO_CUSTOMS_DAYS дней от
-указанной даты отправки. Перевод 'at_customs' → 'left_almaty' выполняется
+указанной даты отправки, но только для посылок, отправленных не раньше чем
+AUTO_CUSTOMS_MAX_AGE_DAYS дней назад: более старые «Отправлено» — зависшие,
+их разбирают вручную, а не уведомляют клиента «Прибыло на таможню». Перевод 'at_customs' → 'left_almaty' выполняется
 вручную кнопкой на странице /profile/shipped-cn/.
 
 Автоперевод запускается фоновым воркером бота (tgbot/bot/workers/status_auto.py)
@@ -31,6 +33,9 @@ LEGACY_STATUS_CHECK = 'trackcode_status_check'
 
 # Через сколько дней после даты отправки партия считается прибывшей на таможню
 AUTO_CUSTOMS_DAYS = 5
+# Посылки, отправленные раньше, автоматика не трогает (зависшие — ручной разбор).
+# Решение владельца 2026-10-12: на проде висели 889 «Отправлено» за февраль–август.
+AUTO_CUSTOMS_MAX_AGE_DAYS = 60
 
 # Статусы «в пути» — партии с этими статусами видны на странице shipped-cn
 TRANSIT_STATUSES = ('shipped_cn', 'at_customs', 'left_almaty')
@@ -95,19 +100,34 @@ def backfill_transit_dates():
     return len(tracks)
 
 
+def _customs_window():
+    """(самая ранняя, самая поздняя) дата отправки, которую переводит автоматика."""
+    today = timezone.localdate()
+    return today - timedelta(days=AUTO_CUSTOMS_MAX_AGE_DAYS), today - timedelta(days=AUTO_CUSTOMS_DAYS)
+
+
 def overdue_shipped_count():
     """Сколько треков уже должны были уйти «на таможню» (для подсветки на shipped-cn)."""
     from myprofile.models import TrackCode
 
-    threshold = timezone.localdate() - timedelta(days=AUTO_CUSTOMS_DAYS)
-    return TrackCode.all_objects.filter(status='shipped_cn', date_shipped_cn__lte=threshold).count()
+    oldest, threshold = _customs_window()
+    return TrackCode.all_objects.filter(
+        status='shipped_cn', date_shipped_cn__gte=oldest, date_shipped_cn__lte=threshold).count()
+
+
+def stale_shipped_count():
+    """Зависшие «Отправлено» старше AUTO_CUSTOMS_MAX_AGE_DAYS — автоматика их не трогает."""
+    from myprofile.models import TrackCode
+
+    oldest, _ = _customs_window()
+    return TrackCode.all_objects.filter(status='shipped_cn', date_shipped_cn__lt=oldest).count()
 
 
 def auto_advance_shipped_to_customs(changed_by='auto'):
     """'Отправлено со склада (Китай)' → 'Прибыло на таможню (Китай-Казахстан)'.
 
-    Срабатывает для треков, у которых дата отправки (date_shipped_cn)
-    была AUTO_CUSTOMS_DAYS и более дней назад. Идемпотентна; защищена
+    Срабатывает для треков, у которых дата отправки (date_shipped_cn) была
+    от AUTO_CUSTOMS_DAYS до AUTO_CUSTOMS_MAX_AGE_DAYS дней назад. Идемпотентна; защищена
     от параллельного запуска (воркер бота + открытие страницы).
     Возвращает количество переведённых треков.
     """
@@ -115,7 +135,7 @@ def auto_advance_shipped_to_customs(changed_by='auto'):
     from myprofile.views.utils import send_grouped_notifications
 
     backfill_transit_dates()
-    threshold = timezone.localdate() - timedelta(days=AUTO_CUSTOMS_DAYS)
+    oldest, threshold = _customs_window()
     try:
         with transaction.atomic():
             tracks = (
@@ -124,7 +144,7 @@ def auto_advance_shipped_to_customs(changed_by='auto'):
                 # на nullable-стороне внешнего соединения (тест test_postgres_locking).
                 .select_for_update(skip_locked=True, of=('self',))
                 .select_related('owner')
-                .filter(status='shipped_cn', date_shipped_cn__lte=threshold)
+                .filter(status='shipped_cn', date_shipped_cn__gte=oldest, date_shipped_cn__lte=threshold)
             )
             advanced, notif_counts = _advance_tracks(tracks, 'at_customs', changed_by)
     except IntegrityError:
