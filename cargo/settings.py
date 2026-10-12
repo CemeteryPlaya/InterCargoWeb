@@ -332,7 +332,7 @@ TELEGRAM_SITE_URL = os.getenv('SITE_URL')
 # Требование банка-эквайера: на сайте — страна, город, юр. и факт. адреса,
 # БИН/ИИН, график работы, телефоны поддержки. Пустые значения не выводятся,
 # а `manage.py check` предупреждает о них (mainview/checks.py).
-_DEFAULT_ADDRESS = 'Республика Казахстан, Жамбылская обл., г. Тараз, мкр. Акбулак (1), д. 21'
+_DEFAULT_ADDRESS = 'Республика Казахстан, Жамбылская обл., г. Тараз, массив Арай-2, д. 13'
 COMPANY_INFO = {
     'brand': os.getenv('COMPANY_BRAND', 'Inter Cargo'),
     'legal_name': os.getenv('COMPANY_LEGAL_NAME', 'ИП INTER Service'),
