@@ -393,8 +393,13 @@
             <span>{{ rate|floatformat:0 }} ₸/кг</span>
         </div>
         <div class="totals-row grand">
+            {% if receipt.source == 'dibuyer' %}
+            <span class="totals-label">{% trans "Оплата:" %}</span>
+            <span>{% if dibuyer_enabled %}{% trans "партнёру Di.Buyer" %}{% else %}{% trans "оплачивается отдельно" %}{% endif %}</span>
+            {% else %}
             <span class="totals-label">{% trans "Итого к оплате:" %}</span>
             <span>{{ total_price|floatformat:0 }} ₸</span>
+            {% endif %}
         </div>
     </div>
 

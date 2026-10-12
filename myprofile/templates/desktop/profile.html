@@ -31,9 +31,9 @@
     {% include 'mobile/sidebar.html' %}
 
     <!-- Main content -->
-    <main class="flex-1 px-4 md:px-8 py-8 space-y-10">
+    <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8 space-y-6">
         <!-- Мобильный хедер -->
-        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
             <h1 class="text-lg font-bold text-center">{% trans "Личный кабинет" %}</h1>
         </div>
 
@@ -52,11 +52,11 @@
         {% endif %}
 
         <!-- User Info -->
-        <section id="user-info" class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6 relative">
+        <section id="user-info" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 relative">
             <a href="{% url 'settings' %}" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition" title="{% trans "Настройки" %}">
                 <i class="ri-settings-3-line text-xl"></i>
             </a>
-            <h2 class="text-xl font-semibold mb-4 text-gray-800"><i class="ri-user-3-line text-red-500"></i> {% trans "Информация о пользователе" %}</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4"><i class="ri-user-3-line text-red-500"></i> {% trans "Информация о пользователе" %}</h2>
             <p><strong>{% trans "Имя пользователя:" %}</strong> {{ user.username }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
             {% if user.userprofile %}
@@ -129,7 +129,7 @@
         <!-- Track Codes Section -->
         <section id="trackcodes">
             <h2 class="text-xl font-semibold mb-4"><i class="ri-barcode-line text-red-500"></i> {% trans "Трек-коды" %}</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 bg-white p-4 rounded-lg shadow border border-gray-200">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <p><strong>Новые: {{ user_added }}</strong></p>
                 <p><strong>На складе (Китай): {{ warehouse_cn }}</strong></p>
                 <p><strong>В пути до Тараза: {{ shipped_cn_count }}</strong></p>
@@ -168,7 +168,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 {% for code in last_two_codes %}
-                    <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <p><strong>{% trans "Код:" %}</strong> {{ code.track_code }}</p>
                         <p><strong>{% trans "Статус:" %}</strong> {{ code.get_status_display }}</p>
                         <p><strong>{% trans "Обновлено:" %}</strong> {{ code.update_date }}</p>
@@ -177,7 +177,7 @@
                         {% endif %}
                     </div>
                 {% empty %}
-                    <div class="grid grid-cols-1 md:grid-cols-1 bg-white p-4 rounded-lg shadow border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <p class="text-gray-600">{% trans "Нет новых товаров." %}</p>
                     </div>
                 {% endfor %}

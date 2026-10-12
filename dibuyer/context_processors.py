@@ -1,6 +1,6 @@
 from django.db.models import Sum
 
-from .access import dibuyer_is_enabled, is_dibuyer_staff
+from .access import can_manage_dibuyer, can_use_partner_workspace, dibuyer_visible_for
 
 
 def dibuyer_enabled(request):
@@ -8,11 +8,17 @@ def dibuyer_enabled(request):
     сотрудника Di.Buyer (для показа ссылки на раздел «Заявки» и входа при
     выключенном сервисе) и бейдж непрочитанных сообщений чатов Di.Buyer."""
     user = getattr(request, 'user', None)
-    staff = is_dibuyer_staff(user)
+    # Полный рубильник (dibuyer/access.py): dibuyer_enabled — видит ли Di.Buyer
+    # текущий пользователь (кнопки, раздел, чаты, упоминания в «Инфо» и чеках)
+    visible = dibuyer_visible_for(user)
+    staff = visible and can_manage_dibuyer(user)
     return {
-        'dibuyer_enabled': dibuyer_is_enabled(),
+        'dibuyer_enabled': visible,
         'dibuyer_is_staff': staff,
-        'dibuyer_unread_total': _unread_total(user, staff),
+        # Рабочий раздел посылок (оплаты, отчёт, проверки) — и при выключенном
+        # сервисе для главных администраторов (выдача уже созданных посылок)
+        'dibuyer_workspace': bool(user and user.is_authenticated) and can_use_partner_workspace(user),
+        'dibuyer_unread_total': _unread_total(user, staff) if visible else 0,
     }
 
 

@@ -64,4 +64,24 @@
     </div>
     <button type="submit" class="btn-navy">{% trans "Сохранить" %}</button>
   </form>
+
+  {# Оплату принимает партнёр на свои счета; отметка разрешает ПВЗ выдать посылки #}
+  <div class="eyebrow" style="margin-top:22px">{% trans "Оплата" %}</div>
+  <div class="card">
+    {% if order.partner_paid_at %}
+      <div class="req-meta">
+        {% blocktrans with date=order.partner_paid_at|date:"d.m.Y H:i" who=order.partner_paid_by.username|default:"—" %}Оплата получена {{ date }} (отметил: {{ who }}). Пункт выдачи может выдать посылки заявки.{% endblocktrans %}
+      </div>
+      <form method="post" action="{% url 'dibuyer_manage_partner_paid' order.pk %}" style="margin-top:10px">
+        {% csrf_token %}<input type="hidden" name="paid" value="0">
+        <button type="submit" class="link-btn">{% trans "Снять отметку об оплате" %}</button>
+      </form>
+    {% else %}
+      <div class="req-meta">{% trans "Оплата не отмечена. Пока её нет, пункт выдачи Inter Cargo не выдаст посылки этой заявки." %}</div>
+      <form method="post" action="{% url 'dibuyer_manage_partner_paid' order.pk %}" style="margin-top:10px">
+        {% csrf_token %}<input type="hidden" name="paid" value="1">
+        <button type="submit" class="btn-navy">{% trans "Оплата получена" %}</button>
+      </form>
+    {% endif %}
+  </div>
 {% endblock %}

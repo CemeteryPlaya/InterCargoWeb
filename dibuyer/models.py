@@ -9,7 +9,16 @@ from django.utils.translation import gettext_lazy as _
 
 class DibuyerSettings(models.Model):
     """Singleton: один глобальный рубильник + тариф доставки Di.Buyer."""
-    is_enabled = models.BooleanField(default=True, verbose_name=_("Сервис включён"))
+    is_enabled = models.BooleanField(
+        default=True, verbose_name=_("Сервис включён"),
+        help_text=_("Включён — сервис работает для всех. Выключен — Di.Buyer не виден нигде: "
+                    "ни клиентам, ни сотрудникам Di.Buyer (кроме режима ниже)."),
+    )
+    admins_preview = models.BooleanField(
+        default=False, verbose_name=_("Сервис видят администраторы"),
+        help_text=_("Только при выключенном сервисе: раздел видят пользователи с ролью "
+                    "«Главный администратор» — для настройки перед показом клиентам."),
+    )
     delivery_rate_usd = models.DecimalField(
         max_digits=6, decimal_places=2, default=Decimal('11.30'),
         verbose_name=_("Тариф доставки ($/кг)"),
@@ -99,6 +108,13 @@ class BuyerOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     tracking_exported = models.BooleanField(default=False, verbose_name=_("Посылки созданы"))
+    # Оплату Di.Buyer принимает партнёр на свои счета; отметка разрешает ПВЗ
+    # выдать посылки заявки (чек Di.Buyer без суммы — myprofile/partner_receipts.py).
+    partner_paid_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Оплата получена партнёром"))
+    partner_paid_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
+        verbose_name=_("Оплату отметил"),
+    )
 
     class Meta:
         ordering = ['-created_at']

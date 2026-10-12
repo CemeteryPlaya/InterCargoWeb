@@ -29,12 +29,12 @@
     {% block content %}
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
-        <div class="flex-1 mx-auto p-4 md:p-6 bg-white rounded-lg shadow mt-10">
+        <div class="flex-1 min-w-0 self-start md:m-8 p-4 md:p-6 bg-white md:rounded-2xl md:border md:border-gray-100 md:shadow-sm">
             <!-- Мобильный хедер -->
             <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Обновление трек-кодов" %}</h1>
             </div>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 hidden md:block">{% trans "Обновление трек-кодов" %}</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 hidden md:block">{% trans "Обновление трек-кодов" %}</h2>
 
             {% if messages %}
             <ul class="mb-4">
@@ -51,7 +51,7 @@
                 <!-- Статус -->
                 <label for="status" class="block font-medium mb-1">{% trans "Новый статус" %}</label>
                 <select name="status" id="status" required
-                    class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+                    class="w-full max-w-3xl border border-gray-300 rounded-lg px-3 py-2 mb-4">
                     {% for key, value in status_choices %}
                     {% if key != 'claimed' %}
                     <option value="{{ key }}">{{ value }}</option>
@@ -62,7 +62,7 @@
                 <!-- Дата -->
                 <label for="update_date" class="block font-medium mb-1">{% trans "Дата обновления" %}</label>
                 <input type="date" name="update_date" id="update_date" required
-                    class="max-w-3xl border border-gray-300 rounded px-3 py-2 mb-4">
+                    class="w-full max-w-3xl border border-gray-300 rounded-lg px-3 py-2 mb-4">
 
                 <!-- Кнопка переключения формы (только для статуса delivered) -->
                 <div id="form_toggle_container" class="hidden mb-4">

@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from tgbot.services import is_telegram_linked, get_or_create_link_url
 from support.models import SupportChat, SupportMessage
 from support.services import is_support_operator
-from dibuyer.access import dibuyer_is_enabled, is_dibuyer_staff
+from dibuyer.access import can_manage_dibuyer, dibuyer_visible_for
 from dibuyer.models import BuyerOrder, DibuyerChat
 
 
@@ -261,7 +261,10 @@ def _dibuyer_context(user):
     заявки без начатого чата. Клиент (при включённом сервисе и наличии
     заявок): общий чат Di.Buyer + ветки по своим заявкам.
     """
-    staff_mode = is_dibuyer_staff(user)
+    if not dibuyer_visible_for(user):   # полный рубильник — блока Di.Buyer нет
+        return {'dibuyer_chat_staff': False, 'dibuyer_client_entry': None,
+                'dibuyer_client_orders': [], 'dibuyer_staff_rows': []}
+    staff_mode = can_manage_dibuyer(user)
     ctx = {
         'dibuyer_chat_staff': staff_mode,
         'dibuyer_client_entry': None,
@@ -281,9 +284,6 @@ def _dibuyer_context(user):
         ).exclude(pk__in=chatted_orders).select_related('client')
         rows += [_dibuyer_order_row(o, for_staff=True) for o in pending]
         ctx['dibuyer_staff_rows'] = rows
-        return ctx
-
-    if not dibuyer_is_enabled():
         return ctx
 
     my_orders = list(BuyerOrder.objects.filter(client=user).only('id', 'status'))

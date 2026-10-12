@@ -70,6 +70,12 @@ def register_view(request):
             messages.error(request, _("Заполните все поля."))
             return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
 
+        # Согласие с офертой и обработкой персональных данных (Закон РК «О ПД»,
+        # требование банка-эквайера) — обязательно для заключения договора.
+        if not request.POST.get('agree_terms'):
+            messages.error(request, _("Чтобы зарегистрироваться, примите условия публичной оферты и дайте согласие на обработку персональных данных."))
+            return _render_registration(request, username, phone, pickup_id, first_name, last_name, email)
+
         # Проверка подтверждения email
         verified_email = request.session.get('email_verified', '')
         if verified_email != email:

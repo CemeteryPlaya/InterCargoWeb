@@ -8,11 +8,11 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime
-from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, Receipt, StorageCell, TrackCode
+from myprofile.models import Extradition, ExtraditionPackage, ExtraditionSession, StorageCell, TrackCode
 from myprofile.scan_utils import find_by_scan, normalize_scan_code
 from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
 from myprofile.receipt_lifecycle import issue_to_client as lifecycle_issue, ReceiptLifecycleError
+from myprofile.partner_receipts import partner_issue_error
 from register.models import UserProfile, PickupPoint
 from django.utils.translation import gettext as _
 
@@ -89,6 +89,13 @@ def extradition_view(request):
         all_receipts = package.receipts.all()
         if not all_receipts.exists():
             messages.error(request, f"В пакете '{barcode}' нет чеков.")
+            return redirect('extradition')
+
+        # Посылки Di.Buyer — только после отметки партнёра об оплате (оплату
+        # принимает партнёр, не ПВЗ): myprofile/partner_receipts.py
+        partner_error = partner_issue_error(list(all_receipts))
+        if partner_error:
+            messages.error(request, partner_error)
             return redirect('extradition')
 
         # PAYMENT COMMENTED OUT: проверка оплаты убрана
@@ -471,6 +478,10 @@ def warehouse_quick_issue_receipt(request):
 
     if receipt.is_claimed:
         return JsonResponse({'error': _('Чек уже выдан')}, status=400)
+
+    partner_error = partner_issue_error([receipt])
+    if partner_error:
+        return JsonResponse({'error': partner_error}, status=400)
 
     PICKUP_LABEL = "Быстрая выдача со Склад ПВЗ"
 

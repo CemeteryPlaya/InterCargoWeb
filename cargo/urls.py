@@ -34,6 +34,9 @@ urlpatterns = [
     path('analytics/', include('analytics.urls')),
     path('support/', include('support.urls')),
     path('news/', include('news.urls')),
+    path('payments/', include('payments.urls')),
+    # Покупателям: реквизиты, оферта, оплата, доставка, возврат (требование банка-эквайера)
+    path('info/<slug:slug>/', mainview_views.info_page, name='info_page'),
     path('admin/', admin.site.urls),
     # Main application URLs
     path('', mainview_views.index, name='home'),

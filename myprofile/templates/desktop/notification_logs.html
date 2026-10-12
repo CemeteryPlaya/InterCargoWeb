@@ -27,9 +27,9 @@
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
 
-        <div class="flex-1 px-4 md:px-8 py-8 mx-auto max-w-6xl w-full min-w-0">
+        <div class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8 max-w-6xl w-full">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-8 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Логи уведомлений" %}</h1>
             </div>
 
@@ -46,12 +46,12 @@
             </div>
             {% endif %}
 
-            <h1 class="hidden md:block text-2xl font-bold text-gray-800 mb-6">
+            <h1 class="text-2xl font-bold text-gray-900 hidden md:block mb-6">
                 <i class="ri-notification-3-line text-primary"></i> {% trans "Логи Уведомлений" %}
             </h1>
 
             <!-- Вкладки -->
-            <div class="flex gap-1 mb-6 bg-white border border-gray-200 rounded-xl p-1 shadow-sm overflow-x-auto">
+            <div class="flex gap-1 mb-6 bg-white border border-gray-100 rounded-2xl p-1 shadow-sm overflow-x-auto">
                 <a href="?tab=site{% if search %}&q={{ search }}{% endif %}"
                     class="whitespace-nowrap px-3 md:px-5 py-2 rounded-lg text-sm font-medium transition-colors
                     {% if tab == 'site' %}bg-gray-800 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
@@ -78,15 +78,15 @@
             {% if tab == 'site' %}
 
             <div class="grid grid-cols-3 gap-2 md:gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-gray-800">{{ site_total }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Всего" %}</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-green-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-green-600">{{ site_read }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Прочитано" %}</div>
                 </div>
-                <div class="bg-white border border-yellow-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-yellow-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-yellow-600">{{ site_unread }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Не прочитано" %}</div>
                 </div>
@@ -122,7 +122,7 @@
             </form>
 
             <!-- Desktop: таблица -->
-            <div class="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="hidden md:block bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
@@ -167,7 +167,7 @@
             <!-- Mobile: карточки -->
             <div class="md:hidden space-y-3">
                 {% for n in site_logs %}
-                <div class="bg-white border rounded-lg shadow-sm p-3 {% if not n.is_read %}border-yellow-200 bg-yellow-50{% endif %}">
+                <div class="bg-white border rounded-2xl shadow-sm p-3 {% if not n.is_read %}border-yellow-200 bg-yellow-50{% endif %}">
                     <div class="flex items-start justify-between gap-2 mb-2">
                         {% if n.is_read %}
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -207,19 +207,19 @@
             {% if tab == 'telegram' %}
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-gray-800">{{ tg_total }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Всего" %}</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-green-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-green-600">{{ tg_sent }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Отправлено" %}</div>
                 </div>
-                <div class="bg-white border border-yellow-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-yellow-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-yellow-600">{{ tg_pending }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "В очереди" %}</div>
                 </div>
-                <div class="bg-white border border-red-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-red-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-red-600">{{ tg_failed }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Ошибки" %}</div>
                 </div>
@@ -260,7 +260,7 @@
             </form>
 
             <!-- Desktop: таблица -->
-            <div class="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="hidden md:block bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
@@ -334,7 +334,7 @@
             <!-- Mobile: карточки -->
             <div class="md:hidden space-y-3">
                 {% for n in tg_logs %}
-                <div class="bg-white border rounded-lg shadow-sm p-3
+                <div class="bg-white border rounded-2xl shadow-sm p-3
                     {% if n.tg_status == 'failed' %}border-red-200 bg-red-50
                     {% elif n.tg_status == 'pending' %}border-yellow-200 bg-yellow-50
                     {% endif %}"
@@ -403,15 +403,15 @@
             {% if tab == 'email' %}
 
             <div class="grid grid-cols-3 gap-2 md:gap-4 mb-6">
-                <div class="bg-white border rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-gray-800">{{ email_total }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Всего писем" %}</div>
                 </div>
-                <div class="bg-white border border-green-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-green-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-green-600">{{ email_sent }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Отправлено" %}</div>
                 </div>
-                <div class="bg-white border border-red-200 rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div class="bg-white border border-red-200 rounded-2xl p-3 md:p-4 text-center shadow-sm">
                     <div class="text-xl md:text-2xl font-bold text-red-600">{{ email_failed }}</div>
                     <div class="text-xs md:text-sm text-gray-500">{% trans "Ошибки" %}</div>
                 </div>
@@ -447,7 +447,7 @@
             </form>
 
             <!-- Desktop: таблица -->
-            <div class="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div class="hidden md:block bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
@@ -519,7 +519,7 @@
             <!-- Mobile: карточки -->
             <div class="md:hidden space-y-3">
                 {% for log in email_logs %}
-                <div class="bg-white border rounded-lg shadow-sm p-3 {% if log.status == 'failed' %}border-red-200 bg-red-50{% endif %}"
+                <div class="bg-white border rounded-2xl shadow-sm p-3 {% if log.status == 'failed' %}border-red-200 bg-red-50{% endif %}"
                     x-data="{ expanded: false }">
                     <div class="flex items-start justify-between gap-2 mb-2">
                         {% if log.status == 'sent' %}

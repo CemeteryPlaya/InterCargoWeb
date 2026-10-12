@@ -1,0 +1,15 @@
+<h2>Seller details</h2>
+{% include 'info/_requisites.html' %}
+
+<h2>Customer support</h2>
+<p>Questions about orders, payment, delivery and returns are accepted by phone, messengers and e-mail.{% if COMPANY.schedule %} Working hours: {{ COMPANY.schedule }}.{% endif %}</p>
+<ul>
+    {% if COMPANY.phone_support %}<li>Phone / WhatsApp: <a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_support }}</a></li>{% endif %}
+    <li>Telegram: <a href="https://t.me/inter_cargo" target="_blank" rel="noopener">t.me/inter_cargo</a> (opens the Telegram app)</li>
+    {% if COMPANY.email %}<li>E-mail: <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a></li>{% endif %}
+    <li>Support chat — in your personal account after signing in.</li>
+</ul>
+<p>Written claims are reviewed within 10 calendar days of receipt.</p>
+
+<h2>Pickup points</h2>
+{% include 'info/_pickup_points.html' %}

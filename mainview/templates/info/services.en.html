@@ -1,0 +1,52 @@
+<p>{{ COMPANY.brand }} provides parcel delivery services to the Republic of Kazakhstan. We do not sell marketplace goods: you buy the goods from the seller of your choice, and we receive them at our warehouse, transport them, handle customs clearance and hand them over at a pickup point or by courier.</p>
+
+<h2>1. Parcel delivery from China to Kazakhstan</h2>
+<h3>What the service includes</h3>
+<ul>
+    <li>receiving the parcel at our warehouse in China (the warehouse address is shown in your personal account after registration);</li>
+    <li>matching the tracking number to your account, weighing;</li>
+    <li>consolidation and transportation of the cargo to Kazakhstan;</li>
+    <li>customs clearance of the cargo;</li>
+    <li>sorting and delivery to the selected pickup point or to your door;</li>
+    <li>status tracking in your personal account and notifications (website, push, Telegram);</li>
+    <li>storage at the pickup point and handover by the receipt QR code.</li>
+</ul>
+<h3>Characteristics and limitations</h3>
+<ul>
+    <li>order weight — from 0 to 100 kg (over 100 kg — by agreement with a manager);</li>
+    <li>delivery time — 8–12 days on average from dispatch from our warehouse in China;</li>
+    <li>prohibited goods are not accepted — see <a href="{% url 'info_page' 'delivery' %}#restrictions">“Delivery”</a>;</li>
+    <li>guarantee: we are responsible for the safety of the parcel from its arrival at our warehouse in China until it is handed over to you (terms — <a href="{% url 'info_page' 'offer' %}">public offer</a>, section 7). The warranty for the goods themselves, their completeness and quality is the seller's obligation.</li>
+</ul>
+
+<h2>2. Prices</h2>
+<table>
+    <tbody>
+        <tr><th>Delivery from China to a pickup point in Kazakhstan</th><td><b>{{ price_per_kg|floatformat:0 }} ₸ per 1 kg</b> of actual weight</td></tr>
+        <tr><th>How the amount is calculated</th><td>parcel weight × rate, rounded to whole tenge; the total is shown in the receipt before payment</td></tr>
+        <tr><th>Discounts</th><td>individual rate discount for high-volume customers — by agreement with a manager, shown in the receipt</td></tr>
+        <tr><th>Card payment fee</th><td>none</td></tr>
+        <tr><th>Wooden crating for fragile cargo</th><td>on request, the manager quotes the price in advance</td></tr>
+        <tr><th>VAT</th><td>{% if COMPANY.vat_payer %}prices include VAT{% else %}the seller is not a VAT payer; prices are VAT-exempt{% endif %}</td></tr>
+    </tbody>
+</table>
+<p>All prices are in Kazakhstani tenge (₸). You can estimate the cost in advance with the <a href="/">calculator on the home page</a>.</p>
+
+<h2>3. How to place an order — step by step</h2>
+<ol>
+    <li><b>Registration.</b> Fill in the form on the <a href="/">home page</a>: login, phone, pickup point, e-mail; accept the public offer and give consent to personal data processing.</li>
+    <li><b>Warehouse address.</b> Copy our warehouse address in China from your personal account and enter it when ordering on a marketplace (Pinduoduo, Taobao, Poizon, 1688, etc.).</li>
+    <li><b>Tracking number.</b> After the seller ships, add the parcel's tracking number to your personal account so we know whose parcel it is.</li>
+    <li><b>Tracking.</b> Follow the statuses: “Arrived at warehouse (China)” → “Shipped from warehouse (China)” → “Arrived at customs” → “Left Almaty” → “Delivered to sorting warehouse” → “Out for delivery” → “Delivered to pickup point”.</li>
+    <li><b>Receipt.</b> When the parcel arrives in Kazakhstan, a receipt with the weight and the amount due is created.</li>
+    <li><b>Payment.</b> Pay the receipt online by bank card in “Receipts” or at the pickup point — see <a href="{% url 'info_page' 'payment' %}">“Payment”</a>.</li>
+    <li><b>Collection.</b> Show the receipt QR code at the pickup point and collect your parcel, or receive it from the courier.</li>
+</ol>
+<p>Video and interactive guides are available in <a href="{% url 'education' %}">“Tutorial”</a>.</p>
+
+{% if dibuyer_enabled %}
+<p class="note">The personal account also offers the partner service Di.Buyer (purchasing goods from the USA and Europe). It is provided by a partner: terms, prices and payment acceptance are on the partner's side, and payments go to the partner's accounts. {{ COMPANY.legal_name|default:COMPANY.brand }} does not provide this service and does not accept money for it — neither by card on the website nor at pickup points.</p>
+{% endif %}
+
+<h2>Licences and permits</h2>
+<p>Freight forwarding (delivery arrangement) services are not a licensed activity in the Republic of Kazakhstan; no special licences or permits are required to provide them. Customs clearance is carried out in accordance with the legislation of the EAEU and the Republic of Kazakhstan.</p>

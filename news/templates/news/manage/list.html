@@ -26,15 +26,15 @@
 <div class="flex min-h-screen">
     {% include 'mobile/sidebar.html' %}
 
-    <main class="flex-1 p-4 md:p-8">
+    <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
         <!-- Мобильный хедер -->
-        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+        <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
             <h1 class="text-lg font-bold text-center">{% trans "Управление новостями" %}</h1>
         </div>
 
         <div class="max-w-5xl mx-auto">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-                <h1 class="text-2xl font-bold hidden md:block">
+                <h1 class="text-2xl font-bold text-gray-900 hidden md:block">
                     <i class="ri-newspaper-line mr-2"></i>{% trans "Управление новостями" %}
                 </h1>
                 {% if can_create %}

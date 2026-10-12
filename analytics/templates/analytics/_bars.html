@@ -1,0 +1,21 @@
+{% load i18n %}
+{# Список «подпись — полоска — значение (доля)». rows: [{label, value, pct}] #}
+<div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
+    <div class="px-4 py-3 bg-gray-50 border-b">
+        <h2 class="font-semibold text-gray-700"><i class="{{ icon }} text-primary mr-1"></i> {{ title }}</h2>
+        {% if hint %}<p class="text-xs text-gray-500 mt-0.5">{{ hint }}</p>{% endif %}
+    </div>
+    <div class="p-4 space-y-2.5">
+        {% for r in rows %}
+        <div>
+            <div class="flex justify-between gap-3 text-sm">
+                <span class="text-gray-700 truncate" title="{{ r.label }}">{{ r.label }}</span>
+                <span class="text-gray-900 font-medium whitespace-nowrap">{{ r.value }}{% if r.pct or r.pct == 0 %} <span class="text-gray-400 font-normal">· {{ r.pct }}%</span>{% endif %}</span>
+            </div>
+            {% if r.pct or r.pct == 0 %}<div class="h-1.5 bg-gray-100 rounded-full mt-1"><div class="h-1.5 rounded-full bg-primary/70" style="width:{{ r.pct|stringformat:'s' }}%"></div></div>{% endif %}
+        </div>
+        {% empty %}
+        <p class="text-sm text-gray-500 py-2">{% trans "Пока нет данных за выбранный период." %}</p>
+        {% endfor %}
+    </div>
+</div>

@@ -109,7 +109,10 @@ def _fact_pickup_labels(receipt):
 
 @contract(severity=Severity.CRITICAL)
 def one_pending_receipt_per_client_date_pickup(ctx):
-    """На (клиент, дата, ПВЗ) не больше одного pending-чека с позициями-треками.
+    """На (клиент, дата, ПВЗ, источник) не больше одного pending-чека с позициями-треками.
+
+    Источник — Inter Cargo или партнёрский Di.Buyer: у клиента законно бывают оба
+    pending-чека на одну дату и ПВЗ (myprofile/partner_receipts.py).
 
     Чеки после pending заморожены и ключ не занимают: у клиента может быть
     уехавший чек и новый pending-чек на ту же дату и ПВЗ (решение D4).
@@ -127,7 +130,7 @@ def one_pending_receipt_per_client_date_pickup(ctx):
     dupes = list(
         Receipt.objects
         .filter(same_pickup, owner_id=r.owner_id, created_at=r.created_at, status="pending",
-                items__track_code__isnull=False)
+                source=r.source, items__track_code__isnull=False)
         .exclude(pk=r.pk)
         .distinct()
         .values_list("pk", flat=True)
@@ -220,17 +223,27 @@ def receipt_tracks_pickup_homogeneous(ctx):
 @contract(severity=Severity.CRITICAL)
 def owner_pending_receipts_follow_pickup_rule(ctx):
     """Pending-чеки клиента (первый аргумент — user) однородны по ПВЗ, их метка
-    совпадает с authoritative, и на (дата, ПВЗ) не больше одного pending-чека
+    совпадает с authoritative, и на (дата, ПВЗ, источник) не больше одного pending-чека
     с позициями-треками (чек только с архивными позициями ключ не занимает).
-    Чеки в других статусах заморожены и здесь не проверяются."""
-    from myprofile.models import Receipt
+    Посылки партнёра Di.Buyer — только в чеке Di.Buyer, остальные — только в чеке
+    Inter Cargo. Чеки в других статусах заморожены и здесь не проверяются."""
+    from myprofile.models import Receipt, ReceiptItem
+    from myprofile.partner_receipts import SOURCE_DIBUYER, partner_track_ids
 
     user = ctx.args[0] if ctx.args else ctx.kwargs.get("user")
     if user is None:
         return
     problems = []
     seen_keys = {}
-    for r in Receipt.objects.filter(owner=user, status="pending").order_by("id"):
+    pending = list(Receipt.objects.filter(owner=user, status="pending").order_by("id"))
+    partner_ids = partner_track_ids(
+        ReceiptItem.objects.filter(receipt__in=pending).values_list("track_code_id", flat=True))
+    for r in pending:
+        track_ids = set(r.items.filter(track_code__isnull=False).values_list("track_code_id", flat=True))
+        foreign = (track_ids - partner_ids) if r.source == SOURCE_DIBUYER else (track_ids & partner_ids)
+        if foreign:
+            problems.append({"receipt_id": r.pk, "problem": "mixed_source",
+                             "source": r.source, "foreign_tracks": sorted(foreign)})
         labels = sorted(_item_pickup_labels(r))
         if len(labels) > 1:
             problems.append({"receipt_id": r.pk, "problem": "mixed", "pickups": labels})
@@ -242,7 +255,8 @@ def owner_pending_receipts_follow_pickup_rule(ctx):
                              "pickup_id": r.pickup_id, "expected_pickup_id": obj.id if obj else None})
         if not labels:
             continue
-        key = (r.created_at, ("pickup", r.pickup_id) if r.pickup_id else ("label", r.pickup_point or ""))
+        key = (r.created_at, ("pickup", r.pickup_id) if r.pickup_id else ("label", r.pickup_point or ""),
+               r.source)
         if key in seen_keys:
             problems.append({"receipt_id": r.pk, "problem": "duplicate", "same_as": seen_keys[key]})
         seen_keys.setdefault(key, r.pk)

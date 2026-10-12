@@ -28,9 +28,9 @@
     <div class="flex min-h-screen">
         {% include 'mobile/sidebar.html' %}
 
-        <main class="flex-1 p-4 md:p-8 min-w-0">
+        <main class="flex-1 min-w-0 px-4 md:px-8 py-6 md:py-8">
             <!-- Мобильный хедер -->
-            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-4 mb-4">
+            <div class="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3.5 -mx-4 -mt-6 mb-4">
                 <h1 class="text-lg font-bold text-center">{% trans "Реструктуризация" %}</h1>
             </div>
             <div class="max-w-4xl mx-auto w-full">
@@ -50,7 +50,7 @@
 
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                     <div>
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">
+                        <h1 class="text-2xl font-bold text-gray-900 hidden md:block">
                             <i class="ri-refresh-line text-orange-500"></i>
                             {% trans "Реструктуризация склада" %}
                         </h1>
@@ -78,7 +78,7 @@
                 <!-- Способы назначения -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <!-- Ручной ввод -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                         <h3 class="font-semibold text-gray-800 mb-2">
                             <i class="ri-edit-line text-blue-500 mr-1"></i> {% trans "Вручную" %}
                         </h3>
@@ -102,7 +102,7 @@
                     </div>
 
                     <!-- Сканер аппаратный -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                         <h3 class="font-semibold text-gray-800 mb-2">
                             <i class="ri-barcode-line text-green-500 mr-1"></i> {% trans "Сканер" %}
                         </h3>
@@ -113,7 +113,7 @@
                     </div>
 
                     <!-- Камера телефона -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                         <h3 class="font-semibold text-gray-800 mb-2">
                             <i class="ri-camera-line text-purple-500 mr-1"></i> {% trans "Камера" %}
                         </h3>
@@ -132,7 +132,7 @@
                 </div>
 
                 <!-- Список клиентов -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="px-5 py-3 bg-gray-50 border-b flex items-center justify-between">
                         <h2 class="font-semibold text-gray-800">
                             <i class="ri-group-line mr-1"></i> {% trans "Клиенты на складе" %}

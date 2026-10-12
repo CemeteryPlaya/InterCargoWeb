@@ -167,11 +167,11 @@
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Видеоуроки" %}</span>
                 </a>
-                <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
+                <a href="{% url 'info_page' 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
-                        <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
+                        <i class="ri-information-line text-xl" style="color:#ec4899;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "О компании" %}</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Инфо" %}</span>
                 </a>
                 <button id="mobile-theme-btn" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#f1f5f9;">
@@ -197,8 +197,8 @@
         <!-- Карточки статистики -->
         {% if mobile_stats %}
         <div class="px-4 py-2">
-            {% if dibuyer_enabled or dibuyer_is_staff %}
-            <a href="{% url 'dibuyer_home' %}"
+            {% if dibuyer_enabled %}
+            <a href="{% url 'dibuyer_home' %}" data-ad-slot="home_dibuyer_mobile"
                class="flex items-center justify-between w-full mb-3 px-4 py-3.5 rounded-2xl shadow-sm active:scale-[0.99] transition"
                style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
                 <span class="flex items-center gap-3">
@@ -330,11 +330,11 @@
                     </div>
                     <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Обучение" %}</span>
                 </a>
-                <a href="{% url 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
+                <a href="{% url 'info_page' 'about' %}" class="flex flex-col items-center gap-1.5 py-3">
                     <div class="w-12 h-12 rounded-2xl flex items-center justify-center mobile-icon-tile" style="background:#fce7f3;">
-                        <i class="ri-building-2-line text-xl" style="color:#ec4899;"></i>
+                        <i class="ri-information-line text-xl" style="color:#ec4899;"></i>
                     </div>
-                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "О компании" %}</span>
+                    <span class="text-[11px] font-medium text-gray-700 text-center leading-tight">{% trans "Инфо" %}</span>
                 </a>
             </div>
         </div>
@@ -594,8 +594,8 @@
                             {% trans "Обучение по сайту" %}
                         </button>
                     </div>
-                    {% if dibuyer_enabled or dibuyer_is_staff %}
-                    <a href="{% url 'dibuyer_home' %}"
+                    {% if dibuyer_enabled %}
+                    <a href="{% url 'dibuyer_home' %}" data-ad-slot="home_dibuyer_desktop"
                        class="inline-flex items-center gap-3 mt-3 px-6 py-3 !rounded-button font-medium transition w-fit"
                        style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
                         <svg style="width:34px;height:34px;display:block" aria-label="США и Европа"><use href="#us-eu-badge"/></svg>
@@ -890,6 +890,10 @@
                         class="w-full bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-opacity-90 transition whitespace-nowrap">
                         {% trans "Зарегистрироваться" %}
                     </button>
+                    <p class="text-xs text-gray-500 text-center mt-3">
+                        {% url 'info_page' 'offer' as offer_url %}{% url 'info_page' 'privacy' as privacy_url %}
+                        {% blocktrans trimmed %}Регистрируясь, вы принимаете условия <a href="{{ offer_url }}" class="text-primary underline">публичной оферты</a> и <a href="{{ privacy_url }}" class="text-primary underline">политики конфиденциальности</a>.{% endblocktrans %}
+                    </p>
 
                 </form>
             </div>
@@ -989,11 +993,11 @@
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Регистрация на сайте" %}</h3>
                         <p class="text-gray-700 mb-4">{% trans "Узнайте, как правильно заполнить форму регистрации и выбрать удобный пункт выдачи для получения ваших посылок." %}</p>
-                        <a href="https://t.me/c/3896488034/3"><button
+                        {% if EDUCATION_VIDEOS.registration %}<a href="{{ EDUCATION_VIDEOS.registration }}" target="_blank" rel="noopener" title="Telegram"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                                 {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
-                            </button></a>
+                            </button></a>{% endif %}
                     </div>
                 </div>
 
@@ -1005,11 +1009,11 @@
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Оформление заказа в Китае" %}</h3>
                         <p class="text-gray-700 mb-4">{% trans "Пошаговая инструкция по оформлению заказа на китайских торговых площадках и указанию нашего адреса доставки." %}</p>
-                        <a href="#"><button
+                        {% if EDUCATION_VIDEOS.order %}<a href="{{ EDUCATION_VIDEOS.order }}" target="_blank" rel="noopener" title="Telegram"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                                 {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
-                            </button></a>
+                            </button></a>{% endif %}
                     </div>
                 </div>
 
@@ -1021,11 +1025,11 @@
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{% trans "Отслеживание посылки" %}</h3>
                         <p class="text-gray-700 mb-4">{% trans "Узнайте, как отслеживать статус вашей посылки на каждом этапе доставки из Китая в Казахстан." %}</p>
-                        <a href="https://t.me/c/3896488034/4"><button
+                        {% if EDUCATION_VIDEOS.tracking %}<a href="{{ EDUCATION_VIDEOS.tracking }}" target="_blank" rel="noopener" title="Telegram"><button
                                 class="inline-flex items-center text-primary font-medium hover:text-primary-dark transition">
                                 {% trans "Смотреть видео" %}
                                 <i class="ri-play-circle-line ml-2"></i>
-                            </button></a>
+                            </button></a>{% endif %}
                     </div>
                 </div>
             </div>

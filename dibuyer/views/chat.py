@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from dibuyer.access import dibuyer_is_enabled, is_dibuyer_staff
+from dibuyer.access import can_manage_dibuyer, dibuyer_visible_for, is_dibuyer_staff
 from dibuyer.models import BuyerOrder, DibuyerChat, DibuyerMessage
 from dibuyer.services import (
     notify_client_new_dibuyer_message, notify_staff_new_dibuyer_message,
@@ -91,13 +91,13 @@ def _client_chat(request, create=False):
 def _client_blocked(user):
     """Клиентские эндпоинты закрыты для сотрудников Di.Buyer (они отвечают
     через /api/chat/) и для всех при выключенном сервисе."""
+    if not dibuyer_visible_for(user):
+        return JsonResponse(
+            {'error': _('Сервис Di.Buyer временно недоступен.')}, status=403)
     if is_dibuyer_staff(user):
         return JsonResponse(
             {'error': _('Сотрудники Di.Buyer отвечают из раздела «Сообщения».')},
             status=403)
-    if not dibuyer_is_enabled():
-        return JsonResponse(
-            {'error': _('Сервис Di.Buyer временно недоступен.')}, status=403)
     return None
 
 
@@ -157,7 +157,7 @@ def dibuyer_my_read(request):
 # ---------------------------------------------------------------------------
 
 def _get_chat_for_staff(request, chat_id):
-    if not is_dibuyer_staff(request.user):
+    if not can_manage_dibuyer(request.user):
         return None, _forbidden()
     try:
         chat = DibuyerChat.objects.select_related('client', 'order').get(id=chat_id)
@@ -213,7 +213,7 @@ def dibuyer_order_chat_open(request, order_id):
 
     Используется сотрудником Di.Buyer для заявок, по которым ещё нет чата.
     """
-    if not is_dibuyer_staff(request.user):
+    if not can_manage_dibuyer(request.user):
         return _forbidden()
     try:
         order = BuyerOrder.objects.select_related('client').get(pk=order_id)

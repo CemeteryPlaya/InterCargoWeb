@@ -2,7 +2,7 @@
 {% load static %}
 <footer class="hidden md:block bg-gray-900 text-white py-6 md:py-12 w-full mb-16 md:mb-0">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
                 <div>
                     <a href="/" class="text-2xl font-['Pacifico'] text-white mb-4 inline-block"><img src="{% static 'images/logo.png' %}" style="height: 50px; width: 50px;"></a>
                     <p class="text-gray-400 mb-6">{% trans "Надежная доставка грузов из Китая в Казахстан по выгодным тарифам." %}</p>
@@ -13,7 +13,7 @@
                         <a href="https://t.me/inter_cargo" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 hover:bg-gray-900 transition">
                             <img src="{% static 'images/telegram.svg' %}" style="height: 35px; width: 35px;">
                         </a>
-                        <a href="https://wa.me/77066440624" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 hover:bg-gray-900 transition">
+                        <a href="https://wa.me/{{ COMPANY.whatsapp }}" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 hover:bg-gray-900 transition">
                             <img src="{% static 'images/whatsapp.svg' %}" style="height: 35px; width: 35px;">
                         </a>
                     </div>
@@ -25,7 +25,16 @@
                         <li><a href="/" class="text-gray-400 hover:text-white transition">{% trans "Главная" %}</a></li>
                         <li><a href="{% url 'register' %}" class="text-gray-400 hover:text-white transition">{% trans "Регистрация" %}</a></li>
                         <li><a href="{% url 'education' %}" class="text-gray-400 hover:text-white transition">{% trans "Обучение" %}</a></li>
-                        <li><a href="{% url 'about' %}" class="text-gray-400 hover:text-white transition">{% trans "О компании" %}</a></li>
+                        <li><a href="{% url 'info_page' 'about' %}" class="text-gray-400 hover:text-white transition">{% trans "Инфо" %}</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">{% trans "Покупателям" %}</h3>
+                    <ul class="space-y-2">
+                        {% for key, title in INFO_PAGES %}
+                        <li><a href="{% url 'info_page' key %}" class="text-gray-400 hover:text-white transition">{{ title }}</a></li>
+                        {% endfor %}
                     </ul>
                 </div>
 
@@ -40,7 +49,7 @@
                             {% endif %}
                         </li>
                         {% endfor %}
-                        <li><a href="{% url 'about' %}" class="text-primary hover:text-primary-light transition">{% trans "Смотреть все пункты" %}</a></li>
+                        <li><a href="{% url 'info_page' 'contacts' %}" class="text-primary hover:text-primary-light transition">{% trans "Смотреть все пункты" %}</a></li>
                     </ul>
                 </div>
 
@@ -63,23 +72,35 @@
                             <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
 
                             </div>
-                            <span class="text-gray-400">{% trans "Менеджер:" %} <a href="tel:+77066640624" class="hover:text-white transition">+7 (706) 664-06-24</a></span>
+                            <span class="text-gray-400">{% trans "Менеджер:" %} <a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}" class="hover:text-white transition">{{ COMPANY.phone_support }}</a></span>
                         </li>
                         <li class="flex items-start">
                             <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
                                 <i class="ri-mail-line text-primary"></i>
                             </div>
-                            <a href="mailto:cargo.inter.kz@gmail.com" class="text-gray-400 hover:text-white transition">cargo.inter.kz@gmail.com</a>
+                            <a href="mailto:{{ COMPANY.email }}" class="text-gray-400 hover:text-white transition">{{ COMPANY.email }}</a>
                         </li>
+                        {% if COMPANY.schedule %}
+                        <li class="flex items-start">
+                            <div class="w-5 h-5 flex items-center justify-center mt-1 mr-3">
+                                <i class="ri-time-line text-primary"></i>
+                            </div>
+                            <span class="text-gray-400">{% trans "Поддержка:" %} {{ COMPANY.schedule }}</span>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
 
-            <div class="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-500 text-sm mb-4 md:mb-0">{% trans "© 2026 Inter Cargo. Все права защищены." %}</p>
-                <div class="flex items-center space-x-4">
+            <div class="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col lg:flex-row justify-between items-center gap-4">
+                <div class="text-gray-500 text-sm text-center lg:text-left">
+                    <p>{% trans "© 2026 Inter Cargo. Все права защищены." %}</p>
+                    {% if COMPANY.legal_name %}<p class="text-xs mt-1">{{ COMPANY.legal_name }}{% if COMPANY.iin %}, {% trans "ИИН/БИН" %} {{ COMPANY.iin }}{% endif %} · {{ COMPANY.legal_address }}</p>{% endif %}
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-3">
                     <span class="text-gray-500 text-sm">{% trans "Способы оплаты:" %}</span>
-                    <i ><img src="{% static 'images/kaspi.png' %}" style="height: 15px; width: 61px;"></i>
+                    {% include 'shared/_payment_logos.html' with logo_height='24px' %}
+                    <img src="{% static 'images/kaspi.png' %}" alt="Kaspi" style="height: 15px; width: 61px;">
                 </div>
             </div>
         </div>

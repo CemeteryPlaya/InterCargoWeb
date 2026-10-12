@@ -1,0 +1,168 @@
+{% load i18n %}{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Медиакит" %} — {{ section_label }} — {{ month|date:"F Y" }}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --ink:#111827; --muted:#6b7280; --line:#e5e7eb; --brand:#e53e3e; --soft:#fef2f2; }
+        * { box-sizing: border-box; }
+        body { margin:0; background:#f3f4f6; color:var(--ink); font-family:Inter, -apple-system, Segoe UI, Roboto, sans-serif; }
+        .toolbar { max-width:900px; margin:16px auto 0; padding:0 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+        .toolbar select, .toolbar button, .toolbar a { font:inherit; font-size:14px; padding:8px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); text-decoration:none; cursor:pointer; }
+        .toolbar .primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+        .sheet { max-width:900px; margin:16px auto 40px; background:#fff; border-radius:18px; padding:40px 44px; box-shadow:0 10px 30px rgba(0,0,0,.06); }
+        header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:3px solid var(--brand); padding-bottom:18px; }
+        .brand { font-size:28px; font-weight:700; letter-spacing:-.5px; }
+        .brand small { display:block; font-size:13px; font-weight:500; color:var(--muted); margin-top:4px; letter-spacing:0; }
+        .period { text-align:right; font-size:13px; color:var(--muted); }
+        .period b { display:block; font-size:18px; color:var(--ink); }
+        h2 { font-size:15px; text-transform:uppercase; letter-spacing:1.2px; color:var(--brand); margin:30px 0 12px; }
+        p.lead { font-size:14px; line-height:1.6; color:#374151; margin:14px 0 0; }
+        .kpis { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+        .kpi { border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+        .kpi b { display:block; font-size:28px; font-weight:700; }
+        .kpi span { font-size:12px; color:var(--muted); }
+        .kpi em { font-style:normal; font-size:12px; font-weight:600; }
+        .up { color:#15803d; } .down { color:#b91c1c; }
+        .cols { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+        .bar { margin:7px 0; font-size:13px; }
+        .bar div:first-child { display:flex; justify-content:space-between; gap:8px; }
+        .track { height:6px; background:#f3f4f6; border-radius:4px; margin-top:4px; }
+        .fill { height:6px; background:var(--brand); border-radius:4px; }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        th { text-align:left; color:var(--muted); font-weight:500; font-size:11px; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--line); padding:8px 6px; }
+        td { padding:9px 6px; border-bottom:1px solid #f3f4f6; }
+        td.n, th.n { text-align:right; white-space:nowrap; }
+        .hours { display:flex; align-items:flex-end; gap:2px; height:70px; }
+        .hours div { flex:1; background:var(--brand); opacity:.75; border-radius:2px 2px 0 0; min-height:2px; }
+        .hours-axis { display:flex; gap:2px; font-size:9px; color:var(--muted); margin-top:3px; }
+        .hours-axis span { flex:1; text-align:center; }
+        .note { font-size:11.5px; color:var(--muted); line-height:1.6; }
+        .empty { padding:30px; text-align:center; color:var(--muted); }
+        .contacts { background:var(--soft); border-radius:14px; padding:16px 18px; font-size:14px; line-height:1.7; }
+        @media (max-width:640px) {
+            .sheet { padding:22px 18px; border-radius:0; }
+            .kpis { grid-template-columns:1fr 1fr; }
+            .cols { grid-template-columns:1fr; }
+            header { flex-direction:column; } .period { text-align:left; }
+        }
+        @media print {
+            body { background:#fff; }
+            .toolbar { display:none; }
+            .sheet { box-shadow:none; margin:0; padding:0; max-width:none; border-radius:0; }
+            h2 { break-after:avoid; } .kpi, table, .cols > div { break-inside:avoid; }
+            @page { size:A4; margin:14mm; }
+        }
+    </style>
+</head>
+<body>
+    <form class="toolbar" method="get">
+        <a href="{% url 'analytics_dashboard' %}?section={{ section }}">← {% trans "Аналитика" %}</a>
+        <select name="section" onchange="this.form.submit()">
+            {% for key, label in sections %}<option value="{{ key }}" {% if key == section %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <select name="month" onchange="this.form.submit()">
+            {% for m in months %}<option value="{{ m|date:'Y-m' }}" {% if m == month %}selected{% endif %}>{{ m|date:"F Y" }}</option>{% endfor %}
+        </select>
+        <span style="flex:1"></span>
+        <button type="button" class="primary" onclick="window.print()">{% trans "Печать / PDF" %}</button>
+    </form>
+
+    <main class="sheet">
+        <header>
+            <div class="brand">
+                {% if section == 'dibuyer' %}Di.Buyer{% else %}{{ COMPANY.brand|default:"Inter Cargo" }}{% endif %}
+                <small>{% trans "Медиакит для рекламодателей" %} · cargointer.kz</small>
+            </div>
+            <div class="period">
+                {% trans "Период" %}
+                <b>{{ month|date:"F Y" }}</b>
+                {{ section_label }}{% if is_current_month %} · {% trans "месяц ещё идёт" %}{% endif %}
+            </div>
+        </header>
+
+        <p class="lead">
+            {% if section == 'dibuyer' %}
+            {% trans "Di.Buyer — партнёрский сервис выкупа товаров из США и Европы с доставкой в Казахстан через Inter Cargo. Аудитория — покупатели брендовой одежды, обуви и товаров, которые заказывают из-за рубежа." %}
+            {% else %}
+            {% blocktrans with city=COMPANY.city|default:"Тараз" %}Inter Cargo — служба доставки посылок из Китая, США и Европы в Казахстан (пункты выдачи в г. {{ city }}). Аудитория — активные онлайн-покупатели, которые регулярно заказывают на маркетплейсах и отслеживают посылки на сайте.{% endblocktrans %}
+            {% endif %}
+        </p>
+
+        {% if not data %}
+            <div class="empty">{% trans "За этот месяц нет данных: статистика собирается с момента обновления аналитики, сырые данные хранятся 90 дней." %}</div>
+        {% else %}
+        <h2>{% trans "Аудитория за месяц" %}</h2>
+        <div class="kpis">
+            <div class="kpi"><b>{{ data.summary.visitors }}</b><span>{% trans "уникальных посетителей" %}</span>
+                {% if growth.visitors is not None %}<br><em class="{% if growth.visitors >= 0 %}up{% else %}down{% endif %}">{% if growth.visitors >= 0 %}+{% endif %}{{ growth.visitors }}% {% trans "к прошлому месяцу" %}</em>{% endif %}</div>
+            <div class="kpi"><b>{{ data.summary.visits }}</b><span>{% trans "визитов" %}</span>
+                {% if growth.visits is not None %}<br><em class="{% if growth.visits >= 0 %}up{% else %}down{% endif %}">{% if growth.visits >= 0 %}+{% endif %}{{ growth.visits }}%</em>{% endif %}</div>
+            <div class="kpi"><b>{{ data.summary.views }}</b><span>{% trans "просмотров страниц" %}</span>
+                {% if growth.views is not None %}<br><em class="{% if growth.views >= 0 %}up{% else %}down{% endif %}">{% if growth.views >= 0 %}+{% endif %}{{ growth.views }}%</em>{% endif %}</div>
+            <div class="kpi"><b>{{ data.summary.depth }}</b><span>{% trans "страниц за визит" %}</span></div>
+            <div class="kpi"><b>{{ data.summary.avg_visit_label }}</b><span>{% trans "среднее время визита" %}</span></div>
+            <div class="kpi"><b>{{ data.summary.bounce_pct }}%</b><span>{% trans "отказов (одна страница)" %}</span></div>
+        </div>
+
+        <div class="cols">
+            <div>
+                <h2>{% trans "Устройства" %}</h2>
+                {% for r in data.devices %}<div class="bar"><div><span>{{ r.label }}</span><b>{{ r.pct }}%</b></div><div class="track"><div class="fill" style="width:{{ r.pct|stringformat:'s' }}%"></div></div></div>{% endfor %}
+                <h2>{% trans "Язык сайта" %}</h2>
+                {% for r in data.languages %}<div class="bar"><div><span>{{ r.label }}</span><b>{{ r.pct }}%</b></div><div class="track"><div class="fill" style="width:{{ r.pct|stringformat:'s' }}%"></div></div></div>{% endfor %}
+            </div>
+            <div>
+                <h2>{% trans "Источники визитов" %}</h2>
+                {% for r in data.sources %}<div class="bar"><div><span>{{ r.label }}</span><b>{{ r.pct }}%</b></div><div class="track"><div class="fill" style="width:{{ r.pct|stringformat:'s' }}%"></div></div></div>{% endfor %}
+                <h2>{% trans "География" %}</h2>
+                {% for r in data.cities %}<div class="bar"><div><span>{{ r.label }}</span><b>{{ r.pct }}%</b></div><div class="track"><div class="fill" style="width:{{ r.pct|stringformat:'s' }}%"></div></div></div>{% endfor %}
+            </div>
+        </div>
+
+        <div class="cols">
+            <div>
+                <h2>{% trans "Лояльность" %}</h2>
+                <div class="bar"><div><span>{% trans "Новые посетители" %}</span><b>{{ data.summary.new_pct }}%</b></div><div class="track"><div class="fill" style="width:{{ data.summary.new_pct|stringformat:'s' }}%"></div></div></div>
+                <div class="bar"><div><span>{% trans "Зарегистрированные клиенты" %}</span><b>{{ data.summary.auth_pct }}%</b></div><div class="track"><div class="fill" style="width:{{ data.summary.auth_pct|stringformat:'s' }}%"></div></div></div>
+            </div>
+            <div>
+                <h2>{% trans "Активность по часам" %}</h2>
+                <div class="hours">{% for h in data.hours %}<div style="height:{{ h.pct|stringformat:'s' }}%" title="{{ h.hour }}:00"></div>{% endfor %}</div>
+                <div class="hours-axis">{% for h in data.hours %}<span>{% if h.hour|divisibleby:6 %}{{ h.hour }}{% endif %}</span>{% endfor %}</div>
+                {% if data.peak_hours %}<p class="note">{% trans "Пик" %}: {{ data.peak_hours|join:", " }}</p>{% endif %}
+            </div>
+        </div>
+
+        <h2>{% trans "Рекламные места" %}</h2>
+        <table>
+            <thead><tr><th>{% trans "Размещение" %}</th><th class="n">{% trans "Видимые показы" %}</th><th class="n">{% trans "Охват" %}</th><th class="n">{% trans "Клики" %}</th><th class="n">CTR</th></tr></thead>
+            <tbody>
+            {% for a in data.ads %}
+                <tr><td>{{ a.label }}</td><td class="n">{{ a.views }}</td><td class="n">{{ a.reach }}</td><td class="n">{{ a.clicks }}</td><td class="n"><b>{{ a.ctr }}%</b></td></tr>
+            {% empty %}
+                <tr><td colspan="5" class="note">{% trans "Показы рекламных мест за этот месяц ещё не накоплены." %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <h2>{% trans "Методика" %}</h2>
+        <p class="note">
+            {% trans "Посетитель — уникальный браузер (анонимная cookie, без персональных данных). Визит — серия просмотров, завершается после 30 минут бездействия. Роботы, превью ссылок и сервисы мониторинга исключены; сотрудники компании не учитываются. Показ рекламного места засчитывается, если не меньше 50% блока было на экране не меньше 1 секунды (стандарт видимости IAB/MRC). CTR — клики, делённые на видимые показы." %}
+            {% if from_snapshot %}{% trans "Данные — сохранённый снимок месяца." %}{% endif %}
+        </p>
+
+        <h2>{% trans "Контакты" %}</h2>
+        <div class="contacts">
+            {{ COMPANY.legal_name }}{% if COMPANY.city %}, {{ COMPANY.city }}{% endif %}<br>
+            {% if COMPANY.phone_support %}{% trans "Телефон / WhatsApp" %}: {{ COMPANY.phone_support }}<br>{% endif %}
+            {% if COMPANY.email %}E-mail: {{ COMPANY.email }}{% endif %}
+        </div>
+    </main>
+</body>
+</html>

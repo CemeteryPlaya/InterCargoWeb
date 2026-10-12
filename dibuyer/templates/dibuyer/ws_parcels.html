@@ -1,0 +1,51 @@
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}
+{% block title %}Di.Buyer — {% trans "Посылки" %}{% endblock %}
+{% block body_class %}ws{% endblock %}
+
+{% block content %}
+  {% include 'dibuyer/_ws_tabs.html' %}
+  <div class="eyebrow">{% trans "Посылки и чеки Di.Buyer" %}</div>
+  <p class="ws-hint">{% trans "Все посылки заявок: где сейчас, в каком чеке и отмечена ли оплата. Эти посылки не попадают в финансы Inter Cargo — оплату принимает партнёр." %}</p>
+
+  <form class="card ws-filters" method="get">
+    <input class="fld" type="search" name="q" value="{{ q }}" placeholder="{% trans 'Трек-код, клиент, телефон или № заявки' %}">
+    <select class="fld" name="stage">
+      <option value="">{% trans "Все этапы" %}</option>
+      {% for key, label in stages %}<option value="{{ key }}" {% if stage == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select class="fld" name="paid">
+      <option value="">{% trans "Оплата: все" %}</option>
+      <option value="no" {% if paid == 'no' %}selected{% endif %}>{% trans "Оплата не отмечена" %}</option>
+      <option value="yes" {% if paid == 'yes' %}selected{% endif %}>{% trans "Оплата получена" %}</option>
+    </select>
+    <button class="ws-btn" type="submit">{% trans "Показать" %}</button>
+  </form>
+
+  <div class="card ws-scroll">
+    <table class="ws-table">
+      <thead><tr>
+        <th>{% trans "Трек-код" %}</th><th>{% trans "Заявка" %}</th><th>{% trans "Клиент" %}</th>
+        <th>{% trans "Статус" %}</th><th class="num">{% trans "Вес, кг" %}</th>
+        <th class="num">{% trans "Доставка, ₸" %}</th><th>{% trans "Чек" %}</th><th>{% trans "Оплата" %}</th>
+      </tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr>
+          <td><b>{{ r.track.track_code }}</b></td>
+          <td>{% if dibuyer_is_staff %}<a href="{% url 'dibuyer_manage_detail' r.order.pk %}">№{{ r.order.pk }}</a>{% else %}№{{ r.order.pk }}{% endif %}</td>
+          <td>{{ r.client }}</td>
+          <td>{{ r.track.get_status_display }}{% if r.days is not None and not r.issued %}<div class="req-meta">{% blocktrans count d=r.days %}{{ d }} день в статусе{% plural %}{{ d }} дн. в статусе{% endblocktrans %}</div>{% endif %}</td>
+          <td class="num">{{ r.item.weight|default:"—" }}</td>
+          <td class="num">{{ r.item.delivery_cost_kzt|default:"—" }}</td>
+          <td>{% if r.receipt %}{{ r.receipt.receipt_number }}{% if r.receipt.is_claimed %} <span class="req-meta">({% trans "выдан" %})</span>{% endif %}{% else %}<span class="req-meta">{% trans "нет" %}</span>{% endif %}</td>
+          <td>{% if r.paid %}<span class="ws-ok">{% trans "получена" %}</span>{% else %}<span class="ws-bad">{% trans "не отмечена" %}</span>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8"><div class="empty">{% trans "Посылок не найдено." %}</div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% if limit_hit %}<p class="ws-hint" style="margin-top:10px">{% trans "Показаны первые 500 посылок — уточните поиск." %}</p>{% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,15 @@
+<h2>Сатушы туралы мәліметтер</h2>
+{% include 'info/_requisites.html' %}
+
+<h2>Қолдау қызметі</h2>
+<p>Тапсырыстар, төлем, жеткізу және қайтару бойынша сұрақтар телефон, мессенджерлер және электрондық пошта арқылы қабылданады.{% if COMPANY.schedule %} Жұмыс кестесі: {{ COMPANY.schedule }}.{% endif %}</p>
+<ul>
+    {% if COMPANY.phone_support %}<li>Телефон / WhatsApp: <a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_support }}</a></li>{% endif %}
+    <li>Telegram: <a href="https://t.me/inter_cargo" target="_blank" rel="noopener">t.me/inter_cargo</a> (Telegram қосымшасы ашылады)</li>
+    {% if COMPANY.email %}<li>E-mail: <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a></li>{% endif %}
+    <li>Қолдау чаты — сайтқа кіргеннен кейін жеке кабинетте.</li>
+</ul>
+<p>Жазбаша шағымдар алынған күннен бастап 10 күнтізбелік күн ішінде қаралады.</p>
+
+<h2>Беру пункттері</h2>
+{% include 'info/_pickup_points.html' %}

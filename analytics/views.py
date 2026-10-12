@@ -1,4 +1,5 @@
 import json
+import re
 from collections import defaultdict
 from datetime import timedelta
 
@@ -6,12 +7,15 @@ from django.db.models import Count, Min, Q, Sum
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from myprofile.permissions import require_staff
 
+from . import audience
 from .models import PageView, PageViewDaily
+from .tracking import section_for_path
 
 ALLOWED_RANGES = (1, 7, 30, 90)
 MAX_DURATION_MS = 24 * 3600 * 1000  # отсекаем заведомо мусорные значения
@@ -105,6 +109,58 @@ def _apps_from_bucket(bucket):
     return rows
 
 
+def _section_param(request):
+    section = request.GET.get('section') or 'all'
+    return section if section in audience.SECTION_LABELS else 'all'
+
+
+def _dibuyer_funnel(since, ad_qs, pv_qs):
+    """Воронка Di.Buyer за период: витрина → заявки → выкуплено + клики по брендам."""
+    from dibuyer.models import BuyerOrder
+    from .models import AdEvent
+    orders = BuyerOrder.objects.filter(created_at__gte=since)
+    home_visitors = pv_qs.filter(path='/dibuyer/').aggregate(n=Count('vkey', distinct=True))['n'] or 0
+    created = orders.count()
+    return {
+        'home_visitors': home_visitors,
+        'orders': created,
+        'clients': orders.values('client').distinct().count(),
+        'purchased': orders.filter(status=BuyerOrder.STATUS_PURCHASED).count(),
+        'brand_clicks': ad_qs.filter(slot='dibuyer_brand', kind=AdEvent.KIND_CLICK).count(),
+        'conversion_pct': round(created * 100 / home_visitors, 1) if home_visitors else 0,
+    }
+
+
+def _audience_context(since, section, include_staff):
+    pv_qs = audience.pageviews(since, None, section, include_staff)
+    ad_qs = audience.ad_events(since, None, section, include_staff)
+    hour_rows = audience.hours(pv_qs)
+    daily = audience.daily(pv_qs)
+    ctx = {
+        'aud': audience.summary(pv_qs),
+        'aud_sources': audience.sources(pv_qs),
+        'aud_devices': audience.dimension(pv_qs, 'device', audience.DEVICE_LABELS),
+        'aud_os': audience.dimension(pv_qs, 'os'),
+        'aud_browsers': audience.dimension(pv_qs, 'browser'),
+        'aud_languages': audience.dimension(pv_qs, 'language', audience.LANGUAGE_LABELS),
+        'aud_cities': audience.dimension(pv_qs, 'city', {'': _('Не определён')}),
+        'aud_hours': hour_rows,
+        'aud_peak_hours': audience.peak_hours(hour_rows),
+        'aud_weekdays': audience.weekdays(pv_qs),
+        'aud_landing': audience.landing_pages(pv_qs),
+        'aud_referrers': audience.referrers(pv_qs),
+        'aud_campaigns': audience.campaigns(pv_qs),
+        'aud_ads': audience.ad_slots(ad_qs),
+        'trend_labels': [d['day'].strftime('%d.%m') for d in daily],
+        'trend_views': [d['views'] for d in daily],
+        'trend_visitors': [d['visitors'] for d in daily],
+    }
+    if section == 'dibuyer':
+        ctx['funnel'] = _dibuyer_funnel(since, ad_qs, pv_qs)
+        ctx['brand_rows'] = audience.ad_labels(ad_qs, 'dibuyer_brand')
+    return ctx
+
+
 @require_staff
 def dashboard(request):
     try:
@@ -113,6 +169,8 @@ def dashboard(request):
         days = 7
     if days not in ALLOWED_RANGES:
         days = 7
+    section = _section_param(request)
+    include_staff = request.GET.get('staff') == '1'
 
     since = timezone.now() - timedelta(days=days)
     since_date = timezone.localtime(since).date()
@@ -152,12 +210,20 @@ def dashboard(request):
             b['sessions'] += r['sessions'] or 0; b['dur'] += r['dur'] or 0
             b['samples'] += r['samples'] or 0
 
+    if section != 'all':   # вкладка Inter Cargo / Di.Buyer — только пути раздела
+        bucket = {p: b for p, b in bucket.items() if section_for_path(p) == section}
+
     app_key = (request.GET.get('app') or '').strip() or None
 
     ctx = {
         'days': days,
         'ranges': ALLOWED_RANGES,
         'approx': has_archive,
+        'section': section,
+        'sections': audience.SECTIONS,
+        'section_label': audience.SECTION_LABELS[section],
+        'include_staff': include_staff,
+        'keep': '&section=%s%s' % (section, '&staff=1' if include_staff else ''),
     }
 
     if app_key:
@@ -200,6 +266,7 @@ def dashboard(request):
             total_users += arch_tot['users'] or 0
             total_sessions += arch_tot['sessions'] or 0
 
+        ctx.update(_audience_context(since, section, include_staff))
         ctx.update({
             'mode': 'apps',
             'app_rows': app_rows,
@@ -230,3 +297,96 @@ def ping(request):
             Q(duration_ms__isnull=True) | Q(duration_ms__lt=ms)
         ).update(duration_ms=ms)
     return HttpResponse(status=204)
+
+
+_SLOT_RE = re.compile(r'^[a-z0-9_]{1,40}$')
+
+
+@csrf_exempt
+@require_POST
+def ad_event(request):
+    """Видимый показ / клик рекламного места от счётчика на странице.
+
+    Событие привязывается к записанному просмотру страницы (pv): так боты и
+    подделки без реального просмотра не попадают в статистику, а показ
+    одного места засчитывается не больше одного раза за просмотр."""
+    from .models import AdEvent
+    try:
+        data = json.loads(request.body.decode('utf-8') or '{}')
+        pv_id = int(data['pv'])
+        slot = str(data['slot'])
+        kind = str(data['kind'])
+        label = str(data.get('label') or '')[:100]
+    except (KeyError, ValueError, TypeError, json.JSONDecodeError):
+        return HttpResponseBadRequest('bad request')
+    if not _SLOT_RE.match(slot) or kind not in (AdEvent.KIND_VIEW, AdEvent.KIND_CLICK):
+        return HttpResponseBadRequest('bad request')
+    pv = PageView.objects.filter(pk=pv_id, created_at__gte=timezone.now() - timedelta(days=1)).first()
+    if pv is None:
+        return HttpResponse(status=204)
+    dup = AdEvent.objects.filter(pv_id=pv.pk, slot=slot, label=label, kind=kind)
+    if kind == AdEvent.KIND_VIEW and dup.exists():
+        return HttpResponse(status=204)
+    if kind == AdEvent.KIND_CLICK and dup.count() >= 5:   # защита от накрутки кликами
+        return HttpResponse(status=204)
+    AdEvent.objects.create(slot=slot, label=label, kind=kind, path=pv.path, section=pv.section,
+                           visitor_id=pv.visitor_id, is_staff_view=pv.is_staff_view, pv_id=pv.pk)
+    return HttpResponse(status=204)
+
+
+def _month_param(raw):
+    import datetime
+    today = timezone.localdate()
+    try:
+        y, m = (int(x) for x in (raw or '').split('-'))
+        return datetime.date(y, m, 1)
+    except (TypeError, ValueError):
+        # По умолчанию — прошлый полный месяц
+        return (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+
+
+@require_staff
+def mediakit(request):
+    """Медиакит для рекламодателей: аудитория за месяц, печатается в PDF."""
+    from .models import AudienceMonth
+    from .services import month_bounds
+
+    section = _section_param(request)
+    month = _month_param(request.GET.get('month'))
+    prev = (month - timedelta(days=1)).replace(day=1)
+
+    def data_for(m):
+        snap = AudienceMonth.objects.filter(month=m, section=section).first()
+        if snap is not None:
+            return snap.data, True
+        since, until = month_bounds(m)
+        if not PageView.objects.filter(created_at__lt=until, created_at__gte=since).exists():
+            return None, False
+        return audience.full_report(since, until, section=section), False
+
+    data, from_snapshot = data_for(month)
+    prev_data, _snap = data_for(prev)
+    growth = dict.fromkeys(('visitors', 'visits', 'views'))
+    if data and prev_data:
+        for key in ('visitors', 'visits', 'views'):
+            a, b = data['summary'][key], prev_data['summary'][key]
+            growth[key] = round((a - b) * 100 / b, 1) if b else None
+
+    months = []
+    cursor = timezone.localdate().replace(day=1)
+    for _i in range(12):
+        months.append(cursor)
+        cursor = (cursor - timedelta(days=1)).replace(day=1)
+
+    return render(request, 'analytics/mediakit.html', {
+        'section': section,
+        'sections': audience.SECTIONS,
+        'section_label': audience.SECTION_LABELS[section],
+        'month': month,
+        'months': months,
+        'data': data,
+        'growth': growth,
+        'from_snapshot': from_snapshot,
+        'is_current_month': month == timezone.localdate().replace(day=1),
+        'slot_descriptions': audience.AD_SLOTS,
+    })

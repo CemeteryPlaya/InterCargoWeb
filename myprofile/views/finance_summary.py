@@ -102,7 +102,8 @@ def finance_summary_view(request):
 
     # ── Бухгалтерская часть ──
     if show_accountant:
-        base_qs = Receipt.objects.all()
+        # Чеки партнёра Di.Buyer — не выручка ИП (оплату принимает партнёр, сумма 0)
+        base_qs = Receipt.objects.filter(source=Receipt.SOURCE_CARGO)
         pickups = PickupPoint.objects.filter(is_active=True, is_home_delivery=False).order_by('id')
         home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
         if pickup_id:
@@ -152,7 +153,7 @@ def finance_summary_view(request):
             # Доставка на дом
             if home_pp and not pickup_id:
                 home_qs = Receipt.objects.filter(
-                    pickup_q(home_pp),
+                    pickup_q(home_pp), source=Receipt.SOURCE_CARGO,
                     created_at__year=year, created_at__month=month,
                 )
                 context['home_delivery_totals'] = _aggregate_receipts(home_qs)
@@ -193,7 +194,7 @@ def finance_summary_view(request):
             # Доставка на дом
             if home_pp and not pickup_id:
                 home_qs = Receipt.objects.filter(
-                    pickup_q(home_pp),
+                    pickup_q(home_pp), source=Receipt.SOURCE_CARGO,
                     created_at=sel_date,
                 )
                 context['home_delivery_totals'] = _aggregate_receipts(home_qs)

@@ -1,0 +1,18 @@
+<p>By registering on cargointer.kz, I, acting freely, of my own will and in my own interest, in accordance with the Law of the Republic of Kazakhstan “On Personal Data and Their Protection”, give my consent to {% if COMPANY.legal_name %}{{ COMPANY.legal_name }}{% if COMPANY.iin %} (IIN/BIN {{ COMPANY.iin }}){% endif %}{% else %}the individual entrepreneur listed in “Contacts and company details”{% endif %}, trade mark “{{ COMPANY.brand }}” (the “Operator”), to collect and process my personal data on the following terms.</p>
+
+<h2>1. Data covered</h2>
+<p>Last name, first name; login; phone number; e-mail address; delivery address; selected pickup point; information about parcels, receipts, requests and payments (without full card details); correspondence with customer support; Telegram ID (if linked); IP address and technical device data.</p>
+
+<h2>2. Purposes</h2>
+<p>Performance of the public offer: registration, receiving, delivering and handing over parcels, calculating and accepting payment, refunds, status notifications, handling enquiries and disputed payments, compliance with the law.</p>
+
+<h2>3. Processing operations</h2>
+<p>Collection, recording, systematisation, accumulation, storage, clarification (updating, modification), use, transfer (including to {% include 'info/_acquirers.en.html' with conj='and' %} for payments, to transport and customs clearance partners, and to notification services), anonymisation, blocking and destruction — both with and without automated means.</p>
+
+<h2>4. Cross-border transfer</h2>
+<p>I consent to the cross-border transfer of data required to receive and transport parcels (customer identifier and tracking number — to the warehouse in China; recipient data — to transport partners), and to the transfer of contact details to notification services whose servers may be located outside the Republic of Kazakhstan.</p>
+
+<h2>5. Term and withdrawal</h2>
+<p>The consent is valid until the purposes of processing are achieved or until it is withdrawn. Consent can be withdrawn by a written request{% if COMPANY.email %} to <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}. Withdrawal is not permitted where it contradicts the law or prevents the performance of outstanding obligations; after withdrawal, services via the personal account can no longer be provided.</p>
+
+<p>How the data is protected is described in the <a href="{% url 'info_page' 'privacy' %}">Privacy Policy</a>.</p>

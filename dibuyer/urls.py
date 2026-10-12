@@ -1,6 +1,6 @@
 from django.urls import path
 
-from dibuyer.views import chat, client, staff
+from dibuyer.views import chat, client, staff, workspace
 
 urlpatterns = [
     path('', client.dibuyer_home, name='dibuyer_home'),
@@ -10,6 +10,14 @@ urlpatterns = [
     path('manage/', staff.dibuyer_manage, name='dibuyer_manage'),
     path('manage/<int:pk>/', staff.dibuyer_manage_detail, name='dibuyer_manage_detail'),
     path('manage/<int:pk>/update/', staff.dibuyer_manage_update, name='dibuyer_manage_update'),
+    path('manage/<int:pk>/partner-paid/', staff.dibuyer_manage_partner_paid, name='dibuyer_manage_partner_paid'),
+
+    # Рабочий раздел: посылки, оплаты, отчёт, проверки (dibuyer/workspace.py)
+    path('manage/parcels/', workspace.dibuyer_parcels, name='dibuyer_parcels'),
+    path('manage/payments/', workspace.dibuyer_payments, name='dibuyer_payments'),
+    path('manage/payments/mark/', workspace.dibuyer_payments_mark, name='dibuyer_payments_mark'),
+    path('manage/report/', workspace.dibuyer_report, name='dibuyer_report'),
+    path('manage/checks/', workspace.dibuyer_checks, name='dibuyer_checks'),
 
     # Мессенджер Di.Buyer (клиент)
     path('api/my/messages/', chat.dibuyer_my_messages, name='dibuyer_my_messages'),

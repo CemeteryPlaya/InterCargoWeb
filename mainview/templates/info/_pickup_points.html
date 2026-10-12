@@ -1,0 +1,24 @@
+{% load i18n %}
+{# Пункты выдачи: страна, город/адрес, телефон, график, схема проезда. #}
+<table>
+    <thead>
+        <tr><th>{% trans "Пункт выдачи" %}</th><td><b>{% trans "Телефон и график работы" %}</b></td></tr>
+    </thead>
+    <tbody>
+        {% for pp in office_points %}
+        <tr>
+            <th>{{ COMPANY.country }}, {{ pp.address }}<br><span style="font-weight:400;color:#6b7280">{{ pp.premise_name }}</span></th>
+            <td>
+                {% if COMPANY.phone_support %}<a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_support }}</a><br>{% endif %}
+                {% if pp.working_hours %}{{ pp.working_hours }}{% else %}{{ COMPANY.schedule }}{% endif %}
+                {% if pp.short_info %}<br><span style="color:#6b7280">{{ pp.short_info }}</span>{% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2">{% trans "Список пунктов выдачи уточняйте в службе поддержки." %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if has_home_delivery %}<p>{% trans "Также доступна доставка до двери курьером — выберите её в личном кабинете или уточните у менеджера." %}</p>{% endif %}
+<h3>{% trans "Схема проезда" %}</h3>
+<div class="rounded-xl overflow-hidden border border-gray-200">{% include 'shared/_pvz_map.html' with map_height='420px' %}</div>

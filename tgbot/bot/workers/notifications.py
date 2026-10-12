@@ -358,10 +358,28 @@ def _format_delivery_notification(user_id, tracks):
         total_weight = Decimal('0')
         total_price = Decimal('0')
 
+        # Посылки партнёра Di.Buyer Inter Cargo не оплачиваются (оплата партнёру)
+        from myprofile.models import TrackCode
+        from myprofile.partner_receipts import partner_track_ids
+        code_ids = dict(TrackCode.all_objects.filter(
+            owner_id=user_id, track_code__in=[t['track_code'] for t in tracks],
+        ).values_list('track_code', 'id'))
+        partner_ids = partner_track_ids(code_ids.values())
+        from dibuyer.access import dibuyer_is_enabled
+        partner_public = dibuyer_is_enabled()   # выключен — без названия сервиса
+
         for t in tracks:
             w = Decimal(str(t['weight']))
-            cost = (w * effective_rate).quantize(Decimal('1'))
             total_weight += w
+            if code_ids.get(t['track_code']) in partner_ids:
+                lines.append(
+                    (_("• <code>{code}</code> — {weight:.3f} кг — Di.Buyer, оплата партнёру") if partner_public
+                     else _("• <code>{code}</code> — {weight:.3f} кг — оплачивается отдельно")).format(
+                        code=t['track_code'], weight=w,
+                    )
+                )
+                continue
+            cost = (w * effective_rate).quantize(Decimal('1'))
             total_price += cost
             lines.append(
                 _("• <code>{code}</code> — {weight:.3f} кг — {cost} ₸").format(

@@ -98,7 +98,20 @@
             color: #e5e7eb !important;
         }
 
-        /* Границы и карточки */
+        /* Активный пункт навигации (сайдбар кабинета, «Инфо») и мягкие подсветки */
+        body.theme-dark .bg-red-50 {
+            background-color: rgba(239, 68, 68, 0.14) !important;
+        }
+
+        body.theme-dark .hover\:bg-gray-50:hover {
+            background-color: #0f172a !important;
+        }
+
+        /* Границы и карточки (в т.ч. адаптивные md:-варианты обёрток кабинета) */
+        body.theme-dark .md\:border-gray-100 {
+            border-color: #1e293b !important;
+        }
+
         body.theme-dark .border-gray-100 {
             border-color: #1e293b !important;
         }
@@ -517,6 +530,10 @@
             .flex.min-h-screen {
                 max-width: 100vw;
                 overflow-x: hidden;
+                /* clip, а не hidden: hidden делает блок контейнером прокрутки, и
+                   sticky-шапка страницы «прилипает» не к экрану, а ниже паддинга main,
+                   наезжая на контент. clip обрезает так же, но прокрутку не создаёт. */
+                overflow-x: clip;
             }
 
             /* main внутри flex-layout — не даёт контенту "ломать" ширину страницы */
@@ -524,6 +541,7 @@
                 min-width: 0;
                 max-width: 100%;
                 overflow-x: hidden;
+                overflow-x: clip;
             }
 
             /* Таблицы внутри overflow-x-auto скроллятся, а не тянут страницу */

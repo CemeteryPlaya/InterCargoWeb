@@ -1,0 +1,15 @@
+{% load i18n %}
+{# Вкладки рабочего раздела Di.Buyer. «Заявки» — только тем, кто ведёт сервис; #}
+{# остальное — и главным администраторам при выключенном сервисе. #}
+<nav class="ws-tabs" aria-label="{% trans 'Рабочий раздел Di.Buyer' %}">
+  {% if dibuyer_is_staff %}
+    <a class="ws-tab {% if ws_tab == 'orders' %}is-active{% endif %}" href="{% url 'dibuyer_manage' %}">{% trans "Заявки" %}</a>
+  {% endif %}
+  <a class="ws-tab {% if ws_tab == 'parcels' %}is-active{% endif %}" href="{% url 'dibuyer_parcels' %}">{% trans "Посылки" %}</a>
+  <a class="ws-tab {% if ws_tab == 'payments' %}is-active{% endif %}" href="{% url 'dibuyer_payments' %}">{% trans "Оплаты" %}</a>
+  <a class="ws-tab {% if ws_tab == 'report' %}is-active{% endif %}" href="{% url 'dibuyer_report' %}">{% trans "Отчёт" %}</a>
+  <a class="ws-tab {% if ws_tab == 'checks' %}is-active{% endif %}" href="{% url 'dibuyer_checks' %}">{% trans "Проверки" %}</a>
+</nav>
+{% if not dibuyer_enabled %}
+  <div class="flash info">{% trans "Сервис Di.Buyer выключен: клиенты его не видят. Здесь — уже созданные посылки, которые ПВЗ выдаёт после отметки об оплате." %}</div>
+{% endif %}

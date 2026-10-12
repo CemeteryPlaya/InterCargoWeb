@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from register.models import PickupPoint
 from news.services import home_news
-from tgbot.services import get_telegram_context, is_telegram_linked, get_or_create_link_url
+from tgbot.services import is_telegram_linked, get_or_create_link_url
 
 
 def index(request):
@@ -35,4 +35,46 @@ def education(request):
 
 
 def about(request):
-    return render(request, "desktop/about.html")
+    # «О компании» переехала в раздел «Инфо» (стиль страниц для банка-эквайера).
+    from django.shortcuts import redirect
+    return redirect('info_page', slug='about', permanent=True)
+
+
+def info_page(request, slug):
+    """Страницы «Покупателям»: реквизиты, услуги, оплата, доставка, возврат,
+    оферта, политика конфиденциальности, согласие на обработку ПД.
+
+    Требование банка-эквайера (Приложение 1 к Договору интернет-эквайринга).
+    Длинные юридические тексты лежат отдельным шаблоном на язык:
+    info/<slug>.<lang>.html (ru — запасной).
+    """
+    from django.http import Http404
+    from django.utils.translation import get_language
+    from mainview.context_processors import INFO_PAGES
+    from myprofile.views.utils import get_global_price_per_kg
+
+    titles = dict(INFO_PAGES)
+    if slug not in titles:
+        raise Http404
+    lang = (get_language() or 'ru')[:2]
+    if lang not in ('ru', 'kk', 'en'):
+        lang = 'ru'
+
+    from django.template import TemplateDoesNotExist
+    from django.template.loader import get_template
+    content_template = f'info/{slug}.{lang}.html'
+    try:
+        get_template(content_template)
+    except TemplateDoesNotExist:
+        content_template = f'info/{slug}.ru.html'
+
+    points = PickupPoint.objects.filter(is_active=True)
+    context = {
+        'slug': slug,
+        'page_title': titles[slug],
+        'content_template': content_template,
+        'price_per_kg': get_global_price_per_kg(),
+        'office_points': points.filter(is_home_delivery=False).order_by('address'),
+        'has_home_delivery': points.filter(is_home_delivery=True).exists(),
+    }
+    return render(request, 'desktop/info_page.html', context)
