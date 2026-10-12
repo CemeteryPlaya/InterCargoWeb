@@ -110,6 +110,15 @@
                 </div>
                 {% endif %}
 
+                {% if stale_count %}
+                <div class="mb-4 p-4 rounded-lg bg-gray-50 border border-gray-300 flex items-center gap-2">
+                    <i class="ri-error-warning-line text-gray-500 text-xl flex-shrink-0"></i>
+                    <p class="text-sm text-gray-700">
+                        {% blocktrans with count=stale_count days=auto_customs_max_age_days %}{{ count }} трек-кодов в статусе «Отправлено» дольше {{ days }} дней. Автоматика их не переводит — проверьте эти партии в таблице ниже вручную.{% endblocktrans %}
+                    </p>
+                </div>
+                {% endif %}
+
                 {% if transit_batches %}
                 <div class="overflow-x-auto border border-gray-200 rounded-lg">
                     <table class="min-w-full text-sm">

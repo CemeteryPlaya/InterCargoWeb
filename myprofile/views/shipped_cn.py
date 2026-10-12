@@ -7,9 +7,9 @@ from django.views.decorators.http import require_POST
 from datetime import datetime
 from myprofile.models import TrackCode
 from myprofile.track_lifecycle import (
-    AUTO_CUSTOMS_DAYS, TRANSIT_STATUSES,
+    AUTO_CUSTOMS_DAYS, AUTO_CUSTOMS_MAX_AGE_DAYS, TRANSIT_STATUSES,
     advance_customs_to_almaty, auto_advance_shipped_to_customs, get_transit_batches,
-    overdue_shipped_count,
+    overdue_shipped_count, stale_shipped_count,
 )
 from register.models import UserProfile
 from myprofile.views.utils import is_staff as _is_staff, send_grouped_notifications, add_bulk_result_messages
@@ -49,6 +49,9 @@ def shipped_cn_view(request):
             # Автоперевод должен был сработать, но не сработал (воркер не запущен,
             # БД отвергает статус) — подсвечиваем и даём перевести вручную
             'overdue_count': overdue_shipped_count(),
+            # Зависшие «Отправлено» старше AUTO_CUSTOMS_MAX_AGE_DAYS — только ручной разбор
+            'stale_count': stale_shipped_count(),
+            'auto_customs_max_age_days': AUTO_CUSTOMS_MAX_AGE_DAYS,
         })
 
     update_date_str = request.POST.get('update_date')
