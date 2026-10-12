@@ -11,7 +11,8 @@ from collections import OrderedDict
 
 from django.db.models import Q
 
-from myprofile.models import TrackCode, CustomerDiscount, Arrival, ReceiptItem
+from myprofile.models import TrackCode, CustomerDiscount, Arrival, Receipt, ReceiptItem
+from myprofile.partner_receipts import partner_track_ids
 from myprofile.views.utils import get_global_price_per_kg, get_user_discount, get_discount_weight_threshold, is_staff as _is_staff, round_price as _round_price
 from myprofile.views.utils import add_reprint_messages, pending_receipts_snapshot, reprice_pending_receipts
 from myprofile.receipt_pickup import receipt_pickup_key, sync_pending_receipts_safely
@@ -22,8 +23,9 @@ from django.utils.translation import gettext as _
 logger = logging.getLogger(__name__)
 
 
-def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weight):
-    """Добавить клиента в группу ПВЗ (или создать группу)."""
+def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weight, partner_weight=0):
+    """Добавить клиента в группу ПВЗ (или создать группу).
+    partner_weight — вес посылок Di.Buyer: в сумму Inter Cargo не входит."""
     if pp_id not in pickups:
         pickups[pp_id] = {
             'id': pp_id,
@@ -34,6 +36,19 @@ def _add_to_pickup(pickups, pp_id, pp_name, client_key, client_data, track_weigh
         pickups[pp_id]['clients'][client_key] = client_data
     pickups[pp_id]['clients'][client_key]['track_count'] += 1
     pickups[pp_id]['clients'][client_key]['total_weight'] += track_weight or Decimal("0")
+    _add_partner_weight(pickups[pp_id]['clients'][client_key], partner_weight)
+
+
+def _add_partner_weight(client, partner_weight):
+    """Вес посылок партнёра Di.Buyer у клиента — вычитается из оплачиваемого веса."""
+    client['partner_weight'] = client.get('partner_weight', Decimal("0")) + (partner_weight or Decimal("0"))
+
+
+def _billable_price(client):
+    """Сумма Inter Cargo: вес без посылок Di.Buyer (их оплачивают партнёру) × тариф."""
+    billable = client['total_weight'] - client.get('partner_weight', Decimal("0"))
+    client['billable_weight'] = float(billable)  # для пересчёта суммы на странице после скидки
+    return _round_price(billable * client['effective_rate'])
 
 
 @login_required
@@ -57,6 +72,7 @@ def arrival_summary_view(request):
 
     default_rate = get_global_price_per_kg()
     discount_threshold = float(get_discount_weight_threshold())
+    partner_ids = partner_track_ids(tracks.values_list('id', flat=True))
     home_pp = PickupPoint.objects.filter(is_home_delivery=True).first()
 
     # Группируем по ПВЗ → Клиент
@@ -68,6 +84,7 @@ def arrival_summary_view(request):
     for track in tracks:
         owner = track.owner
         weight = track.weight or Decimal("0")
+        partner_w = weight if track.id in partner_ids else Decimal("0")
 
         if not owner:
             continue
@@ -123,11 +140,12 @@ def arrival_summary_view(request):
                 home_clients[uid] = {**base_client, 'is_override': True}
             home_clients[uid]['track_count'] += 1
             home_clients[uid]['total_weight'] += weight
+            _add_partner_weight(home_clients[uid], partner_w)
         elif is_warehouse_override:
             override_pp = track.delivery_pickup
             _add_to_pickup(pickups, override_pp.id, str(override_pp), uid, {
                 **base_client, 'is_override': True,
-            }, weight)
+            }, weight, partner_w)
         else:
             try:
                 pp = owner.userprofile.pickup
@@ -135,7 +153,7 @@ def arrival_summary_view(request):
                 pp = None
 
             if pp:
-                _add_to_pickup(pickups, pp.id, str(pp), uid, base_client, weight)
+                _add_to_pickup(pickups, pp.id, str(pp), uid, base_client, weight, partner_w)
             else:
                 # Без ПВЗ — в список "Без пункта"
                 if uid not in no_pickup_clients:
@@ -150,6 +168,7 @@ def arrival_summary_view(request):
                     }
                 no_pickup_clients[uid]['track_count'] += 1
                 no_pickup_clients[uid]['total_weight'] += weight
+                _add_partner_weight(no_pickup_clients[uid], partner_w)
 
     # === Архивированные треки (track_code удалён, данные в ReceiptItem) ===
     archived_items = (
@@ -161,6 +180,7 @@ def arrival_summary_view(request):
     for item in archived_items:
         receipt = item.receipt
         weight = item.display_weight or Decimal("0")
+        partner_w = weight if receipt.source == Receipt.SOURCE_DIBUYER else Decimal("0")
         owner = receipt.owner
 
         if not owner:
@@ -193,8 +213,9 @@ def arrival_summary_view(request):
                 home_clients[uid] = {**base_client, 'is_override': True}
             home_clients[uid]['track_count'] += 1
             home_clients[uid]['total_weight'] += weight
+            _add_partner_weight(home_clients[uid], partner_w)
         elif pp:
-            _add_to_pickup(pickups, pp.id, str(pp), uid, base_client, weight)
+            _add_to_pickup(pickups, pp.id, str(pp), uid, base_client, weight, partner_w)
         else:
             if uid not in no_pickup_clients:
                 no_pickup_clients[uid] = {
@@ -208,19 +229,20 @@ def arrival_summary_view(request):
                 }
             no_pickup_clients[uid]['track_count'] += 1
             no_pickup_clients[uid]['total_weight'] += weight
+            _add_partner_weight(no_pickup_clients[uid], partner_w)
 
-    # Считаем total_price от общего веса
+    # Считаем total_price от общего веса (без посылок Di.Buyer — их оплачивают партнёру)
     for pp_data in pickups.values():
         for client in pp_data['clients'].values():
-            client['total_price'] = _round_price(client['total_weight'] * client['effective_rate'])
+            client['total_price'] = _billable_price(client)
             client['total_weight'] = float(client['total_weight'])
 
     for client in home_clients.values():
-        client['total_price'] = _round_price(client['total_weight'] * client['effective_rate'])
+        client['total_price'] = _billable_price(client)
         client['total_weight'] = float(client['total_weight'])
 
     for client in no_pickup_clients.values():
-        client['total_price'] = _round_price(client['total_weight'] * client['effective_rate'])
+        client['total_price'] = _billable_price(client)
         client['total_weight'] = float(client['total_weight'])
 
     for client in reschedule_clients.values():

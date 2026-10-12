@@ -6,11 +6,13 @@ from .models import (
     Arrival, ArrivalSession, ArrivalSessionItem, ArrivalSessionSnapshot, ContractViolation
 )
 from django import forms
+from django.db.models import Count, Q
 from django.shortcuts import render
 from django.contrib import messages
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .forms import MassUpdateTrackForm
+from .admin_filters import DateRangeFilter, DriverListFilter, driver_users_q, user_label
 
 # Register your models here.
 class TrackCodeAdminForm(forms.ModelForm):
@@ -70,7 +72,16 @@ class TrackCodeAdmin(admin.ModelAdmin):
     form = TrackCodeAdminForm
     list_display = ('id', 'track_code', 'owner', 'update_date', 'status', 'is_archived', 'is_accepted_pp', 'sorting_location', 'weight', 'historical_price_per_kg')
     search_fields = ('id', 'track_code', 'owner__username', 'owner__first_name', 'owner__last_name')
-    list_filter = ('status', 'is_archived', 'is_accepted_pp', 'update_date', 'sorting_location')
+    list_filter = (
+        'status', 'is_archived', 'is_accepted_pp', 'awaiting_arrival', 'needs_pickup_reschedule',
+        'sorting_location', 'delivery_pickup',
+        ('update_date', DateRangeFilter),
+        ('date_user_added', DateRangeFilter),
+        ('date_shipped_cn', DateRangeFilter),
+        ('delivered_date', DateRangeFilter),
+        ('date_claimed', DateRangeFilter),
+    )
+    list_select_related = ('owner', 'sorting_location')
     ordering = ('-pk',)
     readonly_fields = ('status_history',)
     actions = ['update_status_action']
@@ -147,15 +158,22 @@ class TrackCodeAdmin(admin.ModelAdmin):
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
     list_display = ('id', 'client_display', 'created_at', 'is_paid', 'paid_at', 'is_accepted_pp', 'total_weight', 'total_price')
-    list_filter = ('is_paid', 'is_accepted_pp', 'needs_attention', 'created_at')
+    list_filter = (
+        'status', 'source', 'is_paid', 'is_claimed', 'is_accepted_pp', 'needs_attention', 'pickup',
+        ('created_at', DateRangeFilter),
+        ('paid_at', DateRangeFilter),
+        ('claimed_at', DateRangeFilter),
+    )
+    list_select_related = ('owner',)
     ordering = ('-pk',)
-    search_fields = ('owner__username',)
+    search_fields = ('owner__username', 'receipt_number')
 
     def client_display(self, obj):
         if obj.owner:
             return obj.owner.username
         return "—"
     client_display.short_description = "Клиент"
+    client_display.admin_order_field = 'owner__username'
 
     def save_model(self, request, obj, form, change):
         """Разрешаем администраторам изменять чеки через панель администратора."""
@@ -166,13 +184,14 @@ class ReceiptAdmin(admin.ModelAdmin):
 class ReceiptItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'receipt', 'track_code', 'weight', 'item_rate', 'item_price')
     search_fields = ('track_code__track_code', 'receipt__owner__username', 'receipt__receipt_number')
-    list_filter = ('receipt__created_at',)
+    list_filter = (('receipt__created_at', DateRangeFilter),)
+    list_select_related = ('receipt', 'track_code')
     autocomplete_fields = ('receipt', 'track_code')
 
 @admin.register(ReceiptQrCode)
 class ReceiptQrCodeAdmin(admin.ModelAdmin):
     list_display = ('code', 'state_display', 'owner', 'receipt', 'superseded_by', 'created_at', 'archived_at')
-    list_filter = ('created_at', 'archived_at')
+    list_filter = (('created_at', DateRangeFilter), ('archived_at', DateRangeFilter))
     search_fields = ('code', 'owner__username', 'receipt__receipt_number', 'superseded_by__receipt_number')
     readonly_fields = ('code', 'created_at', 'qr_preview')
     autocomplete_fields = ('receipt', 'superseded_by')
@@ -196,14 +215,17 @@ class ReceiptQrCodeAdmin(admin.ModelAdmin):
 @admin.register(CustomerDiscount)
 class CustomerDiscountAdmin(admin.ModelAdmin):
     list_display = ('client_display', 'amount_per_kg', 'is_temporary', 'active', 'created_at')
-    list_filter = ('is_temporary', 'active')
+    list_filter = ('is_temporary', 'active', ('created_at', DateRangeFilter))
     search_fields = ('user__username',)
+    list_select_related = ('user',)
+    ordering = ('-created_at',)
 
     def client_display(self, obj):
         if obj.user:
             return obj.user.username
         return "—"
     client_display.short_description = "Клиент"
+    client_display.admin_order_field = 'user__username'
 
     # Скидка меняет тариф клиента → pending-чеки (печатные и цифровые) должны
     # пересчитаться сразу; чеки «В доставке» и дальше не меняются (D4).
@@ -246,7 +268,7 @@ class CustomerDiscountAdmin(admin.ModelAdmin):
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'message', 'is_read', 'created_at')
-    list_filter = ('is_read', 'created_at')
+    list_filter = ('is_read', 'push_status', ('created_at', DateRangeFilter))
     search_fields = ('user__username', 'message')
     readonly_fields = ('created_at',)
     list_editable = ('is_read',)
@@ -266,16 +288,21 @@ class UserPushSubscriptionAdmin(admin.ModelAdmin):
 @admin.register(ExtraditionPackage)
 class ExtraditionPackageAdmin(admin.ModelAdmin):
     list_display = ('barcode', 'user', 'is_issued', 'created_at', 'updated_at', 'receipts_count')
-    list_filter = ('is_issued', 'created_at')
+    list_filter = ('is_issued', ('created_at', DateRangeFilter), ('updated_at', DateRangeFilter))
     ordering = ('-pk',)
     search_fields = ('barcode', 'user__username')
     readonly_fields = ('barcode', 'created_at', 'updated_at')
     autocomplete_fields = ('receipts',)
+    list_select_related = ('user',)
     date_hierarchy = 'created_at'
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_receipts_count=Count('receipts', distinct=True))
+
     def receipts_count(self, obj):
-        return obj.receipts.count()
+        return obj._receipts_count
     receipts_count.short_description = 'Количество чеков'
+    receipts_count.admin_order_field = '_receipts_count'
 
     fieldsets = (
         ('Основная информация', {
@@ -292,7 +319,8 @@ class ExtraditionPackageAdmin(admin.ModelAdmin):
 @admin.register(Extradition)
 class ExtraditionAdmin(admin.ModelAdmin):
     list_display = ('id', 'package', 'user', 'pickup_point', 'issued_by', 'confirmed', 'created_at')
-    list_filter = ('confirmed', 'created_at', 'pickup_point')
+    list_filter = ('confirmed', ('created_at', DateRangeFilter), 'pickup_point')
+    list_select_related = ('package', 'user', 'issued_by')
     search_fields = ('user__username', 'package__barcode', 'pickup_point')
     readonly_fields = ('created_at',)
     autocomplete_fields = ('package',)
@@ -332,18 +360,49 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
 class ArchivedTrackCodeAdmin(admin.ModelAdmin):
     list_display = ('id', 'track_code', 'owner', 'status', 'weight', 'archived_at')
     search_fields = ('track_code', 'owner__username')
-    list_filter = ('status', 'archived_at')
+    list_filter = ('status', ('archived_at', DateRangeFilter), ('update_date', DateRangeFilter))
+    list_select_related = ('owner',)
+    ordering = ('-archived_at',)
     readonly_fields = ('archived_at',)
 
 @admin.register(DeliveryHistory)
 class DeliveryHistoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'driver_name', 'pickup_point', 'total_weight', 'track_codes_count', 'taken_at', 'delivered_at')
-    list_filter = ('driver', 'taken_at', 'delivered_at', 'pickup_point')
+    # Доставщик — только пользователи с ролью «Доставщик» / флагом is_driver,
+    # а не все User (иначе в сайдбаре и в форме — каждый клиент).
+    list_filter = (
+        ('driver', DriverListFilter),
+        'pickup_point',
+        ('taken_at', DateRangeFilter),
+        ('delivered_at', DateRangeFilter),
+    )
     search_fields = ('driver__username', 'driver__first_name', 'driver__last_name', 'pickup_point__address', 'pickup_point__premise_name')
     readonly_fields = ('created_at',)
     autocomplete_fields = ('track_codes',)
+    list_select_related = ('driver', 'pickup_point')
     date_hierarchy = 'taken_at'
     ordering = ('-taken_at',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_track_codes_count=Count('track_codes', distinct=True))
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'driver':
+            drivers = driver_users_q()
+            # У существующей записи оставляем текущего водителя, даже если роль
+            # с него уже сняли, — иначе форму нельзя будет сохранить.
+            object_id = request.resolver_match.kwargs.get('object_id') if request.resolver_match else None
+            if object_id:
+                current = DeliveryHistory.objects.filter(pk=object_id).values('driver_id')
+                drivers |= Q(pk__in=current)
+            kwargs['queryset'] = (
+                db_field.related_model.objects.filter(drivers).distinct()
+                .order_by('first_name', 'last_name', 'username')
+            )
+            field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+            field.label_from_instance = user_label
+            return field
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def driver_name(self, obj):
         return obj.driver.get_full_name() or obj.driver.username
@@ -351,13 +410,14 @@ class DeliveryHistoryAdmin(admin.ModelAdmin):
     driver_name.admin_order_field = 'driver__first_name'
 
     def track_codes_count(self, obj):
-        return obj.track_codes.count()
+        return obj._track_codes_count
     track_codes_count.short_description = 'Кол-во треков'
+    track_codes_count.admin_order_field = '_track_codes_count'
 
 @admin.register(ClientRegistry)
 class ClientRegistryAdmin(admin.ModelAdmin):
     list_display = ('id', 'registry_date', 'created_at')
-    list_filter = ('registry_date', 'created_at')
+    list_filter = (('registry_date', DateRangeFilter), ('created_at', DateRangeFilter))
     readonly_fields = ('created_at',)
     autocomplete_fields = ('track_codes',)
     ordering = ('-created_at',)
@@ -365,8 +425,9 @@ class ClientRegistryAdmin(admin.ModelAdmin):
 @admin.register(StorageCell)
 class StorageCellAdmin(admin.ModelAdmin):
     list_display = ('cell_number', 'pickup_point', 'user', 'created_at')
-    list_filter = ('pickup_point',)
+    list_filter = ('pickup_point', ('created_at', DateRangeFilter))
     search_fields = ('user__username', 'cell_number')
+    list_select_related = ('pickup_point', 'user')
 
 @admin.register(SortingLocation)
 class SortingLocationAdmin(admin.ModelAdmin):
@@ -377,15 +438,20 @@ class SortingLocationAdmin(admin.ModelAdmin):
 @admin.register(PickupChangeRequest)
 class PickupChangeRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'current_pickup', 'requested_pickup', 'status', 'created_at', 'reviewed_at', 'reviewed_by')
-    list_filter = ('status', 'created_at')
+    list_filter = (
+        'status', 'current_pickup', 'requested_pickup',
+        ('created_at', DateRangeFilter), ('reviewed_at', DateRangeFilter),
+    )
     search_fields = ('user__username',)
     readonly_fields = ('created_at',)
+    list_select_related = ('user', 'current_pickup', 'requested_pickup', 'reviewed_by')
+    ordering = ('-created_at',)
 
 
 @admin.register(EmailLog)
 class EmailLogAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipient', 'subject', 'status', 'short_error', 'created_at')
-    list_filter = ('status', 'created_at')
+    list_filter = ('status', ('created_at', DateRangeFilter))
     search_fields = ('recipient', 'subject')
     readonly_fields = ('recipient', 'subject', 'body', 'status', 'error_message', 'created_at')
     date_hierarchy = 'created_at'
@@ -396,6 +462,7 @@ class EmailLogAdmin(admin.ModelAdmin):
             return obj.error_message[:100] + ('...' if len(obj.error_message) > 100 else '')
         return '—'
     short_error.short_description = 'Ошибка'
+    short_error.admin_order_field = 'error_message'
 
     def has_add_permission(self, request):
         return False
@@ -424,7 +491,8 @@ class ArrivalSessionItemInline(admin.TabularInline):
 @admin.register(Arrival)
 class ArrivalAdmin(admin.ModelAdmin):
     list_display = ('id', 'date', 'sorting_location', 'total_tracks', 'updated_count', 'created_count', 'created_by', 'created_at')
-    list_filter = ('date', 'sorting_location', 'created_at')
+    list_filter = (('date', DateRangeFilter), 'sorting_location', ('created_at', DateRangeFilter))
+    list_select_related = ('sorting_location', 'created_by')
     search_fields = ('id', 'created_by__username')
     readonly_fields = ('created_at', 'raw_data')
     autocomplete_fields = ('track_codes',)
@@ -451,7 +519,8 @@ class ArrivalAdmin(admin.ModelAdmin):
 @admin.register(ArrivalSession)
 class ArrivalSessionAdmin(admin.ModelAdmin):
     list_display = ('id', 'date', 'status', 'sorting_location', 'created_by', 'created_at', 'completed_at', 'arrival')
-    list_filter = ('status', 'date', 'sorting_location')
+    list_filter = ('status', ('date', DateRangeFilter), 'sorting_location', ('completed_at', DateRangeFilter))
+    list_select_related = ('sorting_location', 'created_by', 'arrival')
     search_fields = ('id', 'created_by__username')
     readonly_fields = ('created_at',)
     date_hierarchy = 'date'
@@ -464,7 +533,7 @@ class ArrivalSessionSnapshotAdmin(admin.ModelAdmin):
     """Журнал сохранений сессий прихода — только просмотр (восстановление — на
     странице «История сохранений» сессии)."""
     list_display = ('id', 'session', 'created_at', 'row_count', 'outcome', 'source', 'revision', 'user')
-    list_filter = ('outcome', 'source')
+    list_filter = ('outcome', 'source', ('created_at', DateRangeFilter))
     search_fields = ('session__id',)
     list_select_related = ('session', 'user')
     date_hierarchy = 'created_at'
@@ -479,14 +548,17 @@ class ArrivalSessionSnapshotAdmin(admin.ModelAdmin):
 @admin.register(RestructureSession)
 class RestructureSessionAdmin(admin.ModelAdmin):
     list_display = ('id', 'pickup_point', 'status', 'created_by', 'created_at', 'completed_at')
-    list_filter = ('status', 'pickup_point')
+    list_filter = ('status', 'pickup_point', ('created_at', DateRangeFilter), ('completed_at', DateRangeFilter))
     readonly_fields = ('created_at', 'cells_backup')
+    list_select_related = ('pickup_point', 'created_by')
+    ordering = ('-created_at',)
 
 
 @admin.register(ContractViolation)
 class ContractViolationAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'severity', 'function', 'contract', 'resolved')
-    list_filter = ('severity', 'resolved', 'function')
+    list_filter = ('severity', 'resolved', 'function', ('created_at', DateRangeFilter))
+    ordering = ('-created_at',)
     search_fields = ('function', 'contract', 'message')
     readonly_fields = ('function', 'contract', 'severity', 'message', 'context', 'created_at')
     list_per_page = 50

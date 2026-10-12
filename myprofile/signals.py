@@ -149,6 +149,10 @@ def _recalc_receipt_safe(receipt):
     if not items:
         receipt.delete()
         return
+    if receipt.source == receipt.SOURCE_DIBUYER:
+        # Чек партнёра Di.Buyer — без суммы (оплата партнёру), см. partner_receipts.py
+        receipt.items.exclude(item_price=0, item_rate=0).update(item_price=0, item_rate=0)
+        items = list(receipt.items.all())
 
     total_weight = sum((i.weight or Decimal('0')) for i in items)
     total_price = sum((i.item_price or Decimal('0')) for i in items)

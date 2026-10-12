@@ -18,7 +18,7 @@
     <div class="db-brands-wrap">
       <div class="db-brands" id="db-brands">
         {% for b in brands %}
-        <a class="db-brand" href="{% url 'dibuyer_brand_click' b.pk %}" target="_blank" rel="noopener">
+        <a class="db-brand" href="{% url 'dibuyer_brand_click' b.pk %}" target="_blank" rel="noopener" data-ad-slot="dibuyer_brand" data-ad-label="{{ b.name }}">
           <span class="db-brand-badge{% if b.logo %} has-logo{% endif %}">
             {% if b.logo %}<img class="db-brand-img" src="{{ b.logo.url }}" alt="{{ b.name }}">{% endif %}
             <span class="db-brand-mono" aria-hidden="true">{{ b.display_monogram }}</span>

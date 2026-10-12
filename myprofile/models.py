@@ -309,6 +309,21 @@ class Receipt(models.Model):
     )
     payment_link = models.URLField(blank=True, null=True, verbose_name=_("Ссылка на оплату"))
 
+    # Чек Di.Buyer — посылки партнёрского сервиса: Inter Cargo их выдаёт, но денег
+    # не берёт (оплату партнёр принимает на свои счета), поэтому сумма чека 0 и
+    # выдача разрешена только после отметки партнёра об оплате
+    # (myprofile/partner_receipts.py). Ключ pending-чека: клиент + дата + ПВЗ + источник.
+    SOURCE_CARGO = 'cargo'
+    SOURCE_DIBUYER = 'dibuyer'
+    SOURCE_CHOICES = [
+        (SOURCE_CARGO, 'Inter Cargo'),
+        (SOURCE_DIBUYER, _('Di.Buyer (партнёр)')),
+    ]
+    source = models.CharField(
+        max_length=10, choices=SOURCE_CHOICES, default=SOURCE_CARGO, db_index=True,
+        verbose_name=_("Источник"),
+    )
+
     class Meta:
         verbose_name = _("Чек")
         verbose_name_plural = _("Чеки")

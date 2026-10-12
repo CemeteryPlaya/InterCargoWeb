@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import django
 from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
 
@@ -88,7 +89,7 @@ MIDDLEWARE = [
     'analytics.middleware.PageViewMiddleware',
 ]
 
-APP_VERSION = '1.5.5'
+APP_VERSION = '1.6.2'
 
 ROOT_URLCONF = 'cargo.urls'
 
@@ -124,28 +125,28 @@ WSGI_APPLICATION = 'cargo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#        'OPTIONS': {
-#            'timeout': 30,
-#       },
-#    }
-#}
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-        "CONN_MAX_AGE": 60,
-        "CONN_HEALTH_CHECKS": True,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,
+       },
     }
 }
+
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': os.getenv('DB_NAME'),
+#        'USER': os.getenv('DB_USER'),
+#        'PASSWORD': os.getenv('DB_PASSWORD'),
+#        'HOST': os.getenv('DB_HOST'),
+#        'PORT': os.getenv('DB_PORT'),
+#        "CONN_MAX_AGE": 60,
+#        "CONN_HEALTH_CHECKS": True,
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -348,6 +349,9 @@ COMPANY_INFO = {
     'bank_name': os.getenv('COMPANY_BANK_NAME', 'АО «Народный Банк Казахстана»'),
     'iban': os.getenv('COMPANY_IBAN', ''),
     'bik': os.getenv('COMPANY_BIK', 'HSBKKZKX'),
+    # Шаблон оферты Freedom Pay просит также БИН банка и ОКПО — выводятся, если заданы.
+    'bank_bin': os.getenv('COMPANY_BANK_BIN', ''),
+    'okpo': os.getenv('COMPANY_OKPO', ''),
     # Плательщик НДС? Влияет на формулировку цен («включая НДС» / «НДС не облагается»).
     'vat_payer': os.getenv('COMPANY_VAT_PAYER', 'false').lower() == 'true',
 }
@@ -391,6 +395,30 @@ EPAY_SITE_URL = (os.getenv('EPAY_SITE_URL') or os.getenv('SITE_URL') or '').rstr
 # Логотипы платёжных систем в футере — только те, что приняты по договору с банком.
 EPAY_CARD_BRANDS = [
     b.strip() for b in os.getenv('EPAY_CARD_BRANDS', 'visa,mastercard,unionpay,amex').split(',') if b.strip()
+]
+
+# ─────────────────────────────────────────────────────
+# Интернет-эквайринг Freedom Pay (группа Freedom / Freedom Bank), приложение payments
+# ─────────────────────────────────────────────────────
+# FREEDOM_ENABLED=false — вариант «Freedom Pay» не предлагается при оплате, колбэк 404.
+# Публичных тестовых реквизитов нет: merchant_id и secret_key (ключ для приёма
+# платежей) выдаются в личном кабинете Freedom Pay после заявки. Новый магазин
+# сам работает в тестовом режиме, пока Freedom Pay не переведёт его в боевой.
+# FREEDOM_TEST_MODE=true — платежи создаются с pg_testing_mode=1 (деньги не списываются).
+FREEDOM_ENABLED = os.getenv('FREEDOM_ENABLED', 'false').lower() == 'true'
+FREEDOM_TEST_MODE = os.getenv('FREEDOM_TEST_MODE', 'true').lower() != 'false'
+FREEDOM_MERCHANT_ID = os.getenv('FREEDOM_MERCHANT_ID', '')
+FREEDOM_SECRET_KEY = os.getenv('FREEDOM_SECRET_KEY', '')
+FREEDOM_API_URL = (os.getenv('FREEDOM_API_URL') or 'https://api.freedompay.kz').rstrip('/')
+# Юрлицо платёжной организации из договора — выводится в оферте и политике.
+FREEDOM_LEGAL_NAME = os.getenv('FREEDOM_LEGAL_NAME', '')
+
+# Какие эквайеры описаны на сайте (оферта, «Оплата», политика, логотипы) — в этом
+# порядке. Включённый провайдер (*_ENABLED=true) добавляется сам; список нужен,
+# чтобы описать банк на сайте ДО включения оплаты: банк проверяет сайт до выдачи
+# терминала. Значения: halyk, freedom.
+PAYMENT_PROVIDERS = [
+    p.strip() for p in os.getenv('PAYMENT_PROVIDERS', 'halyk').split(',') if p.strip()
 ]
 
 # ─────────────────────────────────────────────────────

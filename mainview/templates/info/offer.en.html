@@ -1,9 +1,13 @@
-<p class="note">This document is a public offer under Articles 395 and 396 of the Civil Code of the Republic of Kazakhstan. Registering on the website with the consent box ticked, adding a tracking number to the personal account or paying for the services constitutes full and unconditional acceptance of this offer. This English version is provided for convenience; in case of discrepancy, the Russian version prevails.</p>
+<p class="note">This document is a public offer under Articles 395, 396 and 447 of the Civil Code of the Republic of Kazakhstan. Registering on the website with the consent box ticked, adding a tracking number to the personal account or paying for the services constitutes full and unconditional acceptance of this offer. This English version is provided for convenience; in case of discrepancy, the Russian version prevails.</p>
 
 <h2>1. General provisions</h2>
-<p>1.1. {% if COMPANY.legal_name %}{{ COMPANY.legal_name }}{% if COMPANY.iin %} (IIN/BIN {{ COMPANY.iin }}){% endif %}{% else %}The individual entrepreneur whose details are given in section 13{% endif %}, operating under the trade mark “{{ COMPANY.brand }}” (the “Contractor”), offers any legally capable individual, individual entrepreneur or legal entity (the “Customer”) to enter into a service agreement on the terms of this offer (the “Agreement”).</p>
+<p>1.1. {% if COMPANY.legal_name %}{{ COMPANY.legal_name }}{% if COMPANY.iin %} (IIN/BIN {{ COMPANY.iin }}){% endif %}{% else %}The individual entrepreneur whose details are given in section 14{% endif %}, operating under the trade mark “{{ COMPANY.brand }}” (the “Contractor”), offers any legally capable individual, individual entrepreneur or legal entity (the “Customer”) to enter into a service agreement on the terms of this offer (the “Agreement”).</p>
 <p>1.2. The Agreement is concluded upon acceptance and remains in force until the parties have fully performed their obligations.</p>
 <p>1.3. The current version of the offer is published at cargointer.kz. The Contractor may amend the offer; amendments take effect upon publication and do not apply to services paid for before publication.</p>
+
+<p>1.4. Acceptance is confirmed by ticking “I have read the terms of the Agreement in full, all terms of the Agreement are clear to me, and I agree with all terms of the Agreement” when registering on the Website.</p>
+<p>1.5. Relations between the parties are governed by the Civil Code of the Republic of Kazakhstan, the Law of the Republic of Kazakhstan “On Consumer Protection” and other regulations of the Republic of Kazakhstan.</p>
+<p>1.6. Using the Website to learn about the services and place orders is free of charge for the Customer. To receive a paper copy of the Agreement, the Customer sends a request to the Contractor’s e-mail.</p>
 
 <h2>2. Definitions</h2>
 <ul>
@@ -17,21 +21,24 @@
 
 <h2>3. Subject of the Agreement</h2>
 <p>3.1. The Contractor undertakes to provide the Customer with services for arranging the delivery of parcels to the Republic of Kazakhstan: receiving parcels at the warehouse in China, transporting them, arranging customs clearance, delivering them to a pickup point or the Customer's address and handing them over; the Customer undertakes to pay for the services.</p>
-<p>3.2. The Di.Buyer service (purchasing goods from the USA and Europe) available on the Website is provided by a partner and is not the subject of this offer. The Contractor does not provide this service and does not accept card payments for it on the Website; receipts containing Di.Buyer items are paid at the pickup point.</p>
-<p>3.3. The Contractor is not the seller, manufacturer or importer of the Customer's goods and is not responsible for their quality, completeness, conformity with the description or the seller's warranty obligations.</p>
+<p>3.2. The Contractor is not the seller, manufacturer or importer of the Customer's goods and is not responsible for their quality, completeness, conformity with the description or the seller's warranty obligations.</p>
+{% if dibuyer_enabled %}<p>3.3. The Di.Buyer service (purchasing goods from the USA and Europe) available on the Website is provided by a partner and is not the subject of this offer. The Contractor does not provide this service and does not accept payment for it; the Customer settles Di.Buyer payments directly with the partner.</p>{% endif %}
 
 <h2>4. Service procedure</h2>
-<p>4.1. The Customer registers on the Website, provides accurate details and selects a pickup point.</p>
+<p>4.1. The Customer registers on the Website, providing accurate details — surname and first name, phone number, e-mail address — and selects a pickup point (or gives a delivery address for door-to-door delivery). The Contractor does not change the Customer’s details without the Customer’s request.</p>
 <p>4.2. The Customer places a purchase with the seller, specifying the warehouse address in China and their identifier, and adds the tracking number to the personal account. Parcels without a tracking number in the personal account may not be identified.</p>
 <p>4.3. The Contractor receives and weighs the parcel and ships it to Kazakhstan as part of a consolidated shipment. The average delivery time is 8–12 days from dispatch from the warehouse in China; delivery times are estimates.</p>
 <p>4.4. When the parcels arrive in Kazakhstan, a Receipt is created. The parcel is handed over at the pickup point upon presentation of the paid Receipt's QR code, or passed to a courier for door-to-door delivery.</p>
 
+<p>4.5. Information about the services on the Website is for reference. If the Customer has questions about the terms of the services, before ordering they may contact the Contractor’s manager by the phone numbers given on the Website; the manager provides the information the Customer needs to make a decision.</p>
+
 <h2>5. Price and payment</h2>
 <p>5.1. The delivery cost is determined by the rate per 1 kg of actual weight published on the Website (“Services and prices”) on the date the Receipt is created. The current rate is {{ price_per_kg|floatformat:0 }} ₸ per 1 kg. Individual discounts are shown in the Receipt.</p>
 <p>5.2. All prices are in Kazakhstani tenge. {% if COMPANY.vat_payer %}Prices include VAT.{% else %}The Contractor is not a VAT payer.{% endif %}</p>
-<p>5.3. Payment is made against the Receipt: by bank card on the Website via the payment service of Halyk Bank of Kazakhstan JSC (Halyk ePay), or at the pickup point via Kaspi QR to the Contractor's account (each pickup point has its own QR code). No fee is charged to the Customer for card payments.</p>
-<p>5.4. The Customer's payment obligation is fulfilled when the payment is confirmed by the bank.</p>
+<p>5.3. Payment is made against the Receipt: by bank card on the Website via the payment service of {% include 'info/_acquirers.en.html' %}{% if PAYMENT_PROVIDERS|length > 1 %} at the Customer's choice{% endif %}, or at the pickup point via Kaspi QR to the Contractor's account (each pickup point has its own QR code). No fee is charged to the Customer for card payments.</p>
+<p>5.4. The Customer's payment obligation is fulfilled when the payment is confirmed by the bank{% if 'freedom' in PAYMENT_PROVIDERS %} or payment institution{% endif %}.</p>
 <p>5.5. The electronic Receipt and payment confirmation in the personal account are documents confirming the provision of and payment for the services.</p>
+<p>5.6. The Contractor may change the rate unilaterally; the price of services under a Receipt that has been created and paid does not change. Payment methods and procedure are described in detail in <a href="{% url 'info_page' 'payment' %}">“Payment”</a>; settlements are made in tenge.</p>
 
 <h2>6. Rights and obligations of the parties</h2>
 <p>6.1. The Contractor undertakes to: provide services of proper quality; ensure the safety of the parcel from acceptance at the warehouse in China until handover; inform the Customer of parcel statuses; keep the Customer's data confidential.</p>
@@ -52,7 +59,7 @@
 <p>9.2. Money paid by bank card is refunded only to the card used for payment.</p>
 
 <h2>10. Claims and dispute resolution</h2>
-<p>10.1. Claims are accepted in writing by e-mail or via customer support and are reviewed within 10 calendar days.</p>
+<p>10.1. Claims are sent to the Contractor’s address ({{ COMPANY.actual_address }}), by e-mail {% if COMPANY.email %}<a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %} or by phone {% if COMPANY.phone_support %}<a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_support }}</a>{% endif %}, or via customer support. Written claims are reviewed within 10 calendar days.</p>
 <p>10.2. Disputes are resolved through negotiation and, failing agreement, by the court at the Contractor's location under the laws of the Republic of Kazakhstan, respecting consumer rights under the Law of the Republic of Kazakhstan “On Consumer Protection”.</p>
 
 <h2>11. Personal data</h2>
@@ -61,5 +68,8 @@
 <h2>12. Force majeure</h2>
 <p>The parties are released from liability for non-performance caused by force majeure (natural disasters, military action, epidemics, decisions of state authorities, border closures) for the duration of such circumstances.</p>
 
-<h2>13. Contractor details</h2>
+<h2>13. Other terms</h2>
+<p>The Contractor may expand or reduce the list of services on the Website and suspend or stop providing individual services at its discretion; this does not affect obligations for parcels already accepted for delivery.</p>
+
+<h2>14. Contractor details</h2>
 {% include 'info/_requisites.html' %}

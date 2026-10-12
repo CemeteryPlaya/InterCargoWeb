@@ -120,7 +120,7 @@
                         </thead>
                         <tbody>
                             {% for uid, client in home_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0" data-user-id="{{ uid }}" data-weight="{{ client.total_weight }}">
+                            <tr class="border-b border-gray-100 last:border-0" data-user-id="{{ uid }}" data-weight="{{ client.billable_weight|stringformat:'s' }}">
                                 <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                     <i class="ri-user-line text-gray-400 mr-1"></i>
                                     {{ client.full_name }}
@@ -246,7 +246,7 @@
                         </thead>
                         <tbody>
                             {% for key, client in no_pickup_clients.items %}
-                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ key }}" data-login="{{ client.login }}" data-user-id="{{ client.user_id }}" data-weight="{{ client.total_weight }}">
+                            <tr class="border-b border-gray-100 last:border-0" data-tid="{{ key }}" data-login="{{ client.login }}" data-user-id="{{ client.user_id }}" data-weight="{{ client.billable_weight|stringformat:'s' }}">
                                 <td class="py-3 px-4 bulk-col hidden">
                                     <input type="checkbox" class="bulk-check rounded border-gray-300 text-purple-600 focus:ring-purple-400" value="{{ key }}" data-user-id="{{ client.user_id }}">
                                 </td>
@@ -345,7 +345,7 @@
                             </thead>
                             <tbody>
                                 {% for uid, client in pp_data.clients.items %}
-                                <tr class="border-b border-gray-100 last:border-0" data-user-id="{{ uid }}" data-weight="{{ client.total_weight }}">
+                                <tr class="border-b border-gray-100 last:border-0" data-user-id="{{ uid }}" data-weight="{{ client.billable_weight|stringformat:'s' }}">
                                     <td class="py-3 px-4 text-gray-800" data-val="{{ client.username }}">
                                         <i class="ri-user-line text-gray-400 mr-1"></i>
                                         {{ client.full_name }}

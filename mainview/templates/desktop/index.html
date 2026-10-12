@@ -197,8 +197,8 @@
         <!-- Карточки статистики -->
         {% if mobile_stats %}
         <div class="px-4 py-2">
-            {% if dibuyer_enabled or dibuyer_is_staff %}
-            <a href="{% url 'dibuyer_home' %}"
+            {% if dibuyer_enabled %}
+            <a href="{% url 'dibuyer_home' %}" data-ad-slot="home_dibuyer_mobile"
                class="flex items-center justify-between w-full mb-3 px-4 py-3.5 rounded-2xl shadow-sm active:scale-[0.99] transition"
                style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
                 <span class="flex items-center gap-3">
@@ -594,8 +594,8 @@
                             {% trans "Обучение по сайту" %}
                         </button>
                     </div>
-                    {% if dibuyer_enabled or dibuyer_is_staff %}
-                    <a href="{% url 'dibuyer_home' %}"
+                    {% if dibuyer_enabled %}
+                    <a href="{% url 'dibuyer_home' %}" data-ad-slot="home_dibuyer_desktop"
                        class="inline-flex items-center gap-3 mt-3 px-6 py-3 !rounded-button font-medium transition w-fit"
                        style="background:linear-gradient(120deg,#3d4163 0%,#534c79 55%,#9b93c4 130%);">
                         <svg style="width:34px;height:34px;display:block" aria-label="США и Европа"><use href="#us-eu-badge"/></svg>

@@ -5,7 +5,8 @@ from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from myprofile.models import TrackCode, ClientRegistry, ReceiptItem, Arrival
+from myprofile.models import TrackCode, ClientRegistry, Receipt, ReceiptItem, Arrival
+from myprofile.partner_receipts import partner_track_ids, unpaid_partner_receipts
 from register.models import UserProfile, PickupPoint
 from datetime import datetime
 from decimal import Decimal
@@ -117,9 +118,13 @@ def print_documents_view(request):
                     name = r.owner.username if r.owner else ''
                     return (name, r.id)
 
+                # Чеки партнёра Di.Buyer: без суммы, статус оплаты партнёру (partner_receipts.py)
+                partner_unpaid = {r.id for r in unpaid_partner_receipts(
+                    [e['receipt'] for e in receipts_map.values()])}
                 for entry in sorted(receipts_map.values(), key=_receipt_sort_key):
                     receipt = entry['receipt']
                     receipt_items = entry['items']
+                    partner = receipt.source == Receipt.SOURCE_DIBUYER
 
                     # Имя клиента
                     if receipt.owner:
@@ -154,7 +159,9 @@ def print_documents_view(request):
                     for item in receipt_items:
                         weight = item.display_weight or Decimal("0")
                         explicit_rate = item.track_code_id and item.track_code.rate_override is not None
-                        if item.item_price or explicit_rate:
+                        if partner:
+                            price = 0  # оплата партнёру, не Inter Cargo
+                        elif item.item_price or explicit_rate:
                             price = _round_price(item.item_price or 0)
                         else:
                             price = _round_price(weight * effective_rate)
@@ -174,6 +181,8 @@ def print_documents_view(request):
                         'total_count': len(track_rows),
                         'total_weight': float(total_weight),
                         'total_sum': total_sum,
+                        'partner': partner,
+                        'partner_paid': partner and receipt.id not in partner_unpaid,
                         'qr_number': receipt.receipt_number,
                         'qr_image': receipt.get_qr_base64(),
                     })
@@ -181,6 +190,8 @@ def print_documents_view(request):
                 # Треки без чеков — группируем по клиенту (без QR)
                 default_price_per_kg = get_global_price_per_kg()
                 no_receipt_clients = {}
+                no_receipt_partner = partner_track_ids(
+                    [t.id for t in tracks if t.id not in tracks_with_receipt])
                 for track in tracks:
                     if track.id in tracks_with_receipt:
                         continue
@@ -210,7 +221,8 @@ def print_documents_view(request):
                     no_receipt_clients[username]['tracks'].append({
                         'track_code': track.track_code,
                         'weight': float(weight),
-                        'price': _round_price(weight * rate),
+                        # посылка Di.Buyer — оплата партнёру, для Inter Cargo 0
+                        'price': 0 if track.id in no_receipt_partner else _round_price(weight * rate),
                     })
                     no_receipt_clients[username]['total_weight'] += weight
 
@@ -295,6 +307,7 @@ def client_registry_pdf(request, registry_id):
 
     data = {}
     user_rates = {}
+    partner_ids = partner_track_ids(tracks.values_list('id', flat=True))
 
     for track in tracks:
         owner = track.owner
@@ -331,6 +344,7 @@ def client_registry_pdf(request, registry_id):
             data[pickup_key]['clients'][client_username] = {
                 'count': 0,
                 'weight': Decimal("0"),
+                'billable_weight': Decimal("0"),  # без посылок Di.Buyer (оплата партнёру)
                 'sum': 0,
                 'effective_rate': user_rates[client_username],
             }
@@ -340,6 +354,8 @@ def client_registry_pdf(request, registry_id):
         client_data = data[pickup_key]['clients'][client_username]
         client_data['count'] += 1
         client_data['weight'] += weight
+        if track.id not in partner_ids:
+            client_data['billable_weight'] += weight
 
         data[pickup_key]['total_count'] += 1
         data[pickup_key]['total_weight'] += weight
@@ -349,7 +365,7 @@ def client_registry_pdf(request, registry_id):
         pickup_data = data[pickup_key]
         pickup_data['total_sum'] = 0
         for client_username, client_data in pickup_data['clients'].items():
-            client_data['sum'] = _round_price(client_data['weight'] * client_data['effective_rate'])
+            client_data['sum'] = _round_price(client_data['billable_weight'] * client_data['effective_rate'])
             client_data['weight'] = float(client_data['weight'])
             pickup_data['total_sum'] += client_data['sum']
         pickup_data['total_weight'] = float(pickup_data['total_weight'])

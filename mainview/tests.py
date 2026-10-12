@@ -179,3 +179,33 @@ class NavGroupsTest(TestCase):
         mobile = self.client.get(reverse('mobile_menu'))
         self.assertContains(mobile, 'Отчёты и рассылки')
         self.assertContains(mobile, reverse('support_inbox'))
+
+
+class DibuyerPartnerTextsTest(TestCase):
+    """Di.Buyer — партнёрский сервис: оплату принимает партнёр на свои счета.
+    В разделе «Инфо» он упоминается только при включённом сервисе (рубильник
+    в настройках Di.Buyer), чтобы на время проверки банком его можно было скрыть."""
+
+    PAGES = ('services', 'offer', 'payment')
+
+    def _set(self, enabled):
+        from dibuyer.models import DibuyerSettings
+        s = DibuyerSettings.load()
+        s.is_enabled = enabled
+        s.save()
+
+    def test_hidden_when_switched_off(self):
+        self._set(False)
+        for slug in self.PAGES:
+            for lang in ('ru', 'kk', 'en'):
+                self.client.cookies['django_language'] = lang
+                resp = self.client.get(reverse('info_page', args=[slug]))
+                self.assertNotContains(resp, 'Di.Buyer', msg_prefix=f'{lang}/{slug}')
+
+    def test_shown_as_partner_paid_directly_when_on(self):
+        self._set(True)
+        resp = self.client.get(reverse('info_page', args=['payment']))
+        self.assertContains(resp, 'оплачивается партнёру напрямую')
+        self.assertNotContains(resp, 'оплачиваются только этим способом')
+        offer = self.client.get(reverse('info_page', args=['offer']))
+        self.assertContains(offer, 'расчёты по Di.Buyer Клиент ведёт с партнёром напрямую')

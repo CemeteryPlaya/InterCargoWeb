@@ -49,6 +49,16 @@ MIGRATION_MODULES = _DisableMigrations()
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# Доступ снаружи через ngrok (https-туннель на runserver). Домен меняется
+# переменной NGROK_HOST; добавляем после импорта, чтобы .env его не затёр.
+NGROK_HOST = os.getenv('NGROK_HOST', 'nonempirical-overfragile-whitney.ngrok-free.dev')
+if NGROK_HOST:
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, NGROK_HOST]  # noqa: F405
+    CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, f'https://{NGROK_HOST}']  # noqa: F405
+# ngrok терминирует TLS и шлёт X-Forwarded-Proto — без этого build_absolute_uri
+# собрал бы http-ссылки (возврат с оплаты, postLink банка).
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Локально банк не достучится до postLink (localhost) — статус оплаты сверяется
 # при возврате клиента на сайт (payments.views.payment_return).
 SILENCED_SYSTEM_CHECKS = ['mainview.W003']

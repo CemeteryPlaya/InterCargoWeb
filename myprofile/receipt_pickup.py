@@ -1,7 +1,9 @@
 """Единый сервис ПВЗ чеков.
 
 Правила (решения D1/D2/D4/D5 — Plans.md, STRUCTURE.md §8):
-- ключ позиции чека — (владелец, дата прихода, resolved-ПВЗ трека), см. receipt_key;
+- ключ позиции чека — (владелец, дата прихода, resolved-ПВЗ трека, источник), см.
+  receipt_key; источник — Inter Cargo или партнёрский Di.Buyer (partner_receipts.py):
+  посылки Di.Buyer всегда в отдельном чеке без суммы;
 - новые и переносимые позиции попадают только в pending-чек; на (клиент, дата,
   ПВЗ) — не больше одного pending-чека, см. find_pending_receipt;
 - pending-чек следует за ПВЗ своих треков: при смене ПВЗ перевешивается,
@@ -15,6 +17,9 @@ from django.db.models import Q
 from django.utils import timezone
 
 from myprofile.execution_validator import validate_execution
+from myprofile.partner_receipts import (
+    SOURCE_CARGO, SOURCE_DIBUYER, partner_track_ids, track_source,
+)
 from myprofile.execution_validator.receipt_contracts import (
     authoritative_pickup_obj,
     owner_pending_receipts_follow_pickup_rule,
@@ -24,11 +29,12 @@ from myprofile.execution_validator.receipt_contracts import (
 PENDING = 'pending'
 
 
-def receipt_key(track, default_date=None):
-    """Ключ чека для трека: (owner_id, дата прихода, id resolved-ПВЗ или None)."""
+def receipt_key(track, default_date=None, partner_ids=None):
+    """Ключ чека для трека: (owner_id, дата прихода, id resolved-ПВЗ или None, источник).
+    partner_ids — заранее посчитанный partner_track_ids (иначе запрос на трек)."""
     pickup = resolved_pickup_obj(track)
     date = track.delivered_date or default_date or timezone.localdate()
-    return (track.owner_id, date, pickup.id if pickup else None)
+    return (track.owner_id, date, pickup.id if pickup else None, track_source(track, partner_ids))
 
 
 def pickup_q(pickup, prefix=''):
@@ -48,7 +54,7 @@ def receipt_pickup_key(receipt):
     return ('label', receipt.pickup_point or '')
 
 
-def find_pending_receipt(owner, date, pickup, exclude_ids=()):
+def find_pending_receipt(owner, date, pickup, exclude_ids=(), source=SOURCE_CARGO):
     """Старший pending-чек клиента на (дата, ПВЗ), в котором есть позиции с треком.
 
     Чеки без позиций с треком (пустые/только архивные позиции) не считаются
@@ -60,7 +66,7 @@ def find_pending_receipt(owner, date, pickup, exclude_ids=()):
     return (
         Receipt.objects
         .filter(pickup_q(pickup), owner=owner, created_at=date, status=PENDING,
-                items__track_code__isnull=False)
+                source=source, items__track_code__isnull=False)
         .exclude(pk__in=list(exclude_ids))
         .distinct()
         .order_by('id')
@@ -68,29 +74,32 @@ def find_pending_receipt(owner, date, pickup, exclude_ids=()):
     )
 
 
-def _new_pending_receipt(owner, date, pickup, price_per_kg):
+def _new_pending_receipt(owner, date, pickup, price_per_kg, source=SOURCE_CARGO):
     from myprofile.models import Receipt
 
+    partner = source == SOURCE_DIBUYER
     return Receipt.objects.create(
-        owner=owner, created_at=date, status=PENDING,
-        total_weight=0, total_price=0, price_per_kg=price_per_kg or 0,
+        owner=owner, created_at=date, status=PENDING, source=source,
+        total_weight=0, total_price=0, price_per_kg=0 if partner else (price_per_kg or 0),
         pickup=pickup, pickup_point=str(pickup) if pickup else '',
-        payment_link=pickup.payment_link if pickup else None,
+        # Чек Di.Buyer Inter Cargo не оплачивается — ссылки на оплату ПВЗ нет
+        payment_link=None if partner or not pickup else pickup.payment_link,
     )
 
 
-def pending_receipt_for(owner, date, pickup, price_per_kg=0, exclude_ids=()):
-    """Pending-чек ключа (owner, date, pickup): существующий или новый (решение D4).
+def pending_receipt_for(owner, date, pickup, price_per_kg=0, exclude_ids=(), source=SOURCE_CARGO):
+    """Pending-чек ключа (owner, date, pickup, source): существующий или новый (D4).
     exclude_ids — чеки, которые не могут быть целью (например, чек-источник)."""
-    return (find_pending_receipt(owner, date, pickup, exclude_ids=exclude_ids)
-            or _new_pending_receipt(owner, date, pickup, price_per_kg))
+    return (find_pending_receipt(owner, date, pickup, exclude_ids=exclude_ids, source=source)
+            or _new_pending_receipt(owner, date, pickup, price_per_kg, source=source))
 
 
 def move_item_to_pending_receipt(item, date, price_per_kg=0, exclude_ids=()):
     """Переносит позицию в pending-чек её ключа (date, resolved-ПВЗ трека) и
     возвращает чек-цель. Итоги чеков пересчитывает вызывающая сторона."""
     track = item.track_code
-    target = pending_receipt_for(track.owner, date, resolved_pickup_obj(track), price_per_kg, exclude_ids)
+    target = pending_receipt_for(track.owner, date, resolved_pickup_obj(track), price_per_kg,
+                                 exclude_ids, source=track_source(track))
     if item.receipt_id != target.id:
         item.receipt = target
         item.save(update_fields=['receipt'])
@@ -188,9 +197,11 @@ def sync_pending_receipts_for_user(user):
         return summary
 
     # 1. Корзины
-    buckets = defaultdict(list)                        # (date, pickup_id) -> [item]
+    buckets = defaultdict(list)                        # (date, pickup_id, source) -> [item]
     pickups = {}                                       # pickup_id -> PickupPoint
     held = defaultdict(lambda: defaultdict(int))       # receipt_id -> {bucket: count}
+    partner_ids = partner_track_ids(
+        ReceiptItem.objects.filter(receipt__in=receipts).values_list('track_code_id', flat=True))
     for r in receipts:
         items = r.items.select_related(
             'track_code__owner__userprofile__pickup', 'track_code__delivery_pickup')
@@ -198,28 +209,31 @@ def sync_pending_receipts_for_user(user):
             obj = resolved_pickup_obj(item.track_code) if item.track_code_id else None
             if obj is None:
                 continue  # позиция без трека/ПВЗ остаётся в своём чеке
-            key = (r.created_at, obj.id)
+            key = (r.created_at, obj.id, track_source(item.track_code, partner_ids))
             pickups[obj.id] = obj
             buckets[key].append(item)
             held[r.id][key] += 1
 
-    # 2. Хранители
+    # 2. Хранители (источник чека не меняется: хранитель корзины — только чек того
+    #    же источника, иначе позиции Di.Buyer осели бы в чеке Inter Cargo и наоборот)
     keepers = {}                                       # bucket -> Receipt
     for r in receipts:
-        if not held[r.id]:
+        own = [k for k in held[r.id] if k[2] == r.source]
+        if not own:
             continue
         label = r.pickup_point or ''
-        home = max(held[r.id], key=lambda k: (str(pickups[k[1]]) == label, held[r.id][k], -k[1]))
+        home = max(own, key=lambda k: (str(pickups[k[1]]) == label, held[r.id][k], -k[1]))
         keepers.setdefault(home, r)
 
     for key in sorted(k for k in buckets if k not in keepers):
         busy = {k.id for k in keepers.values()}
         holders = [r for r in receipts if key in held[r.id]]
-        free = next((r for r in holders if r.id not in busy), None)
+        free = next((r for r in holders if r.id not in busy and r.source == key[2]), None)
         if free is None:
-            free = find_pending_receipt(user, key[0], pickups[key[1]], exclude_ids=busy)
+            free = find_pending_receipt(user, key[0], pickups[key[1]], exclude_ids=busy, source=key[2])
         if free is None:
-            free = _new_pending_receipt(user, key[0], pickups[key[1]], holders[0].price_per_kg)
+            free = _new_pending_receipt(user, key[0], pickups[key[1]], holders[0].price_per_kg,
+                                        source=key[2])
             summary.created += 1
         keepers[key] = free
 
@@ -255,7 +269,8 @@ def sync_pending_receipts_for_user(user):
         obj = authoritative_pickup_obj(r)
         if obj is None:
             continue
-        label, link = str(obj), obj.payment_link
+        label = str(obj)
+        link = None if r.source == SOURCE_DIBUYER else obj.payment_link  # чек партнёра не оплачивается ПВЗ
         if r.pickup_id == obj.id and (r.pickup_point or '') == label and r.payment_link == link:
             continue
         r.pickup, r.pickup_point, r.payment_link = obj, label, link

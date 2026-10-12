@@ -45,9 +45,22 @@ class AccessHelperTests(TestCase):
         resp = view(_request(self.rf, self.client_user))
         self.assertEqual(resp.status_code, 302)
 
-    def test_require_enabled_lets_superuser_through_when_disabled(self):
+    def test_require_enabled_hides_from_superuser_when_fully_disabled(self):
+        # Полный рубильник: без «Сервис видят администраторы» не видит никто
         s = DibuyerSettings.load()
         s.is_enabled = False
+        s.save()
+
+        @require_dibuyer_enabled
+        def view(request):
+            return 'OK'
+
+        self.assertEqual(view(_request(self.rf, self.super_user)).status_code, 302)
+
+    def test_require_enabled_lets_superuser_through_in_admin_preview(self):
+        s = DibuyerSettings.load()
+        s.is_enabled = False
+        s.admins_preview = True
         s.save()
 
         @require_dibuyer_enabled

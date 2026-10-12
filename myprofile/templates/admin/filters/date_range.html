@@ -1,0 +1,26 @@
+{% load i18n %}
+<details data-filter-title="{{ title }}" open>
+  <summary>
+    {% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}
+  </summary>
+  <ul>
+  {% for choice in choices %}
+    <li{% if choice.selected %} class="selected"{% endif %}>
+    <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
+  {% endfor %}
+    <li{% if spec.is_custom %} class="selected"{% endif %}>
+      <form method="get" class="date-range-filter" style="margin:4px 0 0;padding:0 15px">
+        {% for name, value in spec.hidden_params %}
+          <input type="hidden" name="{{ name }}" value="{{ value }}">
+        {% endfor %}
+        <label style="display:block;margin-bottom:4px">{% trans "с" %}
+          <input type="date" name="{{ spec.parameter_from }}" value="{{ spec.date_from|date:'Y-m-d' }}" style="width:100%;box-sizing:border-box">
+        </label>
+        <label style="display:block;margin-bottom:6px">{% trans "по" %}
+          <input type="date" name="{{ spec.parameter_to }}" value="{{ spec.date_to|date:'Y-m-d' }}" style="width:100%;box-sizing:border-box">
+        </label>
+        <input type="submit" class="button" value="{% trans 'Показать за период' %}" style="width:100%">
+      </form>
+    </li>
+  </ul>
+</details>

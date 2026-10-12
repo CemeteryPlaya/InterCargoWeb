@@ -15,6 +15,10 @@ from analytics.views import _app_for_path
 from register.models import UserProfile
 
 
+BROWSER_UA = ('Mozilla/5.0 (Linux; Android 14; SM-A546B) AppleWebKit/537.36 '
+              '(KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36')
+
+
 def _raw(path, when, **kw):
     """Создаёт PageView с конкретным created_at (auto_now_add иначе ставит now)."""
     pv = PageView.objects.create(path=path, **kw)
@@ -38,6 +42,7 @@ class MiddlewareTrackingTest(TestCase):
         self.f = RequestFactory()
 
     def _req(self, path='/some/page/', **extra):
+        extra.setdefault('HTTP_USER_AGENT', BROWSER_UA)
         req = self.f.get(path, **extra)
         req.user = AnonymousUser()
         req.session = _FakeSession('sess123')

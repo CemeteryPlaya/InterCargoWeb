@@ -32,10 +32,7 @@
 </table>
 <p>All prices are in Kazakhstani tenge (₸). You can estimate the cost in advance with the <a href="/">calculator on the home page</a>.</p>
 
-<h2>3. Partner service Di.Buyer</h2>
-<p>The Di.Buyer service (purchasing goods from the USA and Europe), available in the personal account, is provided by a partner. {{ COMPANY.legal_name|default:COMPANY.brand }} is not the provider of this service; its terms and prices are set by the partner. Online card payment on the website does not apply to Di.Buyer: receipts containing Di.Buyer items are paid at the pickup point.</p>
-
-<h2>4. How to place an order — step by step</h2>
+<h2>3. How to place an order — step by step</h2>
 <ol>
     <li><b>Registration.</b> Fill in the form on the <a href="/">home page</a>: login, phone, pickup point, e-mail; accept the public offer and give consent to personal data processing.</li>
     <li><b>Warehouse address.</b> Copy our warehouse address in China from your personal account and enter it when ordering on a marketplace (Pinduoduo, Taobao, Poizon, 1688, etc.).</li>
@@ -46,6 +43,10 @@
     <li><b>Collection.</b> Show the receipt QR code at the pickup point and collect your parcel, or receive it from the courier.</li>
 </ol>
 <p>Video and interactive guides are available in <a href="{% url 'education' %}">“Tutorial”</a>.</p>
+
+{% if dibuyer_enabled %}
+<p class="note">The personal account also offers the partner service Di.Buyer (purchasing goods from the USA and Europe). It is provided by a partner: terms, prices and payment acceptance are on the partner's side, and payments go to the partner's accounts. {{ COMPANY.legal_name|default:COMPANY.brand }} does not provide this service and does not accept money for it — neither by card on the website nor at pickup points.</p>
+{% endif %}
 
 <h2>Licences and permits</h2>
 <p>Freight forwarding (delivery arrangement) services are not a licensed activity in the Republic of Kazakhstan; no special licences or permits are required to provide them. Customs clearance is carried out in accordance with the legislation of the EAEU and the Republic of Kazakhstan.</p>

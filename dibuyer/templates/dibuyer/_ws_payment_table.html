@@ -1,0 +1,27 @@
+{% load i18n %}
+<div class="card ws-scroll">
+  <table class="ws-table">
+    <thead><tr>
+      <th></th><th>{% trans "Заявка" %}</th><th>{% trans "Клиент" %}</th><th>{% trans "Телефон" %}</th>
+      <th class="num">{% trans "Посылок" %}</th><th class="num">{% trans "Пришло" %}</th>
+      <th class="num">{% trans "Вес, кг" %}</th><th class="num">{% trans "Доставка, ₸" %}</th><th>{% trans "Пришли с" %}</th>
+    </tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><input type="checkbox" name="order_ids" value="{{ r.order.pk }}" aria-label="№{{ r.order.pk }}"></td>
+        <td>{% if dibuyer_is_staff %}<a href="{% url 'dibuyer_manage_detail' r.order.pk %}">№{{ r.order.pk }}</a>{% else %}№{{ r.order.pk }}{% endif %}</td>
+        <td>{{ r.client }}</td>
+        <td>{{ r.phone|default:"—" }}</td>
+        <td class="num">{{ r.parcels }}</td>
+        <td class="num">{{ r.arrived }}</td>
+        <td class="num">{{ r.weight }}</td>
+        <td class="num">{{ r.cost }}</td>
+        <td>{{ r.arrived_since|date:"d.m.Y"|default:"—" }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9"><div class="empty">{{ empty_text }}</div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

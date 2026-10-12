@@ -1,4 +1,13 @@
 <p>This Policy sets out how personal data of users of cargointer.kz (the “Website”) is processed and protected in accordance with Law of the Republic of Kazakhstan No. 94-V of 21 May 2013 “On Personal Data and Their Protection”.</p>
+<p>This Policy forms an integral part of the <a href="{% url 'info_page' 'offer' %}">public offer</a>. Using the Website means the user’s unconditional consent to this Policy and to the terms of processing of their personal data; a user who does not agree must stop using the Website.</p>
+
+<h2>Definitions</h2>
+<ul>
+    <li><b>Personal data</b> — information relating to an identified or identifiable data subject, recorded on electronic, paper and/or other tangible media.</li>
+    <li><b>Non-personal (anonymised) data</b> — information transmitted automatically when visiting the Website’s pages: the requested page address, cookies, IP address, browser information, referrer (previous page address), access time.</li>
+    <li><b>Cookies</b> — small text files in which the browser stores data from visited websites; they keep you signed in to your personal account and remember settings such as the chosen language.</li>
+    <li><b>IP address</b> — a unique network address of a node in an IP network. The Website does not determine the user’s location more precisely than city and region.</li>
+</ul>
 
 <h2>1. Operator</h2>
 <p>The owner and operator of the database containing personal data is {% if COMPANY.legal_name %}{{ COMPANY.legal_name }}{% if COMPANY.iin %}, IIN/BIN {{ COMPANY.iin }}{% endif %}{% else %}the individual entrepreneur listed in “Contacts and company details”{% endif %} (trade mark “{{ COMPANY.brand }}”), address: {{ COMPANY.actual_address }}{% if COMPANY.email %}, e-mail: <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}.</p>
@@ -20,7 +29,8 @@
     <li>parcel status notifications and replies to enquiries;</li>
     <li>fraud prevention, account protection, handling disputed payments (chargebacks);</li>
     <li>compliance with the laws of the Republic of Kazakhstan (including tax and customs law);</li>
-    <li>improving the Website (anonymised visit statistics).</li>
+    <li>improving the Website and evaluating advertising placements on it (anonymised visit and impression statistics);</li>
+    <li>detecting and resolving technical problems and verifying the lawfulness of payments (IP address statistics).</li>
 </ul>
 
 <h2>4. Legal grounds</h2>
@@ -29,12 +39,14 @@
 <h2>5. Disclosure to third parties</h2>
 <p>We do not sell personal data. Data is shared only to the extent necessary to provide the services:</p>
 <ul>
-    <li>Halyk Bank of Kazakhstan JSC — to process payments and refunds (Halyk ePay service);</li>
+    {% for code in PAYMENT_PROVIDERS %}{% if code == 'halyk' %}<li>Halyk Bank of Kazakhstan JSC — to process payments and refunds (Halyk ePay service);</li>{% elif code == 'freedom' %}<li>Freedom Pay{% if FREEDOM_LEGAL_NAME %} ({{ FREEDOM_LEGAL_NAME }}){% endif %} — to process payments and refunds;</li>{% endif %}
+    {% endfor %}
     <li>transport and customs clearance partners — recipient data required to clear the cargo;</li>
     <li>notification services (e-mail, Telegram, browser push services) — only the contact and the notification text;</li>
     <li>state authorities — on grounds provided by law.</li>
 </ul>
 <p>Recipients must keep the data confidential and secure.</p>
+<p>Without the user’s prior written consent, personal data is not disclosed to anyone other than the recipients listed above. Anonymised aggregate statistics of visits and ad impressions (without personal data) may be provided to advertisers and partners; their use of it is governed by their own policies.</p>
 
 <h2>6. Storage and protection</h2>
 <ul>
@@ -52,3 +64,12 @@
 
 <h2>9. Changes to this Policy</h2>
 <p>The current version of the Policy is always available on this page. Material changes take effect upon publication.</p>
+
+<h2>10. Liability and other terms</h2>
+<ul>
+    <li>The operator does not verify the accuracy of personal data provided by the user; the user is responsible for its accuracy and relevance. You can update your data in your personal account at any time.</li>
+    <li>The operator is not liable for losses arising because the user’s login and password became known to third parties through the user’s fault, or for information the user has published on the Website in publicly accessible form.</li>
+    <li>This Policy applies only to cargointer.kz and its subdomains; the operator is not responsible for third-party websites reachable via links on the Website.</li>
+    <li>This Policy and relations between the user and the operator are governed by the laws of the Republic of Kazakhstan.</li>
+    <li>Please send questions and suggestions about this Policy{% if COMPANY.email %} to {% if COMPANY.email %}<a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}{% endif %}.</li>
+</ul>

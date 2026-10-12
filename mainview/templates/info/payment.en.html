@@ -4,8 +4,9 @@
 
 <h2>Payment methods</h2>
 <ul>
-    <li><b>Bank card online</b> — in your personal account, “Receipts”, the “Pay by card” button. Cards of the payment systems listed below, issued by any bank, are accepted. Payment is made on the secure payment page of Halyk Bank of Kazakhstan JSC (Halyk ePay service).</li>
-    <li><b>At the pickup point — Kaspi QR.</b> Payment goes to the account of {{ COMPANY.legal_name|default:"the seller" }}; each pickup point has its own QR code (different addresses and cash desks). Receipts containing items of the partner service Di.Buyer are paid by this method only.</li>
+    <li><b>Bank card online</b> — in your personal account, “Receipts”, the “Pay by card” button. Cards of the payment systems listed below, issued by any bank, are accepted. Payment is made on the secure payment page of {% if PAYMENT_PROVIDERS|length > 1 %}the payment service you choose: {% endif %}{% include 'info/_acquirers.en.html' %}.</li>
+    <li><b>At the pickup point — Kaspi QR.</b> Payment goes to the account of {{ COMPANY.legal_name|default:"the seller" }}; each pickup point has its own QR code (different addresses and cash desks).</li>
+    {% if dibuyer_enabled %}<li><b>The partner service Di.Buyer</b> is paid directly to the partner, to the partner's accounts; {{ COMPANY.brand }} does not accept payment for it.</li>{% endif %}
 </ul>
 <p>Accepted payment systems:</p>
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:0 0 1rem">
@@ -15,9 +16,9 @@
 <h2>Card payment rules and conditions</h2>
 <ol>
     <li>Sign in to your personal account and open “Receipts”.</li>
-    <li>Click “Pay by card” next to the receipt — the amount is taken from the receipt.</li>
-    <li>You will be redirected to the Halyk ePay payment page. Enter the card number, expiry date, CVV2/CVC2 and cardholder name.</li>
-    <li>Confirm the payment with the 3-D Secure one-time code from your card-issuing bank.</li>
+    <li>{% if PAYMENT_PROVIDERS|length > 1 %}Next to the receipt, choose the service to pay by card with: {% include 'info/_acquirers.en.html' %}{% else %}Click “Pay by card” next to the receipt{% endif %} — the amount is taken from the receipt.</li>
+    <li>You will be redirected to the secure payment page of {% if PAYMENT_PROVIDERS|length > 1 %}the selected service{% else %}{% include 'info/_acquirers.en.html' %}{% endif %}. Enter the card number, the cardholder name (in Latin letters, as on the card), the expiry date and the three-digit security code CVV2 (Visa) / CVC2 (Mastercard) — the three digits on the back of the card. All these details are printed on the card itself.</li>
+    <li>Your card-issuing bank’s page then opens — enter the 3-D Secure code sent to you by SMS. If the code does not arrive, contact the bank that issued your card.</li>
     <li>After a successful payment you return to the website and the receipt is marked “Paid”. The electronic payment confirmation is kept in your personal account.</li>
 </ol>
 <ul>
@@ -26,14 +27,24 @@
     <li>The amount is debited immediately after the payment is confirmed (single-step payment).</li>
     <li>If a payment fails, no money is debited; any blocked amount is released by the bank automatically. Try again or contact support.</li>
 </ul>
-<p>Payment cancellation and refunds — see <a href="{% url 'info_page' 'returns' %}">“Cancellation, exchange and refunds”</a>.</p>
+<h3>When a payment may be declined</h3>
+<ul>
+    <li>the card is not enabled for online payments — check with your card-issuing bank;</li>
+    <li>there are insufficient funds on the card — your card-issuing bank can tell you the balance;</li>
+    <li>the card details were entered incorrectly;</li>
+    <li>the card has expired — the expiry month and year are shown on the front of the card; your card-issuing bank can tell you more.</li>
+</ul>
+<p>For questions about paying by card or about the website, call {% if COMPANY.phone_support %}<a href="tel:{{ COMPANY.phone_support|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_support }}</a>{% endif %}{% if COMPANY.email %} or e-mail {% if COMPANY.email %}<a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}{% endif %}.</p>
+<p>Card payments are not refunded in cash: money is returned to the card, and refunds follow the rules of the international payment systems and the Law of the Republic of Kazakhstan “On Consumer Protection”. Details — <a href="{% url 'info_page' 'returns' %}">“Cancellation, exchange and refunds”</a>.</p>
 
 <h2 id="security">Payment security and confidentiality</h2>
 <ul>
-    <li>Card details are entered only on the payment page of Halyk Bank of Kazakhstan JSC (Halyk ePay). They are not transmitted to {{ COMPANY.brand }} servers and are not stored by us: we receive only the transaction result and a masked card number (e.g. 440043…0128).</li>
-    <li>The bank's payment gateway complies with the Payment Card Industry Data Security Standard (PCI DSS).</li>
+    <li>Online payments are made in accordance with the rules of the Visa and Mastercard international payment systems on the principles of confidentiality and security, using modern methods of verification, encryption and transmission of data over closed communication channels.</li>
+    <li>Card details are entered only on the payment page of {% include 'info/_acquirers.en.html' %}. They are not transmitted to {{ COMPANY.brand }} servers and are not stored by us: we receive only the transaction result and a masked card number (e.g. 440043…0128).</li>
+    <li>{% if PAYMENT_PROVIDERS|length > 1 %}The payment gateways comply{% else %}The payment gateway complies{% endif %} with the Payment Card Industry Data Security Standard (PCI DSS).</li>
     <li>3-D Secure technology (Visa Secure, Mastercard Identity Check) is used: the payment is confirmed with a one-time code from the issuing bank.</li>
     <li>All pages of the website and the payment page are transmitted over the secure HTTPS (TLS) protocol.</li>
     <li>{{ COMPANY.brand }} staff will never ask for your card details, CVV2/CVC2 or SMS codes — by phone or in messengers. If someone asks you for them, it is fraud.</li>
+    <li>The personal information you provide (name, address, phone, e-mail, card number) is confidential and is not disclosed. Card data is transmitted only in encrypted form and is not stored on our web server.</li>
     <li>Payment information is processed in accordance with the <a href="{% url 'info_page' 'privacy' %}">Privacy Policy</a>.</li>
 </ul>

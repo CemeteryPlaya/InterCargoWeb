@@ -158,12 +158,13 @@ class StaffFlowTests(DibuyerChatBase):
         self.assertEqual(chat.client_unread, 1)
         self.assertTrue(Notification.objects.filter(user=self.cli).exists())
 
-    def test_staff_reply_works_when_service_disabled(self):
+    def test_staff_reply_blocked_when_service_disabled(self):
+        # Полный рубильник: сотрудники Di.Buyer тоже не работают в разделе
         self.disable_service()
         chat = DibuyerChat.objects.create(client=self.cli)
         c = self.login('dstaff')
         resp = c.post(_chat_url(chat.id, 'reply'), {'text': 'Ответ'})
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 403)
 
     def test_staff_read_resets_unread(self):
         chat = DibuyerChat.objects.create(client=self.cli)
@@ -228,13 +229,11 @@ class MessagesPageTests(DibuyerChatBase):
 
 
 class DisabledServiceAccessTests(DibuyerChatBase):
-    def test_staff_can_open_dibuyer_when_disabled(self):
+    def test_staff_locked_out_when_disabled(self):
         self.disable_service()
         c = self.login('dstaff')
-        resp = c.get(reverse('dibuyer_home'))
-        self.assertEqual(resp.status_code, 200)
-        resp = c.get(reverse('dibuyer_manage'))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(c.get(reverse('dibuyer_home')).status_code, 302)
+        self.assertEqual(c.get(reverse('dibuyer_manage')).status_code, 404)
 
     def test_client_redirected_when_disabled(self):
         self.disable_service()

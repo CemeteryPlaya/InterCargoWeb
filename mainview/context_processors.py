@@ -37,7 +37,8 @@ def role_management_access(request):
 # приход → доставка → ПВЗ, затем клиенты, отчёты, администрирование).
 # Единый источник для сайдбара (desktop) и плиток «Меню» (mobile).
 # Пункт: (page_key, url_name, иконка, подпись, короткая подпись для плитки).
-# page_key '@staff' — только user.is_staff, '@superuser' — только superuser.
+# page_key '@staff' — только user.is_staff, '@superuser' — только superuser,
+# '@partner' — рабочий раздел посылок Di.Buyer (dibuyer.access.can_use_partner_workspace).
 NAV_GROUPS = [
     (_('Приход и сортировка'), ('#dbeafe', '#2563eb'), [
         ('shipped_cn', 'shipped_cn', 'ri-flight-takeoff-line', _('Отправлено из Китая'), _('Из Китая')),
@@ -59,6 +60,7 @@ NAV_GROUPS = [
         ('pp_extradition_history', 'pp_extradition_history', 'ri-file-history-line',
          _('История выдачи ПВЗ'), _('История ПВЗ')),
         ('attention_required', 'attention_required', 'ri-alarm-warning-line', _('Требует внимания'), _('Внимание')),
+        ('@partner', 'dibuyer_payments', 'ri-hand-coin-line', _('Посылки партнёра'), _('Партнёр')),
     ]),
     (_('Клиенты'), ('#dcfce7', '#16a34a'), [
         ('confirm', 'confirm', 'ri-admin-fill', _('Подтверждение пользователей'), _('Подтв. польз.')),
@@ -94,6 +96,9 @@ def build_nav_groups(user, pages):
                 allowed = user.is_staff
             elif key == '@superuser':
                 allowed = user.is_superuser
+            elif key == '@partner':
+                from dibuyer.access import can_use_partner_workspace
+                allowed = can_use_partner_workspace(user)
             else:
                 allowed = key in pages
             if allowed:
@@ -137,11 +142,19 @@ INFO_PAGES = [
 
 def company_info(request):
     """Реквизиты компании, список инфо-страниц и флаги эквайринга для шаблонов."""
+    from payments import providers
+    card_providers = providers.enabled_providers()
     return {
         'COMPANY': settings.COMPANY_INFO,
         'INFO_PAGES': INFO_PAGES,
         'EPAY_ENABLED': settings.EPAY_ENABLED,
         'EPAY_CARD_BRANDS': settings.EPAY_CARD_BRANDS,
+        # Онлайн-оплата картой: включённые провайдеры (выбор в «Чеках») и
+        # провайдеры, описанные на сайте (оферта, «Оплата», логотипы).
+        'CARD_PAYMENT_ENABLED': bool(card_providers),
+        'CARD_PROVIDERS': card_providers,
+        'PAYMENT_PROVIDERS': providers.public_codes(),
+        'FREEDOM_LEGAL_NAME': getattr(settings, 'FREEDOM_LEGAL_NAME', ''),
         'EDUCATION_VIDEOS': _education_videos(request),
     }
 

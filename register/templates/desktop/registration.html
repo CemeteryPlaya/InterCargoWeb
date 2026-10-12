@@ -152,7 +152,7 @@
             class="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary flex-shrink-0">
           <span class="text-sm text-gray-600 leading-relaxed">
             {% url 'info_page' 'offer' as offer_url %}{% url 'info_page' 'privacy' as privacy_url %}{% url 'info_page' 'personal-data' as pd_url %}
-            {% blocktrans trimmed %}Я принимаю условия <a href="{{ offer_url }}" target="_blank" class="text-primary underline">публичной оферты</a>, ознакомлен(-а) с <a href="{{ privacy_url }}" target="_blank" class="text-primary underline">политикой конфиденциальности</a> и даю <a href="{{ pd_url }}" target="_blank" class="text-primary underline">согласие на обработку персональных данных</a>{% endblocktrans %}
+            {% blocktrans trimmed %}Условия <a href="{{ offer_url }}" target="_blank" class="text-primary underline">Договора (публичной оферты)</a> мною прочитаны полностью, все условия Договора мне понятны, со всеми условиями Договора я согласен(-на). Ознакомлен(-а) с <a href="{{ privacy_url }}" target="_blank" class="text-primary underline">политикой конфиденциальности</a> и даю <a href="{{ pd_url }}" target="_blank" class="text-primary underline">согласие на обработку персональных данных</a>{% endblocktrans %}
           </span>
         </label>
 

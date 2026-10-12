@@ -2,14 +2,17 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .providers import CHOICES as PROVIDER_CHOICES, HALYK
+
 
 class EpayPayment(models.Model):
-    """Попытка оплаты чека картой через Halyk ePay.
+    """Попытка оплаты чека картой — через Halyk ePay или Freedom Pay (`provider`).
 
-    Одна строка = один invoiceId в банке. На чек может быть несколько попыток
-    (неуспешные + одна успешная). Источник правды о результате — API статуса
-    банка (`services.sync_payment`), а не браузер клиента: postLink и возврат
-    на сайт только запускают проверку.
+    Одна строка = один номер заказа в платёжной системе (invoiceId у Halyk,
+    pg_order_id у Freedom Pay). На чек может быть несколько попыток (неуспешные +
+    одна успешная). Браузеру клиента не доверяем: Halyk — проверка по API статуса
+    (`services.sync_payment`), Freedom Pay — подписанный колбэк result_url или
+    get_status3 (`freedom.py`).
     """
 
     STATUS_NEW = 'new'
@@ -34,9 +37,13 @@ class EpayPayment(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='epay_payments', verbose_name=_('Плательщик'),
     )
+    provider = models.CharField(
+        _('Платёжный сервис'), max_length=10, choices=PROVIDER_CHOICES, default=HALYK, db_index=True,
+    )
     invoice_id = models.CharField(_('Номер заказа (invoiceId)'), max_length=15, unique=True)
     amount = models.DecimalField(_('Сумма, ₸'), max_digits=12, decimal_places=2)
     currency = models.CharField(_('Валюта'), max_length=3, default='KZT')
+    # Halyk — ID терминала, Freedom Pay — merchant_id магазина.
     terminal = models.CharField(_('Терминал'), max_length=64)
     test_mode = models.BooleanField(_('Тестовый контур'), default=False)
     # Случайный секрет заказа: передаётся банку при получении токена и
@@ -65,8 +72,8 @@ class EpayPayment(models.Model):
     paid_at = models.DateTimeField(_('Оплачен'), null=True, blank=True)
 
     class Meta:
-        verbose_name = _('Платёж ePay')
-        verbose_name_plural = _('Платежи ePay')
+        verbose_name = _('Онлайн-платёж')
+        verbose_name_plural = _('Онлайн-платежи')
         ordering = ['-created_at']
 
     def __str__(self):

@@ -39,7 +39,7 @@
             <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
                 <div class="hidden md:block">
                     {% if mode == 'pages' %}
-                    <a href="?days={{ days }}" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1 mb-1">
+                    <a href="?days={{ days }}{{ keep }}" class="text-sm text-gray-500 hover:text-primary inline-flex items-center gap-1 mb-1">
                         <i class="ri-arrow-left-line"></i> {% trans "Все приложения" %}
                     </a>
                     <h1 class="text-2xl font-bold text-gray-900 hidden md:block">
@@ -54,7 +54,7 @@
                 <!-- Диапазон -->
                 <div class="flex gap-2">
                     {% for r in ranges %}
-                    <a href="?days={{ r }}{% if app_key %}&app={{ app_key }}{% endif %}"
+                    <a href="?days={{ r }}{{ keep }}{% if app_key %}&app={{ app_key }}{% endif %}"
                         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                         {% if r == days %}bg-primary text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
                         {{ r }} {% trans "дн." %}
@@ -63,7 +63,202 @@
                 </div>
             </div>
 
-            <!-- Итоговые карточки -->
+            <!-- Разделы: весь сайт / Inter Cargo / Di.Buyer -->
+            <div class="flex flex-wrap items-center gap-2 mb-5">
+                {% for key, label in sections %}
+                <a href="?days={{ days }}&section={{ key }}{% if include_staff %}&staff=1{% endif %}"
+                   class="px-4 py-2 rounded-full text-sm font-medium border transition-colors
+                   {% if key == section %}bg-gray-900 text-white border-gray-900{% else %}bg-white text-gray-700 border-gray-200 hover:bg-gray-50{% endif %}">{{ label }}</a>
+                {% endfor %}
+                <span class="flex-1"></span>
+                <a href="?days={{ days }}&section={{ section }}{% if not include_staff %}&staff=1{% endif %}{% if app_key %}&app={{ app_key }}{% endif %}"
+                   class="text-sm text-gray-600 hover:text-primary inline-flex items-center gap-1">
+                    <i class="{% if include_staff %}ri-checkbox-line{% else %}ri-checkbox-blank-line{% endif %}"></i>
+                    {% trans "Учитывать сотрудников" %}
+                </a>
+                <a href="{% url 'analytics_mediakit' %}?section={{ section }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:opacity-90 inline-flex items-center gap-1">
+                    <i class="ri-file-chart-line"></i> {% trans "Медиакит" %}
+                </a>
+            </div>
+
+            {% if mode == 'apps' %}
+            <!-- Главное: аудитория -->
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-3">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="text-xs text-gray-500">{% trans "Посетители" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ aud.visitors }}</div>
+                    <div class="text-[11px] text-gray-400 leading-snug mt-1">{% trans "разные люди (браузеры), заходившие на сайт" %}</div>
+                </div>
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="text-xs text-gray-500">{% trans "Визиты" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ aud.visits }}</div>
+                    <div class="text-[11px] text-gray-400 leading-snug mt-1">{% trans "заходы на сайт; после 30 минут без действий — новый визит" %}</div>
+                </div>
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="text-xs text-gray-500">{% trans "Просмотры" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ aud.views }}</div>
+                    <div class="text-[11px] text-gray-400 leading-snug mt-1">{% trans "сколько раз открывали страницы" %}</div>
+                </div>
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="text-xs text-gray-500">{% trans "Глубина просмотра" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ aud.depth }}</div>
+                    <div class="text-[11px] text-gray-400 leading-snug mt-1">{% trans "страниц в среднем за один визит" %}</div>
+                </div>
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="text-xs text-gray-500">{% trans "Время визита" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ aud.avg_visit_label }}</div>
+                    <div class="text-[11px] text-gray-400 leading-snug mt-1">{% trans "сколько в среднем проводят на сайте за визит" %}</div>
+                </div>
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="text-xs text-gray-500">{% trans "Отказы" %}</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ aud.bounce_pct }}%</div>
+                    <div class="text-[11px] text-gray-400 leading-snug mt-1">{% trans "визиты, где открыли одну страницу и ушли" %}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="flex justify-between text-sm"><span class="text-gray-600">{% trans "Новые посетители" %}</span><b>{{ aud.new_visitors }} · {{ aud.new_pct }}%</b></div>
+                    <div class="h-2 bg-gray-100 rounded-full mt-2"><div class="h-2 rounded-full bg-primary" style="width:{{ aud.new_pct|stringformat:'s' }}%"></div></div>
+                    <div class="text-[11px] text-gray-400 mt-1">{% blocktrans with n=aud.returning_visitors %}Вернувшихся: {{ n }} — те, кто уже был на сайте раньше{% endblocktrans %}</div>
+                </div>
+                <div class="bg-white border rounded-2xl p-4 shadow-sm">
+                    <div class="flex justify-between text-sm"><span class="text-gray-600">{% trans "Вошли в личный кабинет" %}</span><b>{{ aud.auth_visitors }} · {{ aud.auth_pct }}%</b></div>
+                    <div class="h-2 bg-gray-100 rounded-full mt-2"><div class="h-2 rounded-full bg-green-500" style="width:{{ aud.auth_pct|stringformat:'s' }}%"></div></div>
+                    <div class="text-[11px] text-gray-400 mt-1">{% trans "доля посетителей-клиентов (авторизованных)" %}</div>
+                </div>
+            </div>
+            <details class="mb-6 text-sm text-gray-600 bg-white border rounded-2xl px-4 py-3">
+                <summary class="cursor-pointer font-medium text-gray-700"><i class="ri-question-line text-primary"></i> {% trans "Как считаются показатели" %}</summary>
+                <ul class="list-disc pl-5 mt-2 space-y-1 text-xs leading-relaxed">
+                    <li>{% trans "Посетитель определяется по анонимной cookie (без имени и телефона). Один человек с телефона и компьютера — два посетителя." %}</li>
+                    <li>{% trans "Роботы поисковиков, превью ссылок в мессенджерах и сервисы проверки сайта не учитываются." %}</li>
+                    <li>{% trans "Просмотры сотрудников (склад, ПВЗ, водители, администраторы) по умолчанию исключены — это не аудитория. Их можно включить переключателем выше." %}</li>
+                    <li>{% trans "Источник визита — откуда пришёл человек при первом открытии сайта: поиск, соцсети, мессенджеры, рекламная ссылка с UTM-меткой или прямой заход." %}</li>
+                    <li>{% trans "Показ рекламного места засчитывается, только если блок был виден на экране хотя бы наполовину не меньше 1 секунды (стандарт IAB). CTR — доля кликов от показов." %}</li>
+                    <li>{% trans "Подробные разрезы строятся по данным за последние 90 дней; более старые месяцы — в медиаките по сохранённым снимкам." %}</li>
+                </ul>
+            </details>
+
+            {% if trend_labels %}
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700"><i class="ri-line-chart-line text-primary mr-1"></i> {% trans "Посещаемость по дням" %}</h2>
+                </div>
+                <div class="p-4"><div style="position:relative;height:260px"><canvas id="trendChart"></canvas></div></div>
+            </div>
+            {% endif %}
+
+            {% if section == 'dibuyer' and funnel %}
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700"><i class="ri-filter-3-line text-primary mr-1"></i> {% trans "Воронка Di.Buyer" %}</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">{% trans "Сколько людей дошли от витрины до заказа за период" %}</p>
+                </div>
+                <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
+                    <div><div class="text-2xl font-bold">{{ funnel.home_visitors }}</div><div class="text-xs text-gray-500">{% trans "открыли витрину" %}</div></div>
+                    <div><div class="text-2xl font-bold">{{ funnel.brand_clicks }}</div><div class="text-xs text-gray-500">{% trans "переходов на сайты брендов" %}</div></div>
+                    <div><div class="text-2xl font-bold">{{ funnel.orders }}</div><div class="text-xs text-gray-500">{% blocktrans with n=funnel.clients %}заявок (клиентов: {{ n }}){% endblocktrans %}</div></div>
+                    <div><div class="text-2xl font-bold">{{ funnel.purchased }}</div><div class="text-xs text-gray-500">{% trans "выкуплено" %}</div></div>
+                    <div><div class="text-2xl font-bold">{{ funnel.conversion_pct }}%</div><div class="text-xs text-gray-500">{% trans "заявок на 100 посетителей витрины" %}</div></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                {% trans "Источники трафика" as t %}{% trans "Откуда приходят визиты" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-route-line' rows=aud_sources %}
+                {% trans "Устройства" as t %}{% trans "Доля посетителей по типу устройства" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-smartphone-line' rows=aud_devices %}
+                {% trans "Операционные системы" as t %}
+                {% include 'analytics/_bars.html' with title=t hint='' icon='ri-android-line' rows=aud_os %}
+                {% trans "Браузеры" as t %}
+                {% include 'analytics/_bars.html' with title=t hint='' icon='ri-global-line' rows=aud_browsers %}
+                {% trans "Язык сайта" as t %}{% trans "На каком языке смотрят сайт" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-translate-2' rows=aud_languages %}
+                {% trans "Города" as t %}{% trans "Выбранный город, город пункта выдачи клиента или определённый по IP" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-map-pin-line' rows=aud_cities %}
+            </div>
+
+            <!-- Время активности -->
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700"><i class="ri-time-line text-primary mr-1"></i> {% trans "Когда аудитория на сайте" %}</h2>
+                    {% if aud_peak_hours %}<p class="text-xs text-gray-500 mt-0.5">{% trans "Пиковые часы" %}: {{ aud_peak_hours|join:", " }}</p>{% endif %}
+                </div>
+                <div class="p-4">
+                    <div class="flex items-end gap-[3px] h-28">
+                        {% for h in aud_hours %}
+                        <div class="flex-1 flex flex-col items-center justify-end h-full" title="{{ h.hour }}:00 — {{ h.value }}">
+                            <div class="w-full rounded-t bg-primary/70" style="height:{{ h.pct|stringformat:'s' }}%;min-height:2px"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="flex gap-[3px] text-[10px] text-gray-400 mt-1">
+                        {% for h in aud_hours %}<div class="flex-1 text-center">{% if h.hour|divisibleby:3 %}{{ h.hour }}{% endif %}</div>{% endfor %}
+                    </div>
+                    <div class="grid grid-cols-7 gap-2 mt-5">
+                        {% for d in aud_weekdays %}
+                        <div class="text-center">
+                            <div class="h-16 flex items-end"><div class="w-full rounded-t bg-gray-300" style="height:{{ d.pct|stringformat:'s' }}%;min-height:2px"></div></div>
+                            <div class="text-xs text-gray-600 mt-1">{{ d.label }}</div>
+                            <div class="text-[11px] text-gray-400">{{ d.value }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                {% trans "Страницы входа" as t %}{% trans "С каких страниц начинают визит" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-login-box-line' rows=aud_landing %}
+                {% trans "Сайты-источники" as t %}{% trans "Какие сайты и соцсети ведут к нам" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-links-line' rows=aud_referrers %}
+                {% trans "Рекламные кампании (UTM)" as t %}{% trans "Переходы по ссылкам с UTM-метками" as h %}
+                {% include 'analytics/_bars.html' with title=t hint=h icon='ri-megaphone-line' rows=aud_campaigns %}
+            </div>
+
+            <!-- Рекламные места -->
+            <div class="bg-white border rounded-2xl shadow-sm overflow-hidden mb-6">
+                <div class="px-4 py-3 bg-gray-50 border-b">
+                    <h2 class="font-semibold text-gray-700"><i class="ri-advertisement-line text-primary mr-1"></i> {% trans "Рекламные места" %}</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">{% trans "Видимые показы (≥50% блока на экране ≥1 с), охват, клики и CTR — то, за что платят рекламодатели" %}</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead><tr class="bg-gray-50 text-gray-600 border-b">
+                            <th class="px-4 py-3 text-left font-medium">{% trans "Место" %}</th>
+                            <th class="px-4 py-3 text-right font-medium">{% trans "Показы" %}</th>
+                            <th class="px-4 py-3 text-right font-medium">{% trans "Охват" %}</th>
+                            <th class="px-4 py-3 text-right font-medium">{% trans "Клики" %}</th>
+                            <th class="px-4 py-3 text-right font-medium">CTR</th>
+                        </tr></thead>
+                        <tbody class="divide-y divide-gray-100">
+                        {% for a in aud_ads %}
+                            <tr><td class="px-4 py-3 text-gray-800">{{ a.label }}</td>
+                                <td class="px-4 py-3 text-right">{{ a.views }}</td>
+                                <td class="px-4 py-3 text-right">{{ a.reach }}</td>
+                                <td class="px-4 py-3 text-right">{{ a.clicks }}</td>
+                                <td class="px-4 py-3 text-right font-medium">{{ a.ctr }}%</td></tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">{% trans "Пока нет показов рекламных мест за период." %}</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if brand_rows %}
+                <div class="border-t px-4 py-3">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">{% trans "Бренды на витрине Di.Buyer" %}</h3>
+                    <div class="overflow-x-auto"><table class="w-full text-sm">
+                        <thead><tr class="text-gray-500 text-xs"><th class="text-left py-1">{% trans "Бренд" %}</th><th class="text-right py-1">{% trans "Показы" %}</th><th class="text-right py-1">{% trans "Клики" %}</th><th class="text-right py-1">CTR</th></tr></thead>
+                        <tbody>{% for b in brand_rows %}<tr class="border-t border-gray-100"><td class="py-1.5">{{ b.label }}</td><td class="text-right">{{ b.views }}</td><td class="text-right">{{ b.clicks }}</td><td class="text-right">{{ b.ctr }}%</td></tr>{% endfor %}</tbody>
+                    </table></div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Итоговые карточки (страницы приложения) -->
             {% if mode == 'pages' %}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white border rounded-2xl p-4 shadow-sm">
@@ -83,35 +278,12 @@
                     <div class="text-2xl font-bold text-gray-800">{{ scope_total_time_label }}</div>
                 </div>
             </div>
-            {% else %}
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                <div class="bg-white border rounded-2xl p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">{% trans "Просмотры страниц" %}</div>
-                    <div class="text-2xl font-bold text-gray-800">{{ totals.views|default:0 }}</div>
-                </div>
-                <div class="bg-white border rounded-2xl p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">{% trans "Уник. пользователи" %}</div>
-                    <div class="text-2xl font-bold text-gray-800">{% if approx %}≈ {% endif %}{{ totals.users|default:0 }}</div>
-                </div>
-                <div class="bg-white border rounded-2xl p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">{% trans "Сессии" %}</div>
-                    <div class="text-2xl font-bold text-gray-800">{% if approx %}≈ {% endif %}{{ totals.sessions|default:0 }}</div>
-                </div>
-                <div class="bg-white border rounded-2xl p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">{% trans "Среднее время на странице" %}</div>
-                    <div class="text-2xl font-bold text-gray-800">{{ avg_label }}</div>
-                </div>
-                <div class="bg-white border rounded-2xl p-4 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">{% trans "Суммарное время всех визитов" %}</div>
-                    <div class="text-2xl font-bold text-gray-800">{{ total_time_label }}</div>
-                </div>
-            </div>
             {% endif %}
 
             {% if approx %}
             <div class="text-xs text-gray-500 -mt-3 mb-6 flex items-start gap-1.5">
                 <i class="ri-information-line mt-0.5"></i>
-                <span>{% trans "За период есть архивные (свёрнутые) данные — уникальные значения приблизительные (сумма по дням). Просмотры и среднее время точны." %}</span>
+                <span>≈ {% trans "За период есть архивные (свёрнутые) данные — уникальные значения приблизительные (сумма по дням). Просмотры и среднее время точны." %}</span>
             </div>
             {% endif %}
 
@@ -120,7 +292,7 @@
                 <div class="px-4 py-3 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-2">
                     <h2 class="font-semibold text-gray-700">
                         <i class="ri-pie-chart-line text-primary mr-1"></i>
-                        {% if mode == 'pages' %}{% trans "Популярные страницы" %}{% else %}{% trans "Приложения сайта" %}{% endif %}
+                        {% if mode == 'pages' %}{% trans "Популярные страницы" %}{% else %}{% trans "Разделы сайта по просмотрам" %}{% endif %}
                     </h2>
                     {% if chart_labels %}
                     <div id="chart-type-toggle" class="inline-flex rounded-lg border border-gray-200 overflow-hidden text-sm">
@@ -208,7 +380,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             {% for a in app_rows %}
-                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='?days={{ days }}&app={{ a.key }}'">
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='?days={{ days }}{{ keep }}&app={{ a.key }}'">
                                 <td class="px-4 py-3 text-gray-800 font-medium">{{ a.label }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
@@ -236,10 +408,36 @@
 
     {% include 'shared/footer.html' %}
 
+    {% if trend_labels %}
+    {{ trend_labels|json_script:"tr-labels" }}
+    {{ trend_views|json_script:"tr-views" }}
+    {{ trend_visitors|json_script:"tr-visitors" }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            var c = document.getElementById('trendChart');
+            if (!c || !window.Chart) return;
+            function j(id) { return JSON.parse(document.getElementById(id).textContent); }
+            var dark = document.documentElement.classList.contains('theme-dark') || document.body.classList.contains('theme-dark');
+            var text = dark ? '#e5e7eb' : '#374151', grid = dark ? 'rgba(148,163,184,0.18)' : '#f1f1f4';
+            new Chart(c, {
+                type: 'line',
+                data: { labels: j('tr-labels'), datasets: [
+                    { label: '{% trans "Посетители" %}', data: j('tr-visitors'), borderColor: '#e53e3e', backgroundColor: 'rgba(229,62,62,.12)', fill: true, tension: .3 },
+                    { label: '{% trans "Просмотры" %}', data: j('tr-views'), borderColor: '#3182ce', backgroundColor: 'transparent', tension: .3 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: text } } },
+                    scales: { x: { ticks: { color: text }, grid: { color: grid } },
+                              y: { beginAtZero: true, ticks: { precision: 0, color: text }, grid: { color: grid } } } }
+            });
+        })();
+    </script>
+    {% endif %}
     {% if chart_labels %}
     {{ chart_labels|json_script:"pp-labels" }}
     {{ chart_values|json_script:"pp-values" }}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    {% if not trend_labels %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>{% endif %}
     <script>
         (function () {
             var canvas = document.getElementById('popularPagesChart');

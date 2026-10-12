@@ -1,4 +1,5 @@
-"""Интеграция с Halyk ePay (https://epayment.kz/docs).
+"""Онлайн-оплата чеков: общая часть и интеграция с Halyk ePay (https://epayment.kz/docs).
+Freedom Pay — в `freedom.py`; выбор провайдера — `providers.py`.
 
 Поток оплаты чека:
 1. `create_payment` — строка EpayPayment с уникальным invoiceId и суммой чека.
@@ -29,6 +30,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from .models import EpayPayment
+from .providers import FREEDOM, HALYK, PROVIDERS, is_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -130,8 +132,11 @@ def card_payment_blocker(receipt):
     from django.utils.translation import gettext as _
     if receipt.is_paid:
         return _('Чек %(number)s уже оплачен.') % {'number': receipt.receipt_number}
-    if receipts_with_partner_items([receipt.pk]):
-        return _('В чеке есть товары партнёрского сервиса Di.Buyer — такой чек оплачивается на пункте выдачи.')
+    if receipt.source == receipt.SOURCE_DIBUYER or receipts_with_partner_items([receipt.pk]):
+        from dibuyer.access import dibuyer_is_enabled
+        if not dibuyer_is_enabled():  # полный рубильник — без названия сервиса
+            return _('Посылки этого чека оплачиваются отдельно — онлайн-оплата недоступна.')
+        return _('В чеке есть товары партнёрского сервиса Di.Buyer — их оплачивают партнёру напрямую, поэтому онлайн-оплата этого чека недоступна.')
     if receipt_amount(receipt) <= 0:
         return _('Сумма чека не рассчитана — оплата пока недоступна.')
     return None
@@ -154,15 +159,20 @@ def _truncate_bytes(text, limit):
 
 # ── Создание оплаты ──────────────────────────────────
 
-def create_payment(receipt, user, payer_ip=None):
+def create_payment(receipt, user, payer_ip=None, provider=HALYK):
+    if provider == FREEDOM:
+        terminal, test_mode = str(settings.FREEDOM_MERCHANT_ID), settings.FREEDOM_TEST_MODE
+    else:
+        terminal, test_mode = settings.EPAY_TERMINAL_ID, settings.EPAY_TEST_MODE
     return EpayPayment.objects.create(
+        provider=provider,
         receipt=receipt,
         receipt_number=receipt.receipt_number,
         user=user,
         invoice_id=new_invoice_id(),
         amount=receipt_amount(receipt),
-        terminal=settings.EPAY_TERMINAL_ID,
-        test_mode=settings.EPAY_TEST_MODE,
+        terminal=terminal,
+        test_mode=test_mode,
         secret_hash=secrets.token_urlsafe(24),
         payer_ip=payer_ip,
     )
@@ -269,6 +279,9 @@ def _to_decimal(value):
 
 def sync_payment(payment):
     """Сверяет платёж со статусом в банке и применяет результат. Идемпотентно."""
+    if payment.provider == FREEDOM:
+        from . import freedom
+        return freedom.sync_payment(payment)
     if payment.status in (EpayPayment.STATUS_PAID, EpayPayment.STATUS_REFUNDED):
         if payment.status == EpayPayment.STATUS_PAID:
             tx = fetch_status(payment.invoice_id)
@@ -372,7 +385,7 @@ def handle_postlink(payload):
     """Сохраняет детали уведомления банка и проверяет статус через API.
     Возвращает платёж или None (чужой/неизвестный invoiceId)."""
     invoice_id = str(payload.get('invoiceId') or '')
-    payment = EpayPayment.objects.filter(invoice_id=invoice_id).first()
+    payment = EpayPayment.objects.filter(provider=HALYK, invoice_id=invoice_id).first()
     if payment is None:
         logger.warning('ePay postLink: неизвестный invoiceId %r', invoice_id)
         return None
@@ -404,13 +417,15 @@ def handle_postlink(payload):
 
 
 def sync_pending_payments(hours=72):
-    """Сверяет «зависшие» оплаты (postLink мог потеряться). Для расписания
-    django-q2 и команды epay_sync_payments. Возвращает счётчики."""
+    """Сверяет «зависшие» оплаты всех включённых провайдеров (postLink/result_url
+    мог потеряться). Для расписания django-q2 и команды epay_sync_payments."""
     counts = {'checked': 0, 'paid': 0, 'failed': 0, 'errors': 0}
-    if not settings.EPAY_ENABLED:
+    enabled = [code for code in PROVIDERS if is_enabled(code)]
+    if not enabled:
         return counts
     now = timezone.now()
     pending = EpayPayment.objects.filter(
+        provider__in=enabled,
         status=EpayPayment.STATUS_NEW,
         created_at__gte=now - timedelta(hours=hours),
         created_at__lte=now - timedelta(minutes=2),  # клиент ещё может быть на странице оплаты

@@ -80,6 +80,12 @@ def _recalc_receipt(receipt, effective_rate):
     Итог считается суммой item_price, т.к. позиции могут иметь разные тарифы
     (обычные посылки InterCargo + товары Di.Buyer с собственной ставкой).
     """
+    if receipt.source == Receipt.SOURCE_DIBUYER:
+        # Чек партнёра Di.Buyer: Inter Cargo денег не берёт (оплата — партнёру
+        # напрямую), поэтому позиции и итог всегда 0 ₸ — в т.ч. после переноса
+        # позиций Di.Buyer из старого смешанного чека.
+        receipt.items.exclude(item_price=0, item_rate=0).update(item_price=0, item_rate=0)
+        effective_rate = 0
     items = receipt.items.select_related('track_code').all()
     total_weight = sum((item.display_weight or Decimal("0")) for item in items)
     total_price = sum((item.item_price or Decimal("0")) for item in items)
@@ -99,6 +105,7 @@ from myprofile.execution_validator.receipt_contracts import (
     receipt_tracks_pickup_homogeneous,
     resolved_pickup_obj,
 )
+from myprofile.partner_receipts import partner_track_ids
 from myprofile.receipt_pickup import find_pending_receipt, receipt_key, sync_pending_receipts_safely
 
 
@@ -119,26 +126,33 @@ def client_track_rate(track, effective_rate):
     receipt_pickup_label_matches_authoritative,
     receipt_tracks_pickup_homogeneous,
 ])
-def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effective_rate):
-    """Дописывает позиции в pending-чек ключа (user, дата, ПВЗ) или создаёт новый.
+def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effective_rate,
+                                   source=Receipt.SOURCE_CARGO):
+    """Дописывает позиции в pending-чек ключа (user, дата, ПВЗ, источник) или создаёт новый.
+
+    source='dibuyer' — посылки партнёра: отдельный чек без суммы и без ссылки на
+    оплату (оплату принимает партнёр, см. myprofile/partner_receipts.py).
 
     Инвариант (решения D2/D4): на (клиент, дата, ПВЗ) — не больше одного
     pending-чека; чеки, уехавшие в доставку или выданные, не дополняются.
     ПВЗ чека вычисляется детерминированно (authoritative), не «первый override».
     Пост-контракты проверяют инварианты после выполнения (декоратор).
     """
-    receipt = find_pending_receipt(user, receipt_date, pickup)
+    partner = source == Receipt.SOURCE_DIBUYER
+    receipt = find_pending_receipt(user, receipt_date, pickup, source=source)
     if receipt is None:
         receipt = Receipt.objects.create(
-            owner=user, total_weight=0, total_price=0,
-            price_per_kg=effective_rate, created_at=receipt_date,
+            owner=user, total_weight=0, total_price=0, source=source,
+            price_per_kg=0 if partner else effective_rate, created_at=receipt_date,
             pickup=pickup, pickup_point=str(pickup) if pickup else '',
         )
 
     client_rates = []
     for track in date_tracks:
         w = track.weight or Decimal("0")
-        if track.rate_override is not None:
+        if partner:
+            rate = Decimal("0")
+        elif track.rate_override is not None:
             rate = track.rate_override
         else:
             rate = client_track_rate(track, effective_rate)
@@ -157,7 +171,10 @@ def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effe
     if pickup_obj:
         receipt.pickup = pickup_obj
     receipt.pickup_point = str(pickup_obj) if pickup_obj else (receipt.pickup_point or '')
-    receipt.payment_link = pickup_obj.payment_link if pickup_obj else receipt.payment_link
+    if partner:
+        receipt.payment_link = None
+    else:
+        receipt.payment_link = pickup_obj.payment_link if pickup_obj else receipt.payment_link
     receipt._allow_content_update = True
     receipt.save(update_fields=['pickup', 'pickup_point', 'payment_link'])
 
@@ -168,9 +185,10 @@ def _create_or_update_date_receipt(user, receipt_date, pickup, date_tracks, effe
 def create_receipts_for_user(user, statuses=('shipping_pp', 'ready'), sync=True):
     """
     Создаёт чеки для треков пользователя, которые ещё не привязаны к ReceiptItem.
-    Группирует треки по ключу (delivered_date, resolved-ПВЗ): позиции ключа
-    дописываются в его pending-чек или в новый (инвариант «клиент + дата + ПВЗ =
-    не больше одного pending-чека» проверяется контрактами).
+    Группирует треки по ключу (delivered_date, resolved-ПВЗ, источник): позиции ключа
+    дописываются в его pending-чек или в новый (инвариант «клиент + дата + ПВЗ +
+    источник = не больше одного pending-чека» проверяется контрактами). Посылки
+    партнёра Di.Buyer — в отдельный чек без суммы.
     Дата чека (created_at) = delivered_date трек-кодов.
     sync=False — вызывающий уже синхронизировал pending-чеки клиента.
     Возвращает последний обработанный чек или None.
@@ -192,19 +210,22 @@ def create_receipts_for_user(user, statuses=('shipping_pp', 'ready'), sync=True)
     discount = get_user_discount(user)
     effective_rate = RATE - discount
 
-    # Группируем по (delivered_date, ПВЗ) (детерминированный fallback даты для None)
+    # Группируем по (delivered_date, ПВЗ, источник) (детерминированный fallback даты для None)
     by_key = defaultdict(list)
     pickups = {}
+    partner_ids = partner_track_ids([t.id for t in new_tracks])
     for track in new_tracks:
-        _owner_id, receipt_date, pickup_id = receipt_key(track)
+        _owner_id, receipt_date, pickup_id, source = receipt_key(track, partner_ids=partner_ids)
         pickups[pickup_id] = resolved_pickup_obj(track)
-        by_key[(receipt_date, pickup_id)].append(track)
+        by_key[(receipt_date, pickup_id, source)].append(track)
 
     last_receipt = None
-    for (receipt_date, pickup_id), key_tracks in by_key.items():
+    # Чеки Inter Cargo — последними: вызывающие сообщают клиенту сумму «последнего» чека
+    for (receipt_date, pickup_id, source), key_tracks in sorted(
+            by_key.items(), key=lambda kv: kv[0][2] == Receipt.SOURCE_CARGO):
         try:
             receipt = _create_or_update_date_receipt(
-                user, receipt_date, pickups[pickup_id], key_tracks, effective_rate)
+                user, receipt_date, pickups[pickup_id], key_tracks, effective_rate, source=source)
         except ExecutionValidationError:
             # CRITICAL-нарушение уже записано в журнал; эту дату пропускаем,
             # чтобы не блокировать формирование чеков остальных дат.
@@ -369,7 +390,7 @@ def reprice_pending_receipts(user, receipt_date, new_rate, track_ids=()):
     Возвращает (номера пересчитанных чеков, номера уже отправленных — их не меняем).
     """
     repriced, frozen = [], []
-    receipts = Receipt.objects.filter(owner=user).filter(
+    receipts = Receipt.objects.filter(owner=user, source=Receipt.SOURCE_CARGO).filter(
         models_q(created_at=receipt_date) | models_q(items__track_code_id__in=list(track_ids))
     ).distinct().order_by('id')
     for receipt in receipts:
@@ -393,7 +414,8 @@ def reprice_after_discount_change(user, old_discount, new_discount):
     repriced, frozen = [], []
     if user is None or old_rate == new_rate:
         return repriced, frozen
-    for receipt in Receipt.objects.filter(owner=user).exclude(status='claimed').order_by('id'):
+    for receipt in (Receipt.objects.filter(owner=user, source=Receipt.SOURCE_CARGO)
+                    .exclude(status='claimed').order_by('id')):
         if receipt.status != 'pending':
             if receipt.price_per_kg == old_rate:
                 frozen.append(receipt.receipt_number)
@@ -481,6 +503,14 @@ def is_notification_muted(user_id, channel):
     ).exists()
 
 
+def _partner_payment_line():
+    """Строка об оплате чека Di.Buyer для клиента: при выключенном сервисе — без
+    его названия (полный рубильник, dibuyer/access.py)."""
+    from dibuyer.access import dibuyer_is_enabled
+    return ("💰 Оплата: <b>партнёру Di.Buyer</b>\n" if dibuyer_is_enabled()
+            else "💰 Оплата: <b>отдельно</b>\n")
+
+
 def notify_receipt_claimed_telegram(receipt, pickup_label=None):
     """
     Создаёт Telegram-уведомление о выдаче посылок по чеку.
@@ -503,7 +533,8 @@ def notify_receipt_claimed_telegram(receipt, pickup_label=None):
             f"📄 Чек №{receipt.receipt_number}\n"
             f"📦 Количество позиций: <b>{items_count}</b>\n"
             f"⚖️ Общий вес: <b>{weight:.3f} кг</b>\n"
-            f"💰 Сумма: <b>{price} ₸</b>\n"
+            + (_partner_payment_line() if receipt.source == Receipt.SOURCE_DIBUYER
+               else f"💰 Сумма: <b>{price} ₸</b>\n") +
             f"📍 Пункт выдачи: <b>{pickup}</b>"
         )
 

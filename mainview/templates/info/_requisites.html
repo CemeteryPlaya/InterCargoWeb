@@ -13,7 +13,9 @@
         {% if COMPANY.phone_director %}<tr><th>{% trans "Телефон руководителя" %}</th><td><a href="tel:{{ COMPANY.phone_director|cut:' '|cut:'('|cut:')'|cut:'-' }}">{{ COMPANY.phone_director }}</a></td></tr>{% endif %}
         {% if COMPANY.email %}<tr><th>E-mail</th><td><a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a></td></tr>{% endif %}
         {% if COMPANY.iban %}<tr><th>{% trans "Банк" %}</th><td>{{ COMPANY.bank_name }}, {% trans "БИК" %} {{ COMPANY.bik }}</td></tr>
-        <tr><th>{% trans "ИИК (IBAN)" %}</th><td>{{ COMPANY.iban }}</td></tr>{% endif %}
+        <tr><th>{% trans "ИИК (IBAN)" %}</th><td>{{ COMPANY.iban }}</td></tr>
+        {% if COMPANY.bank_bin %}<tr><th>{% trans "БИН банка" %}</th><td>{{ COMPANY.bank_bin }}</td></tr>{% endif %}{% endif %}
+        {% if COMPANY.okpo %}<tr><th>{% trans "Код ОКПО" %}</th><td>{{ COMPANY.okpo }}</td></tr>{% endif %}
         <tr><th>{% trans "НДС" %}</th><td>{% if COMPANY.vat_payer %}{% trans "Цены указаны с учётом НДС" %}{% else %}{% trans "Не является плательщиком НДС, цены указаны без НДС" %}{% endif %}</td></tr>
     </tbody>
 </table>

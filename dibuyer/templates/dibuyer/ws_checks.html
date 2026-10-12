@@ -1,0 +1,31 @@
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}
+{% block title %}Di.Buyer — {% trans "Проверки" %}{% endblock %}
+{% block body_class %}ws{% endblock %}
+
+{% block content %}
+  {% include 'dibuyer/_ws_tabs.html' %}
+  <div class="eyebrow">{% trans "Автопроверки" %}</div>
+  <p class="ws-hint">
+    {% if problems %}{% blocktrans count n=problems %}Найдена {{ n }} проблема — разберите её, чтобы посылки не застревали.{% plural %}Найдено проблем: {{ n }} — разберите их, чтобы посылки не застревали.{% endblocktrans %}
+    {% else %}<span class="ws-ok">{% trans "Всё в порядке: расхождений не найдено." %}</span>{% endif %}
+  </p>
+
+  {% for c in checks %}
+    <div class="card">
+      <div class="ws-check">
+        <h3>{{ c.title }}</h3>
+        {% if c.rows %}<span class="ws-count">{{ c.rows|length }}</span>{% else %}<span class="ws-ok req-meta">{% trans "ок" %}</span>{% endif %}
+      </div>
+      <p class="ws-hint" style="margin:6px 0 0">{{ c.hint }}</p>
+      {% if c.rows %}
+        <ul class="ws-list">
+          {% for r in c.rows|slice:":50" %}
+            <li>{% if r.order_id and dibuyer_is_staff %}<a href="{% url 'dibuyer_manage_detail' r.order_id %}">{{ r.text }}</a>{% else %}{{ r.text }}{% endif %}</li>
+          {% endfor %}
+          {% if c.rows|length > 50 %}<li class="req-meta">{% blocktrans with n=c.rows|length %}…и ещё, всего {{ n }}{% endblocktrans %}</li>{% endif %}
+        </ul>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% endblock %}

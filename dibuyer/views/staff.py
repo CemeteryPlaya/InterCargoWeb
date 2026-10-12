@@ -54,6 +54,28 @@ def dibuyer_manage_update(request, pk):
     return redirect('dibuyer_manage_detail', pk=order.pk)
 
 
+@login_required
+@require_dibuyer_staff
+@require_POST
+def dibuyer_manage_partner_paid(request, pk):
+    """Партнёр подтверждает, что получил оплату заявки на свои счета (или снимает
+    отметку). Без отметки ПВЗ не выдаёт посылки заявки — чек Di.Buyer без суммы
+    (myprofile/partner_receipts.py)."""
+    from django.utils import timezone
+
+    order = get_object_or_404(BuyerOrder, pk=pk)
+    if request.POST.get('paid') == '1':
+        order.partner_paid_at = timezone.now()
+        order.partner_paid_by = request.user
+        messages.success(request, _("Оплата отмечена — пункт выдачи сможет выдать посылки заявки."))
+    else:
+        order.partner_paid_at = None
+        order.partner_paid_by = None
+        messages.info(request, _("Отметка об оплате снята — выдача посылок заявки остановлена."))
+    order.save(update_fields=['partner_paid_at', 'partner_paid_by', 'updated_at'])
+    return redirect('dibuyer_manage_detail', pk=order.pk)
+
+
 def _try_export_order(request, order):
     """Собирает данные из POST и создаёт посылки. Ошибки ввода → flash, без падения."""
     from decimal import Decimal, InvalidOperation

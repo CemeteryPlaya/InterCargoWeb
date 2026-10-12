@@ -133,12 +133,33 @@ def run_day_receipts(job_id, date_str):
                 created_count += 1
                 track_count = receipt.items.count()
                 _rid, _tc, _tp = receipt.id, track_count, receipt.total_price
-                notify_in_user_language(user, lambda: _(
-                    "🧾 Создан чек №%(receipt_id)s: %(track_count)s трек-кодов, сумма %(total_price)s тг.") % {
-                    'receipt_id': _rid, 'track_count': _tc, 'total_price': _tp,
-                })
+                from dibuyer.access import dibuyer_is_enabled
+                if receipt.source == receipt.SOURCE_DIBUYER and not dibuyer_is_enabled():
+                    # Сервис выключен — без его названия (полный рубильник)
+                    notify_in_user_language(user, lambda: _(
+                        "🧾 Создан чек №%(receipt_id)s: %(track_count)s посылок, оплачиваются отдельно.") % {
+                        'receipt_id': _rid, 'track_count': _tc,
+                    })
+                elif receipt.source == receipt.SOURCE_DIBUYER:
+                    # Только посылки Di.Buyer: суммы для Inter Cargo нет, оплата — партнёру
+                    notify_in_user_language(user, lambda: _(
+                        "🧾 Создан чек №%(receipt_id)s: %(track_count)s посылок Di.Buyer, оплата — партнёру.") % {
+                        'receipt_id': _rid, 'track_count': _tc,
+                    })
+                else:
+                    notify_in_user_language(user, lambda: _(
+                        "🧾 Создан чек №%(receipt_id)s: %(track_count)s трек-кодов, сумма %(total_price)s тг.") % {
+                        'receipt_id': _rid, 'track_count': _tc, 'total_price': _tp,
+                    })
             job.processed = idx
             job.save(update_fields=['processed'])
+
+        # Партнёру: пришли посылки Di.Buyer, а оплата не отмечена — ПВЗ их не выдаст
+        try:
+            from dibuyer.workspace import notify_unpaid_partner_arrivals
+            notify_unpaid_partner_arrivals([t.id for t in tracks])
+        except Exception:
+            logger.exception("day receipts job %s: уведомление партнёра не отправлено", job_id)
 
         job.status = 'done'
         job.result = {'created': created_count}

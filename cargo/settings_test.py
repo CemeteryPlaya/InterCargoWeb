@@ -8,7 +8,13 @@ Postgres необязательно — логика моделей/вьюх н�
     python manage.py test --settings=cargo.settings_test
 """
 
-from cargo.settings import *  # noqa: F401,F403
+import os
+
+# Без .env settings.py падает на обязательных переменных — заглушки для тестов.
+os.environ.setdefault('DJANGO_SECRET_KEY', 'test-only-insecure-key')
+os.environ.setdefault('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,testserver')
+
+from cargo.settings import *  # noqa: F401,F403,E402
 
 # Приглушение информационных логов django-q.
 # Логирование идёт через logger 'django-q', который инициализируется

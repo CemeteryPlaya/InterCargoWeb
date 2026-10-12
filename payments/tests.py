@@ -124,11 +124,11 @@ class PayReceiptTest(EpayTestBase):
         self.assertNotContains(page, reverse('epay_pay_receipt', args=[self.receipt.pk]))
         self.assertContains(page, 'Di.Buyer')
 
-    def test_receipts_page_shows_pay_button_only_when_enabled(self):
+    def test_receipts_page_has_no_pay_button_in_pre_production(self):
+        """Ветка pre-production: форма онлайн-оплаты в «Чеках» закомментирована —
+        кнопки нет даже при EPAY_ENABLED=true. После подключения эквайринга вернуть
+        проверку «кнопка есть только при включённом флаге»."""
         resp = self.client.get(reverse('delivered_posts'))
-        self.assertContains(resp, reverse('epay_pay_receipt', args=[self.receipt.pk]))
-        with self.settings(EPAY_ENABLED=False):
-            resp = self.client.get(reverse('delivered_posts'))
         self.assertNotContains(resp, reverse('epay_pay_receipt', args=[self.receipt.pk]))
 
 

@@ -137,7 +137,7 @@
         </div>
         <div class="mini-row mini-sum">
             <span class="m-label">{% trans "Сумма" %}:</span>
-            <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span>
+            <span class="m-value">{% if check.partner %}Di.Buyer · {% if check.partner_paid %}{% trans "оплачено партнёру" %}{% else %}{% trans "оплата партнёру НЕ подтверждена" %}{% endif %}{% else %}{{ check.total_sum|floatformat:0 }} ₸{% endif %}</span>
         </div>
     </div>
     {% endfor %}
@@ -151,7 +151,7 @@
         <div class="mini-row"><span class="m-label">{% trans "ПВЗ" %}:</span> <span class="m-value">{{ check.pickup_short|default:"—" }}</span></div>
         <div class="mini-row"><span class="m-label">{% trans "Посылок" %}:</span> <span class="m-value">{{ check.total_count }}</span></div>
         <div class="mini-row"><span class="m-label">{% trans "Вес" %}:</span> <span class="m-value">{{ check.total_weight|floatformat:3 }} {% trans "кг" %}</span></div>
-        <div class="mini-row mini-sum"><span class="m-label">{% trans "Сумма" %}:</span> <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span></div>
+        <div class="mini-row mini-sum"><span class="m-label">{% trans "Сумма" %}:</span> <span class="m-value">{% if check.partner %}Di.Buyer · {% if check.partner_paid %}{% trans "оплачено партнёру" %}{% else %}{% trans "оплата партнёру НЕ подтверждена" %}{% endif %}{% else %}{{ check.total_sum|floatformat:0 }} ₸{% endif %}</span></div>
     </div>
     {% endfor %}
 
@@ -182,7 +182,7 @@
         </div>
         <div class="mini-row mini-sum">
             <span class="m-label">{% trans "Сумма" %}:</span>
-            <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span>
+            <span class="m-value">{% if check.partner %}Di.Buyer · {% if check.partner_paid %}{% trans "оплачено партнёру" %}{% else %}{% trans "оплата партнёру НЕ подтверждена" %}{% endif %}{% else %}{{ check.total_sum|floatformat:0 }} ₸{% endif %}</span>
         </div>
     </div>
     {% endfor %}
@@ -197,7 +197,7 @@
         <div class="mini-row"><span class="m-label">{% trans "Пункт выдачи" %}:</span> <span class="m-value">{{ check.pickup_short|default:"—" }}</span></div>
         <div class="mini-row"><span class="m-label">{% trans "Всего посылок" %}:</span> <span class="m-value">{{ check.total_count }}</span></div>
         <div class="mini-row"><span class="m-label">{% trans "Общий вес" %}:</span> <span class="m-value">{{ check.total_weight|floatformat:3 }} {% trans "кг" %}</span></div>
-        <div class="mini-row mini-sum"><span class="m-label">{% trans "Сумма" %}:</span> <span class="m-value">{{ check.total_sum|floatformat:0 }} ₸</span></div>
+        <div class="mini-row mini-sum"><span class="m-label">{% trans "Сумма" %}:</span> <span class="m-value">{% if check.partner %}Di.Buyer · {% if check.partner_paid %}{% trans "оплачено партнёру" %}{% else %}{% trans "оплата партнёру НЕ подтверждена" %}{% endif %}{% else %}{{ check.total_sum|floatformat:0 }} ₸{% endif %}</span></div>
     </div>
     {% endfor %}
 
@@ -257,6 +257,11 @@
             <span class="total-weight">{{ check.total_weight|floatformat:3 }}</span>
             <span class="total-sum">{{ check.total_sum|floatformat:0 }}</span>
         </div>
+        {% if check.partner %}
+        <div style="margin-top:6px;padding:6px 8px;border:1px dashed #6366f1;font-weight:bold;">
+            Di.Buyer · {% if check.partner_paid %}{% trans "оплачено партнёру — можно выдавать" %}{% else %}{% trans "оплата партнёру НЕ подтверждена — не выдавать" %}{% endif %}
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
     {% endif %}

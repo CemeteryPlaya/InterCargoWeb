@@ -11,11 +11,11 @@
   <link rel="stylesheet" href="{% static 'dibuyer/styles/dibuyer.css' %}?v={{ APP_VERSION }}">
   <link rel="icon" type="image/x-icon" href="{% static 'dibuyer/images/logo-di.ico' %}?v={{ APP_VERSION }}">
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
   <div class="db-topbar">
     <a class="db-back" href="{% url 'home' %}">← {% trans "На главную" %}</a>
     {% block topbar_brand %}
-      <a class="db-brandmark" href="{% url 'dibuyer_home' %}">Di.Buyer</a>
+      {% if dibuyer_enabled %}<a class="db-brandmark" href="{% url 'dibuyer_home' %}">Di.Buyer</a>{% else %}<span class="db-brandmark">Di.Buyer</span>{% endif %}
     {% endblock %}
     <div class="db-topbar-actions">
       <a class="db-ig" href="https://www.instagram.com/di.buyers/" target="_blank" rel="noopener" aria-label="Instagram @di.buyers">
@@ -23,7 +23,9 @@
         <span class="db-ig-label">@di.buyers</span>
       </a>
       {% if dibuyer_is_staff %}
-        <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Заявки" %} →</a>
+        <a class="db-back" href="{% url 'dibuyer_manage' %}">{% trans "Рабочий раздел" %} →</a>
+      {% elif dibuyer_workspace %}
+        <a class="db-back" href="{% url 'dibuyer_payments' %}">{% trans "Рабочий раздел" %} →</a>
       {% endif %}
     </div>
   </div>

@@ -13,14 +13,14 @@ from django.views.decorators.http import require_POST
 
 from myprofile.models import Receipt
 
-from . import services
+from . import freedom, providers, services
 from .models import EpayPayment
 
 logger = logging.getLogger(__name__)
 
 
 def _require_enabled():
-    if not settings.EPAY_ENABLED:
+    if not providers.any_enabled():
         raise Http404
 
 
@@ -37,16 +37,33 @@ def _client_ip(request):
     return ip or None
 
 
+def _chosen_provider(request):
+    """Провайдер из формы (`provider`); единственный включённый — по умолчанию."""
+    enabled = [p['code'] for p in providers.enabled_providers()]
+    code = request.POST.get('provider') or ''
+    if not code and len(enabled) == 1:
+        return enabled[0]
+    return code if code in enabled else None
+
+
 @require_POST
 @login_required
 def pay_receipt(request, receipt_id):
-    """Создаёт оплату чека и открывает платёжную страницу Halyk ePay."""
+    """Создаёт оплату чека и открывает платёжную страницу выбранного провайдера
+    (Halyk ePay или Freedom Pay)."""
     _require_enabled()
     receipt = get_object_or_404(Receipt, pk=receipt_id, owner=request.user)
+    provider = _chosen_provider(request)
+    if provider is None:
+        messages.error(request, _('Выберите, через какой сервис оплатить картой.'))
+        return redirect('delivered_posts')
     blocker = services.card_payment_blocker(receipt)
     if blocker:
         messages.info(request, blocker)
         return redirect('delivered_posts')
+
+    if provider == providers.FREEDOM:
+        return _pay_freedom(request, receipt)
 
     payment = services.create_payment(receipt, request.user, payer_ip=_client_ip(request))
     post_link = _absolute(request, 'epay_postlink')
@@ -76,6 +93,29 @@ def pay_receipt(request, receipt_id):
         'payment_object': payment_object,
         'payform_js': settings.EPAY_PAYFORM_JS,
     })
+
+
+def _pay_freedom(request, receipt):
+    """Freedom Pay: регистрируем платёж и уводим клиента на платёжную страницу."""
+    payment = services.create_payment(receipt, request.user, payer_ip=_client_ip(request),
+                                      provider=providers.FREEDOM)
+    return_url = _absolute(request, 'epay_payment_return', payment.pk)
+    try:
+        payment_url = freedom.init_payment(
+            payment,
+            result_url=_absolute(request, 'freedom_result'),
+            success_url=return_url,
+            failure_url=return_url + '?failed=1',
+            language=get_language(),
+        )
+    except services.EpayError:
+        logger.exception('Freedom Pay: не удалось создать платёж для чека %s', receipt.receipt_number)
+        payment.status = EpayPayment.STATUS_FAILED
+        payment.reason = 'init error'
+        payment.save(update_fields=['status', 'reason', 'updated_at'])
+        messages.error(request, _('Платёжный сервис банка временно недоступен. Попробуйте позже.'))
+        return redirect('delivered_posts')
+    return redirect(payment_url)
 
 
 @login_required
@@ -128,3 +168,16 @@ def failure_postlink(request):
         return HttpResponseBadRequest('bad payload')
     services.handle_postlink(payload)
     return HttpResponse('OK')
+
+
+@csrf_exempt
+def freedom_result(request):
+    """Колбэк Freedom Pay (pg_result_url) о результате оплаты. Подпись
+    проверяется по имени скрипта из пути запроса — поэтому адрес без «/» на конце."""
+    if not providers.is_enabled(providers.FREEDOM):
+        raise Http404
+    params = (request.POST if request.method == 'POST' else request.GET).dict()
+    script = freedom.script_name(request.path)
+    status, description = freedom.handle_result(params, script)
+    return HttpResponse(freedom.result_response(script, status, description),
+                        content_type='application/xml; charset=utf-8')

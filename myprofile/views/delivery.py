@@ -12,11 +12,12 @@ from collections import defaultdict, OrderedDict
 import json
 import logging
 from myprofile.models import (
-    TrackCode, Notification, DeliveryHistory,
+    TrackCode, DeliveryHistory,
     ExtraditionPackage, Extradition, Receipt, ReceiptItem,
 )
 from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
+from myprofile.partner_receipts import partner_issue_error
 from myprofile.receipt_lifecycle import (
     take_into_delivery, complete_delivery_to_pvz, issue_to_client,
     get_receipts_for_tracks, ReceiptLifecycleError,
@@ -598,6 +599,11 @@ def driver_issue(request):
                 items__track_code_id__in=track_ids
             ).distinct()
         )
+
+        partner_error = partner_issue_error(receipts)  # Di.Buyer — после оплаты партнёру
+        if partner_error:
+            messages.error(request, partner_error)
+            return redirect('delivery')
 
         # Lifecycle: in_delivery → claimed (выдача водителем)
         try:

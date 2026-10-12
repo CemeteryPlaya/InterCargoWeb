@@ -8,17 +8,17 @@ from django.db import transaction
 from django.utils import timezone
 from collections import OrderedDict, defaultdict
 from myprofile.models import (
-    TrackCode, StorageCell, Notification,
-    ExtraditionPackage, Extradition, Receipt, ReceiptItem,
+    TrackCode, StorageCell, ExtraditionPackage, Extradition, Receipt, ReceiptItem,
     RestructureSession, InventorySession,
 )
 
 from register.models import UserProfile, PickupPoint
 from myprofile.views.utils import notify_receipt_claimed_telegram, notify_in_user_language
 from django.utils.translation import gettext as _
+from myprofile.partner_receipts import partner_issue_error
 from myprofile.receipt_lifecycle import (
     issue_to_client as lifecycle_issue, return_to_sorting as lifecycle_return,
-    get_receipts_for_tracks, ReceiptLifecycleError,
+    ReceiptLifecycleError,
 )
 
 import logging
@@ -238,6 +238,11 @@ def warehouse_issue_to_client(request):
                 items__track_code_id__in=track_ids
             ).distinct()
         )
+
+        partner_error = partner_issue_error(receipts)  # Di.Buyer — после оплаты партнёру
+        if partner_error:
+            messages.error(request, partner_error)
+            return redirect('warehouse')
 
         # Lifecycle: accepted_pvz → claimed
         try:
@@ -820,7 +825,6 @@ def finish_restructure(request):
             existing_numbers = set(
                 StorageCell.objects.filter(pickup_point=pickup_point).values_list('cell_number', flat=True)
             )
-            from django.contrib.auth.models import User
             auto_cells = []
             next_num = 0
             for user_id in clients_without_cell:

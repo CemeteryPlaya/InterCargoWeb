@@ -2,12 +2,13 @@
 
 import logging
 
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from asgiref.sync import sync_to_async
 from django.conf import settings as django_settings
 from django.utils.translation import gettext as _
 
+from dibuyer.access import dibuyer_is_enabled
 from tgbot.bot.utils import get_telegram_profile
 from tgbot.bot.i18n import with_lang, get_lang_by_chat, render_sync
 
@@ -47,7 +48,9 @@ async def show_my_receipts(message: Message):
     site_url = getattr(django_settings, 'TELEGRAM_SITE_URL', '')
 
     for r in receipts:
-        pay_link = r.get('payment_link') or f"{site_url}/profile/pay-receipt/{r['id']}/"
+        # Чек партнёра Di.Buyer оплачивается партнёру — кнопки оплаты Inter Cargo нет
+        pay_link = None if r.get('partner') else (
+            r.get('payment_link') or f"{site_url}/profile/pay-receipt/{r['id']}/")
         msg_text, kb = await sync_to_async(_build_receipt_message)(lang, r, pay_link)
 
         try:
@@ -80,7 +83,9 @@ def _build_receipt_message(lang, r, pay_link):
             _("📦 Количество посылок: <b>{count}</b>").format(count=r['items_count']),
             _("⚖️ Общий вес: <b>{weight:.3f} кг</b>").format(weight=r['total_weight']),
             "",
-            _("💰 Сумма к оплате: <b>{price} ₸</b>").format(price=r['total_price']),
+            ((_("💰 Оплата: <b>партнёру Di.Buyer</b>") if r.get('partner_public')
+              else _("💰 Оплата: <b>отдельно</b>")) if r.get('partner')
+             else _("💰 Сумма к оплате: <b>{price} ₸</b>").format(price=r['total_price'])),
             "",
             _("📍 Пункт выдачи: <b>{pickup}</b>").format(pickup=pickup_label),
         ]
@@ -124,6 +129,7 @@ def _get_user_receipts(user_id):
     }
 
     result = []
+    partner_public = dibuyer_is_enabled()  # выключен — без названия сервиса
     for receipt in receipts:
         items = list(receipt.items.select_related('track_code').all())
 
@@ -150,6 +156,8 @@ def _get_user_receipts(user_id):
             'id': receipt.id,
             'receipt_number': receipt.receipt_number,
             'total_price': price,
+            'partner': receipt.source == receipt.SOURCE_DIBUYER,
+            'partner_public': partner_public,
             'total_weight': float(total_weight),
             'items_count': len(items),
             'pickup_point': receipt.pickup_point,

@@ -8,4 +8,7 @@ urlpatterns = [
     # Адреса уведомлений банка (postLink / failurePostLink) — без CSRF и логина.
     path('epay/postlink/', views.postlink, name='epay_postlink'),
     path('epay/failure-postlink/', views.failure_postlink, name='epay_failure_postlink'),
+    # Колбэк Freedom Pay (pg_result_url). Без «/» на конце: последняя часть
+    # пути («result») входит в подпись запроса.
+    path('freedom/result', views.freedom_result, name='freedom_result'),
 ]

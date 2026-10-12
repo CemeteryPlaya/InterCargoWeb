@@ -104,3 +104,37 @@ a{color:inherit;text-decoration:none}
 .flash.success{background:#e9f1ea;color:#4f7a5b}
 .flash.error{background:#f7e7e7;color:#9c5b5b}
 .flash.info{background:var(--lav-soft);color:var(--navy2)}
+/* Рабочий раздел (заявки, посылки, оплаты, отчёт, проверки) — шире витрины */
+body.ws .db-container,body.ws .db-topbar{max-width:1100px}
+.ws-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.ws-tab{font-size:12px;letter-spacing:.5px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);
+  background:var(--paper);color:var(--navy);display:inline-flex;align-items:center;gap:6px}
+.ws-tab:hover{background:var(--lav-soft)}
+.ws-tab.is-active{background:var(--navy);border-color:var(--navy);color:var(--cream)}
+.ws-count{font-size:10px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#c25b5b;
+  color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.ws-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ws-filters .fld{margin-bottom:0;width:auto;flex:1 1 180px;padding:9px 12px}
+.ws-btn{background:var(--navy);color:var(--cream);border:none;border-radius:11px;padding:9px 16px;
+  font-family:inherit;font-size:13px;cursor:pointer;display:inline-block}
+.ws-btn.ghost{background:var(--paper);color:var(--navy);border:1px solid var(--lav)}
+.ws-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ws-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ws-table th{text-align:left;font-weight:500;color:var(--muted);font-size:10.5px;letter-spacing:.8px;
+  text-transform:uppercase;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ws-table td{padding:9px 8px;border-bottom:1px solid #f1eee6;vertical-align:top}
+.ws-table tr:last-child td{border-bottom:none}
+.ws-table .num{text-align:right;white-space:nowrap}
+.ws-table tfoot td{font-weight:600;border-top:1px solid var(--line)}
+.ws-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:13px}
+.ws-stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.ws-stat b{display:block;font-size:22px;font-weight:500;color:var(--navy);line-height:1.2;font-variant-numeric:lining-nums tabular-nums}
+.ws-stat span{font-size:11px;color:var(--muted)}
+.ws-hint{font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.ws-ok{color:#4f7a5b}
+.ws-bad{color:#9c5b5b}
+.ws-check{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.ws-check h3{margin:0;font-size:15px;font-weight:500;color:var(--ink)}
+.ws-list{margin:10px 0 0;padding:0;list-style:none;font-size:12.5px}
+.ws-list li{padding:6px 0;border-top:1px dashed var(--line)}
+.ws-list a{color:var(--navy);text-decoration:underline}

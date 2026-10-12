@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
@@ -21,12 +20,19 @@ def delivered_trackcodes_by_date(request):
     # Онлайн-оплата картой (payments): чеки с товарами партнёра Di.Buyer
     # оплачиваются только на ПВЗ.
     partner_receipt_ids = set()
-    if settings.EPAY_ENABLED:
+    from payments.providers import any_enabled as card_payment_enabled
+    if card_payment_enabled():
         from payments.services import receipts_with_partner_items
         partner_receipt_ids = receipts_with_partner_items(receipts.values_list('id', flat=True))
 
+    # Чеки партнёра Di.Buyer: без суммы, статус — подтвердил ли партнёр оплату
+    from myprofile.partner_receipts import unpaid_partner_receipts
+    partner_unpaid = {r.id for r in unpaid_partner_receipts(list(receipts))}
+
     for receipt in receipts:
         receipt.has_partner_items = receipt.id in partner_receipt_ids
+        receipt.is_partner = receipt.source == Receipt.SOURCE_DIBUYER
+        receipt.partner_paid = receipt.is_partner and receipt.id not in partner_unpaid
         receipt.display_pickup_point = receipt.pickup_point or ''
         receipt.items_list = list(receipt.items.select_related('track_code').all())
 

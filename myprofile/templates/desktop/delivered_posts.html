@@ -101,10 +101,14 @@
             <div @click="activeReceipt = activeReceipt === {{ receipt.id }} ? null : {{ receipt.id }}"
               class="cursor-pointer bg-gray-100 hover:bg-gray-200 transition p-3 flex justify-between items-center">
               <div>
-                <h4 class="text-sm font-bold text-gray-800">Чек #{{ receipt.id }}</h4>
+                <h4 class="text-sm font-bold text-gray-800">Чек #{{ receipt.id }}{% if receipt.is_partner and dibuyer_enabled %} <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700">Di.Buyer</span>{% endif %}</h4>
                 <p class="text-xs text-gray-500">{{ receipt.created_at|date:"d.m.Y" }}</p>
+                {% if receipt.is_partner %}
+                <p class="text-xs text-gray-600">{% trans "Вес" %}: {{ receipt.computed_weight }} {% trans "кг" %} | {% if not dibuyer_enabled %}{% trans "оплачивается отдельно" %}{% elif receipt.partner_paid %}{% trans "оплачено партнёру" %}{% else %}{% trans "оплата — партнёру Di.Buyer" %}{% endif %}</p>
+                {% else %}
                 <p class="text-xs text-gray-600">Вес: {{ receipt.computed_weight }} кг | Сумма:
                   {{ receipt.computed_price|floatformat:0 }} ₸</p>
+                {% endif %}
               </div>
               <div class="flex items-center">
                 <div class="text-right mr-2">
@@ -121,7 +125,7 @@
                   {% if receipt.claimed_at %}
                   <div class="text-[10px] text-gray-500">{{ receipt.claimed_at|date:"d.m.Y H:i" }}</div>
                   {% endif %}
-                  {% if EPAY_ENABLED and receipt.is_paid %}
+                  {% if CARD_PAYMENT_ENABLED and receipt.is_paid %}
                   <div class="text-[10px] font-semibold text-green-600"><i class="ri-checkbox-circle-line"></i> {% trans "Оплачен" %}</div>
                   {% endif %}
                 </div>
@@ -149,16 +153,36 @@
               {% endif %}
               {% endcomment %}
 
-              {% if EPAY_ENABLED and not receipt.is_paid and receipt.has_partner_items %}
-              <p class="mb-3 text-center text-[11px] text-gray-500">{% trans "В чеке есть товары партнёрского сервиса Di.Buyer — оплата на пункте выдачи." %}</p>
-              {% elif EPAY_ENABLED and not receipt.is_paid and receipt.computed_price > 0 %}
-              <!-- Онлайн-оплата картой (Halyk ePay) -->
+              {% if receipt.is_partner %}
+              <p class="mb-3 text-center text-[11px] text-gray-500">{% if not dibuyer_enabled %}{% if receipt.partner_paid %}{% trans "Оплата подтверждена — посылки можно получить на пункте выдачи." %}{% else %}{% trans "Эти посылки оплачиваются отдельно; пункт выдачи выдаст их после подтверждения оплаты." %}{% endif %}{% elif receipt.partner_paid %}{% trans "Посылки Di.Buyer: партнёр подтвердил оплату — их можно получить на пункте выдачи." %}{% else %}{% trans "Посылки Di.Buyer оплачиваются партнёру напрямую. Пункт выдачи выдаст их после того, как партнёр подтвердит оплату." %}{% endif %}</p>
+              {% endif %}
+              {% comment %}PRE-PRODUCTION: онлайн-оплата картой (Halyk ePay / Freedom Pay) закомментирована
+              до подключения эквайринга. Чтобы вернуть: снять comment, первое условие ниже снова сделать
+              продолжением (elif) блока receipt.is_partner выше и убрать закрывающий endif перед этим комментарием.
+              {% if CARD_PAYMENT_ENABLED and not receipt.is_paid and receipt.has_partner_items %}
+              <p class="mb-3 text-center text-[11px] text-gray-500">{% trans "В чеке есть товары партнёрского сервиса Di.Buyer — их оплачивают партнёру напрямую, поэтому онлайн-оплата этого чека недоступна." %}</p>
+              {% elif CARD_PAYMENT_ENABLED and not receipt.is_paid and receipt.computed_price > 0 %}
+              <!-- Онлайн-оплата картой: клиент выбирает провайдера (Halyk ePay / Freedom Pay) -->
               <form method="post" action="{% url 'epay_pay_receipt' receipt.id %}" class="mb-3 text-center">
                 {% csrf_token %}
+                {% if CARD_PROVIDERS|length > 1 %}
+                <p class="text-sm font-medium text-gray-800 mb-2">{% blocktrans with amount=receipt.computed_price|floatformat:0 %}Оплатить картой {{ amount }} ₸ через:{% endblocktrans %}</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                  {% for provider in CARD_PROVIDERS %}
+                  <button type="submit" name="provider" value="{{ provider.code }}"
+                    class="inline-flex flex-col items-center min-w-[9rem] px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <span class="inline-flex items-center gap-1.5 text-sm font-medium"><i class="ri-bank-card-line"></i> {{ provider.name }}</span>
+                    <span class="text-[10px] text-green-100">{{ provider.bank }}</span>
+                  </button>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <input type="hidden" name="provider" value="{{ CARD_PROVIDERS.0.code }}">
                 <button type="submit"
                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
                   <i class="ri-bank-card-line"></i> {% blocktrans with amount=receipt.computed_price|floatformat:0 %}Оплатить картой {{ amount }} ₸{% endblocktrans %}
                 </button>
+                {% endif %}
                 <div class="flex flex-wrap items-center justify-center gap-1.5 mt-2">
                   {% include 'shared/_payment_logos.html' with logo_height='18px' %}
                 </div>
@@ -167,6 +191,7 @@
                 </p>
               </form>
               {% endif %}
+              {% endcomment %}
 
               <!-- Таблица с товарами -->
               <div class="overflow-x-auto">

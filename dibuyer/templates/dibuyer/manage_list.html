@@ -2,7 +2,9 @@
 {% load i18n %}
 {% block title %}Di.Buyer — {% trans "Заявки" %}{% endblock %}
 
+{% block body_class %}ws{% endblock %}
 {% block content %}
+  {% include 'dibuyer/_ws_tabs.html' with ws_tab='orders' %}
   <div class="eyebrow">{% trans "Входящие заявки" %}</div>
 
   <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
@@ -20,6 +22,7 @@
           <div class="req-meta">{{ o.items.all|length }} {% trans "товар(ов)" %} · {{ o.created_at|date:"d.m.Y H:i" }}</div>
         </div>
         <span class="chip chip-{{ o.status }}">{{ o.get_status_display }}</span>
+        {% if o.tracking_exported %}<span class="chip {% if o.partner_paid_at %}chip-purchased{% else %}chip-new{% endif %}">{% if o.partner_paid_at %}{% trans "оплачено" %}{% else %}{% trans "оплата не отмечена" %}{% endif %}</span>{% endif %}
       </div>
     </a>
   {% empty %}

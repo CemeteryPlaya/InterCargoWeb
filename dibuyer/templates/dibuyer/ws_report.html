@@ -1,0 +1,57 @@
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}
+{% block title %}Di.Buyer — {% trans "Отчёт" %}{% endblock %}
+{% block body_class %}ws{% endblock %}
+
+{% block content %}
+  {% include 'dibuyer/_ws_tabs.html' %}
+  <div class="eyebrow">{% trans "Отчёт партнёра" %}</div>
+  <p class="ws-hint">{% trans "Заявки, созданные за период: сколько посылок, какой вес и стоимость доставки, что оплачено и выдано. CSV открывается в Excel." %}</p>
+
+  <form class="card ws-filters" method="get">
+    <label class="req-meta">{% trans "с" %} <input class="fld" type="date" name="from" value="{{ date_from|date:'Y-m-d' }}"></label>
+    <label class="req-meta">{% trans "по" %} <input class="fld" type="date" name="to" value="{{ date_to|date:'Y-m-d' }}"></label>
+    <button class="ws-btn" type="submit">{% trans "Показать" %}</button>
+    <a class="ws-btn ghost" href="?from={{ date_from|date:'Y-m-d' }}&to={{ date_to|date:'Y-m-d' }}&format=csv">{% trans "Скачать CSV" %}</a>
+  </form>
+
+  <div class="ws-stats">
+    <div class="ws-stat"><b>{{ totals.orders }}</b><span>{% trans "заявок" %}</span></div>
+    <div class="ws-stat"><b>{{ totals.parcels }}</b><span>{% trans "посылок" %} · {% trans "выдано" %} {{ totals.issued }}</span></div>
+    <div class="ws-stat"><b>{{ totals.weight }}</b><span>{% trans "кг всего" %}</span></div>
+    <div class="ws-stat"><b>{{ totals.cost }} ₸</b><span>{% trans "доставка по заявкам" %}</span></div>
+    <div class="ws-stat"><b class="ws-ok">{{ totals.paid_cost }} ₸</b><span>{% trans "оплата получена" %} ({{ totals.paid_orders }})</span></div>
+    <div class="ws-stat"><b class="ws-bad">{{ totals.unpaid_cost }} ₸</b><span>{% trans "оплата не отмечена" %}</span></div>
+  </div>
+
+  <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
+    {% for label, n in statuses %}<span class="chip chip-new">{{ label }}: {{ n }}</span>{% endfor %}
+  </div>
+
+  <div class="card ws-scroll">
+    <table class="ws-table">
+      <thead><tr>
+        <th>{% trans "Заявка" %}</th><th>{% trans "Создана" %}</th><th>{% trans "Клиент" %}</th><th>{% trans "Статус" %}</th>
+        <th class="num">{% trans "Посылок" %}</th><th class="num">{% trans "Выдано" %}</th>
+        <th class="num">{% trans "Вес, кг" %}</th><th class="num">{% trans "Доставка, ₸" %}</th><th>{% trans "Оплата" %}</th>
+      </tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr>
+          <td>{% if dibuyer_is_staff %}<a href="{% url 'dibuyer_manage_detail' r.order.pk %}">№{{ r.order.pk }}</a>{% else %}№{{ r.order.pk }}{% endif %}</td>
+          <td>{{ r.order.created_at|date:"d.m.Y" }}</td>
+          <td>{{ r.client }}</td>
+          <td>{{ r.order.get_status_display }}</td>
+          <td class="num">{{ r.parcels }}</td>
+          <td class="num">{{ r.issued }}</td>
+          <td class="num">{{ r.weight }}</td>
+          <td class="num">{{ r.cost }}</td>
+          <td>{% if r.order.partner_paid_at %}<span class="ws-ok">{{ r.order.partner_paid_at|date:"d.m.Y" }}</span>{% elif r.parcels %}<span class="ws-bad">{% trans "не отмечена" %}</span>{% else %}—{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9"><div class="empty">{% trans "За период заявок нет." %}</div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
+from myprofile.admin_filters import DateRangeFilter
+
 from .models import (
     Brand, BuyerOrder, BuyerOrderItem, DibuyerChat, DibuyerMessage,
     DibuyerSettings,
@@ -38,8 +40,12 @@ class BuyerOrderItemInline(admin.TabularInline):
 @admin.register(BuyerOrder)
 class BuyerOrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'client', 'status', 'items_count', 'handled_by', 'created_at')
-    list_filter = ('status', 'created_at')
+    list_filter = (
+        'status', 'tracking_exported',
+        ('created_at', DateRangeFilter), ('partner_paid_at', DateRangeFilter),
+    )
     search_fields = ('client__username', 'client__first_name', 'client__last_name')
+    list_select_related = ('client', 'handled_by')
     list_editable = ('status',)
     list_display_links = ('id',)
     inlines = [BuyerOrderItemInline]
@@ -59,32 +65,37 @@ class DibuyerMessageInline(admin.TabularInline):
 class DibuyerChatAdmin(admin.ModelAdmin):
     list_display = ('id', 'client_display', 'order', 'staff_unread',
                     'client_unread', 'last_message_at', 'created_at')
+    list_filter = (('created_at', DateRangeFilter), ('last_message_at', DateRangeFilter))
     search_fields = ('client__username', 'client__first_name', 'client__last_name')
     autocomplete_fields = ('client', 'order')
+    list_select_related = ('client', 'order')
     inlines = (DibuyerMessageInline,)
 
     def client_display(self, obj):
         return obj.title_for_staff
     client_display.short_description = "Клиент"
+    client_display.admin_order_field = 'client__username'
 
 
 @admin.register(DibuyerMessage)
 class DibuyerMessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'chat', 'author_role', 'sender', 'short_text',
                     'created_at', 'is_read_by_client', 'is_read_by_staff')
-    list_filter = ('author_role', 'created_at')
+    list_filter = ('author_role', 'is_read_by_client', 'is_read_by_staff', ('created_at', DateRangeFilter))
     search_fields = ('text', 'chat__client__username', 'sender__username')
     autocomplete_fields = ('chat', 'sender')
+    list_select_related = ('chat__client', 'sender')
 
     def short_text(self, obj):
         return obj.text[:60]
     short_text.short_description = "Текст"
+    short_text.admin_order_field = 'text'
 
 
 @admin.register(DibuyerSettings)
 class DibuyerSettingsAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'is_enabled', 'delivery_rate_usd')
-    list_editable = ('is_enabled', 'delivery_rate_usd')
+    list_display = ('__str__', 'is_enabled', 'admins_preview', 'delivery_rate_usd')
+    list_editable = ('is_enabled', 'admins_preview', 'delivery_rate_usd')
 
     def has_add_permission(self, request):
         return not DibuyerSettings.objects.exists()

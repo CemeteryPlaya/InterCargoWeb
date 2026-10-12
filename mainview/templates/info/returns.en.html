@@ -18,7 +18,8 @@
 <h2>Refunds to the cardholder</h2>
 <ul>
     <li>Money is refunded in case of: an erroneous or duplicate payment; payment for a receipt whose parcels were then not handed over; loss of or damage to a parcel through our fault.</li>
-    <li>To request a refund, contact customer support (e-mail{% if COMPANY.email %} <a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}, phone or messenger) with the receipt number and the reason.</li>
+    <li>To request a refund, ask customer support for the “Refund application” form — it will be sent to your e-mail. Send the completed application (receipt number, reason) together with a copy of your ID card{% if COMPANY.email %} to {% if COMPANY.email %}<a href="mailto:{{ COMPANY.email }}">{{ COMPANY.email }}</a>{% endif %}{% else %} to customer support{% endif %}. For transactions made in error (erroneous debits), also attach copies of the receipts or slips confirming the debit.</li>
+    <li>The refund amount equals the amount paid, except for partial refunds (see below).</li>
     <li>Money is refunded <b>to the same card</b> used for payment — refunds to another card or in cash for online payments are not possible.</li>
     <li>For a partial refund, only the amount relating to the undelivered or damaged part of the order is returned.</li>
 </ul>
@@ -30,5 +31,5 @@
         <tr><th>Other cases</th><td>4 to 14 days on average after all circumstances are clarified</td></tr>
     </tbody>
 </table>
-<p>These are the times for us to process the refund. After that, the time for the money to reach your card depends on your card-issuing bank.</p>
+<p>These are the times for us to process the refund. Times are counted from the date we receive the application. After that, the time for the money to reach your card depends on your card-issuing bank.</p>
 <p>The dispute resolution procedure and the parties' liability are described in detail in the <a href="{% url 'info_page' 'offer' %}">public offer</a>.</p>

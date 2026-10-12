@@ -63,8 +63,9 @@ class Base(TestCase):
 
 class ReceiptKeyTests(Base):
     def test_key_uses_override_then_profile(self):
-        self.assertEqual(receipt_key(self._track("K1", pickup=self.pp_b)), (self.user.id, D, self.pp_b.id))
-        self.assertEqual(receipt_key(self._track("K2")), (self.user.id, D, self.pp_a.id))
+        # 4-й элемент — источник чека (Inter Cargo / партнёр Di.Buyer, partner_receipts.py)
+        self.assertEqual(receipt_key(self._track("K1", pickup=self.pp_b)), (self.user.id, D, self.pp_b.id, 'cargo'))
+        self.assertEqual(receipt_key(self._track("K2")), (self.user.id, D, self.pp_a.id, 'cargo'))
 
 
 class SyncPendingReceiptsTests(Base):

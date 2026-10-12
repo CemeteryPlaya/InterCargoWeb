@@ -1,0 +1,28 @@
+{% extends 'dibuyer/base.html' %}
+{% load i18n %}
+{% block title %}Di.Buyer — {% trans "Оплаты" %}{% endblock %}
+{% block body_class %}ws{% endblock %}
+
+{% block content %}
+  {% include 'dibuyer/_ws_tabs.html' %}
+  <div class="eyebrow">{% trans "Контроль оплат" %}</div>
+  <p class="ws-hint">{% trans "Клиент платит партнёру напрямую. Пока оплата не отмечена, пункт выдачи Inter Cargo не выдаёт посылки заявки. Отметьте все заявки, по которым деньги уже получены." %}</p>
+
+  <div class="ws-stats">
+    <div class="ws-stat"><b>{{ arrived|length }}</b><span>{% trans "заявок: посылки пришли, оплаты нет" %}</span></div>
+    <div class="ws-stat"><b>{{ transit|length }}</b><span>{% trans "заявок: посылки в пути, оплаты нет" %}</span></div>
+  </div>
+
+  <form method="post" action="{% url 'dibuyer_payments_mark' %}">
+    {% csrf_token %}
+    <div class="eyebrow">{% trans "Посылки уже в Казахстане — ждут отметки" %}</div>
+    {% include 'dibuyer/_ws_payment_table.html' with rows=arrived empty_text=_("Нет заявок, ожидающих отметки.") %}
+
+    <div class="eyebrow">{% trans "Посылки в пути" %}</div>
+    {% include 'dibuyer/_ws_payment_table.html' with rows=transit empty_text=_("Нет заявок в пути без отметки.") %}
+
+    {% if arrived or transit %}
+      <button class="btn-navy" type="submit">{% trans "Отметить оплату по выбранным заявкам" %}</button>
+    {% endif %}
+  </form>
+{% endblock %}
