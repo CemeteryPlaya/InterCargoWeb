@@ -86,7 +86,8 @@ class AcquiringRequirementsTest(TestCase):
         resp = self.client.get(reverse('home'))
         self.assertContains(resp, 'images/payments/visa.svg')
         self.assertContains(resp, 'images/payments/mastercard.svg')
-        self.assertContains(resp, 'href="https://epayment.kz"')
+        # pre-production: кнопка-логотип Halyk ePay закомментирована в _payment_logos.html
+        self.assertNotContains(resp, 'href="https://epayment.kz"')
         for slug in ('offer', 'privacy', 'returns', 'payment', 'delivery', 'contacts'):
             self.assertContains(resp, reverse('info_page', args=[slug]))
 

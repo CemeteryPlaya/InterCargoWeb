@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-12 16:13+0500\n"
+"POT-Creation-Date: 2026-10-12 18:47+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,12 +45,12 @@ msgstr "Tablet"
 msgid "Не определено"
 msgstr "Unknown"
 
-#: .\analytics\audience.py:24 .\cargo\settings.py:175
+#: .\analytics\audience.py:24 .\cargo\settings.py:176
 #: .\myprofile\templates\desktop\settings.html:191
 msgid "Русский"
 msgstr "Russian"
 
-#: .\analytics\audience.py:24 .\cargo\settings.py:176
+#: .\analytics\audience.py:24 .\cargo\settings.py:177
 #: .\myprofile\templates\desktop\settings.html:199
 msgid "Қазақша"
 msgstr "Kazakh"
@@ -880,7 +880,7 @@ msgstr "Ad links (UTM)"
 msgid "Внутренние переходы"
 msgstr "Internal navigation"
 
-#: .\cargo\settings.py:177
+#: .\cargo\settings.py:178
 msgid "English"
 msgstr "English"
 
@@ -1168,7 +1168,7 @@ msgstr "Quantity"
 #: .\myprofile\templates\desktop\arrival_summary.html:178
 #: .\myprofile\templates\desktop\arrival_summary.html:242
 #: .\myprofile\templates\desktop\arrival_summary.html:340
-#: .\myprofile\templates\desktop\delivered_posts.html:199
+#: .\myprofile\templates\desktop\delivered_posts.html:205
 #: .\myprofile\templates\desktop\delivery.html:330
 #: .\myprofile\templates\desktop\extradition_package.html:109
 #: .\myprofile\templates\desktop\finance_summary.html:141
@@ -1428,7 +1428,7 @@ msgstr "rate"
 #: .\dibuyer\templates\dibuyer\ws_parcels.html:28 .\myprofile\models.py:219
 #: .\myprofile\models.py:933
 #: .\myprofile\templates\desktop\arrival_history.html:299
-#: .\myprofile\templates\desktop\delivered_posts.html:198
+#: .\myprofile\templates\desktop\delivered_posts.html:204
 #: .\myprofile\templates\desktop\extradition_package.html:108
 #: .\myprofile\templates\desktop\goods_arrival_history.html:117
 #: .\myprofile\templates\desktop\goods_arrival_session.html:204
@@ -2694,7 +2694,7 @@ msgid "Мин: 0 - Макс: 100"
 msgstr "Min: 0 - Max: 100"
 
 #: .\mainview\templates\desktop\index.html:655
-#: .\myprofile\templates\desktop\delivered_posts.html:214
+#: .\myprofile\templates\desktop\delivered_posts.html:220
 #: .\myprofile\templates\desktop\finance_summary.html:435
 #: .\myprofile\templates\desktop\inventory_report.html:83
 #: .\myprofile\templates\shared\print\client_check_pdf.html:255
@@ -3132,12 +3132,10 @@ msgid "ИИК (IBAN)"
 msgstr "Account (IBAN)"
 
 #: .\mainview\templates\info\_requisites.html:17
-#| msgid "Статус в банке"
 msgid "БИН банка"
 msgstr "Bank BIN"
 
 #: .\mainview\templates\info\_requisites.html:18
-#| msgid "Код чека"
 msgid "Код ОКПО"
 msgstr "OKPO code"
 
@@ -3304,8 +3302,8 @@ msgid "Казахстан, г. Тараз,"
 msgstr "Kazakhstan, Taraz,"
 
 #: .\mainview\templates\mobile\mobile_footer.html:37
-msgid "мкр. Акбулак(1), д. 21"
-msgstr "Akbulak(1) district, 21"
+msgid "массив Арай-2, д. 13"
+msgstr "Arai-2 residential area, 13"
 
 #: .\mainview\templates\mobile\mobile_footer.html:44
 msgid "— директор"
@@ -3368,9 +3366,11 @@ msgid "Смотреть все пункты"
 msgstr "View all points"
 
 #: .\mainview\templates\shared\footer.html:63
-msgid "Республика Казахстан, Жамбылская обл., г. Тараз, мкр.Акбулак(1), д.21"
+#| msgid ""
+#| "Республика Казахстан, Жамбылская обл., г. Тараз, мкр.Акбулак(1), д.21"
+msgid "Республика Казахстан, Жамбылская обл., г. Тараз, массив Арай-2, д. 13"
 msgstr ""
-"Republic of Kazakhstan, Zhambyl region, Taraz, Akbulak(1) microdistrict, 21"
+"Republic of Kazakhstan, Zhambyl region, Taraz, Arai-2 residential area, 13"
 
 #: .\mainview\templates\shared\footer.html:69
 msgid "Директор:"
@@ -4922,7 +4922,7 @@ msgstr "Assign PVZ"
 #: .\myprofile\templates\desktop\arrival_summary.html:228
 #: .\myprofile\templates\desktop\arrival_summary.html:307
 #: .\myprofile\templates\desktop\arrival_summary.html:434
-#: .\myprofile\templates\desktop\delivered_posts.html:268
+#: .\myprofile\templates\desktop\delivered_posts.html:274
 #: .\myprofile\templates\desktop\delivery.html:405
 #: .\myprofile\templates\desktop\extraditions.html:275
 #: .\myprofile\templates\desktop\profile.html:310
@@ -5169,53 +5169,25 @@ msgstr ""
 "Di.Buyer parcels are paid to the partner directly. The pickup point will "
 "hand them over once the partner confirms payment."
 
-#: .\myprofile\templates\desktop\delivered_posts.html:161
-#: .\payments\services.py:139
-msgid ""
-"В чеке есть товары партнёрского сервиса Di.Buyer — их оплачивают партнёру "
-"напрямую, поэтому онлайн-оплата этого чека недоступна."
-msgstr ""
-"This receipt contains items of the partner service Di.Buyer — they are paid "
-"to the partner directly, so online payment of this receipt is unavailable."
-
-#: .\myprofile\templates\desktop\delivered_posts.html:167
-#, python-format
-msgid "Оплатить картой %(amount)s ₸ через:"
-msgstr "Pay %(amount)s ₸ by card via:"
-
-#: .\myprofile\templates\desktop\delivered_posts.html:181
-#, python-format
-msgid "Оплатить картой %(amount)s ₸"
-msgstr "Pay by card %(amount)s ₸"
-
-#: .\myprofile\templates\desktop\delivered_posts.html:188
-#, python-format
-msgid ""
-"Без комиссии. <a href=\"%(payment_url)s\" class=\"underline\">Условия оплаты"
-" и безопасность</a>"
-msgstr ""
-"No fee. <a href=\"%(payment_url)s\" class=\"underline\">Payment terms and "
-"security</a>"
-
-#: .\myprofile\templates\desktop\delivered_posts.html:200
+#: .\myprofile\templates\desktop\delivered_posts.html:206
 #: .\myprofile\templates\shared\print\receipt_print.html:368
 msgid "Цена (₸)"
 msgstr "Price (₸)"
 
-#: .\myprofile\templates\desktop\delivered_posts.html:234
+#: .\myprofile\templates\desktop\delivered_posts.html:240
 msgid "Печатная форма (PDF)"
 msgstr "Print form (PDF)"
 
-#: .\myprofile\templates\desktop\delivered_posts.html:242
+#: .\myprofile\templates\desktop\delivered_posts.html:248
 msgid "Чеки ещё не сформированы."
 msgstr "Receipts not yet generated."
 
-#: .\myprofile\templates\desktop\delivered_posts.html:257
+#: .\myprofile\templates\desktop\delivered_posts.html:263
 #: .\myprofile\templates\desktop\profile.html:299
 msgid "Обратите внимание"
 msgstr "Please note"
 
-#: .\myprofile\templates\desktop\delivered_posts.html:260
+#: .\myprofile\templates\desktop\delivered_posts.html:266
 #: .\myprofile\templates\desktop\profile.html:302
 msgid ""
 "Данная функция предназначена только для удобства оплаты при получении "
@@ -5225,12 +5197,12 @@ msgstr ""
 "This feature is for payment convenience when receiving a parcel, you will "
 "still need to show your payment receipt at the pickup point."
 
-#: .\myprofile\templates\desktop\delivered_posts.html:264
+#: .\myprofile\templates\desktop\delivered_posts.html:270
 #: .\myprofile\templates\desktop\profile.html:306
 msgid "Больше не показывать"
 msgstr "Don't show again"
 
-#: .\myprofile\templates\desktop\delivered_posts.html:272
+#: .\myprofile\templates\desktop\delivered_posts.html:278
 #: .\myprofile\templates\desktop\goods_arrival.html:107
 #: .\myprofile\templates\desktop\goods_arrival.html:146
 #: .\myprofile\templates\desktop\profile.html:314
@@ -9211,6 +9183,14 @@ msgstr ""
 "The parcels in this receipt are paid separately — online payment is "
 "unavailable."
 
+#: .\payments\services.py:139
+msgid ""
+"В чеке есть товары партнёрского сервиса Di.Buyer — их оплачивают партнёру "
+"напрямую, поэтому онлайн-оплата этого чека недоступна."
+msgstr ""
+"This receipt contains items of the partner service Di.Buyer — they are paid "
+"to the partner directly, so online payment of this receipt is unavailable."
+
 #: .\payments\services.py:141
 msgid "Сумма чека не рассчитана — оплата пока недоступна."
 msgstr "The receipt amount is not calculated yet — payment is unavailable."
@@ -9698,13 +9678,6 @@ msgstr "Email confirmed"
 
 #: .\register\templates\desktop\registration.html:155
 #, python-format
-#| msgid ""
-#| "Я принимаю условия <a href=\"%(offer_url)s\" target=\"_blank\" class=\"text-"
-#| "primary underline\">публичной оферты</a>, ознакомлен(-а) с <a "
-#| "href=\"%(privacy_url)s\" target=\"_blank\" class=\"text-primary "
-#| "underline\">политикой конфиденциальности</a> и даю <a href=\"%(pd_url)s\" "
-#| "target=\"_blank\" class=\"text-primary underline\">согласие на обработку "
-#| "персональных данных</a>"
 msgid ""
 "Условия <a href=\"%(offer_url)s\" target=\"_blank\" class=\"text-primary "
 "underline\">Договора (публичной оферты)</a> мною прочитаны полностью, все "
@@ -10775,6 +10748,25 @@ msgstr "📦 Status updated: %(status)s"
 #, python-format
 msgid "Трек-код %(track_code)s — %(status)s"
 msgstr "Track code %(track_code)s — %(status)s"
+
+#~ msgid "мкр. Акбулак(1), д. 21"
+#~ msgstr "Akbulak(1) district, 21"
+
+#, python-format
+#~ msgid "Оплатить картой %(amount)s ₸ через:"
+#~ msgstr "Pay %(amount)s ₸ by card via:"
+
+#, python-format
+#~ msgid "Оплатить картой %(amount)s ₸"
+#~ msgstr "Pay by card %(amount)s ₸"
+
+#, python-format
+#~ msgid ""
+#~ "Без комиссии. <a href=\"%(payment_url)s\" class=\"underline\">Условия оплаты"
+#~ " и безопасность</a>"
+#~ msgstr ""
+#~ "No fee. <a href=\"%(payment_url)s\" class=\"underline\">Payment terms and "
+#~ "security</a>"
 
 #~ msgid "Платёж ePay"
 #~ msgstr "ePay payment"
