@@ -120,7 +120,9 @@ def auto_advance_shipped_to_customs(changed_by='auto'):
         with transaction.atomic():
             tracks = (
                 TrackCode.all_objects
-                .select_for_update(skip_locked=True)
+                # OF self: owner nullable → LEFT OUTER JOIN, а PostgreSQL не даёт FOR UPDATE
+                # на nullable-стороне внешнего соединения (тест test_postgres_locking).
+                .select_for_update(skip_locked=True, of=('self',))
                 .select_related('owner')
                 .filter(status='shipped_cn', date_shipped_cn__lte=threshold)
             )
@@ -147,7 +149,9 @@ def advance_customs_to_almaty(date_shipped, changed_by):
         with transaction.atomic():
             tracks = (
                 TrackCode.all_objects
-                .select_for_update(skip_locked=True)
+                # OF self: owner nullable → LEFT OUTER JOIN, а PostgreSQL не даёт FOR UPDATE
+                # на nullable-стороне внешнего соединения (тест test_postgres_locking).
+                .select_for_update(skip_locked=True, of=('self',))
                 .select_related('owner')
                 .filter(status='at_customs', date_shipped_cn=date_shipped)
             )

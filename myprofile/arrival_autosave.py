@@ -170,7 +170,8 @@ def heartbeat(session, user, client_id, *, take_over=False, release=False,
     now = timezone.now()
     client_id = (client_id or '')[:64]
     with transaction.atomic():
-        s = ArrivalSession.objects.select_for_update().select_related('editor').get(pk=session.pk)
+        # OF self: editor nullable → LEFT OUTER JOIN; без OF PostgreSQL отвергает FOR UPDATE.
+        s = ArrivalSession.objects.select_for_update(of=('self',)).select_related('editor').get(pk=session.pk)
         if release:
             if client_id and s.editor_client_id == client_id:
                 s.editor, s.editor_client_id, s.editor_seen_at = None, '', None
@@ -249,7 +250,7 @@ def save_items(session, raw_items, *, user, source, client_id='', seq=None,
     current = new_count = 0
     try:
         with transaction.atomic():
-            s = ArrivalSession.objects.select_for_update().select_related('editor').get(pk=session.pk)
+            s = ArrivalSession.objects.select_for_update(of=('self',)).select_related('editor').get(pk=session.pk)
             same_client = bool(client_id) and seq is not None and client_id == s.last_client_id
             if s.status == 'completed' or (s.status != 'active' and not force):
                 outcome = 'inactive'
