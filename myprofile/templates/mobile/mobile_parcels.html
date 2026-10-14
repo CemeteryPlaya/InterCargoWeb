@@ -188,7 +188,7 @@
 
                         <p class="pr-20 break-all card-content"><strong>{% trans "Код:" %}</strong> {{ track.track_code }}</p>
                         <p><strong>{% trans "Статус:" %}</strong> {{ track.get_status_display }}</p>
-                        <p><strong>{% trans "Обновлено:" %}</strong> {{ track.update_date|date:"d.m.Y" }}</p>
+                        <p><strong>{% trans "Обновлено:" %}</strong> {{ track.update_date|date:"d.m.Y" }}{% if track.status == 'at_customs' or track.status == 'left_almaty' %}{% if track.date_shipped_cn %} <span class="text-gray-500">({% blocktrans with date=track.date_shipped_cn|date:"d.m.Y" %}Отправка от {{ date }}{% endblocktrans %})</span>{% endif %}{% endif %}</p>
                         {% if track.sorting_location %}
                         <p><strong>{% trans "Где отсортирован:" %}</strong> {{ track.sorting_location }}</p>
                         {% endif %}

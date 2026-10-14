@@ -10766,6 +10766,12 @@ msgstr "📦 Мәртебе жаңартылды: %(status)s"
 msgid "Трек-код %(track_code)s — %(status)s"
 msgstr "Трек-код %(track_code)s — %(status)s"
 
+#: .\myprofile\templates\desktop\track_codes.html:246
+#: .\myprofile\templates\mobile\mobile_parcels.html:191
+#, python-format
+msgid "Отправка от %(date)s"
+msgstr "%(date)s жөнелтілді"
+
 #~ msgid "мкр. Акбулак(1), д. 21"
 #~ msgstr "Ақбұлақ(1) шағ., 21-үй"
 
