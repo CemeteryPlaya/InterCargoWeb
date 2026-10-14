@@ -243,7 +243,7 @@
                     {% endif %}
                     <p class="pr-24 break-all" :class="archiveMode ? 'pl-8' : ''"><strong>{% trans "Код:" %}</strong> {{ code.track_code }}</p>
                     <p><strong>{% trans "Статус:" %}</strong> <span data-track-status>{{ code.get_status_display }}</span></p>
-                    <p><strong>{% trans "Обновлено:" %}</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-500 dark:text-gray-500">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}</p>
+                    <p><strong>{% trans "Обновлено:" %}</strong> <span data-track-date>{{ code.update_date }}</span>{% if code.status == 'ready' and code.receipt_date %} <span class="text-gray-500 dark:text-gray-500">(Приход от {{ code.receipt_date|date:"j E Y г." }})</span>{% endif %}{% if code.status == 'at_customs' or code.status == 'left_almaty' %}{% if code.date_shipped_cn %} <span class="text-gray-500">({% blocktrans with date=code.date_shipped_cn|date:"d.m.Y" %}Отправка от {{ date }}{% endblocktrans %})</span>{% endif %}{% endif %}</p>
                     {% if code.sorting_location %}
                     <p><strong>{% trans "Где отсортирован:" %}</strong> {{ code.sorting_location }}</p>
                     {% endif %}

@@ -161,6 +161,14 @@
             background-color: #ffedd5 !important;
         }
 
+        body.theme-dark .bg-cyan-100 {
+            background-color: #cffafe !important;
+        }
+
+        body.theme-dark .bg-indigo-100 {
+            background-color: #e0e7ff !important;
+        }
+
         body.theme-dark .bg-white-100 {
             background-color: #f9fafb !important;
         }
@@ -180,6 +188,8 @@
         body.theme-dark .bg-orange-100,
         body.theme-dark .bg-purple-100,
         body.theme-dark .bg-blue-100,
+        body.theme-dark .bg-cyan-100,
+        body.theme-dark .bg-indigo-100,
         body.theme-dark .bg-white-100,
         body.theme-dark .bg-amber-50,
         body.theme-dark .bg-gray-200 {
@@ -192,6 +202,8 @@
         body.theme-dark .bg-orange-100 p,
         body.theme-dark .bg-purple-100 p,
         body.theme-dark .bg-blue-100 p,
+        body.theme-dark .bg-cyan-100 p,
+        body.theme-dark .bg-indigo-100 p,
         body.theme-dark .bg-white-100 p,
         body.theme-dark .bg-amber-50 p,
         body.theme-dark .bg-gray-200 p,
@@ -201,10 +213,26 @@
         body.theme-dark .bg-orange-100 strong,
         body.theme-dark .bg-purple-100 strong,
         body.theme-dark .bg-blue-100 strong,
+        body.theme-dark .bg-cyan-100 strong,
+        body.theme-dark .bg-indigo-100 strong,
         body.theme-dark .bg-white-100 strong,
         body.theme-dark .bg-amber-50 strong,
         body.theme-dark .bg-gray-200 strong {
             color: #111827 !important;
+        }
+
+        /* Второстепенный текст в карточках статусов («Отправка от …», «Приход от …»):
+           светло-серый тёмной темы на светлом фоне карточки не читается */
+        body.theme-dark .bg-green-100 .text-gray-500,
+        body.theme-dark .bg-red-100 .text-gray-500,
+        body.theme-dark .bg-yellow-100 .text-gray-500,
+        body.theme-dark .bg-orange-100 .text-gray-500,
+        body.theme-dark .bg-purple-100 .text-gray-500,
+        body.theme-dark .bg-blue-100 .text-gray-500,
+        body.theme-dark .bg-cyan-100 .text-gray-500,
+        body.theme-dark .bg-indigo-100 .text-gray-500,
+        body.theme-dark .bg-gray-200 .text-gray-500 {
+            color: #4b5563 !important;
         }
 
         /* Инпуты и формы */

@@ -10760,6 +10760,12 @@ msgstr "📦 Status updated: %(status)s"
 msgid "Трек-код %(track_code)s — %(status)s"
 msgstr "Track code %(track_code)s — %(status)s"
 
+#: .\myprofile\templates\desktop\track_codes.html:246
+#: .\myprofile\templates\mobile\mobile_parcels.html:191
+#, python-format
+msgid "Отправка от %(date)s"
+msgstr "Shipped on %(date)s"
+
 #~ msgid "мкр. Акбулак(1), д. 21"
 #~ msgstr "Akbulak(1) district, 21"
 
