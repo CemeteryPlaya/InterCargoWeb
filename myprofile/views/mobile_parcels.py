@@ -80,7 +80,7 @@ def mobile_parcels_view(request):
         },
         {
             'key': 'left_almaty',
-            'label': _('Выехало из Алматы'),
+            'label': _('Прибыло в Алматы'),
             'icon': 'ri-roadster-line',
             'tracks': groups['left_almaty'],
             'count': len(groups['left_almaty']),

@@ -3714,8 +3714,8 @@ msgstr "Arrived at customs (China-Kazakhstan)"
 #: .\myprofile\views\mobile_parcels.py:83 .\tgbot\bot\settings_handlers.py:45
 #: .\tgbot\bot\workers\notifications.py:451 .\tgbot\models.py:167
 #: .\tgbot\signals.py:16
-msgid "Выехало из Алматы"
-msgstr "Departed from Almaty"
+msgid "Прибыло в Алматы"
+msgstr "Arrived in Almaty"
 
 #: .\myprofile\models.py:51
 msgid "Неопозка (сортировочный склад)"
@@ -3792,8 +3792,8 @@ msgid "Дата прибытия на таможню (Китай-Казахст�
 msgstr "Date of arrival at customs (China-Kazakhstan)"
 
 #: .\myprofile\models.py:100
-msgid "Дата выезда из Алматы"
-msgstr "Date of departure from Almaty"
+msgid "Дата прибытия в Алматы"
+msgstr "Date of arrival in Almaty"
 
 #: .\myprofile\models.py:101
 msgid "Дата прихода на сорт. склад"
@@ -7209,12 +7209,12 @@ msgid "На таможню:"
 msgstr "To customs:"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:159
-msgid "Перевести партию в статус «Выехало из Алматы»?"
-msgstr "Move batch to status \"Departed Almaty\"?"
+msgid "Перевести партию в статус «Прибыло в Алматы»?"
+msgstr "Move batch to status \"Arrived in Almaty\"?"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:164
-msgid "Перевести в статус \"Выехало из Алматы\""
-msgstr "Move to status \"Departed Almaty\""
+msgid "Перевести в статус \"Прибыло в Алматы\""
+msgstr "Move to status \"Arrived in Almaty\""
 
 #: .\myprofile\templates\desktop\shipped_cn.html:181
 msgid "Нет партий в пути."
@@ -8532,8 +8532,8 @@ msgstr "Import started in background: %(count)s track codes."
 
 #: .\myprofile\views\shipped_cn.py:153
 #, python-format
-msgid "Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов."
-msgstr "Moved to status \"Departed Almaty\": %(count)s track codes."
+msgid "Переведено в статус «Прибыло в Алматы»: %(count)s трек-кодов."
+msgstr "Moved to status \"Arrived in Almaty\": %(count)s track codes."
 
 #: .\myprofile\views\shipped_cn.py:156 .\myprofile\views\shipped_cn.py:182
 msgid "Нет трек-кодов для перевода."

@@ -150,7 +150,7 @@ def shipped_cn_advance_almaty(request):
     if advanced:
         messages.success(
             request,
-            _("Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов.") % {'count': advanced}
+            _("Переведено в статус «Прибыло в Алматы»: %(count)s трек-кодов.") % {'count': advanced}
         )
     else:
         messages.info(request, _("Нет трек-кодов для перевода."))

@@ -3714,8 +3714,8 @@ msgstr "Кеденге келді (Қытай-Қазақстан)"
 #: .\myprofile\views\mobile_parcels.py:83 .\tgbot\bot\settings_handlers.py:45
 #: .\tgbot\bot\workers\notifications.py:451 .\tgbot\models.py:167
 #: .\tgbot\signals.py:16
-msgid "Выехало из Алматы"
-msgstr "Алматыдан шықты"
+msgid "Прибыло в Алматы"
+msgstr "Алматыға келді"
 
 #: .\myprofile\models.py:51
 msgid "Неопозка (сортировочный склад)"
@@ -3792,8 +3792,8 @@ msgid "Дата прибытия на таможню (Китай-Казахст�
 msgstr "Кеденге келген күні (Қытай-Қазақстан)"
 
 #: .\myprofile\models.py:100
-msgid "Дата выезда из Алматы"
-msgstr "Алматыдан шыққан күні"
+msgid "Дата прибытия в Алматы"
+msgstr "Алматыға келген күні"
 
 #: .\myprofile\models.py:101
 msgid "Дата прихода на сорт. склад"
@@ -7216,12 +7216,12 @@ msgid "На таможню:"
 msgstr "Кеденге:"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:159
-msgid "Перевести партию в статус «Выехало из Алматы»?"
-msgstr "Партияны «Алматыдан шықты» мәртебесіне ауыстыру керек пе?"
+msgid "Перевести партию в статус «Прибыло в Алматы»?"
+msgstr "Партияны «Алматыға келді» мәртебесіне ауыстыру керек пе?"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:164
-msgid "Перевести в статус \"Выехало из Алматы\""
-msgstr "«Алматыдан шықты» мәртебесіне ауыстыру"
+msgid "Перевести в статус \"Прибыло в Алматы\""
+msgstr "«Алматыға келді» мәртебесіне ауыстыру"
 
 #: .\myprofile\templates\desktop\shipped_cn.html:181
 msgid "Нет партий в пути."
@@ -8535,8 +8535,8 @@ msgstr "Импорт фонда іске қосылды: %(count)s трек-ко
 
 #: .\myprofile\views\shipped_cn.py:153
 #, python-format
-msgid "Переведено в статус «Выехало из Алматы»: %(count)s трек-кодов."
-msgstr "«Алматыдан шықты» мәртебесіне ауыстырылды: %(count)s трек-код."
+msgid "Переведено в статус «Прибыло в Алматы»: %(count)s трек-кодов."
+msgstr "«Алматыға келді» мәртебесіне ауыстырылды: %(count)s трек-код."
 
 #: .\myprofile\views\shipped_cn.py:156 .\myprofile\views\shipped_cn.py:182
 msgid "Нет трек-кодов для перевода."

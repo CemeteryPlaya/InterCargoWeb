@@ -177,7 +177,7 @@ def advance_customs_to_almaty(date_shipped, changed_by):
             )
             advanced, notif_counts = _advance_tracks(tracks, 'left_almaty', changed_by)
     except IntegrityError:
-        logger.error("Перевод «Выехало из Алматы» отвергнут БД: вероятно, устаревший CHECK %s. "
+        logger.error("Перевод «Прибыло в Алматы» отвергнут БД: вероятно, устаревший CHECK %s. "
                      "Выполните на сервере: python manage.py migrate", LEGACY_STATUS_CHECK)
         raise
     if notif_counts:

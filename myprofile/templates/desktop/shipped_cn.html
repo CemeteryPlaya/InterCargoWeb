@@ -156,12 +156,12 @@
                                         </button>
                                         {% if batch.can_advance %}
                                         <form method="post" action="{% url 'shipped_cn_advance_almaty' %}"
-                                            onsubmit="return confirm('{% trans "Перевести партию в статус «Выехало из Алматы»?" %}');">
+                                            onsubmit="return confirm('{% trans "Перевести партию в статус «Прибыло в Алматы»?" %}');">
                                             {% csrf_token %}
                                             <input type="hidden" name="date" value="{{ batch.date|date:'Y-m-d' }}">
                                             <button type="submit"
                                                 class="w-full sm:w-auto text-xs font-semibold bg-indigo-600 text-white rounded px-3 py-1.5 hover:bg-indigo-700 transition">
-                                                <i class="ri-roadster-line"></i> {% trans 'Перевести в статус "Выехало из Алматы"' %}
+                                                <i class="ri-roadster-line"></i> {% trans 'Перевести в статус "Прибыло в Алматы"' %}
                                             </button>
                                         </form>
                                         {% endif %}

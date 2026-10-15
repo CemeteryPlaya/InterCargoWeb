@@ -47,7 +47,7 @@ class TrackCode(models.Model):
         ('warehouse_cn', _('Прибыло на склад (Китай)')),
         ('shipped_cn', _('Отправлено со склада (Китай)')),
         ('at_customs', _('Прибыло на таможню (Китай-Казахстан)')),
-        ('left_almaty', _('Выехало из Алматы')),
+        ('left_almaty', _('Прибыло в Алматы')),
         ('unidentified', _('Неопозка (сортировочный склад)')),
         ('delivered', _('Доставлен на сортировочный склад')),
         ('shipping_pp', _('В доставке')),
@@ -97,7 +97,7 @@ class TrackCode(models.Model):
     date_user_added = models.DateField(null=True, blank=True, verbose_name=_("Дата добавления пользователем"))
     date_shipped_cn = models.DateField(null=True, blank=True, verbose_name=_("Дата отправки со склада (Китай)"))
     date_at_customs = models.DateField(null=True, blank=True, verbose_name=_("Дата прибытия на таможню (Китай-Казахстан)"))
-    date_left_almaty = models.DateField(null=True, blank=True, verbose_name=_("Дата выезда из Алматы"))
+    date_left_almaty = models.DateField(null=True, blank=True, verbose_name=_("Дата прибытия в Алматы"))
     delivered_date = models.DateField(null=True, blank=True, verbose_name=_("Дата прихода на сорт. склад"))
     date_shipping_pp = models.DateField(null=True, blank=True, verbose_name=_("Дата принятия в доставку"))
     date_ready = models.DateField(null=True, blank=True, verbose_name=_("Дата прибытия на ПВЗ"))
