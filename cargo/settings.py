@@ -89,7 +89,7 @@ MIDDLEWARE = [
     'analytics.middleware.PageViewMiddleware',
 ]
 
-APP_VERSION = '1.6.3'
+APP_VERSION = '1.6.3.1'
 
 ROOT_URLCONF = 'cargo.urls'
 

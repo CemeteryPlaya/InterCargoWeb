@@ -42,7 +42,7 @@ def get_settings_markup(settings):
         kb.append([InlineKeyboardButton(text=f"{mark_customs} " + _("Таможня (Китай-Казахстан)"), callback_data="toggle_pref:at_customs")])
 
         mark_almaty = "✅" if settings.notify_left_almaty else "❌"
-        kb.append([InlineKeyboardButton(text=f"{mark_almaty} " + _("Выехало из Алматы"), callback_data="toggle_pref:left_almaty")])
+        kb.append([InlineKeyboardButton(text=f"{mark_almaty} " + _("Прибыло в Алматы"), callback_data="toggle_pref:left_almaty")])
 
         mark_sort = "✅" if settings.notify_delivered_sort else "❌"
         kb.append([InlineKeyboardButton(text=f"{mark_sort} " + _("Сортировочный склад"), callback_data="toggle_pref:delivered_sort")])

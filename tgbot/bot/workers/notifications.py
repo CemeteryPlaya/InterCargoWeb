@@ -448,7 +448,7 @@ def _format_status_group_notification(user_id, status_key, track_codes):
         elif status_key == 'at_customs':
             status_label = _('Прибыло на таможню (Китай-Казахстан)')
         elif status_key == 'left_almaty':
-            status_label = _('Выехало из Алматы')
+            status_label = _('Прибыло в Алматы')
         else:
             status_label = status_key
 
